@@ -36,10 +36,10 @@ IF ( (${BUILD_STATIC_LIBS} EQUAL ON) AND NOT CMAKE_POSITION_INDEPENDENT_CODE)
 ENDIF()
 
 #------------------------------- mmg2d
-CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ${BUILD_STATIC_LIBS}
-  "BUILD_MMG2D" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMG2D_SHARED "Compile the mmg2d dynamic library" ${BUILD_SHARED_LIBS}
-  "BUILD_MMG2D" OFF )
+CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ON
+  "BUILD_MMG2D;BUILD_STATIC_LIBS" OFF)
+CMAKE_DEPENDENT_OPTION ( LIBMMG2D_SHARED "Compile the mmg2d dynamic library" ON
+  "BUILD_MMG2D;BUILD_SHARED_LIBS" OFF )
 IF (LIBMMG2D_STATIC OR LIBMMG2D_SHARED)
   SET(LIBMMG2D_INTERNAL ON )
 ELSE()
@@ -47,18 +47,17 @@ ELSE()
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
   TEST_LIBMMG2D  "Build mmg2d library examples and tests" OFF
-  "BUILD_MMG2D;LIBMMG2D_INTERNAL" OFF
-  )
+  "BUILD_MMG2D;LIBMMG2D_INTERNAL" OFF)
 
 CMAKE_DEPENDENT_OPTION(
   MMG2D_CI "Enable/Disabletest_execution for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
 #------------------------------- mmgs
-CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ${BUILD_STATIC_LIBS}
-  "BUILD_MMGS" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMGS_SHARED "Compile the mmgs dynamic library" ${BUILD_SHARED_LIBS}
-  "BUILD_MMGS" OFF)
+CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ON
+  "BUILD_MMGS;BUILD_STATIC_LIBS" OFF)
+CMAKE_DEPENDENT_OPTION ( LIBMMGS_SHARED "Compile the mmgs dynamic library" ON
+  "BUILD_MMGS;BUILD_SHARED_LIBS" OFF)
 IF (LIBMMGS_STATIC OR LIBMMGS_SHARED)
   SET(LIBMMGS_INTERNAL ON )
 ELSE()
@@ -74,10 +73,10 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_TESTING;BUILD_MMGS" OFF )
 
 #------------------------------- mmg3d
-CMAKE_DEPENDENT_OPTION ( LIBMMG3D_STATIC "Compile the mmg3d static library" ${BUILD_STATIC_LIBS}
-  "BUILD_MMG3D" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMG3D_SHARED "Compile the mmg3d dynamic library" ${BUILD_SHARED_LIBS}
-  "BUILD_MMG3D" OFF )
+CMAKE_DEPENDENT_OPTION ( LIBMMG3D_STATIC "Compile the mmg3d static library" ON
+  "BUILD_MMG3D;BUILD_STATIC_LIBS" OFF )
+CMAKE_DEPENDENT_OPTION ( LIBMMG3D_SHARED "Compile the mmg3d dynamic library" ON
+  "BUILD_MMG3D;BUILD_SHARED_LIBS" OFF )
 IF (LIBMMG3D_STATIC OR LIBMMG3D_SHARED)
   SET(LIBMMG3D_INTERNAL ON )
 ELSE()
@@ -100,11 +99,11 @@ MARK_AS_ADVANCED(PATTERN)
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
-  "Compile the mmg static library (mmg2d + mmgs + mmg3d)" ${BUILD_STATIC_LIBS}
-  "BUILD_MMG" OFF)
+  "Compile the mmg static library (mmg2d + mmgs + mmg3d)" ON
+  "BUILD_MMG;BUILD_STATIC_LIBS" OFF)
 CMAKE_DEPENDENT_OPTION ( LIBMMG_SHARED
-  "Compile the mmg dynamic library (mmg2d + mmgs + mmg3d)" ${BUILD_SHARED_LIBS}
-  "BUILD_MMG" OFF )
+  "Compile the mmg dynamic library (mmg2d + mmgs + mmg3d)" ON
+  "BUILD_MMG;BUILD_SHARED_LIBS" OFF )
 IF (LIBMMG_STATIC OR LIBMMG_SHARED)
   SET(LIBMMG_INTERNAL ON )
 ELSE()
