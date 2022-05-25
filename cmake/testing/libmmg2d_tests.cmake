@@ -129,6 +129,7 @@ SET ( src_test_met2d
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met2d.c
   )
 ADD_LIBRARY_TEST ( test_met2d "${src_test_met2d}" copy_2d_headers ${lib_name} ${lib_type})
+TARGET_LINK_LIBRARIES ( test_met2d PRIVATE ${M_LIB} )
 
 IF ( BUILD_TESTING )
 

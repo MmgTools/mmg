@@ -135,7 +135,7 @@ SET ( src_test_met3d
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
   )
 ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} ${lib_type})
-
+TARGET_LINK_LIBRARIES ( test_met3d PRIVATE ${M_LIB} )
 
 IF ( MMG3D_CI )
   SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
