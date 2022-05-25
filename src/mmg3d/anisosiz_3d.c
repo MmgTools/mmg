@@ -45,7 +45,6 @@
  * Print eigendecomposition.
  */
 int MMG3D_printEigenv(double dm[3],double vp[3][3]) {
-  int i;
 
   printf("--- Eigenvalues:\n");
   printf("%e %e %e\n",dm[0],dm[1],dm[2]);
@@ -65,7 +64,6 @@ int MMG3D_printEigenv(double dm[3],double vp[3][3]) {
  * Print matrix entries.
  */
 int MMG3D_printMat(int8_t symmat,double *m) {
-  int i;
 
   if( symmat ) {
     printf("%e %e %e\n",m[0],m[1],m[2]);

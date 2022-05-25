@@ -36,8 +36,6 @@
 
 #include "libmmgcommon.h"
 
-#include "mmg2d_export.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -204,33 +202,22 @@ size_t MMG5_memSize(void);
 int MMG2D_memOption(MMG5_pMesh mesh);
 int  MMG2D_setMeshSize_alloc(MMG5_pMesh);
 
-LIBMMG2D_EXPORT int MMG2D_scaleMesh(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
-int MMG2D_unscaleMesh(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_pack(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_outqua(MMG5_pMesh ,MMG5_pSol );
-//int MMG2D_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_mmg2d1(MMG5_pMesh ,MMG5_pSol );
-//int MMG2D_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double );
-//int MMG2D_splitbdry(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double*);
-//int MMG2D_colpoi(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
-//int MMG2D_colpoibdry(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
 
-LIBMMG2D_EXPORT int  MMG2D_Init_mesh_var( va_list argptr );
+int  MMG2D_Init_mesh_var( va_list argptr );
 int  MMG2D_Free_all_var( va_list argptr );
 int  MMG2D_Free_structures_var( va_list argptr );
 int  MMG2D_Free_names_var( va_list argptr );
 
-LIBMMG2D_EXPORT void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
-
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
-//int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,int8_t ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2D_2dMeshCheck(MMG5_pMesh mesh);
 int MMG2D_boulep(MMG5_pMesh , int , int , int * );
-//int MMG2D_markBdry(MMG5_pMesh );
 int MMG2D_prilen(MMG5_pMesh ,MMG5_pSol );
 
 int MMG2D_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
@@ -238,7 +225,6 @@ int MMG2D_isInTriangle(MMG5_pMesh ,int,double c[2]);
 int MMG2D_cutEdge(MMG5_pMesh ,MMG5_pTria ,MMG5_pPoint ,MMG5_pPoint );
 int MMG2D_cutEdgeTriangle(MMG5_pMesh ,int ,int ,int );
 int MMG2D_findTria(MMG5_pMesh ,int );
-//int MMG2D_findpos(MMG5_pMesh ,MMG5_pTria ,int ,int ,int ,int ,int );
 int MMG2D_locateEdge(MMG5_pMesh ,int ,int ,int* ,int* ) ;
 int MMG2D_bdryenforcement(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_settagtriangles(MMG5_pMesh ,MMG5_pSol );
@@ -252,8 +238,6 @@ int MMG2D_kiupop(pQueue q);
 
 int MMG2D_baseBdry(MMG5_pMesh mesh);
 
-//int MMG2D_evalgeom(MMG5_pMesh mesh);
-
 int MMG2D_cavity(MMG5_pMesh ,MMG5_pSol ,int ,int *);
 int MMG2D_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
 int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
@@ -261,7 +245,6 @@ int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 /* Adds Charles */
 double MMG2D_voltri(MMG5_pMesh ,int ,int ,int );
 double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
-LIBMMG2D_EXPORT int MMG2D_parsop(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , int8_t );
 int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_chkmanimesh(MMG5_pMesh );

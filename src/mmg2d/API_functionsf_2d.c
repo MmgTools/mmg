@@ -61,7 +61,7 @@ FORTRAN_VARIADIC ( MMG2D_INIT_MESH, mmg2d_init_mesh,
   )
 
 /**
- * See \ref MMG2D_Init_fileNames function in mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Init_fileNames function in mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_INIT_FILENAMES, mmg2d_init_filenames,(MMG5_pMesh *mesh, MMG5_pSol *sol),
              (mesh,sol)) {
@@ -69,7 +69,7 @@ FORTRAN_NAME(MMG2D_INIT_FILENAMES, mmg2d_init_filenames,(MMG5_pMesh *mesh, MMG5_
   return;
 }
 /**
- * See \ref MMG2D_Init_parameters function in mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Init_parameters function in mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_INIT_PARAMETERS, mmg2d_init_parameters,(MMG5_pMesh *mesh),
              (mesh)) {
@@ -112,8 +112,8 @@ FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
 }
 
 /**
- * See \ref MMG2D_Set_outputMeshName function in mmg2d/liblibmmg2d_private.h or
- * mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_outputMeshName function in mmg2d/libmmg2d.h or
+ * mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
              (MMG5_pMesh *mesh, char* meshout, int* strlen0,int* retval),
@@ -147,7 +147,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
 }
 
 /**
- * See \ref MMG2D_Set_iparameter function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_iparameter function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_IPARAMETER,mmg2d_set_iparameter,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, int *val, int* retval),
@@ -156,7 +156,7 @@ FORTRAN_NAME(MMG2D_SET_IPARAMETER,mmg2d_set_iparameter,
   return;
 }
 /**
- * See \ref MMG2D_Set_dparameter function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_dparameter function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_DPARAMETER,mmg2d_set_dparameter,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int *dparam, double *val, int* retval),
@@ -166,7 +166,7 @@ FORTRAN_NAME(MMG2D_SET_DPARAMETER,mmg2d_set_dparameter,
 }
 
 /**
- * See \ref MMG2D_Set_localParameter function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_localParameter function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_LOCALPARAMETER,mmg2d_set_localparameter,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, int *ref,
@@ -178,7 +178,7 @@ FORTRAN_NAME(MMG2D_SET_LOCALPARAMETER,mmg2d_set_localparameter,
 
 
 /**
- * See \ref MMG2D_Set_multiMat function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_multiMat function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_MULTIMAT,mmg2d_set_multimat,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, int *ref,int *split,
@@ -189,7 +189,7 @@ FORTRAN_NAME(MMG2D_SET_MULTIMAT,mmg2d_set_multimat,
 }
 
 /**
- * See \ref MMG2D_Set_meshSize function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_MESHSIZE,mmg2d_set_meshsize,
              (MMG5_pMesh *mesh, int *np, int *nt, int *nquad, int *na, int *retval),
@@ -198,7 +198,7 @@ FORTRAN_NAME(MMG2D_SET_MESHSIZE,mmg2d_set_meshsize,
   return;
 }
 /**
- * See \ref MMG2D_Set_solSize function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_solSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_SOLSIZE,mmg2d_set_solsize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity,
@@ -208,7 +208,7 @@ FORTRAN_NAME(MMG2D_SET_SOLSIZE,mmg2d_set_solsize,
   return;
 }
 /**
- * See \ref MMG2D_Set_solsAtVerticesSize function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_solsAtVerticesSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_SOLSATVERTICESSIZE,mmg2d_set_solsatverticessize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsols,
@@ -219,7 +219,7 @@ FORTRAN_NAME(MMG2D_SET_SOLSATVERTICESSIZE,mmg2d_set_solsatverticessize,
 }
 
 /**
- * See \ref MMG2D_Get_solSize function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_solSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_SOLSIZE,mmg2d_get_solsize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity, int* np, int* typSol, int* retval),
@@ -230,7 +230,7 @@ FORTRAN_NAME(MMG2D_GET_SOLSIZE,mmg2d_get_solsize,
 }
 
 /**
- * See \ref MMG2D_Get_solsAtVerticesSize function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_solsAtVerticesSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_SOLSATVERTICESSIZE,mmg2d_get_solsatverticessize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsols,
@@ -242,7 +242,7 @@ FORTRAN_NAME(MMG2D_GET_SOLSATVERTICESSIZE,mmg2d_get_solsatverticessize,
 }
 
 /**
- * See \ref MMG2D_Set_vertex function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_vertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VERTEX,mmg2d_set_vertex,
              (MMG5_pMesh *mesh, double* c0, double* c1, int* ref,
@@ -253,7 +253,7 @@ FORTRAN_NAME(MMG2D_SET_VERTEX,mmg2d_set_vertex,
   return;
 }
 /**
- * See \ref MMG2D_Set_corner function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_corner function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_CORNER,mmg2d_set_corner,(MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
@@ -261,7 +261,7 @@ FORTRAN_NAME(MMG2D_SET_CORNER,mmg2d_set_corner,(MMG5_pMesh *mesh, int *k, int* r
   return;
 }
 /**
- * See \ref MMG2D_Unset_corner function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Unset_corner function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_UNSET_CORNER,mmg2d_unset_corner,(MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
@@ -270,7 +270,7 @@ FORTRAN_NAME(MMG2D_UNSET_CORNER,mmg2d_unset_corner,(MMG5_pMesh *mesh, int *k, in
 }
 
 /**
- * See \ref MMG2D_Set_requiredVertex function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_requiredVertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_REQUIREDVERTEX,mmg2d_set_requiredvertex,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -280,7 +280,7 @@ FORTRAN_NAME(MMG2D_SET_REQUIREDVERTEX,mmg2d_set_requiredvertex,
 }
 
 /**
- * See \ref MMG2D_Unset_requiredVertex function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Unset_requiredVertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_UNSET_REQUIREDVERTEX,mmg2d_unset_requiredvertex,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -290,7 +290,7 @@ FORTRAN_NAME(MMG2D_UNSET_REQUIREDVERTEX,mmg2d_unset_requiredvertex,
 }
 
 /**
- * See \ref MMG2D_Get_vertex function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_vertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_VERTEX,mmg2d_get_vertex,
              (MMG5_pMesh *mesh,double* c0, double* c1, int* ref,
@@ -300,7 +300,7 @@ FORTRAN_NAME(MMG2D_GET_VERTEX,mmg2d_get_vertex,
   return;
 }
 /**
- * See \ref MMG2D_GetByIdx_vertex function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_GetByIdx_vertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GETBYIDX_VERTEX,mmg2d_getbyidx_vertex,
              (MMG5_pMesh *mesh, double* c0, double* c1, int* ref,
@@ -311,7 +311,7 @@ FORTRAN_NAME(MMG2D_GETBYIDX_VERTEX,mmg2d_getbyidx_vertex,
 }
 
 /**
- * See \ref MMG2D_Set_vertices function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_vertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VERTICES,mmg2d_set_vertices,
              (MMG5_pMesh *mesh, double* vertices, int* refs, int* retval),
@@ -323,7 +323,7 @@ FORTRAN_NAME(MMG2D_SET_VERTICES,mmg2d_set_vertices,
 
 
 /**
- * See \ref MMG2D_Get_vertices function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_vertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_VERTICES,mmg2d_get_vertices,
              (MMG5_pMesh *mesh, double* vertices, int* refs,
@@ -335,7 +335,7 @@ FORTRAN_NAME(MMG2D_GET_VERTICES,mmg2d_get_vertices,
 
 
 /**
- * See \ref MMG2D_Set_triangle function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_triangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TRIANGLE,mmg2d_set_triangle,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int* ref,int* pos,
@@ -345,7 +345,7 @@ FORTRAN_NAME(MMG2D_SET_TRIANGLE,mmg2d_set_triangle,
   return;
 }
 /**
- * See \ref MMG2D_Set_requiredTriangle function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_requiredTriangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_REQUIREDTRIANGLE,mmg2d_set_requiredtriangle,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -354,7 +354,7 @@ FORTRAN_NAME(MMG2D_SET_REQUIREDTRIANGLE,mmg2d_set_requiredtriangle,
   return;
 }
 /**
- * See \ref MMG2D_Unset_requiredTriangle function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Unset_requiredTriangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_UNSET_REQUIREDTRIANGLE,mmg2d_unset_requiredtriangle,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -364,7 +364,7 @@ FORTRAN_NAME(MMG2D_UNSET_REQUIREDTRIANGLE,mmg2d_unset_requiredtriangle,
 }
 
 /**
- * See \ref MMG2D_Get_triangle function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_triangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIANGLE,mmg2d_get_triangle,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int* ref
@@ -374,7 +374,7 @@ FORTRAN_NAME(MMG2D_GET_TRIANGLE,mmg2d_get_triangle,
   return;
 }
 /**
- * See \ref MMG2D_Set_triangles function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_triangles function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TRIANGLES,mmg2d_set_triangles,
              (MMG5_pMesh *mesh, int* tria, int* refs,
@@ -385,7 +385,7 @@ FORTRAN_NAME(MMG2D_SET_TRIANGLES,mmg2d_set_triangles,
 }
 
 /**
- * See \ref MMG2D_Get_triangles function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_triangles function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIANGLES,mmg2d_get_triangles,
              (MMG5_pMesh *mesh, int* tria, int* refs,int* areRequired,
@@ -396,7 +396,7 @@ FORTRAN_NAME(MMG2D_GET_TRIANGLES,mmg2d_get_triangles,
 }
 
 /**
- * See \ref MMG2D_Set_quadrilateral function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_quadrilateral function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_QUADRILATERAL,mmg2d_set_quadrilateral,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int *v3,int* ref,int* pos,
@@ -406,7 +406,7 @@ FORTRAN_NAME(MMG2D_SET_QUADRILATERAL,mmg2d_set_quadrilateral,
   return;
 }
 /**
- * See \ref MMG2D_Get_quadrilateral function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_quadrilateral function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_QUADRILATERAL,mmg2d_get_quadrilateral,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int *v3, int* ref
@@ -416,7 +416,7 @@ FORTRAN_NAME(MMG2D_GET_QUADRILATERAL,mmg2d_get_quadrilateral,
   return;
 }
 /**
- * See \ref MMG2D_Set_quadrilaterals function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_quadrilaterals function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_QUADRILATERALS,mmg2d_set_quadrilaterals,
              (MMG5_pMesh *mesh, int* quadra, int* refs,
@@ -427,7 +427,7 @@ FORTRAN_NAME(MMG2D_SET_QUADRILATERALS,mmg2d_set_quadrilaterals,
 }
 
 /**
- * See \ref MMG2D_Get_quadrilaterals function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_quadrilaterals function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_QUADRILATERALS,mmg2d_get_quadrilaterals,
              (MMG5_pMesh *mesh, int* quadra, int* refs,int* areRequired,
@@ -438,7 +438,7 @@ FORTRAN_NAME(MMG2D_GET_QUADRILATERALS,mmg2d_get_quadrilaterals,
 }
 
 /**
- * See \ref MMG2D_Set_edge function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_edge function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_EDGE,mmg2d_set_edge,
              (MMG5_pMesh *mesh, int *v0, int *v1, int *ref, int *pos, int* retval),
@@ -447,7 +447,7 @@ FORTRAN_NAME(MMG2D_SET_EDGE,mmg2d_set_edge,
   return;
 }
 /**
- * See \ref MMG2D_Set_requiredEdge function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_requiredEdge function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_REQUIREDEDGE,mmg2d_set_requirededge,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -456,7 +456,7 @@ FORTRAN_NAME(MMG2D_SET_REQUIREDEDGE,mmg2d_set_requirededge,
   return;
 }
 /**
- * See \ref MMG2D_Unset_requiredEdge function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Unset_requiredEdge function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_UNSET_REQUIREDEDGE,mmg2d_unset_requirededge,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -465,7 +465,7 @@ FORTRAN_NAME(MMG2D_UNSET_REQUIREDEDGE,mmg2d_unset_requirededge,
   return;
 }
 /**
- * See \ref MMG2D_Set_parallelEdge function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_parallelEdge function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_PARALLELEDGE,mmg2d_set_paralleledge,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -475,7 +475,7 @@ FORTRAN_NAME(MMG2D_SET_PARALLELEDGE,mmg2d_set_paralleledge,
 }
 
 /**
- * See \ref MMG2D_Get_edge function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_edge function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, int* ref
                                           ,int* isRidge, int* isRequired, int* retval),
@@ -484,7 +484,7 @@ FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, 
   return;
 }
 /**
- * See \ref MMG2D_Set_edges function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_edges function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_EDGES,mmg2d_set_edges,
              (MMG5_pMesh *mesh, int *edges, int *refs, int* retval),
@@ -494,7 +494,7 @@ FORTRAN_NAME(MMG2D_SET_EDGES,mmg2d_set_edges,
 }
 
 /**
- * See \ref MMG2D_Get_edges function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_edges function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_EDGES,mmg2d_get_edges,(MMG5_pMesh *mesh, int* edges,
                                               int* refs,int* areRidges,
@@ -505,7 +505,7 @@ FORTRAN_NAME(MMG2D_GET_EDGES,mmg2d_get_edges,(MMG5_pMesh *mesh, int* edges,
 }
 
 /**
- * See \ref MMG2D_Get_triangleQuality function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_triangleQuality function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIANGLEQUALITY,mmg2d_get_trianglequality,
              (MMG5_pMesh *mesh, MMG5_pSol *met, int* k, double* retval),
@@ -515,7 +515,7 @@ FORTRAN_NAME(MMG2D_GET_TRIANGLEQUALITY,mmg2d_get_trianglequality,
 }
 
 /**
- * See \ref MMG2D_Get_meshSize function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_MESHSIZE,mmg2d_get_meshsize,
              (MMG5_pMesh *mesh, int* np, int* nt, int *nquad, int* na, int* retval),
@@ -525,7 +525,7 @@ FORTRAN_NAME(MMG2D_GET_MESHSIZE,mmg2d_get_meshsize,
   return;
 }
 /**
- * See \ref MMG2D_Set_scalarSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_scalarSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_SCALARSOL,mmg2d_set_scalarsol,
              (MMG5_pSol *met, double *s, int *pos, int* retval),
@@ -534,7 +534,7 @@ FORTRAN_NAME(MMG2D_SET_SCALARSOL,mmg2d_set_scalarsol,
   return;
 }
 /**
- * See \ref MMG2D_Get_scalarSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_scalarSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_SCALARSOL,mmg2d_get_scalarsol,
              (MMG5_pSol *met, double* s, int* retval),
@@ -543,7 +543,7 @@ FORTRAN_NAME(MMG2D_GET_SCALARSOL,mmg2d_get_scalarsol,
   return;
 }
 /**
- * See \ref MMG2D_Set_scalarSols function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_scalarSols function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_SCALARSOLS,mmg2d_set_scalarsols,
              (MMG5_pSol *met, double *s, int* retval),
@@ -553,7 +553,7 @@ FORTRAN_NAME(MMG2D_SET_SCALARSOLS,mmg2d_set_scalarsols,
 }
 
 /**
- * See \ref MMG2D_Get_scalarSols function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_scalarSols function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_SCALARSOLS,mmg2d_get_scalarsols,
              (MMG5_pSol *met, double* s, int* retval),
@@ -563,7 +563,7 @@ FORTRAN_NAME(MMG2D_GET_SCALARSOLS,mmg2d_get_scalarsols,
 }
 
 /**
- * See \ref MMG2D_Set_vectorSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_vectorSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VECTORSOL,mmg2d_set_vectorsol,
              (MMG5_pSol *met, double *vx, double *vy,
@@ -574,7 +574,7 @@ FORTRAN_NAME(MMG2D_SET_VECTORSOL,mmg2d_set_vectorsol,
 }
 
 /**
- * See \ref MMG2D_Get_vectorSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_vectorSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_VECTORSOL,mmg2d_get_vectorsol,
              (MMG5_pSol *met, double* vx,double *vy, int* retval),
@@ -583,7 +583,7 @@ FORTRAN_NAME(MMG2D_GET_VECTORSOL,mmg2d_get_vectorsol,
   return;
 }
 /**
- * See \ref MMG2D_Set_vectorSols function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_vectorSols function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VECTORSOLS,mmg2d_set_vectorsols,
              (MMG5_pSol *met, double *sols, int* retval),
@@ -593,7 +593,7 @@ FORTRAN_NAME(MMG2D_SET_VECTORSOLS,mmg2d_set_vectorsols,
 }
 
 /**
- * See \ref MMG2D_Get_vectorSols function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_vectorSols function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_VECTORSOLS,mmg2d_get_vectorsols,
              (MMG5_pSol *met, double* sols, int* retval),
@@ -603,7 +603,7 @@ FORTRAN_NAME(MMG2D_GET_VECTORSOLS,mmg2d_get_vectorsols,
 }
 
 /**
- * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TENSORSOL,mmg2d_set_tensorsol,
              (MMG5_pSol *met, double *m11, double *m12, double *m22,
@@ -613,7 +613,7 @@ FORTRAN_NAME(MMG2D_SET_TENSORSOL,mmg2d_set_tensorsol,
   return;
 }
 /**
- * See \ref MMG2D_Get_tensorSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_tensorSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TENSORSOL,mmg2d_get_tensorsol,
              (MMG5_pSol *met, double* m11,double *m12, double *m22,
@@ -623,7 +623,7 @@ FORTRAN_NAME(MMG2D_GET_TENSORSOL,mmg2d_get_tensorsol,
   return;
 }
 /**
- * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TENSORSOLS,mmg2d_set_tensorsols,
              (MMG5_pSol *met, double* sols,int* retval),
@@ -633,7 +633,7 @@ FORTRAN_NAME(MMG2D_SET_TENSORSOLS,mmg2d_set_tensorsols,
 }
 
 /**
- * See \ref MMG2D_Get_tensorSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_tensorSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TENSORSOLS,mmg2d_get_tensorsols,
              (MMG5_pSol *met, double* sols, int* retval),
@@ -642,7 +642,7 @@ FORTRAN_NAME(MMG2D_GET_TENSORSOLS,mmg2d_get_tensorsols,
   return;
 }
 /**
- * See \ref MMG2D_Set_ithSol_solsAtVertices function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_ithSol_solsAtVertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_ITHSOL_INSOLSATVERTICES,mmg2d_set_ithsol_insolsatvertices,
              (MMG5_pSol *sol, int *i,double *s,int *pos, int* retval),
@@ -652,7 +652,7 @@ FORTRAN_NAME(MMG2D_SET_ITHSOL_INSOLSATVERTICES,mmg2d_set_ithsol_insolsatvertices
 }
 
 /**
- * See \ref MMG2D_Get_ithSol_inSolsAtVertices function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_ithSol_inSolsAtVertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ITHSOL_INSOLSATVERTICES,mmg2d_get_ithsol_insolsatvertices,
              (MMG5_pSol *sol, int* i,double *s,int *pos, int* retval),
@@ -663,7 +663,7 @@ FORTRAN_NAME(MMG2D_GET_ITHSOL_INSOLSATVERTICES,mmg2d_get_ithsol_insolsatvertices
 
 
 /**
- * See \ref MMG2D_Set_ithSols_inSolsAtVertices function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Set_ithSols_inSolsAtVertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_ITHSOLS_INSOLSATVERTICES,mmg2d_set_ithsols_insolsatvertices,
              (MMG5_pSol *sol, int *i,double *s, int* retval),
@@ -673,7 +673,7 @@ FORTRAN_NAME(MMG2D_SET_ITHSOLS_INSOLSATVERTICES,mmg2d_set_ithsols_insolsatvertic
 }
 
 /**
- * See \ref MMG2D_Get_ithSols_inSolsAtVertices function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Get_ithSols_inSolsAtVertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ITHSOLS_INSOLSATVERTICES,mmg2d_get_ithsols_insolsatvertices,
              (MMG5_pSol *sol, int* i,double *s, int* retval),
@@ -683,7 +683,7 @@ FORTRAN_NAME(MMG2D_GET_ITHSOLS_INSOLSATVERTICES,mmg2d_get_ithsols_insolsatvertic
 }
 
 /**
- * See \ref MMG2D_Chk_meshData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Chk_meshData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_CHK_MESHDATA,mmg2d_chk_meshdata,
              (MMG5_pMesh *mesh,MMG5_pSol *met, int* retval),
@@ -693,7 +693,7 @@ FORTRAN_NAME(MMG2D_CHK_MESHDATA,mmg2d_chk_meshdata,
 }
 
 /**
- * See \ref MMG2D_Free_allSols function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Free_allSols function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_ALLSOLS,mmg2d_free_allsols,
              (MMG5_pMesh *mesh,MMG5_pSol *sol,int* retval),
@@ -706,7 +706,7 @@ FORTRAN_NAME(MMG2D_FREE_ALLSOLS,mmg2d_free_allsols,
 
 
 /**
- * See \ref MMG2D_Free_all function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Free_all function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
                  (const int starter,...),
@@ -725,7 +725,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
   )
 
 /**
- * See \ref MMG2D_Free_structures function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Free_structures function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,
                  (const int starter,...),
@@ -744,7 +744,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,
   )
 
 /**
- * See \ref MMG2D_Free_names function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_Free_names function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_NAMES,mmg2d_free_names,
                  (const int starter,...),
@@ -763,7 +763,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_NAMES,mmg2d_free_names,
   )
 
 /**
- * See \ref MMG2D_loadMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* strlen0,int* retval),(mesh, meshin,strlen0,retval)){
 
@@ -780,7 +780,7 @@ FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* s
 }
 
 /**
- * See \ref MMG2D_loadVtkMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadVtkMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADVTKMESH,mmg2d_loadvtkmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -798,7 +798,7 @@ FORTRAN_NAME(MMG2D_LOADVTKMESH,mmg2d_loadvtkmesh,
   return;
 }
 /**
- * See \ref MMG2D_loadvtkMesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadvtkMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADVTKMESH_AND_ALLDATA,mmg2d_loadvtkmesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -816,7 +816,7 @@ FORTRAN_NAME(MMG2D_LOADVTKMESH_AND_ALLDATA,mmg2d_loadvtkmesh_and_alldata,
   return;
 }
 /**
- * See \ref MMG2D_loadVtpMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadVtpMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADVTPMESH,mmg2d_loadvtpmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -834,7 +834,7 @@ FORTRAN_NAME(MMG2D_LOADVTPMESH,mmg2d_loadvtpmesh,
   return;
 }
 /**
- * See \ref MMG2D_loadvtpMesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadvtpMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADVTPMESH_AND_ALLDATA,mmg2d_loadvtpmesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -852,7 +852,7 @@ FORTRAN_NAME(MMG2D_LOADVTPMESH_AND_ALLDATA,mmg2d_loadvtpmesh_and_alldata,
   return;
 }
 /**
- * See \ref MMG2D_loadVtuMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadVtuMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADVTUMESH,mmg2d_loadvtumesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -870,7 +870,7 @@ FORTRAN_NAME(MMG2D_LOADVTUMESH,mmg2d_loadvtumesh,
   return;
 }
 /**
- * See \ref MMG2D_loadVtuMesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadVtuMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADVTUMESH_AND_ALLDATA,mmg2d_loadvtumesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -889,7 +889,7 @@ FORTRAN_NAME(MMG2D_LOADVTUMESH_AND_ALLDATA,mmg2d_loadvtumesh_and_alldata,
 }
 
 /**
- * See \ref MMG2D_loadMshMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadMshMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADMSHMESH,mmg2d_loadmshmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -908,7 +908,7 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH,mmg2d_loadmshmesh,
 }
 
 /**
- * See \ref MMG2D_loadGenericMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadGenericMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADGENERICMESH,mmg2d_loadgenericmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -927,7 +927,7 @@ FORTRAN_NAME(MMG2D_LOADGENERICMESH,mmg2d_loadgenericmesh,
 }
 
 /**
- * See \ref MMG2D_loadMshMesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadMshMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADMSHMESH_AND_ALLDATA,mmg2d_loadmshmesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -946,7 +946,7 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH_AND_ALLDATA,mmg2d_loadmshmesh_and_alldata,
 }
 
 /**
- * See \ref MMG2D_saveMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *strlen0, int* retval),
              (mesh,meshin,strlen0,retval)){
@@ -961,7 +961,7 @@ FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *s
   return;
 }
 /**
- * See \ref MMG2D_saveVtkMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveVtkMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEVTKMESH,mmg2d_savevtkmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -980,7 +980,7 @@ FORTRAN_NAME(MMG2D_SAVEVTKMESH,mmg2d_savevtkmesh,
   return;
 }
 /**
- * See \ref MMG2D_saveVtkMesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveVtkMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEVTKMESH_AND_ALLDATA,mmg2d_savevtkmesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1000,7 +1000,7 @@ FORTRAN_NAME(MMG2D_SAVEVTKMESH_AND_ALLDATA,mmg2d_savevtkmesh_and_alldata,
 }
 
 /**
- * See \ref MMG2D_saveVtuMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveVtuMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEVTUMESH,mmg2d_savevtumesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1019,7 +1019,7 @@ FORTRAN_NAME(MMG2D_SAVEVTUMESH,mmg2d_savevtumesh,
   return;
 }
 /**
- * See \ref MMG2D_saveVtuMesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveVtuMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEVTUMESH_AND_ALLDATA,mmg2d_savevtumesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1039,7 +1039,7 @@ FORTRAN_NAME(MMG2D_SAVEVTUMESH_AND_ALLDATA,mmg2d_savevtumesh_and_alldata,
 }
 
 /**
- * See \ref MMG2D_saveVtpMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveVtpMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEVTPMESH,mmg2d_savevtpmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1058,7 +1058,7 @@ FORTRAN_NAME(MMG2D_SAVEVTPMESH,mmg2d_savevtpmesh,
   return;
 }
 /**
- * See \ref MMG2D_saveVtpmesh_and_allData function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveVtpmesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEVTPMESH_AND_ALLDATA,mmg2d_savevtpmesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1078,7 +1078,7 @@ FORTRAN_NAME(MMG2D_SAVEVTPMESH_AND_ALLDATA,mmg2d_savevtpmesh_and_alldata,
 }
 
 /**
- * See \ref MMG2D_saveMshMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveMshMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEMSHMESH,mmg2d_savemshmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1098,7 +1098,7 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH,mmg2d_savemshmesh,
 }
 
 /**
- * See \ref MMG2D_saveMshMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveMshMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEMSHMESH_AND_ALLDATA,mmg2d_savemshmesh_and_alldata,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
@@ -1118,7 +1118,7 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH_AND_ALLDATA,mmg2d_savemshmesh_and_alldata,
 }
 
 /**
- * See \ref MMG2D_saveTetgenMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveTetgenMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVETETGENMESH,mmg2d_savetetgenmesh,(MMG5_pMesh *mesh,char *meshin,int *strlen0, int* retval),
              (mesh,meshin,strlen0,retval)){
@@ -1134,7 +1134,7 @@ FORTRAN_NAME(MMG2D_SAVETETGENMESH,mmg2d_savetetgenmesh,(MMG5_pMesh *mesh,char *m
 }
 
 /**
- * See \ref MMG2D_saveGenericMesh function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveGenericMesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEGENERICMESH,mmg2d_savegenericmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
@@ -1153,7 +1153,7 @@ FORTRAN_NAME(MMG2D_SAVEGENERICMESH,mmg2d_savegenericmesh,
 }
 
 /**
- * See \ref MMG2D_loadSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,
              (MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int* strlen0,int* retval),
@@ -1171,7 +1171,7 @@ FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,
 }
 
 /**
- * See \ref MMG2D_loadAllSols function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_loadAllSols function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADALLSOLS,mmg2d_loadallsols,
              (MMG5_pMesh *mesh,MMG5_pSol *sol,char *meshin,int* strlen0,int* retval),
@@ -1190,7 +1190,7 @@ FORTRAN_NAME(MMG2D_LOADALLSOLS,mmg2d_loadallsols,
 
 
 /**
- * See \ref MMG2D_saveSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,
                                           char *meshin,int *strlen0,int* retval),
@@ -1208,7 +1208,7 @@ FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,
 }
 
 /**
- * See \ref MMG2D_saveSol function in \ref mmg2d/liblibmmg2d_private.h file.
+ * See \ref MMG2D_saveSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SAVEALLSOLS,mmg2d_saveallsols,(MMG5_pMesh *mesh,MMG5_pSol *sol,
                                                   char *meshin,int *strlen0,int* retval),
@@ -1221,6 +1221,18 @@ FORTRAN_NAME(MMG2D_SAVEALLSOLS,mmg2d_saveallsols,(MMG5_pMesh *mesh,MMG5_pSol *so
 
   *retval = MMG2D_saveAllSols(*mesh,sol,tmp);
   MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_scaleMesh function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SCALEMESH,mmg2d_scalemesh,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *ls,int* retval),
+             (mesh,met,ls,retval)){
+
+  *retval = MMG2D_scaleMesh(*mesh,*met,*ls);
 
   return;
 }
