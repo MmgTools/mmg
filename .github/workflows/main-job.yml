@@ -166,7 +166,7 @@ jobs:
         with:
           path: mmg
 
-      - name: Compilation: test shared libs
+      - name: Test compilation with shared libs linkage
         run: |
           cmake -Smmg -Bbuild_shared \
           ${{ env.FORT_FLG }} \
@@ -186,7 +186,7 @@ jobs:
             cmake --build build_shared --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
         shell: bash
 
-      - name: Compilation: test no libs
+      - name: Test compilation without library linkage
         run: |
           cmake -Smmg -Bbuild_nolibs \
           ${{ env.FORT_FLG }} \
