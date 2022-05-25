@@ -13,7 +13,7 @@ node('mmg-sonnar-new') {
         cd buildPattern'''+list[i]+'''useScotch'''+list[i]+'''
         rm -rf *
         export CFLAGS="-O0 -g -fPIC"
-                cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_VTK=OFF -DCMAKE_Fortran_COMPILER="" -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=OFF -DLIBMMG3D_STATIC=OFF -DLIBMMG_STATIC=OFF -DLIBMMG2D_STATIC=OFF -DLIBMMGS_STATIC=OFF -DTEST_LIBMMG=OFF -DTEST_LIBMMG2D=OFF -DTEST_LIBMMG3D=OFF -DTEST_LIBMMGS=OFF -DSCOTCH_DIR=/home/ci/scotch_6.0.6 -DSCOTCH_LIBRARIES=/builds/scotch_6.0.6/lib/libscotch.a -DUSE_SCOTCH='''+list[i]+''' -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=OFF
+                cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_VTK=OFF -DCMAKE_Fortran_COMPILER="" -DMMG_PATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=OFF -DLIBMMG3D_STATIC=OFF -DLIBMMG_STATIC=OFF -DLIBMMG2D_STATIC=OFF -DLIBMMGS_STATIC=OFF -DTEST_LIBMMG=OFF -DTEST_LIBMMG2D=OFF -DTEST_LIBMMG3D=OFF -DTEST_LIBMMGS=OFF -DSCOTCH_DIR=/home/ci/scotch_6.0.6 -DSCOTCH_LIBRARIES=/builds/scotch_6.0.6/lib/libscotch.a -DUSE_SCOTCH='''+list[i]+''' -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=OFF
         make clean
         scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make 2>&1 |tee mmg-build.log
         make install |tee -a mmg-build.log

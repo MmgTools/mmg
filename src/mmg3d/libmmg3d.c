@@ -1138,7 +1138,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
 
-#ifdef PATTERN
+#ifdef MMG_PATTERN
     if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
         fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
@@ -1415,7 +1415,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
       MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
 
-#ifdef PATTERN
+#ifdef MMG_PATTERN
     if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
@@ -1686,7 +1686,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
         MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
       }
 
-#ifdef PATTERN
+#ifdef MMG_PATTERN
       if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
         if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
           fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");

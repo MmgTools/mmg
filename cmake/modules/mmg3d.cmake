@@ -52,11 +52,11 @@ GENERATE_FORTRAN_HEADER ( mmg3d
 #####
 ############################################################################
 # Should we use patterns for insertion istead of delaunay kernel
-IF ( NOT PATTERN )
+IF ( NOT MMG_PATTERN )
   MESSAGE(STATUS "Vertex insertion by delaunay kernel")
 ELSE()
   MESSAGE(STATUS "Vertex insertion by patterns")
-  SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
+  SET(CMAKE_C_FLAGS "-DMMG_PATTERN ${CMAKE_C_FLAGS}")
 ENDIF()
 
 ###############################################################################

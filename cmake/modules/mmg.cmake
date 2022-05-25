@@ -133,16 +133,16 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   # Install header files in project directory
   FILE(INSTALL  ${mmg2d_headers}
     DESTINATION ${PROJECT_BINARY_DIR}/include/mmg/mmg2d/
-    PATTERN "libmmg*f.h"  EXCLUDE)
+    MMG_PATTERN "libmmg*f.h"  EXCLUDE)
   FILE(INSTALL  ${mmgs_headers}
     DESTINATION ${PROJECT_BINARY_DIR}/include/mmg/mmgs/
-    PATTERN "libmmg*f.h"  EXCLUDE)
+    MMG_PATTERN "libmmg*f.h"  EXCLUDE)
   FILE(INSTALL  ${mmg3d_headers}
     DESTINATION ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/
-    PATTERN "libmmg*f.h"  EXCLUDE)
+    MMG_PATTERN "libmmg*f.h"  EXCLUDE)
   FILE(INSTALL  ${mmg_headers}
     DESTINATION ${PROJECT_BINARY_DIR}/include/mmg/
-    PATTERN "libmmg*f.h"  EXCLUDE)
+    MMG_PATTERN "libmmg*f.h"  EXCLUDE)
 
 
   ADD_CUSTOM_TARGET(copy_mmg_headers ALL
