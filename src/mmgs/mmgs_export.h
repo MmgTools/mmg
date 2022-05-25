@@ -25,9 +25,9 @@
 #define MMGS_EXPORT_H
 
 #include <mmg_export.h>
-#if defined(libmmgs_so_EXPORTS)
+#if defined(libmmgs_so_EXPORTS) || defined(libmmg_so_EXPORTS)
 #  define LIBMMGS_EXPORT MMG_DECL_EXPORT
-#elif defined(libmmgs_so_IMPORTS)
+#elif defined(libmmgs_so_IMPORTS) || defined(libmmg_so_IMPORTS)
 #  define LIBMMGS_EXPORT MMG_DECL_IMPORT
 #else
 #  define LIBMMGS_EXPORT
