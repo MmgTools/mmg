@@ -222,6 +222,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
 
     IF ( NOT TARGET lib${exec_name}_a )
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
+      ADD_DEFINITIONS(-Dlib${exec_name}_so_IMPORTS)
     ELSE ( )
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_a)
     ENDIF ( )
