@@ -90,12 +90,12 @@ CMAKE_DEPENDENT_OPTION(
   MMG3D_CI "Enable/Disable test execution for mmg3d" ON
   "BUILD_TESTING;BUILD_MMG3D" OFF)
 
-CMAKE_DEPENDENT_OPTION ( PATTERN
+CMAKE_DEPENDENT_OPTION ( MMG_PATTERN
   "If ON, insertion by patterns, otherwise insertion by delaunay kernel"
   OFF
   "BUILD_MMG3D" OFF)
 #-- Remove the next line to have this option visible in basic cmake mode
-MARK_AS_ADVANCED(PATTERN)
+MARK_AS_ADVANCED(MMG_PATTERN)
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
