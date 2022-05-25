@@ -72,8 +72,10 @@ ENDIF( )
 
 IF ( LIBMMG3D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}3d_a )
+  SET ( lib_type "STATIC" )
 ELSEIF ( LIBMMG3D_SHARED )
   SET ( lib_name lib${PROJECT_NAME}3d_so )
+  SET ( lib_type "SHARED" )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
@@ -118,7 +120,7 @@ FOREACH ( test_idx RANGE ${nbTests} )
   LIST ( GET MMG3D_LIB_TESTS           ${test_idx} test_name )
   LIST ( GET MMG3D_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
 
-  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_3d_headers ${lib_name} )
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_3d_headers ${lib_name} ${lib_type} )
 
 ENDFOREACH ( )
 
@@ -132,7 +134,7 @@ SET ( src_test_met3d
   ${PROJECT_SOURCE_DIR}/src/common/mmgexterns.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
   )
-ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} )
+ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} ${lib_type})
 
 
 IF ( MMG3D_CI )

@@ -223,18 +223,26 @@ ENDMACRO ( )
 MACRO ( ADD_AND_INSTALL_EXECUTABLE
     exec_name target_dependencies lib_files main_file )
 
-  IF ( NOT TARGET lib${exec_name}_a AND NOT TARGET lib${exec_name}_so )
+  # if one of the Mmg lib is built, use it instead of compiling whole sources
+  IF ( NOT TARGET lib${exec_name}_a AND NOT TARGET lib${exec_name}_so
+      AND NOT TARGET libmmg_a AND NOT TARGET libmmg_so )
     ADD_EXECUTABLE ( ${exec_name} ${lib_files} ${main_file} )
   ELSE ( )
     ADD_EXECUTABLE ( ${exec_name} ${main_file})
 
     SET_PROPERTY(TARGET ${exec_name} PROPERTY C_STANDARD 99)
 
-    IF ( NOT TARGET lib${exec_name}_a )
+    # link libraries in order of simplicities and depending on built targets
+    IF ( TARGET  lib${exec_name}_a )
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_a)
+    ELSEIF ( TARGET  libmmg_a )
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE libmmg_a)
+    ELSEIF ( TARGET lib${exec_name}_so )
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
       ADD_DEFINITIONS(-Dlib${exec_name}_so_IMPORTS)
     ELSE ( )
-      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_a)
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE libmmg_so)
+      ADD_DEFINITIONS(-Dlibmmg_so_IMPORTS)
     ENDIF ( )
 
   ENDIF ( )
@@ -333,7 +341,7 @@ ENDMACRO ( )
 #####
 ###############################################################################
 
-MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
+MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name lib_type )
   ADD_EXECUTABLE ( ${target_name} ${main_path} )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
@@ -346,6 +354,10 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   IF ( WIN32 AND ((NOT MINGW) AND SCOTCH_FOUND) )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
   ENDIF ( )
+
+  IF ( "${lib_type}" STREQUAL "SHARED" )
+    ADD_DEFINITIONS(-D${lib_name}_IMPORTS)
+  ENDIF()
 
   TARGET_LINK_LIBRARIES ( ${target_name}  PRIVATE ${lib_name} )
   INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin COMPONENT appli )

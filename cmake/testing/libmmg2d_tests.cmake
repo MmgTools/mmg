@@ -63,8 +63,10 @@ ENDIF( )
 
 IF ( LIBMMG2D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}2d_a )
+  SET ( lib_type "STATIC" )
 ELSEIF ( LIBMMG2D_SHARED )
   SET ( lib_name lib${PROJECT_NAME}2d_so )
+  SET ( lib_type "SHARED" )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
@@ -112,7 +114,7 @@ FOREACH ( test_idx RANGE ${nbTests} )
   LIST ( GET MMG2D_LIB_TESTS           ${test_idx} test_name )
   LIST ( GET MMG2D_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
 
-  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_2d_headers ${lib_name} )
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_2d_headers ${lib_name} ${lib_type})
 
 ENDFOREACH ( )
 
@@ -126,7 +128,7 @@ SET ( src_test_met2d
   ${PROJECT_SOURCE_DIR}/src/common/mmgexterns.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met2d.c
   )
-ADD_LIBRARY_TEST ( test_met2d "${src_test_met2d}" copy_2d_headers ${lib_name} )
+ADD_LIBRARY_TEST ( test_met2d "${src_test_met2d}" copy_2d_headers ${lib_name} ${lib_type})
 
 IF ( BUILD_TESTING )
 
