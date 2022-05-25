@@ -166,7 +166,46 @@ jobs:
         with:
           path: mmg
 
-      - name: Configure Mmg
+      - name: Compilation: test shared libs
+        run: |
+          cmake -Smmg -Bbuild_shared \
+          ${{ env.FORT_FLG }} \
+            -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
+            -DPATTERN=${{ matrix.pattern }} \
+            -DUSE_SCOTCH=${{ matrix.scotch }} \
+            -DSCOTCH_DIR=scotch \
+            -DUSE_VTK=${{ matrix.vtk }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            ${{ inputs.add_cmake_cfg_args }} ..
+            cmake --build build_shared --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+        shell: bash
+
+      - name: Compilation: test no libs
+        run: |
+          cmake -Smmg -Bbuild_nolibs \
+          ${{ env.FORT_FLG }} \
+            -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
+            -DPATTERN=${{ matrix.pattern }} \
+            -DUSE_SCOTCH=${{ matrix.scotch }} \
+            -DSCOTCH_DIR=scotch \
+            -DUSE_VTK=${{ matrix.vtk }} \
+            -DLIBMMG_STATIC=OFF \
+            -DLIBMMGS_STATIC=OFF \
+            -DLIBMMG2D_STATIC=OFF \
+            -DLIBMMG3D_STATIC=OFF \
+            ${{ inputs.add_cmake_cfg_args }} ..
+            cmake --build build_nolibs --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+        shell: bash
+
+      - name: Configure Mmg with static libs (default behaviour)
         run: |
           cmake -Smmg -Bbuild \
           ${{ env.FORT_FLG }} \
