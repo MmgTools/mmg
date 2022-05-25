@@ -182,7 +182,7 @@ jobs:
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
-            ${{ inputs.add_cmake_cfg_args }} ..
+            ${{ inputs.add_cmake_cfg_args }}
             cmake --build build_shared --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
         shell: bash
 
@@ -201,7 +201,7 @@ jobs:
             -DLIBMMGS_STATIC=OFF \
             -DLIBMMG2D_STATIC=OFF \
             -DLIBMMG3D_STATIC=OFF \
-            ${{ inputs.add_cmake_cfg_args }} ..
+            ${{ inputs.add_cmake_cfg_args }}
             cmake --build build_nolibs --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
         shell: bash
 
@@ -220,7 +220,7 @@ jobs:
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
-            ${{ inputs.add_cmake_cfg_args }} ..
+            ${{ inputs.add_cmake_cfg_args }}
         shell: bash
 
       - name: Build Mmg
