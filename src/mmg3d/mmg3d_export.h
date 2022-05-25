@@ -27,8 +27,10 @@
 #include <mmg_export.h>
 #if defined(libmmg3d_so_EXPORTS)
 #  define LIBMMG3D_EXPORT MMG_DECL_EXPORT
-#else
+#elif defined(libmmg3d_so_IMPORTS)
 #  define LIBMMG3D_EXPORT MMG_DECL_IMPORT
+#else
+#  define LIBMMG3D_EXPORT
 #endif
 
 #endif
