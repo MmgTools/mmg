@@ -79,6 +79,10 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     DEPENDS
     ${source_dir}/libmmg${target_identifier}.h )
 
+  ADD_CUSTOM_TARGET(mmg${target_identifier}_export_header ALL
+    DEPENDS
+    ${source_dir}/mmg${target_identifier}_export.h )
+
   COPY_HEADER (
     ${COMMON_SOURCE_DIR} libmmgtypes.h
     ${include_dir} libmmgtypes.h
@@ -100,6 +104,11 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     mmg${target_identifier}_header copy_libmmg${target_identifier} )
 
   COPY_HEADER (
+    ${source_dir} mmg${target_identifier}_export.h
+    ${include_dir} mmg${target_identifier}_export.h
+    mmg${target_identifier}_export_header copy_mmg${target_identifier}_export )
+
+  COPY_HEADER (
     ${COMMON_BINARY_DIR} libmmgtypesf.h
     ${include_dir} libmmgtypesf.h
     mmg_fortran_header copy${target_identifier}_libmmgtypesf )
@@ -111,7 +120,8 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   SET ( tgt_list copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
     copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
-    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgversion )
+    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgversion
+    copy_mmg${target_identifier}_export )
 
   IF (NOT WIN32 OR MINGW)
     COPY_HEADER (
