@@ -475,7 +475,6 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
-  MMG5_pMat  pm;
   fpos_t     position;
 
   /* Check for parameter file */

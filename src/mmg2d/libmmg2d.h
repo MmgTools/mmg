@@ -2376,6 +2376,41 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
  * functions.
  */
   LIBMMG2D_EXPORT void MMG2D_Set_commonFunc(void);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ls pointer toward a solution structure (level-set or displacement).
+ *
+ * \return 1 if success, 0 if fail (computed bounding box too small
+ * or one af the anisotropic input metric is not valid).
+ *
+ * Scale the mesh and the size informations between 0 and 1.
+ * Compute a default value for the hmin/hmax parameters if needed.
+ *
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SCALEMESH(mesh,met,ls,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,ls\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  LIBMMG2D_EXPORT int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
+ *
+ * \warning works only for a metric computed by the DoSol function because we
+ * suppose that we have a diagonal tensor in aniso.
+ *
+ */
+LIBMMG2D_EXPORT void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
+
 #ifdef __cplusplus
 }
 #endif

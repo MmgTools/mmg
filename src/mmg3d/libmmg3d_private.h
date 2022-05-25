@@ -25,7 +25,6 @@
 #define LIBMMG3D_PRIVATE_H
 
 #include "libmmgcommon.h"
-#include "mmg3d_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -259,7 +258,7 @@ void MMG5_freeXTets(MMG5_pMesh mesh);
 void MMG5_freeXPrisms(MMG5_pMesh mesh);
 void MMG3D_Free_topoTables(MMG5_pMesh mesh);
 int  MMG5_chkBdryTria(MMG5_pMesh mesh);
-LIBMMG3D_EXPORT int  MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori);
+int  MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori);
 extern int    MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 extern double MMG5_BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
 int  MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]);
@@ -311,7 +310,7 @@ int  MMG3D_nmgeom(MMG5_pMesh mesh);
 int  MMG5_paktet(MMG5_pMesh mesh);
 int  MMG5_hashGetFace(MMG5_Hash*,int,int,int);
 int  MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash*);
-int   MMG3D_hashPrism(MMG5_pMesh mesh);
+int  MMG3D_hashPrism(MMG5_pMesh mesh);
 int  MMG5_hashPop(MMG5_Hash *hash,int a,int b);
 int  MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag);
 int  MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag);
@@ -333,7 +332,7 @@ int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int  MMG3D_update_xtetra ( MMG5_pMesh mesh );
-LIBMMG3D_EXPORT int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
+int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int  MMG3D_setMeshSize_initData(MMG5_pMesh,int,int,int,int,int,int);
 int  MMG3D_setMeshSize_alloc(MMG5_pMesh);
 int  MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
@@ -454,15 +453,15 @@ int    MMG5_isbr(MMG5_pMesh ,int );
 void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 
 /* useful functions to debug */
-LIBMMG3D_EXPORT int  MMG3D_indElt(MMG5_pMesh mesh,int kel);
-LIBMMG3D_EXPORT int  MMG3D_indPt(MMG5_pMesh mesh,int kp);
+int  MMG3D_indElt(MMG5_pMesh mesh,int kel);
+int  MMG3D_indPt(MMG5_pMesh mesh,int kp);
 void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
 void MMG3D_chkpointtag(MMG5_pMesh mesh);
 void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
 int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref);
 
 #ifdef USE_SCOTCH
-LIBMMG3D_EXPORT int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
+int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
 #endif
 
 int    MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
@@ -480,8 +479,8 @@ int MMG5_saveDisp(MMG5_pMesh ,MMG5_pSol );
 
 /* Delaunay functions*/
 int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
-  int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
-  int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
+int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
+int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
 int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
