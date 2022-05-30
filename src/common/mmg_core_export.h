@@ -24,10 +24,13 @@
 #ifndef MMG_CORE_EXPORT_H
 #define MMG_CORE_EXPORT_H
 
-#if defined(libmmgs_so_EXPORTS) || defined(libmmg2d_so_EXPORTS) || defined(libmmg3d_so_EXPORTS)
-#  define LIBMMG_CORE_EXPORT __declspec(dllexport)
+#include <mmg_export.h>
+#if defined(libmmgs_so_EXPORTS) || defined(libmmg2d_so_EXPORTS) || defined(libmmg3d_so_EXPORTS) || defined(libmmg_so_EXPORTS)
+#  define LIBMMG_CORE_EXPORT MMG_DECL_EXPORT
+#elif defined(libmmgs_so_IMPORTS) || defined(libmmg2d_so_IMPORTS) || defined(libmmg3d_so_IMPORTS) || defined(libmmg_so_IMPORTS)
+#  define LIBMMG_CORE_EXPORT MMG_DECL_IMPORT
 #else
-#  define LIBMMG_CORE_EXPORT __declspec(dllimport)
+#  define LIBMMG_CORE_EXPORT
 #endif
 
 #endif

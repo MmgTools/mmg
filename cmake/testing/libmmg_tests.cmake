@@ -38,8 +38,10 @@ SET ( MMG_LIB_TESTS_MAIN_PATH
 
 IF ( LIBMMG_STATIC )
   SET ( lib_name lib${PROJECT_NAME}_a )
+  SET ( lib_type "STATIC" )
 ELSEIF ( LIBMMG_SHARED )
   SET ( lib_name lib${PROJECT_NAME}_so )
+  SET ( lib_type "SHARED" )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
@@ -66,7 +68,7 @@ FOREACH ( test_idx RANGE ${nbTests} )
   LIST ( GET MMG_LIB_TESTS           ${test_idx} test_name )
   LIST ( GET MMG_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
 
-  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_mmg_headers ${lib_name} )
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_mmg_headers ${lib_name} ${lib_type} )
 
 ENDFOREACH ( )
 

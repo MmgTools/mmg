@@ -57,10 +57,14 @@ FILE(
   mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG2D_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.h
   ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp
   )
+
 LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   ${REMOVE_FILE} )
 
 IF ( VTK_FOUND )
@@ -72,6 +76,7 @@ FILE(
   GLOB
   mmg2d_main_file
   ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################
@@ -102,8 +107,10 @@ ENDIF ( )
 ############################################################################
 # mmg2d header files needed for library
 SET( mmg2d_headers
+  ${MMG2D_SOURCE_DIR}/mmg2d_export.h
   ${MMG2D_SOURCE_DIR}/libmmg2d.h
   ${MMG2D_BINARY_DIR}/libmmg2df.h
+  ${COMMON_SOURCE_DIR}/mmg_export.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
@@ -141,7 +148,7 @@ ENDIF()
 ###############################################################################
 
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d copy_2d_headers
-  "${mmg2d_library_files}" ${mmg2d_main_file} )
+  "${mmg2d_library_files}" "${mmg2d_main_file}" )
 
 
 ###############################################################################

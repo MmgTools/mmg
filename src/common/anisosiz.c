@@ -33,6 +33,7 @@
  */
 
 #include "mmgcommon.h"
+#include "mmgexterns.h"
 #include "inlined_functions.h"
 
 /**

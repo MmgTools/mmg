@@ -179,7 +179,7 @@ jobs:
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{ github.event.inputs.cmake_build_type }} \
-            -DPATTERN=${{ github.event.inputs.pattern }} \
+            -DMMG_PATTERN=${{ github.event.inputs.pattern }} \
             -DUSE_SCOTCH=${{ github.event.inputs.scotch }} \
             -DUSE_VTK=${{ github.event.inputs.vtk }} \
             -DTEST_LIBMMG=ON \

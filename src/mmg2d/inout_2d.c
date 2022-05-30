@@ -20,7 +20,9 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 /* read mesh data */
 int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {

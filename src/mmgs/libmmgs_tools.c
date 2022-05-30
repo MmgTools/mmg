@@ -33,8 +33,10 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include "inlined_functions.h"
+#include "mmgexterns.h"
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {

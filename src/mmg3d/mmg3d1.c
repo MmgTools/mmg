@@ -32,11 +32,13 @@
  * \copyright GNU Lesser General Public License.
  *
  * Perform volume and surface mesh adaptation with pattern splitting
- * (\a PATTERN preprocessor flag set to ON).
+ * (\a MMG_PATTERN preprocessor flag set to ON).
  *
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmgexterns.h"
 
 extern int8_t ddb;
 
@@ -2860,7 +2862,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
     nns += ns;
     nnf += nf;
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf > 0 ){
-#ifndef PATTERN
+#ifndef MMG_PATTERN
       fprintf(stdout,"                   ");
 #endif
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
@@ -2885,7 +2887,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
-#ifndef PATTERN
+#ifndef MMG_PATTERN
       fprintf(stdout,"                   ");
 #endif
       fprintf(stdout, "     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);

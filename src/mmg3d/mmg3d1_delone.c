@@ -30,13 +30,15 @@
  * \todo Doxygen documentation
  *
  * Perform volume and surface mesh adaptation in delaunay mode (\a
- * PATTERN preprocessor flag set to OFF).
+ * MMG_PATTERN preprocessor flag set to OFF).
  *
  * \todo Clean the boucle for (code copy...)
  */
-#include "mmg3d.h"
 
-#ifndef PATTERN
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
+
+#ifndef MMG_PATTERN
 
 int8_t  ddb;
 

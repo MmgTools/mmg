@@ -24,10 +24,13 @@
 #ifndef MMG2D_EXPORT_H
 #define MMG2D_EXPORT_H
 
-#if defined(libmmg2d_so_EXPORTS)
-#  define LIBMMG2D_EXPORT __declspec(dllexport)
+#include <mmg_export.h>
+#if defined(libmmg2d_so_EXPORTS) || defined(libmmg_so_EXPORTS)
+#  define LIBMMG2D_EXPORT MMG_DECL_EXPORT
+#elif defined(libmmg2d_so_IMPORTS) || defined(libmmg2d_so_IMPORTS)
+#  define LIBMMG2D_EXPORT MMG_DECL_IMPORT
 #else
-#  define LIBMMG2D_EXPORT __declspec(dllimport)
+#  define LIBMMG2D_EXPORT
 #endif
 
 #endif

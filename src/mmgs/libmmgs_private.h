@@ -21,13 +21,10 @@
 ** =============================================================================
 */
 
-#ifndef MMGS_H
-#define MMGS_H
+#ifndef LIBMMGS_PRIVATE_H
+#define LIBMMGS_PRIVATE_H
 
 #include "libmmgcommon.h"
-#include "libmmgs.h"
-
-#include "mmgs_export.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -144,7 +141,7 @@ void MMGS_delPt(MMG5_pMesh mesh,int ip);
 int  MMGS_newElt(MMG5_pMesh mesh);
 int  MMGS_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
-LIBMMGS_EXPORT int  MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, MMG5_pBezier, int8_t ori);
+int  MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, MMG5_pBezier, int8_t ori);
 int  MMGS_bezierInt(MMG5_pBezier ,double *,double *,double *,double *);
 int  MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip);
 int  MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i, int *vx);
@@ -164,7 +161,7 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t typchk);
 int8_t typelt(MMG5_pPoint p[3],int8_t *ia);
 int  litswp(MMG5_pMesh mesh,int k,int8_t i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,int8_t i,double kal);
-LIBMMGS_EXPORT int  MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
+int  MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,double mr[6]);
 int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
@@ -184,12 +181,11 @@ int MMG5_mmgsRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
 void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 
 /* useful functions to debug */
-LIBMMGS_EXPORT int  MMGS_indElt(MMG5_pMesh mesh,int kel);
-LIBMMGS_EXPORT int  MMGS_indPt(MMG5_pMesh mesh,int kp);
+int  MMGS_indElt(MMG5_pMesh mesh,int kel);
+int  MMGS_indPt(MMG5_pMesh mesh,int kp);
 
 /* function pointers */
-/* init structures */
-void  MMG5_Init_parameters(MMG5_pMesh mesh);
+
 /* iso/aniso computations */
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
@@ -220,22 +216,6 @@ extern int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,doub
 extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
-/**
- * Set common pointer functions between mmgs and mmg3d to the matching mmgs
- * functions.
- */
-static inline
-void MMGS_Set_commonFunc(void) {
-  MMG5_bezierCP          = MMG5_mmgsBezierCP;
-  MMG5_chkmsh            = MMG5_mmgsChkmsh;
-  MMG5_indPt             = MMGS_indPt;
-  MMG5_indElt            = MMGS_indElt;
-  MMG5_grad2met_ani      = MMG5_grad2metSurf;
-  MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
-#ifdef USE_SCOTCH
-  MMG5_renumbering       = MMG5_mmgsRenumbering;
-#endif
-}
 
 #ifdef __cplusplus
 }

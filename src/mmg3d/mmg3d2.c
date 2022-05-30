@@ -33,7 +33,8 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 extern int8_t ddb;
 

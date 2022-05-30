@@ -33,7 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * \param imprim verbosity level (muted for stdout if -1)

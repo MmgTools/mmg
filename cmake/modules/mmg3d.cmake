@@ -52,11 +52,11 @@ GENERATE_FORTRAN_HEADER ( mmg3d
 #####
 ############################################################################
 # Should we use patterns for insertion istead of delaunay kernel
-IF ( NOT PATTERN )
+IF ( NOT MMG_PATTERN )
   MESSAGE(STATUS "Vertex insertion by delaunay kernel")
 ELSE()
   MESSAGE(STATUS "Vertex insertion by patterns")
-  SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
+  SET(CMAKE_C_FLAGS "-DMMG_PATTERN ${CMAKE_C_FLAGS}")
 ENDIF()
 
 ###############################################################################
@@ -71,10 +71,13 @@ FILE(
   mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG3D_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.h
   ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
   )
 LIST(REMOVE_ITEM mmg3d_library_files
-  ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
+  ${MMG3D_SOURCE_DIR}/mmg3d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 IF ( VTK_FOUND )
@@ -86,6 +89,7 @@ FILE(
   GLOB
   mmg3d_main_file
   ${MMG3D_SOURCE_DIR}/mmg3d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################
@@ -129,8 +133,10 @@ ENDIF()
 
 # mmg3d header files needed for library
 SET( mmg3d_headers
+  ${MMG3D_SOURCE_DIR}/mmg3d_export.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h
   ${MMG3D_BINARY_DIR}/libmmg3df.h
+  ${COMMON_SOURCE_DIR}/mmg_export.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
@@ -155,7 +161,7 @@ COPY_HEADERS_AND_CREATE_TARGET ( ${MMG3D_SOURCE_DIR} ${MMG3D_BINARY_DIR} ${MMG3D
 #####
 ###############################################################################
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
-  "${mmg3d_library_files}" ${mmg3d_main_file} )
+  "${mmg3d_library_files}" "${mmg3d_main_file}" )
 
 ###############################################################################
 #####

@@ -20,7 +20,7 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 #define  MMG2D_AREAMIN      1e-15 //1e-20 failed : creation of too bad element
 

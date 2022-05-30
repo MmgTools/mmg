@@ -46,6 +46,10 @@ FILE(
   ${MMG3D_SOURCE_DIR}/*.c
   ${MMGS_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG2D_SOURCE_DIR}/*.h
+  ${MMG3D_SOURCE_DIR}/*.h
+  ${MMGS_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.h
   )
 LIST(REMOVE_ITEM mmg_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
@@ -76,27 +80,35 @@ ENDIF()
 IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   # mmg header files needed for library
   SET( mmg2d_headers
+    ${MMG2D_SOURCE_DIR}/mmg2d_export.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
     ${MMG2D_BINARY_DIR}/libmmg2df.h
+    ${COMMON_SOURCE_DIR}/mmg_export.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmg3d_headers
+    ${MMG3D_SOURCE_DIR}/mmg3d_export.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
     ${MMG3D_BINARY_DIR}/libmmg3df.h
+    ${COMMON_SOURCE_DIR}/mmg_export.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmgs_headers
+    ${MMGS_SOURCE_DIR}/mmgs_export.h
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_BINARY_DIR}/libmmgsf.h
+    ${COMMON_SOURCE_DIR}/mmg_export.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmg_headers
+    ${COMMON_SOURCE_DIR}/mmg_export.h
+    ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h
     )

@@ -38,7 +38,7 @@
 #define _LS_LAMBDA      10.0e5
 #define _LS_MU          8.2e5
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 #include "ls_calls.h"
 
 /** Create submesh for solving the linear elasticity velocity extension problem.

@@ -79,6 +79,10 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     DEPENDS
     ${source_dir}/libmmg${target_identifier}.h )
 
+  ADD_CUSTOM_TARGET(mmg${target_identifier}_export_header ALL
+    DEPENDS
+    ${source_dir}/mmg${target_identifier}_export.h )
+
   COPY_HEADER (
     ${COMMON_SOURCE_DIR} libmmgtypes.h
     ${include_dir} libmmgtypes.h
@@ -100,6 +104,11 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     mmg${target_identifier}_header copy_libmmg${target_identifier} )
 
   COPY_HEADER (
+    ${source_dir} mmg${target_identifier}_export.h
+    ${include_dir} mmg${target_identifier}_export.h
+    mmg${target_identifier}_export_header copy_mmg${target_identifier}_export )
+
+  COPY_HEADER (
     ${COMMON_BINARY_DIR} libmmgtypesf.h
     ${include_dir} libmmgtypesf.h
     mmg_fortran_header copy${target_identifier}_libmmgtypesf )
@@ -111,7 +120,8 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   SET ( tgt_list copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
     copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
-    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgversion )
+    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgversion
+    copy_mmg${target_identifier}_export )
 
   IF (NOT WIN32 OR MINGW)
     COPY_HEADER (
@@ -213,17 +223,26 @@ ENDMACRO ( )
 MACRO ( ADD_AND_INSTALL_EXECUTABLE
     exec_name target_dependencies lib_files main_file )
 
-  IF ( NOT TARGET lib${exec_name}_a AND NOT TARGET lib${exec_name}_so )
+  # if one of the Mmg lib is built, use it instead of compiling whole sources
+  IF ( NOT TARGET lib${exec_name}_a AND NOT TARGET lib${exec_name}_so
+      AND NOT TARGET libmmg_a AND NOT TARGET libmmg_so )
     ADD_EXECUTABLE ( ${exec_name} ${lib_files} ${main_file} )
   ELSE ( )
     ADD_EXECUTABLE ( ${exec_name} ${main_file})
 
     SET_PROPERTY(TARGET ${exec_name} PROPERTY C_STANDARD 99)
 
-    IF ( NOT TARGET lib${exec_name}_a )
-      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
-    ELSE ( )
+    # link libraries in order of simplicities and depending on built targets
+    IF ( TARGET  lib${exec_name}_a )
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_a)
+    ELSEIF ( TARGET  libmmg_a )
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE libmmg_a)
+    ELSEIF ( TARGET lib${exec_name}_so )
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
+      ADD_DEFINITIONS(-Dlib${exec_name}_so_IMPORTS)
+    ELSE ( )
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE libmmg_so)
+      ADD_DEFINITIONS(-Dlibmmg_so_IMPORTS)
     ENDIF ( )
 
   ENDIF ( )
@@ -322,7 +341,7 @@ ENDMACRO ( )
 #####
 ###############################################################################
 
-MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
+MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name lib_type )
   ADD_EXECUTABLE ( ${target_name} ${main_path} )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
@@ -335,6 +354,10 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   IF ( WIN32 AND ((NOT MINGW) AND SCOTCH_FOUND) )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
   ENDIF ( )
+
+  IF ( "${lib_type}" STREQUAL "SHARED" )
+    ADD_DEFINITIONS(-D${lib_name}_IMPORTS)
+  ENDIF()
 
   TARGET_LINK_LIBRARIES ( ${target_name}  PRIVATE ${lib_name} )
   INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin COMPONENT appli )

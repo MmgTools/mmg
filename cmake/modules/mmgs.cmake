@@ -57,10 +57,13 @@ FILE(
   mmgs_library_files
   ${MMGS_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMGS_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.h
   ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   )
 LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   ${REMOVE_FILE} )
 
 IF ( VTK_FOUND )
@@ -72,6 +75,7 @@ FILE(
   GLOB
   mmgs_main_file
   ${MMGS_SOURCE_DIR}/mmgs.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################
@@ -94,8 +98,10 @@ ENDIF()
 
 # mmgs header files needed for library
 SET( mmgs_headers
+  ${MMGS_SOURCE_DIR}/mmgs_export.h
   ${MMGS_SOURCE_DIR}/libmmgs.h
   ${MMGS_BINARY_DIR}/libmmgsf.h
+  ${COMMON_SOURCE_DIR}/mmg_export.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
@@ -120,7 +126,7 @@ COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_IN
 #####
 ###############################################################################
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
-  "${mmgs_library_files}" ${mmgs_main_file} )
+  "${mmgs_library_files}" "${mmgs_main_file}" )
 
 ###############################################################################
 #####

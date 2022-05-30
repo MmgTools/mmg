@@ -37,7 +37,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 #include "mmgsexterns.h"
 
 /**

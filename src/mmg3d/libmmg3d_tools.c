@@ -30,8 +30,12 @@
  * \copyright GNU Lesser General Public License.
  **/
 
+#include "libmmg3d.h"
+#include "mmgcommon.h"
 #include "inlined_functions_3d.h"
 #include "mmgversion.h"
+#include "mmgexterns.h"
+
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 
@@ -62,7 +66,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG3D_defsiz         = MMG3D_defsiz_ani;
     MMG3D_gradsiz        = MMG3D_gradsiz_ani;
     MMG3D_gradsizreq     = MMG3D_gradsizreq_ani;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
     MMG5_cavity          = MMG5_cavity_ani;
     MMG3D_PROctreein     = MMG3D_PROctreein_ani;
 #endif
@@ -92,7 +96,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG3D_gradsiz        = MMG3D_gradsiz_iso;
     MMG3D_gradsizreq     = MMG3D_gradsizreq_iso;
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
     MMG5_cavity          = MMG5_cavity_iso;
     MMG3D_PROctreein     = MMG3D_PROctreein_iso;
 #endif
@@ -130,7 +134,7 @@ int MMG3D_usage(char *prog) {
   /* Parameters shared by mmg2d and 3d only*/
   MMG5_2d3dUsage();
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   fprintf(stdout,"-octree val  specify the max number of points per octree cell \n");
 #endif
 #ifdef USE_SCOTCH
@@ -160,7 +164,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 
   MMG5_mmgDefaultValues(mesh);
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   fprintf(stdout,"Max number of point per octree cell (-octree) : %d\n",
           mesh->info.PROctree);
 #endif
@@ -399,7 +403,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_opnbdy,1) )
             return 0;
         }
-#ifndef PATTERN
+#ifndef MMG_PATTERN
         else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
                                      atoi(argv[i])) )
@@ -1420,3 +1424,4 @@ void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return;
 }
+
