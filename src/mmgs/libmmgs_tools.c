@@ -820,15 +820,18 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
 int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria   ptt;
-  MMG5_pPoint  p1,p2;
-  double       u[3],dd,tensordot[6];
-  int          i,j,k,iadr,ipa,ipb,type;
+  MMG5_pPoint  p1;
+  double       dd,tensordot[3];
+  double       *m,r[3][3],lispoi[3*MMGS_LMAX+1],b0[3],b1[3],b2[3];
+  int          i,j,k,iadr,ip,type,list[MMGS_LMAX+2],ilist;
   int          *mark;
 
-  /* Mesh analysis: normal at vertices are needed. In adaptation mode,
-   * analysis has already been computed */
-  if ( !MMGS_analys_for_norver(mesh) ) {
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Mesh analysis: normal at vertices are needed. In adaptation mode,
+     * analysis has already been computed */
+    if ( !MMGS_analys_for_norver(mesh) ) {
+      return 0;
+    }
   }
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
@@ -841,89 +844,118 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   type = 3;
-  if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
+  if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to allocate metric.\n",
+            __func__);
     return 0;
+  }
 
-  /* Travel the triangles edges and add the edge contribution to edges
-   * extermities */
+  /* Travel the triangles */
+#warning to remove
+  double isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !MG_EOK(ptt) )  continue;
 
     for (i=0; i<3; i++) {
-      ipa = ptt->v[i];
-      ipb = ptt->v[MMG5_inxt2[i]];
-      p1  = &mesh->point[ipa];
-      p2  = &mesh->point[ipb];
+      ip = ptt->v[i];
 
-      u[0]  = p1->c[0] - p2->c[0];
-      u[1]  = p1->c[1] - p2->c[1];
-      u[2]  = p1->c[2] - p2->c[2];
-
-      tensordot[0] = u[0]*u[0];
-      tensordot[1] = u[0]*u[1];
-      tensordot[2] = u[0]*u[2];
-      tensordot[3] = u[1]*u[1];
-      tensordot[4] = u[1]*u[2];
-      tensordot[5] = u[2]*u[2];
-
-      iadr = 6*ipa;
-      for ( j=0; j<6; ++j ) {
-        met->m[iadr+j]   += tensordot[j];
+      if ( mark[ip] ) {
+        continue;
       }
-      mark[ipa]++;
+      p1  = &mesh->point[ip];
 
-      iadr = 6*ipb;
-      for ( j=0; j<6; ++j ) {
-        met->m[iadr+j]   += tensordot[j];
+      /* Regular point: get the ball of the point and project it in the tangent
+       * plane to compute the unit metric tensor in 2D. */
+      ilist = boulet(mesh,k,i,list);
+      if ( ilist < 1 ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
+                __func__);
+        return 0;
       }
-      mark[ipb]++;
-    }
-  }
 
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    if ( !mark[k] ) {
-      continue;
-    }
+      mark[ip] = ilist;
 
-    /* Metric = nedges/dim * inv (sum(tensor_dot(edges,edges))).
-     * sum(tensor_dot) is stored in sol->m so reuse tensordot to
-     * compute M.  */
-    iadr = 6*k;
-    if ( !MMG5_invmat(met->m+iadr,tensordot) ) {
-      /* Non invertible matrix: impose FLT_MIN, it will be truncated by hmax
-       * later */
-      fprintf(stdout, " ## Warning: %s: %d: non invertible matrix."
-             " Impose hmax size at point\n",__func__,__LINE__);
-      met->m[iadr+0] = FLT_MIN;
-      met->m[iadr+1] = 0;
-      met->m[iadr+2] = 0;
-      met->m[iadr+3] = FLT_MIN;
-      met->m[iadr+4] = 0;
-      met->m[iadr+5] = FLT_MIN;
-      continue;
-    }
+      iadr = 6*ip;
+      m    = &met->m[iadr];
 
-    dd = (double)mark[k]*0.5;
+      if ( p1->tag & MG_CRN || p1->tag & MG_GEO || p1->tag & MG_REF ) {
+#warning to Treat
+        m[0] = m[3] = m[5] = isqhmax;
+        continue;
+      }
 
-    for ( j=0; j<6; ++j ) {
-      met->m[iadr+j] = dd*tensordot[j];
-    }
+      /* Rotation of the ball of p0 so lispoi will contain all the points of the
+         ball of p0, rotated so that t_{p_0}S = [z = 0] */
+      if ( !MMGS_surfballRotation(mesh,p1,list,ilist,r,lispoi)  ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to compute ball rotation.\n",
+                __func__);
+        return 0;
+      }
+
+      tensordot[0] = 0.;
+      tensordot[1] = 0.;
+      tensordot[2] = 0.;
+
+      for ( j=0; j<ilist; ++j ) {
+        /* Compute the 2D metric tensor from the projection of the vectors on
+         * the tangent plane */
+        tensordot[0] += lispoi[3*j+1]*lispoi[3*j+1];
+        tensordot[1] += lispoi[3*j+1]*lispoi[3*j+2];
+        tensordot[2] += lispoi[3*j+2]*lispoi[3*j+2];
+      }
+
+      /* Metric = nedges/dim * inv (sum(tensor_dot(edges,edges)))  */
+      dd = 1./(tensordot[0]*tensordot[2] - tensordot[1]*tensordot[1]);
+      dd *= (double)ilist/2.;
+
+      double tmp = tensordot[0];
+
+      tensordot[0] = dd*tensordot[2];
+      tensordot[1] = -dd*tensordot[1];
+      tensordot[2] = dd*tmp;
 
 #ifndef NDEBUG
-    /* Check metric */
-    double lambda[3],vp[3][3];
-    if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
-      fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric.",
-              __func__,__LINE__);
-    }
+      /* Check 2D metric */
+      double lambda[2],vp[2][2];
+      MMG5_eigensym(tensordot,lambda,vp);
 
-    assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
-            && "Negative eigenvalue");
-    assert ( isfinite(lambda[0]) && isfinite(lambda[1]) && isfinite(lambda[2])
-             && "Infinite eigenvalue" );
+      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+
+      /* Normally the case where the point belongs to only 2 colinear points is
+         impossible */
+      assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
 #endif
+
+#warning to factorize
+      /* At this point, tensordot (with 0 replaced by isqhmax in the z
+         direction) is the desired metric, except it is expressed in the rotated
+         canonical basis, that is tensordot = R * metric in cb * ^t R, so metric
+         in cb = ^tR*intm*R */
+      // intm = intm[0]  intm[1]    0
+      //        intm[1]  intm[2]    0
+      //           0       0     isqhmax
+
+      /* b0 and b1 serve now for nothing : let them be the lines of matrix intm*R */
+      b0[0] = tensordot[0]*r[0][0] + tensordot[1]*r[1][0];
+      b0[1] = tensordot[0]*r[0][1] + tensordot[1]*r[1][1];
+      b0[2] = tensordot[0]*r[0][2] + tensordot[1]*r[1][2];
+      b1[0] = tensordot[1]*r[0][0] + tensordot[2]*r[1][0];
+      b1[1] = tensordot[1]*r[0][1] + tensordot[2]*r[1][1];
+      b1[2] = tensordot[1]*r[0][2] + tensordot[2]*r[1][2];
+      b2[0] = isqhmax*r[2][0];
+      b2[1] = isqhmax*r[2][1];
+      b2[2] = isqhmax*r[2][2];
+
+      m[0] = r[0][0] * b0[0] + r[1][0] * b1[0] + r[2][0] * b2[0];
+      m[1] = r[0][0] * b0[1] + r[1][0] * b1[1] + r[2][0] * b2[1];
+      m[2] = r[0][0] * b0[2] + r[1][0] * b1[2] + r[2][0] * b2[2];
+
+      m[3] = r[0][1] * b0[1] + r[1][1] * b1[1] + r[2][1] * b2[1];
+      m[4] = r[0][1] * b0[2] + r[1][1] * b1[2] + r[2][1] * b2[2];
+
+      m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
+    }
   }
 
   MMG5_SAFE_FREE(mark);
