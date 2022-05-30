@@ -21,65 +21,13 @@
 ** =============================================================================
 */
 
-#ifndef CHRONO_H
-#define CHRONO_H
+#ifndef MMGS_EXPORT_H
+#define MMGS_EXPORT_H
 
-#include <time.h>
-#include "mmgcommon.h"
-
-#ifndef MMG_POSIX
-#include <windows.h>
+#if defined(libmmgs_so_EXPORTS)
+#  define LIBMMGS_EXPORT __declspec(dllexport)
 #else
-#include <sys/time.h>
-#include <sys/resource.h>
-#endif
-
-#include "mmg_core_export.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifndef  ON
-#define  RESET  0
-#define  ON     1
-#define  OFF    2
-#endif
-
-#define  BIG      1e6
-#define  BIG1     1e-6
-#define  TIMEMAX  12
-
-/**
- * \struct mytime
- * \brief Chrono object.
- *
- * mytime allow storage of chronograph informations.
- *
- */
-typedef struct mytime {
-  double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
-#ifdef MMG_POSIX
-  struct  timeval rutim;
-  struct  rusage  ru;
-#else
-  HANDLE        thisProcess;
-  FILETIME      ftIni, ftEnd, ftSys, ftUser;
-  SYSTEMTIME    stSys, stUser;
-  LARGE_INTEGER frequency;
-  LARGE_INTEGER rutim;
-#endif
-  int     call;
-} mytime;
-
-
-/* prototypes */
-LIBMMG_CORE_EXPORT void   chrono(int cmode,mytime *ptt);
-LIBMMG_CORE_EXPORT void   tminit(mytime *t,int maxtim);
-LIBMMG_CORE_EXPORT void   printim(double ,char *);
-
-#ifdef __cplusplus
-}
+#  define LIBMMGS_EXPORT __declspec(dllimport)
 #endif
 
 #endif
