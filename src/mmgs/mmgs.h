@@ -127,7 +127,6 @@ int  MMGS_Free_names_var( va_list argptr );
 
 int  MMGS_zaldy(MMG5_pMesh mesh);
 int  MMGS_assignEdge(MMG5_pMesh mesh);
-int  MMGS_clean_analys_for_norver(MMG5_pMesh mesh);
 int  MMGS_analys_for_norver(MMG5_pMesh mesh);
 int  MMGS_analys(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
