@@ -573,7 +573,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.iso ) {
-    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLe"
+    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMGS_IPARAM_iso):\n"
             "          YOU MUST CALL THE MMGS_MMGSLS FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);

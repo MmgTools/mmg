@@ -764,7 +764,7 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
             __func__,met->size);
     return 0;
-          }
+  }
 
   type = 1;
   if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
