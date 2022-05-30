@@ -45,8 +45,8 @@
 // if the header file is in the "include" directory
 // #include "libmmg3d.h"
 // if the header file is in "include/mmg/mmg3d"
-#include "mmg/mmg3d/libmmg3d.h"
 #include "libmmg3d_private.h"
+#include "mmg/mmg3d/libmmg3d.h"
 
 #define  TRIA_PARBDY(tag)    ((tag[0] & MG_PARBDY) && (tag[1] & MG_PARBDY) && (tag[2] & MG_PARBDY) )
 

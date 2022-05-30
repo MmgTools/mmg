@@ -130,8 +130,9 @@ extern "C" {
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >   END SUBROUTINE\n
  *
- */
+ */ 
   LIBMMG2D_EXPORT void  MMG2D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
+  
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -1407,7 +1408,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_Free_structures(const int starter,...);
+ LIBMMG2D_EXPORT int MMG2D_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1549,7 +1550,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1593,7 +1594,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1615,7 +1616,8 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
@@ -1701,6 +1703,7 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
  */
   LIBMMG2D_EXPORT int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
 
+  LIBMMG2D_EXPORT int MMG2D_loadVect(MMG5_pMesh ,char *);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1938,6 +1941,9 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
  *
  */
   LIBMMG2D_EXPORT int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
+
+
+  LIBMMG2D_EXPORT int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2330,6 +2336,7 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
  *
  */
   LIBMMG2D_EXPORT void MMG2D_Reset_verticestags(MMG5_pMesh mesh);
+
 /**
  * \param mesh pointer toward the mesh structure
  *
