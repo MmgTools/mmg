@@ -239,10 +239,8 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE libmmg_a)
     ELSEIF ( TARGET lib${exec_name}_so )
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
-      ADD_DEFINITIONS(-Dlib${exec_name}_so_IMPORTS)
     ELSE ( )
       TARGET_LINK_LIBRARIES(${exec_name} PRIVATE libmmg_so)
-      ADD_DEFINITIONS(-Dlibmmg_so_IMPORTS)
     ENDIF ( )
 
   ENDIF ( )

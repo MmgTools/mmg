@@ -85,6 +85,8 @@ ENDIF ()
 
 # Create mmgcmakedefines.h file with the architecture infos and
 # the definition ot the USE_POINTMAP flag.
+###############################################################################
+SET(MMG_DYN_LIB ${BUILD_SHARED_LIBS} CACHE INTERNAL "" FORCE)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
   ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefines.h @ONLY)
 
