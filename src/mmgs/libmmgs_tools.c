@@ -807,6 +807,14 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMGS_solTruncatureForOptim(mesh,met,0);
 
+  if ( mesh->info.iso ) {
+    /* Clean spurious entities added by mesh analysis */
+    if ( !MMGS_clean_analys_for_norver(mesh) ) {
+      return 0;
+    }
+  }
+
+
   return 1;
 }
 

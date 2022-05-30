@@ -322,7 +322,8 @@ static void nmpoints(MMG5_pMesh mesh) {
           
       if ( jel != numt) {
         if ( !(p0->tag & MG_CRN) || !(p0->tag & MG_REQ) ) {
-          p0->tag |= MG_CRN + MG_REQ; 
+          /* Add MG_BDY tag to be able to remove added tags */
+          p0->tag |= MG_CRN + MG_REQ + MG_BDY; 
           nmp++;
         }
       }
@@ -724,6 +725,80 @@ static int norver(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param tag tag to remove at MG_BDY points.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Clean tags at MG_BDY points. It is required to not have any MG_BDY tags
+ * before entering mmgs1 function (because functions that are shared by mmgs and
+ * mmg3d uses the MG_BDY tag to detect if we are in mmgs or mmg3d)
+ *
+ */
+static inline
+void MMGS_clean_bdytag(MMG5_pMesh mesh,int16_t tag) {
+  MMG5_pPoint  ppt;
+  int          k;
+
+  for ( k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( (!MG_VOK(ppt)) || !(ppt->tag & MG_BDY) ) {
+      continue;
+    }
+    /* Remove added CRN and REQ tags */
+    ppt->tag &= ~ ( tag );
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Clean spurious entites added by MMGS_analys_for_norver when called by the
+ * MMGS_doSol function.
+ *
+ */
+int MMGS_clean_analys_for_norver(MMG5_pMesh mesh) {
+  MMG5_pTria   pt;
+  int          k,i;
+  int16_t      tag;
+  static const int nv=3;
+
+  /** Entities added by setadj */
+  for ( k=1; k<=mesh->nt; ++k ) {
+    pt = &mesh->tria[k];
+
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
+
+    for (i=0; i<nv; i++) {
+      if ( pt->tag[i] ) {
+        int8_t i1  = MMG5_inxt2[i];
+        int8_t i2  = MMG5_iprv2[i];
+        int ip1 = pt->v[i1];
+        int ip2 = pt->v[i2];
+
+        tag = pt->tag[i];
+
+        /* Remove tag */
+        mesh->point[ip1].tag &= ~tag;
+        mesh->point[ip2].tag &= ~tag;
+        pt->tag[i] &= ~tag;
+      }
+    }
+  }
+
+  /** Remove CRN + REQ + BDY tags added by nmpoints */
+  MMGS_clean_bdytag( mesh, (MG_CRN + MG_REQ + MG_BDY));
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -803,6 +878,13 @@ int MMGS_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
+  /* next step of analysis */
   ier = MMGS_analys_for_norver(mesh);
+
+  /* Clean MG_BDY tags added by analys_for_norver and now useless (mandatory
+   * because functions that are shared by mmgs and mmg3d uses the MG_BDY tag to
+   * detect if called by mmgs or mmg3d) */
+  MMGS_clean_bdytag( mesh, MG_BDY);
+
   return ier;
 }
