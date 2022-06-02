@@ -818,14 +818,6 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   int          i,j,k,iadr,ip,type,list[MMGS_LMAX+2],ilist;
   int          *mark;
 
-  if ( mesh->info.iso ) {
-    /* Mesh analysis: normal at vertices are needed. In adaptation mode,
-     * analysis has already been computed */
-    if ( !MMGS_analys_for_norver(mesh) ) {
-      return 0;
-    }
-  }
-
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
   /* Memory alloc */

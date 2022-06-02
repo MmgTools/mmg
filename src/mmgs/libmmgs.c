@@ -373,6 +373,13 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION IS NOT AVAILABLE IN"
+           " SURFACIC LEVEL_SET DISCRETIZATION MODE.\n");
+    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  }
+
   if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMGSLS: INPUT DATA\n");
   /* load data */
   chrono(ON,&(ctim[1]));
