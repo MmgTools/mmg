@@ -169,7 +169,7 @@ IF ( MMG3D_CI )
     "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_1.o"
     "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_2.o"
     )
-  IF ( ELAS_FOUND )
+  IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4}
       "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt"
       "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"
@@ -226,7 +226,7 @@ IF ( MMG3D_CI )
     "${CTEST_OUTPUT_DIR}/cube.o.vtu" "1"
     )
 
-  IF ( NOT VTK_FOUND )
+  IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     SET(expr "VTK library not founded")
     SET_PROPERTY(TEST test_api3d_vtk2mesh
       PROPERTY PASS_REGULAR_EXPRESSION "${expr}")

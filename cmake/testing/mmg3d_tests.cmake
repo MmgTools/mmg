@@ -473,7 +473,7 @@ ADD_TEST(NAME mmg3d_opnbdy_ref_island
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
@@ -731,7 +731,7 @@ IF ( LONG_TESTS )
   #####
   ###############################################################################
   #####
-  IF ( ELAS_FOUND )
+  IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     ADD_TEST(NAME mmg3d_LagMotion0_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
