@@ -80,7 +80,7 @@ LIST(REMOVE_ITEM mmg3d_library_files
   ${COMMON_SOURCE_DIR}/apptools.c
   )
 
-IF ( VTK_FOUND )
+IF ( VTK_FOUND AND NOT USE_VTK MATCHES OFF )
   LIST(APPEND  mmg3d_library_files
     ${COMMON_SOURCE_DIR}/vtkparser.cpp)
 ENDIF ( )
@@ -98,7 +98,7 @@ FILE(
 #####
 ############################################################################
 
-IF( ELAS_FOUND )
+IF( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   # Set flags for building test program
   INCLUDE_DIRECTORIES(AFTER PUBLIC ${ELAS_INCLUDE_DIR})
 

@@ -30,9 +30,9 @@ SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 
 # add Scotch library?
 SET ( USE_SCOTCH "" CACHE STRING "Use SCOTCH tool for renumbering (ON, OFF or <empty>)" )
-SET_PROPERTY(CACHE USE_SCOTCH PROPERTY STRINGS "ON" "OFF" " ")
+SET_PROPERTY(CACHE USE_SCOTCH PROPERTY STRINGS "ON" "OFF" "")
 
-IF ( NOT DEFINED USE_SCOTCH OR USE_SCOTCH STREQUAL "" )
+IF ( NOT DEFINED USE_SCOTCH OR USE_SCOTCH STREQUAL "" OR USE_SCOTCH MATCHES " +" )
   # Variable is not provided by user
   FIND_PACKAGE(SCOTCH QUIET)
 
@@ -52,7 +52,7 @@ ELSE ()
 
 ENDIF ( )
 
-If ( SCOTCH_FOUND )
+If ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF)
   add_definitions(-DUSE_SCOTCH)
 
   MESSAGE(STATUS
@@ -70,9 +70,9 @@ ENDIF()
 SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
 
 SET ( USE_ELAS "" CACHE STRING "Use the Elas library for lagrangian motion option (ON, OFF or <empty>)" )
-SET_PROPERTY(CACHE USE_ELAS PROPERTY STRINGS "ON" "OFF" " ")
+SET_PROPERTY(CACHE USE_ELAS PROPERTY STRINGS "ON" "OFF" "")
 
-IF ( NOT DEFINED USE_ELAS OR USE_ELAS STREQUAL ""  )
+IF ( NOT DEFINED USE_ELAS OR USE_ELAS STREQUAL "" OR USE_ELAS MATCHES " +" )
   INCLUDE(FindElas)
 
 ELSE()
@@ -99,9 +99,9 @@ ENDIF ( )
 ############################################################################
 # add the VTK library ?
 SET ( USE_VTK "" CACHE STRING "Use VTK I/O (ON, OFF or <empty>)" )
-SET_PROPERTY(CACHE USE_VTK PROPERTY STRINGS "ON" "OFF" " ")
+SET_PROPERTY(CACHE USE_VTK PROPERTY STRINGS "ON" "OFF" "")
 
-IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK )
+IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" )
   # USE_VTK is not false, ie that it is true or empty (or contains a fake value)
 
   # Handle vtk components name change between v8.2 and v9
@@ -136,7 +136,7 @@ IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK )
   ENDIF()
 ENDIF()
 
-IF ( VTK_FOUND )
+IF ( VTK_FOUND AND NOT USE_VTK MATCHES OFF)
   add_definitions(-DUSE_VTK)
 
   MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )

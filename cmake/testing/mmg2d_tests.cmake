@@ -289,7 +289,7 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -609,7 +609,7 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg2d_LagMotion0_circle
     COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle

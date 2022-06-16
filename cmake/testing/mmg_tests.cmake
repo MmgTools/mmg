@@ -114,7 +114,7 @@ FOREACH(EXEC ${EXECUT_MMG})
     ${MMG_CI_TESTS}/VtkInout/ani.vtu
     ${CTEST_OUTPUT_DIR}/mmg_vtkvtu_ani_${SHRT_EXEC})
 
-  IF ( NOT VTK_FOUND )
+  IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     SET(expr "VTK library not founded")
     SET_PROPERTY(TEST mmg_vtkvtk_${SHRT_EXEC}
       PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
