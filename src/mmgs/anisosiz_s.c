@@ -155,13 +155,13 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  *
  * Compute metric tensor associated to a ridge point : convention is a bit weird
  * here :
- * \a p->m[0] is the specific size in direction \a t,
- * \a p->m[1] is the specific size in direction \f$ u_1 = n_1^{}t\f$,
- * \a p->m[2] is the specific size in direction \f$ u_2 = n_2^{}t\f$,
- * \a p->m[3] is the specific size in direction \f$ n_1\f$
- * (computed by the \a MMG5_intextmet function),
- * \a p->m[4] is the specific size in direction \f$ n_2\f$,
- * (computed by the \a MMG5_intextmet function),
+ *  - p->m[0] is the specific size in direction \a t,
+ *  - p->m[1] is the specific size in direction \f$u_1 = n_1^{}t\f$,
+ *  - p->m[2] is the specific size in direction \f$u_2 = n_2^{}t\f$,
+ *  - p->m[3] is the specific size in direction \f$n_1\f$
+ *    (computed by the \a MMG5_intextmet function),
+ *  - p->m[4] is the specific size in direction \f$n_2\f$,
+ *   (computed by the \a MMG5_intextmet function),
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
@@ -345,7 +345,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
-  MMG5_Bezier       b;
+  MMG5_Bezier        b;
   MMG5_pPar          par;
   int                i,ilist,list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMGS_LMAX+1];
