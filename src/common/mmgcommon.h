@@ -550,6 +550,22 @@ enum MMG5_Format {
  *
  * Store the Bezier definition of a surface triangle.
  *
+ * \remark Numbering convention for high order points (b)
+ * \verbatim
+ *
+ *     2                                                       *
+ *     |`\                                                     *
+ *     |  `\                                                   *
+ *     5    `4                                                 *
+ *     |      `\                                               *
+ *     |        `\                                             *
+ *     6          `3                                           *
+ *     |            `\                                         *
+ *     |              `\                                       *
+ *     0 --- 7 --- 8 --- 1                                     *
+ *
+ * \endverbatim
+ *
  */
 typedef struct {
   double       b[10][3];/*!< Bezier basis functions */

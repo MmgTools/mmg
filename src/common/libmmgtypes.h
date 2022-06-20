@@ -251,7 +251,9 @@ typedef struct {
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
-  double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
+  double   n[3]; /*!< Unitary normal (regular points) or unitary tangent (ridge
+                  * and ref points) for mmgs and unitary tangent (if needed) for
+                  * mmg3d */
 #ifdef USE_POINTMAP
   int      src; /*!< Source point in input mesh */
 #endif

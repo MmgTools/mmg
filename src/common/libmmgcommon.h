@@ -216,7 +216,7 @@ extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t
  * Fill hmin and hamx if they are not setted by the user.
  *
  */
-int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
+int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz);
 
 /* Enum utilities */
 /**
