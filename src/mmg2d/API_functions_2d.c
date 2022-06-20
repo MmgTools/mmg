@@ -30,15 +30,15 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg2d/libmmg2d.h header file for the documentation of all
+ * the \ref mmg2d/liblibmmg2d_private.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * C API for MMG2D library.
  *
  */
 
-
-#include "mmg2d.h"
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -77,6 +77,7 @@ int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return MMG5_Set_outputSolName(mesh,sol,solout);
 }
+
 void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmg2d, mmgs and mmg2d. */
@@ -99,6 +100,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
 }
+
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   int k;
@@ -146,6 +148,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
+    break;
+  case MMG2D_IPARAM_isoref :
+    mesh->info.isoref   = val;
     break;
   case MMG2D_IPARAM_lag :
 #ifdef USE_ELAS
@@ -286,7 +291,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 ) {
+    if ( mesh->info.hgrad <= 0.0 ) {
       mesh->info.hgrad = MMG5_NOHGRAD;
     }
     else {
@@ -295,7 +300,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 ) {
+    if ( mesh->info.hgradreq <= 0.0 ) {
       mesh->info.hgradreq = MMG5_NOHGRAD;
     }
     else {

@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include <math.h>
 
 mytime         MMG5_ctim[TIMEMAX];
@@ -295,7 +296,9 @@ int main(int argc,char *argv[]) {
   /* Version info */
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
+#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+#endif
 
   MMGS_Set_commonFunc();
 

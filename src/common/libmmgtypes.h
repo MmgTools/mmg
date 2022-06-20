@@ -228,6 +228,24 @@ enum MMG5_entities {
 };
 
 /**
+ * \enum MMG5_Format
+ * \brief Type of supported file format
+ */
+enum MMG5_Format {
+  MMG5_FMT_MeditASCII, /*!< ASCII Medit (.mesh) */
+  MMG5_FMT_MeditBinary, /*!< Binary Medit (.meshb) */
+  MMG5_FMT_GmshASCII, /*!< ASCII Gmsh */
+  MMG5_FMT_GmshBinary, /*!< Binary Gmsh */
+  MMG5_FMT_VtkPvtp, /*!< VTK pvtp */
+  MMG5_FMT_VtkPvtu, /*!< VTK pvtu */
+  MMG5_FMT_VtkVtu, /*!< VTK vtu */
+  MMG5_FMT_VtkVtp, /*!< VTK vtp */
+  MMG5_FMT_VtkVtk, /*!< VTK vtk */
+  MMG5_FMT_Tetgen, /*!< Tetgen or Triangle */
+  MMG5_FMT_Unknown /*!< Unrecognized */
+};
+
+/**
  * \struct MMG5_Par
  * number) associated to a specific reference.
  *
@@ -511,6 +529,7 @@ typedef struct {
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
+  int           isoref; /*!< isovalue reference in ls mode */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */

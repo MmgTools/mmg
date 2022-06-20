@@ -28,7 +28,7 @@
  * \version 5
  * \date 07 2015
  * \copyright GNU Lesser General Public License.
- * \note Please, refer to the \ref mmg2d/libmmg2d.h file for functions
+ * \note Please, refer to the \ref mmg2d/liblibmmg2d_private.h file for functions
  * documentation.
  *
  * Define the Fortran API functions for MMG2D library: adds function
@@ -36,7 +36,10 @@
  * any fortran compiler.
  *
  */
-#include "mmg2d.h"
+
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 /**
  * See \ref MMG2D_Init_mesh function in common/libmmgcommon.h file.

@@ -1,5 +1,5 @@
 #include "mmgexterns.h"
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol )=NULL;
 int    (*MMG2D_intmet)(MMG5_pMesh ,MMG5_pSol ,int ,int8_t ,int ,double )=NULL;

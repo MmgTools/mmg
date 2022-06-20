@@ -30,8 +30,12 @@
  * \copyright GNU Lesser General Public License.
  **/
 
+#include "libmmg3d.h"
+#include "mmgcommon.h"
 #include "inlined_functions_3d.h"
 #include "mmgversion.h"
+#include "mmgexterns.h"
+
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 
@@ -69,7 +73,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG3D_defsiz         = MMG3D_defsiz_ani;
     MMG3D_gradsiz        = MMG3D_gradsiz_ani;
     MMG3D_gradsizreq     = MMG3D_gradsizreq_ani;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
     MMG5_cavity          = MMG5_cavity_ani;
     MMG3D_PROctreein     = MMG3D_PROctreein_ani;
 #endif
@@ -100,7 +104,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG3D_gradsiz        = MMG3D_gradsiz_iso;
     MMG3D_gradsizreq     = MMG3D_gradsizreq_iso;
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
     MMG5_cavity          = MMG5_cavity_iso;
     MMG3D_PROctreein     = MMG3D_PROctreein_iso;
 #endif
@@ -138,7 +142,7 @@ int MMG3D_usage(char *prog) {
   /* Parameters shared by mmg2d and 3d only*/
   MMG5_2d3dUsage();
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   fprintf(stdout,"-octree val  specify the max number of points per octree cell \n");
 #endif
 #ifdef USE_SCOTCH
@@ -168,7 +172,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 
   MMG5_mmgDefaultValues(mesh);
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   fprintf(stdout,"Max number of point per octree cell (-octree) : %d\n",
           mesh->info.PROctree);
 #endif
@@ -276,8 +280,16 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
           }
         }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isoref,
+                                     atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
-
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -399,7 +411,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_opnbdy,1) )
             return 0;
         }
-#ifndef PATTERN
+#ifndef MMG_PATTERN
         else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
                                      atoi(argv[i])) )
@@ -1252,6 +1264,7 @@ int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
     ier = MMG5_solTruncature_iso(mesh,met);
   }
   else {
+    MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
     ier = MMG5_3dSolTruncature_ani(mesh,met,3);
   }
 
@@ -1431,7 +1444,7 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifndef NDEBUG
     /* Check metric */
     double lambda[3],vp[3][3];
-    if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+    if (!MMG5_eigenv3d(1,met->m+iadr,lambda,vp) ) {
       fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric.",
               __func__,__LINE__);
     }
@@ -1497,7 +1510,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
 
 int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
 
-  return  MMG5_eigenv(1,m,lambda,vp);
+  return  MMG5_eigenv3d(1,m,lambda,vp);
 
 }
 
@@ -1527,3 +1540,4 @@ void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return;
 }
+

@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
 
 mytime         MMG5_ctim[TIMEMAX];
 
@@ -57,7 +58,6 @@ static void MMG5_endcod(void) {
  * references.
  *
  */
-static inline
 int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
   int         npar,k,ier;
 
@@ -101,7 +101,6 @@ int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
  * Write the local default values at tetrahedra in the parameter file.
  *
  */
-static inline
 int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
                                 FILE *out ) {
   MMG5_iNode *cur;
@@ -127,7 +126,6 @@ int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
  * can be locally defined.
  *
  */
-static inline
 int MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   MMG5_iNode  *triRefs,*tetRefs;
   int          nparTri,nparTet;
@@ -312,7 +310,9 @@ int main(int argc,char *argv[]) {
   /* Version info */
   fprintf(stdout,"  -- MMG3D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
+#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+#endif
 
   MMG3D_Set_commonFunc();
 

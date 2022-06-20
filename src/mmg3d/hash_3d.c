@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 #define MMG5_KC    13
 
@@ -77,66 +78,6 @@ int MMG5_paktet(MMG5_pMesh mesh) {
     mesh->tetra[mesh->nemax].v[3] = 0;
   }
   return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh.
- * \param hash pointer toward the hash table to fill.
- * \param ia first vertex of face to hash.
- * \param ib second vertex of face to hash.
- * \param ic third vertex of face to hash.
- * \param k index of face to hash.
- *
- * \return 0 if fail, -1 if the face is newly hashed, index of the first face
- * hashed if another face with same vertices exist.
- *
- *
- **/
-int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
-  MMG5_hedge     *ph;
-  int        key,mins,maxs,sum,j;
-
-  mins = MG_MIN(ia,MG_MIN(ib,ic));
-  maxs = MG_MAX(ia,MG_MAX(ib,ic));
-
-  /* compute key */
-  sum = ia + ib + ic;
-  key = (MMG5_KA*mins + MMG5_KB*maxs) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( ph->a ) {
-    if ( ph->a == mins && ph->b == maxs && ph->s == sum )
-      return ph->k;
-    else {
-      while ( ph->nxt && ph->nxt < hash->max ) {
-        ph = &hash->item[ph->nxt];
-        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return ph->k;
-      }
-    }
-    ph->nxt = hash->nxt;
-    ph      = &hash->item[hash->nxt];
-    ph->a   = mins;
-    ph->b   = maxs;
-    ph->s   = sum;
-    ph->k   = k;
-    hash->nxt = ph->nxt;
-    ph->nxt = 0;
-
-    if ( hash->nxt >= hash->max ) {
-      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,"face",return 0;);
-      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
-    }
-    return -1;
-  }
-
-  /* insert new face */
-  ph->a = mins;
-  ph->b = maxs;
-  ph->s = sum;
-  ph->k = k;
-  ph->nxt = 0;
-
-  return -1;
 }
 
 /** return index of triangle ia ib ic */
@@ -1167,7 +1108,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         if ( !kk || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
-              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : mesh->info.isoref;
           }
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]) )
             return 0;
@@ -1322,11 +1263,11 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
-            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
+            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to mesh->info.isoref ref */
             if ( pxt && pxt->ftag[i] & MG_BDY )
               ptt->ref = pxt->ref[i];
             else if( MMG5_isLevelSet(mesh,pt->ref,pt1->ref) )
-              ptt->ref = MG_ISO;
+              ptt->ref = mesh->info.isoref;
             else
               ptt->ref = MG_MIN(pt->ref,pt1->ref);
           }
@@ -1421,7 +1362,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           if ( pxpr->tag[MMG5_iarf_pr[i][2]] )  ptt->tag[2] = pxpr->tag[MMG5_iarf_pr[i][2]];
         }
         if ( adj ) {
-          if ( mesh->info.iso ) ptt->ref = MG_ISO;
+          if ( mesh->info.iso ) ptt->ref = mesh->info.isoref;
           /* useful only when saving mesh */
           else ptt->ref  = pxpr ? pxpr->ref[i] : 0;
         }

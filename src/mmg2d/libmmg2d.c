@@ -20,7 +20,9 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 #include "mmg2dexterns.h"
 
 /**
@@ -42,6 +44,19 @@
     _LIBMMG5_RETURN(mesh,met,sol,val);            \
   }while(0)
 
+ /**
+ * Set common pointer functions between mmgs and mmg2d to the matching mmg2d
+ * functions.
+ */
+void MMG2D_Set_commonFunc(void) {
+    MMG5_chkmsh = MMG5_mmg2dChkmsh;
+    MMG5_grad2met_ani = MMG2D_grad2met_ani;
+    MMG5_grad2metreq_ani = MMG2D_grad2metreq_ani;
+    MMG5_solTruncature_ani = MMG5_2dSolTruncature_ani;
+
+    return;
+}
+
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   MMG5_pSol sol=NULL; // unused
@@ -51,7 +66,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -301,7 +317,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -528,7 +545,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -827,7 +845,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);

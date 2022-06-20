@@ -33,7 +33,9 @@
  * \todo Doxygen documentation
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -193,7 +195,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
   MMG5_Bezier       b;
-  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
+  double            n[3],r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
   double            detloc,gv[2],step,lambda[3];
   double            o[3],no[3],*m0,ncur[3],nprev[3],nneighi[3];
   double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
@@ -213,7 +215,9 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   m0 = &met->m[6*ip0];
   assert( p0->xp && !MG_EDG(p0->tag) );
 
-  n = &(mesh->xpoint[p0->xp].n1[0]);
+  n[0] = mesh->xpoint[p0->xp].n1[0];
+  n[1] = mesh->xpoint[p0->xp].n1[1];
+  n[2] = mesh->xpoint[p0->xp].n1[2];
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !MMG5_rotmatrix(n,r) ) {
@@ -663,6 +667,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     }
   }
   else if ( MG_GEO & edgTag ) {
+    assert ( (!MG_SIN(mesh->point[ip0].tag)) && "BezierRidge don't work if both ip0 and ip are singular" );
     if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no,no2,to)) ) {
       return 0;
     }

@@ -32,7 +32,8 @@
  */
 
 #include <vtkparser.hpp>
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 
 #ifdef USE_VTK
 
@@ -89,8 +90,8 @@ int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check element count */
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
@@ -159,8 +160,8 @@ int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check element count */
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
@@ -229,8 +230,8 @@ int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check element count */
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol

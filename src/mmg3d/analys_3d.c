@@ -33,7 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * \param mesh pointer towarad the mesh structure.
@@ -90,7 +91,17 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * \param mesh pointer towarad the mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
- * topology: set tria adjacency, detect Moebius, flip faces, count connected comp.
+ * topology: set tria adjacency, detect Moebius, flip faces, count connected
+ * comp.
+ *
+ * \remark: as all triangles are mesh boundaries, we do not need to mark their
+ * adges as MG_BDY so the MG_BDY tag may be used inside geometrical triangles
+ * (external non-parallel, or internal parallel) to tag edges on the
+ * intersection with purely parallel (non-geometrical) triangles.
+ * The MG_PARBDYBDY tag is also added, as it does not have a supporting triangle
+ * to inherit this tag from.
+ *
+ * \remark REQ, NOSURF, etc... tags are added only inside xtetra.
  *
  */
 int MMG5_setadj(MMG5_pMesh mesh){

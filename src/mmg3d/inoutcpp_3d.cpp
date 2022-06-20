@@ -34,7 +34,8 @@
 
 #include <vtkparser.hpp>
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 #ifdef USE_VTK
 
@@ -45,7 +46,7 @@ static int MMG3D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
   int ier;
 
   if ( !MMG3D_zaldy(mesh) ) {
-    return 0;
+    return -1;
   }
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
     return -1;
@@ -88,8 +89,8 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check element count */
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
@@ -159,8 +160,8 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   // Check solutions number
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol

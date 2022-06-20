@@ -21,11 +21,10 @@
 ** =============================================================================
 */
 
-#ifndef MMGS_H
-#define MMGS_H
+#ifndef LIBMMGS_PRIVATE_H
+#define LIBMMGS_PRIVATE_H
 
 #include "libmmgcommon.h"
-#include "libmmgs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +49,6 @@ extern "C" {
 
 #define MS_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))
 
-static const uint8_t MMGS_iare[3][2] = {{1,2},{2,0},{0,1}};
 
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define MMGS_RETURN_AND_FREE(mesh,met,ls,val)do                     \
@@ -188,8 +186,6 @@ int  MMGS_indElt(MMG5_pMesh mesh,int kel);
 int  MMGS_indPt(MMG5_pMesh mesh,int kp);
 
 /* function pointers */
-/* init structures */
-void  MMG5_Init_parameters(MMG5_pMesh mesh);
 
 /* iso/aniso computations */
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
@@ -222,25 +218,6 @@ extern int    (*MMGS_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol met);
 extern int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s);
 extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-
-/**
- * Set common pointer functions between mmgs and mmg3d to the matching mmgs
- * functions.
- */
-static inline
-void MMGS_Set_commonFunc(void) {
-  MMG5_bezierCP          = MMG5_mmgsBezierCP;
-  MMG5_chkmsh            = MMG5_mmgsChkmsh;
-  MMG5_indPt             = MMGS_indPt;
-  MMG5_indElt            = MMGS_indElt;
-  MMG5_grad2met_ani      = MMG5_grad2metSurf;
-  MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
-  MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
-
-#ifdef USE_SCOTCH
-  MMG5_renumbering       = MMG5_mmgsRenumbering;
-#endif
-}
 
 #ifdef __cplusplus
 }

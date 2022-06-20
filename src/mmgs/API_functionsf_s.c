@@ -37,7 +37,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 
 /**
  * See \ref MMGS_Init_mesh function in common/libmmgcommon.h file.

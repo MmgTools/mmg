@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -723,6 +723,52 @@ static int norver(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer to the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Remove duplicated triangles.
+ *
+ */
+int MMGS_remDup(MMG5_pMesh mesh) {
+  MMG5_Hash     hash;
+  MMG5_pTria    ptt;
+  int           k,jel,dup;
+
+  if ( !mesh->nt ) return 1;
+
+  /* Hash triangles */
+  if ( ! MMG5_hashNew(mesh,&hash,(int)(0.51*mesh->nt),(int)(1.51*mesh->nt)) ) {
+    return 0;
+  }
+
+  dup = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    jel = MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    if ( !jel ) {
+      MMG5_DEL_MEM(mesh,hash.item);
+      return 0;
+    }
+    else if ( jel > 0 ) {
+      ++dup;
+      /* Remove duplicated face */
+      MMGS_delElt(mesh,k);
+    }
+  }
+
+  if ( abs(mesh->info.imprim) > 5 && dup > 0 ) {
+    fprintf(stdout,"  ## ");  fflush(stdout);
+    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    fprintf(stdout,"\n");
+  }
+
+  MMG5_DEL_MEM(mesh,hash.item);
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
@@ -780,16 +826,9 @@ int MMGS_analys_for_norver(MMG5_pMesh mesh) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * \return 1 if succeed, 0 if fail
- *
- * Perform minimal surface analysis needed to compute normal at vertices.
- *
- */
+
+/* preprocessing stage: mesh analysis */
 int MMGS_analys(MMG5_pMesh mesh) {
-  int ier;
 
   /* Update tags stored into tria */
   if ( !MMGS_bdryUpdate(mesh) ) {
@@ -803,6 +842,52 @@ int MMGS_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
-  ier = MMGS_analys_for_norver(mesh);
-  return ier;
+  /* create adjacency */
+  if ( !MMGS_hashTria(mesh) ) {
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return 0;
+  }
+
+  /* delete badly shaped elts */
+  /*if ( mesh->info.badkal && !delbad(mesh) ) {
+    fprintf(stderr,"\n  ## Geometry trouble. Exit program.\n");
+    return 0;
+    }*/
+
+  /* identify connexity */
+  if ( !setadj(mesh) ) {
+    fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
+    return 0;
+  }
+
+  /* check for nomanifold point */
+  nmpoints(mesh);
+
+  /* check for ridges */
+  if ( mesh->info.dhd > MMG5_ANGLIM && !setdhd(mesh) ) {
+    fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
+    return 0;
+  }
+
+  /* identify singularities */
+  if ( !MMG5_singul(mesh) ) {
+    fprintf(stderr,"\n  ## Singularity problem. Exit program.\n");
+    return 0;
+  }
+
+  /* define normals */
+  if ( !mesh->xp ) {
+    if ( !norver(mesh) ) {
+      fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
+      return 0;
+    }
+    /* regularize normals */
+    if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
+      fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
+      return 0;
+    }
+  }
+
+  return 1;
 }
+

@@ -33,7 +33,9 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include <math.h>
 
 int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
@@ -62,7 +64,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   nref = 0;
 
-  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -108,7 +110,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FSCANF(inm,"%d",&mesh->dim);
         if(mesh->dim!=3) {
           fprintf(stderr,"BAD DIMENSION : %d\n",mesh->dim);
-          return 0;
+          return -1;
         }
         continue;
       } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
@@ -299,7 +301,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   mesh->nt = mesh->nti + 2*nq;
 
   /* mem alloc */
-  if ( !MMGS_zaldy(mesh) )  return 0;
+  if ( !MMGS_zaldy(mesh) )  return -1;
 
   /* read vertices */
 
@@ -485,10 +487,10 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
 
-    /* Skip edges with MG_ISO refs */
+    /* Skip edges with mesh->info.isoref refs */
     if( mesh->info.iso ) {
       mesh->na = 0;
-      MMG5_SAFE_CALLOC(ina,na+1,int,return 0);
+      MMG5_SAFE_CALLOC(ina,na+1,int,return -1);
 
       for (k=1; k<=na; k++) {
         if (!bin) {
@@ -508,7 +510,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           ++nref;
         }
 
-        if ( ref != MG_ISO ) {
+        if ( ref != mesh->info.isoref ) {
           ped = &mesh->edge[++mesh->na];
           ped->a   = a;
           ped->b   = b;
@@ -531,8 +533,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
                      fprintf(stderr,"  Exit program.\n");
                      MMG5_SAFE_FREE(ina);
-                     return 0);
-        MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges",return 0);
+                     return -1);
+        MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges",return -1);
       }
     }
     else {
@@ -625,7 +627,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   }
 
   if ( ng > 0 ) {
-    MMG5_SAFE_CALLOC(norm,3*ng+1,double,return 0);
+    MMG5_SAFE_CALLOC(norm,3*ng+1,double,return -1);
 
     rewind(inm);
     fseek(inm,posnormal,SEEK_SET);
@@ -715,14 +717,16 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 )  return (ier);
 
   if ( nsols > 1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    fclose(inm);
+    MMG5_SAFE_FREE(posNodeData);
+    return -1;
   }
 
   if ( !MMGS_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   mesh->ne = mesh->nprism = 0;
@@ -783,7 +787,7 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   if ( !MMGS_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   mesh->ne = mesh->nprism = 0;
@@ -839,10 +843,10 @@ int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
     fprintf(stderr,"  ## Error: %s: please provide input file name"
             " (either in the mesh structure or as function argument).\n",
             __func__);
-    return 0;
+    return -1;
   }
 
-  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return 0);
+  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return -1);
   strcpy(tmp,filenameptr);
 
   /* read mesh/sol files */
@@ -873,7 +877,7 @@ int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
 
     /* Facultative metric */
     if ( sol ) {
-      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return 0);
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return -1);
       strcpy(soltmp,solnameptr);
 
       if ( MMGS_loadSol(mesh,sol,tmp) == -1) {
@@ -1379,7 +1383,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
   if ( ier < 1 ) return ier;
 
   if ( nsols!=1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;

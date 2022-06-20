@@ -33,7 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * \param imprim verbosity level (muted for stdout if -1)
@@ -43,7 +44,7 @@
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  *
- * \return -1 if lack of memory, 0 if fail to open file, 1 if success.
+ * \return 0 if fail to open file, -1 for other errors, 1 if success.
  *
  * Try to open a Medit file at asked mode (read only, write, etc) and store if
  * file is binary (depending on the extension).
@@ -545,7 +546,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   if ( mesh->nt ) {
     rewind(inm);
     fseek(inm,posnt,SEEK_SET);
-    /* Skip triangles with MG_ISO refs */
+    /* Skip triangles with mesh->info.isoref refs */
     if( mesh->info.iso ) {
       mesh->nt = 0;
       MMG5_SAFE_CALLOC(ina,nt+1,int,return -1);
@@ -562,7 +563,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
           MMG_FREAD(&ref,MMG5_SW,1,inm);
           if(iswp) ref=MMG5_swapbin(ref);
         }
-        if( abs(ref) != MG_ISO ) {
+        if( abs(ref) != mesh->info.isoref ) {
           pt1 = &mesh->tria[++mesh->nt];
           pt1->v[0] = v[0];
           pt1->v[1] = v[1];
@@ -576,7 +577,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
         }
         else {
           /* To uncomment when the normals reading will be enabled in iso mode */
-          /* Mark the MG_ISO point to be able to delete the normal at points */
+          /* Mark the mesh->info.isoref point to be able to delete the normal at points */
           /* mesh->point[v[0]].xp = -1; */
           /* mesh->point[v[1]].xp = -1; */
           /* mesh->point[v[2]].xp = -1; */
@@ -792,7 +793,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       }
 
       if ( mesh->info.iso ) {
-        if( pa->ref != MG_ISO ) {
+        if( pa->ref != mesh->info.isoref ) {
           ++mesh->na;
           memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(MMG5_Edge));
           ina[k] = mesh->na;
@@ -1106,7 +1107,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
         }
         if ( idn > 0 && ip < mesh->np+1 ) {
           if ( (mesh->info.iso ) &&  mesh->point[ip].xp == -1 ) {
-            /* Do not store the normals at MG_ISO points (ls mode) */
+            /* Do not store the normals at mesh->info.isoref points (ls mode) */
             continue;
           }
           memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
@@ -1212,7 +1213,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 ) return (ier);
 
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
     return -1;
@@ -1221,7 +1222,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( !MMG3D_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
@@ -1281,7 +1282,7 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   if ( !MMG3D_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
@@ -1334,10 +1335,10 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
     fprintf(stderr,"  ## Error: %s: please provide input file name"
             " (either in the mesh structure or as function argument).\n",
             __func__);
-    return 0;
+    return -1;
   }
 
-  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return 0);
+  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return -1);
   strcpy(tmp,filenameptr);
 
   /* read mesh/sol files */
@@ -1364,7 +1365,7 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
 
     /* Facultative metric */
     if ( sol ) {
-      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return 0);
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return -1);
       strcpy(soltmp,solnameptr);
 
       if ( MMG3D_loadSol(mesh,sol,soltmp) == -1) {
@@ -1377,7 +1378,7 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
 
   default:
     fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmt) );
-    ier= 0;
+    ier= -1;
   }
 
   MMG5_SAFE_FREE(tmp);
@@ -2258,7 +2259,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   if ( ier < 1 ) return ier;
 
   if ( nsols!=1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;

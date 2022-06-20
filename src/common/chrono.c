@@ -139,7 +139,18 @@ void  tminit(mytime *t,int maxtim) {
   }
 }
 
+#ifdef MMG_DIFFOUTPUT
+/**
+ * \fn void  printim(double elps,char *stim)
+ * \brief Print real time.
+ * \param elps elapsed time in seconds.
+ * \param stim pointer toward string containg the elapsed time at .h.m.s format.
+ */
+void printim(double elps,char *stim) {
+  sprintf(stim,"");
+}
 
+#else
 /**
  * \fn void  printim(double elps,char *stim)
  * \brief Print real time.
@@ -163,3 +174,4 @@ void printim(double elps,char *stim) {
     sprintf(stim,"%dh%dm%ds",hh,mm,ss);
   }
 }
+#endif

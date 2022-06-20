@@ -50,6 +50,7 @@ extern "C" {
 #endif
 
 #include "mmg/mmg3d/libmmgtypes.h"
+#include "mmg3d_export.h"
 
 /**
  * Maximum array size when storing adjacent points (or ball) of a vertex.
@@ -89,6 +90,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,                    /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
   MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
+  MMG3D_IPARAM_isoref,                    /*!< [0/n], Isosurface boundary material reference */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,                      /*!< [val], Maximal mesh size */
@@ -135,7 +137,7 @@ enum MMG3D_Param {
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-  int MMG3D_Init_mesh(const int starter,...);
+ LIBMMG3D_EXPORT int MMG3D_Init_mesh(const int starter,...);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -148,7 +150,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  void  MMG3D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
+ LIBMMG3D_EXPORT void  MMG3D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -160,7 +162,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  void  MMG3D_Init_parameters(MMG5_pMesh mesh);
+ LIBMMG3D_EXPORT void  MMG3D_Init_parameters(MMG5_pMesh mesh);
 
 /* init file names */
 /**
@@ -179,7 +181,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_inputMeshName(MMG5_pMesh mesh,const char* meshin);
+ LIBMMG3D_EXPORT int  MMG3D_Set_inputMeshName(MMG5_pMesh mesh,const char* meshin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param meshout name of the output mesh file.
@@ -196,7 +198,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
+ LIBMMG3D_EXPORT  int  MMG3D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -214,8 +216,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
-                              const char* solin);
+  LIBMMG3D_EXPORT int  MMG3D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
+                                              const char* solin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -233,8 +235,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
-                               const char* solout);
+ LIBMMG3D_EXPORT int  MMG3D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
+                                              const char* solout);
 
 /* init structure sizes */
 /**
@@ -256,7 +258,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
+  LIBMMG3D_EXPORT int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
                          int np, int typSol);
 
 /**
@@ -281,8 +283,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
-                                   int nentities, int *typSol);
+  LIBMMG3D_EXPORT int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
+                                                   int nentities, int *typSol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -306,8 +308,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_meshSize(MMG5_pMesh mesh,int np,int ne,int nprism,
-                          int nt,int nquad,int na);
+ LIBMMG3D_EXPORT  int  MMG3D_Set_meshSize(MMG5_pMesh mesh,int np,int ne,int nprism,
+                                          int nt,int nquad,int na);
 
 /* init structure datas */
 /**
@@ -331,8 +333,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-                        double c2, int ref,int pos);
+ LIBMMG3D_EXPORT  int  MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
+                                        double c2, int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param vertices table of the points coor.
@@ -355,7 +357,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
+ LIBMMG3D_EXPORT  int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of tetrahedron.
@@ -377,8 +379,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
-                             int v2, int v3, int ref, int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
+                                            int v2, int v3, int ref, int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tetra vertices of the tetras of the mesh
@@ -399,8 +401,8 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra,
-                            int *refs);
+  LIBMMG3D_EXPORT int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra,
+                                            int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of prism.
@@ -424,8 +426,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
-                       int v2, int v3, int v4, int v5, int ref, int pos);
+LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
+                                     int v2, int v3, int v4, int v5, int ref, int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param prisms vertices of the prisms of the mesh
@@ -446,8 +448,8 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms,
-                        int *refs);
+  LIBMMG3D_EXPORT int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms,
+                                        int *refs);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -469,8 +471,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
-                          int v2, int ref,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
+                                         int v2, int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the tria vertices
@@ -491,7 +493,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+ LIBMMG3D_EXPORT int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of quadrilateral.
@@ -513,8 +515,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
-                               int v2, int v3, int ref,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
+                                              int v2, int v3, int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quads vertices
@@ -535,7 +537,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs);
+ LIBMMG3D_EXPORT int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first extremity of the edge.
@@ -555,7 +557,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -571,7 +573,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_corner(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_corner(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -589,7 +591,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_corner(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_corner(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -606,7 +608,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -623,7 +625,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -640,7 +642,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -658,7 +660,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -677,7 +679,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -697,7 +699,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -714,7 +716,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -731,7 +733,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -750,7 +752,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -769,7 +771,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -787,7 +789,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -805,7 +807,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -825,7 +827,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+ LIBMMG3D_EXPORT int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -845,7 +847,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -862,7 +864,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_ridge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_ridge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -879,7 +881,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_ridge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_ridge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -896,7 +898,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -913,7 +915,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -935,8 +937,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1,
-                                double n2) ;
+ LIBMMG3D_EXPORT int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1,
+                                               double n2) ;
 
 /**
  * \param met pointer toward the sol structure.
@@ -956,7 +958,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions values.
@@ -973,7 +975,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
+ LIBMMG3D_EXPORT int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
 /**
  * \param met pointer toward the sol structure.
  * \param vx x value of the vectorial solution.
@@ -994,8 +996,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
-                          int pos);
+ LIBMMG3D_EXPORT int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
+                                         int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the vectorial solutions
@@ -1012,7 +1014,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_vectorSols(MMG5_pSol met, double *sols);
+ LIBMMG3D_EXPORT int MMG3D_Set_vectorSols(MMG5_pSol met, double *sols);
 /**
  * \param met pointer toward the sol structure.
  * \param m11 value of the tensorial solution at position (1,1) in the tensor
@@ -1036,8 +1038,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
-                          double m22,double m23, double m33, int pos);
+ LIBMMG3D_EXPORT int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
+                                         double m22,double m23, double m33, int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the tensorial solutions.
@@ -1054,7 +1056,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
+ LIBMMG3D_EXPORT int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1076,7 +1078,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1098,7 +1100,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+ LIBMMG3D_EXPORT int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1112,7 +1114,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  void MMG3D_Set_handGivenMesh(MMG5_pMesh mesh);
+ LIBMMG3D_EXPORT void MMG3D_Set_handGivenMesh(MMG5_pMesh mesh);
 
 /* check init */
 /**
@@ -1130,12 +1132,12 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
+ LIBMMG3D_EXPORT int MMG3D_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
 
 /** functions to set parameters */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward the sol structure (unused).
  * \param iparam integer parameter to set (see \a MMG3D_Param structure).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -1151,11 +1153,11 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
-                            int val);
+ LIBMMG3D_EXPORT int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
+                                           int val);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward the sol structure (unused).
  * \param dparam double parameter to set (see \a MMG3D_Param structure).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -1172,8 +1174,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam,
-                            double val);
+ LIBMMG3D_EXPORT int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam,
+                                           double val);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1197,8 +1199,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
-                                int ref,double hmin,double hmax,double hausd);
+ LIBMMG3D_EXPORT int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
+                                               int ref,double hmin,double hmax,double hausd);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1219,8 +1221,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                          int rin, int rex);
+ LIBMMG3D_EXPORT int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
+                                         int rin, int rex);
 
 /** recover datas */
 /**
@@ -1244,8 +1246,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne,int *nprism, int* nt,
-                          int* nquad, int* na);
+ LIBMMG3D_EXPORT int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne,int *nprism, int* nt,
+                                         int* nquad, int* na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1266,8 +1268,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
-                         int* np,int* typSol);
+ LIBMMG3D_EXPORT int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
+                                        int* np,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of sol structure.
@@ -1289,8 +1291,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
-                                    int* nentities,int* typSol);
+ LIBMMG3D_EXPORT int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
+                                                   int* nentities,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first
@@ -1317,8 +1319,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
-                        int* ref,int* isCorner, int* isRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
+                                       int* ref,int* isCorner, int* isRequired);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1343,8 +1345,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
- int  MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-                            int* isCorner, int* isRequired,int idx);
+ LIBMMG3D_EXPORT int  MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+                                           int* isCorner, int* isRequired,int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1374,8 +1376,8 @@ enum MMG3D_Param {
  * > ! END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
-                          int* areCorners, int* areRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+                                         int* areCorners, int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of tetrahedron.
@@ -1400,8 +1402,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                             int* v3,int* ref, int* isRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
+                                            int* v3,int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tetra pointer toward the table of the tetrahedra vertices.
@@ -1427,8 +1429,8 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int* tetra,int* refs,
-                            int* areRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int* tetra,int* refs,
+                                           int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of prism.
@@ -1455,8 +1457,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                       int* v3,int* v4,int* v5,int* ref, int* isRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
+                                      int* v3,int* v4,int* v5,int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param prisms pointer toward the table of the prisms vertices.
@@ -1482,8 +1484,8 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_prisms(MMG5_pMesh mesh, int* prisms,int* refs,
-                        int* areRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_prisms(MMG5_pMesh mesh, int* prisms,int* refs,
+                                       int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of triangle.
@@ -1505,8 +1507,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
-                          int* isRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
+                                         int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the triangles vertices
@@ -1531,8 +1533,8 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
-                           int* areRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+                                          int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of quadrilateral.
@@ -1555,8 +1557,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
-                               int* ref, int* isRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
+                                              int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quadrilaterals vertices
@@ -1581,8 +1583,8 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int* quads, int* refs,
-                                int* areRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int* quads, int* refs,
+                                               int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param e0 pointer toward the first extremity of the edge.
@@ -1603,8 +1605,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
-                      int* isRidge, int* isRequired);
+ LIBMMG3D_EXPORT int  MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
+                                     int* isRidge, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -1622,7 +1624,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_edges(MMG5_pMesh mesh, int *edges, int* refs);
+ LIBMMG3D_EXPORT int MMG3D_Set_edges(MMG5_pMesh mesh, int *edges, int* refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -1643,8 +1645,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
-                      int *areRidges,int *areRequired);
+ LIBMMG3D_EXPORT int MMG3D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
+                                     int *areRidges,int *areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k point index
@@ -1665,8 +1667,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1,
-                                double *n2) ;
+ LIBMMG3D_EXPORT int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1,
+                                               double *n2) ;
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1684,7 +1686,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+ LIBMMG3D_EXPORT double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
 
 /**
  * \param met pointer toward the sol structure.
@@ -1701,7 +1703,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_scalarSol(MMG5_pSol met, double* s);
+ LIBMMG3D_EXPORT int  MMG3D_Get_scalarSol(MMG5_pSol met, double* s);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions at mesh vertices. s[i-1] is
@@ -1718,7 +1720,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_scalarSols(MMG5_pSol met, double* s);
+ LIBMMG3D_EXPORT int  MMG3D_Get_scalarSols(MMG5_pSol met, double* s);
 /**
  * \param met pointer toward the sol structure.
  * \param vx x value of the vectorial solution.
@@ -1736,7 +1738,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
+ LIBMMG3D_EXPORT int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the solutions at mesh vertices. sols[3*(i-1)]\@3 is
@@ -1753,7 +1755,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols);
+ LIBMMG3D_EXPORT int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols);
 /**
  * \param met pointer toward the sol structure.
  * \param m11 pointer toward the position (1,1) in the solution tensor.
@@ -1774,8 +1776,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
-                          double *m22,double *m23, double *m33);
+ LIBMMG3D_EXPORT int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
+                                         double *m22,double *m23, double *m33);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the solutions at mesh vertices.
@@ -1792,7 +1794,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
+ LIBMMG3D_EXPORT int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1813,7 +1815,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1835,7 +1837,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+ LIBMMG3D_EXPORT int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1852,7 +1854,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
+ LIBMMG3D_EXPORT int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1877,8 +1879,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
-                             int v2, int v3, int ref);
+ LIBMMG3D_EXPORT int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
+                                            int v2, int v3, int ref);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1902,14 +1904,16 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
-                        double c2, int ref);
+ LIBMMG3D_EXPORT int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
+                                       double c2, int ref);
 
 /* input/output functions */
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh data.
  *
@@ -1922,12 +1926,14 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -1941,13 +1947,15 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at VTU (VTK) file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -1963,12 +1971,14 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh a list of data in VTU file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -1984,13 +1994,15 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2006,12 +2018,14 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data in VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2027,13 +2041,15 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -2047,12 +2063,14 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG3D_EXPORT  int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh data in a file whose format depends on the filename extension.
  *
@@ -2065,7 +2083,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2084,7 +2102,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2103,7 +2121,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2125,7 +2143,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2143,7 +2161,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2161,7 +2179,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2179,7 +2197,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2197,7 +2215,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2215,7 +2233,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveTetgenMesh(MMG5_pMesh ,const char *);
+  LIBMMG3D_EXPORT int MMG3D_saveTetgenMesh(MMG5_pMesh ,const char *);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2233,13 +2251,15 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
- * \return -1 data invalid, 0 no file, 1 ok.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load metric field. The solution file must contains only 1 solution: the
  * metric
@@ -2253,12 +2273,14 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load 1 or more solutions in a solution file at medit file format.
  *
@@ -2271,7 +2293,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
+  LIBMMG3D_EXPORT int  MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2290,7 +2312,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
@@ -2308,7 +2330,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2324,7 +2346,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
+  LIBMMG3D_EXPORT int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 
 /* deallocations */
 /**
@@ -2358,7 +2380,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-  int MMG3D_Free_all(const int starter,...);
+  LIBMMG3D_EXPORT int MMG3D_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -2393,7 +2415,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-  int MMG3D_Free_structures(const int starter,...);
+  LIBMMG3D_EXPORT int MMG3D_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -2426,7 +2448,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-  int MMG3D_Free_names(const int starter,...);
+  LIBMMG3D_EXPORT int MMG3D_Free_names(const int starter,...);
 
 /* library */
 /**
@@ -2445,7 +2467,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
+  LIBMMG3D_EXPORT int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2466,7 +2488,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met );
+  LIBMMG3D_EXPORT int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2486,7 +2508,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
+  LIBMMG3D_EXPORT int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /** Tools for the library */
 /**
@@ -2502,7 +2524,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_defaultValues(MMG5_pMesh mesh);
+  LIBMMG3D_EXPORT int MMG3D_defaultValues(MMG5_pMesh mesh);
 
 /**
  * \param argc number of command line arguments.
@@ -2517,7 +2539,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark no matching fortran function.
  *
  */
-  int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
+  LIBMMG3D_EXPORT int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2535,7 +2557,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
+  LIBMMG3D_EXPORT int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param prog pointer toward the program name.
  * \param return 1 if success, 0 if fail.
@@ -2550,7 +2572,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_usage(char *prog);
+  LIBMMG3D_EXPORT int  MMG3D_usage(char *prog);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.
@@ -2565,7 +2587,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+  LIBMMG3D_EXPORT int  MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.
@@ -2578,7 +2600,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  void  MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+  LIBMMG3D_EXPORT void  MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 /** Checks */
 /**
@@ -2605,8 +2627,8 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
-                       double lmin, double lmax, int *eltab,int8_t metRidTyp);
+  LIBMMG3D_EXPORT int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
+                                       double lmin, double lmax, int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2627,8 +2649,8 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin,
-                        int *eltab,int8_t metRidTyp);
+  LIBMMG3D_EXPORT void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin,
+                                        int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2655,8 +2677,8 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  *
  */
-  int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                       double lmax,int *eltab,int8_t  metRidTyp);
+  LIBMMG3D_EXPORT int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
+                                       double lmax,int *eltab,int8_t  metRidTyp);
 
 /** Utils */
 /**
@@ -2680,7 +2702,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int listet[4]);
+  LIBMMG3D_EXPORT int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int listet[4]);
 /**
  * \param ca pointer toward the coordinates of the first edge's extremity.
  * \param cb pointer toward the coordinates of the second edge's extremity.
@@ -2701,7 +2723,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+  LIBMMG3D_EXPORT extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2719,14 +2741,14 @@ extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
+  LIBMMG3D_EXPORT int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
 
 /**
  * \param mesh pointer toward the mesh structure
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute unit size map according to the mean of the length of the
+ * Compute isotropic size map according to the mean of the length of the
  * edges passing through a point.
  *
  * \remark Fortran interface:
@@ -2736,7 +2758,7 @@ extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  * >   END SUBROUTINE\n
  *
  */
-  extern int (*MMG3D_doSol)(MMG5_pMesh mesh,MMG5_pSol met);
+  LIBMMG3D_EXPORT extern int (*MMG3D_doSol)(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -2753,7 +2775,7 @@ extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
+  LIBMMG3D_EXPORT int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -2770,7 +2792,7 @@ extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
+  LIBMMG3D_EXPORT int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
 
 
 /** To associate function pointers without calling MMG3D_mmg3dlib */
@@ -2787,7 +2809,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  void  MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+ LIBMMG3D_EXPORT void  MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2811,7 +2833,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria);
+  LIBMMG3D_EXPORT int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2837,7 +2859,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref, int idx);
+ LIBMMG3D_EXPORT int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref, int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2861,7 +2883,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
+  LIBMMG3D_EXPORT int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2887,7 +2909,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2]);
+  LIBMMG3D_EXPORT int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2]);
 
 /**
  * \param m upper part of a symetric matric diagonalizable in |R
@@ -2913,7 +2935,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
+  LIBMMG3D_EXPORT int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -2927,8 +2949,14 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
+  LIBMMG3D_EXPORT void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
+
+ /**
+  * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+  * functions.
+  */
+  LIBMMG3D_EXPORT void MMG3D_Set_commonFunc(void);
 #ifdef __cplusplus
 }
 #endif

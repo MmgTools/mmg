@@ -20,7 +20,7 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 /* Compute isotropic edge length */
 double long_iso(double *ca,double *cb,double *ma,double *mb) {

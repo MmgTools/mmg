@@ -39,6 +39,7 @@
  *
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 #include "mmg3dexterns.h"
 
@@ -981,7 +982,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -1136,7 +1137,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
 
-#ifdef PATTERN
+#ifdef MMG_PATTERN
     if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
         fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
@@ -1204,7 +1205,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -1416,7 +1417,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
       MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
 
-#ifdef PATTERN
+#ifdef MMG_PATTERN
     if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
@@ -1490,7 +1491,8 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -1685,7 +1687,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
         MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
       }
 
-#ifdef PATTERN
+#ifdef MMG_PATTERN
       if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
         if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
           fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
@@ -1753,4 +1755,22 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
   disp->npi = disp->np;
   _LIBMMG5_RETURN(mesh,met,disp,MMG5_SUCCESS);
+}
+
+/**
+* Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+* functions.
+*/
+void MMG3D_Set_commonFunc(void) {
+    MMG5_bezierCP = MMG5_mmg3dBezierCP;
+    MMG5_chkmsh = MMG5_mmg3dChkmsh;
+    MMG5_indPt = MMG3D_indPt;
+    MMG5_indElt = MMG3D_indElt;
+    MMG5_grad2met_ani = MMG5_grad2metSurf;
+    MMG5_grad2metreq_ani = MMG5_grad2metSurfreq;
+    MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
+
+#ifdef USE_SCOTCH
+    MMG5_renumbering = MMG5_mmg3dRenumbering;
+#endif
 }

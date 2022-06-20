@@ -33,8 +33,10 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include "inlined_functions.h"
+#include "mmgexterns.h"
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( (!mesh->info.ani) && ((!met) || (met->size < 6)) ) {
@@ -211,6 +213,15 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
             MMGS_usage(argv[0]);
             return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_isoref,
+                                    atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMGS_usage(argv[0]);
+          return 0;
         }
         break;
       case 'k':
@@ -735,6 +746,7 @@ int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
     ier = MMG5_solTruncature_iso(mesh,met);
   }
   else {
+    MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
     ier = MMG5_3dSolTruncature_ani(mesh,met,2);
   }
 
@@ -1122,7 +1134,7 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifndef NDEBUG
       /* Check metric */
       double lambda[3],vp[3][3];
-      if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+      if (!MMG5_eigenv3d(1,met->m+iadr,lambda,vp) ) {
         fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric.",
                 __func__,__LINE__);
       }
@@ -1170,7 +1182,7 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 
 int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
 
-  return  MMG5_eigenv(1,m,lambda,vp);
+  return  MMG5_eigenv3d(1,m,lambda,vp);
 
 }
 

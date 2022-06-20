@@ -257,13 +257,13 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
 
-  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
 
   /* Allocation of the posNodeData array: we assume that we have less than 20
    * solutions in the file (for a greater number of sol, posNoteData is
    * reallocated) */
   initPosNodeDataSize = posNodeDataSize = 20;
-  MMG5_SAFE_CALLOC(*posNodeData,posNodeDataSize,long,return 0);
+  MMG5_SAFE_CALLOC(*posNodeData,posNodeDataSize,long,return -1);
 
   strcpy(data,filename);
   ptr = strstr(data,".msh");
@@ -342,7 +342,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       if ( ++(*nsols) == posNodeDataSize ) {
         MMG5_SAFE_RECALLOC(*posNodeData,*nsols,
                            posNodeDataSize+initPosNodeDataSize,
-                           long,"posNodeData",return 0);
+                           long,"posNodeData",return -1);
         posNodeDataSize += initPosNodeDataSize;
       }
 
@@ -617,7 +617,7 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
  * \param bin 1 if binary format
  * \param nelts number of elements in file
  * \param nsols number of silutions in file
- * \return 1 if success, 0 if fail.
+ * \return 1 if success, -1 if fail.
  *
  * End to read mesh and solution array at MSH file format after the
  * mesh/solution array alloc.
@@ -721,8 +721,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
       switch (typ) {
       case 1:
         /* Edge */
-        /* Skip edges with MG_ISO refs */
-        if ( mesh->info.iso && abs(ref)== MG_ISO ) {
+        /* Skip edges with mesh->info.isoref refs */
+        if ( mesh->info.iso && abs(ref)== mesh->info.isoref ) {
           /* Skip this edge but advance the file pointer */
           pa = &mesh->edge[0];
           MMG_FSCANF((*inm),"%d %d ",&pa->a,&pa->b);
@@ -742,8 +742,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         break;
       case 2:
         /* Tria */
-        /* Skip triangles with MG_ISO refs in 3D */
-        if ( mesh->info.iso && abs(ref)== MG_ISO && mesh->dim == 3 ) {
+        /* Skip triangles with mesh->info.isoref refs in 3D */
+        if ( mesh->info.iso && abs(ref)== mesh->info.isoref && mesh->dim == 3 ) {
           /* Skip this triangle but advance the file pointer */
           ptt = &mesh->tria[0];
           MMG_FSCANF((*inm),"%d %d %d",&ptt->v[0],&ptt->v[1],&ptt->v[2]);
@@ -856,8 +856,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
           if(iswp) ref = MMG5_swapbin(ref);
 
-          /* Skip edges with MG_ISO refs */
-          if ( mesh->info.iso &&  abs(ref) == MG_ISO ) {
+          /* Skip edges with mesh->info.isoref refs */
+          if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
             /* Skip this edge but advance the file pointer */
             pa = &mesh->edge[0];
             MMG_FREAD(&pa->a,MMG5_SW,1,(*inm));
@@ -911,8 +911,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
           if(iswp) ref = MMG5_swapbin(ref);
 
-          /* Skip triangles with MG_ISO refs in 3D */
-          if ( mesh->info.iso && abs(ref) == MG_ISO && mesh->dim == 3 ) {
+          /* Skip triangles with mesh->info.isoref refs in 3D */
+          if ( mesh->info.iso && abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
             /* Skip this triangle but advance the file pointer */
             for ( i=0; i<3 ; ++i ) {
               MMG_FREAD(&l,MMG5_SW,1,(*inm));
@@ -1136,9 +1136,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
                      fprintf(stderr,"  Exit program.\n");
                      fclose(*inm);
-                     return 0);
+                     return -1);
         MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",
-                           return 0);
+                           return -1);
       }
       mesh->nt = nt;
     }
@@ -1149,9 +1149,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
                      fprintf(stderr,"  Exit program.\n");
                      fclose(*inm);
-                     return 0);
+                     return -1);
         MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",
-                           return 0);
+                           return -1);
       }
       mesh->na = na;
     }
@@ -1271,8 +1271,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
       MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",
                    fprintf(stderr,"  Exit program.\n");
                    fclose(*inm);
-                   return 0);
-      MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
+                   return -1);
+      MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return -1);
 
       /* isotropic solution */
       if ( psl->size == 1 ) {

@@ -33,6 +33,7 @@
  */
 
 #include "mmgcommon.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -141,7 +142,7 @@ int MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax) {
 
   m = &met->m[met->size*ip];
 
-  if ( !MMG5_eigenv(1,m,lambda,v) ) {
+  if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
     if ( !mmgWarn ) {
       fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
               " 1 metric.\n",__func__);
@@ -468,7 +469,7 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
       iadr = met->size*k;
 
       /* Check metric */
-      if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+      if (!MMG5_eigenv3d(1,met->m+iadr,lambda,vp) ) {
         fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
                 " Impose hmax size at point\n",__func__,__LINE__);
         met->m[iadr+0] = FLT_MIN;

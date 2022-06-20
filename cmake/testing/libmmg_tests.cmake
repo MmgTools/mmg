@@ -38,8 +38,10 @@ SET ( MMG_LIB_TESTS_MAIN_PATH
 
 IF ( LIBMMG_STATIC )
   SET ( lib_name lib${PROJECT_NAME}_a )
+  SET ( lib_type "STATIC" )
 ELSEIF ( LIBMMG_SHARED )
   SET ( lib_name lib${PROJECT_NAME}_so )
+  SET ( lib_type "SHARED" )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
@@ -66,6 +68,31 @@ FOREACH ( test_idx RANGE ${nbTests} )
   LIST ( GET MMG_LIB_TESTS           ${test_idx} test_name )
   LIST ( GET MMG_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
 
-  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_mmg_headers ${lib_name} )
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_mmg_headers ${lib_name} ${lib_type} )
 
 ENDFOREACH ( )
+
+IF( MMG_CI )
+  # Add libmmg tests
+  SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a )
+  SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a )
+
+  ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a}
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/init
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/cube
+    "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0.o")
+  ADD_TEST(NAME libmmg_cpp_a        COMMAND ${LIBMMG_CPP_a}
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/init
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/cube
+    "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_cpp.o")
+
+  IF ( CMAKE_Fortran_COMPILER)
+    SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
+    ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a}
+      ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/init
+      ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/cube
+      "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_Fortran.o"
+      )
+  ENDIF()
+
+ENDIF( MMG_CI )

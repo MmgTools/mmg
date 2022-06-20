@@ -57,6 +57,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  MMG5_OFF;
+  mesh->info.isoref   =  MG_ISO;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
   /* [0/1]    ,Turn on/off debug mode */
@@ -626,6 +627,16 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
   return 1;
 }
 
+/* Useful tools to manage C strings */
+char *MMG5_Get_basename(char *path) {
+  char *s = strrchr(path, '/');
+
+  if (!s)
+    return strdup(path);
+  else
+    return strdup(s + 1);
+}
+
 
 const char* MMG5_Get_entitiesName(enum MMG5_entities ent)
 {
@@ -671,72 +682,215 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
-int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
-                      int split,int rin,int rex){
-  MMG5_pMat mat;
-  int k;
 
-  if ( !mesh->info.nmat ) {
-    fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
-    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
-    fprintf(stderr," values in multi material structure. \n");
-    return 0;
+/**
+ * \param ptr pointer toward the file extension (dot included)
+ * \param fmt default file format.
+ *
+ * \return and index associated to the file format detected from the extension.
+ *
+ * Get the wanted file format from the mesh extension. If \a fmt is provided, it
+ * is used as default file format (\a ptr==NULL), otherwise, the default file
+ * format is the medit one.
+ *
+ */
+int MMG5_Get_format( char *ptr, int fmt ) {
+  /* Default is the Medit file format or a format given as input */
+  int defFmt = fmt;
+
+  if ( !ptr ) return defFmt;
+
+  if ( !strncmp ( ptr,".meshb",strlen(".meshb") ) ) {
+    return MMG5_FMT_MeditBinary;
   }
-  if ( mesh->info.nmati >= mesh->info.nmat ) {
-    fprintf(stderr,"\n  ## Error: %s: unable to set a new material.\n",
-            __func__);
-    fprintf(stderr,"    max number of materials: %d\n",mesh->info.nmat);
-    return 0;
+  else if ( !strncmp( ptr,".mesh",strlen(".mesh") ) ) {
+    return MMG5_FMT_MeditASCII;
   }
-  if ( ref < 0 ) {
-    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
-            __func__);
-    return 0;
+  else if ( !strncmp( ptr,".mshb",strlen(".mshb") ) ) {
+    return MMG5_FMT_GmshBinary;
+  }
+  else if ( !strncmp( ptr,".msh",strlen(".msh") ) ) {
+    return MMG5_FMT_GmshASCII;
+  }
+  else if ( !strncmp ( ptr,".pvtu",strlen(".pvtu") ) ) {
+    return MMG5_FMT_VtkPvtu;
+  }
+  else if ( !strncmp ( ptr,".vtu",strlen(".vtu") ) ) {
+    return MMG5_FMT_VtkVtu;
+  }
+  else if ( !strncmp ( ptr,".pvtp",strlen(".pvtu") ) ) {
+    return MMG5_FMT_VtkPvtp;
+  }
+  else if ( !strncmp ( ptr,".vtp",strlen(".vtp") ) ) {
+    return MMG5_FMT_VtkVtp;
+  }
+  else if ( !strncmp ( ptr,".vtk",strlen(".vtk") ) ) {
+    return MMG5_FMT_VtkVtk;
+  }
+  else if ( !strncmp ( ptr,".node",strlen(".node") ) ) {
+    return MMG5_FMT_Tetgen;
   }
 
-  for (k=0; k<mesh->info.nmati; k++) {
-    mat = &mesh->info.mat[k];
+  return defFmt;
+}
 
-    if ( mat->ref == ref ) {
-      mat->dospl = split;
-      if ( split ) {
-        mat->rin   = rin;
-        mat->rex   = rex;
-      }
-      else {
-        mat->rin = mat->ref;
-        mat->rex = mat->ref;
-      }
-      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-        fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
-                __func__);
-        fprintf(stderr," for material of ref %d\n",ref);
-      }
-      return 1;
+/**
+ * \param fmt file format.
+ *
+ * \return The name of the file format in a string.
+ *
+ * Print the name of the file format associated to \a fmt.
+ *
+ */
+const char* MMG5_Get_formatName(enum MMG5_Format fmt)
+{
+  switch (fmt)
+  {
+  case MMG5_FMT_MeditASCII:
+    return "MMG5_FMT_MeditASCII";
+    break;
+  case MMG5_FMT_MeditBinary:
+    return "MMG5_FMT_MeditBinary";
+    break;
+  case MMG5_FMT_VtkVtu:
+    return "MMG5_FMT_VtkVtu";
+    break;
+  case MMG5_FMT_VtkVtp:
+    return "MMG5_FMT_VtkVtp";
+    break;
+  case MMG5_FMT_VtkPvtu:
+    return "MMG5_FMT_VtkPvtu";
+    break;
+  case MMG5_FMT_VtkPvtp:
+    return "MMG5_FMT_VtkPvtp";
+    break;
+  case MMG5_FMT_VtkVtk:
+    return "MMG5_FMT_VtkVtk";
+    break;
+  case MMG5_FMT_GmshASCII:
+    return "MMG5_FMT_GmshASCII";
+    break;
+  case MMG5_FMT_GmshBinary:
+    return "MMG5_FMT_GmshBinary";
+    break;
+  case MMG5_FMT_Tetgen:
+    return "MMG5_FMT_Tetgen";
+    break;
+  default:
+    return "MMG5_Unknown";
+  }
+}
+
+/**
+ * \param filename string containing a filename
+ *
+ * \return pointer toward the filename extension or toward the end of the string
+ * if no extension have been founded
+ *
+ * Get the extension of the filename string. Do not consider '.o' as an extension.
+ *
+ */
+char *MMG5_Get_filenameExt( char *filename ) {
+  const char pathsep='/';
+  char       *dot,*lastpath;
+
+  if ( !filename ) {
+    return NULL;
+  }
+
+  dot = strrchr(filename, '.');
+  lastpath = (pathsep == 0) ? NULL : strrchr (filename, pathsep);
+
+  if ( (!dot) || dot == filename || (lastpath>dot) || (!strcmp(dot,".o")) ) {
+    /* No extension */
+    return filename + strlen(filename);
+  }
+
+  return dot;
+}
+
+/**
+ * \param path string containing a filename and its path
+ *
+ * \return a pointer toward the path allocated here
+ *
+ * Remove filename from a path and return the path in a newly allocated string.
+ *
+ */
+char *MMG5_Get_path(char *path) {
+  char *lastpath,*retpath;
+  int len;
+
+  if ( path == NULL) return NULL;
+
+  lastpath = (MMG5_PATHSEP == 0) ? NULL : strrchr (path, MMG5_PATHSEP);
+
+  if ( !lastpath ) {
+    return NULL;
+  }
+
+
+  len = 0;
+  while ( path+len != lastpath ) {
+    ++len;
+  }
+
+  MMG5_SAFE_MALLOC(retpath,len+1,char,return NULL);
+
+  /* Copy the string without the extension and add \0 */
+  strncpy ( retpath, path, len );
+  retpath[len] = '\0';
+
+  return retpath;
+}
+
+/**
+ * \param path path from which we want to remove the extension.
+ *
+ * \return allocated string or NULL if the allocation fail.
+ *
+ * Allocate a new string and copy \a path without extension in it.
+ *
+ */
+char *MMG5_Remove_ext (char* path,char *ext) {
+  int        len;
+  char       *retpath, *lastext, *lastpath;
+  char       *extloc;
+
+  /* Default extension if not provided */
+  if ( (!ext) || !*ext ) {
+    extloc = ".";
+  }
+  else {
+    extloc = ext;
+  }
+
+  /* Error checks and string allocation. */
+  if ( path == NULL) return NULL;
+
+  /* Find the relevant characters and the length of the string without
+   * extension */
+  lastext = strstr (path, extloc);
+  lastpath = (MMG5_PATHSEP == 0) ? NULL : strrchr (path, MMG5_PATHSEP);
+
+  if ( lastext == NULL || (lastpath != NULL && lastpath > lastext) ) {
+    /* No extension or the extension is left from a separator (i.e. it is not an
+     * extension) */
+    len = strlen(path);
+  }
+  else {
+    /* An extension is found */
+    len = 0;
+    while ( path+len != lastext ) {
+      ++len;
     }
   }
 
-  if ( ( split != MMG5_MMAT_Split ) && ( split != MMG5_MMAT_NoSplit ) ) {
-    fprintf(stderr,"\n ## Error: %s: unexpected value for the 'split' argument."
-            " You must use the MMG5_MMAT_Split or MMG5_MMAT_NpSplit keywords \n",
-            __func__);
-    return 0;
-  }
+  MMG5_SAFE_MALLOC(retpath,len+1,char,return NULL);
 
-  mesh->info.mat[mesh->info.nmati].ref   = ref;
-  mesh->info.mat[mesh->info.nmati].dospl = split;
-  mesh->info.mat[mesh->info.nmati].rin   = rin;
-  mesh->info.mat[mesh->info.nmati].rex   = rex;
+  /* Copy the string without the extension and add \0 */
+  strncpy ( retpath, path, len );
+  retpath[len] = '\0';
 
-  mesh->info.nmati++;
-
-  /* Invert the table if all materials have been set */
-  if( mesh->info.nmati == mesh->info.nmat )
-    if( !MMG5_MultiMat_init(mesh) ) {
-      fprintf(stderr,"\n ## Error: %s: unable to create lookup table for multiple materials.\n",
-              __func__);
-      return 0;
-    }
-
-  return 1;
+  return retpath;
 }

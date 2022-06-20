@@ -32,8 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
-
+#include "libmmgs_private.h"
+#include "mmgexterns.h"
 
 extern int8_t ddb;
 

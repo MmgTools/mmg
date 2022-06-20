@@ -51,7 +51,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  int             ier;
+  int             ier,silent=0;
   /* To save final mesh in a file */
   FILE*           inm;
   char            *fileout_generic,*fileout_medit,*filein;
@@ -59,8 +59,8 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"  -- TEST LOAD AND GET MESH DATA \n");
 
-  if ( argc != 3 ) {
-    printf(" Usage: %s filein fileout\n",argv[0]);
+  if ( argc != 4 ) {
+    printf(" Usage: %s filein fileout silent_mode\n",argv[0]);
     return(EXIT_FAILURE);
   }
 
@@ -87,6 +87,8 @@ int main(int argc,char *argv[]) {
   strcpy(fileout_medit,argv[2]);
   strcat(fileout_medit,".mesh");
 
+  silent = atoi(argv[3]);
+
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh  structure of Mmg */
   /* args of InitMesh:
@@ -109,6 +111,11 @@ int main(int argc,char *argv[]) {
     if ( ier==0 ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",filein);
       fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
+      return EXIT_FAILURE;
+    }
+    else {
+      assert ( ier == -1 );
+      fprintf(stderr,"  ** UNABLE TO READ INPUT FILE.\n");
       return EXIT_FAILURE;
     }
   }
@@ -200,8 +207,10 @@ int main(int argc,char *argv[]) {
       return EXIT_FAILURE;
     }
 
-    fprintf(stdout,"Tetra %d is adjacent to tetras %d %d %d %d\n",
-            k,adja[0],adja[1],adja[2],adja[3]);
+    if ( !silent ) {
+      fprintf(stdout,"Tetra %d is adjacent to tetras %d %d %d %d\n",
+              k,adja[0],adja[1],adja[2],adja[3]);
+    }
   }
 
   /** 6) Save output file depending on the detected extension */
