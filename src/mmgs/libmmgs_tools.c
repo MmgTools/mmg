@@ -712,17 +712,21 @@ int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
 
   assert ( mesh->info.optim );
 
-  /* Detect the point not used by the mesh */
+  /* Detect points not used by the mesh */
+  ++mesh->base;
+
+#ifndef NDEBUG
   for (k=1; k<=mesh->np; k++) {
-    mesh->point[k].flag = 1;
+    assert ( mesh->point[k].flag < mesh->base );
   }
+#endif
 
   for (k=1; k<=mesh->nt; k++) {
     MMG5_pTria ptt = &mesh->tria[k];
     if ( !MG_EOK(ptt) ) continue;
 
     for (i=0; i<3; i++) {
-      mesh->point[ptt->v[i]].flag = 0;
+      mesh->point[ptt->v[i]].flag = mesh->base;
     }
   }
 
@@ -834,9 +838,20 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
+  /** Increment base marker to detect points already processed */
+  ++mesh->base;
+
+#ifndef NDEBUG
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
+    assert ( p1->flag < mesh->base );
+  }
+#endif
+
+  double isqhmax = 1./(MMG5_HMAXCOE*MMG5_HMAXCOE);
+
+
   /* Travel the triangles */
-#warning to remove
-  double isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !MG_EOK(ptt) )  continue;

@@ -196,18 +196,23 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
   int    k,ier;
   static int8_t mmgWarn0 = 0;
 
+  ++mesh->base;
+
+#ifndef NDEBUG
+  for (k=1; k<=mesh->np; k++) {
+    assert ( mesh->point[k].flag < mesh->base );
+  }
+#endif
+
   for (k=1; k<=mesh->np; k++)  {
 
     if( !MG_VOK( &mesh->point[k] ) ) {
-      /* Set point flag to 1 so MMG5_solTruncature function will ignore the point
-       * data to compute the hmin/hmax values if not provided by the user. */
-      mesh->point[k].flag = 1;
       continue;
     }
 
-    /* Set point flag to 0 so MMG5_solTruncature function will use the point
+    /* Set point flag to base so MMG5_solTruncature function will use its
      * data to compute the hmin/hmax values if not provided by the user. */
-    mesh->point[k].flag = 0;
+    mesh->point[k].flag = mesh->base;
 
     /* Check the metric */
     if ( met->m[k] <= 0 ) {
@@ -245,18 +250,17 @@ int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
 
   dd = 1.0 / (dd*dd);
 
+  ++mesh->base;
+
   for (k=1; k<=mesh->np; k++)  {
 
     if( !MG_VOK( &mesh->point[k] ) ) {
-      /* Set point flag to 1 so MMG5_solTruncature function will ignore the point
-       * data to compute the hmin/hmax values if not provided by the user. */
-      mesh->point[k].flag = 1;
       continue;
     }
 
-    /* Set point flag to 0 so MMG5_solTruncature function will use the point
+    /* Set point flag to base so MMG5_solTruncature function will use its
      * data to compute the hmin/hmax values if not provided by the user. */
-    mesh->point[k].flag = 0;
+    mesh->point[k].flag = mesh->base;
 
     iadr = k*met->size;
     for (i=0; i<met->size; i++) {
@@ -297,7 +301,7 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
   if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
-      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
+      if ( (!MG_VOK(ppt)) || (ppt->flag < mesh->base) ) continue;
       hmin = MG_MIN(hmin,met->m[k]);
       hmax = MG_MAX(hmax,met->m[k]);
     }
@@ -316,7 +320,7 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->flag ) {
+    if ( ppt->flag<mesh->base ) {
       met->m[k] = mesh->info.hmax;
     }
     else {
@@ -364,7 +368,7 @@ int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
-      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
+      if ( (!MG_VOK(ppt)) || (ppt->flag < mesh->base) ) continue;
       iadr = met->size*k;
 
       MMG5_eigensym(met->m+iadr,lambda,vp);
@@ -397,7 +401,7 @@ int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
     iadr = 3*k;
 
     ppt = &mesh->point[k];
-    if ( ppt->flag ) {
+    if ( ppt->flag < mesh->base ) {
       met->m[iadr] = met->m[iadr+2] = isqhmax;
       met->m[iadr+1] = 0;
     }
@@ -452,7 +456,7 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->flag ) {
+      if ( !MG_VOK(ppt) || (ppt->flag < mesh->base) ) {
         continue;
       }
       iadr = met->size*k;
@@ -505,7 +509,7 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) continue;
 
-    if ( ppt->flag || !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
+    if ( (ppt->flag < mesh->base) || !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
       /* Fail to diagonalize metric: put hmax */
       iadr = 6*k;
       met->m[iadr]   = isqhmax;

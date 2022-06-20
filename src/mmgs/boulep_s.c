@@ -248,8 +248,8 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
  * \param il2 pointer toward the second ball size.
  * \param l2 pointer toward the second computed ball (associated to \a n2's
  * side).
- * \param ip0 index of the first extremity of the ridge.
- * \param ip1 index of the second extremity of the ridge.
+ * \param global ip0 index of the first extremity of the ridge.
+ * \param global ip1 index of the second extremity of the ridge.
  * \return 0 if fail, 1 otherwise.
  *
  * Computation of the two balls of a ridge point: the list \a l1 is associated
