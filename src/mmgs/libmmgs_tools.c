@@ -814,10 +814,23 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * \remark need the normal at vertices.
+ * \remark hmax/hmin may be not setted here so we can't use it.
+ *
+ * Compute the unit metric tensor at mesh vertices (from edges passing through
+ * the vertices).
+ *
+ */
 int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria   ptt;
-  MMG5_pPoint  p1;
-  double       dd,tensordot[3];
+  MMG5_pTria   ptt,ptt1;
+  MMG5_pPoint  p1,p2;
+  double       dd,u[3];
   double       *m,r[3][3],lispoi[3*MMGS_LMAX+1],b0[3],b1[3],b2[3];
   int          i,j,k,iadr,ip,type,list[MMGS_LMAX+2],ilist;
   int          *mark;
@@ -859,105 +872,268 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       ip = ptt->v[i];
 
-      if ( mark[ip] ) {
+      p1   = &mesh->point[ip];
+      if ( p1->flag == mesh->base ) {
         continue;
       }
-      p1  = &mesh->point[ip];
-
-      /* Regular point: get the ball of the point and project it in the tangent
-       * plane to compute the unit metric tensor in 2D. */
-      ilist = boulet(mesh,k,i,list);
-      if ( ilist < 1 ) {
-        fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
-                __func__);
-        return 0;
-      }
-
-      mark[ip] = ilist;
 
       iadr = 6*ip;
       m    = &met->m[iadr];
 
-      if ( p1->tag & MG_CRN || p1->tag & MG_GEO || p1->tag & MG_REF ) {
-#warning to Treat
-        m[0] = m[3] = m[5] = isqhmax;
+      if ( MG_SIN(p1->tag) ) {
+        /** Singular point: No normal at vertex: find the maximal edge length in
+         * the ball of the point and impose it in an isotropic way (hoping that
+         * the gradation will propagate onto this tensor)... Another solution
+         * can be to compute the isotropic mean edge length but it can propagate
+         * small sizes onto the maximal direction of anisotropic tensors. */
+
+        ilist = boulet(mesh,k,i,list);
+        if ( ilist < 1 ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
+                  __func__);
+          return 0;
+        }
+
+        /* First edge for an open ball */
+        int    i1,i2,iel;
+
+        i2  = MMG5_iprv2[i];
+        p2  = &mesh->point[ptt->v[i2]];
+
+        u[0] = p2->c[0] - p1->c[0];
+        u[1] = p2->c[1] - p1->c[1];
+        u[2] = p2->c[2] - p1->c[2];
+
+        double hmaxedg = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
+        for ( j=0; j<ilist; ++j ) {
+          /* Compute euclidean edge length */
+          iel = list[j] / 3;
+          i1  = list[j] % 3;
+          i2  = MMG5_inxt2[i1];
+
+          ptt1 = &mesh->tria[iel];
+
+          p2 = &mesh->point[ptt1->v[i2]];
+
+          u[0] = p2->c[0] - p1->c[0];
+          u[1] = p2->c[1] - p1->c[1];
+          u[2] = p2->c[2] - p1->c[2];
+
+          hmaxedg = MG_MAX ( hmaxedg, u[0]*u[0] + u[1]*u[1] + u[2]*u[2] );
+        }
+        /* Last edge for an open ball */
+        // iel = list[ilist-1]/3;
+        // i1  = list[ilist-1]%3;
+        i2  = MMG5_iprv2[i1];
+        p2  = &mesh->point[ptt1->v[i2]];
+
+        u[0] = p2->c[0] - p1->c[0];
+        u[1] = p2->c[1] - p1->c[1];
+        u[2] = p2->c[2] - p1->c[2];
+        hmaxedg = MG_MAX ( hmaxedg, u[0]*u[0] + u[1]*u[1] + u[2]*u[2] );
+
+        /** Assign maximal edge length in an isotropic way */
+        m[0] = m[3] = m[5] = 1. / hmaxedg;
+
+        p1->flag = mesh->base;
         continue;
       }
+      else if ( p1->tag & MG_GEO  ) {
+        /** Ridge point: We have two normals at vertex and we want to compute
+         * two 2D metrics, each one being computed as the covariance matrix of
+         * the edges (belonging to the half-plane and projected onto the tangent
+         * plane). */
+        /* int ilist2,list2[MMGS_LMAX+2],ier,iprid[2]; */
+        /* ier = bouletrid(mesh,k,i,&ilist,list,&ilist2,list2,&iprid[0],&iprid[1]); */
+        /* if ( !ier ) { */
+        /*   fprintf(stderr,"\n  ## Error: %s: unable to compute the two balls at ridge point %d.\n", */
+        /*           __func__,ip); */
+        /*   return 0; */
+        /* } */
 
-      /* Rotation of the ball of p0 so lispoi will contain all the points of the
-         ball of p0, rotated so that t_{p_0}S = [z = 0] */
-      if ( !MMGS_surfballRotation(mesh,p1,list,ilist,r,lispoi)  ) {
-        fprintf(stderr,"\n  ## Error: %s: unable to compute ball rotation.\n",
-                __func__);
-        return 0;
+        /* /\** Specific size in direction of t: mean of euclidean lengths of the */
+        /*  * projection of the ridges coming from \a ip on t.*\/ */
+        /* m[0] = 0.; */
+        /* for ( j=0; j<2; ++j) { */
+        /*   p2 = &mesh->point[iprid[j]]; */
+        /*   m[0] += (p2->c[0]-p1->c[0])*p1->n[0] */
+        /*     + (p2->c[1]-p1->c[1])*p1->n[1] + (p2->c[2]-p1->c[2])*p1->n[2]; */
+        /* } */
+        /* m[0] *= 0.5; */
+
+#warning rewrite comments
+        /** Specific size in direction \f$u_1 = n_1^{}t\f$ and \f$u_2 =
+         * n_2^{}t\f$: mean of euclidean lengths of the projection of the ridges
+         * coming from \a ip on t.*/
+        /* assert(mesh->point[ip].xp); */
+        /* double *n1 = &mesh->xpoint[p1->xp].n1[0]; */
+        /* double *n2 = &mesh->xpoint[p1->xp].n2[0]; */
+
+
+        /* m[3] = m[5] = isqhmax; */
+
+// TEST -------------
+        ilist = boulet(mesh,k,i,list);
+        if ( ilist < 1 ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
+                  __func__);
+          return 0;
+        }
+
+        for ( j=0; j<6; ++j ) {
+          m[j] = 0.;
+        }
+
+        for ( j=0; j<ilist; ++j ) {
+          /* Compute euclidean edge length */
+          int    iel = list[j] / 3;
+          int8_t i1  = list[j] % 3;
+          int8_t i2  = MMG5_inxt2[i1];
+
+          ptt1 = &mesh->tria[iel];
+
+          p2 = &mesh->point[ptt1->v[i2]];
+
+          u[0]  = p1->c[0] - p2->c[0];
+          u[1]  = p1->c[1] - p2->c[1];
+          u[2]  = p1->c[2] - p2->c[2];
+
+          m[0] += u[0]*u[0];
+          m[1] += u[0]*u[1];
+          m[2] += u[0]*u[2];
+          m[3] += u[1]*u[1];
+          m[4] += u[1]*u[2];
+          m[5] += u[2]*u[2];
+        }
+
+        if ( k==407 && i==0 ) {
+          puts("plop");
+        }
+        double tensordot[6];
+        if ( !MMG5_invmat(m,tensordot) ) {
+          /* Non invertible matrix: impose FLT_MIN, it will be truncated by hmax
+           * later */
+          fprintf(stdout, " ## Warning: %s: %d: non invertible matrix."
+                  " Impose hmax size at point\n",__func__,__LINE__);
+          m[0] = FLT_MIN;
+          m[1] = 0;
+          m[2] = 0;
+          m[3] = FLT_MIN;
+          m[4] = 0;
+          m[5] = FLT_MIN;
+          continue;
+        }
+
+        dd = (double)ilist/3.;
+        for ( j=0; j<6; ++j ) {
+          m[j] = dd*tensordot[j];
+        }
+
+// END TEST ---------
+        p1->flag = mesh->base;
+        continue;
       }
+      else {
+        /** Regular or reference point: projection of edges onto the tangent
+         * plane and computation of the 2D unit metric tensor */
+        ilist = boulet(mesh,k,i,list);
+        if ( ilist < 1 ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
+                  __func__);
+          return 0;
+        }
 
-      tensordot[0] = 0.;
-      tensordot[1] = 0.;
-      tensordot[2] = 0.;
+        /* Rotation of the ball of p0 so lispoi will contain all the points of
+           the ball of p0, rotated so that t_{p_0}S = [z = 0] */
+        if ( !MMGS_surfballRotation(mesh,p1,list,ilist,r,lispoi)  ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute ball rotation.\n",
+                  __func__);
+          return 0;
+        }
 
-      for ( j=0; j<ilist; ++j ) {
-        /* Compute the 2D metric tensor from the projection of the vectors on
-         * the tangent plane */
-        tensordot[0] += lispoi[3*j+1]*lispoi[3*j+1];
-        tensordot[1] += lispoi[3*j+1]*lispoi[3*j+2];
-        tensordot[2] += lispoi[3*j+2]*lispoi[3*j+2];
-      }
+        double tensordot[3];
+        tensordot[0] = 0.;
+        tensordot[1] = 0.;
+        tensordot[2] = 0.;
 
-      /* Metric = nedges/dim * inv (sum(tensor_dot(edges,edges)))  */
-      dd = 1./(tensordot[0]*tensordot[2] - tensordot[1]*tensordot[1]);
-      dd *= (double)ilist/2.;
+        for ( j=0; j<ilist; ++j ) {
+          /* Compute the 2D metric tensor from the projection of the vectors on
+           * the tangent plane */
+          tensordot[0] += lispoi[3*j+1]*lispoi[3*j+1];
+          tensordot[1] += lispoi[3*j+1]*lispoi[3*j+2];
+          tensordot[2] += lispoi[3*j+2]*lispoi[3*j+2];
+        }
 
-      double tmp = tensordot[0];
+        /* Metric = nedges/dim * inv (sum(tensor_dot(edges,edges)))  */
+        dd = 1./(tensordot[0]*tensordot[2] - tensordot[1]*tensordot[1]);
+        dd *= (double)ilist/2.;
 
-      tensordot[0] = dd*tensordot[2];
-      tensordot[1] = -dd*tensordot[1];
-      tensordot[2] = dd*tmp;
+        double tmp = tensordot[0];
+
+        tensordot[0] = dd*tensordot[2];
+        tensordot[1] = -dd*tensordot[1];
+        tensordot[2] = dd*tmp;
 
 #ifndef NDEBUG
-      /* Check 2D metric */
-      double lambda[2],vp[2][2];
-      MMG5_eigensym(tensordot,lambda,vp);
+        /* Check 2D metric */
+        double lambda[2],vp[2][2];
+        MMG5_eigensym(tensordot,lambda,vp);
 
-      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+        assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
 
-      /* Normally the case where the point belongs to only 2 colinear points is
-         impossible */
-      assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
+        /* Normally the case where the point belongs to only 2 colinear points is
+           impossible */
+        assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
 #endif
 
 #warning to factorize
-      /* At this point, tensordot (with 0 replaced by isqhmax in the z
-         direction) is the desired metric, except it is expressed in the rotated
-         canonical basis, that is tensordot = R * metric in cb * ^t R, so metric
-         in cb = ^tR*intm*R */
-      // intm = intm[0]  intm[1]    0
-      //        intm[1]  intm[2]    0
-      //           0       0     isqhmax
+        /* At this point, tensordot (with 0 replaced by isqhmax in the z
+           direction) is the desired metric, except it is expressed in the rotated
+           canonical basis, that is tensordot = R * metric in cb * ^t R, so metric
+           in cb = ^tR*intm*R */
+        // intm = intm[0]  intm[1]    0
+        //        intm[1]  intm[2]    0
+        //           0       0     isqhmax
 
-      /* b0 and b1 serve now for nothing : let them be the lines of matrix intm*R */
-      b0[0] = tensordot[0]*r[0][0] + tensordot[1]*r[1][0];
-      b0[1] = tensordot[0]*r[0][1] + tensordot[1]*r[1][1];
-      b0[2] = tensordot[0]*r[0][2] + tensordot[1]*r[1][2];
-      b1[0] = tensordot[1]*r[0][0] + tensordot[2]*r[1][0];
-      b1[1] = tensordot[1]*r[0][1] + tensordot[2]*r[1][1];
-      b1[2] = tensordot[1]*r[0][2] + tensordot[2]*r[1][2];
-      b2[0] = isqhmax*r[2][0];
-      b2[1] = isqhmax*r[2][1];
-      b2[2] = isqhmax*r[2][2];
+        /* b0 and b1 serve now for nothing : let them be the lines of matrix intm*R */
+        b0[0] = tensordot[0]*r[0][0] + tensordot[1]*r[1][0];
+        b0[1] = tensordot[0]*r[0][1] + tensordot[1]*r[1][1];
+        b0[2] = tensordot[0]*r[0][2] + tensordot[1]*r[1][2];
+        b1[0] = tensordot[1]*r[0][0] + tensordot[2]*r[1][0];
+        b1[1] = tensordot[1]*r[0][1] + tensordot[2]*r[1][1];
+        b1[2] = tensordot[1]*r[0][2] + tensordot[2]*r[1][2];
+#warning check and comment the use of inf
+        b2[0] = isqhmax*r[2][0];
+        b2[1] = isqhmax*r[2][1];
+        b2[2] = isqhmax*r[2][2];
 
-      m[0] = r[0][0] * b0[0] + r[1][0] * b1[0] + r[2][0] * b2[0];
-      m[1] = r[0][0] * b0[1] + r[1][0] * b1[1] + r[2][0] * b2[1];
-      m[2] = r[0][0] * b0[2] + r[1][0] * b1[2] + r[2][0] * b2[2];
+        m[0] = r[0][0] * b0[0] + r[1][0] * b1[0] + r[2][0] * b2[0];
+        m[1] = r[0][0] * b0[1] + r[1][0] * b1[1] + r[2][0] * b2[1];
+        m[2] = r[0][0] * b0[2] + r[1][0] * b1[2] + r[2][0] * b2[2];
 
-      m[3] = r[0][1] * b0[1] + r[1][1] * b1[1] + r[2][1] * b2[1];
-      m[4] = r[0][1] * b0[2] + r[1][1] * b1[2] + r[2][1] * b2[2];
+        m[3] = r[0][1] * b0[1] + r[1][1] * b1[1] + r[2][1] * b2[1];
+        m[4] = r[0][1] * b0[2] + r[1][1] * b1[2] + r[2][1] * b2[2];
 
-      m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
+        m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
+
+        p1->flag = mesh->base;
+      }
+
+#ifndef NDEBUG
+      /* Check metric */
+      double lambda[3],vp[3][3];
+      if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+        fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric.",
+                __func__,__LINE__);
+      }
+
+      assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
+               && "Negative eigenvalue" );
+      assert ( isfinite(lambda[0]) && isfinite(lambda[1]) && isfinite(lambda[2])
+               && "Infinite eigenvalue" );
+#endif
     }
   }
-
-  MMG5_SAFE_FREE(mark);
 
   MMGS_solTruncatureForOptim(mesh,met,1);
 
