@@ -1131,13 +1131,16 @@ extern "C" {
  *
  * Get vertices and references of the mesh edges.
  *
+ * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+ * instead of the refs, areRidges or areRequired arrays)
+ *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: edges(*)\n
- * >     INTEGER, INTENT(OUT)          :: refs(*),areRequired(*),areRidges(*)\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
- * >   END SUBROUTINE\n
+ * > !  SUBROUTINE MMG2D_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: edges\n
+ * > !    INTEGER, DIMENSION(*)         :: refs,areRequired,areRidges\n
+ * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !  END SUBROUTINE\n
  *
  */
   LIBMMG2D_EXPORT int MMG2D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
