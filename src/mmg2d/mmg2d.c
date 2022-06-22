@@ -673,7 +673,7 @@ int main(int argc,char *argv[]) {
   met  = NULL;
   ls   = NULL;
   disp = NULL;
-
+  
   if ( !MMG2D_Init_mesh(MMG5_ARG_start,
                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
                         MMG5_ARG_ppLs,&ls,

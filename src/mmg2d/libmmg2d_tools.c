@@ -82,7 +82,7 @@ int MMG2D_defaultValues(MMG5_pMesh mesh) {
  *
  */
 int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,ref,i,j,npar,rin,rex,split;
+  int        ret,ref,i,j,npar,nbr,br,rin,rex,split;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
@@ -182,6 +182,17 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
+      }
+    }
+    /* Read user-defined references where connected components should stay attached in ls mode */
+    else if ( !strcmp(data,"lsbasereferences") ) {
+      MMG_FSCANF(in,"%d",&nbr);
+      if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numberOfLSBaseReferences,nbr) )
+        return 0;
+
+      for (i=0; i<mesh->info.nbr; i++) {
+        MMG_FSCANF(in,"%d",&br);
+        mesh->info.br[i] = br;
       }
     }
     else {

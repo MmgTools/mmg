@@ -71,7 +71,8 @@ extern "C" {
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG2D_IPARAM_numberOfMat,       /*!< [n], Number of material in ls mode */
+    MMG2D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
+    MMG2D_IPARAM_numberOfMat,                /*!< [n], Number of material in ls mode */
     MMG2D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
     MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
