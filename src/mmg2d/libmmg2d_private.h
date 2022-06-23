@@ -213,6 +213,7 @@ int  MMG2D_Free_names_var( va_list argptr );
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
+int MMG2D_mmg2d6s(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,int8_t ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
@@ -252,8 +253,10 @@ int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);
 int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
+int MMG2D_cuttri_lssurf(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_setref_lssurf(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int MMG2D_split2_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int MMG2D_split3_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);

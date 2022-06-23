@@ -681,8 +681,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   assert ( mesh->point );
   assert ( mesh->tria );
 
-  if ( !mesh->info.iso ) { mesh->info.iso = 1; }
-
   if ( !umet ) {
     /* User doesn't provide the metric, allocate our own one */
     MMG5_SAFE_CALLOC(met,1,MMG5_Sol,_LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE));
@@ -826,14 +824,32 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
-  if ( !MMG2D_mmg2d6(mesh,sol,umet) ) {
+  if ( mesh->info.iso ) {
+    if ( !MMG2D_mmg2d6(mesh,sol,umet) ) {
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+      }
+      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
+    }
+  }
+  else if ( mesh->info.surfiso ) {
+    if ( !MMG2D_mmg2d6s(mesh,sol,umet) ) {
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+      }
+      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
+    }
+  }
+  else {
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
       _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
     }
     MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
-
+  
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim > 0 )
