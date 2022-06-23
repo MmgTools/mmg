@@ -33,16 +33,6 @@
 
 #include "mmg2d.h"
 
-/** Return 1 if reference ref is in the br table, 0 otherwise */
-int MMG2D_isbr(MMG5_pMesh mesh,int ref) {
-  int k;
-
-  for(k=0; k<mesh->info.nbr; k++)
-    if ( ref == mesh->info.br[k] ) return(1);
-
-  return(0);
-}
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param kel index of the element in the unpacked mesh

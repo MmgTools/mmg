@@ -215,18 +215,6 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
     break;
-  case MMG2D_IPARAM_numberOfLSBaseReferences :
-    mesh->info.nbr = val;
-    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
-                  printf("  Exit program.\n");
-                  return 0);
-    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
-
-    for (k=0; k<mesh->info.nbr; k++)
-      mesh->info.br[k] = 0;
-
-    break;
-      
   case MMG2D_IPARAM_numberOfMat :
     if ( mesh->info.mat ) {
       MMG5_DEL_MEM(mesh,mesh->info.mat);
