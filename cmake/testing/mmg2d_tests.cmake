@@ -525,7 +525,7 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
 
 # ls + rmc + LSBaseReference
 ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
   ${MMG2D_CI_TESTS}/LSBaseReferences/box
   -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences.o.meshb)

@@ -2482,6 +2482,11 @@ int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,i
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
 
+int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
+  return MMG3D_Set_lsBaseReference(mesh,sol,br);
+}
+
+
 int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 
   return MMG5_Free_allSols(mesh,sol);

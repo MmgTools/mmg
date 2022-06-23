@@ -580,7 +580,9 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<mesh->info.nbr; i++) {
         MMG_FSCANF(in,"%d",&br);
-        mesh->info.br[i] = br;
+        if ( !MMG2D_Set_lsBaseReference(mesh,met,br) ) {
+          return 0;
+        }
       }
     }
     else {
