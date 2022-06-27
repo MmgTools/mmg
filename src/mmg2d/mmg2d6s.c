@@ -41,7 +41,8 @@
  * Snap values of sol very close to 0 to 0 exactly in the case of surface ls splitting
  * (to avoid very small triangles in cutting)
  */
-int MMG2D_snapvalsurf(MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG2D_snapval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
+  MMG5_pPoint      p0;
   double           *tmp;
   int              k,ns,nc;
 
@@ -54,11 +55,62 @@ int MMG2D_snapvalsurf(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-
+  
+  /* Snap values of sol that are close to 0 to 0 exactly */
+  ns = nc = 0;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( !MG_VOK(p0) ) continue;
+    if ( fabs(sol->m[k]) < MMG5_EPS ) {
+      tmp[k] =  sol->m[k];
+      p0->flag = 1;
+      sol->m[k] = 0.0;
+      ns++;
+    }
+  }
+  
+  /* Unsnap if need be... */
+  
   MMG5_DEL_MEM ( mesh, tmp );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * Reset mesh->info.isoref vertex references to 0.
+ *
+ */
+int MMG2D_resetRef_lssurf(MMG5_pMesh mesh) {
+  MMG5_pTria      pt;
+  MMG5_pPoint     p0,p1;
+  int             k,ref;
+  int8_t          i,i0,i1;
+
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !pt->v[0] ) continue;
+
+    for (i=0; i<3; i++) {
+      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      
+      if( !MMG5_getStartRef(mesh,pt->edg[i],&ref) ) return 0;
+      pt->edg[i] = ref;
+      
+      i0 = MMG5_inxt2[i];
+      i1 = MMG5_inxt2[i0];
+      
+      p0 = &mesh->point[pt->v[i0]];
+      p1 = &mesh->point[pt->v[i1]];
+
+      if ( p0->ref == mesh->info.isoref ) p0->ref = 0;
+      if ( p1->ref == mesh->info.isoref ) p1->ref = 0;
+    }
+  }
 
   return 1;
 }
@@ -321,13 +373,22 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
   
-  /* SNAPVAL : on verra */
+  /* Snap values of the level set function which are very close to 0 to 0 exactly */
+  if ( !MMG2D_snapval_lssurf(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
+    return 0;
+  }
+  
   /* RMC : on verra */
   
   /* No need to keep adjacencies from now on */
   MMG5_DEL_MEM(mesh,mesh->adja);
   
-  /* Somehow reset references */
+  /* Reset the mesh->info.isoref field everywhere it appears */
+  if ( !MMG2D_resetRef_lssurf(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
+    return 0;
+  }
   
   /* Effective splitting of the crossed triangles */
   if ( !MMG2D_cuttri_lssurf(mesh,sol,met) ) {
