@@ -248,6 +248,7 @@ double MMG2D_voltri(MMG5_pMesh ,int ,int ,int );
 double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , int8_t );
 int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
+int MMG2D_snapvalsurf(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);

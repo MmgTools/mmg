@@ -807,6 +807,7 @@ int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
  **/
 int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
 
+  return 1;
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");

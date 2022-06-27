@@ -772,6 +772,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
+  
   /* Creation quadrilaterals adjacency relations in the mesh */
   if ( !MMG2D_hashQuad(mesh) ) {
      fprintf(stderr,"\n  ## Quadrilaterals hashing problem. Exit program.\n");

@@ -33,6 +33,37 @@
 #include "libmmg2d_private.h"
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Snap values of sol very close to 0 to 0 exactly in the case of surface ls splitting
+ * (to avoid very small triangles in cutting)
+ */
+int MMG2D_snapvalsurf(MMG5_pMesh mesh, MMG5_pSol sol) {
+  double           *tmp;
+  int              k,ns,nc;
+
+  /* Allocate memory for tmp */
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+                printf("  Exit program.\n");
+                return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
+
+  /* Reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
+  MMG5_DEL_MEM ( mesh, tmp );
+
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
+    fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param sol pointer toward the level-set
  * \param met pointer toward a metric (non-mandatory)
@@ -54,13 +85,16 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
-  /* Evaluate the number of intersected surface edges by the 0 level set */
+  /* Estimate the number of intersected surface edges by the 0 level set */
   nb = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+      
+      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
 
@@ -84,7 +118,7 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   }
   if ( !nb ) return 1;
 
-  /* Create the intersection points between the edges in the mesh and the 0
+  /* Create the intersection points between the surface edges in the mesh and the 0
    * level set */
   if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
@@ -93,6 +127,9 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+      
+      if ( !(pt->tag[i] & MG_BDY) ) continue;
+
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
 
@@ -192,7 +229,60 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
 
 /* Set references to the new triangles */
 int MMG2D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
+  MMG5_pTria     pt;
+  double         v,v1;
+  int            k,ier,ip1,ref,refint,refext;
+  int8_t         i,i1,i2,j,nmn,npl,nz;
 
+  /* Travel all surface edges (via triangles) */
+  for(k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    
+    for (i=0; i<3; i++) {
+      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      ref = pt->edg[i];
+      nmn = npl = nz = 0;
+      
+      i1 = i;
+      for (j=0; j<2; j++) {
+        i1  = MMG5_inxt2[i1];
+        ip1 = pt->v[i1];
+        v1  = sol->m[ip1];
+        
+        if ( v1 > 0.0 )
+          npl++;
+        else if ( v1 < 0.0 )
+          nmn++;
+        else
+          nz++;
+      }
+      
+      assert(nz < 2);
+      ier = MMG5_isSplit(mesh,ref,&refint,&refext);
+      if ( npl ) {
+        if (ier ) {
+          assert ( !nmn );
+          pt->edg[i] = refext;
+        }
+      }
+      else {
+        if ( ier ) {
+          assert ( !npl );
+          pt->edg[i] = refint;
+        }
+      }
+    }
+  }
+  
+  /* Set MG_ISO ref at vertices on the ls */
+  for (k=1; k<=mesh->np; k++) {
+    v = sol->m[k];
+    if ( v == 0.0 ) {
+      mesh->point[k].ref = MG_ISO;
+    }
+  }
+  
   return 1;
 }
 
@@ -216,6 +306,18 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2D_assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
+    return 0;
+  }
+  
+  /* Creation of tria adjacency relations in the mesh */
+  if ( !MMG2D_hashTria(mesh) ) {
+     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return 0;
+  }
+  
+  /* Set tags to triangles from geometric configuration */
+  if ( !MMG2D_setadj(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return 0;
   }
   

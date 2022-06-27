@@ -374,7 +374,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
  * \param mesh   pointer toward the mesh structure.
  * \param ref    initial reference.
  * \param refint internal reference after ls discretization.
- * \param refint internal reference after ls discretization.
+ * \param refext external reference after ls discretization.
  * \return 1 if entity can be splitted, 0 if cannot be splitted.
  *
  * Identify whether an entity with reference ref should be split, and the
