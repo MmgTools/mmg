@@ -42,9 +42,11 @@
  * (to avoid very small triangles in cutting)
  */
 int MMG2D_snapval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
-  MMG5_pPoint      p0;
-  double           *tmp;
-  int              k,ns,nc;
+  MMG5_pTria       pt;
+  MMG5_pPoint      p0,p1;
+  double           v0,v1,*tmp;
+  int              k,ns,nc,ip0,ip1;
+  int8_t           i,i0,i1;
 
   /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
@@ -69,7 +71,45 @@ int MMG2D_snapval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
     }
   }
   
-  /* Unsnap if need be... */
+  /* Unsnap values that have been put to 0, entailing a component reduced to a point */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !pt->v[0] ) continue;
+    
+    for (i=0; i<3; i++) {
+      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      i0 = MMG5_inxt2[i];
+      i1 = MMG5_inxt2[i0];
+      
+      ip0 = pt->v[i0];
+      ip1 = pt->v[i1];
+      
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
+      
+      p0 = &mesh->point[pt->v[i0]];
+      p1 = &mesh->point[pt->v[i1]];
+      
+      if ( fabs(v0) < MMG5_EPS && fabs(v1) < MMG5_EPS ) {
+        if ( p0->flag ) {
+          if ( tmp[ip0] < 0.0 )
+            sol->m[ip0] = -100.0*MMG5_EPS;
+          else
+            sol->m[ip0] = 100.0*MMG5_EPS;
+          nc++;
+          p0->flag = 0;
+        }
+        else if ( p1->flag ) {
+          if ( tmp[ip1] < 0.0 )
+            sol->m[ip1] = -100.0*MMG5_EPS;
+          else
+            sol->m[ip1] = 100.0*MMG5_EPS;
+          nc++;
+          p1->flag = 0;
+        }
+      }
+    }
+  }
   
   MMG5_DEL_MEM ( mesh, tmp );
 
@@ -408,8 +448,6 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
   
-  /* Check manifold... TODO */
-
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;
