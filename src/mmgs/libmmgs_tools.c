@@ -33,8 +33,10 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include "inlined_functions.h"
+#include "mmgexterns.h"
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
@@ -849,7 +851,7 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 
 int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
 
-  return  MMG5_eigenv(1,m,lambda,vp);
+  return  MMG5_eigenv3d(1,m,lambda,vp);
 
 }
 

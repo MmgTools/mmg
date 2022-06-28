@@ -258,18 +258,8 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
   return 1;
 
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param sol pointer toward a solution structure (level-set or displacement).
- *
- * \return 1 if success, 0 if fail (computed bounding box too small
- * or one af the anisotropic input metric is not valid).
- *
- * Scale the mesh and the size informations between 0 and 1.
- * Compute a default value for the hmin/hmax parameters if needed.
- *
- */
+
+
 int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   double         dd,d1;
   int            k,i;
@@ -320,7 +310,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         m    = &met->m[6*k];
 
         /* Check the input metric */
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
           return 0;
@@ -354,7 +344,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
         m    = &met->m[6*k];
 
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
           return 0;

@@ -37,7 +37,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 
 int MMGS_Init_mesh(const int starter,...) {
   va_list argptr;

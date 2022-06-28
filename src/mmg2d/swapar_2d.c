@@ -31,7 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 /* Version of edge swapping specific to the boundary enforcement stage in Delaunay meshing;
    the quality of the resulting criterion should be > crit.

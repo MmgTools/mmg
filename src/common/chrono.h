@@ -34,6 +34,8 @@
 #include <sys/resource.h>
 #endif
 
+#include "mmg_core_export.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -72,9 +74,9 @@ typedef struct mytime {
 
 
 /* prototypes */
-void   chrono(int cmode,mytime *ptt);
-void   tminit(mytime *t,int maxtim);
-void   printim(double ,char *);
+LIBMMG_CORE_EXPORT void   chrono(int cmode,mytime *ptt);
+LIBMMG_CORE_EXPORT void   tminit(mytime *t,int maxtim);
+LIBMMG_CORE_EXPORT void   printim(double ,char *);
 
 #ifdef __cplusplus
 }

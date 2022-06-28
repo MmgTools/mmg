@@ -32,10 +32,11 @@
  * \copyright GNU Lesser General Public License.
  *
  * Perform volume and surface mesh adaptation with pattern splitting
- * (\a PATTERN preprocessor flag set to ON).
+ * (\a MMG_PATTERN preprocessor flag set to ON).
  *
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 
 /**

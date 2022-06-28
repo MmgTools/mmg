@@ -28,13 +28,13 @@
  * \author Pascal Frey (UPMC)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \remark Delaunay mode only (\a PATTERN flag set to \a OFF).
+ * \remark Delaunay mode only (\a MMG_PATTERN flag set to \a OFF).
  * \todo doxygen documentation.
  */
 
 #include "inlined_functions_3d.h"
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
 
 #define MMG3D_EPSRAD       1.00005
 /* For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:

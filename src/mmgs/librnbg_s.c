@@ -30,7 +30,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 
 #ifdef USE_SCOTCH
 

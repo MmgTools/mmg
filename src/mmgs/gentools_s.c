@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 
 /* Delete all triangle references in mesh */

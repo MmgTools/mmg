@@ -34,7 +34,7 @@
  */
 #ifdef USE_ELAS
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 #include "ls_calls.h"
 
 #define MMG5_DEGTOL    0.75

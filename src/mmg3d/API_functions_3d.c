@@ -38,7 +38,8 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions_3d.h"
 
 int MMG3D_Init_mesh(const int starter,...) {
@@ -102,7 +103,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* level set value */
   mesh->info.ls       = MMG5_LS;
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   mesh->info.PROctree = MMG5_PROCTREE;
 #endif
 }
@@ -2119,7 +2120,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.mem      = val;
     if ( !MMG3D_memOption(mesh) )  return 0;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     mesh->info.PROctree   = val;
     break;
@@ -2287,7 +2288,7 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_mem :
     return  mesh->info.mem;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     return  mesh->info.PROctree;
     break;

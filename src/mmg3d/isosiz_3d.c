@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions.h"
 #include "mmg3dexterns.h"
 
@@ -1017,7 +1018,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  *
- * Set the s field of the points that belongs to a required edge to 1, set it to
+ * Set the s field of the points that belongs to a required edge to 4*ne+3, set it to
  * 0 otherwise.
  *
  */
