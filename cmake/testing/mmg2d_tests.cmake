@@ -471,6 +471,22 @@ ADD_TEST(NAME mmg2d_OptLs_Bridge
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_bridge.o.meshb
   )
 
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmg2d_OptLsSurf_box
+  COMMAND ${EXECUT_MMG2D} -v 5 -lssurf
+  -sol ${MMG2D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG2D_CI_TESTS}/OptLsSurf_box/box.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLsSurf_box.o.meshb
+  )
+
+# lssurf + multimat: discretization of boundaries only
+ADD_TEST(NAME mmg2d_OptLsSurf_multiMat_box
+  COMMAND ${EXECUT_MMG2D} -v 5 -lssurf
+  -sol ${MMG2D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG2D_CI_TESTS}/OptLsSurf_box/box_multiMat.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLsSurf_multiMat_box.o.meshb
+  )
+
 #multi-mat + opnbdy + non-manifold check
 ADD_TEST(NAME mmg2d_LSMultiMat_nm
   COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
