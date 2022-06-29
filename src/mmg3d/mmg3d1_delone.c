@@ -43,6 +43,21 @@ int8_t  ddb;
 #define MMG3D_LOPTLMMG5_DEL     1.41
 #define MMG3D_LOPTSMMG5_DEL     0.6
 
+#define MMG5_RETURN_AND_PACK(mesh,met,sol,val)do                        \
+  {                                                                     \
+    if ( !MMG3D_packMesh(mesh,met,sol) )  {                             \
+      mesh->npi = mesh->np;                                             \
+      mesh->nti = mesh->nt;                                             \
+      mesh->nai = mesh->na;                                             \
+      mesh->nei = mesh->ne;                                             \
+      mesh->xt   = 0;                                                   \
+      if ( met ) { met->npi  = met->np; }                               \
+      if ( sol ) { sol->npi  = sol->np; }                               \
+      return MMG5_STRONGFAILURE;                                        \
+    }                                                                   \
+    _LIBMMG5_RETURN(mesh,met,sol,val);                                  \
+  }while(0)
+
 /* Decomment this part to debug */
 //int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
 
@@ -1249,6 +1264,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
                    int * permNodGlob) {
   int      nnf,ns,nf;
   int      warn;
+  MMG5_pSol sol=NULL; // unused
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
@@ -1271,6 +1287,11 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
   if ( mesh->info.ddebug ) {
     fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7d\n",nnf);
     MMG3D_outqua(mesh,met);
+  }
+
+  if ( !MMG3D_outqua(mesh,met) ) {
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
   /* Iterative mesh modifications */
