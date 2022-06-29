@@ -31,3 +31,5 @@ src/common/mmg.h
 
 include/*
 *.o
+
+.DS_Store
