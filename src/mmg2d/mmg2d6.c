@@ -31,6 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 #include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

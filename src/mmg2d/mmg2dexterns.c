@@ -7,4 +7,6 @@ double (*MMG2D_lencurv)(MMG5_pMesh ,MMG5_pSol ,int ,int )=NULL;
 int    (*MMG2D_gradsizreq)(MMG5_pMesh ,MMG5_pSol )=NULL;
 double (*MMG2D_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria )=NULL;
 int    (*MMG2D_gradsiz)(MMG5_pMesh ,MMG5_pSol )=NULL;
-
+int    (*MMG2D_resetRef)(MMG5_pMesh)=NULL;
+int    (*MMG2D_setref)(MMG5_pMesh,MMG5_pSol)=NULL;
+int    (*MMG2D_snapval)(MMG5_pMesh,MMG5_pSol)=NULL;
