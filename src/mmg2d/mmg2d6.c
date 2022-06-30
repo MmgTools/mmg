@@ -190,7 +190,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
  * Reset mesh->info.isoref vertex and edge references to 0.
  *
  */
-int MMG2D_resetRef(MMG5_pMesh mesh) {
+int MMG2D_resetRef_ls(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
   int             k,ref;
@@ -332,7 +332,7 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
  * Snap values of sol very close to 0 to 0 exactly (to avoid very small
  * triangles in cutting)
  */
-int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG2D_snapval_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
   double           v1,v2,*tmp;
@@ -1055,7 +1055,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
-  if ( !MMG2D_snapval(mesh,sol) ) {
+  if ( !MMG2D_snapval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
@@ -1070,7 +1070,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG2D_resetRef(mesh) ) {
+  if ( !MMG2D_resetRef_ls(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
