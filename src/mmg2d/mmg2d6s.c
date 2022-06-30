@@ -420,6 +420,9 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* RMC : on verra */
+  if ( mesh->info.rmc > 0 ) {
+    fprintf(stdout,"\n  ## Warning: rmc option not used in boundary isosurface extraction.\n");
+  }
 
   /* No need to keep adjacencies from now on */
   MMG5_DEL_MEM(mesh,mesh->adja);

@@ -60,6 +60,8 @@ inline double MMG2D_voltri(MMG5_pMesh mesh,int ip0,int ip1,int ip2) {
  * \param mesh pointer toward the mesh structure
  * \param sol pointer toward the ls function
  * \param k index of the triangle
+ * \param pm positive subdomain if 1, negative if -1
+ *
  * \return volfrac
  *
  * Calculate the area of the positive (if pm == 1) or negative (if pm == -1) subdomain
