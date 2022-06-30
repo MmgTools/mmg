@@ -1040,12 +1040,18 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   return 1;
 }
 
-/* Main function of the -ls mode */
+/** Main function of the -ls mode */
 int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
+  char str[16]="";
   int k;
 
-  if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+  if ( mesh->info.isosurf ) {
+    strcat(str,"(BOUNDARY PART)");
+  }
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"  ** ISOSURFACE EXTRACTION %s\n",str);
+  }
 
   if ( mesh->nquad ) {
     fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"

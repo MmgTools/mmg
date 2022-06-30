@@ -177,7 +177,7 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
-  /* Estimate the number of intersected surface edges by the 0 level set */
+  /* Estimate the number of intersected edges or surface edges by the 0 level set */
   nb = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
