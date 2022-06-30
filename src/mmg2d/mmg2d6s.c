@@ -57,7 +57,7 @@ int MMG2D_snapval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-  
+
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -70,26 +70,26 @@ int MMG2D_snapval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
       ns++;
     }
   }
-  
+
   /* Unsnap values that have been put to 0, entailing a component reduced to a point */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
-    
+
     for (i=0; i<3; i++) {
       if ( !(pt->tag[i] & MG_BDY) ) continue;
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
-      
+
       ip0 = pt->v[i0];
       ip1 = pt->v[i1];
-      
+
       v0 = sol->m[ip0];
       v1 = sol->m[ip1];
-      
+
       p0 = &mesh->point[pt->v[i0]];
       p1 = &mesh->point[pt->v[i1]];
-      
+
       if ( fabs(v0) < MMG5_EPS && fabs(v1) < MMG5_EPS ) {
         if ( p0->flag ) {
           if ( tmp[ip0] < 0.0 )
@@ -110,7 +110,7 @@ int MMG2D_snapval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
       }
     }
   }
-  
+
   MMG5_DEL_MEM ( mesh, tmp );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
@@ -137,13 +137,13 @@ int MMG2D_resetRef_lssurf(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       if ( !(pt->tag[i] & MG_BDY) ) continue;
-      
+
       if( !MMG5_getStartRef(mesh,pt->edg[i],&ref) ) return 0;
       pt->edg[i] = ref;
-      
+
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
-      
+
       p0 = &mesh->point[pt->v[i0]];
       p1 = &mesh->point[pt->v[i1]];
 
@@ -184,9 +184,9 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
-      
+
       if ( !(pt->tag[i] & MG_BDY) ) continue;
-      
+
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
 
@@ -219,7 +219,7 @@ int MMG2D_cuttri_lssurf(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
-      
+
       if ( !(pt->tag[i] & MG_BDY) ) continue;
 
       i0 = MMG5_inxt2[i];
@@ -330,18 +330,18 @@ int MMG2D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
   for(k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<3; i++) {
       if ( !(pt->tag[i] & MG_BDY) ) continue;
       ref = pt->edg[i];
       nmn = npl = nz = 0;
-      
+
       i1 = i;
       for (j=0; j<2; j++) {
         i1  = MMG5_inxt2[i1];
         ip1 = pt->v[i1];
         v1  = sol->m[ip1];
-        
+
         if ( v1 > 0.0 )
           npl++;
         else if ( v1 < 0.0 )
@@ -349,7 +349,7 @@ int MMG2D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
         else
           nz++;
       }
-      
+
       assert(nz < 2);
       ier = MMG5_isSplit(mesh,ref,&refint,&refext);
       if ( npl ) {
@@ -366,7 +366,7 @@ int MMG2D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
       }
     }
   }
-  
+
   /* Set MG_ISO ref at vertices on the ls */
   for (k=1; k<=mesh->np; k++) {
     v = sol->m[k];
@@ -374,14 +374,14 @@ int MMG2D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
       mesh->point[k].ref = MG_ISO;
     }
   }
-  
+
   return 1;
 }
 
 /* Main function of the -ls surf mode */
 int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   int k;
-  
+
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION (BOUNDARY PART)\n");
 
@@ -390,46 +390,46 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
             " hybrid meshes. Exit program.\n");
     return 0;
   }
-  
+
   /* Work only with the 0 level set */
   for (k=1; k<= sol->np; k++)
     sol->m[k] -= mesh->info.ls;
-  
+
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2D_assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
-  
+
   /* Creation of tria adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
-  
+
   /* Set tags to triangles from geometric configuration */
   if ( !MMG2D_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return 0;
   }
-  
+
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !MMG2D_snapval_lssurf(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
-  
+
   /* RMC : on verra */
-  
+
   /* No need to keep adjacencies from now on */
   MMG5_DEL_MEM(mesh,mesh->adja);
-  
+
   /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG2D_resetRef_lssurf(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
-  
+
   /* Effective splitting of the crossed triangles */
   if ( !MMG2D_cuttri_lssurf(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
@@ -447,7 +447,7 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
-  
+
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;
