@@ -816,10 +816,11 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
  *
  * \return 1 if success, 0 otherwise
  *
- * Effective discretization of the 0 level set encoded in sol in the mesh
+ * Effective discretization of the 0 level set encoded in sol in the mesh.
+ * Only the boundary part of the domain is discretized if mesh->info.isosurf is 1.
  *
  */
-int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
+int MMG2D_cuttri(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
@@ -831,13 +832,17 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
-  /* Evaluate the number of intersected edges by the 0 level set */
+  /* Estimate the number of intersected edges or surface edges by the 0 level set */
   nb = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+
+      /* If only surface edges are discretized, skip non boundary entities */
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_BDY) ) continue;
+
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
 
@@ -861,8 +866,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   }
   if ( !nb ) return 1;
 
-  /* Create the intersection points between the edges in the mesh and the 0
-   * level set */
+  /* Create the intersection points between the edges or surface edges
+   * in the mesh and the 0 level set */
   if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -870,6 +875,10 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+
+      /* If only surface edges are discretized, skip non boundary entities */
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_BDY) ) continue;
+
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
 
@@ -1076,7 +1085,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Effective splitting of the crossed triangles */
-  if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
+  if ( !MMG2D_cuttri(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
     return 0;
   }

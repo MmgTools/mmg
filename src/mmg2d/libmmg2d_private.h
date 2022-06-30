@@ -254,7 +254,7 @@ int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);
 int MMG2D_resetRef_ls(MMG5_pMesh );
 int MMG2D_resetRef_lssurf(MMG5_pMesh );
-int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
+int MMG2D_cuttri(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_cuttri_lssurf(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
