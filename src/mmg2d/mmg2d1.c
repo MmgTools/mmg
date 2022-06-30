@@ -816,6 +816,14 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-1."
+           " (MMG_SAVE_ANATRI1 env variable is exported).\n");
+    return 1;
+  }
+
   /* Stage 2: creation of a computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
@@ -823,6 +831,14 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG2D_defsiz(mesh,met) ) {
     fprintf(stderr,"  ## Metric undefined. Exit program.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
   }
 
   MMG5_gradation_info(mesh);
@@ -836,11 +852,26 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.hgradreq > 0. ) {
     MMG2D_gradsizreq(mesh,met);
   }
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
 
   if ( !MMG2D_anatri(mesh,met,2) ) {
     fprintf(stderr,"  ## Unable to proceed adaptation. Exit program.\n");
     return 0;
   }
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-2."
+           " (MMG_SAVE_ANATRI2 env variable is exported).\n");
+    return 1;
+  }
+
 
   /* Stage 3: fine mesh improvements */
   if ( !MMG2D_adptri(mesh,met) ) {
