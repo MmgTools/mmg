@@ -681,7 +681,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   assert ( mesh->point );
   assert ( mesh->tria );
 
-  if ( (!mesh->info.iso) && (!mesh->info.surfiso) ) {
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf) ) {
     fprintf(stdout,"\n  ## WARNING: ISO MODE NOT PROVIDED: ENABLING ISOVALUE DISCRETIZATION MODE (-ls) \n");
     mesh->info.iso = 1;
   }
@@ -838,7 +838,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
   }
-  else if ( mesh->info.surfiso ) {
+  else if ( mesh->info.isosurf ) {
     if ( !MMG2D_mmg2d6s(mesh,sol,umet) ) {
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
       if ( !MMG5_unscaleMesh(mesh,met,sol) ) {

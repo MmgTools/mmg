@@ -192,8 +192,8 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
   /* met is a metric so it cannot be a vector */
   if ( met ) { assert ( met->type != MMG5_Vector ); }
 
-  /* if we are not in iso, surfiso or lagrangian mode, check that sol isn't allocated */
-  if ( (!mesh->info.iso) && (!mesh->info.surfiso)  && mesh->info.lag < 0 ) {
+  /* if we are not in iso, isosurf or lagrangian mode, check that sol isn't allocated */
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf)  && mesh->info.lag < 0 ) {
     assert ( !(sol && sol->m) );
   }
 

@@ -62,7 +62,7 @@ extern "C" {
     MMG2D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
     MMG2D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
     MMG2D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
-    MMG2D_IPARAM_surfiso,           /*!< [1/0], Level-set meshing on the surface part */
+    MMG2D_IPARAM_isosurf,           /*!< [1/0], Level-set meshing on the surface part */
     MMG2D_IPARAM_opnbdy,            /*!< [1/0], Preserve edges at interface of 2 domains with same reference */
     MMG2D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
     MMG2D_IPARAM_3dMedit,           /*!< [0/1/2], Read/write 2D mesh in 3D (Medit only). out if val=1 in/out if val=2 */
