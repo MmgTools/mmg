@@ -183,7 +183,10 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *p
   k = MMG5_InvMat_getIndex(pim,ref);
 
   /* Material not found in the table */
-  if( k == -1 ) return 0;
+  if( k == -1 ) {
+    fprintf(stderr,"\n  ## Error: %s: material %d not found in table.\n",__func__,ref);
+    return 0;
+  }
 
   /* Get the material in the lookup table and return the parent reference */
   pm = &mesh->info.mat[k];
