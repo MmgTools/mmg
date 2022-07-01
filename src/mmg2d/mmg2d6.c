@@ -1050,8 +1050,16 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
 
   assert ( (!(mesh->info.iso && mesh->info.isosurf)) && "unable to determine level-set discretization mode" );
 
+  /* Set function pointers */
   if ( mesh->info.isosurf ) {
     strcat(str,"(BOUNDARY PART)");
+
+    MMG2D_snapval = MMG2D_snapval_lssurf;
+
+  }
+  else {
+    MMG2D_snapval = MMG2D_snapval_ls;
+
   }
 
   if ( abs(mesh->info.imprim) > 3 ) {
@@ -1075,7 +1083,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
-  if ( !MMG2D_snapval_ls(mesh,sol) ) {
+  if ( !MMG2D_snapval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }

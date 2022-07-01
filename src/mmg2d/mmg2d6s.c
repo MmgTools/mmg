@@ -415,7 +415,8 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
-  if ( !MMG2D_snapval_lssurf(mesh,sol) ) {
+  MMG2D_snapval = MMG2D_snapval_lssurf;
+  if ( !MMG2D_snapval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
