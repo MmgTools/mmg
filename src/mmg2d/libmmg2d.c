@@ -829,7 +829,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
-  if ( mesh->info.iso ) {
+  if ( mesh->info.iso || mesh->info.isosurf ) {
     if ( !MMG2D_mmg2d6(mesh,sol,umet) ) {
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
       if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
@@ -838,17 +838,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
   }
-  else if ( mesh->info.isosurf ) {
-    if ( !MMG2D_mmg2d6s(mesh,sol,umet) ) {
-      if ( mettofree ) { MMG5_SAFE_FREE (met); }
-      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
-        _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
-      }
-      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
-    }
-  }
   else {
-    assert ( 0 && "not in iso nor in isosurf mode: nothing to do");
+    assert ( 0 && "neither in iso nor in isosurf mode: nothing to do");
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
       _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
