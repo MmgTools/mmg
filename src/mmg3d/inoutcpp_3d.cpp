@@ -34,7 +34,8 @@
 
 #include <vtkparser.hpp>
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 #ifdef USE_VTK
 

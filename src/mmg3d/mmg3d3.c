@@ -33,7 +33,8 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions_3d.h"
 
 #define MMG5_DEGTOL  1.e-1

@@ -289,7 +289,7 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -523,6 +523,13 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences.o.meshb)
+
 # ls + rmc: max pile size bug
 ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
@@ -609,7 +616,7 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg2d_LagMotion0_circle
     COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle

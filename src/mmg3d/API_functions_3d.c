@@ -38,7 +38,8 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions_3d.h"
 
 int MMG3D_Init_mesh(const int starter,...) {
@@ -102,7 +103,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* level set value */
   mesh->info.ls       = MMG5_LS;
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   mesh->info.PROctree = MMG5_PROCTREE;
 #endif
 }
@@ -2119,7 +2120,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.mem      = val;
     if ( !MMG3D_memOption(mesh) )  return 0;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     mesh->info.PROctree   = val;
     break;
@@ -2287,7 +2288,7 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_mem :
     return  mesh->info.mem;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     return  mesh->info.PROctree;
     break;
@@ -2436,6 +2437,22 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     return 0;
   }
 
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
 
@@ -2480,6 +2497,11 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
+
+int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
+  return MMG3D_Set_lsBaseReference(mesh,sol,br);
+}
+
 
 int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 

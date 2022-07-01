@@ -27,6 +27,7 @@
 @DEF_POSIX@
 @DEF_GNU@
 
-#cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
+#cmakedefine   USE_POINTMAP /*!< Flag to enable and export the pointmap used */
+#cmakedefine01 MMG_DYN_LIB
 
 #endif

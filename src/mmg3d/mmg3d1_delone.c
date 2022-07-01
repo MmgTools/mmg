@@ -30,13 +30,15 @@
  * \todo Doxygen documentation
  *
  * Perform volume and surface mesh adaptation in delaunay mode (\a
- * PATTERN preprocessor flag set to OFF).
+ * MMG_PATTERN preprocessor flag set to OFF).
  *
  * \todo Clean the boucle for (code copy...)
  */
-#include "mmg3d.h"
 
-#ifndef PATTERN
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
+
+#ifndef MMG_PATTERN
 
 int8_t  ddb;
 
@@ -1314,14 +1316,31 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     return 0;
   }
 
+  /* Debug: export variable MMG_SAVE_ANATET1 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-1."
+           " (MMG_SAVE_ANATET1 env variable is exported).\n");
+    return 1;
+  }
+
   /**--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
+
 
   /* define metric map */
   if ( !MMG3D_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
   }
 
   MMG5_gradation_info(mesh);
@@ -1336,12 +1355,28 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     MMG3D_gradsizreq(mesh,met);
   }
 
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
+
   /*update quality*/
   if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
   if ( !MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_ANATET2 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET2") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-2."
+           " (MMG_SAVE_ANATET2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumerotation if available */

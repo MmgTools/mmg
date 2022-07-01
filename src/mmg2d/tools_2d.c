@@ -31,7 +31,17 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+
+/** Return 1 if reference ref is in the br table, 0 otherwise */
+int MMG2D_isbr(MMG5_pMesh mesh,int ref) {
+  int k;
+
+  for(k=0; k<mesh->info.nbr; k++)
+    if ( ref == mesh->info.br[k] ) return(1);
+
+  return(0);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.

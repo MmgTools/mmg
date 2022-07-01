@@ -32,8 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
-
+#include "libmmgs_private.h"
+#include "mmgexterns.h"
 
 extern int8_t ddb;
 
@@ -1396,6 +1396,15 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     fprintf(stderr,"\n  ## Unable to split mesh-> Exiting.\n");
     return 0;
   }
+
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-1."
+           " (MMG_SAVE_ANATRI1 env variable is exported).\n");
+    return 1;
+  }
+
   /* renumbering if available */
   if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
@@ -1410,6 +1419,14 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     return 0;
   }
 
+ /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
+  }
+
   MMG5_gradation_info(mesh);
   if ( mesh->info.hgrad > 0. ) {
      if (!MMGS_gradsiz(mesh,met) ) {
@@ -1422,9 +1439,24 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     MMGS_gradsizreq(mesh,met);
   }
 
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
+
   if ( !anatri(mesh,met,2) ) {
     fprintf(stderr,"\n  ## Unable to proceed adaptation. Exit program.\n");
     return 0;
+  }
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-2."
+           " (MMG_SAVE_ANATRI2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumbering if available */

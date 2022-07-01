@@ -32,6 +32,7 @@
  */
 
 #include "mmgcommon.h"
+#include "mmgexterns.h"
 
 #ifdef USE_SCOTCH
 

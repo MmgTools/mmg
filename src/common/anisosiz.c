@@ -33,6 +33,7 @@
  */
 
 #include "mmgcommon.h"
+#include "mmgexterns.h"
 #include "inlined_functions.h"
 
 /**
@@ -528,7 +529,7 @@ int MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
  * \param m pointer toward the metric.
  * \param isqhmax maximum size for edge.
  * \param isqhmin minimum size for edge.
- * \param hausd hausdorff value at point.
+ * \param hausd hausdorff value at point (unused).
  * \return 1 if success, 0 if fail.
  *
  * Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) for a ref
@@ -545,6 +546,8 @@ int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   double        gammasec[3],tau[2], ux, uy, uz, ps1, l, ll, *t, *t1;
   int           i;
   static int8_t mmgWarn=0;
+
+  (void)hausd;
 
   memset(intm,0x0,3*sizeof(double));
 
@@ -719,8 +722,45 @@ int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
  * \param isqhmax maximum edge size.
  * \return the computed ridge size in the tangent direction.
  *
- * Compute the specific size of a ridge in the direction of the tangent of the
- * ridge.
+ * Compute the specific size that we want to apply to a ridge in the direction
+ * of the tangent of the ridge.  This wanted size is computed as using the
+ * majoration of the haudorff distance between a triangle and its ideal curve
+ * approximation by the Hessian of the signed distance function to the ideal
+ * surface.
+ *
+ *
+ \f[
+ d^H(\partial \Omega,S_T) \leq \displaystyle\frac{1}{2}\left(
+ \frac{d-1}{d} \right)^2 \max\limits_{T\in S_T} \max\limits_{x \in T
+ } \max\limits_{y,z \in T} \langle \left| H(d_\omega)(x) \right|
+ yz,yz\rangle.
+ \f]
+ *
+ * where \f$ d^H(\partial \Omega,S_T) \f$ is the distance between the
+ * triangle \f$S_T\f$ and the ideal boundary (reconstructed using cubic Bezier
+ * patches) \f$ \partial \Omega \f$, \f$ d\f$ is the mesh dimension and \f$
+ * H(d_\Omega) \f$ is the hessian matrix of the signed distance function to \f$
+ * \Omega \f$.
+ *
+ * For all \f$ x \in \partial \Omega \f$, \f$H(d_\omega)(x)\f$ is the second
+ * fundamental form whose eigenvalues are the principal curvatures (\f$\kappa_1
+ * \f$ and \f$ \kappa_2 \f$) of \f$ \partial \Omega \f$ at \f$ x \f$ so the
+ * previous formula can be rewritten as:
+ \f[
+ d^H(\partial \Omega,S_T) \leq \displaystyle\frac{1}{2}\left(
+ \frac{d-1}{d} \right)^2 \max( \left|\kappa_1\right|,\left|\kappa_2\right|).
+ \f]
+ *
+ * As we want to respect the imposed the \a hausd threshold and we are
+ * interessed to get the wanted size along the tangent direction at the ridge
+ * point only, finally, m is computed as
+ *
+ \f[
+ m = \kappa \frac{1}{2\textrm{hausd}}
+ \left(\frac{d-1}{d} \right)^2.
+ \f]
+ *
+ * See Theorem 1 of \cite{dapogny2014three}.
  *
  **/
 double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
@@ -747,16 +787,27 @@ double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
     tau[1] *= l;
     tau[2] *= l;
 
+    /* Acceleration of the bezier curve in p0 (parameteric coor t=0) in
+     * canonical basis */
     gammasec[0] = 6.0*p0->c[0] -12.0*b0[0] + 6.0*b1[0];
     gammasec[1] = 6.0*p0->c[1] -12.0*b0[1] + 6.0*b1[1];
     gammasec[2] = 6.0*p0->c[2] -12.0*b0[2] + 6.0*b1[2];
 
+    /* Scalar component of acceleration along tangent field (ie along velocity) */
     ps = tau[0]*gammasec[0] + tau[1]*gammasec[1] + tau[2]*gammasec[2];
+
+    /* Normal component of acceleration along velocity (ps*tau[] being the vector
+     * component along velocity) */
     c[0] = gammasec[0] - ps*tau[0];
     c[1] = gammasec[1] - ps*tau[1];
     c[2] = gammasec[2] - ps*tau[2];
 
+    /* Evaluation of curvature (derivative of unit tangent vector, i.e. change
+     * in direction): be T the unit tangent vector, s. a. T = v/||v||, kappa =
+     * ||T'||/||v|| = sqrt(c[0]) /||v||^2 */
     kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+
+    /* Computation of size from the mesh dimension and the curvature */
     kappacur = 1.0/8.0*kappacur/mesh->info.hausd;
     kappacur = MG_MIN(kappacur,isqhmin);
     kappacur = MG_MAX(kappacur,isqhmax);
@@ -778,7 +829,10 @@ double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
  * (depending of i0).
  *
  * Compute the specific size of a ridge in the direction of the normal of the
- * looked face.
+ * looked face.  This wanted size is computed as using the
+ * majoration of the haudorff distance between a triangle and its ideal curve
+ * approximation by the Hessian of the signed distance function to the ideal
+ * surface. See documentation of \ref MMG5_ridSizeInTangentDir function.
  *
  **/
 double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
@@ -791,6 +845,8 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
     lambda[0] = bcu[1];
     lambda[1] = bcu[2];
 
+    /* Jacb[i] = Jacobian matrix of i-th component of b at point p0.
+       Jacb[i] = (\partial_u S_p0[i], \partial_v S_p0[i] ) */
     Jacb[0][0] = 3.0*(b->b[7][0]-b->b[0][0]);
     Jacb[1][0] = 3.0*(b->b[7][1]-b->b[0][1]);
     Jacb[2][0] = 3.0*(b->b[7][2]-b->b[0][2]);
@@ -799,7 +855,8 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
     Jacb[1][1] = 3.0*(b->b[6][1]-b->b[0][1]);
     Jacb[2][1] = 3.0*(b->b[6][2]-b->b[0][2]);
 
-    /* Hb[i] = hessian matrix of i-th component of b at point p0 */
+    /* Hb[i] = hessian matrix of i-th component of b at point p0.
+       Hb[i] = (\partial_u^2 S_p0[i], \partial_v \partial_u S_p0[i],\partial_v^2 S_p0[i]) */
     Hb[0][0] = 6.0*(b->b[0][0] - 2.0*b->b[7][0] + b->b[8][0]);
     Hb[1][0] = 6.0*(b->b[0][1] - 2.0*b->b[7][1] + b->b[8][1]);
     Hb[2][0] = 6.0*(b->b[0][2] - 2.0*b->b[7][2] + b->b[8][2]);
@@ -878,11 +935,18 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
   gammasec[2] = Hb[2][0]*lambda[0]*lambda[0] + 2.0*Hb[2][1]*lambda[0]*lambda[1] + Hb[2][2]*lambda[1]*lambda[1];
 
   ps = tau[0]*gammasec[0] + tau[1]*gammasec[1] + tau[2]*gammasec[2];
+
+  /* Normal component of acceleration along velocity (ps*tau[] being the vector
+   * component along velocity) */
   c[0] = gammasec[0] - ps*tau[0];
   c[1] = gammasec[1] - ps*tau[1];
   c[2] = gammasec[2] - ps*tau[2];
 
+  /* Evaluation of curvature (derivative of unit tangent vector, i.e. change
+   * in direction) */
   kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+
+  /* Computation of size from the mesh dimension and the curvature */
   kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
   kappacur = MG_MIN(kappacur,isqhmin);
   kappacur = MG_MAX(kappacur,isqhmax);

@@ -21,12 +21,10 @@
 ** =============================================================================
 */
 
-#ifndef MMG3D_H
-#define MMG3D_H
+#ifndef LIBMMG3D_PRIVATE_H
+#define LIBMMG3D_PRIVATE_H
 
-#include "libmmg3d.h"
 #include "libmmgcommon.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -312,7 +310,7 @@ int  MMG3D_nmgeom(MMG5_pMesh mesh);
 int  MMG5_paktet(MMG5_pMesh mesh);
 int  MMG5_hashGetFace(MMG5_Hash*,int,int,int);
 int  MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash*);
-int   MMG3D_hashPrism(MMG5_pMesh mesh);
+int  MMG3D_hashPrism(MMG5_pMesh mesh);
 int  MMG5_hashPop(MMG5_Hash *hash,int a,int b);
 int  MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag);
 int  MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag);
@@ -480,8 +478,8 @@ int  MMG5_velextLS(MMG5_pMesh ,MMG5_pSol );
 
 /* Delaunay functions*/
 int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
-  int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
-  int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
+int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
+int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
 int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
@@ -500,8 +498,7 @@ int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
 int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
 
 /* pointers */
-/* init structures */
-void  MMG5_Init_parameters(MMG5_pMesh mesh);
+
 /* iso/aniso computations */
 double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 extern double MMG5_lenedgCoor_iso(double*, double*, double*, double*);
@@ -565,22 +562,6 @@ void MMG5_warnOrientation(MMG5_pMesh mesh) {
   mesh->xt = 0;
 }
 
-/**
- * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
- * functions.
- */
-static inline
-void MMG3D_Set_commonFunc(void) {
-  MMG5_bezierCP          = MMG5_mmg3dBezierCP;
-  MMG5_chkmsh            = MMG5_mmg3dChkmsh;
-  MMG5_indPt             = MMG3D_indPt;
-  MMG5_indElt            = MMG3D_indElt;
-  MMG5_grad2met_ani      = MMG5_grad2metSurf;
-  MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
-#ifdef USE_SCOTCH
-  MMG5_renumbering       = MMG5_mmg3dRenumbering;
-#endif
-}
 
 #ifdef __cplusplus
 }

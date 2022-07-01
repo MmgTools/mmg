@@ -20,7 +20,9 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 #include "mmg2dexterns.h"
 
 /**
@@ -41,6 +43,21 @@
     }                                             \
     _LIBMMG5_RETURN(mesh,met,sol,val);            \
   }while(0)
+
+
+
+
+ /**
+ * Set common pointer functions between mmgs and mmg2d to the matching mmg2d
+ * functions.
+ */
+void MMG2D_Set_commonFunc(void) {
+    MMG5_chkmsh = MMG5_mmg2dChkmsh;
+    MMG5_grad2met_ani = MMG2D_grad2met_ani;
+    MMG5_grad2metreq_ani = MMG2D_grad2metreq_ani;
+
+    return;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.

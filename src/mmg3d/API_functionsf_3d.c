@@ -38,7 +38,8 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
 
 /**
  * See \ref MMG3D_Init_mesh function in common/libmmgcommon.h file.
@@ -938,6 +939,16 @@ FORTRAN_NAME(MMG3D_SET_MULTIMAT,mmg3d_set_multimat,
               int* rin,int* rex, int* retval),
              (mesh,sol,ref,split,rin,rex,retval)){
   *retval = MMG3D_Set_multiMat(*mesh,*sol,*ref,*split,*rin,*rex);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Set_lsBaseReference function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_LSBASEREFERENCE,mmg3d_set_lsbasereference,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *br, int* retval),
+             (mesh,sol,br,retval)){
+  *retval = MMG3D_Set_lsBaseReference(*mesh,*sol,*br);
   return;
 }
 

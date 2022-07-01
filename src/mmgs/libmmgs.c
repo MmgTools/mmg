@@ -38,7 +38,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include "mmgsexterns.h"
 
 /**
@@ -718,4 +719,22 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
+
+
+}
+
+/**
+* Set common pointer functions between mmgs and mmg3d to the matching mmgs
+* functions.
+*/
+void MMGS_Set_commonFunc(void) {
+    MMG5_bezierCP = MMG5_mmgsBezierCP;
+    MMG5_chkmsh = MMG5_mmgsChkmsh;
+    MMG5_indPt = MMGS_indPt;
+    MMG5_indElt = MMGS_indElt;
+    MMG5_grad2met_ani = MMG5_grad2metSurf;
+    MMG5_grad2metreq_ani = MMG5_grad2metSurfreq;
+#ifdef USE_SCOTCH
+    MMG5_renumbering = MMG5_mmgsRenumbering;
+#endif
 }

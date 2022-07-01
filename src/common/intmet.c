@@ -33,6 +33,7 @@
  */
 
 #include "mmgcommon.h"
+#include "mmgexterns.h"
 
 /**
  * \param m input metric.
