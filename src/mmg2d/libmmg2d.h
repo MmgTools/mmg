@@ -73,7 +73,8 @@ extern "C" {
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG2D_IPARAM_numberOfMat,       /*!< [n], Number of material in ls mode */
+    MMG2D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
+    MMG2D_IPARAM_numberOfMat,                /*!< [n], Number of material in ls mode */
     MMG2D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
     MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
@@ -303,6 +304,28 @@ extern "C" {
  */
   LIBMMG2D_EXPORT int  MMG2D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
                                           int rin, int rex);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param br new level-set base reference.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set a new level-set base reference of ref \a br in ls discretization
+ * mode. Based references are boundary conditions to which implicit domain can
+ * be attached. All implicit volumes that are not attached to listed base
+ * references are deleted as spurious volumes by the \a rmc option.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_LSBASEREFERENCE(mesh,sol,br,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER, INTENT(IN)           :: br\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,int br);
+
 
 /* init structure datas */
 /**
