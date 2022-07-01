@@ -1084,6 +1084,21 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
+  /* Processing of bdy infos for isosurface boundary discretization */
+  if ( mesh->info.isosurf ) {
+    /* Creation of tria adjacency relations in the mesh */
+    if ( !MMG2D_hashTria(mesh) ) {
+       fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+      return 0;
+    }
+
+    /* Set tags to triangles from geometric configuration */
+    if ( !MMG2D_setadj(mesh) ) {
+      fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
+      return 0;
+    }
+  }
+
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !MMG2D_snapval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
