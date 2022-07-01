@@ -1056,11 +1056,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
 
     MMG2D_snapval  = MMG2D_snapval_lssurf;
     MMG2D_resetRef = MMG2D_resetRef_lssurf;
+    MMG2D_setref   = MMG2D_setref_lssurf;
   }
   else {
     MMG2D_snapval  = MMG2D_snapval_ls;
     MMG2D_resetRef = MMG2D_resetRef_ls;
-
+    MMG2D_setref   = MMG2D_setref_ls;
   }
 
   if ( abs(mesh->info.imprim) > 3 ) {
@@ -1120,7 +1121,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Set references on the interior / exterior triangles*/
-  if ( !MMG2D_setref_ls(mesh,sol) ) {
+  if ( !MMG2D_setref(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }

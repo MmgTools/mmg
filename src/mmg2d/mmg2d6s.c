@@ -444,7 +444,8 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Set references on the interior / exterior triangles*/
-  if ( !MMG2D_setref_lssurf(mesh,sol) ) {
+  MMG2D_setref = MMG2D_setref_lssurf;
+  if ( !MMG2D_setref(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
