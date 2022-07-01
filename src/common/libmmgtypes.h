@@ -516,7 +516,8 @@ typedef struct {
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
-  int           nbr,*br;
+  int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
+  int           *br; /*!< list of based references to which an implicit surface can be attached */
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */
@@ -539,8 +540,8 @@ typedef struct {
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
+  uint8_t       optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
 } MMG5_Info;
