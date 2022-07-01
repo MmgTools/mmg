@@ -1046,6 +1046,10 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   char str[16]="";
   int k;
 
+  assert ( (mesh->info.iso || mesh->info.isosurf) && "level-set discretization mode not specified" );
+
+  assert ( (!(mesh->info.iso && mesh->info.isosurf)) && "unable to determine level-set discretization mode" );
+
   if ( mesh->info.isosurf ) {
     strcat(str,"(BOUNDARY PART)");
   }
@@ -1076,10 +1080,19 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Removal of small parasitic components */
-  if ( mesh->info.rmc > 0. && !MMG2D_rmc(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Removal of small parasitic components */
+    if ( mesh->info.rmc > 0. && !MMG2D_rmc(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
+      return 0;
+    }
+  }
+  else {
+    /* RMC : on verra */
+    if ( mesh->info.rmc > 0 ) {
+      fprintf(stdout,"\n  ## Warning: rmc option not implemented for boundary"
+              " isosurface extraction.\n");
+    }
   }
 
   /* No need to keep adjacencies from now on */
@@ -1109,10 +1122,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Check that the resulting mesh is manifold */
-  if ( !MMG2D_chkmanimesh(mesh) ) {
-    fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Check that the resulting mesh is manifold */
+    if ( !MMG2D_chkmanimesh(mesh) ) {
+      fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
+      return 0;
+    }
   }
 
   /* Clean memory */
