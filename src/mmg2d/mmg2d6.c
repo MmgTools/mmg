@@ -1054,11 +1054,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   if ( mesh->info.isosurf ) {
     strcat(str,"(BOUNDARY PART)");
 
-    MMG2D_snapval = MMG2D_snapval_lssurf;
-
+    MMG2D_snapval  = MMG2D_snapval_lssurf;
+    MMG2D_resetRef = MMG2D_resetRef_lssurf;
   }
   else {
-    MMG2D_snapval = MMG2D_snapval_ls;
+    MMG2D_snapval  = MMG2D_snapval_ls;
+    MMG2D_resetRef = MMG2D_resetRef_ls;
 
   }
 
@@ -1107,7 +1108,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG2D_resetRef_ls(mesh) ) {
+  if ( !MMG2D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }

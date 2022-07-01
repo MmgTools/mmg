@@ -431,7 +431,8 @@ int MMG2D_mmg2d6s(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG2D_resetRef_lssurf(mesh) ) {
+  MMG2D_resetRef = MMG2D_resetRef_lssurf;
+  if ( !MMG2D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
