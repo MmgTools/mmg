@@ -20,7 +20,9 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 /* read mesh data */
 int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
@@ -44,7 +46,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nref = 0;
 
-  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -92,13 +94,13 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if ( mesh->info.renum >= 2) {
           if(mesh->dim!=3) {
             fprintf(stdout,"WRONG USE OF 3dMedit option \n");
-            return 0;
+            return -1;
           }
           mesh->dim = 2;
         }
         if(mesh->dim!=2) {
           fprintf(stdout,"BAD DIMENSION : %d\n",mesh->dim);
-          return 0;
+          return -1;
         }
         continue;
       }
@@ -171,7 +173,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         mesh->dim = bdim;
         if(bdim!=2) {
           fprintf(stdout,"BAD MESH DIMENSION : %d\n",mesh->dim);
-          return 0;
+          return -1;
         }
         continue;
       } else if(!mesh->np && binch==4) {  //Vertices
@@ -282,7 +284,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* Memory allocation */
-  if ( !MMG2D_zaldy(mesh) )  return 0;
+  if ( !MMG2D_zaldy(mesh) )  return -1;
 
   /* Read vertices */
   rewind(inm);
@@ -308,7 +310,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if ( mesh->info.renum >= 2 ) {
           fprintf(stderr,"  ## Warning: %s: binary not available with"
                   " -msh option.\n",__func__);
-          return 0;
+          return -1;
         }
         for (i=0 ; i<2 ; i++) {
           MMG_FREAD(&fc,MMG5_SW,1,inm);
@@ -584,6 +586,80 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
+int MMG2D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
+  int ier=0;
+  const char *filenameptr,*solnameptr;
+  char *tmp,*soltmp;
+
+  if ( filename && strlen(filename) ) {
+    filenameptr = filename;
+    solnameptr = filename;
+  }
+  else if (mesh->namein && strlen(mesh->namein) ) {
+    filenameptr = mesh->namein;
+    if ( sol && strlen(sol->namein) ) {
+      solnameptr  = sol->namein;
+    }
+    else {
+      solnameptr = mesh->namein;
+    }
+  }
+  else {
+    fprintf(stderr,"  ## Error: %s: please provide input file name"
+            " (either in the mesh structure or as function argument).\n",
+            __func__);
+    return -1;
+  }
+
+  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return -1);
+  strcpy(tmp,filenameptr);
+
+  /* read mesh/sol files */
+  char *ptr   = MMG5_Get_filenameExt(tmp);
+  int  fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
+
+  switch ( fmtin ) {
+
+  case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
+    ier = MMG2D_loadMshMesh(mesh,sol,tmp);
+    break;
+
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMG2D_loadVtuMesh(mesh,sol,tmp);
+    break;
+
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMG2D_loadVtkMesh(mesh,sol,tmp);
+    break;
+
+  case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
+    ier = MMG2D_loadMesh(mesh,tmp);
+    if ( ier <  1 ) { break; }
+
+    /* Facultative metric */
+    if ( sol ) {
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return -1);
+      strcpy(soltmp,solnameptr);
+
+      if ( MMG2D_loadSol(mesh,sol,tmp) == -1) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        ier = 0;
+      }
+      MMG5_SAFE_FREE(soltmp);
+    }
+    break;
+
+  default:
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmtin) );
+    ier= 0;
+  }
+
+  MMG5_SAFE_FREE(tmp);
+
+  return ier;
+}
+
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if failed, 1 otherwise.
@@ -633,14 +709,16 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 )  return (ier);
 
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    fclose(inm);
+    MMG5_SAFE_FREE(posNodeData);
+    return -1;
   }
 
   if ( !MMG2D_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   if ( mesh->ne || mesh->nprism ) {
@@ -664,13 +742,15 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
                                 bin,iswp,nelts,nsols);
 
   MMG5_SAFE_FREE(posNodeData);
-  if ( ier < 1 ) return  ier;
+  if ( ier < 1 ) return ier;
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,inm);
-  if ( ier <1 ) {
-    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
-    return ier;
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+    if ( ier <1 ) {
+      fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+      return ier;
+    }
   }
 
   /* Mark all points as used in case of mesh generation and check the
@@ -705,7 +785,7 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   if ( !MMG2D_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   if ( mesh->ne || mesh->nprism ) {
@@ -833,7 +913,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 ) return ier;
 
   if ( nsols!=1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;
@@ -2134,4 +2214,75 @@ int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   return 1;
+}
+
+int MMG2D_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
+  int ier=0;
+  const char *filenameptr,*solnameptr;
+  char *tmp,*soltmp;
+
+  if ( filename && strlen(filename) ) {
+    filenameptr = filename;
+    solnameptr = filename;
+  }
+  else if (mesh->namein && strlen(mesh->namein) ) {
+    filenameptr = mesh->namein;
+    if ( sol && strlen(sol->namein) ) {
+      solnameptr  = sol->namein;
+    }
+    else {
+      solnameptr = mesh->namein;
+    }
+  }
+  else {
+    fprintf(stderr,"  ## Error: %s: please provide input file name"
+            " (either in the mesh structure or as function argument).\n",
+            __func__);
+    return 0;
+  }
+
+  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return 0);
+  strcpy(tmp,filenameptr);
+
+  /* read mesh/sol files */
+  char *ptr   = MMG5_Get_filenameExt(tmp);
+  int  fmt = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
+
+  int8_t savesolFile = 0;
+
+  switch ( fmt ) {
+  case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
+    ier = MMG2D_saveMshMesh(mesh,sol,tmp);
+    break;
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMG2D_saveVtuMesh(mesh,sol,tmp);
+    break;
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMG2D_saveVtkMesh(mesh,sol,tmp);
+    break;
+  case ( MMG5_FMT_Tetgen ):
+    ier = MMG2D_saveTetgenMesh(mesh,tmp);
+    savesolFile = 1;
+    break;
+  default:
+    ier = MMG2D_saveMesh(mesh,tmp);
+    savesolFile = 1;
+    break;
+  }
+
+  if ( ier && savesolFile ) {
+    /* Medit or tetgen output: save the solution in a .sol file */
+    if ( sol && sol->np ) {
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return 0);
+      strcpy(soltmp,solnameptr);
+
+      if ( MMG2D_saveSol(mesh,sol,soltmp) == -1) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        ier = 0;
+      }
+      MMG5_SAFE_FREE(soltmp);
+    }
+  }
+
+  return ier;
 }

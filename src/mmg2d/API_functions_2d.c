@@ -30,15 +30,15 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg2d/libmmg2d.h header file for the documentation of all
+ * the \ref mmg2d/liblibmmg2d_private.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * C API for MMG2D library.
  *
  */
 
-
-#include "mmg2d.h"
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -77,6 +77,7 @@ int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return MMG5_Set_outputSolName(mesh,sol,solout);
 }
+
 void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmg2d, mmgs and mmg2d. */
@@ -99,6 +100,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
 }
+
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   int k;
@@ -146,6 +148,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
+    break;
+  case MMG2D_IPARAM_isoref :
+    mesh->info.isoref   = val;
     break;
   case MMG2D_IPARAM_lag :
 #ifdef USE_ELAS
@@ -215,6 +220,24 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
     break;
+  case MMG2D_IPARAM_numberOfLSBaseReferences :
+    if ( mesh->info.br ) {
+      MMG5_DEL_MEM(mesh,mesh->info.br);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new level-set based references values\n",__func__);
+    }
+    mesh->info.nbr   = val;
+    mesh->info.nbri  = 0;
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+
+    for (k=0; k<mesh->info.nbr; k++)
+      mesh->info.br[k] = 0;
+
+    break;
+
   case MMG2D_IPARAM_numberOfMat :
     if ( mesh->info.mat ) {
       MMG5_DEL_MEM(mesh,mesh->info.mat);
@@ -265,7 +288,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 ) {
+    if ( mesh->info.hgrad <= 0.0 ) {
       mesh->info.hgrad = MMG5_NOHGRAD;
     }
     else {
@@ -274,7 +297,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 ) {
+    if ( mesh->info.hgradreq <= 0.0 ) {
       mesh->info.hgradreq = MMG5_NOHGRAD;
     }
     else {
@@ -342,6 +365,21 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
             __func__);
     return 0;
   }
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
 
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
@@ -387,6 +425,10 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
                        int split,int rin,int rout){
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+}
+
+int MMG2D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
 }
 
 

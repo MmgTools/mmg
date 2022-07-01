@@ -33,7 +33,9 @@
  * \todo Doxygen documentation
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

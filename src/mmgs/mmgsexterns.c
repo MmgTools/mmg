@@ -1,5 +1,5 @@
 #include "mmgexterns.h"
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist)=NULL;
 int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met)=NULL;

@@ -33,6 +33,555 @@
  */
 
 #include "mmgcommon.h"
+#include "inlined_functions.h"
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param dim matrix size.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v array of eigenvectors.
+ *
+ * Recompose a generic-size symmetric matrix from its eigenvalue
+ * decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+static inline
+void MMG5_eigenvmat_buildsym(MMG5_pMesh mesh,int8_t dim,double m[],
+                             double lambda[],double v[]) {
+  int8_t i,j,k,ij;
+
+  /* Storage of a matrix as a one-dimensional array: (dim+1)*dim/2 entries for a
+   * symmetric matrix (loop on each symmetric entry only once). */
+  ij = 0;
+
+  /* Loop on matrix rows */
+  for( i = 0; i < dim; i++ ) {
+    /* Loop on the upper-triangular part of the matrix */
+    for( j = i; j < dim; j++ ) {
+      /* Initialize matrix entry */
+      m[ij] = 0.0;
+      /* Compute matrix entry as the recomposition of eigenvalues and
+       * eigenvectors:
+       *
+       * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V_{jl} =
+       *        = \sum_{k} lambda_{k} V_{ik} V_{jk}
+       *
+       * Eigenvectors are stored as rows in Mmg (not columns) so their indices
+       * have to be exchanged when implementing the above formula. */
+      for( k = 0; k < dim; k++ ) {
+        m[ij] += lambda[k]*v[k*dim+i]*v[k*dim+j];
+      }
+      /* Go to next entry */
+      ++ij;
+    }
+  }
+  assert( ij == (dim+1)*dim/2 );
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param dim matrix size.
+ * \param lambda eigenvalues array.
+ * \param v double array of right eigenvectors.
+ * \param iv double array of left eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a generic-size non-symmetric matrix from its eigenvalue
+ * decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+static inline
+void MMG5_eigenvmat_buildnonsym(MMG5_pMesh mesh,int8_t dim,double m[],
+                                double lambda[],double v[],double iv[]){
+  int8_t i,j,k,ij;
+
+  /* Storage of a matrix as a one-dimensional array: dim^2 entries for a
+   * non-symmetric matrix. */
+  ij = 0;
+
+  /* Loop on matrix rows */
+  for( i = 0; i < dim; i++ ) {
+    /* Loop on matrix columns */
+    for( j = 0; j < dim; j++ ) {
+      /* Initialize matrix entry */
+      m[ij] = 0.0;
+      /* Compute matrix entry as the recomposition of eigenvalues and
+       * eigenvectors:
+       *
+       * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V^{-1}_{lj} =
+       *        = \sum_{k} lambda_{k} V_{ik} V^{-1}_{kj}
+       *
+       * Eigenvectors are stored as rows in Mmg (not columns) so their indices
+       * have to be exchanged when implementing the above formula. */
+      for( k = 0; k < dim; k++ ) {
+        m[ij] += lambda[k]*v[k*dim+i]*iv[j*dim+k];
+      }
+      /* Go to next entry */
+      ++ij;
+    }
+  }
+  assert( ij == dim*dim );
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 2x2 symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]) {
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildsym(mesh,2,m,lambda,(double *)v);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 3x3 symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]) {
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildsym(mesh,3,m,lambda,(double *)v);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 2x2 non-symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatnonsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]) {
+  double iv[2][2];
+
+  /* Compute the inverse of the eigenvectors matrix */
+  if( !MMG5_invmat22(v,iv) )
+    return 0;
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildnonsym(mesh,2,m,lambda,(double *)v,(double *)iv);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 3x3 non-symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatnonsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]) {
+  double iv[3][3];
+
+  /* Compute the inverse of the eigenvectors matrix */
+  if( !MMG5_invmat33(v,iv) )
+    return 0;
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildnonsym(mesh,3,m,lambda,(double *)v,(double *)iv);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param dim matrix size.
+ * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
+ * \param m input matrix array.
+ * <param mnew output matrix array.
+ * \return 1 if success, 0 if failure.
+ *
+ * Check the recomposition of a matrix from its numerical eigenvalue
+ * decomposition.
+ */
+int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[],
+                         double mnew[]) {
+
+  /* Compute eigendecomposition, recompose matrix from eigendecomposition */
+  if( dim == 2 ) {
+    double lambda[2],v[2][2];
+
+    if( !MMG5_eigenv2d(symmat,m,lambda,v) )
+      return 0;
+
+    if( symmat ) {
+      if( !MMG5_eigenvmatsym2d(mesh,mnew,lambda,v) )
+        return 0;
+    } else {
+      if( !MMG5_eigenvmatnonsym2d(mesh,mnew,lambda,v) )
+        return 0;
+    }
+
+  } else if( dim == 3 ) {
+    double lambda[3],v[3][3];
+
+    if( !MMG5_eigenv3d(symmat,m,lambda,v) )
+      return 0;
+
+    if( symmat ) {
+      if( !MMG5_eigenvmatsym3d(mesh,mnew,lambda,v) )
+        return 0;
+    } else {
+      if( !MMG5_eigenvmatnonsym3d(mesh,mnew,lambda,v) )
+        return 0;
+    }
+  }
+
+  return 1;
+}
+
+/**
+ * \param dim square matrix size
+ * \param lambda eigenvalues array
+ * \param vp eigenvectors array
+ * \param swap swap array
+ * \param perm permutation array
+ *
+ * Sort and permute eigenvalues (and eigenvectors) in increasing order.
+ *
+ */
+void MMG5_sort_eigenv( int8_t dim,double *lambda,double *vp,
+                       double *swap,int8_t *perm ) {
+  MMG5_nsort(dim,lambda,perm);
+  MMG5_nperm(dim,0,1,lambda,swap,perm);
+  for( int8_t i = 0; i < dim; i++ )
+    MMG5_nperm(dim,i,dim,vp,swap,perm);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * For a 2x2 symmetric matrix, Test:
+ * - the recomposition of the matrix from its exact eigendecomposition;
+ * - the computation of the eigenvalues of the matrix;
+ * - the computation of the eigenvectors of the matrix;
+ * - the recomposition of the matrix from its numerical eigendecomposition.
+ *
+ */
+int MMG5_test_eigenvmatsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][2]) {
+  double mnum[3],lambdanum[2],vpnum[2][2]; /* Numerical quantities */
+  double swap[2],maxerr,err;
+  int8_t perm[2] = {0,1}; /* eigenvalues permutation array */
+
+
+  /** Recompose matrix from its eigendecomposition */
+  MMG5_eigenvmat_buildsym(mesh,2,mnum,lambdaex,(double *)vpex);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)mex,(double *)mnum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute eigendecomposition */
+  if( !MMG5_eigenv2d(1,mex,lambdanum,vpnum) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_eigenv(2,lambdanum,(double *)vpnum,swap,perm);
+
+  /* Check eigenvalues error in norm inf */
+  maxerr = MMG5_test_mat_error(2,(double *)lambdaex,(double *)lambdanum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvalues: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 2; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 2; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,2,1,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(3,(double *)mex,(double *)mnum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact right eigenvectors.
+ * \param ivpex double array of exact right eigenvectors inverse.
+ * \return 1 if success, 0 if failure.
+ *
+ * For a 2x2 non-symmetric matrix, Test:
+ * - the recomposition of the matrix from its exact eigendecomposition;
+ * - the computation of the eigenvalues of the matrix;
+ * - the computation of the eigenvectors of the matrix;
+ * - the recomposition of the matrix from its numerical eigendecomposition.
+ *
+ */
+int MMG5_test_eigenvmatnonsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][2],double ivpex[][2]) {
+  double mnum[4],lambdanum[2],vpnum[2][2]; /* Numerical quantities */
+  double swap[2],maxerr,err;
+  int8_t perm[2] = {0,1}; /* eigenvalues permutation array */
+
+
+  /** Recompose matrix from its eigendecomposition */
+  MMG5_eigenvmat_buildnonsym(mesh,2,mnum,lambdaex,(double *)vpex,(double *)ivpex);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(4,(double *)mex,(double *)mnum);
+  if( maxerr > 100.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute eigendecomposition */
+  if( !MMG5_eigenv2d(0,mex,lambdanum,vpnum) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_eigenv(2,lambdanum,(double *)vpnum,swap,perm);
+
+  /* Check eigenvalues error in norm inf */
+  maxerr = MMG5_test_mat_error(2,(double *)lambdaex,(double *)lambdanum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvalues: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 2; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 2; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,2,0,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(4,(double *)mex,(double *)mnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * For a 3x3 symmetric matrix, Test:
+ * - the recomposition of the matrix from its exact eigendecomposition;
+ * - the computation of the eigenvalues of the matrix;
+ * - the computation of the eigenvectors of the matrix;
+ *   the recomposition of the matrix from its numerical eigendecomposition.
+ *
+ */
+int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][3]) {
+  double mnum[6],lambdanum[3],vpnum[3][3]; /* Numerical quantities */
+  double swap[3],maxerr,err;
+  int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
+
+
+  /** Recompose matrix from its eigendecomposition */
+  MMG5_eigenvmat_buildsym(mesh,3,mnum,lambdaex,(double *)vpex);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
+  if( maxerr > 100.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute eigendecomposition */
+  if( !MMG5_eigenv3d(1,mex,lambdanum,vpnum) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_eigenv(3,lambdanum,(double *)vpnum,swap,perm);
+
+  /* Check eigenvalues error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)lambdaex,(double *)lambdanum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvalues: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors orthogonality (checking numerical eigenvectors against
+   * the exact ones does not make sense in case of multiple eigenvalues) */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 2; i++ ) {
+    for( int8_t j = i+1; j < 3; j++ ) {
+      err = 0.;
+      for( int8_t k = 0; k < 3; k++ )
+        err += vpnum[i][k] * vpnum[j][k];
+      err = fabs(err);
+      maxerr = MG_MAX(maxerr,err);
+    }
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvectors orthogonality: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,3,1,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact right eigenvectors.
+ * \param ivpex double array of exact right eigenvectors inverse.
+ * \return 1 if success, 0 if failure.
+ *
+ * For a 3x3 non-symmetric matrix, Test:
+ * - the recomposition of the matrix from its exact eigendecomposition;
+ * - the computation of the eigenvalues of the matrix;
+ * - the computation of the eigenvectors of the matrix;
+ * - the recomposition of the matrix from its numerical eigendecomposition.
+ */
+int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][3],double ivpex[][3]) {
+  double mnum[9],lambdanum[3],vpnum[3][3]; /* Numerical quantities */
+  double swap[3],maxerr;
+  int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
+
+
+  /** Recompose matrix from its eigendecomposition */
+  MMG5_eigenvmat_buildnonsym(mesh,3,mnum,lambdaex,(double *)vpex,(double *)ivpex);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,(double *)mex,(double *)mnum);
+  if( maxerr > 1000.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute eigendecomposition */
+  if( !MMG5_eigenv3d(0,mex,lambdanum,vpnum) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_eigenv(3,lambdanum,(double *)vpnum,swap,perm);
+
+  /* Check eigenvalues error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)lambdaex,(double *)lambdanum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvalues: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* skip eigenvectors check */
+
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,3,0,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(9,(double *)mex,(double *)mnum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -252,9 +801,10 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
  *
  */
 int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
+  double  det,imn[4],lambda[2],vp[2][2],dm[2],dn[2],d0,d1,ip[4];
   double  isqhmin,isqhmax;
-  static int8_t mmgWarn = 0, mmgWarn1 = 0;
+  static int8_t mmgWarn0 = 0;
+  int     order;
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
@@ -262,9 +812,9 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < MMG5_EPS*MMG5_EPS ) {
-    if ( !mmgWarn ) {
+    if ( !mmgWarn0 ) {
       fprintf(stderr,"\n  ## Warning: %s: null metric det : %E \n",__func__,det);
-      mmgWarn = 1;
+      mmgWarn0 = 1;
     }
     return 0;
   }
@@ -274,79 +824,32 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
   imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
-  dd = imn[0] - imn[3];
-  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
-  trimn = imn[0] + imn[3];
 
-  lambda[0] = 0.5 * (trimn - sqDelta);
-  if ( lambda[0] < 0.0 ) {
-    if ( !mmgWarn1 ) {
-      fprintf(stderr,"\n  ## Warning: %s: negative eigenvalue (%f).\n",
-              __func__,lambda[0]);
-      mmgWarn1 = 1;
+  /* Find eigenvalues of imn */
+  order = MMG5_eigenv2d(0,imn,lambda,vp);
+
+  if ( !order ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 failing"
+              " simultaneous reduction.\n",__func__);
     }
     return 0;
   }
 
   /* First case : matrices m and n are homothetic : n = lambda0*m */
-  if ( sqDelta < MMG5_EPS ) {
+  if ( order == 2 ) {
     /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
     if ( fabs(m[1]) < MMG5_EPS ) {
-      dm[0]   = m[0];
-      dm[1]   = m[2];
-      vp0[0] = 1;
-      vp0[1] = 0;
-      vp1[0] = 0;
-      vp1[1] = 1;
+      dm[0]    = m[0];
+      dm[1]    = m[2];
+      vp[0][0] = 1;
+      vp[0][1] = 0;
+      vp[1][0] = 0;
+      vp[1][1] = 1;
     }
     else {
-      dd    = m[0] - m[2];
-      trimn = m[0] + m[2];
-
-      sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
-      dm[0]   = 0.5 * (trimn + sqDelta);
-      dm[1]   = 0.5 * (trimn - sqDelta);
-
-      if(fabs(dm[0]-dm[1]) < MMG5_EPS) {
-        vp0[1] = 0;
-        vp1[0] = 0;
-        vp1[1] = 1;
-        vp0[0] = 1;
-        vp0[1] = 0;
-        vp1[0] = 0;
-        vp1[1] = 1;
-      } else {
-        vp0[0] = m[1];
-        vp0[1] = (dm[0]-m[0]);
-        vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-        if ( vnorm < MMG5_EPS ) {
-          vp0[0] = (dm[0] - m[2]);
-          vp0[1] = m[1];
-          vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-
-          if ( vnorm < MMG5_EPS ) return 0;
-        }
-
-        vnorm   = 1.0 / vnorm;
-        vp0[0] *= vnorm;
-        vp0[1] *= vnorm;
-
-        vp1[0] = m[1];
-        vp1[1] = (dm[1]-m[0]);
-        vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
-        if ( vnorm < MMG5_EPS ) {
-          vp1[0] = (dm[1] - m[2]);
-          vp1[1] = m[1];
-          vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
-          if ( vnorm < MMG5_EPS ) return 0;
-        }
-
-        vnorm   = 1.0 / vnorm;
-        vp1[0] *= vnorm;
-        vp1[1] *= vnorm;
-      }
+      MMG5_eigensym(m,dm,vp);
     }
     /* Eigenvalues of the resulting matrix*/
     dn[0] = MG_MAX(dm[0],lambda[0]*dm[0]);
@@ -355,52 +858,22 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     dn[1] = MG_MIN(isqhmin,MG_MAX(isqhmax,dn[1]));
 
     /* Intersected metric = P diag(d0,d1){^t}P, P = (vp0, vp1) stored in columns */
-    mr[0] = dn[0]*vp0[0]*vp0[0] + dn[1]*vp1[0]*vp1[0];
-    mr[1] = dn[0]*vp0[0]*vp0[1] + dn[1]*vp1[0]*vp1[1];
-    mr[2] = dn[0]*vp0[1]*vp0[1] + dn[1]*vp1[1]*vp1[1];
+    mr[0] = dn[0]*vp[0][0]*vp[0][0] + dn[1]*vp[1][0]*vp[1][0];
+    mr[1] = dn[0]*vp[0][0]*vp[0][1] + dn[1]*vp[1][0]*vp[1][1];
+    mr[2] = dn[0]*vp[0][1]*vp[0][1] + dn[1]*vp[1][1]*vp[1][1];
 
     return 1;
   }
 
   /* Second case : both eigenvalues of imn are distinct ; theory says qf associated to m and n
      are diagonalizable in basis (vp0, vp1) - the coreduction basis */
-  else {
-    lambda[1] = 0.5 * (trimn + sqDelta);
-    assert(lambda[1] >= 0.0);
-
-    vp0[0] = imn[1];
-    vp0[1] = (lambda[0] - imn[0]);
-    vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp0[0] = (lambda[0] - imn[3]);
-      vp0[1] = imn[2];
-      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp0[0] *= vnorm;
-    vp0[1] *= vnorm;
-
-    vp1[0] = imn[1];
-    vp1[1] = (lambda[1] - imn[0]);
-    vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp1[0] = (lambda[1] - imn[3]);
-      vp1[1] = imn[2];
-      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp1[0] *= vnorm;
-    vp1[1] *= vnorm;
+  else if( order == 1 ) {
 
     /* Compute diagonal values in simultaneous reduction basis */
-    dm[0] = m[0]*vp0[0]*vp0[0] + 2.0*m[1]*vp0[0]*vp0[1] + m[2]*vp0[1]*vp0[1];
-    dm[1] = m[0]*vp1[0]*vp1[0] + 2.0*m[1]*vp1[0]*vp1[1] + m[2]*vp1[1]*vp1[1];
-    dn[0] = n[0]*vp0[0]*vp0[0] + 2.0*n[1]*vp0[0]*vp0[1] + n[2]*vp0[1]*vp0[1];
-    dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1];
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + m[2]*vp[0][1]*vp[0][1];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + n[2]*vp[0][1]*vp[0][1];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + n[2]*vp[1][1]*vp[1][1];
 
     /* Diagonal values of the intersected metric */
     d0 = MG_MAX(dm[0],dn[0]);
@@ -410,19 +883,231 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     d1 = MG_MIN(isqhmin,MG_MAX(d1,isqhmax));
 
     /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
-    det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
+    det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
     if ( fabs(det) < MMG5_EPS )  return 0;
     det = 1.0 / det;
 
-    ip[0] =  vp1[1]*det;
-    ip[1] = -vp1[0]*det;
-    ip[2] = -vp0[1]*det;
-    ip[3] =  vp0[0]*det;
+    ip[0] =  vp[1][1]*det;
+    ip[1] = -vp[1][0]*det;
+    ip[2] = -vp[0][1]*det;
+    ip[3] =  vp[0][0]*det;
 
     mr[0] = d0*ip[0]*ip[0] + d1*ip[2]*ip[2];
     mr[1] = d0*ip[0]*ip[1] + d1*ip[2]*ip[3];
     mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3];
   }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m pointer toward a \f$(3x3)\f$ metric.
+ * \param n pointer toward a \f$(3x3)\f$ metric.
+ * \param mr computed \f$(3x3)\f$ metric.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute the intersected (3 x 3) metric from metrics \a m and \a n : take
+ * simultaneous reduction, and proceed to truncation in sizes.
+ *
+ */
+int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
+  double  vp[3][3],dm[3],dn[3],d[3],ivp[3][3];
+  double  isqhmin,isqhmax;
+  int8_t  i;
+
+  isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+  isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
+
+  /* Simultaneous reduction */
+  if( !MMG5_simred3d(mesh,m,n,dm,dn,vp) )
+    return 0;
+
+  /* Diagonal values of the intersected metric */
+  for( i = 0; i < 3; i++ ) {
+    d[i] = MG_MAX(dm[i],dn[i]);
+    d[i] = MG_MIN(isqhmin,MG_MAX(d[i],isqhmax));
+  }
+
+  /* Intersected metric = tP^-1 diag(d0,d1,d2)P^-1, P = (vp0, vp1,vp2) stored in
+   * columns */
+
+  /* Compute the inverse of the eigenvectors matrix */
+  if( !MMG5_invmat33(vp,ivp) )
+    return 0;
+
+  /* Recompose matrix */
+  MMG5_simredmat(3,mr,d,(double *)ivp);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Test the intersection of (2 x 2) metrics.
+ *
+ */
+int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
+  double m[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double n[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double intex[3] = {4500.,-2500.,1500.}; /* Exact intersection */
+  double intnum[3],maxerr; /* Numerical quantities */
+
+  /** Compute intersection m^{-1}n */
+  if( !MMG5_intersecmet22(mesh,m,n,intnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,intex,intnum);
+  if( maxerr > 1000.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error metric intersection: in function %s, line %d, max error %e\n",
+      __func__,__LINE__,maxerr);
+    return 0;
+  }
+
+  /** Iteratively Recompute intersection of the result with (m,n), changing the
+   *  matrix to be inverted. */
+  for( int8_t it = 0; it < 20; it++ ) {
+
+    /** Compute the intersection with n, invert n */
+    if( !MMG5_intersecmet22(mesh,n,intnum,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with n, invert intnum */
+    if( !MMG5_intersecmet22(mesh,intnum,n,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with n, invert n */
+    if( !MMG5_intersecmet22(mesh,m,intnum,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with m, invert intnum */
+    if( !MMG5_intersecmet22(mesh,intnum,m,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Test the intersection of (3 x 3) metrics.
+ *
+ */
+int MMG5_test_intersecmet33(MMG5_pMesh mesh) {
+  double m[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix 1 */
+  double n[6] = {409./2.,-393./2.,-407./2.,409./2.,391./2.,409./2.}; /* Test matrix 2 */
+  double intex[6] = {254.,-246.,-154.,254.,146.,254.}; /* Exact intersection */
+  double intnum[6],maxerr; /* Numerical quantities */
+
+  /** Compute intersection m^{-1}n */
+  if( !MMG5_intersecmet33(mesh,m,n,intnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,intex,intnum);
+  if( maxerr > 1000.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error metric intersection: in function %s, line %d, max error %e\n",
+      __func__,__LINE__,maxerr);
+    return 0;
+  }
+
+  /** Iteratively Recompute intersection of the result with (m,n), changing the
+   *  matrix to be inverted. */
+  for( int8_t it = 0; it < 20; it++ ) {
+
+    /** Compute the intersection with n, invert n */
+    if( !MMG5_intersecmet33(mesh,n,intnum,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(6,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with n, invert intnum */
+    if( !MMG5_intersecmet33(mesh,intnum,n,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(6,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with n, invert n */
+    if( !MMG5_intersecmet33(mesh,m,intnum,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(6,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with m, invert intnum */
+    if( !MMG5_intersecmet33(mesh,intnum,m,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(6,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+  }
+
   return 1;
 }
 
@@ -457,11 +1142,34 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   p0 = &mesh->point[np];
   m  = &met->m[6*np];
 
-  /* Case of a singular point : take the physical metric */
+  /* Case of a singular point : since MMG5_defmetsin() computes an isotropic
+   * metric, scale it by the physical metric while keeping it isotropic */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-    for(i=0	; i<6; i++) {
-      m[i] = me[i];
+
+    /* Compute minimum size in physical metric */
+    order = MMG5_eigenv3d(1,me,lambda,vp);
+    if ( !order ) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
+        mmgWarn = 1;
+      }
+      return 0;
     }
+
+    hu = 0.0;
+    for( i = 0; i < 3; i++ ) {
+      hu = MG_MAX(hu,lambda[i]);
+    }
+
+    /* Truncate physical size with respect to mesh constraints */
+    hu = MG_MIN(isqhmin,hu);
+    hu = MG_MAX(isqhmax,hu);
+
+    /* Overwrite diagonal metric if physical metric prescribes smaller sizes */
+    if( hu > m[0] )
+      m[0] = m[3] = m[5] = hu;
+
   }
   /* Case of a ridge point : take sizes in 3 directions t,n1,u */
   else if ( p0->tag & MG_GEO ) {
@@ -553,7 +1261,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     /* Intersection of metrics in the tangent plane */
     if ( !MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
       if ( !mmgWarn1 ) {
-        fprintf(stderr,"\n  ## Warning: %s: impossible metric inersection:"
+        fprintf(stderr,"\n  ## Warning: %s: impossible metric intersection:"
                 " surfacic metric skipped.\n",__func__);
         mmgWarn1 = 1;
       }
@@ -589,7 +1297,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     /* Truncate the metric in the third direction (because me was not
      * truncated) */
-    order = MMG5_eigenv(1,m,lambda,vp);
+    order = MMG5_eigenv3d(1,m,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
         fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"

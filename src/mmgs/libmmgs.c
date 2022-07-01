@@ -38,7 +38,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include "mmgsexterns.h"
 
 /**
@@ -302,7 +303,8 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -542,7 +544,8 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -716,4 +719,22 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
+
+
+}
+
+/**
+* Set common pointer functions between mmgs and mmg3d to the matching mmgs
+* functions.
+*/
+void MMGS_Set_commonFunc(void) {
+    MMG5_bezierCP = MMG5_mmgsBezierCP;
+    MMG5_chkmsh = MMG5_mmgsChkmsh;
+    MMG5_indPt = MMGS_indPt;
+    MMG5_indElt = MMGS_indElt;
+    MMG5_grad2met_ani = MMG5_grad2metSurf;
+    MMG5_grad2metreq_ani = MMG5_grad2metSurfreq;
+#ifdef USE_SCOTCH
+    MMG5_renumbering = MMG5_mmgsRenumbering;
+#endif
 }

@@ -46,6 +46,14 @@
  *
  * \remark the ph->s field computation is useless in mmgs.
  *
+ *
+ * \remark: as all triangles are mesh boundaries, we do not need to mark their
+ * adges as MG_BDY so the MG_BDY tag may be used inside geometrical triangles
+ * (external non-parallel, or internal parallel) to tag edges on the
+ * intersection with purely parallel (non-geometrical) triangles.
+ * The MG_PARBDYBDY tag is also added, as it does not have a supporting triangle
+ * to inherit this tag from.
+ *
  */
 int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1,pt2;
@@ -79,6 +87,8 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
     adja = &adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
 
+      if ( !MG_EOK(pt) )  continue;
+
       /* Skip parallel edges */
       if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
 
@@ -111,7 +121,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           pt1 = &mesh->tria[jel];
           /* discard duplicate face */
           if ( pt1->v[j] == pt->v[i] ) {
-            pt1->v[0] = 0;
+            pt->v[0] = 0;
             dup++;
           }
           /* update adjacent */
@@ -125,7 +135,8 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
             lel = adjt[3*(jel-1)+1+j]/3;
             l   = adjt[3*(jel-1)+1+j]%3;
             pt2 = &mesh->tria[lel];
-            if ( chkISO && ( (pt->ref == MG_ISO) || (pt->ref < 0)) ) {
+
+            if ( chkISO && ( (pt->ref == mesh->info.isoref) || (pt->ref < 0)) ) {
               adjt[3*(lel-1)+1+l] = 0;
               adja[i] = 3*jel+j;
               adjt[3*(jel-1)+1+j] = 3*k + i;
@@ -185,9 +196,9 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
    * non-manifold case the MG_NOM tag suffices).
    *
    * Rationale:
-   *   - put MG_BDY tags on edges that are contact edges between a true
-   *     boundary (!MG_PARBDY || (MG_PARBDY && MG_PARBDYBDY) and a parallel one
-   *     (MG_PARBDY && !MG_PARBDYBDY);
+   *   - put MG_BDY tags on edges that are contact edges between a "true"
+   *     geometrical boundary (!MG_PARBDY || (MG_PARBDY && MG_PARBDYBDY) and a
+   *     purele parallel (non-geometrical) one (MG_PARBDY && !MG_PARBDYBDY);
    *   - add also a MG_PARBDYBDY tag on those edges (as it cannot be inherited
    *     from any triangle there) and their extremities.
    */
@@ -253,6 +264,66 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
 
   return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh.
+ * \param hash pointer toward the hash table to fill.
+ * \param ia first vertex of face to hash.
+ * \param ib second vertex of face to hash.
+ * \param ic third vertex of face to hash.
+ * \param k index of face to hash.
+ *
+ * \return 0 if fail, -1 if the face is newly hashed, index of the first face
+ * hashed if another face with same vertices exist.
+ *
+ *
+ **/
+int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
+  MMG5_hedge     *ph;
+  int        key,mins,maxs,sum,j;
+
+  mins = MG_MIN(ia,MG_MIN(ib,ic));
+  maxs = MG_MAX(ia,MG_MAX(ib,ic));
+
+  /* compute key */
+  sum = ia + ib + ic;
+  key = (MMG5_KA*mins + MMG5_KB*maxs) % hash->siz;
+  ph  = &hash->item[key];
+
+  if ( ph->a ) {
+    if ( ph->a == mins && ph->b == maxs && ph->s == sum )
+      return ph->k;
+    else {
+      while ( ph->nxt && ph->nxt < hash->max ) {
+        ph = &hash->item[ph->nxt];
+        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return ph->k;
+      }
+    }
+    ph->nxt = hash->nxt;
+    ph      = &hash->item[hash->nxt];
+    ph->a   = mins;
+    ph->b   = maxs;
+    ph->s   = sum;
+    ph->k   = k;
+    hash->nxt = ph->nxt;
+    ph->nxt = 0;
+
+    if ( hash->nxt >= hash->max ) {
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,"face",return 0;);
+      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
+    }
+    return -1;
+  }
+
+  /* insert new face */
+  ph->a = mins;
+  ph->b = maxs;
+  ph->s = sum;
+  ph->k = k;
+  ph->nxt = 0;
+
+  return -1;
 }
 
 /**

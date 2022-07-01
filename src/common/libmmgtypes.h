@@ -228,6 +228,24 @@ enum MMG5_entities {
 };
 
 /**
+ * \enum MMG5_Format
+ * \brief Type of supported file format
+ */
+enum MMG5_Format {
+  MMG5_FMT_MeditASCII, /*!< ASCII Medit (.mesh) */
+  MMG5_FMT_MeditBinary, /*!< Binary Medit (.meshb) */
+  MMG5_FMT_GmshASCII, /*!< ASCII Gmsh */
+  MMG5_FMT_GmshBinary, /*!< Binary Gmsh */
+  MMG5_FMT_VtkPvtp, /*!< VTK pvtp */
+  MMG5_FMT_VtkPvtu, /*!< VTK pvtu */
+  MMG5_FMT_VtkVtu, /*!< VTK vtu */
+  MMG5_FMT_VtkVtp, /*!< VTK vtp */
+  MMG5_FMT_VtkVtk, /*!< VTK vtk */
+  MMG5_FMT_Tetgen, /*!< Tetgen or Triangle */
+  MMG5_FMT_Unknown /*!< Unrecognized */
+};
+
+/**
  * \struct MMG5_Par
  * number) associated to a specific reference.
  *
@@ -498,7 +516,8 @@ typedef struct {
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
-  int           nbr,*br;
+  int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
+  int           *br; /*!< list of based references to which an implicit surface can be attached */
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */
@@ -509,6 +528,7 @@ typedef struct {
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
+  int           isoref; /*!< isovalue reference in ls mode */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
@@ -519,8 +539,8 @@ typedef struct {
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
+  uint8_t       optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
 } MMG5_Info;

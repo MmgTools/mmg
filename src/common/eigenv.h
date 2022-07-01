@@ -31,7 +31,8 @@ extern "C" {
 #define MMG5_EPSD      1.e-30
 #define MMG5_EPS       1.e-06
 
-int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]);
+int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]);
+int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double v[2][2]);
 int MMG5_eigen2(double *mm,double *lambda,double vp[2][2]);
 extern int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]);
 

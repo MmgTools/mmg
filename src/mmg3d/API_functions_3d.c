@@ -38,7 +38,8 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions_3d.h"
 
 int MMG3D_Init_mesh(const int starter,...) {
@@ -102,7 +103,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* level set value */
   mesh->info.ls       = MMG5_LS;
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   mesh->info.PROctree = MMG5_PROCTREE;
 #endif
 }
@@ -1925,20 +1926,20 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
 
   if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
     fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %d reference.\n",
-            __func__,MG_ISO);
+            __func__,mesh->info.isoref);
 
-  /* Skip triangles with MG_ISO refs */
+  /* Skip triangles with mesh->info.isoref refs */
   k = 1;
   do {
     ptt = &mesh->tria[k];
-    if ( abs(ptt->ref) != MG_ISO ) continue;
+    if ( abs(ptt->ref) != mesh->info.isoref ) continue;
     /* here ptt is the first tri of mesh->tria that we want to delete */
     do {
       ptt1 = &mesh->tria[mesh->nti];
     }
-    while( (abs(ptt1->ref) == MG_ISO) && (k <= --mesh->nti) );
+    while( (abs(ptt1->ref) == mesh->info.isoref) && (k <= --mesh->nti) );
 
-    if ( abs(ptt1->ref) != MG_ISO )
+    if ( abs(ptt1->ref) != mesh->info.isoref )
       /* ptt1 is the last tri of mesh->tria that we want to keep */
       memcpy(ptt,ptt1,sizeof(MMG5_Tria));
   } while( ++k <= mesh->nti );
@@ -1954,12 +1955,12 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
     mesh->nt = mesh->nti;
   }
 
-  /* Skip edges with MG_ISO refs */
+  /* Skip edges with mesh->info.isoref refs */
   if ( mesh->na ) {
     k = 1;
     do {
       pa = &mesh->edge[k];
-      if ( abs(pa->ref) != MG_ISO ) {
+      if ( abs(pa->ref) != mesh->info.isoref ) {
         pa->ref = abs(pa->ref);
         continue;
       }
@@ -1967,9 +1968,9 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
       do {
         pa1 = &mesh->edge[mesh->nai];
       }
-      while( (abs(pa1->ref) == MG_ISO) && (k <= --mesh->nai) );
+      while( (abs(pa1->ref) == mesh->info.isoref) && (k <= --mesh->nai) );
 
-      if ( abs(pa1->ref) != MG_ISO ) {
+      if ( abs(pa1->ref) != mesh->info.isoref ) {
         /* pa1 is the last edge of mesh->edge that we want to keep */
         memcpy(pa,pa1,sizeof(MMG5_Edge));
         pa1->ref = abs(pa1->ref);
@@ -2119,7 +2120,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.mem      = val;
     if ( !MMG3D_memOption(mesh) )  return 0;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     mesh->info.PROctree   = val;
     break;
@@ -2155,6 +2156,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     if ( mesh->info.iso )
       if ( mesh->nt && !MMG3D_skipIso(mesh) )
         return 0;
+    break;
+  case MMG3D_IPARAM_isoref :
+    mesh->info.isoref   = val;
     break;
   case MMG3D_IPARAM_lag :
 #ifdef USE_ELAS
@@ -2284,7 +2288,7 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_mem :
     return  mesh->info.mem;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     return  mesh->info.PROctree;
     break;
@@ -2360,14 +2364,14 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
+    if ( mesh->info.hgrad <= 0.0 )
       mesh->info.hgrad = -1.0;
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
   case MMG3D_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 )
+    if ( mesh->info.hgradreq <= 0.0 )
       mesh->info.hgradreq = -1.0;
     else
       mesh->info.hgradreq = log(mesh->info.hgradreq);
@@ -2433,6 +2437,22 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     return 0;
   }
 
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
 
@@ -2477,6 +2497,11 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
+
+int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
+  return MMG3D_Set_lsBaseReference(mesh,sol,br);
+}
+
 
 int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 

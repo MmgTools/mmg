@@ -112,7 +112,7 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmgs_vtkvtp
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -192,6 +192,28 @@ ADD_TEST(NAME mmgs_OptLs_teapot2
   COMMAND ${EXECUT_MMGS} -v 5 -ls -nr ${common_args}
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot2-teapot.o.meshb)
+
+add_test(
+  NAME mmgs_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMGS} -v 5 -ls ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh.mesh
+  -sol ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_isoref.o.mesh
+  )
+add_test(
+  NAME mmgs_OptLs_isoref_5
+  COMMAND ${EXECUT_MMGS} -v 5 -isoref 5 -ls
+  ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh-isoref5.mesh
+  -sol ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmgs_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmgs_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmgs_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
+
 
 ####### -met option
 ADD_TEST(NAME mmgs_2squares-withMet

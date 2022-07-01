@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 
 /**
@@ -231,7 +231,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
 
 #ifndef NDEBUG
   MMG5_pTria pt = &mesh->tria[start];
-  assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==MG_ISO) );
+  assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==mesh->info.isoref) );
 #endif
 
   /* First travel, while another part of the implicit boundary is not met */
@@ -242,7 +242,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( !k || mesh->tria[k].edg[i]==MG_ISO ) break;
+    if ( !k || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
 
     i = MMG5_inxt2[i];
   }
@@ -273,7 +273,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
       k = adja[i1] / 3;
       i = adja[i1] % 3;
 
-      if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
+      if ( (!k) || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
 
       i = MMG5_iprv2[i];
     }
@@ -293,7 +293,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
+    if ( (!k) || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
 
     i = MMG5_inxt2[i];
   }
@@ -336,7 +336,7 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
         continue;
       }
       else {
-        if ( pt->edg[i] == MG_ISO ) cnt++;
+        if ( pt->edg[i] == mesh->info.isoref ) cnt++;
       }
     }
     if( cnt == 3 ) {
@@ -360,7 +360,7 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
       adja = &mesh->adja[3*(k-1)+1];
       iel = adja[i] / 3;
 
-      if ( (!iel) || (pt->edg[i] != MG_ISO) ) continue;
+      if ( (!iel) || (pt->edg[i] != mesh->info.isoref) ) continue;
 
       i1 = MMG5_inxt2[i];
       if ( !MMGS_chkmaniball(mesh,k,i1) )
@@ -577,7 +577,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       }
     }
 
-    // Set MG_ISO ref at ls edges
+    // Set mesh->info.isoref ref at ls edges
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[MMG5_inxt2[i]];
@@ -585,7 +585,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
         v   = sol->m[ip] -mesh->info.ls;
         v1  = sol->m[ip1]-mesh->info.ls;
         if ( v == 0.0 && v1 == 0.0) {
-          pt->edg[i]  = MG_ISO;
+          pt->edg[i]  = mesh->info.isoref;
           pt->tag[i] |= MG_REF;
         }
       }

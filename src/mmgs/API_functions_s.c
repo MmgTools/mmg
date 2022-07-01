@@ -37,7 +37,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 
 int MMGS_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -1334,6 +1335,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( !mesh->info.iso )
       mesh->info.iso      = val;
     break;
+  case MMGS_IPARAM_isoref :
+      mesh->info.isoref   = val;
+    break;
   case MMGS_IPARAM_keepRef :
     if ( val )
       mesh->info.iso      = 2;
@@ -1469,14 +1473,14 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     break;
   case MMGS_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
+    if ( mesh->info.hgrad <= 0.0 )
       mesh->info.hgrad = -1.0;
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
   case MMGS_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 )
+    if ( mesh->info.hgradreq <= 0.0 )
       mesh->info.hgradreq = -1.0;
     else
       mesh->info.hgradreq = log(mesh->info.hgradreq);
@@ -1527,6 +1531,22 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   }
   if ( ref < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
             __func__);
     return 0;
   }

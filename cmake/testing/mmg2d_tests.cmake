@@ -289,7 +289,7 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -463,6 +463,14 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
   )
+
+ADD_TEST(NAME mmg2d_OptLs_Bridge
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/OptLs_bridge/bridge.sol
+  ${MMG2D_CI_TESTS}/OptLs_bridge/bridge
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_bridge.o.meshb
+  )
+
 #multi-mat + opnbdy + non-manifold check
 ADD_TEST(NAME mmg2d_LSMultiMat_nm
   COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
@@ -515,6 +523,13 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences.o.meshb)
+
 # ls + rmc: max pile size bug
 ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
@@ -534,6 +549,26 @@ ADD_TEST(NAME mmg2d_OptLs_dom_rembub2
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub2.o.meshb)
 
+add_test(
+  NAME mmg2d_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.mesh
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh
+  )
+add_test(
+  NAME mmg2d_OptLs_isoref_5
+  COMMAND ${EXECUT_MMG2D} -v 5 -isoref 5 -ls
+  ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh-isoref5.mesh
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmg2d_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmg2d_LSMultiMat_optim
@@ -581,7 +616,7 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg2d_LagMotion0_circle
     COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle

@@ -33,7 +33,8 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 extern int8_t ddb;
 
@@ -300,7 +301,7 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
 /**
  * \param mesh pointer toward the mesh.
  *
- * Reset MG_ISO vertex and tetra references to 0.
+ * Reset mesh->info.isoref vertex and tetra references to 0.
  *
  * \warning to improve: for now, entities linked to the old ls (corners,required
  * points, normals/tangents, triangles and edges) are deleted in loadMesh. It
@@ -326,7 +327,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
       /* Reset triangles */
 
       /* Reset vertices */
-      if ( p0->ref == MG_ISO ) {
+      if ( p0->ref == mesh->info.isoref ) {
         p0->ref = 0;
         /* Reset tags */
         p0->tag &= ~MG_CRN;
@@ -721,22 +722,26 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   do {
     nc = 0;
-  /* Check snapping did not lead to a nonmanifold situation */
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
-    for (i=0; i<4; i++) {
-      ip = pt->v[i];
-      p0 = &mesh->point[ip];
+    /* Check snapping did not lead to a nonmanifold situation */
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      for (i=0; i<4; i++) {
+        ip = pt->v[i];
+        p0 = &mesh->point[ip];
         if ( p0->flag == 1 ) {
-        if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
+          if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
+            if ( tmp[ip] < 0.0 )
+              sol->m[ip] = -100.0*MMG5_EPS;
+            else
+              sol->m[ip] = 100.0*MMG5_EPS;
+
             p0->flag = 0;
-          nc++;
+            nc++;
+          }
         }
       }
     }
-  }
   }
   while ( nc );
 
@@ -1364,7 +1369,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       }
 
       pxt = &mesh->xtetra[ptmax->xt];
-      pxt->ref[imax]   = MG_ISO;
+      pxt->ref[imax]   = mesh->info.isoref;
       pxt->ftag[imax] |= MG_BDY;
       MG_SET(pxt->ori,imax);
 
@@ -1381,7 +1386,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       }
 
       pxt = &mesh->xtetra[ptmin->xt];
-      pxt->ref[imin]   = MG_ISO;
+      pxt->ref[imin]   = mesh->info.isoref;
       pxt->ftag[imin] |= MG_BDY;
       MG_CLR(pxt->ori,imin);
     }
@@ -2210,7 +2215,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Reset the MG_ISO field everywhere it appears */
+  /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG3D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
