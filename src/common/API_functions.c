@@ -707,11 +707,11 @@ const char* MMG5_Get_tagName(int tag)
     strcat(tags_name,"Old-parbdy ");
   }
 
-  if ( tag & MG_OLDPARBDY) {
+  if ( tag & MG_PARBDYBDY) {
     strcat(tags_name,"Parbdybdy ");
   }
 
-  if ( tag & MG_OLDPARBDY) {
+  if ( tag & MG_PARBDY) {
     strcat(tags_name,"Parbdy ");
   }
   strcat(tags_name,"tag(s).");
