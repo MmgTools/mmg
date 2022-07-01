@@ -78,6 +78,8 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
   MMG5_pMat mat;
   int k;
 
+  (void)sol;
+
   if ( !mesh->info.nmat ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
     fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
@@ -142,6 +144,36 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
 
   return 1;
 }
+
+int MMG5_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br) {
+
+  (void)sol;
+
+  if ( !mesh->info.nbr ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of"
+            " level-set based references",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," based references values. \n");
+    return 0;
+  }
+  if ( mesh->info.nbri >= mesh->info.nbr ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new level-set"
+            " based reference.\n",__func__);
+    fprintf(stderr,"    max number of level-set based references: %d\n",mesh->info.nbr);
+    return 0;
+  }
+  if ( br < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  mesh->info.br[mesh->info.nbri] = br;
+  mesh->info.nbri++;
+
+  return 1;
+}
+
 
 /**
  * \param *prog pointer toward the program name.

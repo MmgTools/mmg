@@ -943,6 +943,16 @@ FORTRAN_NAME(MMG3D_SET_MULTIMAT,mmg3d_set_multimat,
 }
 
 /**
+ * See \ref MMG3D_Set_lsBaseReference function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_LSBASEREFERENCE,mmg3d_set_lsbasereference,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *br, int* retval),
+             (mesh,sol,br,retval)){
+  *retval = MMG3D_Set_lsBaseReference(*mesh,*sol,*br);
+  return;
+}
+
+/**
  * See \ref MMG3D_Free_allSols function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_FREE_ALLSOLS,mmg3d_free_allsols,
