@@ -1041,7 +1041,16 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   return 1;
 }
 
-/** Main function of the -ls mode */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set.
+ * \param met pointer toward the metric (may be NULL)
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Main function of the -ls mode.
+ *
+ */
 int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   char str[16]="";
   int k;

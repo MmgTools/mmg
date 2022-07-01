@@ -213,7 +213,6 @@ int  MMG2D_Free_names_var( va_list argptr );
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
-int MMG2D_mmg2d6s(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,int8_t ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
