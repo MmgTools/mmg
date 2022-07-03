@@ -656,6 +656,27 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
       ++warn;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 impossible metric"
               " interpolation.\n", __func__);
+
+      if ( mesh->info.ddebug ) {
+        fprintf(stderr," points: %d: %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip1),
+                mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
+                MMG5_Get_tagName(mesh->point[ip1].tag));
+        fprintf(stderr,"         %d: %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip2),
+                mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
+                MMG5_Get_tagName(mesh->point[ip2].tag));
+
+        fprintf(stderr,"\n BEFORE ROTATION:\n");
+        fprintf(stderr,"\n metric %e %e %e %e %e %e\n",
+                m1old[0],m1old[1],m1old[2],m1old[3],m1old[4],m1old[5]);
+        fprintf(stderr,"     %e %e %e %e %e %e\n",
+                m2old[0],m2old[1],m2old[2],m2old[3],m2old[4],m2old[5]);
+
+        fprintf(stderr,"\n AFTER ROTATION (to %e %e %e):\n",n[0],n[1],n[2]);
+        fprintf(stderr,"\n metric %e %e %e %e %e %e\n",
+                m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+        fprintf(stderr,"     %e %e %e %e %e %e\n",
+                m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+      }
     }
     return 0;
   }
