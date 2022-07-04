@@ -2499,7 +2499,7 @@ int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,i
 }
 
 int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
-  return MMG3D_Set_lsBaseReference(mesh,sol,br);
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
 }
 
 
