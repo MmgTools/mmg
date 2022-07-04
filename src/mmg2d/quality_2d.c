@@ -64,7 +64,6 @@ double MMG2D_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
  * Compute quality of a triangle from the datum of its 3 vertices.
  *
  */
-inline
 double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
   double        abx,aby,acx,acy,bcx,bcy,area,h1,h2,h3,hm;
 
