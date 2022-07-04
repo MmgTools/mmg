@@ -348,7 +348,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
 
-  /* command line */
+  /* Read command line */
   if ( !MMG3D_parsar(argc,argv,mesh,met,ls) )  return MMG5_STRONGFAILURE;
 
   /* load data */
@@ -360,7 +360,7 @@ int main(int argc,char *argv[]) {
   if ( mesh->info.lag >= 0 ) {
     sol = disp;
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     sol = ls;
   }
   else {
@@ -395,9 +395,9 @@ int main(int argc,char *argv[]) {
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
       MMG5_DEL_MEM(mesh,ls->namein);
-      }
+    }
 
-    if ( mesh->info.lag >= 0 || mesh->info.iso ) {
+    if ( mesh->info.lag >= 0 || mesh->info.iso || mesh->info.isosurf ) {
       /* displacement or isovalue are mandatory */
       if ( MMG3D_loadSol(mesh,sol,sol->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION FILE.\n");
@@ -425,8 +425,8 @@ int main(int argc,char *argv[]) {
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 
-  if ( ier<1 ) {
-    if ( ier==0 ) {
+  if ( ier < 1 ) {
+    if ( ier == 0 ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
       fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
     }
@@ -441,10 +441,10 @@ int main(int argc,char *argv[]) {
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
      if ( ls == NULL || ls->m == NULL ) {
         fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
-      MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
 
@@ -463,12 +463,15 @@ int main(int argc,char *argv[]) {
     ier = MMG3D_defaultOption(mesh,met,disp);
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,ier);
   }
+  /* Lagrangian mode */
   else if ( mesh->info.lag > -1 ) {
     ier = MMG3D_mmg3dmov(mesh,met,disp);
   }
-  else if ( mesh->info.iso ) {
+  /* Level Set mode */
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     ier = MMG3D_mmg3dls(mesh,ls,met);
   }
+  /* Remeshing mode */
   else {
     if ( met && ls && met->namein && ls->namein ) {
       fprintf(stdout,"\n  ## ERROR: IMPOSSIBLE TO PROVIDE BOTH A METRIC"

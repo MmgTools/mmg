@@ -18,4 +18,7 @@ extern int    (*MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, 
 extern int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
 extern int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double);
 extern int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double );
-
+extern int    (*MMG3D_resetRef)(MMG5_pMesh);
+extern int    (*MMG3D_setref)(MMG5_pMesh,MMG5_pSol);
+extern int    (*MMG3D_snpval)(MMG5_pMesh,MMG5_pSol);
+extern int    (*MMG3D_cuttet)(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
