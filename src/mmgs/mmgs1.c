@@ -1453,7 +1453,7 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   }
   /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
    * anatri wave */
-  if ( getenv("MMG_SAVE_ANATRI1") ) {
+  if ( getenv("MMG_SAVE_ANATRI2") ) {
     printf("  ## WARNING: EXIT AFTER ANATRI-2."
            " (MMG_SAVE_ANATRI2 env variable is exported).\n");
     return 1;
