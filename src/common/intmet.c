@@ -176,6 +176,11 @@ int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
   if ( (MG_SIN(p1->tag) || (p1->tag & MG_NOM)) &&
        (MG_SIN(p2->tag) || (p2->tag & MG_NOM)) ) {
     /* m1 and m2 are isotropic metrics */
+    /* Remark (Algiane): Perspective of improvement can be:
+       - 1. to not force isotropy at singular point
+       - 2. to not force the metric to be along tangent and normal dir at ridge point
+    */
+
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
     dd *= dd;
     if ( dd < MMG5_EPSD ) {
