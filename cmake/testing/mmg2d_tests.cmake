@@ -524,11 +524,17 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
 
 # ls + rmc + LSBaseReference
-ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-rmc
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
   ${MMG2D_CI_TESTS}/LSBaseReferences/box
   -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-normc.o.meshb)
 
 # ls + rmc: max pile size bug
 ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile

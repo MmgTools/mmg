@@ -490,67 +490,6 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
   return idx;
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement field
- * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
- *
- * Return the largest fraction t that makes the motion along disp valid.
- *
- */
-short MMG5_dikmov(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
-  int     it,maxit;
-  short   t,tmin,tmax;
-  int8_t  ier;
-
-  maxit = 200;
-  it = 0;
-
-  tmin = 0;
-  tmax = MMG3D_SHORTMAX;
-
-  *lastt = 0;
-
-  /* If full displacement can be achieved */
-  if ( !MMG5_chkmovmesh(mesh,disp,tmax,NULL) )
-    return tmax;
-
-  /* Else, find the largest displacement by dichotomy */
-  while( tmin != tmax && it < maxit ) {
-    t = (tmin+tmax)/2;
-
-    /* Case that tmax = tmin +1 : check move with tmax */
-    if ( t == tmin ) {
-      ier = MMG5_chkmovmesh(mesh,disp,tmax,NULL);
-      if ( !ier ) {
-        return tmax;
-      }
-      else {
-        if ( tmin==0 ) {
-          *lastt = tmax;
-        }
-        return tmin;
-      }
-    }
-
-    /* General case: check move with t */
-    ier = MMG5_chkmovmesh(mesh,disp,t,NULL);
-    if ( !ier ) {
-      tmin = t;
-    }
-    else
-      tmax = t;
-
-    it++;
-  }
-
-  if ( tmin==0 ) {
-    *lastt=t;
-  }
-
-  return tmin;
-}
-
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
 int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTetra   pt;
@@ -606,32 +545,6 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   return 1;
 }
 
-/** For debugging purposes: save disp */
-int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
-  FILE        *out;
-  int         k;
-  char        data[256],*ptr;
-
-  strcpy(data,disp->namein);
-  ptr = strstr(data,".sol");
-  *ptr = '\0';
-  strcat(data,".o.disp.sol");
-
-  out = fopen(data,"w");
-
-  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
-  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
-
-  /* Print solutions */
-  for(k=1; k<= disp->np; k++) {
-    fprintf(out,"%f %f %f\n",disp->m[3*k+0],disp->m[3*k+1],disp->m[3*k+2]);
-  }
-
-  fprintf(out,"\nEnd");
-  fclose(out);
-
-  return 1;
-}
 
 /**
  * \param mesh mesh structure
@@ -650,20 +563,19 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  *
  */
 int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) {
-  double  avlen,tau;
+  double  avlen,tau,hmintmp,hmaxtmp;
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
   int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl,ninvalidTets;
   short   t,lastt;
   int8_t  ier;
 
-  tau = 0.0;
   maxitmn = 10;
   maxitdc = 100;
   t  = 0;
+  tau = 0.0;
   ninvalidTets = 0;
-  lastt = 0;
 
-  //++mesh->info.fem;
+  nnnspl = nnnc = nnns = nnnm = lastt = 0;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** LAGRANGIAN MOTION\n");
@@ -674,18 +586,19 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
 
   /* Estimates of the minimum and maximum edge lengths in the mesh */
   avlen = MMG5_estavglen(mesh);
-  mesh->info.hmax = MMG3D_LLONG*avlen;
-  mesh->info.hmin = MMG3D_LOPTS*avlen;
 
-  //printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);
+  hmintmp = mesh->info.hmin;
+  hmaxtmp = mesh->info.hmax;
+
+  mesh->info.hmax = MMG3D_LLONG*avlen;
+  mesh->info.hmin = MMG3D_LSHRT*avlen;
 
   for (itmn=0; itmn<maxitmn; itmn++) {
-    nnnspl = nnnc = nnns = nnnm = 0;
 
 #ifdef USE_ELAS
-    /* Extension of the velocity field */
+    /* Extension of the displacement field */
     if ( !MMG5_velextLS(mesh,disp) ) {
-      fprintf(stderr,"\n  ## Problem in func. MMG5_packLS. Exit program.\n");
+      fprintf(stderr,"\n  ## Problem in func. MMG5_velextLS. Exit program.\n");
       return 0;
     }
 #else
@@ -696,11 +609,11 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
 
     //MMG5_saveDisp(mesh,disp);
 
-    /* Dichotomy loop */
+    /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG5_dikmov(mesh,disp,&lastt);
+      t = MMG5_dikmov(mesh,disp,&lastt,MMG3D_SHORTMAX,MMG5_chkmovmesh);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
@@ -724,35 +637,41 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
           nspl = nc = ns = nm = 0;
 
           if ( mesh->info.lag > 1 ) {
-            /* Split of points */
-            nspl = MMG5_spllag(mesh,disp,met,itdc,&warn);
-            if ( nspl < 0 ) {
-              fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
-              return 0;
-            }
+            if ( !mesh->info.noinsert ) {
+              /* Split of points */
+              nspl = MMG5_spllag(mesh,disp,met,itdc,&warn);
+              if ( nspl < 0 ) {
+                fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
+                return 0;
+              }
 
-            /* Collapse of points */
-            nc = MMG5_coltetlag(mesh,met,itdc);
-            if ( nc < 0 ) {
-              fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
-              return 0;
+              /* Collapse of points */
+              nc = MMG5_coltetlag(mesh,met,itdc);
+              if ( nc < 0 ) {
+                fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
+                return 0;
+              }
             }
           }
 
           /* Swap of edges in tetra that have resulted distorted from the process */
           /* I do not know whether it is safe to put NULL in metric here (a
            * priori ok, since there is no vertex creation or suppression) */
-          ns = MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
-          if ( ns < 0 ) {
-            fprintf(stderr,"\n  ## Problem in swaptetlag. Exiting.\n");
-            return 0;
+          if ( !mesh->info.noswap ) {
+            ns = MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
+            if ( ns < 0 ) {
+              fprintf(stderr,"\n  ## Problem in swaptetlag. Exiting.\n");
+              return 0;
+            }
           }
 
           /* Relocate vertices of tetra which have been distorted in the displacement process */
-          nm = MMG5_movtetlag(mesh,met,itdc);
-          if ( nm < 0 ) {
-            fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
-            return 0;
+          if ( !mesh->info.nomove ) {
+            nm = MMG5_movtetlag(mesh,met,itdc);
+            if ( nm < 0 ) {
+              fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
+              return 0;
+            }
           }
 
           if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (nspl+nc+ns+nm > 0) )
@@ -763,10 +682,11 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
           nnc  += nc;
           nns  += ns;
         }
-        if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5
-             && (nnspl+nnm+nns+nnc > 0) )
+        /* Five iterations of local remeshing have been performed: print final stats */
+        if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
           printf(" %d edges splitted, %d vertices collapsed, %d elements"
                  " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
+
       }
 
       nnnspl += nnspl;
@@ -774,16 +694,26 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( (mesh->info.imprim > 1) && (mesh->info.imprim < 4) ) {
-        printf("   ---> Realized displacement: %f\n",tau);
-      }
-
-      if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
-        printf(" %d edges splitted, %d vertices collapsed, %d elements"
-               " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+      if ( t == MMG3D_SHORTMAX ) break;
     }
+
+    /* End of dichotomy loop: maximal displacement of the extended velocity
+     * field has been performed */
+    if ( mesh->info.imprim > 1 && abs(mesh->info.imprim) < 4 ) {
+      printf("   ---> Realized displacement: %f\n",tau);
+    }
+
+    if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
+      printf(" %d edges splitted, %d vertices collapsed, %d elements"
+             " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+
     if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
+
+  /* Reinsert standard values for hmin, hmax */
+  mesh->info.hmin = hmintmp;
+  mesh->info.hmax = hmaxtmp;
+
   if ( tau < MMG5_EPSD2 ) {
     MMG5_SAFE_CALLOC(*invalidTets,mesh->np,int,
                      printf("## Warning: Not enough memory to keep track of"
