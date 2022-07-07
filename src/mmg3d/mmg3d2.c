@@ -2233,12 +2233,6 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG3D_resetRef(mesh) ) {
-    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
-    return 0;
-  }
-
   /* Compatibility triangle orientation w/r tetras */
   if ( !MMG5_bdryPerm(mesh) ) {
     fprintf(stderr,"\n  ## Boundary orientation problem. Exit program.\n");
@@ -2260,6 +2254,12 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
+  
+  /* Reset the mesh->info.isoref field everywhere it appears */
+  if ( !MMG3D_resetRef(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
+    return 0;
+  }
 
   /* Removal of small parasitic components */
   if ( mesh->info.iso ) {
@@ -2276,7 +2276,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
               " isosurface extraction.\n");
     }
   }
-
+    
   if ( !MMG3D_cuttet(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;

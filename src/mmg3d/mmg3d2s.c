@@ -49,9 +49,49 @@ extern int8_t ddb;
  * deleted depending on the split/nosplit infos.
  */
 int MMG3D_resetRef_lssurf(MMG5_pMesh mesh) {
- 
-  printf("TO DO !!!\n");
-  
+  MMG5_pTetra    pt;
+  MMG5_pPoint    p1,p2;
+  MMG5_pxTetra   pxt;
+  int            k,ref,ip1,ip2;
+  int8_t         i,ia,j,j1,j2;
+      
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    
+    if ( !pt->xt ) continue;
+    pxt = &mesh->xtetra[pt->xt];
+    
+    /* Reset face and edge references */
+    for (i=0; i<4; i++) {
+      if ( !(pxt->ftag[i] & MG_BDY) ) continue;
+            
+      if( !MMG5_getStartRef(mesh,pxt->ref[i],&ref) ) return 0;
+      pxt->ref[i] = ref;
+      
+      for (j=0; j<3; j++) {
+        ia = MMG5_iarf[i][j];
+
+        if ( pxt->edg[ia] == mesh->info.isoref ) {
+          pxt->edg[ia] = 0;
+          pxt->tag[ia] &= ~MG_REF;
+          // pxt->tag[ia] &= ~MG_BDY;
+          
+          j1 = MMG5_inxt2[j];
+          j2 = MMG5_iprv2[j];
+          ip1 = pt->v[MMG5_idir[i][j1]];
+          ip2 = pt->v[MMG5_idir[i][j2]];
+          
+          p1 = &mesh->point[ip1];
+          p2 = &mesh->point[ip2];
+          
+          p1->ref = 0;
+          p2->ref = 0;
+        }
+      }
+    }
+  }
+    
   return 1;
 }
 
@@ -65,8 +105,44 @@ int MMG3D_resetRef_lssurf(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pPoint   p0;
+  double        *tmp;
+  int           k,ns;
   
-  printf("TO DO !!!!\n");
+  /* create tetra adjacency */
+  if ( !MMG3D_hashTetra(mesh,1) ) {
+    fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
+      __func__);
+    return 0;
+  }
+
+  /* Reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+                fprintf(stderr,"  Exit program.\n");
+                return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
+  
+  /* Snap values of sol that are close to 0 to 0 exactly */
+  ns = 0;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( !MG_VOK(p0) ) continue;
+    if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
+      if ( mesh->info.ddebug )
+        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+                "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
+
+      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
+        (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
+      p0->flag = 1;
+      sol->m[k] = mesh->info.ls;
+      ns++;
+    }
+  }
+  
   return 1;
 }
 
@@ -94,7 +170,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-
+  
   /* Compute the number nb of intersection points on edges */
   nb = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -126,7 +202,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
   }
   if ( ! nb )  return 1;
-
+  
   /* Create intersection points at 0 isovalue and set flags to tetras */
   if ( !MMG5_hashNew(mesh,&hash,nb,7*nb) ) return 0;
   
@@ -154,7 +230,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
       for (j=0; j<3; j++) {
         if ( !(pxt->tag[ MMG5_iarf[ia][j] ] & MG_REQ) ) continue;
-
+        
         ip0 = pt->v[MMG5_idir[ia][MMG5_inxt2[j]]];
         ip1 = pt->v[MMG5_idir[ia][MMG5_iprv2[j]]];
         np  = -1;
@@ -170,6 +246,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     pxt = &mesh->xtetra[pt->xt];
 
     for (iface=0; iface<4; iface++) {
+      if ( !(pxt->ftag[iface] & MG_BDY) ) continue;
       for (j=0; j<3; j++) {
         ia = MMG5_iarf[iface][j];
         ip0 = pt->v[MMG5_iare[ia][0]];
@@ -177,8 +254,8 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
         np  = MMG5_hashGet(&hash,ip0,ip1);
         if ( np>0 )  continue;
-        if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
-        
+        if ( !MMG5_isSplit(mesh,pxt->ref[iface],&refint,&refext) ) continue;
+                
         p0 = &mesh->point[ip0];
         p1 = &mesh->point[ip1];
         v0 = sol->m[ip0]-mesh->info.ls;
@@ -268,7 +345,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       }
     }
   }
-
+    
   /* Proceed to splitting, according to flags to tets */
   ne  = mesh->ne;
   ns  = 0;
@@ -283,7 +360,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       vx[ia] = MMG5_hashGet(&hash,pt->v[MMG5_iare[ia][0]],pt->v[MMG5_iare[ia][1]]);
       if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
     }
-    
+        
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
       ier = MMG5_split1(mesh,met,k,vx,1);
@@ -293,6 +370,11 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
       ier = MMG5_split2sf(mesh,met,k,vx,1);
+      ns++;
+      break;
+        
+    case 12: case 18: case 33: /* 2 edges (opposite face) split */
+      ier = MMG5_split2(mesh,met,k,vx,1);
       ns++;
       break;
 
@@ -310,6 +392,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       assert(pt->flag == 0);
       break;
     }
+
     if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
@@ -318,7 +401,6 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
 }
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -331,10 +413,11 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 int MMG3D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  double        v;
-  int           k,ip,ref,refint,refext,ier;
-  int8_t        nmns,npls,nz,i,j;
-  
+  double        v,v1,v2;
+  int           k,ip,ip1,ip2,ref,refint,refext,ier;
+  int8_t        nmns,npls,nz,i,ia,j,j1,j2;
+    
+  /* Travel all boundary faces (via tetra) */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
@@ -347,6 +430,7 @@ int MMG3D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
       ref = pxt->ref[i];
       nmns = npls = nz = 0;
       
+      /* Set face ref */
       for (j=0; j<3; j++) {
         ip = pt->v[MMG5_idir[i][j]];
         v  = sol->m[ip]-mesh->info.ls;
@@ -372,6 +456,24 @@ int MMG3D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
           assert(nmns);
           pxt->ref[i] = refint;
         }
+      }
+      
+      /* Set edge and point refs */
+      for (j=0; j<3; j++) {
+        ia = MMG5_iarf[i][j];
+        j1 = MMG5_inxt2[j];
+        j2 = MMG5_iprv2[j];
+        ip1 = pt->v[MMG5_idir[i][j1]];
+        ip2 = pt->v[MMG5_idir[i][j2]];
+        v1 = sol->m[ip1];
+        v2 = sol->m[ip2];
+        
+        if ( fabs(v1) < MMG5_EPSD && fabs(v2) < MMG5_EPSD ) {
+          pxt->edg[ia] = mesh->info.isoref;
+          pxt->tag[ia] |= MG_REF;
+        }
+        if ( fabs(v1) < MMG5_EPSD ) mesh->point[ip1].ref = mesh->info.isoref;
+        if ( fabs(v2) < MMG5_EPSD ) mesh->point[ip2].ref = mesh->info.isoref;
       }
     }
   }
