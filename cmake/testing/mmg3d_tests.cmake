@@ -545,6 +545,16 @@ ADD_TEST(NAME mmg3d_OptimLES_sphere
 #####
 ###############################################################################
 #####
+
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmg3d_OptLsSurf_box
+  COMMAND ${EXECUT_MMG3D} -v 5 -lssurf
+  -sol ${MMG3D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG3D_CI_TESTS}/OptLsSurf_box/box.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLsSurf_box.o.meshb
+  )
+
+# multi-mat
 ADD_TEST(NAME mmg3d_LSMultiMat
   COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
   ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
