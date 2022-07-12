@@ -43,7 +43,12 @@
  * Compute key for the material in the hash table.
  */
 static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
-  return (ref - pim->offset);
+
+  int key = ref - pim->offset;
+
+  assert ( key >= 0 );
+
+  return key;
 }
 
 /**
