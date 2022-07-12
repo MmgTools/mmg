@@ -153,6 +153,12 @@ ADD_TEST(NAME mmg2d_opnbdy_ls
   -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-ls.o.meshb)
 
+ADD_TEST(NAME mmg2d_opnbdy_lssurf
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -lssurf 0.6
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
+  -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-lssurf.o.meshb)
+
 ADD_TEST(NAME mmg2d_opnbdy_yes_ani
   COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
