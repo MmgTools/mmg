@@ -268,7 +268,7 @@ int MMG2D_split3(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int MMG2D_splitbar(MMG5_pMesh ,int ,int );
 int MMG2D_assignEdge(MMG5_pMesh );
 int MMG2D_bdryEdge(MMG5_pMesh );
-int MMG2D_setadj(MMG5_pMesh );
+int MMG2D_setadj(MMG5_pMesh,int8_t );
 int MMG2D_singul(MMG5_pMesh,int );
 int MMG2D_analys(MMG5_pMesh );
 int MMG2D_norver(MMG5_pMesh,int );

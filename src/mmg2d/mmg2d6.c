@@ -1139,7 +1139,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     }
 
     /* Set tags to triangles from geometric configuration */
-    if ( !MMG2D_setadj(mesh) ) {
+    if ( !MMG2D_setadj(mesh,0) ) {
       fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
       return 0;
     }

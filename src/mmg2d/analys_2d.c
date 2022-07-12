@@ -38,6 +38,8 @@ extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh
+ * \param init_cc 1 if we need to reinitialized \a cc field of tria because
+ * setadj has already been called (isosurf mode)
  *
  * \return 1 if success, 0 if fail
  *
@@ -45,7 +47,7 @@ extern int8_t ddb;
  * count number of subdomains or connected components
  *
  */
-int MMG2D_setadj(MMG5_pMesh mesh) {
+int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
@@ -57,6 +59,13 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
 
   /** Step 1: Tags setting from triangles analysis */
   MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
+
+  /* Reinitialization of cc field (as we pass in steadj more than once) */
+  if ( init_cc ) {
+    for ( k=1; k<=mesh->nt; ++k ) {
+      mesh->tria[k].cc = 0;
+    }
+  }
 
   /* Initialization of the pile */
   ncc = 1;
@@ -780,7 +789,11 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   }
 
   /* Set tags to triangles from geometric configuration */
-  if ( !MMG2D_setadj(mesh) ) {
+  int8_t init_cc  = 0;
+  if ( mesh->info.isosurf ) {
+    init_cc = 1;
+  }
+  if ( !MMG2D_setadj(mesh,init_cc) ) {
     fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return 0;
   }
