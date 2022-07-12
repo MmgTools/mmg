@@ -316,8 +316,6 @@ int MMG3D_resetRef_ls(MMG5_pMesh mesh) {
   int8_t          i;
 
   /* Travel edges and reset tags at edges extremities */
-
-
   /* Reset ref and tags at ISO points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -343,6 +341,10 @@ int MMG3D_resetRef_ls(MMG5_pMesh mesh) {
 
     if ( !MG_EOK(pt) ) continue;
 
+    /* If no material map is provided, reference is resetted to 0, otherwise,
+     * reference has to exist in the material map because it is not possible to
+     * decide for the user if a ref that is not listed has to be preserved or
+     * resetted to 0 */
     if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
     pt->ref = ref;
   }
@@ -1270,6 +1272,8 @@ int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       else
         nz ++;
     }
+    /* Remark: this test is not consistent with the test of the lssurf option
+     * because it autorizes the level-set to be superposed with the surface */
     assert(nz < 4);
     ier = MMG5_isSplit(mesh,ref,&refint,&refext);
 

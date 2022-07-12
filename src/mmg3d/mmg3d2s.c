@@ -441,8 +441,15 @@ int MMG3D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
         else
           nz ++;
       }
-      
-      assert(nz < 3);
+
+      /* Remark: this test is not consistent with the test of the ls option
+       * where the level-set can be superposed with the surface */
+      if ( nz == 3 ) {
+        fprintf(stderr, "  ## Error: at least 1 triangle with its 3 vertices over the level-set.\n"
+                "            Undetermined case.\n");
+        return 0;
+      }
+
       ier = MMG5_isSplit(mesh,ref,&refint,&refext);
       
       if ( npls ) {

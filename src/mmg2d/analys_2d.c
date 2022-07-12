@@ -793,6 +793,11 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   if ( mesh->info.isosurf ) {
     init_cc = 1;
   }
+
+  /** \warning possible time improvment here: in lssurf mode, the second call of
+   * #MMG2D_setadj only adds BDY tag to points that has been inserted by the
+   * level-set splitting (the rest of the job of setadj has alredy be done by
+   * the first call).  */
   if ( !MMG2D_setadj(mesh,init_cc) ) {
     fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return 0;

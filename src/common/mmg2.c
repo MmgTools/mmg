@@ -43,7 +43,12 @@
  * Compute key for the material in the hash table.
  */
 static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
-  return (ref - pim->offset);
+
+  int key = ref - pim->offset;
+
+  assert ( key >= 0 && "offset is not equal to maximal reference" );
+
+  return key;
 }
 
 /**
@@ -184,7 +189,12 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *p
 
   /* Material not found in the table */
   if( k == -1 ) {
-    fprintf(stderr,"\n  ## Error: %s: material %d not found in table.\n",__func__,ref);
+    fprintf(stderr,"\n  ## Warning: %s: material %d not found in table.\n",
+            __func__,ref);
+    fprintf(stderr,"              Please ensure that you provide all mesh"
+            " references in the material map (that is, the whole list of"
+            " surface materials in lssurf mode and the whole list of domain"
+            " materials in ls mode).\n" );
     return 0;
   }
 
@@ -339,7 +349,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   refmax = 0;
   refmin = INT_MAX;
 
-  /* Look for the max/min reference */
+  /* Look for the max/min reference provided in material table */
   for( k = 0; k < mesh->info.nmat; k++ ) {
     pm = &mesh->info.mat[k];
     /* Update max and min val for original ref */
@@ -352,6 +362,23 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
     /* Update max and min val with exterior ref */
     if( pm->rex > refmax ) refmax = pm->rex;
     if( pm->rex < refmin ) refmin = pm->rex;
+  }
+
+  /* Look for the max/min reference of tetra, triangles and edges provided
+   * inside the mesh (worst case to avoid memory error when checking the
+   * the inverse map). Looking at vertices is useless as
+   * we will never check for the mapping of reference of vertices */
+  for ( k=1; k<=mesh->ne; ++k ) {
+    if( mesh->tetra[k].ref > refmax ) refmax = mesh->tetra[k].ref;
+    if( mesh->tetra[k].ref < refmin ) refmin = mesh->tetra[k].ref;
+  }
+  for ( k=1; k<=mesh->nt; ++k ) {
+    if( mesh->tria[k].ref > refmax ) refmax = mesh->tria[k].ref;
+    if( mesh->tria[k].ref < refmin ) refmin = mesh->tria[k].ref;
+  }
+  for ( k=1; k<=mesh->na; ++k ) {
+    if( mesh->edge[k].ref > refmax ) refmax = mesh->edge[k].ref;
+    if( mesh->edge[k].ref < refmin ) refmin = mesh->edge[k].ref;
   }
 
   /* Get span of the lookup table */
@@ -369,7 +396,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
       return 0;
   }
 
-//  MMG5_InvMat_print(mesh,pim);
+  // MMG5_InvMat_print(mesh,pim);
   return 1;
 }
 
