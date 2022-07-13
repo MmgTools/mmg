@@ -192,8 +192,10 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *p
     fprintf(stderr,"\n  ## Warning: %s: material %d not found in table.\n",
             __func__,ref);
     fprintf(stderr,"              Please ensure that you provide all mesh"
-            " references in the material map (that is, the whole list of"
-            " surface materials in lssurf mode and the whole list of domain"
+            " references in the material map\n"
+            "              (that is, the whole list of"
+            " surface materials in lssurf mode,\n"
+            "              and the whole list of domain"
             " materials in ls mode).\n" );
     return 0;
   }
