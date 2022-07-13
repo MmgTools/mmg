@@ -779,7 +779,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           auto ar = cd->GetArray(j);
 
           psl->np = ar->GetNumberOfTuples();
-          if ( mesh->ne != psl->np ) {
+          if ( nc != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
                     "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
                     "THE SOLUTION (%d) \n",mesh->ne,psl->np);
