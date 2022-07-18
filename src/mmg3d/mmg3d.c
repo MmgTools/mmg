@@ -246,9 +246,8 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
+  MMG5_version(mesh,"3D");
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
 
@@ -309,9 +308,9 @@ int main(int argc,char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
 
   /* Version info */
+#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"  -- MMG3D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
-#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 #endif
 

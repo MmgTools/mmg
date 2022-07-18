@@ -979,15 +979,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   assert ( mesh->point );
   assert ( mesh->tetra );
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
+  MMG5_version(mesh,"3D");
 
   MMG3D_Set_commonFunc();
 
@@ -1203,21 +1195,13 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   char      stim[32];
   int8_t    mettofree = 0;
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
-
   /** In debug mode, check that all structures are allocated */
   assert ( mesh );
   assert ( sol );
   assert ( mesh->point );
   assert ( mesh->tetra );
+
+  MMG5_version(mesh,"3D");
 
   if ( !mesh->info.iso ) { mesh->info.iso = 1; }
 
@@ -1486,22 +1470,13 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   int       *invalidTets;
   int       k,ier;
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-
-#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
-
   /** In debug mode, check that all structures are allocated */
   assert ( mesh );
   assert ( met );
   assert ( mesh->point );
   assert ( mesh->tetra );
+
+  MMG5_version(mesh,"3D");
 
   MMG3D_Set_commonFunc();
 
