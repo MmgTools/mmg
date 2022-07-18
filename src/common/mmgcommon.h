@@ -675,7 +675,7 @@ int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*, int);
 int             MMG5_saveDisp(MMG5_pMesh ,MMG5_pSol );
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
                                    int*,int*,int**,long*,int);
-int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
+int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type,int*, FILE *inm);
 int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int*,int,
