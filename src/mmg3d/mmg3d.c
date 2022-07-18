@@ -246,7 +246,6 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  MMG5_version(mesh,"3D");
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
