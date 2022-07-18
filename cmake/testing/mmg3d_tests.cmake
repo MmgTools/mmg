@@ -445,6 +445,12 @@ ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula
   -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula.o.meshb)
 
+ADD_TEST(NAME mmg3d_opnbdy_lssurf_peninsula
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -lssurf 0.6 -nr -hgrad 1.5 -hausd 0.02
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_lssurf_peninsula.o.meshb)
+
 # ls + nsd
 ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula-nsd3
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls -nsd 3
