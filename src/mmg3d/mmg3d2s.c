@@ -383,6 +383,12 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       ns++;
       break;
 
+    case 35: case 19: case 13: case 37: case 22: case 28: case 26:
+    case 14: case 49: case 50: case 44: case 41: /* 3 edges on opposite conf splitted */
+      ier = MMG5_split3op(mesh,met,k,vx,1);
+      ns++;
+      break;
+
     case 30: case 45: case 51:
       ier = MMG5_split4op(mesh,met,k,vx,1);
       ns++;
