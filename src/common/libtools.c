@@ -35,6 +35,33 @@
 #include "mmgcommon.h"
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param dim string dontaining the dimension (3D,2D or S)
+ *
+ * Print MMG release and date
+ */
+void MMG5_version(MMG5_pMesh mesh,char *dim) {
+
+  if ( mesh->info.imprim >= 0 ) {
+#ifndef MMG_DIFFOUTPUT
+    fprintf(stdout,"\n  %s\n   MODULE MMG%s: %s (%s)\n  %s\n",
+            MG_STR,dim,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
+#else
+    fprintf(stdout,"\n  %s\n   MODULE MMG%s\n  %s\n",
+            MG_STR,dim,MG_STR);
+#endif
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
+  }
+
+}
+
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if fail, 1 if success.
  *

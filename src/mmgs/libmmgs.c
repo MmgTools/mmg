@@ -300,22 +300,13 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   int8_t    mettofree = 0;
   char      stim[32];
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-
-#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
-
   /** In debug mode, check that all structures are allocated */
   assert ( mesh );
   assert ( sol );
   assert ( mesh->point );
   assert ( mesh->tria );
+
+  MMG5_version(mesh,"S");
 
   if ( !mesh->info.iso ) { mesh->info.iso = 1; }
 
@@ -541,16 +532,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   assert ( mesh->point );
   assert ( mesh->tria );
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-
-#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
+  MMG5_version(mesh,"S");
 
   MMGS_Set_commonFunc();
 

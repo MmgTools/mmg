@@ -60,9 +60,9 @@
 #include <vtkCellArray.h>
 #include <typeinfo>
 
-int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*);
-int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*);
-int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*);
+int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
+int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
+int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
 
 int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int);
 
