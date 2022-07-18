@@ -25,12 +25,14 @@
 #####         Continuous Integration
 #####
 ###############################################################################
-
 # Simple test: must already pass (-d option allows to cover chkmsh function)
-ADD_TEST(NAME mmg2d_SimpleCircle
-  COMMAND ${EXECUT_MMG2D} -v 5 -d
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_SimpleCircle-cercle.o.meshb)
+
+SET ( MMG_SCRIPTS_DIR ${PROJECT_BINARY_DIR}/cmake_scripts )
+FILE ( MAKE_DIRECTORY  ${MMG_SCRIPTS_DIR} )
+
+MMG_ADD_TEST ( mmg2d_SimpleCircle
+  "${EXECUT_MMG2D} -v 5 -d"
+  "${MMG2D_CI_TESTS}/Circle" "cercle" )
 
 ###############################################################################
 #####
@@ -647,3 +649,6 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     )
 
 ENDIF()
+
+ADD_TEST(MyTestCreateCompare ${CMAKE_COMMAND} -E compare_files
+  ${CMAKE_BINARY_DIR}/toto.out   ${CMAKE_BINARY_DIR}/toto.out)

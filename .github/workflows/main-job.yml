@@ -108,6 +108,12 @@ jobs:
         env:
           NJOBS: "2"
 
+      - name: Set environment variables for output comparison
+        if: "! contains(github.event.head_commit.message, '[skip output comparison]')"
+        run: |
+          echo "C_FLG=\"-DCMAKE_C_FLAGS=-DMMG_COMPARABLE_OUTPUT\"" >> "$GITHUB_ENV"
+          echo "MMG_ERROR_RULE=\"COMMAND_ERROR_IS_FATAL ANY\"" >> "$GITHUB_ENV"
+
       - name: Install VTK
         # Download vtk only if used
         if: matrix.vtk == 'on'
@@ -170,6 +176,7 @@ jobs:
       - name: Test compilation with shared libs linkage
         run: |
           cmake -Smmg -Bbuild_shared \
+          ${{ env.C_FLG }} \
           ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
@@ -190,6 +197,7 @@ jobs:
       - name: Test compilation without library linkage
         run: |
           cmake -Smmg -Bbuild_nolibs \
+          ${{ env.C_FLG }} \
           ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
@@ -209,6 +217,7 @@ jobs:
       - name: Configure Mmg with static libs (default behaviour)
         run: |
           cmake -Smmg -Bbuild \
+          ${{ env.C_FLG }} \
           ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
@@ -228,7 +237,7 @@ jobs:
         run: |
           cmake --build build --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
-      - name: Archive production artifacts
+      - name: Archive production artifacts for binaries
         uses: actions/upload-artifact@v2
         with:
           name: Mmg-bin
@@ -246,3 +255,10 @@ jobs:
         run: |
           cd build
           ctest -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+
+      - name: Archive production artifacts for tests
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mmg-tests
+          path: |
+            build/TEST_OUTPUTS
