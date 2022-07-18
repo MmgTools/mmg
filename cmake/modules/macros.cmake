@@ -408,36 +408,36 @@ ENDMACRO ( )
 
 MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
 
-FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}.cmake
-  CONTENT
-  "EXECUTE_PROCESS(
-  COMMAND
-  ${args}
-  ${path_in}/${file_in}
-  -out ${CTEST_OUTPUT_DIR}/${test_name}.o.meshb
-  COMMAND tee ${test_name}.out 2>&1
-  COMMAND_ECHO STDOUT
-  COMMAND_ERROR_IS_FATAL ANY
-  )"
- )
+  FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}.cmake
+    CONTENT
+    "EXECUTE_PROCESS(
+    COMMAND
+    ${args}
+    ${path_in}/${file_in}
+    -out ${CTEST_OUTPUT_DIR}/${test_name}.o.meshb
+    COMMAND tee ${test_name}.out 2>&1
+    COMMAND_ECHO STDOUT
+    COMMAND_ERROR_IS_FATAL ANY
+    )"
+   )
 
-ADD_TEST(NAME ${test_name}
-  COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}.cmake )
+  ADD_TEST(NAME ${test_name}
+    COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}.cmake )
 
-FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref.cmake
-  CONTENT
-  "EXECUTE_PROCESS(
-  COMMAND
-  diff ${test_name}.out ${path_in}/${test_name}.ref
-  COMMAND tee ${test_name}.compare 2>&1
-  COMMAND_ECHO STDOUT
-  $ENV{MMG_ERROR_RULE}
-  )"
-  )
+  FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref.cmake
+    CONTENT
+    "EXECUTE_PROCESS(
+    COMMAND
+    diff ${test_name}.out ${path_in}/${test_name}.ref
+    COMMAND tee ${test_name}.compare 2>&1
+    COMMAND_ECHO STDOUT
+    $ENV{MMG_ERROR_RULE}
+    )"
+    )
 
-ADD_TEST(NAME ${test_name}_compare_to_ref
-  COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref.cmake )
+  ADD_TEST(NAME ${test_name}_compare_to_ref
+    COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref.cmake )
 
-set_tests_properties( ${test_name}_compare_to_ref PROPERTIES DEPENDS ${test_name} )
+  set_tests_properties( ${test_name}_compare_to_ref PROPERTIES DEPENDS ${test_name} )
 
 ENDMACRO ( )
