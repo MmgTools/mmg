@@ -415,7 +415,8 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
     ${args}
     ${path_in}/${file_in}
     -out ${CTEST_OUTPUT_DIR}/${test_name}.o.mesh
-    COMMAND tee ${test_name}.out 2>&1
+    OUTPUT_FILE ${test_name}.out
+    ERROR_FILE ${test_name}.out
     COMMAND_ECHO STDOUT
     COMMAND_ERROR_IS_FATAL ANY
     )"
@@ -429,7 +430,8 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
     "EXECUTE_PROCESS(
     COMMAND
     diff ${test_name}.out ${path_in}/${test_name}.ref
-    COMMAND tee ${test_name}.compare 2>&1
+    OUTPUT_FILE ${test_name}.compare
+    ERROR_FILE ${test_name}.compare
     COMMAND_ECHO STDOUT
     $ENV{MMG_ERROR_RULE}
     )"

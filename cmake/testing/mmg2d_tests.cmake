@@ -27,9 +27,6 @@
 ###############################################################################
 # Simple test: must already pass (-d option allows to cover chkmsh function)
 
-SET ( MMG_SCRIPTS_DIR ${PROJECT_BINARY_DIR}/cmake_scripts )
-FILE ( MAKE_DIRECTORY  ${MMG_SCRIPTS_DIR} )
-
 MMG_ADD_TEST ( mmg2d_SimpleCircle
   "${EXECUT_MMG2D} -v 5 -d"
   "${MMG2D_CI_TESTS}/Circle" "cercle" )
