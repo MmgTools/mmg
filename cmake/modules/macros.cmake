@@ -369,31 +369,31 @@ ENDMACRO ( )
 #####
 ###############################################################################
 
-MACRO ( ADD_RUN_AGAIN_TESTS exec_name test_names args input_files )
+MACRO ( ADD_RUN_AGAIN_TESTS exec_name test_names args input_paths input_files )
 
   LIST(LENGTH test_names test_number)
   MATH(EXPR len2 "${test_number} - 1")
 
   FOREACH ( it RANGE ${len2} )
     LIST(GET test_names   ${it} test_name)
+    LIST(GET input_paths  ${it} input_path)
     LIST(GET input_files  ${it} input_file)
     LIST(GET args         ${it} _arg_)
 
     STRING(REPLACE " " ";" arg ${_arg_})
 
-    ADD_TEST(NAME ${test_name}
-      COMMAND ${exec_name} ${arg}
-      ${input_file}
-      -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
+    MMG_ADD_TEST(${test_name}
+      "${exec_name} ${arg}"
+      ${input_path} ${input_file}
+      )
 
     SET_TESTS_PROPERTIES ( ${test_name}
       PROPERTIES FIXTURES_SETUP ${test_name} )
 
     IF ( RUN_AGAIN )
-      ADD_TEST(NAME ${test_name}_2
-        COMMAND ${exec_name} ${arg} -hgrad -1
-        ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
-        -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
+      MMG_ADD_TEST(${test_name}_2
+        "${exec_name} ${arg} -hgrad -1"
+        "${CTEST_OUTPUT_DIR}" "${test_name}-out.o.meshb"
         )
 
       SET_TESTS_PROPERTIES ( ${test_name}_2
@@ -414,7 +414,7 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
     COMMAND
     ${args}
     ${path_in}/${file_in}
-    -out ${CTEST_OUTPUT_DIR}/${test_name}.o.meshb
+    -out ${CTEST_OUTPUT_DIR}/${test_name}.o.mesh
     COMMAND tee ${test_name}.out 2>&1
     COMMAND_ECHO STDOUT
     COMMAND_ERROR_IS_FATAL ANY

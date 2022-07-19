@@ -63,30 +63,30 @@ ADD_TEST(NAME mmg2d_val
 SET_PROPERTY(TEST mmg2d_val #mmg2d_default
   PROPERTY WILL_FAIL TRUE)
 
-ADD_TEST(NAME mmg2d_hsizOption
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsiz-circle.o.meshb)
+MMG_ADD_TEST(mmg2d_hsizOption
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
-ADD_TEST(NAME mmg2d_hsizAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -A
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizAni-circle.o.meshb)
+MMG_ADD_TEST(mmg2d_hsizAni
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -A"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
-ADD_TEST(NAME mmg2d_hsizAndNosurfOption
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurf-circle.o.meshb)
+MMG_ADD_TEST(mmg2d_hsizAndNosurfOption
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
-ADD_TEST(NAME mmg2d_hsizAndNosurfAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -A
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurfAni-circle.o.meshb)
+MMG_ADD_TEST(mmg2d_hsizAndNosurfAni
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -A"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
-ADD_TEST(NAME mmg2d_hsizAndNosurfOption2
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -3dMedit 2
-  ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurf-2squares.o.meshb)
+MMG_ADD_TEST(mmg2d_hsizAndNosurfOption2
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -3dMedit 2"
+  "${MMG2D_CI_TESTS}/2squares" "2squares"
+  )
 
 ADD_TEST(NAME mmg2d_hsizHmax
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -hmax 0.05
@@ -104,90 +104,90 @@ SET(passRegex "Mismatched options")
 SET_PROPERTY(TEST mmg2d_hsizHmin
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
-ADD_TEST(NAME mmg2d_reqEntities-ref
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.02
-  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-ref.o.meshb)
+MMG_ADD_TEST(mmg2d_reqEntities-ref
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.02"
+  "${MMG2D_CI_TESTS}/Disk_ReqEntities" "disk.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_orphanPoint
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 10 -hgradreq -1 -nosizreq
-  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_orphan.o.meshb)
+MMG_ADD_TEST(mmg2d_orphanPoint
+  "${EXECUT_MMG2D} -v 5 -hausd 10 -hgradreq -1 -nosizreq"
+  "${MMG2D_CI_TESTS}/Disk_ReqEntities" "disk.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_reqEntitiesAni-ref
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.02 -A
-  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntitiesAni-ref.o.meshb)
+MMG_ADD_TEST(mmg2d_reqEntitiesAni-ref
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.02 -A"
+  "${MMG2D_CI_TESTS}/Disk_ReqEntities" "disk.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_reqEntities-unref
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1
-  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk-tiny.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-unref.o.meshb)
+MMG_ADD_TEST(mmg2d_reqEntities-unref
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1"
+  "${MMG2D_CI_TESTS}/Disk_ReqEntities" "disk-tiny.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_reqEntitiesAni-unref
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -A
-  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk-tiny.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntitiesAni-unref.o.meshb)
+MMG_ADD_TEST(mmg2d_reqEntitiesAni-unref
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.1 -A"
+  "${MMG2D_CI_TESTS}/Disk_ReqEntities" "disk-tiny.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_locParam
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/LocParams/circle2refs.mesh
-  -out ${CTEST_OUTPUT_DIR}/locParams.o.meshb)
+MMG_ADD_TEST(mmg2d_locParam
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/LocParams" "circle2refs.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_locParam_ani
-  COMMAND ${EXECUT_MMG2D} -v 5 -A
-  ${MMG2D_CI_TESTS}/LocParams/circle2refs.mesh
-  -out ${CTEST_OUTPUT_DIR}/locParams-ani.o.meshb)
+MMG_ADD_TEST(mmg2d_locParam_ani
+  "${EXECUT_MMG2D} -v 5 -A"
+  "${MMG2D_CI_TESTS}/LocParams" "circle2refs.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_opnbdy_yes
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001
-  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes.o.meshb)
+MMG_ADD_TEST(mmg2d_opnbdy_yes
+  "${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001"
+  "${MMG2D_CI_TESTS}/Opnbdy" "opnbdy-mesh.msh"
+  )
 
-ADD_TEST(NAME mmg2d_opnbdy_no
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001
-  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-no.o.meshb)
+MMG_ADD_TEST(mmg2d_opnbdy_no
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001"
+  "${MMG2D_CI_TESTS}/Opnbdy" "opnbdy-mesh.msh"
+  )
 
-ADD_TEST(NAME mmg2d_opnbdy_ls
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001
-  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
-  -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
-  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-ls.o.meshb)
+MMG_ADD_TEST(mmg2d_opnbdy_ls
+  "${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001
+   -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol -in "
+  "${MMG2D_CI_TESTS}/Opnbdy" "opnbdy.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_opnbdy_yes_ani
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
-  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes-ani.o.meshb)
+MMG_ADD_TEST(mmg2d_opnbdy_yes_ani
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy"
+  "${MMG2D_CI_TESTS}/Opnbdy" "opnbdy-mesh.msh"
+  )
 
 # default hybrid
-ADD_TEST(NAME mmg2d_hybrid_2d
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
-  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-default)
+MMG_ADD_TEST(mmg2d_hybrid_2d
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/Hybrid" "hybrid.mesh"
+  )
 
 # hybrid opnbdy
-ADD_TEST(NAME mmg2d_hybrid_opnbdy_2d
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy
-  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
-  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
+MMG_ADD_TEST(mmg2d_hybrid_opnbdy_2d
+  "${EXECUT_MMG2D} -v 5 -opnbdy"
+  "${MMG2D_CI_TESTS}/Hybrid" "hybrid.mesh"
+  )
 
 # hybrid hsiz
-ADD_TEST(NAME mmg2d_hybrid_hsiz_2d
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.05 -hgradreq -1
-  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
-  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
+MMG_ADD_TEST(mmg2d_hybrid_hsiz_2d
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.05 -hgradreq -1"
+  "${MMG2D_CI_TESTS}/Hybrid" "hybrid.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_hybrid_nosizreq_nohgradreq_2d
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh -nosizreq -hgradreq -1
-  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-nosizreq)
+MMG_ADD_TEST(mmg2d_hybrid_nosizreq_nohgradreq_2d
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/Hybrid" "hybrid.mesh -nosizreq -hgradreq -1"
+  )
 
 # hybrid nsd: remove the triangular domain as it is of ref 1001
-ADD_TEST(NAME mmg2d_hybrid-nsd1
-  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 1
-  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
-  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-nsd1)
+MMG_ADD_TEST(mmg2d_hybrid-nsd1
+  "${EXECUT_MMG2D} -v 5 -nsd 1"
+  "${MMG2D_CI_TESTS}/Hybrid" "hybrid.mesh"
+  )
 
 ###############################################################################
 #####
@@ -196,100 +196,100 @@ ADD_TEST(NAME mmg2d_hybrid-nsd1
 ###############################################################################
 
 # Binary gmsh no metric
-ADD_TEST(NAME mmg2d_binary_gmsh_2d
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GmshInout/cercle1.mshb
-  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_2d-cercle.mshb)
+MMG_ADD_TEST(mmg2d_binary_gmsh_2d
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GmshInout" "cercle1.mshb"
+  )
 
 # Ascii gmsh no metric
-ADD_TEST(NAME mmg2d_ascii_gmsh_2d
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh
-  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_2d-cercle)
+MMG_ADD_TEST(mmg2d_ascii_gmsh_2d
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GmshInout" "cercle1.msh"
+  )
 
 # Ascii gmsh no metric hybrid
-ADD_TEST(NAME mmg2d_gmsh_hybrid_2d
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/Hybrid/hybrid.msh
-  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_gmsh_2d-hybrid)
+MMG_ADD_TEST(mmg2d_gmsh_hybrid_2d
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/Hybrid" "hybrid.msh"
+  )
 
 # Binary gmsh iso metric
-ADD_TEST(NAME mmg2d_binary_gmsh_iso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GmshInout/iso.mshb
-  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_iso.mshb)
+MMG_ADD_TEST(mmg2d_binary_gmsh_iso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GmshInout" "iso.mshb"
+  )
 
 # Ascii gmsh iso metric
-ADD_TEST(NAME mmg2d_ascii_gmsh_iso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GmshInout/iso.msh
-  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_iso)
+MMG_ADD_TEST(mmg2d_ascii_gmsh_iso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GmshInout" "iso.msh"
+  )
 
 # Binary gmsh iso metric
-ADD_TEST(NAME mmg2d_binary_gmsh_ani
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GmshInout/ani.mshb
-  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_ani.mshb)
+MMG_ADD_TEST(mmg2d_binary_gmsh_ani
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GmshInout" "ani.mshb"
+  )
 
 # Ascii gmsh iso metric
-ADD_TEST(NAME mmg2d_ascii_gmsh_ani
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GmshInout/ani.msh
-  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_ani)
+MMG_ADD_TEST(mmg2d_ascii_gmsh_ani
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GmshInout" "ani.msh"
+  )
 
 # VTK .vtk no metric
-ADD_TEST(NAME mmg2d_vtkvtk
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtk
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk)
+MMG_ADD_TEST(mmg2d_vtkvtk
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "cercle.vtk"
+  )
 
 # VTK .vtp no metric
-ADD_TEST(NAME mmg2d_vtkvtp
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtp
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp)
+MMG_ADD_TEST(mmg2d_vtkvtp
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "cercle.vtp"
+  )
 
 # VTK .vtu no metric
-ADD_TEST(NAME mmg2d_vtkvtu
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtu
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu)
+MMG_ADD_TEST(mmg2d_vtkvtu
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "cercle.vtu"
+  )
 
 # VTK .vtk with iso metric
-ADD_TEST(NAME mmg2d_vtkvtk_iso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/iso.vtk
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_iso)
+MMG_ADD_TEST(mmg2d_vtkvtk_iso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "iso.vtk"
+  )
 
 # VTK .vtp with iso metric
-ADD_TEST(NAME mmg2d_vtkvtp_iso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/iso.vtp
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_iso)
+MMG_ADD_TEST(mmg2d_vtkvtp_iso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "iso.vtp"
+  )
 
 # VTK .vtu with iso metric
-ADD_TEST(NAME mmg2d_vtkvtu_iso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/iso.vtu
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_iso)
+MMG_ADD_TEST(mmg2d_vtkvtu_iso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "iso.vtu"
+  )
 
 # VTK .vtk with aniso metric
-ADD_TEST(NAME mmg2d_vtkvtk_ani
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/ani.vtk
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ani)
+MMG_ADD_TEST(mmg2d_vtkvtk_ani
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "ani.vtk"
+  )
 
 # VTK .vtp with aniso metric
-ADD_TEST(NAME mmg2d_vtkvtp_ani
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/ani.vtp
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ani)
+MMG_ADD_TEST(mmg2d_vtkvtp_ani
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "ani.vtp"
+  )
 
 # VTK .vtu with aniso metric
-ADD_TEST(NAME mmg2d_vtkvtu_ani
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
+MMG_ADD_TEST(mmg2d_vtkvtu_ani
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/VtkInout" "ani.vtu"
+  )
 
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
@@ -317,174 +317,170 @@ ENDIF()
 #
 # Respect the default Tetgen behaviour: saves only boundary edges in
 # .edge file.
-ADD_TEST(NAME mmg2d_Circle-triangle
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle.o.node)
+MMG_ADD_TEST(mmg2d_Circle-triangle
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
 ###############################################################################
 #####
 #####         Isotropic cases
 #####
 ###############################################################################
-ADD_TEST(NAME mmg2d_SquareIso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/SquareIso/carretest
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_SquareIso-carretest.o.meshb)
+MMG_ADD_TEST(mmg2d_SquareIso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/SquareIso" "carretest"
+  )
 
-ADD_TEST(NAME mmg2d_SquareIso_nonConstant
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/SquareIso/non-constant
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_non-constant.o.meshb)
+MMG_ADD_TEST(mmg2d_SquareIso_nonConstant
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/SquareIso" "non-constant"
+  )
 
-ADD_TEST(NAME mmg2d_SquareIso_nonConstant2
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/SquareIso/non-constant-2
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_non-constant-2.o.meshb)
+MMG_ADD_TEST(mmg2d_SquareIso_nonConstant2
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/SquareIso" "non-constant-2"
+  )
 
 ####### -nosurf option
-ADD_TEST(NAME mmg2d_2squares
-  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -hmax 1 -nosurf -v 5
-  ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares.o.meshb)
+MMG_ADD_TEST(mmg2d_2squares
+  "${EXECUT_MMG2D} -3dMedit 2 -hmax 1 -nosurf -v 5"
+  "${MMG2D_CI_TESTS}/2squares" "2squares"
+  )
 
 ####### -nsd
-ADD_TEST(NAME mmg2d_2squares-nsd16
-  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 16
-  ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.meshb)
+MMG_ADD_TEST(mmg2d_2squares-nsd16
+  "${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 16"
+  "${MMG2D_CI_TESTS}/2squares" "2squares"
+  )
 
 ####### orphan
-ADD_TEST(NAME mmg2d_2squares-orphan
-  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 10
-  ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd10.o.meshb)
+MMG_ADD_TEST(mmg2d_2squares-orphan
+  "${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 10"
+  "${MMG2D_CI_TESTS}/2squares" "2squares"
+  )
 
 ####### -met option
-ADD_TEST(NAME mmg2d_2squares-withMet
-  COMMAND ${EXECUT_MMG2D} -3dMedit 2  -v 5
-  ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-met.o.meshb)
+MMG_ADD_TEST(mmg2d_2squares-withMet
+  "${EXECUT_MMG2D} -3dMedit 2  -v 5"
+  "${MMG2D_CI_TESTS}/2squares" "2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol"
+  )
 
 ####### -sol option
-ADD_TEST(NAME mmg2d_2squares-withSol
-  COMMAND ${EXECUT_MMG2D} -3dMedit 2  -v 5
-  ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-sol.o.meshb)
+MMG_ADD_TEST(mmg2d_2squares-withSol
+  "${EXECUT_MMG2D} -3dMedit 2  -v 5"
+  "${MMG2D_CI_TESTS}/2squares" "2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol"
+  )
 
 # -nreg
-ADD_TEST(NAME mmg2d_nreg
-  COMMAND ${EXECUT_MMG2D} -v 5 -nreg
-  ${MMG2D_CI_TESTS}/SquareIso/carretest
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_nreg.o.meshb)
+MMG_ADD_TEST(mmg2d_nreg
+  "${EXECUT_MMG2D} -v 5 -nreg"
+  "${MMG2D_CI_TESTS}/SquareIso" "carretest"
+  )
 
 ###############################################################################
 #####
 #####         Anisotropic cases
 #####
 ###############################################################################
-ADD_TEST(NAME mmg2d_SquareAniso
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/SquareAniso/adap1
-  ${CTEST_OUTPUT_DIR}/mmg2d_SquareAniso-mmg2d_SquareAniso-adap1.o.meshb)
+MMG_ADD_TEST(mmg2d_SquareAniso
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/SquareAniso" "adap1"
+  )
 
-ADD_TEST(NAME mmg2d_Circle-optimAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-optimAni.o.mesh)
+MMG_ADD_TEST(mmg2d_Circle-optimAni
+  "${EXECUT_MMG2D} -v 5 -optim -A -sol 2"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
-ADD_TEST(NAME mmg2d_Circle-hsizAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.01 -A -sol 2
-  ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
+MMG_ADD_TEST(mmg2d_Circle-hsizAni
+  "${EXECUT_MMG2D} -v 5 -hsiz 0.01 -A -sol 2"
+  "${MMG2D_CI_TESTS}/Circle" "cercle"
+  )
 
 ###############################################################################
 #####
 #####         Mesh generation
 #####
 ###############################################################################
-ADD_TEST(NAME mmg2d_SquareGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/SquareGeneration/carretest
-  ${CTEST_OUTPUT_DIR}/mmg2d_SquareGeneration-carretest.o.meshb)
+MMG_ADD_TEST(mmg2d_SquareGeneration
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/SquareGeneration" "carretest"
+  )
 
-ADD_TEST(NAME mmg2d_NacaGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001
-  ${MMG2D_CI_TESTS}/NacaGeneration/naca
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
+MMG_ADD_TEST(mmg2d_NacaGeneration
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001"
+  "${MMG2D_CI_TESTS}/NacaGeneration" "naca"
+  )
 
-ADD_TEST(NAME mmg2d_NacaGenerationAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A
-  ${MMG2D_CI_TESTS}/NacaGeneration/naca
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
+MMG_ADD_TEST(mmg2d_NacaGenerationAni
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001 -A"
+  "${MMG2D_CI_TESTS}/NacaGeneration" "naca"
+  )
 
 # optim
-ADD_TEST(NAME mmg2d_NacaGeneration-optim
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -optim
-  ${MMG2D_CI_TESTS}/NacaGeneration/naca
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-optim.o.meshb)
+MMG_ADD_TEST(mmg2d_NacaGeneration-optim
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001 -optim"
+  "${MMG2D_CI_TESTS}/NacaGeneration" "naca"
+  )
 
 # hsiz
-ADD_TEST(NAME mmg2d_NacaGeneration-hsiz
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01
-  ${MMG2D_CI_TESTS}/NacaGeneration/naca
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-hsiz.o.meshb)
+MMG_ADD_TEST(mmg2d_NacaGeneration-hsiz
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01"
+  "${MMG2D_CI_TESTS}/NacaGeneration" "naca"
+  )
 
 # hsiz + ani
-ADD_TEST(NAME mmg2d_NacaGeneration-hsizAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01 -A
-  ${MMG2D_CI_TESTS}/NacaGeneration/naca
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-hsizAni.o.meshb)
+MMG_ADD_TEST(mmg2d_NacaGeneration-hsizAni
+  "${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01 -A"
+  "${MMG2D_CI_TESTS}/NacaGeneration" "naca"
+  )
 
 # non convex test cases
-ADD_TEST(NAME mmg2d_ACDCGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration.o.meshb)
+MMG_ADD_TEST(mmg2d_ACDCGeneration
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/ACDCGeneration" "acdcBdy.mesh"
+  )
 
 # nsd option: keep only domain of ref 2
-ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
-  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2
-  ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.meshb)
+MMG_ADD_TEST(mmg2d_ACDCGeneration-nsd2
+  "${EXECUT_MMG2D} -v 5 -nsd 2"
+  "${MMG2D_CI_TESTS}/ACDCGeneration" "acdcBdy.mesh"
+  )
 
-ADD_TEST(NAME mmg2d_GaronneGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
+MMG_ADD_TEST(mmg2d_GaronneGeneration
+  "${EXECUT_MMG2D} -v 5"
+  "${MMG2D_CI_TESTS}/GaronneGeneration" "garonneEdges.mesh"
+  )
 
 ###############################################################################
 #####
 #####         Implicit domain discretization
 #####
 ###############################################################################
-ADD_TEST(NAME mmg2d_LSMultiMat_val
-  COMMAND ${EXECUT_MMG2D} -val -v 5 -ls -hausd 0.001
+MMG_ADD_TEST(mmg2d_LSMultiMat_val
+  "${EXECUT_MMG2D} -val -v 5 -ls -hausd 0.001
   -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
-  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
+  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
   )
 
-ADD_TEST(NAME mmg2d_OptLs_Bridge
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-  -sol ${MMG2D_CI_TESTS}/OptLs_bridge/bridge.sol
-  ${MMG2D_CI_TESTS}/OptLs_bridge/bridge
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_bridge.o.meshb
+MMG_ADD_TEST(mmg2d_OptLs_Bridge
+  "${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/OptLs_bridge/bridge.sol"
+  "${MMG2D_CI_TESTS}/OptLs_bridge" "bridge"
   )
 
 #multi-mat + opnbdy + non-manifold check
-ADD_TEST(NAME mmg2d_LSMultiMat_nm
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
-  ${MMG2D_CI_TESTS}/LSMultiMat/2d-opn.mesh
-  ${CTEST_OUTPUT_DIR}/mmg2d_2d-opn.o.meshb
+MMG_ADD_TEST(mmg2d_LSMultiMat_nm
+  "${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "2d-opn.mesh"
   )
 
 ####### -nsd
-ADD_TEST(NAME mmg2d_LSMultiMat-nsd22
-  COMMAND ${EXECUT_MMG2D} -nsd 22 -v 5 -ls
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-nsd22.o.mesh
+MMG_ADD_TEST(mmg2d_LSMultiMat-nsd22
+  "${EXECUT_MMG2D} -nsd 22 -v 5 -ls"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
   )
 
 #ADD_TEST(NAME mmg2d_LSMultiMat_default
@@ -497,78 +493,77 @@ ADD_TEST(NAME mmg2d_LSMultiMat-nsd22
 SET_PROPERTY(TEST mmg2d_LSMultiMat_val #mmg2d_LSMultiMat_default
   PROPERTY WILL_FAIL TRUE)
 
-ADD_TEST(NAME mmg2d_LSDiscretization
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization-dom.o.meshb)
+MMG_ADD_TEST(mmg2d_LSDiscretization
+  "${EXECUT_MMG2D} -v 5 -ls"
+  "${MMG2D_CI_TESTS}/LSDiscretization" "dom"
+  )
 
-ADD_TEST(NAME mmg2d_LSDiscretization2
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization2-nacai.o.meshb)
+MMG_ADD_TEST(mmg2d_LSDiscretization2
+  "${EXECUT_MMG2D} -v 5 -ls"
+  "${MMG2D_CI_TESTS}/LSDiscretization" "nacai"
+  )
 
-ADD_TEST(NAME mmg2d_LSMultiMat
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat
+  "${EXECUT_MMG2D} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # non 0 ls
-ADD_TEST(NAME mmg2d_LSMultiMat_nonzero
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.01 -hausd 0.001
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-nonzero.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat_nonzero
+  "${EXECUT_MMG2D} -v 5 -ls 0.01 -hausd 0.001"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # ls + rmc
-ADD_TEST(NAME mmg2d_OptLs_dom_withbub
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
+MMG_ADD_TEST(mmg2d_OptLs_dom_withbub
+  "${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol"
+  "${MMG2D_CI_TESTS}/LSDiscretization" "dom"
+  )
 
 # ls + rmc + LSBaseReference
-ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-rmc
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
-  ${MMG2D_CI_TESTS}/LSBaseReferences/box
-  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-rmc.o.meshb)
+MMG_ADD_TEST(mmg2d_OptLs_LSBaseReferences-rmc
+  "${EXECUT_MMG2D} -v 5 -ls -rmc
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol"
+  "${MMG2D_CI_TESTS}/LSBaseReferences" "box"
+  )
 
-ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-normc
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-  ${MMG2D_CI_TESTS}/LSBaseReferences/box
-  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-normc.o.meshb)
+MMG_ADD_TEST(mmg2d_OptLs_LSBaseReferences-normc
+  "${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol"
+  "${MMG2D_CI_TESTS}/LSBaseReferences" "box"
+  )
 
 # ls + rmc: max pile size bug
-ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
-  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-  -sol ${MMG2D_CI_TESTS}/LSDiscretization/whole.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rmcmaxpile.o.meshb)
-
-ADD_TEST(NAME mmg2d_OptLs_dom_rembub
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub.o.meshb -rmc)
-
-ADD_TEST(NAME mmg2d_OptLs_dom_rembub2
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc 0.1
-  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub2.o.meshb)
-
-add_test(
-  NAME mmg2d_OptLs_isoref_defaut
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.mesh
-  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh
+MMG_ADD_TEST(mmg2d_OptLs_dom_rmcmaxpile
+  "${EXECUT_MMG2D} -v 5 -ls -rmc
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/whole.sol"
+  "${MMG2D_CI_TESTS}/LSDiscretization" "dom"
   )
-add_test(
-  NAME mmg2d_OptLs_isoref_5
-  COMMAND ${EXECUT_MMG2D} -v 5 -isoref 5 -ls
-  ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh-isoref5.mesh
-  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
-  ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh
+
+MMG_ADD_TEST(mmg2d_OptLs_dom_rembub
+  "${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol"
+  "${MMG2D_CI_TESTS}/LSDiscretization" "dom"
+  )
+
+MMG_ADD_TEST(mmg2d_OptLs_dom_rembub2
+  "${EXECUT_MMG2D} -v 5 -ls -rmc 0.1
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol"
+  "${MMG2D_CI_TESTS}/LSDiscretization" "dom"
+  )
+
+MMG_ADD_TEST(
+  mmg2d_OptLs_isoref_defaut
+  "${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol"
+  "${MMG2D_CI_TESTS}/OptLs_isoref" "2d-mesh.mesh"
+  )
+MMG_ADD_TEST(
+  mmg2d_OptLs_isoref_5
+  "${EXECUT_MMG2D} -v 5 -isoref 5 -ls
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol"
+  "${MMG2D_CI_TESTS}/OptLs_isoref" "2d-mesh-isoref5.mesh"
   )
 
 if (BASH)
@@ -579,44 +574,43 @@ if (BASH)
 endif()
 
 # ls discretisation + optim option
-ADD_TEST(NAME mmg2d_LSMultiMat_optim
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -hausd 0.001
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-optim.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat_optim
+  "${EXECUT_MMG2D} -v 5 -ls -optim -hausd 0.001"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # ls discretisation + optim + aniso option
-ADD_TEST(NAME mmg2d_LSMultiMat_optimAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -A -hausd 0.001
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-optimAni.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat_optimAni
+  "${EXECUT_MMG2D} -v 5 -ls -optim -A -hausd 0.001"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # ls discretisation + hsiz option
-ADD_TEST(NAME mmg2d_LSMultiMat_hsiz
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -hausd 0.001
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-hsiz.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat_hsiz
+  "${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -hausd 0.001"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # ls discretisation + hsiz Ani option
-ADD_TEST(NAME mmg2d_LSMultiMat_hsizAni
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -A -hausd 0.001
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-hsizAni.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat_hsizAni
+  "${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -A -hausd 0.001"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # ls discretisation + metric
-ADD_TEST(NAME mmg2d_LSMultiMat_withMet
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
-  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMet.o.meshb)
+MMG_ADD_TEST(mmg2d_LSMultiMat_withMet
+  "${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 # ls discretisation + metric + ls
-ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
+MMG_ADD_TEST(mmg2d_LSMultiMat_withMetAndLs
+  "${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
   -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
-  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
-  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
-  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
-
+  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol"
+  "${MMG2D_CI_TESTS}/LSMultiMat" "multi-mat"
+  )
 
 ###############################################################################
 #####
@@ -625,30 +619,23 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
 ###############################################################################
 #####
 IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
-  ADD_TEST(NAME mmg2d_LagMotion0_circle
-    COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
-    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
-    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion0_circle-circle.o.meshb
+  MMG_ADD_TEST(mmg2d_LagMotion0_circle
+    "${EXECUT_MMG2D} -v 5  -lag 0"
+    "${MMG2D_CI_TESTS}/LagMotion_circle" "circle"
     )
-  ADD_TEST(NAME mmg2d_LagMotion1_circle
-    COMMAND ${EXECUT_MMG2D} -v 5  -lag 1
-    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
-    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion1_circle-circle.o.meshb
+  MMG_ADD_TEST(mmg2d_LagMotion1_circle
+    "${EXECUT_MMG2D} -v 5  -lag 1"
+    "${MMG2D_CI_TESTS}/LagMotion_circle" "circle"
     )
-  ADD_TEST(NAME mmg2d_LagMotion2_circle
-    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2
-    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
-    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-circle.o.meshb
+  MMG_ADD_TEST(mmg2d_LagMotion2_circle
+    "${EXECUT_MMG2D} -v 5  -lag 2"
+    "${MMG2D_CI_TESTS}/LagMotion_circle" "circle"
     )
 
   # nsd
-  ADD_TEST(NAME mmg2d_LagMotion2_circle-nsd3
-    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2 -nsd 3
-    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
-    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-nsd3.o.mesh
+  MMG_ADD_TEST(mmg2d_LagMotion2_circle-nsd3
+    "${EXECUT_MMG2D} -v 5  -lag 2 -nsd 3"
+    "${MMG2D_CI_TESTS}/LagMotion_circle" "circle"
     )
 
 ENDIF()
-
-ADD_TEST(MyTestCreateCompare ${CMAKE_COMMAND} -E compare_files
-  ${CMAKE_BINARY_DIR}/toto.out   ${CMAKE_BINARY_DIR}/toto.out)
