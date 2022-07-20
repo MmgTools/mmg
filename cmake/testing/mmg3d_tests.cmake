@@ -20,8 +20,6 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMG3D ${EXECUT_MMG3D} NAME )
-
 ##############################################################################
 #####
 #####         Tests that may be run twice
@@ -301,7 +299,7 @@ IF ( LONG_TESTS )
     MMG_ADD_TEST(${test_name}_2
       "${EXECUT_MMG3D}
       -v 5 -hausd 0.1 -ar 60 -hgrad -1"
-      "${CTEST_OUTPUT_DIR}" "${test_name}-out.o.meshb"
+      "${CTEST_OUTPUT_DIR}" "${test_name}.o.meshb"
       )
 
     SET_TESTS_PROPERTIES ( ${test_name}_2
@@ -328,7 +326,7 @@ IF ( LONG_TESTS )
       MMG_ADD_TEST(${test_name}_2
         "${EXECUT_MMG3D}
         -v 5 -hausd 0.1 -ar 60 -hgrad -1"
-        "${CTEST_OUTPUT_DIR}" "${test_name}-out.o.meshb"
+        "${CTEST_OUTPUT_DIR}" "${test_name}.o.meshb"
         )
 
     SET_TESTS_PROPERTIES ( ${test_name}_2
@@ -370,7 +368,7 @@ MMG_ADD_TEST ( mmg3d_cube-tetgen
 #####
 ##############################################################################
 #####
-ADD_TEST ( mmg3d_LeakCheck_AbnormalEnd3
+ADD_TEST ( NAME mmg3d_LeakCheck_AbnormalEnd3
   COMMAND ${EXECUT_MMG3D} -v 5
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
@@ -747,7 +745,7 @@ IF ( TEST_LIBMMG3D )
   SET_TESTS_PROPERTIES ( test_para_tria
     PROPERTIES FIXTURES_SETUP test_para_tria )
 
-  ADD_TEST(test_compare_para_tria
+  ADD_TEST(NAME test_compare_para_tria
     COMMAND ${TEST_COMPARE_PARA_TRIA}
     ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
     ${CTEST_OUTPUT_DIR}/test_para_tria.o.mesh

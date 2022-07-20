@@ -175,7 +175,7 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
 
-    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
+    SET ( EXECUT_MMG2D      $<TARGET_NAME:${PROJECT_NAME}2d> )
 
     IF ( ONLY_VERY_SHORT_TESTS )
       # Add tests that doesn't require to download meshes

@@ -244,6 +244,7 @@ jobs:
           path: |
             build/bin
 
+
       - name: Test Mmg
         if: matrix.vtk == 'off'
         run: |
@@ -257,6 +258,7 @@ jobs:
           ctest -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Archive production artifacts for tests
+        if: success() || failure()
         uses: actions/upload-artifact@v2
         with:
           name: Mmg-tests

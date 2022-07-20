@@ -20,8 +20,6 @@
 ##  use this copy of the Mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
-
 ###############################################################################
 #####
 #####         Continuous Integration
