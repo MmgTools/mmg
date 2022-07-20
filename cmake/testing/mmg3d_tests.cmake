@@ -299,7 +299,7 @@ IF ( LONG_TESTS )
     MMG_ADD_TEST(${test_name}_2
       "${EXECUT_MMG3D}
       -v 5 -hausd 0.1 -ar 60 -hgrad -1"
-      "${CTEST_OUTPUT_DIR}" "${test_name}.o.meshb"
+      "${CTEST_OUTPUT_DIR}" "${test_name}.o.mesh"
       )
 
     SET_TESTS_PROPERTIES ( ${test_name}_2
@@ -326,7 +326,7 @@ IF ( LONG_TESTS )
       MMG_ADD_TEST(${test_name}_2
         "${EXECUT_MMG3D}
         -v 5 -hausd 0.1 -ar 60 -hgrad -1"
-        "${CTEST_OUTPUT_DIR}" "${test_name}.o.meshb"
+        "${CTEST_OUTPUT_DIR}" "${test_name}.o.mesh"
         )
 
     SET_TESTS_PROPERTIES ( ${test_name}_2

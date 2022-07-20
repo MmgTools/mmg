@@ -378,6 +378,14 @@ ENDMACRO ( )
 
 MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
 
+  IF (NOT WIN32)
+    # unix-like
+    SET ( OUTPUT "COMMAND tee  ${test_name}.out" )
+  ELSE()
+    # windows (included win64)
+    SET ( OUTPUT "OUTPUT_FILE ${test_name}.out" )
+  ENDIF()
+
   FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_$<CONFIG>.cmake
     CONTENT
     "EXECUTE_PROCESS(
@@ -385,7 +393,7 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
     ${args}
     ${path_in}/${file_in}
     -out ${CTEST_OUTPUT_DIR}/${test_name}.o.mesh
-    COMMAND tee ${test_name}.out
+    ${OUTPUT}
     COMMAND_ECHO STDOUT
     COMMAND_ERROR_IS_FATAL ANY
     )"
