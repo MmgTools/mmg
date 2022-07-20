@@ -235,7 +235,6 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG2D_setfunc(mesh,met);
   MMG2D_Set_commonFunc();
 
-  MMG5_version(mesh,"2D");
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
