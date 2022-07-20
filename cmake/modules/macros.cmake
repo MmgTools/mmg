@@ -378,7 +378,7 @@ ENDMACRO ( )
 
 MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
 
-  FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}.cmake
+  FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_$<CONFIG>.cmake
     CONTENT
     "EXECUTE_PROCESS(
     COMMAND
@@ -392,9 +392,9 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
    )
 
   ADD_TEST(NAME ${test_name}
-    COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}.cmake )
+    COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}_$<CONFIG>.cmake )
 
-  FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref.cmake
+  FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref_$<CONFIG>.cmake
     CONTENT
     "EXECUTE_PROCESS(
     COMMAND
@@ -405,7 +405,7 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
     )
 
   ADD_TEST(NAME ${test_name}_compare_to_ref
-    COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref.cmake )
+    COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref_$<CONFIG>.cmake )
 
   set_tests_properties( ${test_name}_compare_to_ref PROPERTIES DEPENDS ${test_name} )
 
