@@ -380,13 +380,13 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
 
   IF (NOT WIN32)
     # unix-like
-    SET ( OUTPUT "COMMAND tee  ${test_name}.out" )
-    SET ( COMPARE_OUTPUT "COMMAND tee  ${test_name}.compare" )
+    SET ( OUTPUT "COMMAND tee  ${CTEST_OUTPUT_DIR}/${test_name}.out" )
+    SET ( COMPARE_OUTPUT "COMMAND tee  ${CTEST_OUTPUT_DIR}/${test_name}.compare" )
 
   ELSE()
     # windows (included win64)
-    SET ( OUTPUT "COMMAND tee  ${test_name}.out" )
-    SET ( COMPARE_OUTPUT "COMMAND tee  ${test_name}.compare" )
+    SET ( OUTPUT "COMMAND tee  ${CTEST_OUTPUT_DIR}/${test_name}.out" )
+    SET ( COMPARE_OUTPUT "COMMAND tee  ${CTEST_OUTPUT_DIR}/${test_name}.compare" )
   ENDIF()
 
   FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_$<CONFIG>.cmake
