@@ -277,6 +277,8 @@ IF( BUILD_TESTING )
 
   # Set the continuous integration options
   SET ( MMG_CI_TESTS ${CI_DIR}/mmg )
+  SET ( MMG_CI_ERROR_RULE LAST CACHE STRING
+    "Rule when comparaison of test outputs fail: ANY mark the test as failed, LAST mark it as successful)" )
 
   # Copy config file and custom file in the good directories
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake

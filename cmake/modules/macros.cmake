@@ -381,9 +381,12 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
   IF (NOT WIN32)
     # unix-like
     SET ( OUTPUT "COMMAND tee  ${test_name}.out" )
+    SET ( COMPARE_OUTPUT "COMMAND tee  ${test_name}.compare" )
+
   ELSE()
     # windows (included win64)
-    SET ( OUTPUT "OUTPUT_FILE ${test_name}.out" )
+    SET ( OUTPUT "COMMAND tee  ${test_name}.out" )
+    SET ( COMPARE_OUTPUT "COMMAND tee  ${test_name}.compare" )
   ENDIF()
 
   FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_$<CONFIG>.cmake
@@ -402,13 +405,15 @@ MACRO ( MMG_ADD_TEST test_name args path_in file_in  )
   ADD_TEST(NAME ${test_name}
     COMMAND ${CMAKE_COMMAND} -P ${MMG_SCRIPTS_DIR}/${test_name}_$<CONFIG>.cmake )
 
+  # Remark: in the following execute_process call COMMAND_ERROR_IS_FATAL is called twice:
   FILE ( GENERATE OUTPUT ${MMG_SCRIPTS_DIR}/${test_name}_compare_to_ref_$<CONFIG>.cmake
     CONTENT
     "EXECUTE_PROCESS(
     COMMAND
     diff ${test_name}.out ${path_in}/${test_name}.ref
+    ${OUTPUT}
     COMMAND_ECHO STDOUT
-    $ENV{MMG_ERROR_RULE}
+    COMMAND_ERROR_IS_FATAL ${MMG_CI_ERROR_RULE}
     )"
     )
 
