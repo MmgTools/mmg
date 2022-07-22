@@ -235,7 +235,6 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG2D_setfunc(mesh,met);
   MMG2D_Set_commonFunc();
 
-  MMG5_version(mesh,"2D");
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
@@ -285,7 +284,7 @@ int main(int argc,char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
 
   /* Version info */
-#ifndef MMG_DIFFOUTPUT
+#ifndef MMG_COMPARABLE_OUTPUT
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
