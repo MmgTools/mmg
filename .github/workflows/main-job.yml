@@ -27,7 +27,7 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-            os: [ubuntu-20.04,macos-10.15]
+            os: [ubuntu-20.04,macos-12]
             pattern: [on,off]
             pointmap: [off]
             scotch: [on,off]
@@ -42,7 +42,7 @@ jobs:
                 scotch: off
                 vtk: on
 
-              - os: macos-10.15
+              - os: macos-12
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -55,7 +55,7 @@ jobs:
                 scotch: on
                 vtk: off
 
-              - os: macos-10.15
+              - os: macos-12
                 pattern: off
                 pointmap: on
                 scotch: on

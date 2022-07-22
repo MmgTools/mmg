@@ -35,6 +35,7 @@
 
 #include "libmmgs_private.h"
 #include "mmgexterns.h"
+#include "inlined_functions.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -43,13 +44,21 @@
  * \param i index of the edge to collapse
  * \param list pointer toward the ball of point
  * \param typchk type of check to perform
+ * \param MMGS_lenEdg pointer toward the suitable fct to compute edge lengths
+ * depending on presence of input metric, metric type (iso/aniso) and \a typchk
+ * value (i.e. stage of adaptation)
+ * \param MMGS_caltri pointer toward the suitable fct to compute tria quality
+ * depending on presence of input metric, metric type (iso/aniso) and \a typchk
+ * value (i.e. stage of adaptation)
  *
  * \return 0 if we can't move of if we fail, 1 if success
  *
  * check if geometry preserved by collapsing edge i
  *
  */
-int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk) {
+int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk,
+           double (*MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,int ,int,int8_t),
+           double (*MMGS_caltri)(MMG5_pMesh,MMG5_pSol,MMG5_pTria)) {
   MMG5_pTria     pt,pt0,pt1,pt2;
   MMG5_pPoint    p1,p2;
   double         len,lon,ps,cosnold,cosnnew,kal,n0old[3],n1old[3],n00old[3];
@@ -75,8 +84,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk)
   n1new[0]  = n1new[1]  = n1new[2]  = 0.;
 #endif
 
-  if ( typchk == 2 && met->m ) {
-    lon = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+  if ( MMGS_lenEdg ) {
+    lon = MMGS_lenEdg(mesh,met,ip1,ip2,0);
     if ( !lon ) return 0;
     lon = MG_MIN(lon,MMGS_LSHRT);
     lon = MG_MAX(1.0/lon,MMGS_LLONG);
@@ -108,9 +117,9 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk)
       pt1 = &mesh->tria[jel];
 
       /* check length */
-      if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
+      if ( MMGS_lenEdg ) {
         ip1 = pt1->v[j2];
-        len = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+        len = MMGS_lenEdg(mesh,met,ip1,ip2,0);
         if ( len > lon || !len )  return 0;
       }
 
@@ -159,10 +168,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk)
       if ( chkedg(mesh,0) )  return 0;
 
       /* check quality */
-      if ( typchk == 2 && met->m )
-        kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
-      else
-        kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+      kal = MMGS_ALPHAD*MMGS_caltri(mesh,met,pt0);
+
       if ( kal < MMGS_NULKAL )  return 0;
 
       memcpy(n0old,n1old,3*sizeof(double));
@@ -221,10 +228,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk)
     if ( chkedg(mesh,0) )  return 0;
 
     /* check quality */
-    if ( typchk == 2 && met->m )
-      kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
-    else
-      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+    kal = MMGS_ALPHAD*MMGS_caltri(mesh,met,pt0);
+
     if ( kal < MMGS_NULKAL )  return 0;
   }
 
@@ -261,10 +266,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk)
     if ( chkedg(mesh,0) )  return 0;
 
     /* check quality */
-    if ( typchk == 2 && met->m )
-      kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
-    else
-      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+    kal = MMGS_ALPHAD*MMGS_caltri(mesh,met,pt0);
+
     if ( kal < MMGS_NULKAL )  return 0;
 
   }
