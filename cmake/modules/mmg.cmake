@@ -108,6 +108,7 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     )
   SET( mmg_headers
     ${COMMON_SOURCE_DIR}/mmg_export.h
+    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h
