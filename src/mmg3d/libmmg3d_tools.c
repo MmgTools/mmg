@@ -1245,9 +1245,13 @@ int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
   assert ( mesh->info.optim );
 
   /* Detect the point not used by the mesh */
+  ++mesh->base;
+
+#ifndef NDEBUG
   for (k=1; k<=mesh->np; k++) {
-    mesh->point[k].flag = 1;
+    assert ( mesh->point[k].flag < mesh->base );
   }
+#endif
 
   /* For mmg3d, detect points used by tetra */
   for (k=1; k<=mesh->ne; k++) {
@@ -1255,7 +1259,7 @@ int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<4; i++) {
-      mesh->point[pt->v[i]].flag = 0;
+      mesh->point[pt->v[i]].flag = mesh->base;
     }
   }
 
