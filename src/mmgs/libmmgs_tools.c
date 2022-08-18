@@ -1218,66 +1218,6 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       iadr = 6*ip;
       m    = &met->m[iadr];
 
-
-      /* if ( MG_SIN(p1->tag) ) { */
-      /*   /\** Singular point: No normal at vertex: find the minimal edge length in */
-      /*    * the ball of the point and impose it in an isotropic way (consistently */
-      /*    * with what is done in defsiz)... Another solution can be to compute */
-      /*    * the covariation tensor and to use an isotropic length only when it */
-      /*    * fails. *\/ */
-      /*   int8_t dummy; */
-      /*   ilist = boulet(mesh,k,i,list,dummy); */
-      /*   if ( ilist < 1 ) { */
-      /*     fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n", */
-      /*             __func__); */
-      /*     return 0; */
-      /*   } */
-
-      /*   /\* First edge for an open ball *\/ */
-      /*   int    i1,i2,iel; */
-
-      /*   i2  = MMG5_iprv2[i]; */
-      /*   p2  = &mesh->point[ptt->v[i2]]; */
-
-      /*   u[0] = p2->c[0] - p1->c[0]; */
-      /*   u[1] = p2->c[1] - p1->c[1]; */
-      /*   u[2] = p2->c[2] - p1->c[2]; */
-
-      /*   double hmaxedg = u[0]*u[0] + u[1]*u[1] + u[2]*u[2]; */
-      /*   for ( j=0; j<ilist; ++j ) { */
-      /*     /\* Compute euclidean edge length *\/ */
-      /*     iel = list[j] / 3; */
-      /*     i1  = list[j] % 3; */
-      /*     i2  = MMG5_inxt2[i1]; */
-
-      /*     ptt1 = &mesh->tria[iel]; */
-
-      /*     p2 = &mesh->point[ptt1->v[i2]]; */
-
-      /*     u[0] = p2->c[0] - p1->c[0]; */
-      /*     u[1] = p2->c[1] - p1->c[1]; */
-      /*     u[2] = p2->c[2] - p1->c[2]; */
-
-      /*     hmaxedg = MG_MAX ( hmaxedg, u[0]*u[0] + u[1]*u[1] + u[2]*u[2] ); */
-      /*   } */
-      /*   /\* Last edge for an open ball *\/ */
-      /*   // iel = list[ilist-1]/3; */
-      /*   // i1  = list[ilist-1]%3; */
-      /*   i2  = MMG5_iprv2[i1]; */
-      /*   p2  = &mesh->point[ptt1->v[i2]]; */
-
-      /*   u[0] = p2->c[0] - p1->c[0]; */
-      /*   u[1] = p2->c[1] - p1->c[1]; */
-      /*   u[2] = p2->c[2] - p1->c[2]; */
-      /*   hmaxedg = MG_MAX ( hmaxedg, u[0]*u[0] + u[1]*u[1] + u[2]*u[2] ); */
-
-      /*   /\** Assign maximal edge length in an isotropic way *\/ */
-      /*   m[0] = m[3] = m[5] = 1. / hmaxedg; */
-
-      /*   p1->flag = mesh->base; */
-      /*   continue; */
-      /* } */
-
       if ( MG_CRN & p1->tag ) {
         /** Corner point (no normal at vertex): if the corner defines an angle
          * we can compute the 3D unit tensor (non singular), in the other cases
@@ -1310,38 +1250,11 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p1->flag = mesh->base;
       }
       else if ( p1->tag & MG_GEO  ) {
-        /** Ridge point: We have two normals at vertex and we want to compute
-         * two 2D metrics, each one being computed as the covariance matrix of
-         * the edges (belonging to the half-plane and projected onto the tangent
-         * plane). */
-        /* int ilist2,list2[MMGS_LMAX+2],ier,iprid[2]; */
-        /* ier = bouletrid(mesh,k,i,&ilist,list,&ilist2,list2,&iprid[0],&iprid[1]); */
-        /* if ( !ier ) { */
-        /*   fprintf(stderr,"\n  ## Error: %s: unable to compute the two balls at ridge point %d.\n", */
-        /*           __func__,ip); */
-        /*   return 0; */
-        /* } */
-
-        /* /\** Specific size in direction of t: mean of euclidean lengths of the */
-        /*  * projection of the ridges coming from \a ip on t.*\/ */
-        /* m[0] = 0.; */
-        /* for ( j=0; j<2; ++j) { */
-        /*   p2 = &mesh->point[iprid[j]]; */
-        /*   m[0] += (p2->c[0]-p1->c[0])*p1->n[0] */
-        /*     + (p2->c[1]-p1->c[1])*p1->n[1] + (p2->c[2]-p1->c[2])*p1->n[2]; */
-        /* } */
-        /* m[0] *= 0.5; */
-
-#warning rewrite comments
-        /** Specific size in direction \f$u_1 = n_1^{}t\f$ and \f$u_2 =
-         * n_2^{}t\f$: mean of euclidean lengths of the projection of the ridges
-         * coming from \a ip on t.*/
-        /* assert(mesh->point[ip].xp); */
-        /* double *n1 = &mesh->xpoint[p1->xp].n1[0]; */
-        /* double *n2 = &mesh->xpoint[p1->xp].n2[0]; */
-
-
-        /* m[3] = m[5] = isqhmax; */
+        /** Ridge point (2 normals): normally we can compute the 3D unit
+         * tensor. If the angle is too flat, the computation fails and we try to
+         * compute the 2D unit tensor on the tangent plane of the point (as for
+         * regular points). Normal is recomputed from the normals at triangles
+         * of the ball. */
         int ier = MMGS_unitTensor_3D( mesh, k, i, p1, m);
 
         if ( !ier ) {
