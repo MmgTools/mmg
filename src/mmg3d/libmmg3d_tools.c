@@ -1374,7 +1374,7 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
     return 0;
 
-  /* Travel the triangles edges and add the edge contribution to edges
+  /* Travel the tetra edges and add the edge contribution to edges
    * extermities */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

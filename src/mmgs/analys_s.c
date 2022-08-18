@@ -298,7 +298,10 @@ static void nmpoints(MMG5_pMesh mesh) {
       if ( jel == k ) {
         if ( !(p0->tag & MG_CRN) || !(p0->tag & MG_REQ) ) {
           nmp++;
-          // p0->tag |= MG_CRN + MG_REQ;
+          // p0->tag |= MG_CRN + MG_REQ; // Algiane 2022: this line has been
+          // commented by commit 1f592c. I think that it is a mistake (some
+          // forgotten debug thing). It seems that in any case, nm points are
+          // marked as CRN and REQ when checking handles in MMGS_singul
         }
         continue;
       }
@@ -582,6 +585,11 @@ static int MMG5_singul(MMG5_pMesh mesh) {
  * \return 1 if succeed, 0 if fail
  *
  * Compute normals at C1 vertices, for C0: tangents
+ * This function allocate the xpoint array. A point will have an xpoint if:
+ *   - it is along a reference edge, the xpoint then stores the normal at point while the n field of point containt the tangent at ref edge.
+ *   - it is along a ridge, the xpoint then stores both normals at point while ppt->n stores the tangent
+ *
+ * Corner, required and regular points don't have xpoints.
  *
  */
 static int norver(MMG5_pMesh mesh) {

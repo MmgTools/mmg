@@ -72,8 +72,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   int8_t dummy;
   ilist = boulet(mesh,it,ip,list,&dummy);
-  if ( ilist < 1 )
-    return 0;
+  if ( ilist < 1 )  return 0;
 
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
@@ -708,6 +707,13 @@ int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
  * Define size at points by intersecting the surfacic metric and the
  * physical metric.
  *
+ * \warning What we are doing on non-manifold points has to be improved: as such
+ *     points are marked as MG_CRN and MG_REQ, we first try to call \ref
+ *     MMG5_defmetsin that likely fails (because \ref boulet don't work for
+ *     non-manifod points due to the missing of consistent adjacencies
+ *     relationships), then we call \ref MMG5_defUninitSize and we set hmax on
+ *     non-manifold points. Note that the building of adjacency table depends on
+ *     the initial mesh numbering, thus, in certain cases, boulet will succeed...
  */
 int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
@@ -751,7 +757,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
+  /** Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
@@ -791,7 +797,10 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Now the metric storage at ridges is the "mmg" one. */
   mesh->info.metRidTyp = 1;
 
-  /* search for unintialized metric */
+  /** search for unintialized metric */
+  /** Remark: as non manifold points are marked as CRN and REQ, we first try to
+      call defmetsin that fails (because boulet don't work for non-manifod
+      points), then we pass here and we set hmax on non-manifold points */
   MMG5_defUninitSize ( mesh,met,ismet );
 
   return 1;
