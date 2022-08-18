@@ -134,7 +134,7 @@ int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  MMGS_bdryUpdate(MMG5_pMesh mesh);
-int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
+int  boulet(MMG5_pMesh mesh,int start,int ip,int *list,int8_t *opn);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
 int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
@@ -211,7 +211,7 @@ int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-int    MMGS_surfballRotation(MMG5_pMesh,MMG5_pPoint,int*,int,double r[3][3],double*);
+int    MMGS_surfballRotation(MMG5_pMesh,MMG5_pPoint,int*,int,double r[3][3],double*,double n[3]);
 int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol,int8_t );
 
