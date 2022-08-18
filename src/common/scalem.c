@@ -269,9 +269,7 @@ int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
     }
   }
 
-  /* We pass here only if user user has provided a metric so even inside Mmgs we
-   * can take into account the third direction when truncating the metric */
-  ier = MMG5_solTruncature_ani(mesh, met,3);
+  ier = MMG5_solTruncature_ani(mesh, met);
 
   return ier;
 }
@@ -345,7 +343,6 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
- * \param dim dummy argument for prototype compatibility with MMG5_3dSolTruncature_ani
  *
  * \return 0 if fail, 1 if succeed.
  *
@@ -353,13 +350,11 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
  * user), check the values and truncate the 2D metric.
  *
  */
-int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
+int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
   int         k,iadr;
   double      isqhmin, isqhmax;
   double      lambda[2],vp[2][2];
-
-  (void)dim;
 
  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
    * (resp. sethmax) is not setted too */
@@ -436,7 +431,6 @@ int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
- * \param dim working dimension (2 for mmgs, 3 for mmg3d)
  *
  * \return 0 if fail, 1 if succeed.
  *
@@ -444,10 +438,10 @@ int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
  * user), check the values and truncate the 3D metric.
  *
  */
-int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
+int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
   int         k,iadr;
-  double      isqhmin, isqhmax;
+  double      isqhmin, isqhmax, isqhmaxcoe;
   double      lambda[3],vp[3][3];
 
   /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
@@ -460,6 +454,7 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
    * the DoSol function. */
   isqhmin = 0.;
   isqhmax = FLT_MAX;
+  isqhmaxcoe = 1./(MMG5_HMAXCOE*MMG5_HMAXCOE);
   if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
@@ -484,11 +479,11 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim) {
                && "Negative eigenvalue");
 
       /* Take only meaningful values into account: i.e. values at used points
-       * and eigenvalues of the 2 first directions for Mmgs (we don't have any
-       * info to set a suitable value at the third direction.) */
+       * and eigenvalues not equal to MMG5_HMAXCOE for Mmgs (value used when
+       * length in normal direction can't be computed.) */
       int j;
-      for ( j=0; j<dim; ++j ) {
-        if ( isfinite(lambda[j]) ) {
+      for ( j=0; j<3; ++j ) {
+        if ( isfinite(lambda[j]) && fabs(lambda[j]-isqhmaxcoe) > MMG5_EPS ) {
           isqhmax = MG_MIN(isqhmax,lambda[j]);
           isqhmin = MG_MAX(isqhmin,lambda[j]);
         }

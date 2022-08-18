@@ -747,7 +747,7 @@ int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
   }
   else {
     MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
-    ier = MMG5_3dSolTruncature_ani(mesh,met,2);
+    ier = MMG5_3dSolTruncature_ani(mesh,met);
   }
 
   return ier;
@@ -1125,13 +1125,17 @@ int MMGS_unitTensor_2D ( MMG5_pMesh mesh,int k,int i,MMG5_pPoint p1,
   //           0       0     isqhmax
 
   /* b0 and b1 serve now for nothing : let them be the lines of matrix intm*R */
+
+  // Remark: here, we put a 'fake' value along the normal direction but we can't
+  // use a nan or inf value because it impacts the computation of the rotation
+  // for the other directions
   b0[0] = tensordot[0]*r[0][0] + tensordot[1]*r[1][0];
   b0[1] = tensordot[0]*r[0][1] + tensordot[1]*r[1][1];
   b0[2] = tensordot[0]*r[0][2] + tensordot[1]*r[1][2];
   b1[0] = tensordot[1]*r[0][0] + tensordot[2]*r[1][0];
   b1[1] = tensordot[1]*r[0][1] + tensordot[2]*r[1][1];
   b1[2] = tensordot[1]*r[0][2] + tensordot[2]*r[1][2];
-#warning check and comment the use of inf
+
   b2[0] = isqhmax*r[2][0];
   b2[1] = isqhmax*r[2][1];
   b2[2] = isqhmax*r[2][2];

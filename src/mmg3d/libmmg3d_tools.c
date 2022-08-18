@@ -1265,7 +1265,7 @@ int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
   }
   else {
     MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
-    ier = MMG5_3dSolTruncature_ani(mesh,met,3);
+    ier = MMG5_3dSolTruncature_ani(mesh,met);
   }
 
   return ier;

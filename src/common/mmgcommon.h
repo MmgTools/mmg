@@ -659,8 +659,8 @@ typedef struct MMG5_dNode_s {
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);
  int           MMG5_check_setted_hminhmax(MMG5_pMesh mesh);
  int           MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met);
- int           MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim);
- int           MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met, int dim);
+ int           MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
+ int           MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
