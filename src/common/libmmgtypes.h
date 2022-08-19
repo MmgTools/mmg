@@ -518,7 +518,8 @@ typedef struct {
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
-  int           nbr,*br;
+  int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
+  int           *br; /*!< list of based references to which an implicit surface can be attached */
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */

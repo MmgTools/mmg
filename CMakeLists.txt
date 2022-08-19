@@ -29,13 +29,13 @@ endif()
 
 INCLUDE(CMakeDependentOption)
 
+PROJECT (mmg)
+
 LIST(APPEND CMAKE_MODULE_PATH
-  ${CMAKE_SOURCE_DIR}/cmake/modules
-  ${CMAKE_SOURCE_DIR}/cmake/testing )
+  ${PROJECT_SOURCE_DIR}/cmake/modules
+  ${PROJECT_SOURCE_DIR}/cmake/testing )
 
 INCLUDE(macros)
-
-PROJECT (mmg)
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

@@ -854,6 +854,45 @@ int MMG3D_indElt(MMG5_pMesh mesh, int kel) {
     MMG5_pTetra pt;
     int    ne, k;
 
+#ifndef USE_SCOTCH
+    ne = mesh->ne+1;
+    k  = 1;
+
+    assert ( MG_EOK(&mesh->tetra[kel]) );
+
+    do {
+      pt = &mesh->tetra[k];
+
+      if ( !MG_EOK(pt) ) {
+        --ne;
+        pt = &mesh->tetra[ne];
+        assert( pt );
+
+        /* Search last used tetra */
+        while ( !MG_EOK(pt) && k < ne ) {
+          --ne;
+          pt = &mesh->tetra[ne];
+        }
+
+        /* Found elt */
+        if ( ne == kel ) {
+          return k;
+        }
+      }
+      else {
+        /* Found elt */
+        if ( k==kel ) {
+          return k;
+        }
+      }
+      /* All elts have been treated end of loop */
+      if ( k==ne ) {
+        break;
+      }
+    }
+    while ( ++k < ne );
+
+#else
     ne = 0;
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
@@ -862,6 +901,7 @@ int MMG3D_indElt(MMG5_pMesh mesh, int kel) {
             if ( k == kel )  return ne;
         }
     }
+#endif
     return 0;
 }
 
@@ -870,6 +910,45 @@ int MMG3D_indPt(MMG5_pMesh mesh, int kp) {
     MMG5_pPoint ppt;
     int         np, k;
 
+#ifndef USE_SCOTCH
+    np = mesh->np+1;
+    k  = 1;
+
+    assert ( MG_VOK(&mesh->point[kp]) );
+
+    do {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) {
+        --np;
+        ppt = &mesh->point[np];
+        assert ( ppt );
+
+        /* Search the last used point */
+        while ( !MG_VOK(ppt) && k < np ) {
+          --np;
+          ppt = &mesh->point[np];
+        }
+
+        /* Found pt */
+        if ( np == kp ) {
+          return k;
+        }
+      }
+      else {
+        /* Found pt */
+        if ( k==kp ) {
+          return k;
+        }
+      }
+
+      /* All points have been treated end of loop */
+      if ( k==np ) {
+        break;
+      }
+    }
+    while ( ++k < np );
+
+#else
     np = 0;
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
@@ -878,6 +957,8 @@ int MMG3D_indPt(MMG5_pMesh mesh, int kp) {
             if ( k == kp )  return np;
         }
     }
+#endif
+
     return 0;
 }
 

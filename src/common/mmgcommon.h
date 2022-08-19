@@ -574,6 +574,7 @@ typedef struct MMG5_dNode_s {
 
 
 /* Functions declarations */
+ void          MMG5_version(MMG5_pMesh,char*);
  extern void MMG5_nsort(int ,double *,int8_t *);
  extern void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm);
  extern double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
@@ -611,6 +612,8 @@ typedef struct MMG5_dNode_s {
  void          MMG5_displayLengthHisto_internal( int,int,int,double,
                                                  int,int,double, int,double*,
                                                  int*,int8_t,int);
+ short         MMG5_dikmov(MMG5_pMesh,MMG5_pSol,short*,short,
+                           int chkmovmesh(MMG5_pMesh,MMG5_pSol,short,int*));
  int           MMG5_minQualCheck ( int iel, double minqual, double alpha );
  int           MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                                    MMG5_Bezier*,double r[3][3],double gv[2]);
@@ -690,9 +693,10 @@ typedef struct MMG5_dNode_s {
                                        const int iswp,const int nelts,
                                        const int nsols);
 int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*, int);
+int             MMG5_saveDisp(MMG5_pMesh ,MMG5_pSol );
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
                                    int*,int*,int**,long*,int);
-int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
+int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type,int*, FILE *inm);
 int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int*,int,

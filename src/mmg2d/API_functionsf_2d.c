@@ -189,6 +189,16 @@ FORTRAN_NAME(MMG2D_SET_MULTIMAT,mmg2d_set_multimat,
 }
 
 /**
+ * See \ref MMG2D_Set_lsBaseReference function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_LSBASEREFERENCE,mmg2d_set_lsbasereference,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *br, int* retval),
+             (mesh,sol,br,retval)){
+  *retval = MMG2D_Set_lsBaseReference(*mesh,*sol,*br);
+  return;
+}
+
+/**
  * See \ref MMG2D_Set_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_MESHSIZE,mmg2d_set_meshsize,

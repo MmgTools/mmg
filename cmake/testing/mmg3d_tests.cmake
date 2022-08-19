@@ -636,6 +636,19 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
   -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-normc.o.meshb)
+
 # ls + rmc
 ADD_TEST(NAME mmg3d_OptLs_plane_withbub
   COMMAND ${EXECUT_MMG3D} -v 5 -ls

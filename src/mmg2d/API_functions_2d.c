@@ -220,6 +220,24 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
     break;
+  case MMG2D_IPARAM_numberOfLSBaseReferences :
+    if ( mesh->info.br ) {
+      MMG5_DEL_MEM(mesh,mesh->info.br);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new level-set based references values\n",__func__);
+    }
+    mesh->info.nbr   = val;
+    mesh->info.nbri  = 0;
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+
+    for (k=0; k<mesh->info.nbr; k++)
+      mesh->info.br[k] = 0;
+
+    break;
+
   case MMG2D_IPARAM_numberOfMat :
     if ( mesh->info.mat ) {
       MMG5_DEL_MEM(mesh,mesh->info.mat);
@@ -368,6 +386,21 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
             __func__);
     return 0;
   }
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
 
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
@@ -413,6 +446,10 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
                        int split,int rin,int rout){
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+}
+
+int MMG2D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
 }
 
 

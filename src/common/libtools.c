@@ -35,6 +35,32 @@
 #include "mmgcommon.h"
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param dim string dontaining the dimension (3D,2D or S)
+ *
+ * Print MMG release and date
+ */
+void MMG5_version(MMG5_pMesh mesh,char *dim) {
+
+  if ( mesh->info.imprim >= 0 ) {
+#ifndef MMG_COMPARABLE_OUTPUT
+    fprintf(stdout,"\n  %s\n   MODULE MMG%s: %s (%s)\n  %s\n",
+            MG_STR,dim,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
+#else
+    fprintf(stdout,"\n  %s\n   MODULE MMG%s\n  %s\n",
+            MG_STR,dim,MG_STR);
+#endif
+
+#if !defined _WIN32 && !defined MMG_COMPARABLE_OUTPUT
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
+  }
+
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if fail, 1 if success.
  *
@@ -77,6 +103,8 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
                       int split,int rin,int rex){
   MMG5_pMat mat;
   int k;
+
+  (void)sol;
 
   if ( !mesh->info.nmat ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
@@ -142,6 +170,36 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
 
   return 1;
 }
+
+int MMG5_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br) {
+
+  (void)sol;
+
+  if ( !mesh->info.nbr ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of"
+            " level-set based references",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," based references values. \n");
+    return 0;
+  }
+  if ( mesh->info.nbri >= mesh->info.nbr ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new level-set"
+            " based reference.\n",__func__);
+    fprintf(stderr,"    max number of level-set based references: %d\n",mesh->info.nbr);
+    return 0;
+  }
+  if ( br < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  mesh->info.br[mesh->info.nbri] = br;
+  mesh->info.nbri++;
+
+  return 1;
+}
+
 
 /**
  * \param *prog pointer toward the program name.

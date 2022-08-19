@@ -243,6 +243,7 @@ int MMG2D_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
 int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 
 /* Adds Charles */
+double MMG2D_caltri_iso_3pt(double *a,double *b,double *c);
 double MMG2D_voltri(MMG5_pMesh ,int ,int ,int );
 double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , int8_t );
@@ -253,6 +254,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh);
 int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_isbr(MMG5_pMesh ,int );
 int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int MMG2D_split2_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);

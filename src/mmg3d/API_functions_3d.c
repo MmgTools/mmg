@@ -2446,6 +2446,22 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     return 0;
   }
 
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
 
@@ -2490,6 +2506,11 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
+
+int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br){
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
+}
+
 
 int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 

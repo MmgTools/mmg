@@ -57,6 +57,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  MMG5_OFF;
+  /* [n/10]   ,Value for isosurface boundary reference */
   mesh->info.isoref   =  MG_ISO;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
@@ -682,6 +683,68 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
+const char* MMG5_Get_tagName(int tag)
+{
+  static char tags_name[1024];
+
+  if ( !tag )
+  {
+    return "No tag";
+  }
+
+  if ( tag & MG_NUL ) {
+    return "Removed";
+  }
+
+  strcpy(tags_name, "\0");
+
+  if ( tag & MG_REF ) {
+    strcat(tags_name,"Reference ");
+  }
+
+  if ( tag & MG_GEO) {
+    strcat(tags_name,"Ridge ");
+  }
+
+  if ( tag & MG_REQ) {
+    strcat(tags_name,"Required ");
+  }
+
+  if ( tag & MG_NOM) {
+    strcat(tags_name,"Non-manifold ");
+  }
+
+  if ( tag & MG_BDY) {
+    strcat(tags_name,"Boundary ");
+  }
+
+  if ( tag & MG_CRN) {
+    strcat(tags_name,"Corner ");
+  }
+
+  if ( tag & MG_NOSURF) {
+    strcat(tags_name,"Nosurf ");
+  }
+
+  if ( tag & MG_OPNBDY) {
+    strcat(tags_name,"Opnbdy ");
+  }
+
+  if ( tag & MG_OLDPARBDY) {
+    strcat(tags_name,"Old-parbdy ");
+  }
+
+  if ( tag & MG_PARBDYBDY) {
+    strcat(tags_name,"Parbdybdy ");
+  }
+
+  if ( tag & MG_PARBDY) {
+    strcat(tags_name,"Parbdy ");
+  }
+  strcat(tags_name,"tag(s).");
+
+  return tags_name;
+}
 
 /**
  * \param ptr pointer toward the file extension (dot included)

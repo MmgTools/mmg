@@ -680,10 +680,12 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG_FSCANF(in,"%d",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
-
+      
       for (i=0; i<mesh->info.nbr; i++) {
         MMG_FSCANF(in,"%d",&br);
-        mesh->info.br[i] = br;
+        if ( !MMG3D_Set_lsBaseReference(mesh,met,br) ) {
+          return 0;
+        }
       }
     }
   }

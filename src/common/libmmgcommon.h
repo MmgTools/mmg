@@ -217,6 +217,20 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref
                                           int rin, int rex);
 
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param br new level-set base reference.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set a new level-set base reference of ref \a br in ls discretization
+ * mode. Base references are boundary conditions to which implicit domain can
+ * be attached. All implicit volumes that are not attached to listed based
+ * references are deleted as spurious volumes by the \a rmc option.
+ *
+ */
+LIBMMG_CORE_EXPORT int  MMG5_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,int br);
+
 /* deallocations */
 LIBMMG_CORE_EXPORT void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 
@@ -260,6 +274,17 @@ LIBMMG_CORE_EXPORT extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,in
  *
  */
 LIBMMG_CORE_EXPORT int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
+
+/**
+ * \param tag input entity tag
+ *
+ * \return the list of the flags contained in \a tag
+ *
+ * Print the name associated to the \a typ value in the \a MMG5_type enum.
+ *
+ * \warning for debug purpose, no thread safe.
+ */
+const char* MMG5_Get_tagName(int tag);
 
 /**
  * \param mesh pointer toward the mesh structure.

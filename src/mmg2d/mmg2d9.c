@@ -34,7 +34,6 @@
  */
 
 #include "libmmg2d_private.h"
-//#include "ls_calls.h"
 #define MMG2D_DEGTOL  5.e-1
 
 /* Calculate an estimate of the average (isotropic) length of edges in the mesh */
@@ -69,37 +68,6 @@ double MMG2D_estavglen(MMG5_pMesh mesh) {
   lent *= dna;
 
   return lent;
-}
-
-/** Compute quality of a triangle from the datum of its 3 vertices */
-static
-inline double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
-  double        abx,aby,acx,acy,bcx,bcy,area,h1,h2,h3,hm;
-
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-
-  /* orientation */
-  area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return 0.0;
-
-  /* edge lengths */
-  h1 = abx*abx + aby*aby;
-  h2 = acx*acx + acy*acy;
-  h3 = bcx*bcx + bcy*bcy;
-
-  hm = h1 + h2 + h3;
-
-  if ( hm > MMG2D_EPSD ) {
-    return  area / hm;
-  }
-  else {
-    return 0.0;
-  }
 }
 
 /**
@@ -150,66 +118,6 @@ int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
   }
 
   return idx;
-}
-
-/**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement field
- * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
- *
- * Return the largest fraction t that makes the motion along disp valid.
- *
- */
-short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
-  int     it,maxit;
-  short   t,tmin,tmax;
-  int8_t  ier;
-
-  maxit = 200;
-  it    = 0;
-
-  tmin  = 0;
-  tmax  = MMG2D_SHORTMAX;
-
-  *lastt = 0;
-
-  /* If full displacement can be achieved */
-  if ( !MMG2D_chkmovmesh(mesh,disp,tmax,NULL) )
-    return tmax;
-
-  /* Else, find the largest displacement by dichotomy */
-  while( tmin != tmax && it < maxit ) {
-    t = (tmin+tmax)/2;
-
-    /* Case that tmax = tmin +1 : check move with tmax */
-    if ( t == tmin ) {
-      ier = MMG2D_chkmovmesh(mesh,disp,tmax,NULL);
-      if ( !ier ) {
-        return tmax;
-      }
-      else {
-        if ( tmin==0 ) {
-          *lastt = tmax;
-        }
-        return tmin;
-      }
-    }
-
-    /* General case: check move with t */
-    ier = MMG2D_chkmovmesh(mesh,disp,t,NULL);
-    if ( !ier )
-      tmin = t;
-    else
-      tmax = t;
-
-    it++;
-  }
-
-  if ( tmin==0 ) {
-    *lastt=t;
-  }
-
-  return tmin;
 }
 
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
@@ -470,32 +378,7 @@ int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
 
   return nns;
 }
-/** For debugging purposes: save disp */
-int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
-  FILE        *out;
-  int         k;
-  char        data[256],*ptr;
 
-  strcpy(data,"disp.sol");
-  ptr = strstr(data,".sol");
-  if(ptr) *ptr = '\0';
-  strcat(data,"disp.sol");
-
-  out = fopen(data,"w");
-  printf("save disp\n");
-  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
-  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
-
-  /* Print solutions */
-  for(k=1; k<= disp->np; k++) {
-    fprintf(out,"%f %f\n",disp->m[2*k+0],disp->m[2*k+1]);
-  }
-
-  fprintf(out,"\nEnd");
-  fclose(out);
-
-  return 1;
-}
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -557,7 +440,7 @@ int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  * \param mesh mesh structure
  * \param disp displacement structure
  * \param met metric structure
- * \param invalidTriax array to store the list of invalid tria if we are unable to move
+ * \param invalidTrias array to store the list of invalid tria if we are unable to move
  *
  * \return 0 if fail, 1 if success to move, the opposite of the number of non
  * valid trias if we can't move (-ninvalidTrias).
@@ -599,7 +482,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
   mesh->info.hmax = MMG2D_LLONG*avlen;
   mesh->info.hmin = MMG2D_LSHRT*avlen;
 
-  for (itmn=1; itmn<=maxitmn; itmn++) {
+  for (itmn=0; itmn<maxitmn; itmn++) {
 
 #ifdef USE_ELAS
     /* Extension of the displacement field */
@@ -612,21 +495,23 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
             " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
     return 0;
 #endif
-    //MMG2D_saveDisp(mesh,disp);
+
+    // MMG5_saveDisp(mesh,disp);
+
     /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG2D_dikomv(mesh,disp,&lastt);
+      t = MMG5_dikmov(mesh,disp,&lastt,MMG2D_SHORTMAX,MMG2D_chkmovmesh);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-          printf("   *** Stop: impossible to proceed further\n");
+          fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
         break;
       }
 
       ier = MMG2D_dispmesh(mesh,disp,t,itdc);
       if ( !ier ) {
-        fprintf(stdout,"  ** Impossible motion\n");
+        fprintf(stderr,"\n  ** Impossible motion\n");
         return 0;
       }
 
@@ -640,20 +525,22 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
 
           nspl = nc = ns = nm = 0;
 
-          if ( !mesh->info.noinsert ) {
+          if ( mesh->info.lag > 1 ) {
+            if ( !mesh->info.noinsert ) {
 
-            /* Split of points */
-            nspl = MMG2D_spllag(mesh,disp,met,itdc,&warn);
-            if ( nspl < 0 ) {
-              fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
-              return 0;
-            }
+              /* Split of points */
+              nspl = MMG2D_spllag(mesh,disp,met,itdc,&warn);
+              if ( nspl < 0 ) {
+                fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
+                return 0;
+              }
 
-            /* Collapse of points */
-            nc = MMG2D_coleltlag(mesh,met,itdc);
-            if ( nc < 0 ) {
-              fprintf(stdout,"  ## Problem in coleltlag. Exiting.\n");
-              return 0;
+              /* Collapse of points */
+              nc = MMG2D_coleltlag(mesh,met,itdc);
+              if ( nc < 0 ) {
+                fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
+                return 0;
+              }
             }
           }
 
@@ -663,7 +550,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
           if ( !mesh->info.noswap ) {
             ns = MMG2D_swpmshlag(mesh,met,1.1,itdc);
             if ( ns < 0 ) {
-              fprintf(stdout,"  ## Problem in swapeltlag. Exiting.\n");
+              fprintf(stderr,"  ## Problem in swapeltlag. Exiting.\n");
               return 0;
             }
           }
@@ -671,7 +558,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
           if ( !mesh->info.nomove ) {
             nm = MMG2D_movtrilag(mesh,met,itdc);
             if ( nm < 0 ) {
-              fprintf(stdout,"  ## Problem in moveltlag. Exiting.\n");
+              fprintf(stderr,"  ## Problem in moveltlag. Exiting.\n");
               return 0;
             }
           }
@@ -684,7 +571,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
           nnc  += nc;
           nns  += ns;
         }
-
+        /* Five iterations of local remeshing have been performed: print final stats */
         if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
           printf(" %d edges splitted, %d vertices collapsed, %d elements"
                  " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
@@ -698,9 +585,12 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
 
       if ( t == MMG2D_SHORTMAX ) break;
     }
+    /* End of dichotomy loop: maximal displacement of the extended velocity
+     * field has been performed */
     if ( mesh->info.imprim > 1 && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
     }
+
     if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
       printf(" %d edges splitted, %d vertices collapsed, %d elements"
              " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
