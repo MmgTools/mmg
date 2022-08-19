@@ -77,20 +77,20 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
     /* prevent from recreating internal edge between boundaries */
     p0 = &mesh->point[nq];
     if ( mesh->info.fem==typchk ) {
-      if ( !(p0->tag & MG_PARBDY) ) {
-        if ( p0->tag & MG_BDY ) {
-          i = ip;
-          for (jj=0; jj<3; jj++) {
-            i = MMG5_inxt3[i];
-            p0 = &mesh->point[pt->v[i]];
-            if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) )  return 0;
-          }
-        }
-      }
-
-      /* Prevent from creating a tetra with 4 bdy vertices */
       p0 = &mesh->point[nq];
       if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) {
+        i = ip;
+        for (jj=0; jj<3; jj++) {
+          i = MMG5_inxt3[i];
+          p0 = &mesh->point[pt->v[i]];
+          if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ){
+            return 0;
+          }
+        }
+
+        /* Prevent from creating a tetra with 4 bdy vertices */
+        // Algiane (2022) this test is useless I think (because we forbid the
+        // creation of internal edges between boundary points)
         i  = ip;
         nr = 0;
         for (jj=0; jj<3; jj++) {
@@ -98,12 +98,14 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
           p0 = &mesh->point[pt->v[i]];
           if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) ++nr;
         }
-        if ( nr==3 ) return 0;
+        if ( nr==3 ) {
+          return 0;
+        }
       }
     }
     else {
       /* In aniso : prevent from creating a tetra with 4 ridges vertices or
-       * internal edges between to ridges (unable to split it after because of
+       * internal edges between two ridges (unable to split it after because of
        * the ridge metric) */
       if ( met->size==6 ) {
         p0 = &mesh->point[nq];
@@ -115,9 +117,10 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
             p0 = &mesh->point[pt->v[i]];
             if ( p0->tag & MG_GEO )  return 0;
           }
-        }
 
-        if ( p0->tag & MG_GEO ) {
+          // Algiane (2022) this test is useless because we forbid the creation of
+          // internal edges between boundary points but we can keep it in case we
+          // comment the previous test
           i  = ip;
           nr = 0;
           for (jj=0; jj<3; jj++) {
@@ -125,7 +128,9 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
             p0 = &mesh->point[pt->v[i]];
             if ( p0->tag & MG_GEO ) ++nr;
           }
-          if ( nr==3 ) return 0;
+          if ( nr==3 ) {
+            return 0;
+          }
         }
       }
     }
