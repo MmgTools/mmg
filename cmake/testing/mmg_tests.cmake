@@ -383,5 +383,12 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
     -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_${SHRT_EXEC}.o.meshb)
 
+  # test robustness of optim + aniso mode
+  ADD_TEST(NAME mmg_SurfEdges_OptimAni_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hgrad -1 -optim -A -noinsert -noswap -nomove -nosizreq -hgradreq -1
+    ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_OptimAni_${SHRT_EXEC}.o.meshb)
+
+
 
 ENDFOREACH(EXEC)
