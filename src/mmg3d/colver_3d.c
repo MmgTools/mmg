@@ -493,13 +493,17 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       }
     }
 
-    /* Prevent from creating a tetra with 4 ridges vertices */
-    if ( mesh->point[numq].tag & MG_GEO ) {
+    /* Prevent from creating a tetra with 4 ridges metrics */
+    if ( (mesh->point[numq].tag & MG_GEO) &&
+         !(MG_SIN(mesh->point[numq].tag) || mesh->point[numq].tag & MG_NOM) ) {
       i  = ipp;
       nr = 0;
       for (iq=0; iq<3; iq++) {
         i = MMG5_inxt3[i];
-        if ( mesh->point[pt->v[i]].tag & MG_GEO ) ++nr;
+        if ( (mesh->point[pt->v[i]].tag & MG_GEO) &&
+             (MG_SIN(mesh->point[pt->v[i]].tag) || mesh->point[pt->v[i]].tag & MG_NOM) ) {
+          ++nr;
+        }
       }
       if ( nr==3 ) return 0;
     }
