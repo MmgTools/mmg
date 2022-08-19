@@ -182,9 +182,9 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
  * (in tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
- * Define metric map at a SINGULARITY of the geometry, associated to
- * the geometric approx of the surface. metric \f$=\alpha*Id\f$, \f$\alpha =\f$
- * size.
+ * Define metric map at a SINGULARITY (corner, required or non-manifold points)
+ * of the geometry, associated to the geometric approx of the surface. metric
+ * \f$=\alpha*Id\f$, \f$\alpha =\f$ size.
  *
  */
 static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
