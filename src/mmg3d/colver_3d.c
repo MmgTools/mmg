@@ -113,12 +113,14 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       if ( met->size==6 ) {
         p0 = &mesh->point[nq];
 
-        if ( p0->tag & MG_GEO ) {
+        if ( (p0->tag & MG_GEO) && !(MG_SIN(p0->tag) || p0->tag & MG_NOM) ) {
           i = ip;
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO )  return 0;
+            if ( p0->tag & MG_GEO && !(MG_SIN(p0->tag) || p0->tag & MG_NOM) ) {
+              return 0;
+            }
           }
 
           // Algiane (2022) this test is useless because we forbid the creation of
@@ -130,7 +132,9 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO ) ++nr;
+            if ( p0->tag & MG_GEO && !(MG_SIN(p0->tag) || p0->tag & MG_NOM) ) {
+              ++nr;
+            }
           }
           if ( nr==3 ) {
             assert ( 0 && "Uncomment this test, it is not useless");
