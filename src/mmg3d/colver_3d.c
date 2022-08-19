@@ -91,6 +91,7 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
         /* Prevent from creating a tetra with 4 bdy vertices */
         // Algiane (2022) this test is useless I think (because we forbid the
         // creation of internal edges between boundary points)
+#ifndef NDEBUG
         i  = ip;
         nr = 0;
         for (jj=0; jj<3; jj++) {
@@ -99,8 +100,10 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
           if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) ++nr;
         }
         if ( nr==3 ) {
+          assert ( 0 && "Uncomment this test, it is not useless");
           return 0;
         }
+#endif
       }
     }
     else {
@@ -121,6 +124,7 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
           // Algiane (2022) this test is useless because we forbid the creation of
           // internal edges between boundary points but we can keep it in case we
           // comment the previous test
+#ifndef NDEBUG
           i  = ip;
           nr = 0;
           for (jj=0; jj<3; jj++) {
@@ -129,8 +133,10 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
             if ( p0->tag & MG_GEO ) ++nr;
           }
           if ( nr==3 ) {
+            assert ( 0 && "Uncomment this test, it is not useless");
             return 0;
           }
+#endif
         }
       }
     }
