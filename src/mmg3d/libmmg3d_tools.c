@@ -34,6 +34,7 @@
 #include "mmgcommon.h"
 #include "inlined_functions_3d.h"
 #include "mmgversion.h"
+#include "mmg3dexterns.h"
 #include "mmgexterns.h"
 
 

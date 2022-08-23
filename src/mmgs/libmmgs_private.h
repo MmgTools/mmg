@@ -25,6 +25,7 @@
 #define LIBMMGS_PRIVATE_H
 
 #include "libmmgcommon.h"
+#include "mmgsexterns.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -214,14 +215,6 @@ int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    MMGS_surfballRotation(MMG5_pMesh,MMG5_pPoint,int*,int,double r[3][3],double*,double n[3]);
 int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol,int8_t );
-
-extern double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-extern int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
-extern int    (*MMGS_gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
-extern int    (*MMGS_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol met);
-extern int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s);
-extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
 #ifdef __cplusplus
 }
