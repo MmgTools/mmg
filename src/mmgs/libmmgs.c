@@ -41,6 +41,7 @@
 #include "libmmgs.h"
 #include "libmmgs_private.h"
 #include "mmgsexterns.h"
+#include "mmgexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.

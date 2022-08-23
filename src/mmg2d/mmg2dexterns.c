@@ -1,4 +1,3 @@
-#include "mmgexterns.h"
 #include "libmmg2d_private.h"
 
 int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol )=NULL;

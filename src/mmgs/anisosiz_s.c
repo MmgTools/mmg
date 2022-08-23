@@ -37,6 +37,7 @@
 #include "libmmgs.h"
 #include "inlined_functions.h"
 #include "mmgsexterns.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

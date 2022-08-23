@@ -1,4 +1,3 @@
-#include "mmgexterns.h"
 #include "libmmgs_private.h"
 
 double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt)=NULL;
