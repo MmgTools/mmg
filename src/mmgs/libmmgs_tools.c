@@ -1185,7 +1185,6 @@ int MMGS_unitTensor_2D ( MMG5_pMesh mesh,int k,int i,MMG5_pPoint p1,
   assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
 #endif
 
-#warning to factorize
   /* At this point, tensordot (with 0 replaced by isqhmax in the z
      direction) is the desired metric, except it is expressed in the rotated
      canonical basis, that is tensordot = R * metric in cb * ^t R, so metric
