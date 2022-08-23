@@ -50,7 +50,6 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG2D_caltri     = MMG2D_caltri_ani;
     MMG2D_intmet     = MMG2D_intmet_ani;
     MMG2D_doSol      = MMG2D_doSol_ani;
-    //    MMG2D_optlen    = optlen_ani;
   }
   else {
     MMG2D_lencurv   = MMG2D_lencurv_iso;
