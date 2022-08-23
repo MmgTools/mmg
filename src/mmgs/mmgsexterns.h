@@ -1,7 +1,6 @@
 #include "libmmgs_private.h"
 
 extern double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-extern int    (*MMGS_doSol)(MMG5_pMesh mesh ,MMG5_pSol met);
 extern int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 extern int    (*MMGS_gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 extern int    (*MMGS_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol met);
