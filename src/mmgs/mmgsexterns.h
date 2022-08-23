@@ -1,4 +1,4 @@
-#include "libmmgs_private.h"
+#include "libmmgtypes.h"
 
 extern double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 extern int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);

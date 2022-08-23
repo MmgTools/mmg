@@ -1,4 +1,4 @@
-#include "libmmg2d_private.h"
+#include "libmmgtypes.h"
 #include "mmg2d_export.h"
 
 int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol )=NULL;
