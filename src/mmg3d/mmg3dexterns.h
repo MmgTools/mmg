@@ -1,3 +1,6 @@
+#ifndef MMG3DEXTERNS_H
+#define MMG3DEXTERNS_H
+
 #include "libmmgtypes.h"
 #include "PRoctree_3d.h"
 
@@ -18,3 +21,4 @@ extern int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, 
 extern int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double);
 extern int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double );
 
+#endif
