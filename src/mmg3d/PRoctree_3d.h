@@ -24,7 +24,7 @@
 #ifndef PROCTREE_3D_H
 #define PROCTREE_3D_H
 
-#include "mmg/mmg3d/libmmgtypes.h"
+#include "libmmgtypes.h"
 
 /**
  * PROctree cell: cellule for point region octree (to speed-up the research of
