@@ -527,6 +527,12 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
 
+ADD_TEST(NAME mmg3d_OptimAni_Cube
+  COMMAND ${EXECUT_MMG3D} -v 5 -optim -A -hgrad -1
+  ${MMG3D_CI_TESTS}/Cube/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_cube.o.meshb)
+
+
 ##############################################################################
 #####
 #####         Check optimLES

@@ -37,6 +37,7 @@
 #include "libmmgs.h"
 #include "inlined_functions.h"
 #include "mmgsexterns.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -70,9 +71,9 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
 
-  ilist = boulet(mesh,it,ip,list);
-  if ( ilist < 1 )
-    return 0;
+  int8_t dummy;
+  ilist = boulet(mesh,it,ip,list,&dummy);
+  if ( ilist < 1 )  return 0;
 
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
@@ -362,7 +363,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  ilist = boulet(mesh,it,ip,list);
+  int8_t dummy;
+  ilist = boulet(mesh,it,ip,list,&dummy);
   if ( ilist < 1 )
     return 0;
 
@@ -512,6 +514,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * \param ilist number of tria in the ball of \a p0
  * \param r rotation that send the normal at p0 onto the z vector
  * \param lipoint rotated ball of point \a p0
+ * \param n normal at point \a p0
  *
  * \return 1 if success, 0 otherwise.
  *
@@ -520,14 +523,13 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  *
  */
 int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int *list,int ilist,
-                          double r[3][3],double *lispoi) {
+                          double r[3][3],double *lispoi,double n[3]) {
   MMG5_pTria  pt;
   MMG5_pPoint p1;
-  double      *n,ux,uy,uz,area;
+  double      ux,uy,uz,area;
   int         iel,i0,i1,k;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  n  = p0->n;
   assert ( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] > MMG5_EPSD2 );
 
   if ( !MMG5_rotmatrix(n,r) ) {
@@ -599,12 +601,13 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
   m   = &met->m[6*idp];
 
-  ilist = boulet(mesh,it,ip,list);
+  int8_t dummy;
+  ilist = boulet(mesh,it,ip,list,&dummy);
   if ( ilist < 1 )
     return 0;
 
   /* Rotation of the ball of p0 */
-  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi)  ) {
+  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi,p0->n)  ) {
     return 0;
   }
 
@@ -715,6 +718,13 @@ int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
  *   - at surface boundary points: anisotropic in an orthonormal basis difined
  * in the tangent plane and the direction normal to this plane.
  *
+ * \warning What we are doing on non-manifold points has to be improved: as such
+ *     points are marked as MG_CRN and MG_REQ, we first try to call \ref
+ *     MMG5_defmetsin that likely fails (because \ref boulet don't work for
+ *     non-manifod points due to the missing of consistent adjacencies
+ *     relationships), then we call \ref MMG5_defUninitSize and we set hmax on
+ *     non-manifold points. Note that the building of adjacency table depends on
+ *     the initial mesh numbering, thus, in certain cases, boulet will succeed...
  */
 int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
@@ -758,7 +768,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
+  /** Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
@@ -798,7 +808,10 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Now the metric storage at ridges is the "mmg" one. */
   mesh->info.metRidTyp = 1;
 
-  /* search for unintialized metric */
+  /** search for unintialized metric */
+  /** Remark: as non manifold points are marked as CRN and REQ, we first try to
+      call defmetsin that fails (because boulet don't work for non-manifod
+      points), then we pass here and we set hmax on non-manifold points */
   MMG5_defUninitSize ( mesh,met,ismet );
 
   return 1;

@@ -254,8 +254,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
 
   case MMG2D_IPARAM_anisosize :
-    if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
-      return 0;
+    mesh->info.ani = val;
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
@@ -278,10 +277,32 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_hmin :
     mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
+    if ( mesh->info.sethmax && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Error: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+      return 0;
+    }
+    if ( val <= 0. ) {
+      fprintf(stderr,"\n  ## Error: hmin must be strictly positive "
+              "(minimal edge length).\n");
+      return 0;
+    }
+
     break;
   case MMG2D_DPARAM_hmax :
     mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
+    if ( mesh->info.sethmin && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Error: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+      return 0;
+    }
+    if ( val <= 0. ) {
+      fprintf(stderr,"\n  ## Error: hmax must be strictly positive "
+              "(maximal edge length).\n");
+      return 0;
+    }
+
     break;
   case MMG2D_DPARAM_hsiz :
     mesh->info.hsiz     = val;

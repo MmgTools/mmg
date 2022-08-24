@@ -1,7 +1,6 @@
-#include "mmgexterns.h"
 #include "libmmg3d_private.h"
+#include "mmg3d_export.h"
 
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb)=NULL;
 double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra )=NULL;
 double (*MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra )=NULL;
 double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)=NULL;
@@ -19,3 +18,5 @@ int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, in
 int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double)=NULL;
 int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double )=NULL;
 
+LIBMMG3D_EXPORT double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb)=NULL;
+LIBMMG3D_EXPORT int    (*MMG3D_doSol)(MMG5_pMesh mesh,MMG5_pSol met)=NULL;

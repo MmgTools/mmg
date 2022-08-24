@@ -269,7 +269,9 @@ typedef struct {
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
-  double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
+  double   n[3]; /*!< Unitary normal (regular points) or unitary tangent (ridge
+                  * and ref points) for mmgs and unitary tangent (if needed) for
+                  * mmg3d */
 #ifdef USE_POINTMAP
   int      src; /*!< Source point in input mesh */
 #endif
@@ -539,7 +541,7 @@ typedef struct {
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  uint8_t       optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t       ani, optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
   uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;

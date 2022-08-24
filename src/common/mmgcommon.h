@@ -528,6 +528,22 @@ void MMG5_excfun(int sigid) {
  *
  * Store the Bezier definition of a surface triangle.
  *
+ * \remark Numbering convention for high order points (b)
+ * \verbatim
+ *
+ *     2                                                       *
+ *     |`\                                                     *
+ *     |  `\                                                   *
+ *     5    `4                                                 *
+ *     |      `\                                               *
+ *     |        `\                                             *
+ *     6          `3                                           *
+ *     |            `\                                         *
+ *     |              `\                                       *
+ *     0 --- 7 --- 8 --- 1                                     *
+ *
+ * \endverbatim
+ *
  */
 typedef struct {
   double       b[10][3];/*!< Bezier basis functions */
@@ -641,9 +657,14 @@ typedef struct MMG5_dNode_s {
  int           MMG5_regnor(MMG5_pMesh mesh);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
- int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*,int8_t*,int8_t*);
- int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double, int8_t, int8_t);
+ int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*);
+ int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double);
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);
+ int           MMG5_check_setted_hminhmax(MMG5_pMesh mesh);
+ int           MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met);
+ int           MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
+ int           MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
+ int           MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
  int           MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],

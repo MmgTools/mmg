@@ -39,7 +39,6 @@ extern "C" {
 #endif
 
 #include "mmg/mmg2d/libmmgtypes.h"
-
 #include "mmg2d_export.h"
 
 /**
@@ -220,7 +219,7 @@ extern "C" {
   LIBMMG2D_EXPORT int  MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward the sol structure (unused).
  * \param iparam integer parameter to set (see \a MMG2D_Param structure).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -229,7 +228,8 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     MMG5_DATA_PTR_T               :: sol\n
  * >     INTEGER, INTENT(IN)           :: iparam,val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -248,7 +248,8 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     MMG5_DATA_PTR_T               :: sol\n
  * >     INTEGER, INTENT(IN)           :: dparam\n
  * >     REAL(KIND=8), INTENT(IN)      :: val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
@@ -2048,7 +2049,6 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
   LIBMMG2D_EXPORT int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp);
 
 /* Tools for the library */
-// void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2119,7 +2119,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute isotropic size map according to the mean of the length of the
+ * Compute unit tensor according to the lengths of the
  * edges passing through a point.
  *
  * \remark Fortran interface:
@@ -2129,7 +2129,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_doSol(MMG5_pMesh mesh ,MMG5_pSol met );
+  LIBMMG2D_EXPORT extern int (*MMG2D_doSol)(MMG5_pMesh mesh ,MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -2430,19 +2430,6 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  */
   LIBMMG2D_EXPORT int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * Truncate the metric computed by the DoSol function by hmax and hmin values
- * (if setted by the user). Set hmin and hmax if they are not setted.
- *
- * \warning works only for a metric computed by the DoSol function because we
- * suppose that we have a diagonal tensor in aniso.
- *
- */
-LIBMMG2D_EXPORT void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 
 #ifdef __cplusplus
 }

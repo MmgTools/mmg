@@ -1,7 +1,5 @@
-#include "mmgexterns.h"
 #include "libmmg3d_private.h"
 
-extern double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 extern double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 extern double (*MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 extern double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);

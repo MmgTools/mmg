@@ -53,7 +53,7 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
 
   minqual = 2./MMG3D_ALPHAD;
 
-  /*compute tet quality*/
+  /* compute tet quality */
   iel = 1;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -69,8 +69,20 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
       pt->qual = MMG5_orcal(mesh,met,k);
     }
 
+    int i=0;
+    /* Once metric is stored using 'ridge' convention, a tetra with 4 ridge
+     * points has a 0 quality, ignore it for quality checks */
+    if ( metRidTyp ) {
+      for ( i=0; i<4; ++i ) {
+        MMG5_pPoint ppt = &mesh->point[pt->v[i]];
+        if ( (MG_SIN(ppt->tag) || MG_NOM & ppt->tag) || !(ppt->tag & MG_GEO) ) {
+          break;
+        }
+      }
+    }
 
-    if ( pt->qual < minqual ) {
+    /* Check quality on suitable elements */
+    if ( i < 4 && pt->qual < minqual ) {
       minqual = pt->qual;
       iel     = k;
     }
