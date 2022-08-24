@@ -25,7 +25,6 @@
 #define LIBMMGS_PRIVATE_H
 
 #include "libmmgcommon.h"
-#include "mmgsexterns.h"
 
 #ifdef __cplusplus
 extern "C" {
