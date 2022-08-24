@@ -31,6 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 #include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 /* Mesh adaptation routine for the first stages of the algorithm: intertwine splitting
  based on patterns, collapses and swaps.

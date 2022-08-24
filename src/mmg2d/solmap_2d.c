@@ -34,6 +34,7 @@
 
 #include "libmmg2d.h"
 #include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 #include "mmgexterns.h"
 
 /**

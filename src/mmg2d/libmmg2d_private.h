@@ -35,7 +35,6 @@
 
 
 #include "libmmgcommon.h"
-#include "mmg2dexterns.h"
 
 #ifdef __cplusplus
 extern "C" {
