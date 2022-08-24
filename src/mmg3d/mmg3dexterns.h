@@ -1,4 +1,5 @@
-#include "libmmg3d_private.h"
+#include "libmmgtypes.h"
+#include "PRoctree_3d.h"
 
 extern double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 extern double (*MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
