@@ -335,23 +335,12 @@ double long_ani(double *ca,double *cb,double *ma,double *mb);
 double long_iso(double *ca,double *cb,double *ma,double *mb);
 double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
-int    optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
-int    optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
-int    optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    interp_ani(double *,double *,double * ,double );
 int    interp_iso(double *,double *,double * ,double );
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 int    MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int8_t);
 int    MMG2D_set_metricAtPointsOnReqEdges(MMG5_pMesh,MMG5_pSol,int8_t);
-
-extern double (*MMG2D_lencurv)(MMG5_pMesh ,MMG5_pSol ,int ,int );
-extern double (*MMG2D_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
-extern int    (*MMG2D_optlen)(MMG5_pMesh ,MMG5_pSol ,double ,int );
-extern int    (*MMG2D_intmet)(MMG5_pMesh ,MMG5_pSol ,int ,int8_t ,int ,double );
-extern int    (*MMG2D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
-extern int    (*MMG2D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
-extern int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 
 #ifdef __cplusplus
 }

@@ -21,6 +21,9 @@
 ** =============================================================================
 */
 
+#ifndef MMGEXTERNS_H
+#define MMGEXTERNS_H
+
 #include "mmgcommon.h"
 
 
@@ -36,4 +39,6 @@ extern int  (*MMG5_solTruncature_ani)(MMG5_pMesh mesh, MMG5_pSol met);
 
 #ifdef USE_SCOTCH
 extern int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
+#endif
+
 #endif
