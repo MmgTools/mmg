@@ -604,7 +604,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       ia = MMG5_iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
-      if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
+      if ( !MG_GEO_OR_NOM(mesh->xtetra[pt->xt].tag[ia]) ) {
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
 
