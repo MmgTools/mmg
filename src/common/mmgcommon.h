@@ -155,6 +155,7 @@ extern "C" {
 
 #define MG_EDG(tag) ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
+#define MG_GEO_OR_NOM(tag) (( tag & MG_GEO ) || ( tag & MG_NOM )) /**< Ridge or non-manifold */
 #define MG_RID(tag) ((!( MG_SIN(tag)||(tag & MG_NOM))) &&  tag & MG_GEO ) /**< Non-singular ridge point (so ridge metric in aniso mode) */
 
 

@@ -292,8 +292,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
   assert ( mesh->tetra[k].xt && "initial tetra is not boundary");
   pxt = &mesh->xtetra[mesh->tetra[k].xt];
 
-  if ( !( (pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]] & MG_GEO) ||
-          (pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
+  if ( !( MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]]) ||
+          MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]])   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
@@ -338,8 +338,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
 
   pxt      = &mesh->xtetra[mesh->tetra[jel1].xt];
 
-  if ( !( (pxt->tag[MMG5_iarf[jface1][MMG5_iprv2[j1]]] & MG_GEO) ||
-          (pxt->tag[MMG5_iarf[jface1][MMG5_inxt2[j1]]] & MG_GEO)   ) ) {
+  if ( !( MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[jface1][MMG5_iprv2[j1]]]) ||
+          MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[jface1][MMG5_inxt2[j1]]])   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
