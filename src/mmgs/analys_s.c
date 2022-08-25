@@ -140,6 +140,7 @@ static int setadj(MMG5_pMesh mesh){
         ii2 = MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
+          assert ( pt1->base );
           if ( pt1->base < 0 ) {
             pt1->ref      = -abs(pt1->ref);
             /* Add MG_NOM flag because it allows neighbours to have non

@@ -197,6 +197,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
         ii1 = MMG5_inxt2[ii];
         ii2 = MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
+          assert ( pt1->base );
           /* Moebius strip */
           if ( pt1->base < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: Triangle orientation problem (1):"

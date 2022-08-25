@@ -76,14 +76,17 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
 
   /* hash triangles */
-  mesh->base = 1;
+  ++mesh->base;
   dup = nmf = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
 
     pt->flag = 0;
+    // base field of triangles has to be setted because it is used in setadj (mmgs
+    // and mmg3d) to detect moebius strip and to flip tria orientation
     pt->base = mesh->base;
+
     adja = &adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
 
