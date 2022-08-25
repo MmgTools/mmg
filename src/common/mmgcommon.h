@@ -471,6 +471,20 @@ void MMG5_excfun(int sigid) {
   exit(EXIT_FAILURE);
 }
 
+/**
+ * \param fproto function prototype
+ *
+ * Expand automatically prototype of function pointer in .h/.c files depending
+ * on the definition of the MMG_EXTERN and MMG_ASSIGN_NULL preprocessor
+ * variables:
+ *   - MMG_EXTERN is setted to "extern" in the .h file and empty in the .c one;
+ *   - MMG_ASSIGN_NULL is empty in .h file and setted to =NULL in .c one.
+ */
+#define FUNCTION_POINTER(fproto)\
+  MMG_EXTERN fproto MMG_ASSIGN_NULL
+
+
+
 /* Macro for fortran function generation */
 /**
  * \def FORTRAN_NAME(nu,nl,pl,pc)

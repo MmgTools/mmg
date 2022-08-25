@@ -34,6 +34,7 @@
  */
 
 #include "libmmgs_private.h"
+#include "mmgsexterns.h"
 #include "mmgexterns.h"
 #include "inlined_functions.h"
 
