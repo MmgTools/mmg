@@ -49,7 +49,7 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     # headers, it will ask to sort the needed source files too). Added here, we
     # can use the ADD_LIBRARY_TEST macro...
     test_compare-para-tria
-    # test_ridge-preservation-in-ls-mode
+    test_ridge-preservation-in-ls-mode
     )
 ENDIF ( )
 
@@ -79,7 +79,7 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     ${MMG3D_CI_TESTS}/API_tests/vtk2mesh.c
     # Following pieces of code are left in repo to take advantage of versionning
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
-    # ${MMG3D_CI_TESTS}/ridge-preservation-in-ls-mode.c
+    ${PROJECT_SOURCE_DIR}/cmake/testing/code/ridge-preservation-in-ls-mode.c
     )
 ENDIF( )
 
@@ -167,6 +167,8 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
   SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
   SET(TEST_API3D_VTK2MESH ${EXECUTABLE_OUTPUT_PATH}/test_api3d_vtk2mesh)
   SET(TEST_COMPARE_PARA_TRIA ${EXECUTABLE_OUTPUT_PATH}/test_compare-para-tria)
+  SET(TEST_RIDGE_PRESERVATION_IN_LS_MODE ${EXECUTABLE_OUTPUT_PATH}/test_ridge-preservation-in-ls-mode)
+
 ENDIF()
 
 ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
@@ -246,7 +248,7 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
     "${CTEST_OUTPUT_DIR}/test_API3d.o"
     )
-  ADD_TEST(NAME test_api3d_domain-selection   COMMAND ${TEST_API3D_DOMSEL}
+  ADD_TEST(NAME test_api3d_domain-selection COMMAND ${TEST_API3D_DOMSEL}
     "${MMG3D_CI_TESTS}/OptLs_plane/plane.mesh"
     "${MMG3D_CI_TESTS}/OptLs_plane/p.sol"
     "${CTEST_OUTPUT_DIR}/test_API3d-domsel-whole.o"
@@ -263,6 +265,15 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     )
   SET_TESTS_PROPERTIES ( test_compare_para_tria
     PROPERTIES FIXTURES_REQUIRED test_para_tria )
+
+  ADD_TEST(NAME test_ridge_preservation_in_ls_mode
+    COMMAND ${TEST_RIDGE_PRESERVATION_IN_LS_MODE}
+    ${MMG3D_CI_TESTS}/OptLs_NM_ridge/cube-it2.mesh
+    ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_NM_cube-it2.o.mesh
+    )
+  SET_TESTS_PROPERTIES ( test_ridge_preservation_in_ls_mode
+    PROPERTIES FIXTURES_REQUIRED mmg3d_OptLs_NM_ridge )
+
 ENDIF()
 
 

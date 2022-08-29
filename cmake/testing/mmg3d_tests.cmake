@@ -587,6 +587,21 @@ ADD_TEST(NAME mmg3d_OptLs_plane_m
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-m.o.meshb)
 
+# ridge preservation
+IF ( (NOT SCOTCH_FOUND) OR USE_SCOTCH MATCHES OFF )
+  SET ( DISABLE_RENUM "" )
+ELSE()
+  SET ( DISABLE_RENUM -rn 0 )
+ENDIF()
+
+ADD_TEST(NAME mmg3d_OptLs_NM_ridge
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.5 -noinsert -noswap -nomove -nr ${DISABLE_RENUM}
+  ${MMG3D_CI_TESTS}/OptLs_NM_ridge/cube-it2.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_NM_cube-it2.o.mesh)
+
+SET_TESTS_PROPERTIES ( mmg3d_OptLs_NM_ridge
+  PROPERTIES FIXTURES_SETUP mmg3d_OptLs_NM_ridge )
+
 # non-zero ls
 ADD_TEST(NAME mmg3d_OptLs_plane_nonzero
   COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.1
