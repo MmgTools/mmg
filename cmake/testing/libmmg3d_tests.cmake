@@ -36,6 +36,10 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_lsOnly
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
+  # Remark: not clean -> next tests don't need the library in fact (moving them
+  # in app tests will ask to clean the installation of public and private
+  # headers, it will ask to sort the needed source files too). Added here, we
+  # can use the ADD_LIBRARY_TEST macro...
   test_compare-para-tria
   )
 
@@ -58,10 +62,17 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
+  # Following pieces of code are left in repo to take advantage of versionning
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
   )
 
-# Additional tests that needs to download ci meshes
+# Additional library tests that needs to download ci meshes to be run
+#
+# Remark: as they are piece of code, it would be probably better to keep it in
+# the mmg repository (so we have versionning). Other pieces of code
+# (compare-para-tria and ridge-preservation-in-ls-mode) are hosted in the repo,
+# I don't think that there is a reason for the difference in the choice of
+# hosting...
 IF ( MMG3D_CI )
   LIST ( APPEND MMG3D_LIB_TESTS_MAIN_PATH
     ${MMG3D_CI_TESTS}/API_tests/3d.c
