@@ -207,8 +207,18 @@ IF ( MMG3D_CI )
     "${MMG3D_CI_TESTS}/API_tests/cellsAndNode-data.vtk"
     "${CTEST_OUTPUT_DIR}/test_API3d-vtk2mesh.o"
     )
+
   ADD_TEST(NAME test_met3d   COMMAND ${TEST_MET3D}
     )
+
+  ADD_TEST(NAME test_compare_para_tria
+    COMMAND ${TEST_COMPARE_PARA_TRIA}
+    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+    )
+  SET_TESTS_PROPERTIES ( test_compare_para_tria
+    PROPERTIES FIXTURES_REQUIRED test_para_tria )
+
   ADD_TEST(NAME libmmg3d_generic_io_msh   COMMAND ${LIBMMG3D_GENERICIO}
     "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.msh"
     "${CTEST_OUTPUT_DIR}/cube.o.msh" "1"
