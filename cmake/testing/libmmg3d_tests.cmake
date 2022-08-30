@@ -49,7 +49,6 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     # headers, it will ask to sort the needed source files too). Added here, we
     # can use the ADD_LIBRARY_TEST macro...
     test_compare-para-tria
-    test_ridge-preservation-in-ls-mode
     )
 ENDIF ( )
 
@@ -79,7 +78,6 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     ${MMG3D_CI_TESTS}/API_tests/vtk2mesh.c
     # Following pieces of code are left in repo to take advantage of versionning
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
-    ${PROJECT_SOURCE_DIR}/cmake/testing/code/ridge-preservation-in-ls-mode.c
     )
 ENDIF( )
 
@@ -149,6 +147,22 @@ SET ( src_test_met3d
   )
 ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} ${lib_type})
 TARGET_LINK_LIBRARIES ( test_met3d PRIVATE ${M_LIB} )
+
+IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
+  SET ( src_test_ridge_preservation_in_ls_mode
+    ${PROJECT_SOURCE_DIR}/src/common/hash.c
+    ${PROJECT_SOURCE_DIR}/src/common/mmg2.c
+    ${PROJECT_SOURCE_DIR}/src/common/tools.c
+    ${PROJECT_SOURCE_DIR}/src/mmg3d/bezier_3d.c
+    ${PROJECT_SOURCE_DIR}/src/mmg3d/boulep_3d.c
+    ${PROJECT_SOURCE_DIR}/src/mmg3d/hash_3d.c
+    ${PROJECT_SOURCE_DIR}/src/mmg3d/tools_3d.c
+    ${PROJECT_SOURCE_DIR}/src/mmg3d/zaldy_3d.c
+    ${PROJECT_SOURCE_DIR}/cmake/testing/code/ridge-preservation-in-ls-mode.c )
+  ADD_LIBRARY_TEST ( test_ridge_preservation_in_ls_mode "${src_test_ridge_preservation_in_ls_mode}"
+    copy_3d_headers ${lib_name} ${lib_type})
+ENDIF()
+
 
 SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
 SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)
