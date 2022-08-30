@@ -161,6 +161,7 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/ridge-preservation-in-ls-mode.c )
   ADD_LIBRARY_TEST ( test_ridge_preservation_in_ls_mode "${src_test_ridge_preservation_in_ls_mode}"
     copy_3d_headers ${lib_name} ${lib_type})
+  TARGET_LINK_LIBRARIES (  test_ridge_preservation_in_ls_mode PRIVATE ${M_LIB} )
 ENDIF()
 
 
