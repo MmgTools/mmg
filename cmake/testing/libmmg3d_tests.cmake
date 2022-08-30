@@ -230,19 +230,6 @@ ADD_TEST(NAME libmmg3d_generic_io_vtu   COMMAND ${LIBMMG3D_GENERICIO}
   "${CTEST_OUTPUT_DIR}/cube.o.vtu" "1"
   )
 
-IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
-  SET(expr "VTK library not founded")
-
-  IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
-    SET_PROPERTY(TEST test_api3d_vtk2mesh
-      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  ENDIF()
-  SET_PROPERTY(TEST libmmg3d_generic_io_vtk
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST libmmg3d_generic_io_vtu
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-ENDIF ( )
-
 IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
   ADD_TEST(NAME test_api3d_0   COMMAND ${TEST_API3D_EXEC0}
     "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
@@ -276,6 +263,18 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
 
 ENDIF()
 
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
+  SET(expr "VTK library not founded")
+
+  IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
+    SET_PROPERTY(TEST test_api3d_vtk2mesh
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  ENDIF()
+  SET_PROPERTY(TEST libmmg3d_generic_io_vtk
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST libmmg3d_generic_io_vtu
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+ENDIF ( )
 
 IF ( CMAKE_Fortran_COMPILER)
   SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
