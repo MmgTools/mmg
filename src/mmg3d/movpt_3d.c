@@ -1080,6 +1080,11 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     }
   }
   else if ( MG_GEO & edgTag ) {
+    // Remark: Singular points are required so following assertion should be
+    // verified in the entire function. Keep the test here to make easier
+    // debugging/understanding when passing here.
+    assert ( (!MG_SIN(mesh->point[ip0].tag)) &&
+             "BezierRidge don't work if both ip0 and ip are singular" );
     if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no,no2,to)) ) {
       return 0;
     }
