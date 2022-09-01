@@ -270,13 +270,13 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
   SET_TESTS_PROPERTIES ( test_compare_para_tria
     PROPERTIES FIXTURES_REQUIRED test_para_tria )
 
-  ADD_TEST(NAME test_ridge_preservation_in_ls_mode
-    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_ridge_preservation_in_ls_mode
-    ${MMG3D_CI_TESTS}/OptLs_NM_ridge/cube-it2.mesh
-    ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_NM_cube-it2.o.mesh
-    )
-  SET_TESTS_PROPERTIES ( test_ridge_preservation_in_ls_mode
-    PROPERTIES FIXTURES_REQUIRED mmg3d_OptLs_NM_ridge )
+  #ADD_TEST(NAME test_ridge_preservation_in_ls_mode
+  #  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_ridge_preservation_in_ls_mode
+  #  ${MMG3D_CI_TESTS}/OptLs_NM_ridge/cube-it2.mesh
+  #  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_NM_cube-it2.o.mesh
+  #  )
+  #SET_TESTS_PROPERTIES ( test_ridge_preservation_in_ls_mode
+  #  PROPERTIES FIXTURES_REQUIRED mmg3d_OptLs_NM_ridge )
 
 ENDIF()
 
