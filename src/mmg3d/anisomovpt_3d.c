@@ -764,7 +764,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",return 0;);
   }
   ppt0->xp = nxp;
