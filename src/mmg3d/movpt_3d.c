@@ -873,6 +873,9 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
     iface = lists[l]%4;
     pt = &mesh->tetra[iel];
     iea = ieb = 0;
+
+    assert ( pt->xt && "tetra with boundary face has a xtetra");
+
     /* For each bdy face that contains ip0, store the index of the 2 edges
      * passing through \a ip0 in \a iea and \a ieb. */
     for (i=0; i<3; i++) {
@@ -964,6 +967,9 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
     iface = lists[l] % 4;
     pt          = &mesh->tetra[iel];
     iea         = ieb = 0;
+
+    assert ( pt->xt && "tetra with boundary face has a xtetra");
+
     /* For each bdy face that contains ip0, store the index of the 2 edges
      * passing through \a ip0 in \a iea and \a ieb. */
     for (i=0; i<3; i++) {
