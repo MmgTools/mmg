@@ -478,7 +478,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
- * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ * \param edgTag MG_REF, MG_NOM or MG_GEO depending on type of edge on which we move.
  *
  * \return 0 if fail, 1 if success.
  *
@@ -487,6 +487,13 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * Move boundary reference, ridge or non-manifold point, whose volumic and
  * surfacic balls are passed.
  *
+ * \todo Factorization of this function with the iso one if possible and review
+ * of the step 1 (research of ending points of curve) that seems too complex
+ * (probably due to successive cleanings):
+ *    - 1. I think that tetra of surfacic ball always have an xtetra (allow to
+ * clean some useless if),
+ *    - 2. we probably don't need to search edge ipa-ipb when travelling the
+ * surfacic ball.
  */
 static inline
 int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
@@ -508,14 +515,28 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   ip0       = pt->v[listv[0]%4];
   p0        = &mesh->point[ip0];
 
-  /* Compute if the edge is a simple ridge to know if we have to compute a
-   * second normal at point */
+  /** Step 0: Compute if the edge is a simple ridge to know if we have to
+   * compute a second normal at point */
   isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
 
   assert ( edgTag & p0->tag );
 
-  /* Travel surfacic ball and recover the two ending points of curve : two
-     senses must be used */
+  /** Step 1: Travel surfacic ball and recover the two ending points of curve
+     (that will be stored in \a ip1 and \a ip2): ball is travelled from
+     beginning in one direction until meeting the curve edge, then, starting
+     from the end, in the other direction until meeting the second curve
+     edge. */
+
+  /** a. Travel surface edges in one sense to get the first featured edge.
+   * Triangles of the surface are successively processed and the tag of the edge
+   * between current tria and previous one is tested (so each edge is checked
+   * only once). Ball processing stops at first featured edge crossed. */
+
+  /* Get first edge to initialize the loop: \a ip0 is the global idx of the
+   * point we want to move, store in \a ipa and \a ipb the global indices of the
+   * 2 other vertices of the boundary face from which we start. When processing
+   * next triangle we will find either the edge ip0-ipa, or ip0-ipb, this will
+   * be the first edge that we will check. */
   iel = lists[0]/4;
   iface = lists[0]%4;
   pt = &mesh->tetra[iel];
@@ -530,13 +551,19 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   }
   assert(ipa && ipb);
 
+  /* Travel surfacic list of \a ip0 and search if the edge at interface of
+   * boundary triangles stored in lists[l] and lists[l-1] belongs to our curve
+   * (\a edgTag edge).
+   * Reminder: lists[k] = 4* tet idx + idx of bdy face. */
   for (l=1; l<ilists; l++) {
     iel = lists[l]/4;
     iface = lists[l]%4;
     pt = &mesh->tetra[iel];
     iea = ieb = 0;
+    /* For each bdy face that contains ip0, store the index of the 2 edges
+     * passing through \a ip0 in \a iea and \a ieb. */
     for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
+      ie = MMG5_iarf[iface][i]; //index in tet of edge i on face iface
       if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
         if ( !iea )
           iea = ie;
@@ -544,39 +571,63 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
           ieb = ie;
       }
     }
+    /* In current face (\a iface), store in \a iptmpa the global index of the
+     * second vertex of edge \a iea (first vertex being \a ip0). */
     if ( pt->v[MMG5_iare[iea][0]] != ip0 )
       iptmpa = pt->v[MMG5_iare[iea][0]];
     else {
       assert(pt->v[MMG5_iare[iea][1]] != ip0);
       iptmpa = pt->v[MMG5_iare[iea][1]];
     }
+    /* In current face (\a iface), store in \a iptmpb the global index of the
+     * second vertex of edge \a ieb (first vertex being \a ip0). */
     if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
       iptmpb = pt->v[MMG5_iare[ieb][0]];
     else {
       assert(pt->v[MMG5_iare[ieb][1]] != ip0);
       iptmpb = pt->v[MMG5_iare[ieb][1]];
     }
+
+    /* Search if the edge ip0-iptmpa is the edge at the interface with previous
+     * triangle. */
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( edgTag & tag ) {
+        /* The featured edge has been found. End of ball processing. */
         ip1 = iptmpa;
         break;
       }
     }
+
+    /* Search if the edge ip0-iptmpb is the edge at the interface with previous
+     * triangle. */
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
       if ( edgTag & tag ) {
+        /* featured edge has been found. End of ball processing */
         ip1 = iptmpb;
         break;
       }
     }
+
+    /* Next edge of the surfacic ball */
     ipa = iptmpa;
     ipb = iptmpb;
   }
 
-  /* Now travel surfacic list in the reverse sense so as to get the second curve */
+  /** b. Now travel surface edges in the reverse sense so as to get the second
+   * curve. Again, we test the tag of the edge at interface of current triangle
+   * and previous one and we stop ball pocessing when the second featured edge
+   * has been found. This edge is necessarly different from the one previously
+   * found. */
+
+  /* Get first edge to initialize the loop: \a ip0 is the global idx of the
+   * point we want to move, store in \a ipa and \a ipb the global indices of the
+   * 2 other vertices of the boundary face from which we start. When processing
+   * next triangle we will find either the edge ip0-ipa, or ip0-ipb, this will
+   * be the first edge that we will check. */
   iel = lists[0]/4;
   iface = lists[0]%4;
   pt = &mesh->tetra[iel];
@@ -591,11 +642,17 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   }
   assert(ipa && ipb);
 
+  /* Travel surfacic list of \a ip0 and search if the edge at interface of
+   * boundary triangles stored in lists[l] and lists[l+1] belongs to our curve
+   * (\a edgTag edge).
+   * Reminder: lists[k] = 4* tet idx + idx of bdy face. */
   for (l=ilists-1; l>0; l--) {
     iel         = lists[l] / 4;
     iface = lists[l] % 4;
     pt          = &mesh->tetra[iel];
     iea         = ieb = 0;
+    /* For each bdy face that contains ip0, store the index of the 2 edges
+     * passing through \a ip0 in \a iea and \a ieb. */
     for (i=0; i<3; i++) {
       ie = MMG5_iarf[iface][i]; //edge i on face iface
       if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
@@ -605,18 +662,24 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
           ieb = ie;
       }
     }
+    /* In current face (\a iface), store in \a iptmpa the global index of the
+     * second vertex of edge \a iea (first vertex being \a ip0). */
     if ( pt->v[MMG5_iare[iea][0]] != ip0 )
       iptmpa = pt->v[MMG5_iare[iea][0]];
     else {
       assert(pt->v[MMG5_iare[iea][1]] != ip0);
       iptmpa = pt->v[MMG5_iare[iea][1]];
     }
+    /* In current face (\a iface), store in \a iptmpb the global index of the
+     * second vertex of edge \a ieb (first vertex being \a ip0). */
     if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
       iptmpb = pt->v[MMG5_iare[ieb][0]];
     else {
       assert(pt->v[MMG5_iare[ieb][1]] != ip0);
       iptmpb = pt->v[MMG5_iare[ieb][1]];
     }
+    /* Search if the edge ip0-iptmpa is the edge at the interface with previous
+     * triangle. */
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
@@ -625,6 +688,8 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
         break;
       }
     }
+    /* Search if the edge ip0-iptmpb is the edge at the interface with previous
+     * triangle. */
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       if ( (MG_GEO & edgTag) && (!pt->xt) ) {
         tag = 0;
@@ -638,16 +703,18 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
         break;
       }
     }
+    /* Next edge of the surfacic ball */
     ipa = iptmpa;
     ipb = iptmpb;
   }
   if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
 
-  /* At this point, we get the point extremities of the curve passing through
-     ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
-     iface1,iface2, and the associated edges ie1,ie2.*/
+  /** Step 2: At this point, we get the point extremities of the curve passing
+     through ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
+     iface1,iface2, and the associated edges ie1,ie2. Computation of
+     displacement along curve and checks */
 
-  /* Changes needed for choice of time step : see manuscript notes */
+  /** a. Changes needed for choice of time step : see manuscript notes */
   ll1old = MMG5_lenSurfEdg(mesh,met,ip0,ip1,isrid);
   ll2old = MMG5_lenSurfEdg(mesh,met,ip0,ip2,isrid);
 
@@ -660,7 +727,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     ip = ip1;
   }
 
-  /* Compute support of the associated edge, and features of the new position */
+  /** b. Compute support of the associated edge, and features of the new position */
   if ( MG_NOM & edgTag ) {
     if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) ) {
       return 0;
@@ -682,7 +749,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     return 0;
   }
 
-  /* Test : make sure that geometric approximation has not been degraded too much */
+  /** c. Test: make sure that geometric approximation has not been degraded too much */
   ppt0 = &mesh->point[0];
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
@@ -728,7 +795,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     }
   }
 
-  /* Check whether proposed move is admissible under consideration of distances */
+  /** Check whether proposed move is admissible under consideration of distances */
   l1new = MMG5_lenSurfEdg(mesh,met,0,ip1,isrid);
   l2new = MMG5_lenSurfEdg(mesh,met,0,ip2,isrid);
 
@@ -737,7 +804,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   if ( fabs(l2new -l1new) >= fabs(ll2old -ll1old) )
     return 0;
 
-  /* For each surfacic triangle build a virtual displaced triangle for check
+  /** For each surfacic triangle build a virtual displaced triangle for check
    * purposes :
    *      - check the new triangle qualities;
    *      - check normal deviation with the adjacent through the edge facing ip0
@@ -814,7 +881,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   else if ( calnew < calold )    return 0;
   memset(pxp,0,sizeof(MMG5_xPoint));
 
-  /* Test : check whether all volumes remain positive with new position of the point */
+  /** d. Test: Check whether all volumes remain positive with new position of the point */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
     iel = listv[l] / 4;
@@ -837,7 +904,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     return 0;
   }
 
-  /* Update coordinates, normals, for new point */
+  /** Step 3: Update coordinates, normals, for new point */
   if ( PROctree )
     MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
 

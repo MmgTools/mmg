@@ -567,14 +567,14 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
  * \param ilistv pointer toward the computed volumic ball size.
  * \param lists pointer toward the computed surfacic ball.
  * \param ilists pointer toward the computed surfacic ball size.
- * \param isnm is the looked point \a ip non-manifold?
+ * \param isnm 1 if \a ip is non-manifold, 0 otherwise.
  * \return -1 if fail, 1 otherwise.
  *
  * Compute the volumic ball of a SURFACE point \a p, as well as its surfacic
  * ball, starting from tetra \a start, with point \a ip, and face \a if in tetra
- * volumic ball.
- * \a listv[k] = 4*number of tet + index of point surfacic ball.
- * \a lists[k] = 4*number of tet + index of face.
+ * volumic ball:
+ *   - \a listv[k] = 4* tet index + index of point surfacic ball.
+ *   - \a lists[k] = 4* tet index + index of boundary face.
  *
  * \warning Don't work for a non-manifold point if \a start has an adjacent
  * through \a iface (for example : a non-manifold subdomain). Thus, if \a ip is
