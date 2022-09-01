@@ -505,9 +505,8 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   double                step,ll1old,ll2old,l1new,l2new;
   double                o[3],no[3],no2[3],to[3], ncur[3],nprev[3],nneighi[3];
   double                calold,calnew,caltmp,callist[MMG3D_LMAX+2];
-  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
-  int16_t               tag,ier;
-  uint8_t               i,i0,ie,iface,iea,ieb,isrid;
+  int                   l,iel,ip0,ip1,ip2,ip,nxp;
+  uint8_t               i,i0,iface,isrid;
 
   step      = 0.1;
   ip1 = ip2 = 0;
@@ -522,192 +521,9 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   assert ( edgTag & p0->tag );
 
   /** Step 1: Travel surfacic ball and recover the two ending points of curve
-     (that will be stored in \a ip1 and \a ip2): ball is travelled from
-     beginning in one direction until meeting the curve edge, then, starting
-     from the end, in the other direction until meeting the second curve
-     edge. */
-
-  /** a. Travel surface edges in one sense to get the first featured edge.
-   * Triangles of the surface are successively processed and the tag of the edge
-   * between current tria and previous one is tested (so each edge is checked
-   * only once). Ball processing stops at first featured edge crossed. */
-
-  /* Get first edge to initialize the loop: \a ip0 is the global idx of the
-   * point we want to move, store in \a ipa and \a ipb the global indices of the
-   * 2 other vertices of the boundary face from which we start. When processing
-   * next triangle we will find either the edge ip0-ipa, or ip0-ipb, this will
-   * be the first edge that we will check. */
-  iel = lists[0]/4;
-  iface = lists[0]%4;
-  pt = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-  assert(ipa && ipb);
-
-  /* Travel surfacic list of \a ip0 and search if the edge at interface of
-   * boundary triangles stored in lists[l] and lists[l-1] belongs to our curve
-   * (\a edgTag edge).
-   * Reminder: lists[k] = 4* tet idx + idx of bdy face. */
-  for (l=1; l<ilists; l++) {
-    iel = lists[l]/4;
-    iface = lists[l]%4;
-    pt = &mesh->tetra[iel];
-    iea = ieb = 0;
-    /* For each bdy face that contains ip0, store the index of the 2 edges
-     * passing through \a ip0 in \a iea and \a ieb. */
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //index in tet of edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    /* In current face (\a iface), store in \a iptmpa the global index of the
-     * second vertex of edge \a iea (first vertex being \a ip0). */
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    /* In current face (\a iface), store in \a iptmpb the global index of the
-     * second vertex of edge \a ieb (first vertex being \a ip0). */
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-
-    /* Search if the edge ip0-iptmpa is the edge at the interface with previous
-     * triangle. */
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( edgTag & tag ) {
-        /* The featured edge has been found. End of ball processing. */
-        ip1 = iptmpa;
-        break;
-      }
-    }
-
-    /* Search if the edge ip0-iptmpb is the edge at the interface with previous
-     * triangle. */
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
-      else  tag = 0;
-      if ( edgTag & tag ) {
-        /* The featured edge has been found. End of ball processing */
-        ip1 = iptmpb;
-        break;
-      }
-    }
-
-    /* Next edge of the surfacic ball */
-    ipa = iptmpa;
-    ipb = iptmpb;
-  }
-
-  /** b. Now travel surface edges in the reverse sense so as to get the second
-   * curve. Again, we test the tag of the edge at interface of current triangle
-   * and previous one and we stop ball pocessing when the second featured edge
-   * has been found. This edge is necessarly different from the one previously
-   * found. */
-
-  /* Get first edge to initialize the loop: \a ip0 is the global idx of the
-   * point we want to move, store in \a ipa and \a ipb the global indices of the
-   * 2 other vertices of the boundary face from which we start. When processing
-   * next triangle we will find either the edge ip0-ipa, or ip0-ipb, this will
-   * be the first edge that we will check. */
-  iel = lists[0]/4;
-  iface = lists[0]%4;
-  pt = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-  assert(ipa && ipb);
-
-  /* Travel surfacic list of \a ip0 and search if the edge at interface of
-   * boundary triangles stored in lists[l] and lists[l+1] belongs to our curve
-   * (\a edgTag edge).
-   * Reminder: lists[k] = 4* tet idx + idx of bdy face. */
-  for (l=ilists-1; l>0; l--) {
-    iel         = lists[l] / 4;
-    iface = lists[l] % 4;
-    pt          = &mesh->tetra[iel];
-    iea         = ieb = 0;
-    /* For each bdy face that contains ip0, store the index of the 2 edges
-     * passing through \a ip0 in \a iea and \a ieb. */
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    /* In current face (\a iface), store in \a iptmpa the global index of the
-     * second vertex of edge \a iea (first vertex being \a ip0). */
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    /* In current face (\a iface), store in \a iptmpb the global index of the
-     * second vertex of edge \a ieb (first vertex being \a ip0). */
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    /* Search if the edge ip0-iptmpa is the edge at the interface with previous
-     * triangle. */
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( edgTag & tag ) {
-        ip2 = iptmpa;
-        break;
-      }
-    }
-    /* Search if the edge ip0-iptmpb is the edge at the interface with previous
-     * triangle. */
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( (MG_GEO & edgTag) && (!pt->xt) ) {
-        tag = 0;
-      }
-      else {
-        assert(pt->xt);
-        tag = mesh->xtetra[pt->xt].tag[ieb];
-      }
-      if ( edgTag & tag ) {
-        ip2 = iptmpb;
-        break;
-      }
-    }
-    /* Next edge of the surfacic ball */
-    ipa = iptmpa;
-    ipb = iptmpb;
-  }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) ) {
+     (that will be stored in \a ip1 and \a ip2) */
+  int ier = MMG3D_curveEndingPts(mesh,lists,ilists,edgTag,ip0,&ip1,&ip2);
+  if ( !ier ) {
     return 0;
   }
 
@@ -875,12 +691,12 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
-      ier = MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
-      if ( ier <=0 ) {
+      int16_t ier2 = MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
+      if ( ier2 <=0 ) {
         return 0;
       }
-      ier =  MMG5_devangle( ncur, nneighi, mesh->info.dhd );
-      if ( ier <= 0 ) {
+      ier2 =  MMG5_devangle( ncur, nneighi, mesh->info.dhd );
+      if ( ier2 <= 0 ) {
         return 0;
       }
     }
@@ -889,8 +705,8 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between k and the previous triangle */
-      ier =  MMG5_devangle( ncur, nprev, mesh->info.dhd );
-      if ( ier<=0 ) {
+      int16_t ier2 =  MMG5_devangle( ncur, nprev, mesh->info.dhd );
+      if ( ier2<=0 ) {
         return 0;
       }
     }

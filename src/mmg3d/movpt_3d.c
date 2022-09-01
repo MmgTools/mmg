@@ -815,56 +815,30 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
- * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param improve force the new minimum element quality to be greater or equal
- * than 1.02 of the old minimum element quality.
  * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ * \param ip0 point that we want to move along curve.
+ * \param ip1 first ending point of curve (in current surfacic ball).
+ * \param ip2 second ending point of curve (in current surfacic ball).
  *
- * \return 0 if fail, 1 if success.
+ * \return 0 if fail (one of curve extremity is not found), 1 if success.
  *
- * Move boundary reference, ridge or non-manifold point, whose volumic and
- * surfacic balls are passed.
+ * Search the two ending points of curve passing through \a ip0 in the surfacic
+ * ball of \a ip0.
  *
- * \remark the metric is not interpolated at the new position.
+ * Travel surfacic ball and recover the two ending points of curve (that will be
+ * stored in \a ip1 and \a ip2): ball is travelled from beginning in one
+ * direction until meeting the curve edge, then, starting from the end, in the
+ * other direction until meeting the second curve edge.
  */
-static inline
-int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                           int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
-  MMG5_pTetra           pt,pt0;
-  MMG5_pxTetra          pxt;
-  MMG5_pPoint           p0,p1,p2,ppt0;
-  MMG5_Tria             tt;
-  MMG5_pxPoint          pxp;
-  MMG5_pPar             par;
-  double                step,ll1old,ll2old,o[3],no[3],no2[3],to[3];
-  double                calold,calnew,caltmp,callist[MMG3D_LMAX+2],hmax,hausd;
-  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
-  int                   isloc,j;
+int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
+                         const int16_t edgTag, int ip0,int *ip1, int *ip2) {
+
+  MMG5_pTetra           pt;
+  int                   l,iel,ipa,ipb,iptmpa,iptmpb;
   int16_t               tag;
-  uint8_t               i,i0,ie,iface,iea,ieb,isrid;
-
-  step      = 0.1;
-  ip1 = ip2 = 0;
-  pt        = &mesh->tetra[listv[0]/4];
-  ip0       = pt->v[listv[0]%4];
-  p0        = &mesh->point[ip0];
-
-  /** Step 0: Compute if the edge is a simple ridge to know if we have to
-   * compute a second normal at point */
-  isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
-
-  assert ( edgTag & p0->tag );
-
-  /** Step 1: Travel surfacic ball and recover the two ending points of curve
-     (that will be stored in \a ip1 and \a ip2): ball is travelled from
-     beginning in one direction until meeting the curve edge, then, starting
-     from the end, in the other direction until meeting the second curve
-     edge. */
+  uint8_t               i,ie,iface,iea,ieb;
 
   /** a. Travel surface edges in one sense to get the first featured edge.
    * Triangles of the surface are successively processed and the tag of the edge
@@ -934,7 +908,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       else  tag = 0;
       if ( edgTag & tag ) {
         /* The featured edge has been found. End of ball processing. */
-        ip1 = iptmpa;
+        *ip1 = iptmpa;
         break;
       }
     }
@@ -946,7 +920,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       else  tag = 0;
       if ( edgTag & tag ) {
         /* The featured edge has been found. End of ball processing. */
-        ip1 = iptmpb;
+        *ip1 = iptmpb;
         break;
       }
     }
@@ -1023,7 +997,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( edgTag & tag ) {
-        ip2 = iptmpa;
+        *ip2 = iptmpa;
         break;
       }
     }
@@ -1038,7 +1012,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
         tag = mesh->xtetra[pt->xt].tag[ieb];
       }
       if ( edgTag & tag ) {
-        ip2 = iptmpb;
+        *ip2 = iptmpb;
         break;
       }
     }
@@ -1046,7 +1020,71 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     ipa = iptmpa;
     ipb = iptmpb;
   }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) )  {
+
+  /* Check that we have found two distinct ending points */
+  if ( !(*ip1) ) {
+    return 0;
+  }
+  if ( !(*ip2) ) {
+    return 0;
+  }
+  if ( (*ip1) == (*ip2) ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+ * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary reference, ridge or non-manifold point, whose volumic and
+ * surfacic balls are passed.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
+static inline
+int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                           int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
+  MMG5_pTetra           pt,pt0;
+  MMG5_pxTetra          pxt;
+  MMG5_pPoint           p0,p1,p2,ppt0;
+  MMG5_Tria             tt;
+  MMG5_pxPoint          pxp;
+  MMG5_pPar             par;
+  double                step,ll1old,ll2old,o[3],no[3],no2[3],to[3];
+  double                calold,calnew,caltmp,callist[MMG3D_LMAX+2],hmax,hausd;
+  int                   l,iel,ip0,ip1,ip2,ip,nxp;
+  int                   isloc,j;
+  uint8_t               i,i0,iface,isrid;
+
+  step      = 0.1;
+  ip1 = ip2 = 0;
+  pt        = &mesh->tetra[listv[0]/4];
+  ip0       = pt->v[listv[0]%4];
+  p0        = &mesh->point[ip0];
+
+  /** Step 0: Compute if the edge is a simple ridge to know if we have to
+   * compute a second normal at point */
+  isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
+
+  assert ( edgTag & p0->tag );
+
+  /** Step 1: Travel surfacic ball and recover the two ending points of curve
+     (that will be stored in \a ip1 and \a ip2) */
+  int ier = MMG3D_curveEndingPts(mesh,lists,ilists,edgTag,ip0,&ip1,&ip2);
+  if ( !ier ) {
     return 0;
   }
 
