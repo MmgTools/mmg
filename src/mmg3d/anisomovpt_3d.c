@@ -928,8 +928,9 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   }
 
   /** Step 3: Update coordinates, normals, for new point */
-  if ( PROctree )
+  if ( PROctree ) {
     MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
+  }
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
