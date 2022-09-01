@@ -1264,16 +1264,16 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
+
   if ( isrid ) {
     /* Copy the second normal for ridge point */
     pxp->n2[0] = no2[0];
     pxp->n2[1] = no2[1];
     pxp->n2[2] = no2[2];
   }
-
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
