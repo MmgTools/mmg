@@ -611,6 +611,9 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     /* A boundary face has been hit : change travel edge */
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
+
+    assert ( mesh->tetra[k].xt && "tetra of surfacic ball has a xtetra (bdy face) ");
+
     if ( *ilists >= MMG3D_LMAX ) {
       if ( !mmgErr0 ) {
         fprintf(stderr,"\n  ## Warning: %s: problem in surface remesh process."
