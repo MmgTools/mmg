@@ -707,7 +707,9 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     ipa = iptmpa;
     ipb = iptmpb;
   }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
+  if ( !(ip1 && ip2 && (ip1 != ip2)) ) {
+    return 0;
+  }
 
   /** Step 2: At this point, we get the point extremities of the curve passing
      through ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
@@ -718,7 +720,9 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   ll1old = MMG5_lenSurfEdg(mesh,met,ip0,ip1,isrid);
   ll2old = MMG5_lenSurfEdg(mesh,met,ip0,ip2,isrid);
 
-  if ( (!ll1old) || (!ll2old) ) return 0;
+  if ( (!ll1old) || (!ll2old) ) {
+    return 0;
+  }
 
   if ( ll1old < ll2old ) { //move towards p2
     ip = ip2;
@@ -799,10 +803,13 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   l1new = MMG5_lenSurfEdg(mesh,met,0,ip1,isrid);
   l2new = MMG5_lenSurfEdg(mesh,met,0,ip2,isrid);
 
-  if ( (!l1new) || (!l2new) ) return 0;
-
-  if ( fabs(l2new -l1new) >= fabs(ll2old -ll1old) )
+  if ( (!l1new) || (!l2new) ) {
     return 0;
+  }
+
+  if ( fabs(l2new -l1new) >= fabs(ll2old -ll1old) ) {
+    return 0;
+  }
 
   /** For each surfacic triangle build a virtual displaced triangle for check
    * purposes :
@@ -820,10 +827,14 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   }
 
   assert ( i<3 );
-  if ( i>=3 ) return 0;
+  if ( i>=3 ) {
+    return 0;
+  }
   tt.v[i] = 0;
 
-  if ( !MMG5_nortri(mesh, &tt, nprev) ) return 0;
+  if ( !MMG5_nortri(mesh, &tt, nprev) ) {
+    return 0;
+  }
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
@@ -840,7 +851,9 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       }
     }
     assert(i<3);
-    if ( i==3 ) return 0;
+    if ( i==3 ) {
+      return 0;
+    }
 
     tt.v[i] = 0;
 
@@ -852,7 +865,9 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     }
     calnew = MG_MIN(calnew,caltmp);
 
-    if ( !MMG5_nortri(mesh, &tt, ncur) ) return 0;
+    if ( !MMG5_nortri(mesh, &tt, ncur) ) {
+      return 0;
+    }
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
@@ -877,8 +892,12 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     }
     memcpy(nprev, ncur, 3*sizeof(double));
   }
-  if ( calold < MMG5_EPSOK && calnew <= calold )    return 0;
-  else if ( calnew < calold )    return 0;
+  if ( calold < MMG5_EPSOK && calnew <= calold ) {
+    return 0;
+  }
+  else if ( calnew < calold ) {
+    return 0;
+  }
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /** d. Test: Check whether all volumes remain positive with new position of the point */
