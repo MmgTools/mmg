@@ -1046,7 +1046,9 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     ipa = iptmpa;
     ipb = iptmpb;
   }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
+  if ( !(ip1 && ip2 && (ip1 != ip2)) )  {
+    return 0;
+  }
 
   /** Step 2: At this point, we get the point extremities of the curve passing
      through ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
@@ -1147,7 +1149,9 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       }
     }
     assert(i<3);
-    if ( i==3 ) return 0;
+    if ( i==3 ) {
+      return 0;
+    }
 
     tt.v[i] = 0;
 
@@ -1210,8 +1214,12 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       return 0;
     }
   }
-  if ( calold < MMG5_EPSOK && calnew <= calold )    return 0;
-  else if ( calnew < calold )    return 0;
+  if ( calold < MMG5_EPSOK && calnew <= calold ) {
+    return 0;
+  }
+  else if ( calnew < calold ) {
+    return 0;
+  }
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /** d. Test: Check whether all volumes remain positive with new position of the point */
