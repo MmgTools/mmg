@@ -606,7 +606,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
       if ( edgTag & tag ) {
-        /* featured edge has been found. End of ball processing */
+        /* The featured edge has been found. End of ball processing */
         ip1 = iptmpb;
         break;
       }
