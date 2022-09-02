@@ -493,16 +493,14 @@ static inline
 int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
                             int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
   MMG5_pTetra           pt;
-  MMG5_pPoint           p0,ppt0;
+  MMG5_pPoint           p0;
   MMG5_Tria             tt;
-  MMG5_pxPoint          pxp;
-  double                step,ll1old,ll2old,l1new,l2new;
+  double                ll1old,ll2old,l1new,l2new;
   double                o[3],no[3],no2[3],to[3], ncur[3],nprev[3],nneighi[3];
   double                calold,calnew,caltmp;
-  int                   l,iel,ip0,ip1,ip2,ip,nxp;
+  int                   l,iel,ip0,ip1,ip2,ip;
   uint8_t               i,iface,isrid;
 
-  step      = 0.1;
   ip1 = ip2 = 0;
   pt        = &mesh->tetra[listv[0]/4];
   ip0       = pt->v[listv[0]%4];
@@ -534,72 +532,15 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     return 0;
   }
 
-  if ( ll1old < ll2old ) { //move towards p2
-    ip = ip2;
-  }
-  else {
-    ip = ip1;
-  }
-
-  /** b. Compute support of the associated edge, and features of the new position */
-  if ( MG_NOM & edgTag ) {
-    if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) ) {
-      return 0;
-    }
-  }
-  else if ( MG_GEO & edgTag ) {
-    // Remark: Singular points are required so following assertion should be
-    // verified in the entire function. Keep the test here to make easier
-    // debugging/understanding when passing here.
-    assert ( (!MG_SIN(mesh->point[ip0].tag)) &&
-             "BezierRidge don't work if both ip0 and ip are singular" );
-    if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no,no2,to)) ) {
-      return 0;
-    }
-  }
-  else if ( MG_REF & edgTag ) {
-    if ( !(MMG5_BezierRef(mesh,ip0,ip,step,o,no,to)) ) {
-      return 0;
-    }
-  }
-  else {
-    assert ( 0 && "Unexpected edge tag in this function");
+  /** b. Check sense of displacement, compute support of the associated edge and
+   * features of the new position */
+  ip = MMG3D_movbdycurvept_newPosForSimu( mesh,p0,ip0,ip1,ip2,ll1old,ll2old,
+                                          isrid,o,no,no2,to,edgTag );
+  if ( !ip ) {
     return 0;
   }
 
-  /** c. Test: make sure that geometric approximation has not been degraded too much */
-  ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
-  ppt0->tag  = p0->tag;
-  ppt0->ref  = p0->ref;
-
-
-  nxp = mesh->xp + 1;
-  if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
-                       "larger xpoint table",return 0;);
-  }
-  ppt0->xp = nxp;
-  pxp = &mesh->xpoint[nxp];
-  memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
-
-  ppt0->n[0] = to[0];
-  ppt0->n[1] = to[1];
-  ppt0->n[2] = to[2];
-
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
-
-  if ( isrid ) {
-    /* Copy the second normal for ridge point */
-    pxp->n2[0] = no2[0];
-    pxp->n2[1] = no2[1];
-    pxp->n2[2] = no2[2];
-  }
-
+  /** Metric interpolation */
   if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
     /* Interpolation of metric between ip0 and ip2 along ridge */
     if ( !MMG5_intridmet(mesh,met,ip0,ip,step,no,&met->m[0]) ) {
@@ -712,7 +653,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   else if ( calnew < calold ) {
     return 0;
   }
-  memset(pxp,0,sizeof(MMG5_xPoint));
+  memset(&mesh->xpoint[mesh->point[0].xp],0,sizeof(MMG5_xPoint));
 
   /** d. Check whether all volumes remain positive with new position of the
    * point and update coor, normals, tangents and qualities if move is
