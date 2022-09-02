@@ -21,6 +21,9 @@
 ** =============================================================================
 */
 
+#ifndef MMGEXTERNS_H
+#define MMGEXTERNS_H
+
 #include "mmgcommon.h"
 
 
@@ -31,7 +34,11 @@ extern int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
 extern int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
 extern int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
 extern int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
-extern int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
+extern int  (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
+extern int  (*MMG5_solTruncature_ani)(MMG5_pMesh mesh, MMG5_pSol met);
+
 #ifdef USE_SCOTCH
 extern int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
+#endif
+
 #endif

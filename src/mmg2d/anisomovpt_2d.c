@@ -32,6 +32,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 #include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 /* Relocate internal vertex whose ball is passed */
 int MMG2D_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,int8_t improve) {

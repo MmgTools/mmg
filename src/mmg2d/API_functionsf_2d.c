@@ -1234,15 +1234,3 @@ FORTRAN_NAME(MMG2D_SAVEALLSOLS,mmg2d_saveallsols,(MMG5_pMesh *mesh,MMG5_pSol *so
 
   return;
 }
-
-/**
- * See \ref MMG2D_scaleMesh function in \ref mmg2d/libmmg2d.h file.
- */
-FORTRAN_NAME(MMG2D_SCALEMESH,mmg2d_scalemesh,
-             (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *ls,int* retval),
-             (mesh,met,ls,retval)){
-
-  *retval = MMG2D_scaleMesh(*mesh,*met,*ls);
-
-  return;
-}

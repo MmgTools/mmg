@@ -203,19 +203,6 @@ LIBMMG_CORE_EXPORT void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,doub
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * Truncate the metric computed by the DoSol function by hmax and hmin values
- * (if setted by the user). Set hmin and hmax if they are not setted.
- *
- * \warning works only for a metric computed by the DoSol function because we
- * suppose that we have a diagonal tensor in aniso.
- *
- */
-LIBMMG_CORE_EXPORT void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param ref input tetra reference.
  * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise

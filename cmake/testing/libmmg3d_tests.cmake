@@ -34,6 +34,10 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_example4
   libmmg3d_example6_io
   libmmg3d_lsOnly
+  libmmg3d_lsOnly_optim
+  libmmg3d_lsOnly_hsiz
+  libmmg3d_lsAndMetric_optim
+  libmmg3d_lsAndMetric_hsiz
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
   )
@@ -60,6 +64,10 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_hsiz.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
   )
@@ -101,6 +109,10 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg3d_fortran_b
     libmmg3d_fortran_io
     libmmg3d_fortran_lsOnly
+    libmmg3d_fortran_lsOnly_optim
+    libmmg3d_fortran_lsOnly_hsiz
+    libmmg3d_fortran_lsAndMetric_optim
+    libmmg3d_fortran_lsAndMetric_hsiz
     libmmg3d_fortran_lsAndMetric
     )
   # Additional tests that needs to download ci meshes
@@ -113,6 +125,10 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_hsiz.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_hsiz.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.F90
     )
   # Additional tests that needs to download ci meshes

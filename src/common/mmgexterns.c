@@ -31,7 +31,9 @@ int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel)=NULL;
 int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp)=NULL;
 int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int)=NULL;
 int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int)=NULL;
-int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol)=NULL;
+int  (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol)=NULL;
+int  (*MMG5_solTruncature_ani)(MMG5_pMesh mesh, MMG5_pSol met, int dim)=NULL;
+
 #ifdef USE_SCOTCH
 int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*)=NULL;
 #endif

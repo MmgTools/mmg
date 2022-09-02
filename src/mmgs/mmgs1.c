@@ -33,6 +33,7 @@
  */
 
 #include "libmmgs_private.h"
+#include "mmgsexterns.h"
 #include "mmgexterns.h"
 #include "inlined_functions.h"
 
@@ -487,7 +488,9 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 
         if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
           continue;
-        ilist = boulet(mesh,k,i,list);
+
+        int8_t dummy;
+        ilist = boulet(mesh,k,i,list,&dummy);
 
         if ( ilist < 1 ) continue;
 
