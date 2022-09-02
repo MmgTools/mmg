@@ -535,7 +535,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   /** b. Check sense of displacement, compute support of the associated edge and
    * features of the new position */
   ip = MMG3D_movbdycurvept_newPosForSimu( mesh,p0,ip0,ip1,ip2,ll1old,ll2old,
-                                          isrid,o,no,no2,to,edgTag );
+                                          isrid,MMG3D_MOVSTEP,o,no,no2,to,edgTag );
   if ( !ip ) {
     return 0;
   }
@@ -543,7 +543,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   /** Metric interpolation */
   if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
     /* Interpolation of metric between ip0 and ip2 along ridge */
-    if ( !MMG5_intridmet(mesh,met,ip0,ip,step,no,&met->m[0]) ) {
+    if ( !MMG5_intridmet(mesh,met,ip0,ip,MMG3D_MOVSTEP,no,&met->m[0]) ) {
       return 0;
     }
   }

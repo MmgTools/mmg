@@ -137,6 +137,7 @@ extern "C" {
 #define MMG3D_SHORTMAX     0x7fff
 
 #define MMG3D_VOLFRAC      1.e-5
+#define MMG3D_MOVSTEP 0.1
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
 static const uint8_t MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
@@ -377,7 +378,8 @@ int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
                                       int ip0,uint8_t isrid,double o[3],
                                       double no[3],double no2[3],double to[3]);
 int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh,MMG5_pPoint,int,int,int,
-                                      double,double,uint8_t,double[3],double[3],
+                                      double,double,uint8_t,const double,
+                                      double[3],double[3],
                                       double[3],double[3],const int16_t);
 int    MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);

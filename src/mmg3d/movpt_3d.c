@@ -820,16 +820,16 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * \param ip0 global index of point whose ball is passed.
  * \param ipa global idx of second vertex of previous bdy tria of the list (updated at end of tria processing).
  * \param ipb global idx of third vertex of previous bdy tria of the list (updated at end of tria processing).
- * \param edgTag searched tag (MG_NOM, MG_GEO, MG_REF).
+ * \param edgTag searched tag (\ref MG_NOM, \ref MG_GEO, \ref MG_REF).
  * \param ip variable to store the global index of ending point (if found).
  *
- * \return 0 if tested edge is not tagged \ref edgTag, 1 if it is.
+ * \return 0 if tested edge is not tagged \a edgTag, 1 if it is.
  *
- * Process boundary triangle stored in the item \ref l of the surfacic list \ref
- * lists of point \ref ip0. Check if the edge at interface of this tria and the
- * tria ipa - ipb - ip0 (previous tria of the list) has tag \ref edgTag:
- *   - if yes, store second vertex of this edge (\ref ip0 being the first one) in \ref ip and return 1;
- *   - if no, update values of \ref ipa and \ref ipb and return 0.
+ * Process boundary triangle stored in the item \a l of the surfacic list \a
+ * lists of point \a ip0. Check if the edge at interface of this tria and the
+ * tria ipa - ipb - ip0 (previous tria of the list) has tag \a edgTag:
+ *   - if yes, store second vertex of this edge (\a ip0 being the first one) in \a ip and return 1;
+ *   - if no, update values of \a ipa and \a ipb and return 0.
  *
  * \remark lists[k] = 4* tet idx + idx of bdy face.
  *
@@ -911,7 +911,7 @@ int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,int *lists,int l,int ip0,
  * \param mesh pointer toward the mesh structure.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ * \param edgTag Type of edge on which we move (\ref MG_REF, \ref MG_NOM or \ref MG_GEO).
  * \param ip0 point that we want to move along curve.
  * \param ip1 first ending point of curve (in current surfacic ball).
  * \param ip2 second ending point of curve (in current surfacic ball).
@@ -1023,7 +1023,7 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
  * \param p0 point that we want to move.
- * \param ip0 global index of point \ref p0.
+ * \param ip0 global index of point \a p0.
  * \param isrid 1 if point is a ridge manifold point
  * \param o point coordinates at new position
  * \param no normal at point at new position
@@ -1112,16 +1112,17 @@ int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
  * \param ip1 First ending point of curve.
  * \param ip2 Second ending point of curve.
  * \param ll1old length of edge ip0-ip1.
- * \param ll2old length of edge ip0-ip2
- * \param isrid 1 if point is a ridge manifold point
+ * \param ll2old length of edge ip0-ip2.
+ * \param isrid 1 if point is a ridge manifold point.
+ * \param step step of displacement.
  * \param o point coordinates at new position
  * \param no normal at point at new position
  * \param no2 second normal at point at new pos (for ridge manifold point)
  * \param to tangent at point at new pos.
- * \param edgTag \a MG_NOM, \a MG_REF or \ref MG_GEO depending on type of curve
+ * \param edgTag \ref MG_NOM, \ref MG_REF or \ref MG_GEO depending on type of curve
  * along which we move.
  *
- * \return 0 if we don't want to move, global index \ref ip if we want to move
+ * \return 0 if we don't want to move, global index \a ip if we want to move
  * toward point ip.
  *
  * Check volumes of the tetra in the ball of point with new position of point.
@@ -1131,7 +1132,8 @@ int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
  */
 int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,int ip0,
                                       int ip1,int ip2,double ll1old,double ll2old,
-                                      uint8_t isrid,double o[3],double no[3],
+                                      uint8_t isrid,const double step,
+                                      double o[3],double no[3],
                                       double no2[3],double to[3],
                                       const int16_t edgTag) {
 
@@ -1149,8 +1151,6 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,int ip0,
   else {
     return 0;
   }
-
-  const double step = 0.1;
 
   /** Build support of the edge ip-ip0 and features of new position */
   if ( MG_NOM & edgTag ) {
@@ -1226,7 +1226,7 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,int ip0,
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
- * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ * \param edgTag Type of edge on which we move (\ref MG_REF,\ref MG_NOM or \ref MG_GEO).
  *
  * \return 0 if fail, 1 if success.
  *
@@ -1293,7 +1293,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   /** b. Check sense of displacement, compute support of the associated edge and
    * features of the new position */
   ip = MMG3D_movbdycurvept_newPosForSimu( mesh,p0,ip0,ip1,ip2,ll1old,ll2old,
-                                          isrid,o,no,no2,to,edgTag );
+                                          isrid,MMG3D_MOVSTEP,o,no,no2,to,edgTag );
   if ( !ip ) {
     return 0;
   }
