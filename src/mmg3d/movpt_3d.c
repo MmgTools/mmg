@@ -907,8 +907,7 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
     /* Search if the edge ip0-iptmpa is the edge at the interface with previous
      * triangle. */
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
+      tag = mesh->xtetra[pt->xt].tag[iea];
       if ( edgTag & tag ) {
         /* The featured edge has been found. End of ball processing. */
         *ip1 = iptmpa;
@@ -919,8 +918,7 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
     /* Search if the edge ip0-iptmpb is the edge at the interface with previous
      * triangle. */
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
-      else  tag = 0;
+      tag = mesh->xtetra[pt->xt].tag[ieb];
       if ( edgTag & tag ) {
         /* The featured edge has been found. End of ball processing. */
         *ip1 = iptmpb;
@@ -1000,8 +998,7 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
     /* Search if the edge ip0-iptmpa is the edge at the interface with previous
      * triangle. */
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
+      tag = mesh->xtetra[pt->xt].tag[iea];
       if ( edgTag & tag ) {
         *ip2 = iptmpa;
         break;
@@ -1010,13 +1007,7 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
     /* Search if the edge ip0-iptmpb is the edge at the interface with previous
      * triangle. */
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( (MG_GEO & edgTag) && (!pt->xt) ) {
-        tag = 0;
-      }
-      else {
-        assert(pt->xt);
-        tag = mesh->xtetra[pt->xt].tag[ieb];
-      }
+      tag = mesh->xtetra[pt->xt].tag[ieb];
       if ( edgTag & tag ) {
         *ip2 = iptmpb;
         break;
