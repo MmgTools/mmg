@@ -1032,6 +1032,13 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
  * surfacic balls are passed.
  *
  * \remark the metric is not interpolated at the new position.
+ *
+ * \todo End of refactoring with aniso function:
+ *   - test effects of interpolation of metric in iso mode (done only in aniso);
+ *   - check what to do with geometric approx and local hausdorff: only tested
+ * in iso mode, normally the surface size map should be integrated to the
+ * sizemap but chckedg call still returns 0 in some of ci tests (maybe because
+ * metric is not used in lenedg computations).
  */
 static inline
 int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
@@ -1152,8 +1159,12 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   /** For each surfacic triangle build a virtual displaced triangle for check
    * purposes :
    *      - check the new triangle qualities;
-   *      - check normal deviation with the adjacent through the edge facing ip0
-   *        and the previous one */
+   *      - check edge lengths with respect to Hausdorff criterion.
+   *
+   * Remark: normal deviation is checked only with aniso metric because
+   * displacment in inso mode remais sufficiently small to not create spurious
+   * ridges while this issue was encountered on some aniso test cases.
+   */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
     iel         = lists[l] / 4;

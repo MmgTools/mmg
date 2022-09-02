@@ -487,13 +487,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * Move boundary reference, ridge or non-manifold point, whose volumic and
  * surfacic balls are passed.
  *
- * \todo Factorization of this function with the iso one if possible and review
- * of the step 1 (research of ending points of curve) that seems too complex
- * (probably due to successive cleanings):
- *    - 1. I think that tetra of surfacic ball always have an xtetra (allow to
- * clean some useless if),
- *    - 2. we probably don't need to search edge ipa-ipb when travelling the
- * surfacic ball.
+ * \todo Factorization of this function with the iso one.
  */
 static inline
 int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
