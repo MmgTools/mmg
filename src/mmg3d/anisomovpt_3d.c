@@ -492,15 +492,15 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 static inline
 int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
                             int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
-  MMG5_pTetra           pt,pt0;
+  MMG5_pTetra           pt;
   MMG5_pPoint           p0,ppt0;
   MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
   double                step,ll1old,ll2old,l1new,l2new;
   double                o[3],no[3],no2[3],to[3], ncur[3],nprev[3],nneighi[3];
-  double                calold,calnew,caltmp,callist[MMG3D_LMAX+2];
+  double                calold,calnew,caltmp;
   int                   l,iel,ip0,ip1,ip2,ip,nxp;
-  uint8_t               i,i0,iface,isrid;
+  uint8_t               i,iface,isrid;
 
   step      = 0.1;
   ip1 = ip2 = 0;
@@ -714,61 +714,17 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   }
   memset(pxp,0,sizeof(MMG5_xPoint));
 
-  /** d. Test: Check whether all volumes remain positive with new position of the point */
-  calold = calnew = DBL_MAX;
-  for( l=0 ; l<ilistv ; l++ ){
-    iel = listv[l] / 4;
-    i0  = listv[l] % 4;
-    pt  = &mesh->tetra[iel];
-    pt0 = &mesh->tetra[0];
-    memcpy(pt0,pt,sizeof(MMG5_Tetra));
-    pt0->v[i0] = 0;
-    calold = MG_MIN(calold, pt->qual);
-    callist[l] = MMG5_orcal(mesh,met,0);
-    if (callist[l] < MMG5_NULKAL) {
-      return 0;
-    }
-    calnew = MG_MIN(calnew,callist[l]);
-  }
-  if ((calold < MMG5_EPSOK && calnew <= calold) ||
-      (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    return 0;
-  } else if (improve && calnew < calold) {
-    return 0;
+  /** d. Check whether all volumes remain positive with new position of the
+   * point and update coor, normals, tangents and qualities if move is
+   * accepted. */
+  ier =  MMG3D_movbdycurvept_chckAndUpdate(mesh,met,PROctree,listv,ilistv,
+                                           improve,p0,ip0,isrid,o,no,no2,to);
+
+  if ( ier ) {
+    memcpy(&met->m[6*ip0],&met->m[0],6*sizeof(double));
   }
 
-  /** Step 3: Update coordinates, normals, for new point */
-  if ( PROctree ) {
-    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
-  }
-
-  p0->c[0] = o[0];
-  p0->c[1] = o[1];
-  p0->c[2] = o[2];
-
-  pxp = &mesh->xpoint[p0->xp];
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
-
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
-
-  if ( isrid ) {
-    /* Copy the second normal for ridge point */
-    pxp->n2[0] = no2[0];
-    pxp->n2[1] = no2[1];
-    pxp->n2[2] = no2[2];
-  }
-
-  memcpy(&met->m[6*ip0],&met->m[0],6*sizeof(double));
-
-  for( l=0 ; l<ilistv ; l++ ){
-    (&mesh->tetra[listv[l]/4])->qual = callist[l];
-    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
-  }
-  return 1;
+  return ier;
 }
 
 /**

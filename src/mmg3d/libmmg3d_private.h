@@ -371,6 +371,11 @@ int    MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
 int    MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
                              int*, int, int*, int, int ,int);
 int    MMG3D_curveEndingPts(MMG5_pMesh,int*,int,const int16_t,int,int*,int*);
+int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
+                                      MMG3D_pPROctree PROctree, int *listv,
+                                      int ilistv,int improve,MMG5_pPoint p0,
+                                      int ip0,uint8_t isrid,double o[3],
+                                      double no[3],double no2[3],double to[3]);
 int    MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
 int    MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
