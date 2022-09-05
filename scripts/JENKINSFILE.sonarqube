@@ -35,7 +35,7 @@ node('mmg-sonnar-new') {
             sh '''#!/bin/bash -l
             cd buildPattern'''+list[i]+'''useScotch'''+list[i]+'''
             ctest --no-compress-output -T Test -V || /usr/bin/true
-            lcov --directory /builds/workspace/mmg-sonarqube/buildPattern'''+list[i]+'''useScotch'''+list[i]+''' --capture --output-file /builds/workspace/mmg-sonarqube/buildPattern'''+list[i]+'''useScotch'''+list[i]+'''/mmg-pattern'''+list[i]+'''-use-scotch'''+list[i]+'''.lcov
+            lcov --directory /builds/workspace/$dir_mmg/buildPattern'''+list[i]+'''useScotch'''+list[i]+''' --capture --output-file /builds/workspace/$dir_mmg/buildPattern'''+list[i]+'''useScotch'''+list[i]+'''/mmg-pattern'''+list[i]+'''-use-scotch'''+list[i]+'''.lcov
             valgrind --xml=yes --xml-file=valgrind-mmg2d.xml ./bin/mmg2d_debug ../libexamples/mmg2d/adaptation_example0/example0_a/init.mesh
             valgrind --xml=yes --xml-file=valgrind-mmgs.xml ./bin/mmgs_debug ../libexamples/mmgs/adaptation_example0/example0_a/cube.mesh
             valgrind --xml=yes --xml-file=valgrind-mmg3d.xml ./bin/mmg3d_debug ../libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh
@@ -48,15 +48,16 @@ node('mmg-sonnar-new') {
 
     stage('Analysis'){
         sh '''#!/bin/bash -l
-        lcov -a /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/mmg-patternON-use-scotchON.lcov -a /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/mmg-patternOFF-use-scotchOFF.lcov -o /builds/workspace/mmg-sonarqube/mmg.lcov
-        python /builds/sonar/lcov-to-cobertura-xml-1.6/lcov_cobertura/lcov_cobertura.py /builds/workspace/mmg-sonarqube/mmg.lcov --output /builds/workspace/mmg-sonarqube/mmg-coverage.xml
+        export version_mmg=develop
+        export dir_mmg=mmg-sonarqube-$version_mmg
+        lcov -a /builds/workspace/$dir_mmg/buildPatternONuseScotchON/mmg-patternON-use-scotchON.lcov -a /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/mmg-patternOFF-use-scotchOFF.lcov -o /builds/workspace/$dir_mmg/mmg.lcov
+        python /builds/sonar/lcov-to-cobertura-xml-1.6/lcov_cobertura/lcov_cobertura.py /builds/workspace/$dir_mmg/mmg.lcov --output /builds/workspace/$dir_mmg/mmg-coverage.xml
         export CPPCHECK_INCLUDES="-IbuildPatternONuseScotchON/include -IbuildPatternOFFuseScotchOFF/include -IbuildPatternONuseScotchON/src/common -IbuildPatternOFFuseScotchOFF/src/common"
         export SOURCES_TO_ANALYZE="./src"
         cppcheck  -v -f --language=c --platform=unix64 --check-config --enable=all --xml --xml-version=2 --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES} ${SOURCES_TO_ANALYZE} 2> mmg-cppcheck.xml
         /usr/local/bin/rats -w 3 --xml ${SOURCES_TO_ANALYZE} > mmg-rats.xml
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
         export SONAR_SCANNER_OPTS="-Xms512m -Xmx1024m"
-        export version_mmg=develop
         cat > sonar-project.properties << EOF
 sonar.host.url=https://sonarqube.inria.fr/sonarqube
 sonar.links.homepage=http://www.mmgtools.org/
@@ -66,42 +67,41 @@ sonar.links.issue=https://github.com/MmgTools/mmg/issues
 sonar.projectKey=cardamom:mmg:github:$version_mmg
 sonar.projectDescription=open source software for bidimensional and tridimensional remeshing
 sonar.projectVersion=$version_mmg
-sonar.sources=./src,./libexamples,./cmake/testing/code,./scripts,../../ci_tests
+sonar.sources=./src,./scripts
+sonar.tests=./cmake/testing/code,./libexamples
 sonar.sourceEncoding=UTF-8
-sonar.c.suffixes.sources=.c
-sonar.c.suffixes.headers=.h
+sonar.cxx.file.suffixes=.h,.c,.hpp,.cpp
 sonar.lang.patterns.c++ : **/*.cxx,**/*.cpp,**/*.hxx,**/*.hpp
 sonar.c.errorRecoveryEnabled=True
 sonar.c.includeDirectories=\
-   /builds/workspace/mmg-sonarqube/src/common,\
-   /builds/workspace/mmg-sonarqube/src/mmg,\
-   /builds/workspace/mmg-sonarqube/src/mmg3d,\
-   /builds/workspace/mmg-sonarqube/src/mmg2d,\
-   /builds/workspace/mmg-sonarqube/src/mmgs,\
-   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/mmg2d,\
-   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/mmg3d,\
-   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/mmgs,\
-   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/common,\
-   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/include,\
-   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src,\
-   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/mmg2d,\
-   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/mmg3d,\
-   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/mmgs,\
-   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/common,\
-   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/include,\
-   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src,
-sonar.c.compiler.charset=UTF-8
-sonar.c.compiler.parser=GCC
-sonar.c.compiler.regex=^(.*):(\\\\d+):\\\\d+: warning: (.*)\\\\[(.*)\\\\]$
-sonar.c.compiler.reportPath=mmg-build.log
-sonar.c.coverage.reportPath=mmg-coverage.xml
-sonar.c.cppcheck.reportPath=mmg-cppcheck.xml
-sonar.c.rats.reportPath=mmg-rats.xml
-sonar.c.clangsa.reportPath=*/analyzer_reports/*/*.plist
-sonar.c.valgrind.reportPath=valgrind-*.xml
-#sonar.c.vera.reportPath=mmg-vera.xml
+   /builds/workspace/$dir_mmg/src/common,\
+   /builds/workspace/$dir_mmg/src/mmg,\
+   /builds/workspace/$dir_mmg/src/mmg3d,\
+   /builds/workspace/$dir_mmg/src/mmg2d,\
+   /builds/workspace/$dir_mmg/src/mmgs,\
+   /builds/workspace/$dir_mmg/buildPatternONuseScotchON/src/mmg2d,\
+   /builds/workspace/$dir_mmg/buildPatternONuseScotchON/src/mmg3d,\
+   /builds/workspace/$dir_mmg/buildPatternONuseScotchON/src/mmgs,\
+   /builds/workspace/$dir_mmg/buildPatternONuseScotchON/src/common,\
+   /builds/workspace/$dir_mmg/buildPatternONuseScotchON/include,\
+   /builds/workspace/$dir_mmg/buildPatternONuseScotchON/src,\
+   /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/src/mmg2d,\
+   /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/src/mmg3d,\
+   /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/src/mmgs,\
+   /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/src/common,\
+   /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/include,\
+   /builds/workspace/$dir_mmg/buildPatternOFFuseScotchOFF/src,
+sonar.cxx.gcc.encoding=UTF-8
+sonar.cxx.gcc.regex=^(.*):(\\\\d+):\\\\d+: warning: (.*)\\\\[(.*)\\\\]$
+sonar.cxx.gcc.reportPaths=mmg-build.log
+sonar.cxx.cobertura.reportPaths=mmg-coverage.xml
+sonar.cxx.cppcheck.reportPaths=mmg-cppcheck.xml
+sonar.cxx.rats.reportPaths=mmg-rats.xml
+sonar.cxx.clangsa.reportPaths=*/analyzer_reports/*/*.plist
+sonar.cxx.valgrind.reportPaths=valgrind-*.xml
+#sonar.cxx.vera.reportPaths=mmg-vera.xml
 EOF
-        /builds/sonar/sonar-scanner-3.2.0.1227-linux/bin/sonar-scanner -Dsonar.login=`cat /builds/mmg-token`
+        /builds/sonar/sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner -Dsonar.login=`cat /builds/mmg-token`
         '''
     }
 }
