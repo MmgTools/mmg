@@ -222,7 +222,7 @@ endif()
 
 ####### -met option
 ADD_TEST(NAME mmgs_2squares-withMet
-  COMMAND ${EXECUT_MMGS} -v 5
+  COMMAND ${EXECUT_MMGS} -v 5 -d
   ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-met.o.meshb)
 
