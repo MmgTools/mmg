@@ -466,12 +466,12 @@ ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.meshb)
 
 ADD_TEST(NAME mmg2d_GaronneGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5 -d
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
 
 ADD_TEST(NAME mmg2d_GaronneGeneration2
-  COMMAND ${EXECUT_MMG2D} -v 5 -d
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GaronneGeneration/garonne.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration2.o.meshb)
 
