@@ -363,14 +363,20 @@ ADD_TEST(NAME mmg3d_val
   ${MMG3D_CI_TESTS}/Cube/cube
   ${CTEST_OUTPUT_DIR}/mmg3d_cube-val.o.meshb
   )
-
-#ADD_TEST(NAME mmg3d_default
-#  COMMAND ${EXECUT_MMG3D} -v 5 -default
-#  ${MMG3D_CI_TESTS}/Cube/cube
-#  -out ${CTEST_OUTPUT_DIR}/mmg3d_default.o.meshb)
-
-SET_PROPERTY(TEST mmg3d_val #mmg3d_default
+SET_PROPERTY(TEST mmg3d_val
   PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg3d_locParamCrea
+  COMMAND ${EXECUT_MMG3D} -v 5 -default
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.0)
+
+SET_TESTS_PROPERTIES ( mmg3d_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmg3d_locParamCrea )
+ADD_TEST(NAME mmg3d_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.mmg3d)
+SET_TESTS_PROPERTIES ( mmg3d_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmg3d_locParamCrea )
 
 # default hybrid
 ADD_TEST(NAME mmg3d_hybrid_3d

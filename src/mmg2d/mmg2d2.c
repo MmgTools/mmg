@@ -494,53 +494,12 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
  *
  **/
 int MMG2D_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria     pt;
-  MMG5_pPoint    ppt,ppt2;
-  double    c[2],dd;
-  int       j,k,kk,ip1,ip2,ip3,ip4,jel,kel,nt,iadr,*adja;
-  int       *numper;
+  MMG5_pTria pt;
+  double     c[2];
+  int        ip1,ip2,ip3,ip4,jel,kel,iadr,*adja;
 
   mesh->base = 0;
-  /* If triangles already exist, delete them */
-  if ( mesh->nt ) {
-    nt = mesh->nt;
-    for(k=1 ; k<=nt ; k++) {
-      MMG2D_delElt(mesh,k);
-      iadr = 3*(k-1) + 1;
-      adja = &mesh->adja[iadr];
-      adja[0] = 0;
-      adja[1] = 0;
-      adja[2] = 0;
-    }
-  }
-
-  /* This part seems useless */
-  /* Deal with periodic vertices */
-  if ( mesh->info.nsd == -10 ) {
-    MMG5_SAFE_CALLOC(numper,mesh->np+1,int,return 0);
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      for (kk=k; kk<=mesh->np; kk++) {
-        if(k==kk) continue;
-        ppt2 = &mesh->point[kk];
-        dd = (ppt->c[0]-ppt2->c[0])*(ppt->c[0]-ppt2->c[0])
-          +(ppt->c[1]-ppt2->c[1])*(ppt->c[1]-ppt2->c[1]);
-        if ( dd < 1.e-6 ) {
-          ppt2->tmp = 1;
-          if ( !numper[k] ) {
-            numper[k] = kk;
-          }
-          else if ( numper[k]!=kk ){
-            j = numper[k];
-            while(numper[j] && numper[j]!=kk) {
-              j = numper[j];
-            }
-            if(numper[j]!=kk) numper[j] = kk;
-          }
-        }
-      }
-    }
-  }
+  assert ( !mesh->nt );
 
   /* Create the 4 vertices of the bounding box */
   /* Bottom left corner */

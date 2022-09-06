@@ -52,14 +52,20 @@ ADD_TEST(NAME mmg2d_val
   COMMAND ${EXECUT_MMG2D} -v val
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_val.o.meshb)
-
-#ADD_TEST(NAME mmg2d_default
-#  COMMAND ${EXECUT_MMG2D} -default
-#  ${MMG2D_CI_TESTS}/Circle/cercle
-#  -out ${CTEST_OUTPUT_DIR}/mmg2d_default.o.meshb)
-
-SET_PROPERTY(TEST mmg2d_val #mmg2d_default
+SET_PROPERTY(TEST mmg2d_val
   PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg2d_locParamCrea
+  COMMAND ${EXECUT_MMG2D} -v 5 -default
+  ${MMG2D_CI_TESTS}/LocParamsCrea/circle2refs.mesh)
+
+SET_TESTS_PROPERTIES ( mmg2d_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmg2d_locParamCrea )
+ADD_TEST(NAME mmg2d_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMG2D_CI_TESTS}/LocParamsCrea/circle2refs.mmg2d)
+SET_TESTS_PROPERTIES ( mmg2d_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmg2d_locParamCrea )
 
 ADD_TEST(NAME mmg2d_hsizOption
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
@@ -460,9 +466,14 @@ ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.meshb)
 
 ADD_TEST(NAME mmg2d_GaronneGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
+  COMMAND ${EXECUT_MMG2D} -v 5 -d
   ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
+
+ADD_TEST(NAME mmg2d_GaronneGeneration2
+  COMMAND ${EXECUT_MMG2D} -v 5 -d
+  ${MMG2D_CI_TESTS}/GaronneGeneration/garonne.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration2.o.meshb)
 
 ###############################################################################
 #####

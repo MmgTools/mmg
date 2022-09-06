@@ -223,6 +223,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
       j   = adja[i] % 3;
 
       if ( !jel ) {
+        /* Check that a boundary edge has a bdy tag */
         if ( !(pt->tag[i] & MG_GEO ) ) {
           if ( !mmgErr0 ) {
             mmgErr0 = 1;

@@ -61,6 +61,8 @@ ADD_TEST(NAME mmgs_val
   COMMAND ${EXECUT_MMGS} -val
   ${MMGS_CI_TESTS}/Teapot/teapot
   )
+SET_PROPERTY(TEST mmgs_val
+  PROPERTY WILL_FAIL TRUE)
 
 # nsd
 ADD_TEST(NAME mmgs_nsd24
@@ -68,13 +70,16 @@ ADD_TEST(NAME mmgs_nsd24
   ${MMGS_CI_TESTS}/Teapot/teapot
   -out ${CTEST_OUTPUT_DIR}/mmgs_nsd24.o.meshb)
 
-#ADD_TEST(NAME mmgs_default
-#  COMMAND ${EXECUT_MMGS} -default
-#  ${MMGS_CI_TESTS}/Teapot/teapot
-#  -out ${CTEST_OUTPUT_DIR}/mmgs_memOption.o.meshb)
-
-SET_PROPERTY(TEST mmgs_val #mmgs_default
-  PROPERTY WILL_FAIL TRUE)
+ADD_TEST(NAME mmgs_locParamCrea
+  COMMAND ${EXECUT_MMGS} -v 5 -default
+  ${MMGS_CI_TESTS}/LocParamsCrea/circle2refs.mesh)
+SET_TESTS_PROPERTIES ( mmgs_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmgs_locParamCrea )
+ADD_TEST(NAME mmgs_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMGS_CI_TESTS}/LocParamsCrea/circle2refs.mmgs)
+SET_TESTS_PROPERTIES ( mmgs_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmgs_locParamCrea )
 
 ###############################################################################
 #####
