@@ -211,7 +211,13 @@ int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   return 0;
 }
 
-/** Return the index of one triangle containing ip */
+/**
+ * \param mesh pointer toward mesh
+ * \param ip point index
+ * \return index of one elt containing k or 0 (if no elt is found)
+ *
+ * Return the index of one triangle containing k.
+ */
 int MMG2D_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria    pt,pt1;
   int           iel,base,iadr,*adja,iter,ier;

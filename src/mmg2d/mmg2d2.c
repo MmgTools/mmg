@@ -155,6 +155,47 @@ int MMG2D_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip
 }
 
 /**
+ * \param mesh pointer toward mesh
+ * \param k point index
+ * \return index of one elt containing k or 0 (if no elt is found)
+ *
+ * Return the index of one triangle containing k (performing exhausting search
+ * if needed).
+ */
+static inline
+int MMG2D_findTria_exhaust(MMG5_pMesh mesh,int k) {
+  MMG5_pPoint ppt = &mesh->point[k];
+  static int8_t mmgWarn0=0;
+
+  /* Find the triangle lel of the mesh containing ppt */
+  int lel = MMG2D_findTria(mesh,k);
+
+  /* Exhaustive search if not found */
+  if ( !lel ) {
+    if ( mesh->info.ddebug ) {
+      printf(" ** exhaustive search of point location.\n");
+    }
+
+    int kk;
+    for(kk=1; kk<=mesh->nt; kk++) {
+      lel = MMG2D_isInTriangle(mesh,kk,&ppt->c[0]);
+      if ( lel ) break;
+    }
+
+    if ( kk>mesh->nt ) {
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
+                " for at least vertex %d.\n",__func__,k);
+      }
+      return 0;
+    }
+  }
+  return lel;
+}
+
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param sol pointer toward the solution structure
  * \return  0 if fail.
@@ -169,10 +210,11 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   int           k,kk;
   int           iter,maxiter,ns,nus,nu,nud;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
+  const int flag=-10;
 
   for(k=1; k<=mesh->np-4; k++) {
     ppt = &mesh->point[k];
-    ppt->flag	= -10;
+    ppt->flag	= flag;
   }
   iter = 0;
   maxiter = 10;
@@ -183,29 +225,12 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     mmgWarn1 = mmgWarn2 = 0;
     for(k=1; k<=mesh->np-4; k++) {
       ppt = &mesh->point[k];
-		  if(ppt->flag != -10) continue;
+		  if(ppt->flag != flag) continue;
 			nus++;
-      /* Find the triangle lel of the mesh containing ppt */
-      list[0] = MMG2D_findTria(mesh,k);
 
-      /* Exhaustive search if not found */
+      list[0] = MMG2D_findTria_exhaust(mesh,k);
       if ( !list[0] ) {
-        if ( mesh->info.ddebug )
-          printf(" ** exhaustive search of point location.\n");
-
-        for(kk=1; kk<=mesh->nt; kk++) {
-          list[0] = MMG2D_isInTriangle(mesh,kk,&ppt->c[0]);
-          if ( list[0] ) break;
-        }
-
-        if ( kk>mesh->nt ) {
-          if ( !mmgWarn0 ) {
-            mmgWarn0 = 1;
-            fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
-                    " for at least vertex %d.\n",__func__,k);
-          }
-          return 0;
-        }
+        return 0;
       }
 
       /* Create the cavity of point k starting from list[0] */
@@ -255,30 +280,14 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*try to insert using splitbar*/
     for(k=1; k<=mesh->np-4; k++) {
       ppt = &mesh->point[k];
-		  if(ppt->flag != -10) continue;
+		  if(ppt->flag != flag) continue;
 			nus++;
-      /* Find the triangle lel of the mesh containing ppt */
-      list[0] = MMG2D_findTria(mesh,k);
 
-      /* Exhaustive search if not found */
+      list[0] = MMG2D_findTria_exhaust(mesh,k);
       if ( !list[0] ) {
-        if ( mesh->info.ddebug )
-          printf(" ** exhaustive search of point location.\n");
-
-        for(kk=1; kk<=mesh->nt; kk++) {
-          list[0] = MMG2D_isInTriangle(mesh,kk,&ppt->c[0]);
-          if ( list[0] ) break;
-        }
-
-        if ( kk>mesh->nt ) {
-          if ( !mmgWarn0 ) {
-            mmgWarn0 = 1;
-            fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
-                    " for at least vertex %d.\n",__func__,k);
-          }
-          return 0;
-        }
+        return 0;
       }
+
       if(!MMG2D_splitbar(mesh,list[0],k)) {
         if ( !mmgWarn2 ) {
           mmgWarn2 = 1;
