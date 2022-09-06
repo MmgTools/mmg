@@ -361,26 +361,3 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   MMG5_SAFE_FREE(list);
   return 1;
 }
-
-/* Check orientation of elements in the mesh */
-int MMG2D_chkor(MMG5_pMesh mesh) {
-  MMG5_pTria        pt;
-  MMG5_pPoint       p0,p1,p2;
-  double            det;
-  int               k;
-
-  for (k=1; k<=mesh->np; k++) {
-    pt = &mesh->tria[k];
-    if ( !pt->v[0] ) continue;
-
-    p0 = &mesh->point[pt->v[0]];
-    p1 = &mesh->point[pt->v[1]];
-    p2 = &mesh->point[pt->v[2]];
-
-    det = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
-
-    if ( det <= 0.0 ) return 0;
-  }
-
-  return 1;
-}
