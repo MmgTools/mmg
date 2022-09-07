@@ -122,7 +122,7 @@ ADD_TEST(NAME libmmgs_example1
   "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_2.o"
   )
 ADD_TEST(NAME libmmgs_example2
-  COMMAND ${LIBMMGS_EXEC2}
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2
   "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
   "${CTEST_OUTPUT_DIR}/libmmgs-IsosurfDiscretization_0-teapot.o"
   )
