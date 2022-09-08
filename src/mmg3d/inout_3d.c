@@ -1718,8 +1718,9 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
-                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
+                && !((ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         nn++;
+      }
       if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) nt++;
     }
 
@@ -1739,7 +1740,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
-                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+                && !((ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
         if(!bin) {
           fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
@@ -1767,7 +1768,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
-                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+                && !((ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         if(!bin) {
           fprintf(inm,"%d %d\n",ppt->tmp,++nn);
         } else {
