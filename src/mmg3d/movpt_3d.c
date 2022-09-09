@@ -1485,7 +1485,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   ip0 = pt->v[listv[0]%4];
   p0 = &mesh->point[ip0];
 
-  assert ( p0->tag & MG_NOM && p0->xp && mesh->xpoint[p0->xp].nnor );
+  assert ( (p0->tag & MG_NOM) && p0->xp && mesh->xpoint[p0->xp].nnor );
 
   /* Recover the two ending points of the underlying non manifold curve */
   for (l=0; l<ilistv; l++) {
@@ -1598,7 +1598,20 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_GEO);
 }
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k element index
+ * \param ip local index of point
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move internal point according to the normal at the opposite face
+ * Try to increase the volume of the tetra.
+ * Called when processing very bad elts in opttyp.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
 int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   ppa,ppb,p1,p2,p3;
@@ -1711,8 +1724,11 @@ int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
  *
  * Move internal point according to the normal at the opposite face
  * Try to increase the volume of the tetra.
+ * Called when processing very bad elts in opttyp.
  *
  * \remark the metric is not interpolated at the new position.
+ *
+ * \todo to factorize with movv_iso (and movv_ani)?
  */
 int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
@@ -1824,6 +1840,23 @@ int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   return 1;
 
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k element index
+ * \param ip local index of point
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move internal point according to the normal at the opposite face
+ * Try to increase the volume of the tetra.
+ * Called when processing very bad elts in opttyp.
+ *
+ * \remark the metric is not interpolated at the new position.
+ *
+ * \todo to factorize with movnormal_iso (and movv_ani)?
+ */
 int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
