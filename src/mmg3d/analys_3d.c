@@ -107,7 +107,7 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
 int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  int          k,kk,iel,jel,nvf,nf,nr,nm,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
@@ -264,7 +264,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
   }
 
   /* bilan */
-  nr = nre = nreq = nt = 0;
+  nr = nm = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -276,6 +276,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
+        if ( pt->tag[i] & MG_NOM )  nm++;
         if ( pt->tag[i] & MG_REF )  nre++;
         if ( pt->tag[i] & MG_REQ )  nreq++;
       }
@@ -284,6 +285,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
 
   if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
+    fprintf(stdout,"  a- nm    : %d found.\n",nm);
     fprintf(stdout,"  a- requir: %d found.\n",nreq);
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
