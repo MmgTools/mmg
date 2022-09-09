@@ -432,13 +432,14 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
  * \param ip local index of the point in the tetrahedra \a start.
  * \param ng pointer toward the number of ridges.
  * \param nr pointer toward the number of reference edges.
+ * \param nm pointer toward the number of non-manifold edges.
  * \return ns the number of special edges passing through ip, -1 if fail.
  *
  * Count the numer of ridges and reference edges incident to
  * the vertex \a ip when ip is non-manifold.
  *
  */
-int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *nr){
+int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *nr,int *nm){
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_hedge    *ph;
@@ -470,7 +471,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
   list[0] = 4*start + ip;
   ilist = 1;
 
-  *ng = *nr = ns = 0;
+  *ng = *nr = *nm = ns = 0;
 
   /* Explore list and travel by adjacency through elements sharing p */
   cur = 0;
@@ -485,7 +486,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
       for (l=0; l<3; ++l) {
         ie = MMG5_arpt[i][l];
 
-        if ( MG_EDG(pxt->tag[ie]) ) {
+        if ( MG_EDG(pxt->tag[ie]) || (MG_NOM & pxt->tag[ie]) ) {
           /* Seek if we have already seen the edge. If not, hash it and
            * increment ng or nr.*/
           a = pt->v[MMG5_iare[ie][0]];
@@ -524,10 +525,19 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
           ph->b = ib;
           ph->nxt = 0;
 
-          if ( pxt->tag[ie] & MG_GEO )
+          /* Order of following tests impacts the ridge and non-manifold edges
+           * count (an edge that has both tags pass only in first test) but
+           * should not influence the setting for corners and required tags in
+           * setVertexNmTag function) */
+          if ( pxt->tag[ie] & MG_GEO ) {
             ++(*ng);
-          else if ( pxt->tag[ie] & MG_REF )
+          }
+          else if ( pxt->tag[ie] & MG_NOM ) {
+            ++(*nm);
+          }
+          else if ( pxt->tag[ie] & MG_REF ) {
             ++(*nr);
+          }
           ++ns;
         }
       }
