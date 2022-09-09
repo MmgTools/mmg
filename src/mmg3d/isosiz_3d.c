@@ -426,7 +426,7 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       i0  = MMG5_idir[iface][j];
       ip0 = pt->v[i0];
       p1  = &mesh->point[ip0];
-      if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
+      if( (!(p1->tag & MG_NOM)) || MG_SIN(p1->tag) ) continue;
       assert(p1->xp);
       t = &p1->n[0];
       memcpy(c,t,3*sizeof(double));
@@ -869,27 +869,39 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     // Warning: why are we skipped the tetra with negative refs ?
-    if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
-    else if ( !pt->xt )  continue;
+    if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) ) {
+      continue;
+    }
+    else if ( !pt->xt ) {
+      continue;
+    }
 
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
-      if ( !(pxt->ftag[i] & MG_BDY) ) continue;
-      if ( !MG_GET(mesh->xtetra[mesh->tetra[k].xt].ori,i) ) continue;
+      if ( !(pxt->ftag[i] & MG_BDY) ) {
+        continue;
+      }
+      if ( !MG_GET(mesh->xtetra[mesh->tetra[k].xt].ori,i) ) {
+        continue;
+      }
 
       for (j=0; j<3; j++) {
         i0  = MMG5_idir[i][j];
         ip0 = pt->v[i0];
         p0  = &mesh->point[ip0];
 
-        if ( p0->flag>1 ) continue;
-
-        if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) )
+        if ( p0->flag>1 ) {
           continue;
+        }
+
+        if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) {
+          continue;
+        }
 
         /** First step: search for local parameters */
-        if ( MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0) != 1 )
+        if ( MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0) != 1 ) {
           continue;
+        }
 
         if ( !MMG3D_localParamReg(mesh,ip0,listv,ilistv,lists,ilists,
                                    &hausd,&hmin,&hmax) ) {
@@ -916,13 +928,21 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<=mesh->ne; k++) {
 
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
-    else if ( !pt->xt ) continue;
+    if ( (!MG_EOK(pt)) || (pt->tag & MG_REQ) ) {
+      continue;
+    }
+    else if ( !pt->xt ) {
+      continue;
+    }
     pxt = &mesh->xtetra[pt->xt];
 
     for (i=0; i<4; i++) {
-      if ( !(pxt->ftag[i] & MG_BDY) )  continue;
-      else if ( !MMG5_norface(mesh,k,i,v) )  continue;
+      if ( !(pxt->ftag[i] & MG_BDY) ) {
+        continue;
+      }
+      else if ( !MMG5_norface(mesh,k,i,v) ) {
+        continue;
+      }
 
       for (j=0; j<3; j++) {
         ia = MMG5_iarf[i][j];
@@ -937,7 +957,9 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( p0->flag == 3 && p1->flag == 3 ) continue;
 
         /* Skip regular edges */
-        if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
+        if ( (!MG_EDG(p0->tag)) && (!MG_EDG(p1->tag)) ) {
+          continue;
+        }
 
         /** First step: search for local parameters */
         if ( !MMG3D_localParamNm(mesh,k,i,ia,&hausd,&hmin,&hmax) ) {
@@ -1004,10 +1026,12 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         else
           lm = sqrt(8.0*hausd / kappa);
 
-        if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) && p0->flag != 3 )
+        if ( MG_EDG(p0->tag) && (!(p0->tag & MG_NOM)) && (!MG_SIN(p0->tag)) && (p0->flag != 3) ) {
           met->m[ip0] = MG_MAX(hmin,MG_MIN(met->m[ip0],lm));
-        if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) && p1->flag != 3 )
+        }
+        if ( MG_EDG(p1->tag) && (!(p1->tag & MG_NOM)) && (!MG_SIN(p1->tag)) && (p1->flag != 3) ) {
           met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        }
       }
     }
   }
@@ -1080,7 +1104,9 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     nu = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
+      if ( (!MG_EOK(pt)) || (pt->tag & MG_REQ) ) {
+        continue;
+      }
 
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
