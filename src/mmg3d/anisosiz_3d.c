@@ -118,7 +118,7 @@ int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   n = 0;
   for(i=0 ; i<4 ; i++) {
     ppt = &mesh->point[pt->v[i]];
-    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    if ( MG_RID(ppt->tag) ) continue;
     n++;
   }
 
@@ -153,7 +153,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
   for (k=0; k<6; ++k) mm[k] = 0.;
   for(i=0 ; i<4 ; i++) {
     ppt = &mesh->point[pt->v[i]];
-    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    if ( MG_RID(ppt->tag) ) continue;
     n++;
     mp = &met->m[6*pt->v[i]];
     for (k=0; k<6; ++k) {
@@ -1371,7 +1371,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
-        if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
+        if ( MG_SIN_OR_NOM(ppt->tag) ) {
           if ( !MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
         }
         else if ( ppt->tag & MG_GEO ) {
@@ -1434,7 +1434,7 @@ int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,doubl
   mm  = &met->m[6*ip];
 
 
-  if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ){
+  if( MG_SIN_OR_NOM(ppt->tag) ){
 
     /* no normal, no tangent plane */
     memcpy(m,mm,6*sizeof(double));
@@ -1526,7 +1526,7 @@ static inline
 void MMG3D_gradSimred(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
   double tol = MMG5_EPS;
 
-  if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+  if ( MG_SIN_OR_NOM(ppt->tag) ) {
     double dm[3],dmext[3],vp[3][3],beta;
 
     /* Simultaneous reduction basis */
@@ -1554,7 +1554,7 @@ void MMG3D_gradSimred(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6]
     }
 
   }
-  else if( ppt->tag & MG_GEO ) {
+  else if ( ppt->tag & MG_GEO ) {
     MMG5_pxPoint pxp;
     double mr[6],mrext[6],dm[3],dmext[3];
     double u[3],r[3][3],*t,*n;
@@ -1718,7 +1718,7 @@ void MMG5_grad2metVol_setmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8
   ppt = &mesh->point[ip];
   mm = &met->m[6*ip];
 
-  if( !(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && ppt->tag & MG_GEO ) {
+  if ( MG_RID(ppt->tag) ) {
     MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
     double mr[6];
     double u[3],r[3][3],*t,*n;
@@ -1915,8 +1915,8 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
   cfg_m2 = 0;
   ier = 0;
 
-  if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
-    if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+  if ( MG_RID(p1->tag) ) {
+    if ( MG_RID(p2->tag) ) {
       // The volume gradation from ridge point toward another ridge point is
       // bugged...
       return 0;
@@ -1925,16 +1925,18 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
     /* Recover normal and metric associated to p1 */
     if( !MMG5_buildridmet(mesh,met,npmaster,ux,uy,uz,m1,rbasis1) ) { return 0; }
   }
-  else
+  else {
     memcpy(m1,mm1,6*sizeof(double));
+  }
 
-  if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+  if ( MG_RID(p2->tag) ) {
     /* Recover normal and metric associated to p2 */
     cfg_m2 = MMG5_buildridmet(mesh,met,npslave,ux,uy,uz,m2,rbasis2);
     if( !cfg_m2 ) { return 0; }
   }
-  else
+  else {
     memcpy(m2,mm2,6*sizeof(double));
+  }
 
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
@@ -1959,7 +1961,7 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
   }
 
   /* Metric update using the simultaneous reduction technique */
-  if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
+  if( MG_SIN_OR_NOM(p2->tag) ) {
     /* We choose to not respect the gradation in order to restrict the influence
      * of the singular points. Thus:
      * lambda_new = = 0.5 lambda_1 + 0.5 lambda_new = lambda_1 + 0.5 beta.
@@ -2078,7 +2080,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !MG_VOK(p1) ) continue;
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) continue;
+    if ( MG_SIN_OR_NOM(p1->tag) ) continue;
     if ( !(p1->tag & MG_GEO) ) continue;
 
     m = &met->m[6*k];
