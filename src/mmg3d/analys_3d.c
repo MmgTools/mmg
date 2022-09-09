@@ -606,11 +606,17 @@ int MMG5_norver(MMG5_pMesh mesh) {
 
       /* along ridge-curve */
       i1  = MMG5_inxt2[i];
-      if ( !MG_EDG(pt->tag[i1]) )  continue;
-      else if ( !MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
+      if ( !MG_EDG(pt->tag[i1]) ) {
+        continue;
+      }
+
+      /* As we skip non-manifold point, the edge should be manifold */
+      assert ( (!(MG_NOM & pt->tag[i1])) && "Unexpected non-manifold edge" );
+      if ( !MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
         ++nf;
         continue;
       }
+
       ++mesh->xp;
       if(mesh->xp > mesh->xpmax){
         MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
@@ -621,7 +627,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
       pxp = &mesh->xpoint[ppt->xp];
       memcpy(pxp->n1,n,3*sizeof(double));
 
-      if ( pt->tag[i1] & MG_GEO && adja[i1] > 0 ) {
+      if ( (pt->tag[i1] & MG_GEO) && adja[i1] > 0 ) {
         kk = adja[i1] / 3;
         ii = adja[i1] % 3;
         ii = MMG5_inxt2[ii];
