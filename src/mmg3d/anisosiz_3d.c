@@ -1290,6 +1290,12 @@ int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
  * Define size at points by intersecting the surfacic metric and the
  * physical metric.
  *
+ *
+ * 1. On singular (CRN, REQ, NOM) points, the metric on P is made isotropic.
+ * 2. On non-singular ridge points, the metric is forced to be aligned with the
+ *    ridge directions and surface normals.
+ * 3. On regular boundary points, the metric can be anisotropic on the tangent
+ *    plane, but it is forced to be aligned to the normal direction.
  */
 int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
@@ -1504,7 +1510,7 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
  *
  * Use metric intersection to gradate the anisotropic metric on point P, given
  * the metric extended from point Q on the edge PQ.
- * 1. On singular points, the metric on P is isotropic (as in MMG5_defmetsin)
+ * 1. On singular (CRN, REQ, NOM) points, the metric on P is isotropic (as in MMG5_defmetsin)
  *    and should remain isotropic.
  * 2. On non-singular ridge points, the metric on P should remain aligned with
  *    the ridge directions (thus it is not possible to apply metric intersection,
@@ -2042,6 +2048,17 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
  *
  *
  * Enforces mesh gradation by truncating metric field.
+ *
+ * 1. On singular (CRN, REQ, NOM) points, the metric on P is isotropic
+ *    (as in MMG5_defmetsin) and should remain isotropic.
+ * 2. On non-singular ridge points, the metric on P should remain aligned with
+ *    the ridge directions (thus it is not possible to apply metric intersection,
+ *    sizes are truncated instead).
+ * 3. On regular boundary points, the metric can be anisotropic on the tangent
+ *    plane, but it should remain aligned to the normal direction (thus,
+ *    intersection is used only in the tangent plane and sizes are truncated in
+ *    the normal direction).
+ * 4. On interior volume points, 3D metric intersection can be used.
  *
  */
 int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {

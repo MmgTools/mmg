@@ -2736,7 +2736,15 @@ static int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,int *nf, int8_t typchk
 
     for (j=0; j<4; j++) {
       ppt = &mesh->point[pt->v[j]];
-      if ( (ppt->tag & MG_GEO) )  nrid++;
+      if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+        /* Metric iso on this points */
+        continue;
+      }
+
+      if ( (ppt->tag & MG_GEO) ) {
+        /* Non-singular ridge point: metric ridge */
+        nrid++;
+      }
     }
     if ( nrid == 4 ) {
       if ( !mesh->info.noinsert ) {
