@@ -381,7 +381,8 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
     if ( !MMG5_nortri(mesh, &tt, ncur) ) return 0;
 
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
+#warning Can we have issue with adding of ridges along nom edges (check with analysis)?
+    if ( !MG_GEO_OR_NOM(tt.tag[i]) ) {
       /* Check normal deviation between k and the triangle facing ip0 */
       ier = MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi);
       if ( ier <= 0 ) {
@@ -395,7 +396,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
     i = MMG5_iprv2[i];
 
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
+    if ( !MG_GEO_OR_NOM(tt.tag[i]) ) {
       /* Check normal deviation between k and the previous triangle */
       ier =  MMG5_devangle( ncur, nprev, mesh->info.dhd );
       if ( ier<=0 ) {
@@ -625,7 +626,8 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       return 0;
     }
 
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
+#warning Same check on ridge crea along noms
+    if ( !MG_GEO_OR_NOM(tt.tag[i] & MG_GEO) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
       int16_t ier2 = MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
       if ( ier2 <=0 ) {
@@ -639,7 +641,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
 
     i = MMG5_iprv2[i];
 
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
+    if ( !MG_GEO_OR_NOM(tt.tag[i]) ) {
       /* Check normal deviation between k and the previous triangle */
       int16_t ier2 =  MMG5_devangle( ncur, nprev, mesh->info.dhd );
       if ( ier2<=0 ) {

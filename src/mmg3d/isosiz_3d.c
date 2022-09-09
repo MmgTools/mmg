@@ -83,7 +83,9 @@ inline double MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
  * \param hausd hausdorff value.
  * \return the isotropic size at the point if success, FLT_MAX if fail.
  *
- * Define isotropic size at regular point nump, whose surfacic ball is provided.
+ * Define isotropic size at regular point nump, whose surfacic ball is provided
+ * and update metric at 'regular' non-manifold points of the surfacic ball of
+ * point.
  *
  */
 static double
@@ -103,7 +105,7 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   p0 = &mesh->point[nump];
 
-  if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
+  if ( (!p0->xp) || MG_EDG_OR_NOM(p0->tag) || (p0->tag & MG_REQ))  {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Error: %s: at least 1 wrong point"
@@ -111,6 +113,11 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
     }
     return FLT_MAX;
   }
+
+  /* Check that we don't pass here for a corner (not directly tested previously
+   * because corners doesn't have xpoints) */
+  assert ( (!(MG_CRN & p0->tag)) && "We should not pass here with corner points" );
+
   isqhmin = 1.0 / (hmin*hmin);
   isqhmax = 1.0 / (hmax*hmax);
 
@@ -418,7 +425,8 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   h = MG_MIN(kappa[0],kappa[1]);
 
-  /* Travel surfacic ball one last time and update non manifold point metric */
+  /* Travel surfacic ball one last time and update metric of non manifold
+   * regular points of ball */
   for (k=0; k<ilists; k++) {
     iface = lists[k] % 4;
 
@@ -426,7 +434,17 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       i0  = MMG5_idir[iface][j];
       ip0 = pt->v[i0];
       p1  = &mesh->point[ip0];
-      if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
+
+      if ( MG_SIN(p1->tag) ) {
+        /* Do not treat singular points */
+        continue;
+      }
+
+      if ( !(p1->tag & MG_NOM) ) {
+        /* Do not treat manifold points */
+        continue;
+      }
+
       assert(p1->xp);
       t = &p1->n[0];
       memcpy(c,t,3*sizeof(double));
@@ -884,7 +902,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( p0->flag>1 ) continue;
 
-        if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) )
+        if ( MG_SIN_OR_NOM(p0->tag) || MG_EDG(p0->tag) )
           continue;
 
         /** First step: search for local parameters */
@@ -900,7 +918,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /** Second step: set the metric */
         /* Define size coming from the hausdorff approximation at regular
-         * surface point */
+         * surface point and update metric at non-singular non-manifold points
+         * of surfacic ball*/
         hp  = MMG5_defsizreg(mesh,met,ip0,lists,ilists,hmin,hmax,hausd);
 
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
@@ -947,7 +966,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         /** Second step: set metric */
-        ised = MG_EDG(pxt->tag[ia]) || ( pxt->tag[ia] & MG_NOM );
+        ised = MG_EDG_OR_NOM(pxt->tag[ia]);
 
         MMG5_BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
 
@@ -1004,9 +1023,9 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         else
           lm = sqrt(8.0*hausd / kappa);
 
-        if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) && p0->flag != 3 )
+        if ( MG_EDG(p0->tag) && !MG_SIN_OR_NOM(p0->tag) && p0->flag != 3 )
           met->m[ip0] = MG_MAX(hmin,MG_MIN(met->m[ip0],lm));
-        if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) && p1->flag != 3 )
+        if ( MG_EDG(p1->tag) && !MG_SIN_OR_NOM(p1->tag) && p1->flag != 3 )
           met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
       }
     }

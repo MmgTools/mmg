@@ -451,14 +451,14 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
     il = 1.0 / sqrt(ll);
 
     /* Hausdorff w/r tangent direction */
-    if ( MG_EDG(pt->tag[i]) || ( pt->tag[i] & MG_NOM )) {
+    if ( MG_EDG_OR_NOM(pt->tag[i]) ) {
       if ( MG_SIN(p[i1]->tag) ) {
         t1[0] = il * ux;
         t1[1] = il * uy;
         t1[2] = il * uz;
       }
       else {
-        if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
+        if ( !MG_EDG_OR_NOM(p[i1]->tag) ) {
           if ( !mmgWarn0 ) {
             fprintf(stderr,"\n  ## Warning: %s: a- at least 1 geometrical"
                     " problem: non consistency between point tag (%d) and"
@@ -481,7 +481,7 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
         t2[2] = -il * uz;
       }
       else {
-        if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
+        if ( !MG_EDG_OR_NOM(p[i2]->tag) ) {
           if ( !mmgWarn1 ) {
             fprintf(stderr,"\n  ## Warning: %s: b- at least 1 geometrical"
                     " problem: non consistency between point tag (%d) and"
@@ -567,8 +567,7 @@ int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int typc
           ia  = MMG5_iarf[i][j];
 
           /* No swap of geometric edge */
-          if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
-               (pxt->tag[ia] & MG_NOM) )
+          if ( MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) )
             continue;
 
           ret = MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
@@ -1671,7 +1670,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   }
 
   ppt = &mesh->point[ip];
-  if ( MG_EDG(tag) || (tag & MG_NOM) )
+  if ( MG_EDG_OR_NOM(tag) )
     ppt->ref = ref;
   else
     ppt->ref = pxt->ref[i];
@@ -2025,7 +2024,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             }
           }
 
-          if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
+          if ( MG_EDG_OR_NOM(ptt.tag[j]) )
             ppt->ref = ptt.edg[j] ? ptt.edg[j] : ptt.ref;
           else
             ppt->ref = ptt.ref;
@@ -2146,7 +2145,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           if ( (!(ptt.tag[j] & MG_GEO)) || (ptt.tag[j] & MG_NOM) )  continue;
 
           /* From a boundary face of a boundary tetra we can update normal/tangent
-             at ridges; */
+             at manifold ridges; */
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
@@ -2736,12 +2735,7 @@ static int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,int *nf, int8_t typchk
 
     for (j=0; j<4; j++) {
       ppt = &mesh->point[pt->v[j]];
-      if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
-        /* Metric iso on this points */
-        continue;
-      }
-
-      if ( (ppt->tag & MG_GEO) ) {
+      if ( MG_RID(ppt->tag) ) {
         /* Non-singular ridge point: metric ridge */
         nrid++;
       }
