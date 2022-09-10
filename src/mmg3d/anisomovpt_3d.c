@@ -381,7 +381,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
     if ( !MMG5_nortri(mesh, &tt, ncur) ) return 0;
 
-#warning Can we have issue with adding of ridges along nom edges (check with analysis)?
+//#warning Can we have issue with adding of ridges along nom edges (check with analysis)?
     if ( !MG_GEO_OR_NOM(tt.tag[i]) ) {
       /* Check normal deviation between k and the triangle facing ip0 */
       ier = MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi);
