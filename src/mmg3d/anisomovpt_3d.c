@@ -626,7 +626,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       return 0;
     }
 
-#warning Same check on ridge crea along noms
+//#warning Same check on ridge crea along noms
     if ( !MG_GEO_OR_NOM(tt.tag[i] & MG_GEO) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
       int16_t ier2 = MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
