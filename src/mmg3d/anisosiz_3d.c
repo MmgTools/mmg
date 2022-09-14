@@ -33,8 +33,10 @@
  * \todo doxygen documentation.
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 #include "mmg3dexterns.h"
+#include "mmgexterns.h"
 
 /**
  * \param dm matrix eigenvalues (1x3 array).
@@ -44,7 +46,6 @@
  * Print eigendecomposition.
  */
 int MMG3D_printEigenv(double dm[3],double vp[3][3]) {
-  int i;
 
   printf("--- Eigenvalues:\n");
   printf("%e %e %e\n",dm[0],dm[1],dm[2]);
@@ -64,7 +65,6 @@ int MMG3D_printEigenv(double dm[3],double vp[3][3]) {
  * Print matrix entries.
  */
 int MMG3D_printMat(int8_t symmat,double *m) {
-  int i;
 
   if( symmat ) {
     printf("%e %e %e\n",m[0],m[1],m[2]);
@@ -1100,7 +1100,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   MMG5_pTetra   pt,ptloc;
   MMG5_pPoint   ppt;
   MMG5_pPar     par;
-  double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
+  double        isqhmax,isqhmin,*m;
   MMG5_int      list[MMG3D_LMAX+2],k,ip;
   int           l,i,j,isloc,ilist;
   static int8_t mmgWarn = 0;
@@ -1239,42 +1239,9 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
 
 
       /** Second step: set metric */
-      m = &met->m[met->size*ip];
-      if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
-        if ( !mmgWarn ) {
-          fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
-                  " 1 metric.\n",__func__);
-          mmgWarn = 1;
-        }
+      if ( !MMG5_truncate_met3d(met,ip,isqhmin,isqhmax) ) {
         return 0;
       }
-
-      for (i=0; i<3; i++) {
-        if(lambda[i]<=0) {
-          if ( !mmgWarn ) {
-            fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
-                    "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
-                    lambda[1],lambda[2]);
-            mmgWarn = 1;
-          }
-          return 0;
-        }
-        lambda[i]=MG_MIN(isqhmin,lambda[i]);
-        lambda[i]=MG_MAX(isqhmax,lambda[i]);
-      }
-
-      m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
-        + v[2][0]*v[2][0]*lambda[2];
-      m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
-        + v[2][0]*v[2][1]*lambda[2];
-      m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
-        + v[2][0]*v[2][2]*lambda[2];
-      m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
-        + v[2][1]*v[2][1]*lambda[2];
-      m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
-        + v[2][1]*v[2][2]*lambda[2];
-      m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
-        + v[2][2]*v[2][2]*lambda[2];
     }
   }
 
@@ -1295,7 +1262,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
  *
  */
 static inline
-int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np,double me[6]) {
+int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint        go;
   double              *n;

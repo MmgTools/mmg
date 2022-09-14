@@ -34,9 +34,12 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_example4
   libmmg3d_example6_io
   libmmg3d_lsOnly
+  libmmg3d_lsOnly_optim
+  libmmg3d_lsOnly_hsiz
+  libmmg3d_lsAndMetric_optim
+  libmmg3d_lsAndMetric_hsiz
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
-  test_met3d
   test_compare-para-tria
   )
 
@@ -57,9 +60,12 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_hsiz.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
-  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
   )
 
@@ -74,8 +80,10 @@ ENDIF( )
 
 IF ( LIBMMG3D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}3d_a )
+  SET ( lib_type "STATIC" )
 ELSEIF ( LIBMMG3D_SHARED )
   SET ( lib_name lib${PROJECT_NAME}3d_so )
+  SET ( lib_type "SHARED" )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
@@ -90,6 +98,10 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg3d_fortran_b
     libmmg3d_fortran_io
     libmmg3d_fortran_lsOnly
+    libmmg3d_fortran_lsOnly_optim
+    libmmg3d_fortran_lsOnly_hsiz
+    libmmg3d_fortran_lsAndMetric_optim
+    libmmg3d_fortran_lsAndMetric_hsiz
     libmmg3d_fortran_lsAndMetric
     )
   # Additional tests that needs to download ci meshes
@@ -102,6 +114,10 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main_hsiz.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_hsiz.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.F90
     )
   # Additional tests that needs to download ci meshes
@@ -120,9 +136,22 @@ FOREACH ( test_idx RANGE ${nbTests} )
   LIST ( GET MMG3D_LIB_TESTS           ${test_idx} test_name )
   LIST ( GET MMG3D_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
 
-  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_3d_headers ${lib_name} )
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_3d_headers ${lib_name} ${lib_type} )
 
 ENDFOREACH ( )
+
+SET ( src_test_met3d
+  ${PROJECT_SOURCE_DIR}/src/common/bezier.c
+  ${PROJECT_SOURCE_DIR}/src/common/eigenv.c
+  ${PROJECT_SOURCE_DIR}/src/common/mettools.c
+  ${PROJECT_SOURCE_DIR}/src/common/anisosiz.c
+  ${PROJECT_SOURCE_DIR}/src/common/isosiz.c
+  ${PROJECT_SOURCE_DIR}/src/common/tools.c
+  ${PROJECT_SOURCE_DIR}/src/common/mmgexterns.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
+  )
+ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} ${lib_type})
+TARGET_LINK_LIBRARIES ( test_met3d PRIVATE ${M_LIB} )
 
 IF ( MMG3D_CI )
   SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
@@ -156,7 +185,7 @@ IF ( MMG3D_CI )
     "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_1.o"
     "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_2.o"
     )
-  IF ( ELAS_FOUND )
+  IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4}
       "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt"
       "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"
@@ -213,7 +242,7 @@ IF ( MMG3D_CI )
     "${CTEST_OUTPUT_DIR}/cube.o.vtu" "1"
     )
 
-  IF ( NOT VTK_FOUND )
+  IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     SET(expr "VTK library not founded")
     SET_PROPERTY(TEST test_api3d_vtk2mesh
       PROPERTY PASS_REGULAR_EXPRESSION "${expr}")

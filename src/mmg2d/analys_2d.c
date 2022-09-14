@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 extern int8_t ddb;
 
@@ -268,7 +268,8 @@ int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int            list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
+  MMG5_int            list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,nm,nre,nc;
+  int                 ns,ng,nr;
   int8_t              i;
 
   nre = nc = nm = 0;

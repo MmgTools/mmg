@@ -28,7 +28,7 @@
  * \version 5
  * \date 07 2015
  * \copyright GNU Lesser General Public License.
- * \note Please, refer to the \ref mmg2d/libmmg2d.h file for functions
+ * \note Please, refer to the \ref mmg2d/liblibmmg2d_private.h file for functions
  * documentation.
  *
  * Define the Fortran API functions for MMG2D library: adds function
@@ -36,7 +36,10 @@
  * any fortran compiler.
  *
  */
-#include "mmg2d.h"
+
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 /**
  * See \ref MMG2D_Init_mesh function in common/libmmgcommon.h file.
@@ -182,6 +185,16 @@ FORTRAN_NAME(MMG2D_SET_MULTIMAT,mmg2d_set_multimat,
               MMG5_int* rin,MMG5_int* rex, int* retval),
              (mesh,sol,ref,split,rin,rex,retval)){
   *retval = MMG2D_Set_multiMat(*mesh,*sol,*ref,*split,*rin,*rex);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Set_lsBaseReference function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_LSBASEREFERENCE,mmg2d_set_lsbasereference,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *br, int* retval),
+             (mesh,sol,br,retval)){
+  *retval = MMG2D_Set_lsBaseReference(*mesh,*sol,*br);
   return;
 }
 

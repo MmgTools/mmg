@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -140,6 +140,7 @@ static int setadj(MMG5_pMesh mesh){
         ii2 = MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
+          assert ( pt1->base );
           if ( pt1->base < 0 ) {
             pt1->ref      = -MMG5_abs(pt1->ref);
             /* Add MG_NOM flag because it allows neighbours to have non
@@ -241,7 +242,13 @@ static int setadj(MMG5_pMesh mesh){
   return 1;
 }
 
-/* Detect non manifold points */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Detect non manifold points
+ */
 static void nmpoints(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
@@ -292,7 +299,10 @@ static void nmpoints(MMG5_pMesh mesh) {
       if ( jel == k ) {
         if ( !(p0->tag & MG_CRN) || !(p0->tag & MG_REQ) ) {
           nmp++;
-          // p0->tag |= MG_CRN + MG_REQ;
+          // p0->tag |= MG_CRN + MG_REQ; // Algiane 2022: this line has been
+          // commented by commit 1f592c. I think that it is a mistake (some
+          // forgotten debug thing). It seems that in any case, nm points are
+          // marked as CRN and REQ when checking handles in MMGS_singul
         }
         continue;
       }
@@ -335,8 +345,9 @@ static void nmpoints(MMG5_pMesh mesh) {
 /* static int delbad(MMG5_pMesh mesh) { */
 /*   MMG5_pTria    pt; */
 /*   MMG5_pPoint   p[3]; */
-/*   double   s,kal,declic,ux,uy,uz,vx,vy,vz; */
-/*   int     *adja,k,iel,nd,ndd,it; */
+/*   double        s,kal,declic,ux,uy,uz,vx,vy,vz; */
+/*   MMG5_int      *adja,k,iel,nd,ndd; */
+/*   int           it; */
 /*   int8_t   i,ia,i1,i2,j,typ; */
 
 /*   it = ndd = 0; */
@@ -423,7 +434,13 @@ static void nmpoints(MMG5_pMesh mesh) {
 /* } */
 
 
-/* check for ridges: dihedral angle */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * check for ridges: dihedral angle
+ */
 static int setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
@@ -467,12 +484,20 @@ static int setdhd(MMG5_pMesh mesh) {
   return 1;
 }
 
-/** check for singularities */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * check for singularities
+ *
+ */
 static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int       list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,nre;
+  int            xp,nr,ns;
   int8_t         i;
 
   nre = nc = 0;
@@ -537,7 +562,8 @@ static int MMG5_singul(MMG5_pMesh mesh) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !ppt->s )  continue;
-      nr = boulet(mesh,k,i,list);
+      int8_t dummy;
+      nr = boulet(mesh,k,i,list,&dummy);
       if ( nr != ppt->s ) {
         ppt->tag |= MG_CRN + MG_REQ;
         ppt->s = 0;
@@ -556,8 +582,19 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   return 1;
 }
 
-
-/* compute normals at C1 vertices, for C0: tangents */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Compute normals at C1 vertices, for C0: tangents
+ * This function allocate the xpoint array. A point will have an xpoint if:
+ *   - it is along a reference edge, the xpoint then stores the normal at point while the n field of point containt the tangent at ref edge.
+ *   - it is along a ridge, the xpoint then stores both normals at point while ppt->n stores the tangent
+ *
+ * Corner, required and regular points don't have xpoints.
+ *
+ */
 static int norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
@@ -708,12 +745,12 @@ static int norver(MMG5_pMesh mesh) {
 int MMGS_remDup(MMG5_pMesh mesh) {
   MMG5_Hash     hash;
   MMG5_pTria    ptt;
-  int           k,jel,dup;
+  MMG5_int      k,jel,dup;
 
   if ( !mesh->nt ) return 1;
 
   /* Hash triangles */
-  if ( ! MMG5_hashNew(mesh,&hash,(int)(0.51*mesh->nt),(int)(1.51*mesh->nt)) ) {
+  if ( ! MMG5_hashNew(mesh,&hash,(MMG5_int)(0.51*mesh->nt),(MMG5_int)(1.51*mesh->nt)) ) {
     return 0;
   }
 
@@ -734,7 +771,7 @@ int MMGS_remDup(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 5 && dup > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
-    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    if ( dup > 0 )  fprintf(stdout," %"MMG5_PRId" duplicate removed",dup);
     fprintf(stdout,"\n");
   }
 
@@ -743,15 +780,67 @@ int MMGS_remDup(MMG5_pMesh mesh) {
   return 1;
 }
 
-/* preprocessing stage: mesh analysis */
-int MMGS_analys(MMG5_pMesh mesh) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Preprocessing stage: mesh analysis.
+ *
+ */
+int MMGS_analys_for_norver(MMG5_pMesh mesh) {
 
-  /* Remove duplicated triangles */
-  if ( !MMGS_remDup(mesh) ) {
-    fprintf(stderr,"\n  ## Analysis problem."
-            " Unable to remove duplicated faces. Exit program.\n");
+  /* create adjacency */
+  if ( !MMGS_hashTria(mesh) ) {
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
+
+  /* delete badly shaped elts */
+  /*if ( mesh->info.badkal && !delbad(mesh) ) {
+    fprintf(stderr,"\n  ## Geometry trouble. Exit program.\n");
+    return 0;
+    }*/
+
+  /* identify connexity */
+  if ( !setadj(mesh) ) {
+    fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
+    return 0;
+  }
+
+  /* check for nomanifold point */
+  nmpoints(mesh);
+
+  /* check for ridges */
+  if ( mesh->info.dhd > MMG5_ANGLIM && !setdhd(mesh) ) {
+    fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
+    return 0;
+  }
+
+  /* identify singularities */
+  if ( !MMG5_singul(mesh) ) {
+    fprintf(stderr,"\n  ## Singularity problem. Exit program.\n");
+    return 0;
+  }
+
+  /* define normals */
+  if ( !mesh->xp ) {
+    if ( !norver(mesh) ) {
+      fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
+      return 0;
+    }
+    /* regularize normals */
+    if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
+      fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
+      return 0;
+    }
+  }
+  return 1;
+}
+
+
+/* preprocessing stage: mesh analysis */
+int MMGS_analys(MMG5_pMesh mesh) {
 
   /* Update tags stored into tria */
   if ( !MMGS_bdryUpdate(mesh) ) {

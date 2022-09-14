@@ -33,20 +33,21 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
  * \param list pointer toward the computed ball of \a ip.
+ * \param opn 0 for a closed ball, 1 for an open ball.
  * \return the size of the computed ball or 0 if fail.
  *
  * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
  * crossing ridge.
  *
  */
-int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
+int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   MMG5_int      *adja,k;
@@ -57,6 +58,7 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
 
   ppt = &mesh->point[pt->v[ip]];
   ilist = 0;
+  *opn  = 0;
 
   /* store neighbors */
   k = start;
@@ -81,6 +83,7 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
   /* check if boundary hit */
   k = start;
   i = ip;
+  *opn = 1;
   do {
     adja = &mesh->adja[3*(k-1)+1];
     i2 = MMG5_iprv2[i];
@@ -104,6 +107,8 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
  * \param ip index of point in tetra \a start for which we want to compute
  * the ball.
  * \param list pointer toward the computed ball of point.
+ *
+ * \return size of list if success, -size if overflow, 0 if cfg is non-manifold.
  *
  * Find all triangles sharing \a ip, \f$list[0] = start\f$ . Do not stop when
  * crossing ridge. Check whether resulting configuration is manifold.
@@ -250,8 +255,8 @@ int boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
  * \param il2 pointer toward the second ball size.
  * \param l2 pointer toward the second computed ball (associated to \a n2's
  * side).
- * \param ip0 index of the first extremity of the ridge.
- * \param ip1 index of the second extremity of the ridge.
+ * \param global ip0 index of the first extremity of the ridge.
+ * \param global ip1 index of the second extremity of the ridge.
  * \return 0 if fail, 1 otherwise.
  *
  * Computation of the two balls of a ridge point: the list \a l1 is associated

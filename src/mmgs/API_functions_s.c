@@ -37,7 +37,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 
 int MMGS_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -1392,8 +1393,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
 #endif
   case MMGS_IPARAM_anisosize :
-    if ( !MMGS_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
-      return 0;
+    mesh->info.ani = val;
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
@@ -1462,10 +1462,20 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   case MMGS_DPARAM_hmin :
     mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
+    if ( mesh->info.sethmax && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Warning: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+    }
+
     break;
   case MMGS_DPARAM_hmax :
     mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
+    if ( mesh->info.sethmin && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Warning: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+    }
+
     break;
   case MMGS_DPARAM_hsiz :
     mesh->info.hsiz     = val;
@@ -1530,6 +1540,22 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int ref
   }
   if ( ref < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
             __func__);
     return 0;
   }

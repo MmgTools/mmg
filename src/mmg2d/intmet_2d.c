@@ -31,7 +31,7 @@
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
  **/
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 /* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
    ip = index of the new point */

@@ -228,6 +228,24 @@ enum MMG5_entities {
 };
 
 /**
+ * \enum MMG5_Format
+ * \brief Type of supported file format
+ */
+enum MMG5_Format {
+  MMG5_FMT_MeditASCII, /*!< ASCII Medit (.mesh) */
+  MMG5_FMT_MeditBinary, /*!< Binary Medit (.meshb) */
+  MMG5_FMT_GmshASCII, /*!< ASCII Gmsh */
+  MMG5_FMT_GmshBinary, /*!< Binary Gmsh */
+  MMG5_FMT_VtkPvtp, /*!< VTK pvtp */
+  MMG5_FMT_VtkPvtu, /*!< VTK pvtu */
+  MMG5_FMT_VtkVtu, /*!< VTK vtu */
+  MMG5_FMT_VtkVtp, /*!< VTK vtp */
+  MMG5_FMT_VtkVtk, /*!< VTK vtk */
+  MMG5_FMT_Tetgen, /*!< Tetgen or Triangle */
+  MMG5_FMT_Unknown /*!< Unrecognized */
+};
+
+/**
  * \struct MMG5_Par
  * number) associated to a specific reference.
  *
@@ -251,7 +269,9 @@ typedef struct {
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
-  double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
+  double   n[3]; /*!< Unitary normal (regular points) or unitary tangent (ridge
+                  * and ref points) for mmgs and unitary tangent (if needed) for
+                  * mmg3d */
 #ifdef USE_POINTMAP
   MMG5_int src; /*!< Source point in input mesh */
 #endif
@@ -498,7 +518,8 @@ typedef struct {
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
-  int           nbr,*br;
+  int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
+  int           *br; /*!< list of based references to which an implicit surface can be attached */
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */
@@ -520,8 +541,8 @@ typedef struct {
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
+  uint8_t       ani, optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
 } MMG5_Info;
@@ -632,11 +653,11 @@ typedef MMG5_Mesh  * MMG5_pMesh;
  */
 typedef struct {
   int       ver; /* Version of the solution file */
-  MMG5_int  dim; /* Dimension of the solution file*/
+  int       dim; /* Dimension of the solution file*/
   MMG5_int  np; /* Number of points of the solution */
   MMG5_int  npmax; /* Maximum number of points */
   MMG5_int  npi; /* Temporary number of points (internal use only) */
-  MMG5_int  size; /* Number of solutions per entity */
+  int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
   int       entities; /* Type of the solution (scalar, vectorial of tensorial) */
   double    *m; /*!< Solution values */

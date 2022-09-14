@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 #define MMG5_KC    13
 
@@ -80,7 +81,7 @@ int MMG5_paktet(MMG5_pMesh mesh) {
 }
 
 /** return index of triangle ia ib ic */
-int MMG5_hashGetFace(MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,MMG5_int ic) {
+MMG5_int MMG5_hashGetFace(MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,MMG5_int ic) {
   MMG5_hedge  *ph;
   MMG5_int    key,mins,maxs,sum;
 
@@ -1162,8 +1163,8 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
   MMG5_pxTetra   pxt;
   MMG5_pxPrism   pxpr;
   MMG5_Hash      hash;
-  int            kt, tofree=0,ntinit;
-  MMG5_int       ref,*adja,adj,k,ia,ib,ic;
+  MMG5_int       ref,*adja,adj,k,ia,ib,ic,kt,ntinit;
+  int            tofree=0;
   int8_t         i,j;
 
   hash.item = NULL;
@@ -1728,8 +1729,8 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pxTetra  pxt;
   MMG5_pxPrism  pxp;
   MMG5_Hash     hash;
-  MMG5_int      ref,*adja,adj,k,ia,ib,ic;
-  int           kt,j,na,initedg[3];
+  MMG5_int      ref,*adja,adj,k,ia,ib,ic,kt,initedg[3];
+  int           j;
   int16_t       tag,inittag[3];
   int8_t        i,i1,i2;
 
@@ -1753,10 +1754,9 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     ptt = &mesh->tria[k];
     if ( !MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return 0;
   }
-  na = 0;
 
   mesh->xt     = 0;
-  mesh->xtmax  = mesh->ntmax + 2*na;
+  mesh->xtmax  = mesh->ntmax;
   assert(mesh->xtmax);
 
   MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
@@ -2012,8 +2012,8 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_pTria    ptt;
   MMG5_pxTetra  pxt;
   MMG5_Hash     hash;
-  int           kt,j;
-  MMG5_int      ia,ib,ic,k;
+  MMG5_int      ia,ib,ic,k,kt;
+  int           j;
   int16_t       tag;
   int8_t        i;
 
@@ -2102,8 +2102,7 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   MMG5_pTria    ptt;
   MMG5_Hash     hash;
-  int           kt;
-  MMG5_int      *adja,adj,k,ia,ib,ic,nf;
+  MMG5_int      *adja,adj,k,kt,ia,ib,ic,nf;
   int8_t        i;
 
   if ( !mesh->nt ) return 1;

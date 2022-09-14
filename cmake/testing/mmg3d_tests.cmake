@@ -473,7 +473,7 @@ ADD_TEST(NAME mmg3d_opnbdy_ref_island
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
@@ -526,6 +526,12 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${MMG3D_CI_TESTS}/SphereIso_h_met/SphereIso0.5.meshb -sol 2
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
+
+ADD_TEST(NAME mmg3d_OptimAni_Cube
+  COMMAND ${EXECUT_MMG3D} -v 5 -optim -A -hgrad -1
+  ${MMG3D_CI_TESTS}/Cube/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_cube.o.meshb)
+
 
 ##############################################################################
 #####
@@ -630,6 +636,19 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
   -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-normc.o.meshb)
+
 # ls + rmc
 ADD_TEST(NAME mmg3d_OptLs_plane_withbub
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
@@ -731,7 +750,7 @@ IF ( LONG_TESTS )
   #####
   ###############################################################################
   #####
-  IF ( ELAS_FOUND )
+  IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     ADD_TEST(NAME mmg3d_LagMotion0_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt

@@ -20,7 +20,9 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 /* read mesh data */
 int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
@@ -747,7 +749,7 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( sol ) {
     /* Check the metric type */
-    ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+    ier = MMG5_chkMetricType(mesh,&sol->type,&sol->entities,inm);
     if ( ier <1 ) {
       fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
       return ier;
@@ -931,7 +933,10 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return -1;
   }
 
-  ier = MMG5_chkMetricType(mesh,type,inm);
+  /* #MMG5_loadSolHeader function reads only solution at vertices so we don't
+      have to check the entites on which the metric applies */
+  int entities = MMG5_Vertex;
+  ier = MMG5_chkMetricType(mesh,type,&entities,inm);
   if ( ier < 1 ) {
     MMG5_SAFE_FREE(type);
     return ier;
@@ -1668,15 +1673,15 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pSol    psl;
-  MMG5_int     j,k,bpos,*size;
-  int          binch,bin,npointSols,ncellSols;
+  MMG5_int     j,k,bpos;
+  int          binch,bin,npointSols,ncellSols,*size;
   int          *type,*entities,ier,gmsh,dim;
 
 
   if ( !(*sol)[0].np )  return 1;
 
   MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
-  MMG5_SAFE_CALLOC(size,mesh->nsols,MMG5_int,MMG5_SAFE_FREE(type);return 0);
+  MMG5_SAFE_CALLOC(size,mesh->nsols,int,MMG5_SAFE_FREE(type);return 0);
   MMG5_SAFE_CALLOC(entities,mesh->nsols,int,
                    MMG5_SAFE_FREE(type);MMG5_SAFE_FREE(size);return 0);
 

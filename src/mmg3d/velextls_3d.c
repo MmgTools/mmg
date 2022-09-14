@@ -34,7 +34,7 @@
  */
 #ifdef USE_ELAS
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 #include "ls_calls.h"
 
 #define MMG5_DEGTOL    0.75
@@ -65,6 +65,13 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
   MMG5_int       k,ip,npf,ntf,iel,jel,*perm,*invperm,*adja,*list,vper[4];
   int            refdirh,refdirnh;
   int8_t         i,j,jface;
+
+  /* LibElas is not compatible with int64: Check for int32 overflow */
+  if ( mesh->np > INT_MAX || mesh->ne > INT_MAX ) {
+    fprintf(stderr,"\n  ## Error: %s: impossible to call elasticity library"
+            " with int64 integers.\n",__func__);
+    return NULL;
+  }
 
   nlay = 20;
   refdirh = 0;
@@ -110,7 +117,7 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
   }
   if ( !npf ) {
     fprintf(stderr,
-            "\n  ## Error: %s: no triangle with reference %" MMG5_PRId " in the mesh.\n"
+            "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
             "              Nothing to move.\n",__func__,MMG5_DISPREF);
     MMG5_DEL_MEM ( mesh,list );
     MMG5_DEL_MEM ( mesh,perm );
@@ -226,7 +233,7 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
     for(i=0; i<4; i++)
       vper[i] = perm[pt->v[i]];
 
-    if (!LS_addTet(lsst,k,vper,0) ) {
+    if (!LS_addTet(lsst,(int)k,(int*)vper,0) ) {
       fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTet. Exiting.\n",
               __func__);
       MMG5_DEL_MEM ( mesh,list );
@@ -255,7 +262,7 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
         for (j=0; j<3; j++)
           vper[j] = perm[pt->v[MMG5_idir[i][j]]];
 
-        if ( !LS_addTri(lsst,ntf,vper,refdirnh) ) {
+        if ( !LS_addTri(lsst,(int)ntf,(int*)vper,refdirnh) ) {
           fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTri. Exiting.\n",
                   __func__);
           MMG5_DEL_MEM ( mesh,list );
@@ -270,7 +277,7 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
         for (j=0; j<3; j++)
           vper[j] = perm[pt->v[MMG5_idir[i][j]]];
 
-        if ( !LS_addTri(lsst,ntf,vper,refdirh) ) {
+        if ( !LS_addTri(lsst,(int)ntf,(int*)vper,refdirh) ) {
           fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTri. Exiting.\n",
                   __func__);
           MMG5_DEL_MEM ( mesh,list );
@@ -283,7 +290,8 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
   }
 
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (ilist+npf+ntf > 0) )
-    printf("Number of packed tetra %" MMG5_PRId ", points %" MMG5_PRId ", triangles %" MMG5_PRId "\n",ilist,npf,ntf);
+    printf("Number of packed tetra %d, points %" MMG5_PRId
+           ", triangles %" MMG5_PRId "\n",ilist,npf,ntf);
 
   /* Add boundary conditions */
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_tri,NULL) ) {

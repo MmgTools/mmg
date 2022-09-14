@@ -34,6 +34,7 @@
  */
 
 #include "inlined_functions_3d.h"
+#include "mmg3dexterns.h"
 
 extern int8_t  ddb;
 
@@ -378,9 +379,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   MMG5_pPar    par;
   double       calold,calnew,caltmp,nadja[3],nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
   double       ps,devold,devnew,hmax,hausd;
-  int          ipp;
   MMG5_int     nump,numq,ndepmin,ndepplus,l,kk,iel;
-  int          nr,nbbdy,isloc,iedgeOpp;
+  int          nr,nbbdy,isloc,iedgeOpp,ipp;
   int16_t      tag;
   int8_t       iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 #ifndef NDEBUG
@@ -1079,7 +1079,7 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *t
  * (i.e. approximation of the surface, etc... must be performed outside).
  *
  */
-int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist,int8_t indq,int8_t typchk) {
+MMG5_int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist,int8_t indq,int8_t typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;

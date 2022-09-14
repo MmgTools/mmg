@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 
 /* Delete all triangle references in mesh */
@@ -158,14 +158,14 @@ MMG5_int MMGS_indPt(MMG5_pMesh mesh, MMG5_int kp) {
  * Keep only subdomain of index \a nsd and remove other subdomains.
  *
  */
-void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,MMG5_int nsd ) {
 
   if ( !nsd ) {
     return;
   }
 
   if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
-    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %d\n",nsd );
+    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %"MMG5_PRId"\n",nsd );
   }
 
   MMG5_mark_verticesAsUnused ( mesh );

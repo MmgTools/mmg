@@ -33,7 +33,9 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include <math.h>
 
 int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
@@ -759,7 +761,7 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( sol ) {
     /* Check the metric type */
-    ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+    ier = MMG5_chkMetricType(mesh,&sol->type,&sol->entities,inm);
   }
 
   return ier;
@@ -1400,7 +1402,10 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
     return -1;
   }
 
-  ier = MMG5_chkMetricType(mesh,type,inm);
+  /* #MMG5_loadSolHeader function reads only solution at vertices so we don't
+      have to check the entites on which the metric applies */
+  int entities = MMG5_Vertex;
+  ier = MMG5_chkMetricType(mesh,type,&entities,inm);
   if ( ier < 1 ) {
     MMG5_SAFE_FREE(type);
     return ier;
@@ -1581,15 +1586,15 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          binch,bin,ier,npointSols,ncellSols;
-  int          *type,*entities,j;
-  MMG5_int     k,bpos,*size;
+  int          *type,*entities,j,*size;
+  MMG5_int     k,bpos;
 
   if ( !(*sol)[0].m )  return -1;
 
   (*sol)[0].ver = 2;
 
   MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
-  MMG5_SAFE_CALLOC(size,mesh->nsols,MMG5_int,MMG5_SAFE_FREE(type);return 0);
+  MMG5_SAFE_CALLOC(size,mesh->nsols,int,MMG5_SAFE_FREE(type);return 0);
   MMG5_SAFE_CALLOC(entities,mesh->nsols,int,
                    MMG5_SAFE_FREE(type);MMG5_SAFE_FREE(size);return 0);
 

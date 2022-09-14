@@ -81,6 +81,7 @@ vtkDataSet *MMG5_load_vtkXMLFile(const char*fileName)
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, -1 otherwise
 ///
@@ -97,7 +98,8 @@ vtkDataSet *MMG5_load_vtkXMLFile(const char*fileName)
 ///
 static
 int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
-                             int8_t *ptMeditRef, int8_t *eltMeditRef, int *nsols ) {
+                             int8_t *ptMeditRef, int8_t *eltMeditRef,
+                             int *nsols, int8_t *metricData ) {
 
   static int8_t mmgWarn0 = 0;
   static int8_t mmgWarn1 = 0;
@@ -205,7 +207,8 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
             " Ignored.\n",__func__ );
   }
 
-  *nsols = npointData + ncellData - npointRef - ncellRef;
+  *nsols      = npointData + ncellData - npointRef - ncellRef;
+  *metricData = ( nmetricField > 0 );
 
   return 1;
 }
@@ -218,13 +221,15 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 otherwise;
 ///
 /// I/O at Vtp VTK file format.
 ///
 int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
-                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols) {
+                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
+                           int8_t *metricData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -238,7 +243,8 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
   }
 
   // count the number of entities of each type
-  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,nsols );
+  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
+                                     nsols,metricData );
 
   if ( ier != 1 ) {
     return -1;
@@ -254,13 +260,15 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 otherwise;
 ///
 /// I/O at Vtk VTK file format.
 ///
 int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
-                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols) {
+                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
+                           int8_t *metricData ) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -274,7 +282,8 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
   }
 
   // count the number of entities of each type
-  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,nsols );
+  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
+                                     nsols,metricData );
 
   if ( ier != 1 ) {
     return -1;
@@ -290,16 +299,19 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 other errors;
 ///
 /// I/O at Vtu VTK file format, part 1: file reading + count of the number of entities.
 ///
 int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
-                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols) {
+                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
+                           int8_t *metricData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
+  (*metricData) = 0;
 
   // Read all the data from the file
   try {
@@ -310,7 +322,8 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
   }
 
   // count the number of entities of each type
-  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,nsols );
+  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
+                                     nsols,metricData );
 
   if ( ier != 1 ) {
     return -1;
@@ -780,7 +793,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           auto ar = cd->GetArray(j);
 
           psl->np = ar->GetNumberOfTuples();
-          if ( mesh->ne != psl->np ) {
+          if ( numCells != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
                     "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
                     "THE SOLUTION (%d) \n",mesh->ne,psl->np);

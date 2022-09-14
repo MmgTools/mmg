@@ -38,7 +38,7 @@
 #define _LS_LAMBDA      10.0e5
 #define _LS_MU          8.2e5
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 #include "ls_calls.h"
 
 /** Create submesh for solving the linear elasticity velocity extension problem.
@@ -127,7 +127,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
   }
   if ( !npf ) {
     fprintf(stderr,
-            "\n  ## Error: %s: no triangle with reference %" MMG5_PRId " in the mesh.\n"
+            "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
             "              Nothing to move.\n",__func__,MMG5_DISPREF);
     MMG5_DEL_MEM ( mesh,list );
     MMG5_DEL_MEM ( mesh,perm );
@@ -209,7 +209,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
     for (i=0; i<3; i++)
       vper[i] = perm[pt->v[i]];
 
-    if (!LS_addTri(lsst,k,vper,0) ) {
+    if (!LS_addTri(lsst,(int)k,(int*)vper,0) ) {
       fprintf(stdout,"  ## Problem in fn LS_addTet. Exiting.\n");
       MMG5_DEL_MEM ( mesh,list );
       MMG5_DEL_MEM ( mesh,perm );
@@ -236,7 +236,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
         vper[0] = perm[pt->v[MMG5_inxt2[i]]];
         vper[1] = perm[pt->v[MMG5_iprv2[i]]];
 
-        if ( !LS_addEdg(lsst,nef,vper,refdirnh) ) {
+        if ( !LS_addEdg(lsst,(int)nef,(int*)vper,refdirnh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
           MMG5_DEL_MEM ( mesh,list );
           MMG5_DEL_MEM ( mesh,perm );
@@ -249,7 +249,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
         vper[0] = perm[pt->v[MMG5_inxt2[i]]];
         vper[1] = perm[pt->v[MMG5_iprv2[i]]];
 
-        if ( !LS_addEdg(lsst,nef,vper,refdirh) ) {
+        if ( !LS_addEdg(lsst,(int)nef,(int*)vper,refdirh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
           MMG5_DEL_MEM ( mesh,list );
           MMG5_DEL_MEM ( mesh,perm );

@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 extern int8_t ddb;
 
@@ -52,7 +52,7 @@ extern int8_t ddb;
  *
  */
 int MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,
-                       int8_t ori) {
+                      int8_t ori) {
   MMG5_pPoint    p[3];
   double         *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
   MMG5_int       ia,ib,ic;

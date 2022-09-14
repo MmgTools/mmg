@@ -30,7 +30,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 
 #ifdef USE_SCOTCH
 
@@ -84,11 +85,10 @@ int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
   SCOTCH_Num   *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
   MMG5_int     vertNbr, nodeGlbIdx, triaIdx, ballTriIdx;
-  int          i;
-  MMG5_int     j, k;
-  int          edgeSiz;
+  MMG5_int     j, k, edgeSiz;
   MMG5_int     *vertOldTab, *permNodTab, ntreal, npreal;
   MMG5_int     *adja,iadr;
+  int          i;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */

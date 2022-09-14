@@ -20,7 +20,8 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 /* Compute isotropic edge length */
 double long_iso(double *ca,double *cb,double *ma,double *mb) {
@@ -124,8 +125,8 @@ double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2
 int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
   double        lavg,len,ecart,som,lmin,lmax;
-  int           navg,ia,ipa,ipb,nullEdge,hl[9];
-  MMG5_int      iamin,ibmin,iamax,ibmax;
+  int           navg,ia,ipa,ipb,nullEdge;
+  MMG5_int      iamin,ibmin,iamax,ibmax,hl[9];
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   MMG5_int      k,l;
 
@@ -196,7 +197,7 @@ int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   MMG5_displayLengthHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
-			   iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
+                          iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
 
 
   return 1;

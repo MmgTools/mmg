@@ -30,15 +30,15 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg2d/libmmg2d.h header file for the documentation of all
+ * the \ref mmg2d/liblibmmg2d_private.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * C API for MMG2D library.
  *
  */
 
-
-#include "mmg2d.h"
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -77,6 +77,7 @@ int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return MMG5_Set_outputSolName(mesh,sol,solout);
 }
+
 void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmg2d, mmgs and mmg2d. */
@@ -99,6 +100,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
 }
+
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   int k;
@@ -218,6 +220,24 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
     break;
+  case MMG2D_IPARAM_numberOfLSBaseReferences :
+    if ( mesh->info.br ) {
+      MMG5_DEL_MEM(mesh,mesh->info.br);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new level-set based references values\n",__func__);
+    }
+    mesh->info.nbr   = val;
+    mesh->info.nbri  = 0;
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+
+    for (k=0; k<mesh->info.nbr; k++)
+      mesh->info.br[k] = 0;
+
+    break;
+
   case MMG2D_IPARAM_numberOfMat :
     if ( mesh->info.mat ) {
       MMG5_DEL_MEM(mesh,mesh->info.mat);
@@ -234,8 +254,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
 
   case MMG2D_IPARAM_anisosize :
-    if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
-      return 0;
+    mesh->info.ani = val;
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
@@ -258,10 +277,32 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_hmin :
     mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
+    if ( mesh->info.sethmax && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Error: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+      return 0;
+    }
+    if ( val <= 0. ) {
+      fprintf(stderr,"\n  ## Error: hmin must be strictly positive "
+              "(minimal edge length).\n");
+      return 0;
+    }
+
     break;
   case MMG2D_DPARAM_hmax :
     mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
+    if ( mesh->info.sethmin && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Error: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+      return 0;
+    }
+    if ( val <= 0. ) {
+      fprintf(stderr,"\n  ## Error: hmax must be strictly positive "
+              "(maximal edge length).\n");
+      return 0;
+    }
+
     break;
   case MMG2D_DPARAM_hsiz :
     mesh->info.hsiz     = val;
@@ -345,6 +386,21 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
             __func__);
     return 0;
   }
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
 
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
@@ -390,6 +446,10 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
 int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,
                        int split,MMG5_int rin,MMG5_int rout){
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+}
+
+int MMG2D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br){
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
 }
 
 

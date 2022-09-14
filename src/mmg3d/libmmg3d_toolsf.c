@@ -41,7 +41,8 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
 
 /**
  * See \ref MMG3D_setfunc function in \ref mmg3d/libmmg3d.h file.

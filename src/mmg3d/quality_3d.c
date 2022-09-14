@@ -32,7 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmg3dexterns.h"
 
 extern int8_t ddb;
 
@@ -52,7 +54,7 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
 
   minqual = 2./MMG3D_ALPHAD;
 
-  /*compute tet quality*/
+  /* compute tet quality */
   iel = 1;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -68,8 +70,20 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
       pt->qual = MMG5_orcal(mesh,met,k);
     }
 
+    int i=0;
+    /* Once metric is stored using 'ridge' convention, a tetra with 4 ridge
+     * points has a 0 quality, ignore it for quality checks */
+    if ( metRidTyp ) {
+      for ( i=0; i<4; ++i ) {
+        MMG5_pPoint ppt = &mesh->point[pt->v[i]];
+        if ( (MG_SIN(ppt->tag) || MG_NOM & ppt->tag) || !(ppt->tag & MG_GEO) ) {
+          break;
+        }
+      }
+    }
 
-    if ( pt->qual < minqual ) {
+    /* Check quality on suitable elements */
+    if ( i < 4 && pt->qual < minqual ) {
       minqual = pt->qual;
       iel     = k;
     }
@@ -205,8 +219,10 @@ inline double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  *
  */
 int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
-                         double* lmin, double* lmax, int* ned, MMG5_int* amin, MMG5_int* bmin, MMG5_int* amax,
-                         MMG5_int* bmax, int* nullEdge, int8_t metRidTyp, double** bd_in, int hl[9] )
+                         double* lmin, double* lmax, int* ned, MMG5_int* amin,
+                         MMG5_int* bmin, MMG5_int* amax,
+                         MMG5_int* bmax, int* nullEdge, int8_t metRidTyp,
+                         double** bd_in, MMG5_int hl[9] )
 {
   MMG5_pTetra     pt;
   MMG5_pPoint     ppt;
@@ -325,8 +341,8 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
 int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
   return 1;
   double     avlen, lmin, lmax;
-  int        ned, nullEdge, hl[9];
-  MMG5_int   amin, bmin, amax, bmax; 
+  int        ned, nullEdge;
+  MMG5_int   amin, bmin, amax, bmax, hl[9];
   double     *bd;
 
   if (!MMG3D_computePrilen( mesh, met, &avlen, &lmin, &lmax, &ned, &amin,

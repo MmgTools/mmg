@@ -32,7 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmg3dexterns.h"
 
 extern int8_t ddb;
 
@@ -61,8 +63,8 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
   MMG5_pPar     par;
   double        b0[3],b1[3],n[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int           nminus,nplus,isloc,l,info;
-  MMG5_int      iel,iel1,iel2,np,nq,na1,na2,k;
+  MMG5_int      iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,info;
+  int           isloc,l;
   int8_t        ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
 
   iel = list[0] / 6;
@@ -382,7 +384,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
 
     if ( !isshell ) {
       /* Test that we don't recreate an existing elt */
-      int adj = mesh->adja[4*(iel-1)+1+ip];
+      MMG5_int adj = mesh->adja[4*(iel-1)+1+ip];
       if ( adj ) {
         int8_t voy  = adj%4;
         adj /= 4;
@@ -414,7 +416,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
 
     if ( !isshell ) {
       /* Test that we don't recreate an existing elt */
-      int adj = mesh->adja[4*(iel-1)+1+iq];
+      MMG5_int adj = mesh->adja[4*(iel-1)+1+iq];
       if ( adj ) {
         int8_t voy  = adj%4;
         adj /= 4;
@@ -464,8 +466,8 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int it
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int           iel1,ilist;
-  MMG5_int      iel,np,nq,nm,src;
+  int           ilist;
+  MMG5_int      iel,np,nq,nm,src,iel1;
   double        c[3];
   int8_t        ia,iface1,j,ipa,im;
   int           ier;

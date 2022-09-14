@@ -32,8 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions.h"
+#include "mmg3dexterns.h"
 
 #ifndef _INLINED_FUNCT_3D_H
 #define _INLINED_FUNCT_3D_H

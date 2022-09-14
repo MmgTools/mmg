@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 
 /**
@@ -141,8 +141,8 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
   MMG5_int      nc,ns,ip;
-  int8_t        i;
   MMG5_int      k,ip1,ip2;
+  int8_t        i;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
@@ -318,7 +318,7 @@ static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_int        *adja,k;
-  int             cnt,iel;
+  MMG5_int        cnt,iel;
   int8_t          i,i1;
   static int8_t   mmgWarn0 = 0;
 

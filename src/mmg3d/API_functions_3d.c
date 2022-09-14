@@ -38,8 +38,10 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions_3d.h"
+#include "PRoctree_3d.h"
 
 int MMG3D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -102,7 +104,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* level set value */
   mesh->info.ls       = MMG5_LS;
 
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   mesh->info.PROctree = MMG5_PROCTREE;
 #endif
 }
@@ -2122,7 +2124,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.mem      = val;
     if ( !MMG3D_memOption(mesh) )  return 0;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     mesh->info.PROctree   = val;
     break;
@@ -2268,8 +2270,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     break;
 #endif
   case MMG3D_IPARAM_anisosize :
-    if ( !MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
-      return 0;
+    mesh->info.ani = val;
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
@@ -2290,7 +2291,7 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_mem :
     return  mesh->info.mem;
     break;
-#ifndef PATTERN
+#ifndef MMG_PATTERN
   case MMG3D_IPARAM_octree :
     return  mesh->info.PROctree;
     break;
@@ -2356,10 +2357,20 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG3D_DPARAM_hmin :
     mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
+    if ( mesh->info.sethmax && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Warning: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+    }
+
     break;
   case MMG3D_DPARAM_hmax :
     mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
+    if ( mesh->info.sethmin && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
+      fprintf(stderr,"\n  ## Warning: hmin value must be strictly lower than hmax one"
+              " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+    }
+
     break;
   case MMG3D_DPARAM_hsiz :
     mesh->info.hsiz     = val;
@@ -2439,6 +2450,22 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
     return 0;
   }
 
+  if ( hmin <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmin value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hmax <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+  if ( hausd <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hausd value is not allowed.\n",
+            __func__);
+    return 0;
+  }
+
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
 
@@ -2483,6 +2510,11 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
 int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,int split,MMG5_int rin,MMG5_int rout) {
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
+
+int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br){
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
+}
+
 
 int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 

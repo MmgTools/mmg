@@ -30,13 +30,16 @@
  * \todo Doxygen documentation
  *
  * Perform volume and surface mesh adaptation in delaunay mode (\a
- * PATTERN preprocessor flag set to OFF).
+ * MMG_PATTERN preprocessor flag set to OFF).
  *
  * \todo Clean the boucle for (code copy...)
  */
-#include "mmg3d.h"
 
-#ifndef PATTERN
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
+#include "mmg3dexterns.h"
+
+#ifndef MMG_PATTERN
 
 int8_t  ddb;
 
@@ -182,18 +185,10 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
         else if ( tag & MG_GEO ) {
           if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
             continue;
+
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            MMG5_tet2tri(mesh,k,i,&ptt);
-            MMG5_nortri(mesh,&ptt,no1);
-            no2[0] = to[1]*no1[2] - to[2]*no1[1];
-            no2[1] = to[2]*no1[0] - to[0]*no1[2];
-            no2[2] = to[0]*no1[1] - to[1]*no1[0];
-            dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-            if ( dd > MMG5_EPSD2 ) {
-              dd = 1.0 / sqrt(dd);
-              no2[0] *= dd;
-              no2[1] *= dd;
-              no2[2] *= dd;
+            if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+              return -1;
             }
           }
         }
@@ -203,11 +198,6 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
             MMG5_tet2tri(mesh,k,i,&ptt);
             MMG5_nortri(mesh,&ptt,no1);
-            if ( !MG_GET(pxt->ori,i) ) {
-              no1[0] *= -1.0;
-              no1[1] *= -1.0;
-              no1[2] *= -1.0;
-            }
           }
         }
         else {
@@ -545,28 +535,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
             else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
-              if ( !MG_GET(pxt->ori,i) ) {
-                no1[0] *= -1.0;
-                no1[1] *= -1.0;
-                no1[2] *= -1.0;
-              }
             }
           }
           else if ( tag & MG_GEO ) {
             if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
               continue;
+
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              MMG5_tet2tri(mesh,k,i,&ptt);
-              MMG5_nortri(mesh,&ptt,no1);
-              no2[0] = to[1]*no1[2] - to[2]*no1[1];
-              no2[1] = to[2]*no1[0] - to[0]*no1[2];
-              no2[2] = to[0]*no1[1] - to[1]*no1[0];
-              dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-              if ( dd > MMG5_EPSD2 ) {
-                dd = 1.0 / sqrt(dd);
-                no2[0] *= dd;
-                no2[1] *= dd;
-                no2[2] *= dd;
+              if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+                return -1;
               }
             }
           }
@@ -576,11 +553,6 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
-              if ( !MG_GET(pxt->ori,i) ) {
-                no1[0] *= -1.0;
-                no1[1] *= -1.0;
-                no1[2] *= -1.0;
-              }
             }
           }
           else {
@@ -1284,7 +1256,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
   } else  nnf = nf = 0;
 
   if ( mesh->info.ddebug ) {
-    fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7" MMG5_PRId "\n",nnf);
+    fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7"MMG5_PRId"\n",nnf);
     MMG3D_outqua(mesh,met);
   }
 
@@ -1350,14 +1322,31 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     return 0;
   }
 
+  /* Debug: export variable MMG_SAVE_ANATET1 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-1."
+           " (MMG_SAVE_ANATET1 env variable is exported).\n");
+    return 1;
+  }
+
   /**--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
+
 
   /* define metric map */
   if ( !MMG3D_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
   }
 
   MMG5_gradation_info(mesh);
@@ -1372,12 +1361,28 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     MMG3D_gradsizreq(mesh,met);
   }
 
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
+
   /*update quality*/
   if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
   if ( !MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_ANATET2 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET2") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-2."
+           " (MMG_SAVE_ANATET2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumerotation if available */

@@ -33,6 +33,7 @@
  */
 
 #include "mmgcommon.h"
+#include "mmgexterns.h"
 
 /**
  * \param m input metric.
@@ -175,6 +176,11 @@ int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1, MMG5_int ip2,doub
   if ( (MG_SIN(p1->tag) || (p1->tag & MG_NOM)) &&
        (MG_SIN(p2->tag) || (p2->tag & MG_NOM)) ) {
     /* m1 and m2 are isotropic metrics */
+    /* Remark (Algiane): Perspective of improvement can be:
+       - 1. to not force isotropy at singular point
+       - 2. to not force the metric to be along tangent and normal dir at ridge point
+    */
+
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
     dd *= dd;
     if ( dd < MMG5_EPSD ) {
@@ -505,7 +511,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
   int            nstep,l;
   MMG5_int       ip1,ip2;
   int8_t         i1,i2;
-  static int     warn=0;
+  static int     warn=0,warnnorm=0;
 
   /* Number of steps for parallel transport */
   nstep = 4;
@@ -591,8 +597,19 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
     memcpy(m2,&met->m[6*ip2],6*sizeof(double));
 
     /* In this pathological case, n is empty */
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM))
+    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
       memcpy(n,n2,3*sizeof(double));
+      assert( MMG5_EPSD < (n2[0]*n2[0]+n2[1]*n2[1]+n2[2]*n2[2]) && "normal at p2 is 0" );
+    }
+    else if (ddbn < MMG5_EPSD) {
+      /* Other case where n is empty: bezier normal is 0 */
+      if ( !warnnorm ) {
+        fprintf(stderr,"  ## Warning: %s: %d: unexpected case (null normal),"
+                " impossible interpolation.\n",__func__,__LINE__);
+        warnnorm = 1;
+      }
+      return 0;
+    }
   }
   else {
     if ( p2->tag & MG_GEO ) {
@@ -645,6 +662,27 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
       ++warn;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 impossible metric"
               " interpolation.\n", __func__);
+
+      if ( mesh->info.ddebug ) {
+        fprintf(stderr," points: %"MMG5_PRId": %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip1),
+                mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
+                MMG5_Get_tagName(mesh->point[ip1].tag));
+        fprintf(stderr,"         %"MMG5_PRId": %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip2),
+                mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
+                MMG5_Get_tagName(mesh->point[ip2].tag));
+
+        fprintf(stderr,"\n BEFORE ROTATION:\n");
+        fprintf(stderr,"\n metric %e %e %e %e %e %e\n",
+                m1old[0],m1old[1],m1old[2],m1old[3],m1old[4],m1old[5]);
+        fprintf(stderr,"     %e %e %e %e %e %e\n",
+                m2old[0],m2old[1],m2old[2],m2old[3],m2old[4],m2old[5]);
+
+        fprintf(stderr,"\n AFTER ROTATION (to %e %e %e):\n",n[0],n[1],n[2]);
+        fprintf(stderr,"\n metric %e %e %e %e %e %e\n",
+                m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+        fprintf(stderr,"     %e %e %e %e %e %e\n",
+                m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+      }
     }
     return 0;
   }

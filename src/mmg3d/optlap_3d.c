@@ -31,7 +31,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmg3dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

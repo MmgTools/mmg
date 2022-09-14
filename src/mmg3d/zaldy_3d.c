@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 
 /** get new point address */
 MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src) {

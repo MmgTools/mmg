@@ -33,7 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * \param mesh pointer towarad the mesh structure.
@@ -196,6 +197,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
         ii1 = MMG5_inxt2[ii];
         ii2 = MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
+          assert ( pt1->base );
           /* Moebius strip */
           if ( pt1->base < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: Triangle orientation problem (1):"
@@ -442,7 +444,8 @@ int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int       list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,nre;
+  int            xp,nr,ns;
   int8_t         i;
 
   nre = nc = 0;

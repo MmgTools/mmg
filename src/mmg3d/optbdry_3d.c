@@ -30,7 +30,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
+#include "mmg3dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

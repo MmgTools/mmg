@@ -122,9 +122,9 @@ IF ( NOT ${CI_CONTEXT} )
       RESULT_VARIABLE NO_CONNECTION
       )
   endif ( )
-ENDIF()
 
-if ( NOT NO_CONNECTION EQUAL 0 )
+ENDIF()
+if ( NOT (NO_CONNECTION EQUAL 0 OR NO_CONNECTION EQUAL 2) )
     set ( CONNECTED OFF )
     message ( STATUS "Offline mode: requires already downloaded test cases")
 else()

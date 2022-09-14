@@ -30,6 +30,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 
 /**

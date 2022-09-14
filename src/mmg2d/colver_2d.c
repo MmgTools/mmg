@@ -20,7 +20,8 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 extern uint8_t ddb;
 

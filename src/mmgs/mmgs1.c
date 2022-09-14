@@ -32,8 +32,10 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
-
+#include "libmmgs_private.h"
+#include "mmgsexterns.h"
+#include "mmgexterns.h"
+#include "inlined_functions.h"
 
 extern int8_t ddb;
 
@@ -52,9 +54,8 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pPoint  pa,pb,ps;
   double       o[3][3],p[3][3];
   float        to,tp,t;
-  MMG5_int     ia,ib,ier;
-  int          i1,i2;
-  int          it,maxit;
+  MMG5_int     ia,ib;
+  int          i1,i2,ier,it,maxit;
   int8_t       i,j;
 
   pt = &mesh->tria[k];
@@ -389,11 +390,53 @@ int chkedg(MMG5_pMesh mesh,MMG5_int iel) {
   return pt->flag;
 }
 
+/**
+ * \param met pointer toward met structure
+ * \param typchk type of check to perform: 1 for first stage (adaptation to
+ * capture roughly the surface mesh), 2 for second stage of adaptation
+ * (rough capture of input metric).
+ *
+ * Assign functions for computation of edge lengths and tria qualities: they are
+ * now used in first stage of adaptation to ensure that, if we enter with a
+ * mesh+metric already adapted, we don't delete entierly the work done (massive
+ * collapses on planar surfaces for example).
+ *
+ */
+static inline
+void MMGS_set_localFunc ( MMG5_pSol met, int8_t typchk,
+                          double (**MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,MMG5_int ,MMG5_int,int8_t),
+                          double (**MMGS_caltri)(MMG5_pMesh,MMG5_pSol,MMG5_pTria)) {
+
+  if ( met->m ) {
+    if ( (typchk == 1) && (met->size == 6) ) {
+      *MMGS_lenEdg = MMG5_lenSurfEdg33_ani;
+      *MMGS_caltri = MMG5_caltri33_ani;
+    }
+    else if ( typchk == 2 ) {
+      *MMGS_lenEdg = MMG5_lenSurfEdg;
+      *MMGS_caltri = MMG5_calelt;
+    }
+    else {
+      *MMGS_lenEdg = MMG5_lenSurfEdg_iso;
+      *MMGS_caltri = MMG5_caltri_iso;
+    }
+  }
+
+}
+
+
 static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   int           it,maxit;
   MMG5_int      k,ns,nns;
   int8_t        i;
+
+  /* Local function pointer toward the suitable functions to use for edge length
+   * and quality computation depending on the adaptation phase */
+  double (*MMGS_lenEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t ) = NULL;
+  double (*MMGS_caltri)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_pTria pt ) = MMG5_caltri_iso;
+
+  MMGS_set_localFunc ( met, typchk, &MMGS_lenEdg, &MMGS_caltri);
 
   it = nns = 0;
   maxit = 2;
@@ -406,7 +449,8 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
       for (i=0; i<3; i++) {
         if ( MS_SIN(pt->tag[i]) || MG_EDG(pt->tag[i]) )  continue;
-        else if ( chkswp(mesh,met,k,i,typchk) ) {
+        else if ( chkswp(mesh,met,k,i,typchk,
+                         MMGS_lenEdg,MMGS_caltri) ) {
           ns += swapar(mesh,k,i);
           break;
         }
@@ -448,7 +492,9 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 
         if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
           continue;
-        ilist = boulet(mesh,k,i,list);
+
+        int8_t dummy;
+        ilist = boulet(mesh,k,i,list,&dummy);
 
         if ( ilist < 1 ) continue;
 
@@ -966,7 +1012,16 @@ MMG5_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
   return ip;
 }
 
-/* attempt to collapse small edges */
+/**
+ * \param mesh pointer toward mesh structure
+ * \param met pointer toward met structure
+ * \param typchk type of check to perform: 1 for first stage (adaptation to
+ * capture roughly the surface mesh), 2 for second stage of adaptation
+ * (rough capture of input metric).
+ *
+ * Attempt to collapse small edges
+ *
+ */
 static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
@@ -975,6 +1030,13 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_int      nc,list[MMGS_LMAX+2],k;
   int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
+
+  /* Local function pointer toward the suitable functions to use for edge length
+   * and quality computation depending on the adaptation phase */
+  double (*MMGS_lenEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t ) = NULL;
+  double (*MMGS_caltri)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_pTria pt ) = MMG5_caltri_iso;
+
+  MMGS_set_localFunc ( met, typchk, &MMGS_lenEdg, &MMGS_caltri);
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1028,7 +1090,7 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       }
 
       /* check if geometry preserved */
-      ilist = chkcol(mesh,met,k,i,list,typchk);
+      ilist = chkcol(mesh,met,k,i,list,typchk,MMGS_lenEdg,MMGS_caltri);
 
       int8_t open = (mesh->adja[3*(k-1)+1+i] == 0);
 
@@ -1178,7 +1240,7 @@ static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       else if ( p1->tag > p2->tag || p1->tag > pt->tag[i] )  continue;
 
       /* check if geometry preserved */
-      ilist = chkcol(mesh,met,k,i,list,2);
+      ilist = chkcol(mesh,met,k,i,list,2,MMG5_lenSurfEdg,MMG5_calelt);
 
       int8_t open = (mesh->adja[3*(k-1)+1+i] == 0);
 
@@ -1410,6 +1472,15 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     fprintf(stderr,"\n  ## Unable to split mesh-> Exiting.\n");
     return 0;
   }
+
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-1."
+           " (MMG_SAVE_ANATRI1 env variable is exported).\n");
+    return 1;
+  }
+
   /* renumbering if available */
   if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
@@ -1424,6 +1495,14 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     return 0;
   }
 
+ /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
+  }
+
   MMG5_gradation_info(mesh);
   if ( mesh->info.hgrad > 0. ) {
      if (!MMGS_gradsiz(mesh,met) ) {
@@ -1436,9 +1515,24 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     MMGS_gradsizreq(mesh,met);
   }
 
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
+
   if ( !anatri(mesh,met,2) ) {
     fprintf(stderr,"\n  ## Unable to proceed adaptation. Exit program.\n");
     return 0;
+  }
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI2") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-2."
+           " (MMG_SAVE_ANATRI2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumbering if available */

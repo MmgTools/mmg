@@ -31,7 +31,8 @@
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
  **/
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 //extern int8_t ddb;
 

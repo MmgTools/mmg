@@ -38,8 +38,8 @@
  *
  */
 
-#include "mmg3d.h"
-
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
 #include "mmg3dexterns.h"
 
 /**

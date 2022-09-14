@@ -20,13 +20,14 @@ on:
 # job
 jobs:
   ci:
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
 
     # Launch a matrix of jobs
     strategy:
         fail-fast: false
         matrix:
-            os: [ubuntu-20.04,macos-10.15]
+            os: [ubuntu-20.04,macos-12]
             pattern: [on,off]
             pointmap: [off]
             scotch: [on,off]
@@ -41,7 +42,7 @@ jobs:
                 scotch: off
                 vtk: on
 
-              - os: macos-10.15
+              - os: macos-12
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -54,7 +55,7 @@ jobs:
                 scotch: on
                 vtk: off
 
-              - os: macos-10.15
+              - os: macos-12
                 pattern: off
                 pointmap: on
                 scotch: on
@@ -166,14 +167,53 @@ jobs:
         with:
           path: mmg
 
-      - name: Configure Mmg
+      - name: Test compilation with shared libs linkage
+        run: |
+          cmake -Smmg -Bbuild_shared \
+          ${{ env.FORT_FLG }} \
+            -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
+            -DMMG_PATTERN=${{ matrix.pattern }} \
+            -DUSE_SCOTCH=${{ matrix.scotch }} \
+            -DSCOTCH_DIR=scotch \
+            -DUSE_VTK=${{ matrix.vtk }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            ${{ inputs.add_cmake_cfg_args }}
+            cmake --build build_shared --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+        shell: bash
+
+      - name: Test compilation without library linkage
+        run: |
+          cmake -Smmg -Bbuild_nolibs \
+          ${{ env.FORT_FLG }} \
+            -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
+            -DMMG_PATTERN=${{ matrix.pattern }} \
+            -DUSE_SCOTCH=${{ matrix.scotch }} \
+            -DSCOTCH_DIR=scotch \
+            -DUSE_VTK=${{ matrix.vtk }} \
+            -DLIBMMG_STATIC=OFF \
+            -DLIBMMGS_STATIC=OFF \
+            -DLIBMMG2D_STATIC=OFF \
+            -DLIBMMG3D_STATIC=OFF \
+            ${{ inputs.add_cmake_cfg_args }}
+            cmake --build build_nolibs --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+        shell: bash
+
+      - name: Configure Mmg with static libs (default behaviour)
         run: |
           cmake -Smmg -Bbuild \
           ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
-            -DPATTERN=${{ matrix.pattern }} \
+            -DMMG_PATTERN=${{ matrix.pattern }} \
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch \
             -DUSE_VTK=${{ matrix.vtk }} \
@@ -181,7 +221,7 @@ jobs:
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
-            ${{ inputs.add_cmake_cfg_args }} ..
+            ${{ inputs.add_cmake_cfg_args }}
         shell: bash
 
       - name: Build Mmg

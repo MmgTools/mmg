@@ -41,7 +41,8 @@
  *
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 
 /**
  * See \ref MMGS_setfunc function in \ref mmgs/libmmgs.h file.

@@ -28,10 +28,10 @@
  * \date 2013
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \remark Delaunay mode only (\a PATTERN flag set to \a OFF).
+ * \remark Delaunay mode only (\a MMG_PATTERN flag set to \a OFF).
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ct coordinates of vertices of the element.

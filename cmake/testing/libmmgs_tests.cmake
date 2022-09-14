@@ -34,6 +34,10 @@ SET ( MMGS_LIB_TESTS
   libmmgs_example2
   libmmgs_example3
   libmmgs_lsOnly
+  libmmgs_lsOnly_optim
+  libmmgs_lsOnly_hsiz
+  libmmgs_lsAndMetric_optim
+  libmmgs_lsAndMetric_hsiz
   libmmgs_lsAndMetric
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
@@ -43,13 +47,19 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main_hsiz.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
   )
 
 IF ( LIBMMGS_STATIC )
   SET ( lib_name lib${PROJECT_NAME}s_a )
+  SET ( lib_type "STATIC" )
 ELSEIF ( LIBMMGS_SHARED )
   SET ( lib_name lib${PROJECT_NAME}s_so )
+  SET ( lib_type "SHARED" )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
@@ -64,6 +74,10 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmgs_fortran_b
     libmmgs_fortran_io
     libmmgs_fortran_lsOnly
+    libmmgs_fortran_lsOnly_optim
+    libmmgs_fortran_lsOnly_hsiz
+    libmmgs_fortran_lsAndMetric_optim
+    libmmgs_fortran_lsAndMetric_hsiz
     libmmgs_fortran_lsAndMetric
     )
 
@@ -72,6 +86,10 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_b/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main_hsiz.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_hsiz.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.F90
     )
 
@@ -84,7 +102,7 @@ FOREACH ( test_idx RANGE ${nbTests} )
   LIST ( GET MMGS_LIB_TESTS           ${test_idx} test_name )
   LIST ( GET MMGS_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
 
-  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_s_headers ${lib_name} )
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_s_headers ${lib_name} ${lib_type})
 
 ENDFOREACH ( )
 

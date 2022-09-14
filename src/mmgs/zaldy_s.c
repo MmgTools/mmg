@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 /* get new point address */
 MMG5_int MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]) {

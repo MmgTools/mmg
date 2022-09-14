@@ -32,9 +32,10 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 #include "inlined_functions.h"
-#include "mmg3dexterns.h"
+#include "mmgexterns.h"
 
 extern int8_t ddb;
 

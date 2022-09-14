@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
 
 mytime         MMG5_ctim[TIMEMAX];
 
@@ -57,7 +58,6 @@ static void MMG5_endcod(void) {
  * references.
  *
  */
-static inline
 int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
   int         npar,ier;
   MMG5_int    k;
@@ -102,14 +102,13 @@ int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
  * Write the local default values at tetrahedra in the parameter file.
  *
  */
-static inline
 int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
                                 FILE *out ) {
   MMG5_iNode *cur;
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Tetrahedron %e %e %e \n",cur->val,
+    fprintf(out,"%"MMG5_PRId" Tetrahedron %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }
@@ -128,7 +127,6 @@ int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
  * can be locally defined.
  *
  */
-static inline
 int MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   MMG5_iNode  *triRefs,*tetRefs;
   int          nparTri,nparTet;
@@ -250,8 +248,6 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG3D_setfunc(mesh,met);
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
 
@@ -264,7 +260,6 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
@@ -312,9 +307,11 @@ int main(int argc,char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
 
   /* Version info */
+#ifndef MMG_COMPARABLE_OUTPUT
   fprintf(stdout,"  -- MMG3D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+#endif
 
   MMG3D_Set_commonFunc();
 

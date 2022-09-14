@@ -39,7 +39,7 @@ extern MMG5_Info  info;
 /**
  * \param mesh pointer toward mesh structure.
  * \param start a triangle to which \a ip belongs.
- * \param ip point index
+ * \param ip local point index
  * \param adja pointer toward the adjacency array.
  * \param list pointer toward the list of points connected to \a ip.
  *
@@ -48,7 +48,7 @@ extern MMG5_Info  info;
  * Return all vertices connected to ip (with list[0] = ip).
  *
  **/
-int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,MMG5_int *adja, MMG5_int *list) {
+int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *list) {
   MMG5_pTria    pt;
   int           ilist;
   MMG5_int      *adj,k;
@@ -111,7 +111,7 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,MMG5_int *adja, MMG5_
  * Compute average normal of triangles sharing P without crossing ridge.
  *
  */
-int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double *nn) {
+int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
   MMG5_int      *adja,k;
@@ -187,7 +187,7 @@ int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double
  * Compute the tangent to the curve at point \a ip.
  *
  */
-int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double *tt) {
+int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *tt) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
   double        dd;
@@ -275,8 +275,8 @@ int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double
  * the vertex \a ip.
  *
  */
-MMG5_int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,
-                 MMG5_int *list,MMG5_int *listref,MMG5_int *ng,MMG5_int *nr,int lmax) {
+int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,
+                 MMG5_int *list,MMG5_int *listref,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
   MMG5_int      *adja,k;
   MMG5_int      ns;

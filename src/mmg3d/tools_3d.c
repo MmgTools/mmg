@@ -33,7 +33,8 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 extern int8_t ddb;
 
@@ -210,8 +211,10 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s
         3.0*s*s*(1.0-s)*b1[2] + s*s*s*p1->c[2];
 
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-        memcpy(to,t0,3*sizeof(double));
-        return 1;
+      /* In this case, the tangent orientation depends on the triangle from
+       * which we see the ridge */
+      memcpy(to,t0,3*sizeof(double));
+      return 1;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n11,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -853,6 +856,45 @@ MMG5_int MMG3D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
     MMG5_pTetra pt;
     MMG5_int    ne, k;
 
+#ifndef USE_SCOTCH
+    ne = mesh->ne+1;
+    k  = 1;
+
+    assert ( MG_EOK(&mesh->tetra[kel]) );
+
+    do {
+      pt = &mesh->tetra[k];
+
+      if ( !MG_EOK(pt) ) {
+        --ne;
+        pt = &mesh->tetra[ne];
+        assert( pt );
+
+        /* Search last used tetra */
+        while ( !MG_EOK(pt) && k < ne ) {
+          --ne;
+          pt = &mesh->tetra[ne];
+        }
+
+        /* Found elt */
+        if ( ne == kel ) {
+          return k;
+        }
+      }
+      else {
+        /* Found elt */
+        if ( k==kel ) {
+          return k;
+        }
+      }
+      /* All elts have been treated end of loop */
+      if ( k==ne ) {
+        break;
+      }
+    }
+    while ( ++k < ne );
+
+#else
     ne = 0;
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
@@ -861,6 +903,7 @@ MMG5_int MMG3D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
             if ( k == kel )  return ne;
         }
     }
+#endif
     return 0;
 }
 
@@ -869,6 +912,45 @@ MMG5_int MMG3D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
     MMG5_pPoint ppt;
     MMG5_int    np, k;
 
+#ifndef USE_SCOTCH
+    np = mesh->np+1;
+    k  = 1;
+
+    assert ( MG_VOK(&mesh->point[kp]) );
+
+    do {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) {
+        --np;
+        ppt = &mesh->point[np];
+        assert ( ppt );
+
+        /* Search the last used point */
+        while ( !MG_VOK(ppt) && k < np ) {
+          --np;
+          ppt = &mesh->point[np];
+        }
+
+        /* Found pt */
+        if ( np == kp ) {
+          return k;
+        }
+      }
+      else {
+        /* Found pt */
+        if ( k==kp ) {
+          return k;
+        }
+      }
+
+      /* All points have been treated end of loop */
+      if ( k==np ) {
+        break;
+      }
+    }
+    while ( ++k < np );
+
+#else
     np = 0;
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
@@ -877,6 +959,8 @@ MMG5_int MMG3D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
             if ( k == kp )  return np;
         }
     }
+#endif
+
     return 0;
 }
 

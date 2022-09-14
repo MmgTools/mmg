@@ -1194,6 +1194,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
       psl->ver = mesh->ver;
       psl->dim = mesh->dim;
+      psl->entities = MMG5_Vertex;
       psl->type = 1;
 
       /* String tags: The first one stores the solution name */
@@ -2354,7 +2355,7 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
  */
 int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
                         FILE **inm,int ver,int *bin,MMG5_int *bpos,MMG5_int np,int dim,
-                        int nsols,int *entities,int *type,MMG5_int *size) {
+                        int nsols,int *entities,int *type,int *size) {
   MMG5_pPoint ppt;
   int         binch;
   MMG5_int    k;
@@ -2492,7 +2493,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
 int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
                                    FILE *inm,int ver,int bin,MMG5_int *bpos,
                                    int nsols,int nsolsAtTriangles,
-                                   int *entities,int *type,MMG5_int *size) {
+                                   int *entities,int *type,int *size) {
   MMG5_pTria  pt;
   int         binch;
   MMG5_int    k,nt;
@@ -2561,7 +2562,7 @@ int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
 int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
                                     FILE *inm,int ver,int bin,MMG5_int *bpos,
                                     int nsols,int nsolsAtTetra,
-                                    int *entities,int *type,MMG5_int *size) {
+                                    int *entities,int *type,int *size) {
   MMG5_pTetra  pt;
   int          binch;
   MMG5_int     k,ne;
@@ -2615,15 +2616,29 @@ int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param type type of the metric
+ * \param entities entities on which the metric applies (should be MMG5_Vertex)
  * \param inm metric file
  * \return 1 if success, -1 if fail
  *
- * Check if the type of the metric is compatible with the remeshing mode.  If
- * not, close the metric file (note that if type is an allocated array, you must
- * unallocate it outside).
+ * Check metric data:
+ *   1. check that the metric applies on vertices;
+ *   2. check that the type of the metric is compatible with the remeshing mode.
+ * If not, close the metric file (note that if type is an allocated array, you
+ * must unallocate it outside).
  *
  */
-int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
+int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, int *entities, FILE *inm) {
+
+  /* Metric can be provided only on vertices */
+  if ( (*entities != MMG5_Vertex) && (*entities != MMG5_Noentity) ) {
+    fprintf(stderr,"  ## Error: %s: Metric should apply on vertices.\n"
+            " If your input file is at a non Medit"
+            " file format, please ensure to remove non metric fields from your"
+            " file and that the metric field"
+            " contains the \":metric\" string.\n",__FILE__);
+    if ( inm ) fclose(inm);
+    return -1;
+  }
 
   /* 1: scalar solution (isotropic metric or ls function,
      2: vector field (displacement in Lagrangian mode),

@@ -33,7 +33,8 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -80,7 +81,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   if ( nbeg != nend )  return 0;
 
   /* Rotation of the ball of p0 */
-  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi)  ) {
+  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi,p0->n)  ) {
     return 0;
   }
 

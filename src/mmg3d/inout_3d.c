@@ -33,7 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * \param imprim verbosity level (muted for stdout if -1)
@@ -1253,7 +1254,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check the metric type */
   if ( sol ) {
-    ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+    ier = MMG5_chkMetricType(mesh,&sol->type,&sol->entities,inm);
   }
 
   return ier;
@@ -2278,7 +2279,10 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     return -1;
   }
 
-  ier = MMG5_chkMetricType(mesh,type,inm);
+  /* #MMG5_loadSolHeader function reads only solution at vertices so we don't
+      have to check the entites on which the metric applies */
+  int entities = MMG5_Vertex;
+  ier = MMG5_chkMetricType(mesh,type,&entities,inm);
 
   if ( ier < 1 ) {
     MMG5_SAFE_FREE(type);
@@ -2463,15 +2467,15 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pPoint  ppt;
   MMG5_pTetra  pt;
   int          binch,bin,ier,npointSols,ncellSols;
-  MMG5_int     j,k,bpos,*size;
-  int          *type,*entities;
+  MMG5_int     j,k,bpos;
+  int          *type,*entities,*size;
 
   if ( !(*sol)[0].m )  return -1;
 
   (*sol)[0].ver = 2;
 
   MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
-  MMG5_SAFE_CALLOC(size,mesh->nsols,MMG5_int,MMG5_SAFE_FREE(type);return 0);
+  MMG5_SAFE_CALLOC(size,mesh->nsols,int,MMG5_SAFE_FREE(type);return 0);
   MMG5_SAFE_CALLOC(entities,mesh->nsols,int,
                    MMG5_SAFE_FREE(type);MMG5_SAFE_FREE(size);return 0);
 

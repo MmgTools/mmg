@@ -32,7 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "mmgsexterns.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -107,7 +109,7 @@ int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i,MMG5_int *vx)
 int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i,MMG5_int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
-  int             iel;
+  MMG5_int        iel;
   int8_t          i1,i2;
 
   iel = MMGS_newElt(mesh);

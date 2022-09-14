@@ -112,7 +112,7 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmgs_vtkvtp
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -291,6 +291,22 @@ ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-nonzero.o.meshb)
 
+# optim + aniso option with corners
+ADD_TEST(NAME mmgs_CubeOptimAni
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/CubeOptimAni/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmgs_CubeOptimAni-cube.o.meshb)
+
+# optim + aniso option for open surface
+ADD_TEST(NAME mmgs_OpnbdyOptimAni-circle
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/OpnbdyOptimAni/cercle-3D.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-circle.o.meshb)
+
+ADD_TEST(NAME mmgs_OpnbdyOptimAni-adap1
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/OpnbdyOptimAni/adap1-3D.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-adap1.o.meshb)
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmgs_LSMultiMat_optim
@@ -305,6 +321,13 @@ ADD_TEST(NAME mmgs_LSMultiMat_optimAni
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optimAni.o.meshb)
+
+SET(passRegex "## ERROR: MISMATCH OPTIONS: OPTIM OPTION IS NOT AVAILABLE")
+
+SET_PROPERTY(TEST mmgs_LSMultiMat_optim
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+SET_PROPERTY(TEST mmgs_LSMultiMat_optimAni
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 # ls discretisation + hsiz option
 ADD_TEST(NAME mmgs_LSMultiMat_hsiz

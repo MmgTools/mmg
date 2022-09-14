@@ -40,6 +40,7 @@
 
 @DEF_MMG_ABS@ /*!< Abs function for MMG5_int */
 
-#cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
+#cmakedefine   USE_POINTMAP /*!< Flag to enable and export the pointmap used */
+#cmakedefine01 MMG_DYN_LIB
 
 #endif

@@ -31,7 +31,8 @@
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
  **/
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "libmmg2d.h"
 #include "mmg2dexterns.h"
 
 /**
@@ -532,7 +533,7 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG5_int np1,MMG5_int np2) {
+MMG5_int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG5_int np1,MMG5_int np2) {
   MMG5_pPoint  p1,p2;
   double       dm[2],dn[2];
   double       vp[2][2],*m,*n,ll,difsiz;

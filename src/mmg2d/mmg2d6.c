@@ -30,7 +30,8 @@
  * \version 5
  * \copyright GNU Lesser General Public License.
  */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "mmg2dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -580,7 +581,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt,pt1,pt2;
   double         volc,voltot,v0,v1,v2;
   MMG5_int       k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,cur,ipile,*pile,*adja,base;
-  int8_t         i,i1,i2;
+  int8_t         i,i1,i2,onbr;
 
   ncp = 0;
   ncm = 0;
@@ -795,6 +796,43 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       }
       ncm++;
     }
+    
+    /* Remove connected component if it is not attached to one base reference */
+    if ( mesh->info.nbr ) {
+      onbr = 0;
+      for (l=0; l<ipile; l++) {
+        pt1 = &mesh->tria[pile[l]];
+        for (i=0; i<3; i++) {
+          if ( MMG2D_isbr(mesh,pt1->edg[i]) ) {
+            i1 = MMG5_inxt2[i];
+            i2 = MMG5_inxt2[i1];
+            ip1 = pt1->v[i1];
+            if ( sol->m[ip1]-mesh->info.ls < 0.0 )  {
+              onbr = 1;
+              break;
+            }
+            ip2 = pt1->v[i2];
+            if ( sol->m[ip2]-mesh->info.ls < 0.0 )  {
+              onbr = 1;
+              break;
+            }
+          }
+        }
+        if ( onbr ) break;
+      }
+      
+      if ( !onbr ) {
+        for (l=0; l<ipile; l++) {
+          pt1 = &mesh->tria[pile[l]];
+          for (i=0; i<3; i++) {
+            ip0 = pt1->v[i];
+            if ( sol->m[ip0]-mesh->info.ls < 0.0 ) sol->m[ip0] = mesh->info.ls + 100*MMG5_EPS;
+          }
+        }
+        ncm++;
+      }
+    }
+
   }
 
   /* Erase triangle flags */

@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -145,7 +145,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
         i2 = MMG5_inxt2[i1];
         pa = &mesh->edge[ia];
         pt->edg[i2] = pa->ref;
-        pt->tag[i2] = pa->tag;
+        pt->tag[i2] |= pa->tag;
       }
     }
   }
@@ -169,7 +169,8 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
 int MMGS_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash   hash;
   MMG5_pTria  pt;
-  MMG5_int    k,tag,nad;
+  MMG5_int    k,nad;
+  int         tag;
   int8_t      i,i1,i2;
 
   /* adjust hash table params */

@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 extern int8_t ddb;
 
@@ -145,7 +145,7 @@ int MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int
   MMG5_pTria    pt;
   double        *mr,*m,*n;
   int           i1, i2;
-  MMG5_int      ip1, ip2; 
+  MMG5_int      ip1, ip2;
 
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];
