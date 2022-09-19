@@ -253,7 +253,8 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typEntity,np,typSol\n
+ * >     MMG5F_INT, INTENT(IN)         :: np\n
+ * >     INTEGER, INTENT(IN)           :: typEntity,typSol\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -277,7 +278,8 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: nsols,nentities\n
+ * >     INTEGER, INTENT(IN)           :: nsols\n
+ * >     MMG5F_INT, INTENT(IN)         :: nentities\n
  * >     INTEGER, INTENT(IN)           :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1077,13 +1079,14 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     MMG5F_INT, INTENT(IN)                  :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1099,13 +1102,13 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s);
+  LIBMMG3D_EXPORT int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1151,7 +1154,8 @@ enum MMG3D_Param {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     MMG5_DATA_PTR_T               :: sol\n
  * >     INTEGER, INTENT(IN)           :: iparam,val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1852,13 +1856,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     MMG5F_INT, INTENT(IN)                  :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1874,13 +1879,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s);
+  LIBMMG3D_EXPORT int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /**
  * \param mesh pointer toward the mesh structure.

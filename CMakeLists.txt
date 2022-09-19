@@ -105,12 +105,16 @@ ELSE ()
   SET ( DEF_MMG_ABS "#define MMG5_abs(x) abs(x)")
 ENDIF ()
 
-# Create mmgcmakedefines.h file with the architecture infos and
-# the definition ot the USE_POINTMAP flag.
+# Create mmgcmakedefines.h file with the architecture infos and the definition
+# ot the USE_POINTMAP flag. Create also mmgcmakedefinesf.h file for automatic
+# definition of integer size for Fortran API
 ###############################################################################
 SET(MMG_DYN_LIB ${BUILD_SHARED_LIBS} CACHE INTERNAL "" FORCE)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
   ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefines.h @ONLY)
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefinesf.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefinesf.h @ONLY)
 
 # Create mmgversion.h file with the release infos
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in

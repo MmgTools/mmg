@@ -46,7 +46,8 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgLs,mmgMet
-  INTEGER            :: ier,argc,k,np
+  MMG5F_INT          :: k,np,zero_ikind
+  INTEGER            :: ier,argc
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
 
   WRITE(*,*) "  -- TEST MMG2DLIB"
@@ -115,7 +116,8 @@ PROGRAM main
   ! a) give info for the metric: the metric is applied on vertex
   !    entities, number of vertices np is recoverd using get_meshSize and the sol
   !    is tensorial
-  CALL MMG2D_Get_meshSize(mmgMesh,np,%val(0),%val(0),%val(0),ier)
+  zero_ikind = 0
+  CALL MMG2D_Get_meshSize(mmgMesh,np,%val(zero_ikind),%val(zero_ikind),%val(zero_ikind),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(204)
   ENDIF

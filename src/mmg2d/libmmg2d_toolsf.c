@@ -108,7 +108,7 @@ FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
  * See \ref MMG2D_Get_triFromEdge function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIFROMEDGE,mmg2d_get_trifromedge,
-             (MMG5_pMesh *mesh,MMG5_int *ked, MMG5_int *ktri, MMG5_int *ied,int *retval),
+             (MMG5_pMesh *mesh,MMG5_int *ked, MMG5_int *ktri, int *ied,int *retval),
              (mesh,ked,ktri,ied,retval)) {
 
   *retval = MMG2D_Get_triFromEdge(*mesh,*ked,ktri,ied);
@@ -119,7 +119,7 @@ FORTRAN_NAME(MMG2D_GET_TRIFROMEDGE,mmg2d_get_trifromedge,
  * See \ref MMG2D_Get_trisFromEdge function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRISFROMEDGE,mmg2d_get_trisfromedge,
-             (MMG5_pMesh *mesh,MMG5_int *ked, MMG5_int ktri[2], MMG5_int ied[2],int *retval),
+             (MMG5_pMesh *mesh,MMG5_int *ked, MMG5_int ktri[2], int ied[2],int *retval),
              (mesh,ked,ktri,ied,retval)) {
 
   *retval = MMG2D_Get_trisFromEdge(*mesh,*ked,ktri,ied);

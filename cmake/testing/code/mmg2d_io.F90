@@ -88,10 +88,11 @@ subroutine loadmesh(mesh,filename,by_array)
   character(len=*), intent(in)   :: filename
   integer, intent(in) :: by_array
 
-  INTEGER :: i,np,nc,ne,nt,nq,ier
+  INTEGER :: ier
+  MMG5F_INT :: i,np,nc,ne,nt,nq
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: vert
-  integer, dimension(:,:), allocatable :: edg,tri,quad
-  integer, dimension(:)  , allocatable :: vert_ref,corner,edg_ref,tri_ref,quad_ref
+  MMG5F_INT, dimension(:,:), allocatable :: edg,tri,quad
+  MMG5F_INT, dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref,corner
 
 
   !! Parse file
@@ -244,10 +245,12 @@ subroutine writemesh(mesh,filename,by_array)
   character(len=*), intent(in)   :: filename
   integer, intent(in) :: by_array
 
-  INTEGER :: k,np,nc,ne,nt,nq,inm=13,ier,nreq
+  MMG5F_INT :: k,np,nc,ne,nt,nq,nreq,zero_ikind
+  INTEGER :: inm=13,ier
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: vert
-  integer, dimension(:,:), allocatable :: edg,tri,quad
-  integer, dimension(:)  , allocatable :: vert_ref,corner,required,edg_ref,tri_ref,quad_ref
+  MMG5F_INT, dimension(:,:), allocatable :: edg,tri,quad
+  MMG5F_INT, dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref
+  INTEGER, DIMENSION(:), ALLOCATABLE :: corner,required
 
   !> a) get the size of the mesh: vertices, tetra, triangles, edges
   CALL MMG2D_Get_meshSize(mesh,np,nt,nq,ne,ier)
@@ -275,6 +278,7 @@ subroutine writemesh(mesh,filename,by_array)
   WRITE(inm,*) "Vertices"
   WRITE(inm,*) np
 
+  zero_ikind = 0;
   if ( 0== by_array ) then
      DO k=1, np
         !> b) Vertex recovering
@@ -317,19 +321,19 @@ subroutine writemesh(mesh,filename,by_array)
         IF ( required(k)/=0 )  nreq=nreq+1
      ENDDO
 
-     CALL MMG2D_Get_edges(mesh, edg, edg_ref,%val(0),%val(0),ier)
+     CALL MMG2D_Get_edges(mesh, edg, edg_ref,%val(zero_ikind),%val(zero_ikind),ier)
      IF ( ier /= 1 ) THEN
         print*, "Fail to get edges"
         CALL EXIT(102)
      ENDIF
 
-     CALL MMG2D_Get_triangles(mesh, tri, tri_ref,%val(0),ier)
+     CALL MMG2D_Get_triangles(mesh, tri, tri_ref,%val(zero_ikind),ier)
      IF ( ier /= 1 ) THEN
         print*, "Fail to get trias"
         CALL EXIT(102)
      ENDIF
 
-     CALL MMG2D_Get_quadrilaterals(mesh,quad,quad_ref,%val(0),ier)
+     CALL MMG2D_Get_quadrilaterals(mesh,quad,quad_ref,%val(zero_ikind),ier)
      IF ( ier /= 1 ) THEN
         print*, "Fail to get quads"
         CALL EXIT(102)

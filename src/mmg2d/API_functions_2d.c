@@ -1722,7 +1722,7 @@ int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
   return 1;
 }
 
-int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double *s) {
+int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1750,7 +1750,7 @@ int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double *s) {
   return 1;
 }
 
-int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double *s) {
+int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1778,7 +1778,7 @@ int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double *s) {
   return 1;
 }
 
-int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos) {
+int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1805,7 +1805,7 @@ int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_
   return 1;
 }
 
-int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double *s,MMG5_int pos) {
+int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double *s,MMG5_int pos) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */

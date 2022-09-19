@@ -851,7 +851,7 @@ MMG5_int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start,
   return nbpoi;
 }
 
-int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, MMG5_int *ied)
+int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, int *ied)
 {
   int val;
 
@@ -870,7 +870,7 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, MMG5_in
   return 1;
 }
 
-int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2], MMG5_int ied[2])
+int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2], int ied[2])
 {
   int ier,itri;
 #ifndef NDEBUG

@@ -816,7 +816,7 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   SUBROUTINE MMG2D_SET_TENSORSOL(met,m11,m12,m22,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: m11,m12,m22\n
- * >     INTEGER, INTENT(IN)           :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -855,13 +855,14 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     MMG5F_INT, INTENT(IN)                  :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos);
+  LIBMMG2D_EXPORT int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -877,13 +878,13 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s);
+  LIBMMG2D_EXPORT int MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /** recover datas */
 /**
@@ -965,7 +966,8 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   SUBROUTINE MMG2D_GET_VERTEX(mesh,c0,c1,ref,isCorner,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1\n
- * >     INTEGER                       :: ref,isCorner,isRequired\n
+ * >     MMG5F_INT                     :: ref\n
+ * >     INTEGER                       :: isCorner,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1042,8 +1044,9 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_TRIANGLE(mesh,v0,v1,v2,ref,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: v0,v1,v2\n
- * >     INTEGER                       :: ref,isRequired\n
+ * >     MMG5F_INT, INTENT(OUT)        :: v0,v1,v2\n
+ * >     MMG5F_INT                     :: ref\n
+ * >     INTEGER                       :: isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1319,13 +1322,14 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     MMG5F_INT, INTENT(IN)                  :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos);
+  LIBMMG2D_EXPORT int MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1341,13 +1345,13 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s);
+  LIBMMG2D_EXPORT int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 
 /**
@@ -2310,12 +2314,12 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   SUBROUTINE MMG2D_GET_TRIFROMEDGE(mesh,ked,ktri,ied,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                      :: ked\n
- * >     MMG5F_INT, INTENT(OUT)                     :: ktri,ied\n
- * >     INTEGER, INTENT(OUT)                       :: retval\n
+ * >     MMG5F_INT, INTENT(OUT)                     :: ktri\n
+ * >     INTEGER, INTENT(OUT)                       :: retval,ied\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, MMG5_int *ied);
+  LIBMMG2D_EXPORT int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, int *ied);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ked index of the boundary edge.
@@ -2334,12 +2338,12 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   SUBROUTINE MMG2D_GET_TRISFROMEDGE(mesh,ked,ktri,ied,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                      :: ked\n
- * >     MMG5F_INT, DIMENSION(2),INTENT(OUT)        :: ktri,ied\n
- * >     INTEGER, INTENT(OUT)                       :: retval\n
+ * >     MMG5F_INT, DIMENSION(2),INTENT(OUT)        :: ktri\n
+ * >     INTEGER, INTENT(OUT)                       :: retval,ied\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2], MMG5_int ied[2]);
+  LIBMMG2D_EXPORT int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2],int ied[2]);
 
 /**
  * \param m upper part of a symetric matric diagonalizable in |R

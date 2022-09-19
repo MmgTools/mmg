@@ -385,7 +385,7 @@ LIBMMGS_EXPORT int  MMGS_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5_INT, INTENT(IN)          :: v0,v1,ref,pos\n
+ * >     MMG5F_INT, INTENT(IN)          :: v0,v1,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -772,13 +772,14 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     MMG5F_INT, INTENT(IN)                  :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int  MMGS_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos);
+  LIBMMGS_EXPORT int  MMGS_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -794,13 +795,13 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int  MMGS_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s);
+  LIBMMGS_EXPORT int  MMGS_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /* check init */
 /**
@@ -1098,7 +1099,7 @@ LIBMMGS_EXPORT int  MMGS_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int
  * >   SUBROUTINE MMGS_GET_EDGE(mesh,e0,e1,ref,isRidge,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     MMG5F_INT, INTENT(OUT)        :: e0,e1\n
- * >     MMG5_INT                      :: ref\n
+ * >     MMG5F_INT                     :: ref\n
  * >     INTEGER                       :: isRidge,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1250,13 +1251,14 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     MMG5F_INT, INTENT(IN)                  :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMGS_EXPORT int  MMGS_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s,MMG5_int pos);
+ LIBMMGS_EXPORT int  MMGS_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1272,13 +1274,13 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
- * >     MMG5F_INT, INTENT(IN)                  :: i\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG5_int i, double* s);
+  LIBMMGS_EXPORT int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param iparam integer parameter to set (see \a MMGS_Param structure).
