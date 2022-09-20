@@ -107,8 +107,8 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
   MMG5_pPoint    p0,p1;
   double         len,lmax,o[3],hma2;
   double         *m1,*m2,*mp;
-  int            ilist,ier,src;
-  MMG5_int       ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2],iadr;
+  int            ilist,ier;
+  MMG5_int       src,ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2],iadr;
   int8_t         imax,i,i1,i2;
   static int8_t  mmgWarn0 = 0;
 
@@ -463,7 +463,7 @@ MMG5_int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG5_int *tetIdx
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
   MMG5_int     k,np;
-  int          idx;
+  MMG5_int     idx;
   int8_t       i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
@@ -573,7 +573,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int **invalidT
   int      itdc,itmn,maxitmn,maxitdc,iit,warn;
   MMG5_int nspl,ns,nm,nc,k;
   MMG5_int nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl;
-  int      ninvalidTets;
+  MMG5_int ninvalidTets;
   short    t,lastt;
   int8_t   ier;
 

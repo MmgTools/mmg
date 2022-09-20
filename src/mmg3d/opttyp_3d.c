@@ -472,9 +472,9 @@ MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,MM
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   double         crit;
-  int            ityp,cs[10],ds[10],item[2];
-  MMG5_int       k,ntot,ne;
-  int            ier,i,nd,npeau;
+  int            ityp,item[2];
+  MMG5_int       k,ntot,ne,nd,cs[10],ds[10];
+  int            ier,i,npeau;
   int            it,maxit;
 //  double         OCRIT = 1.01;
   MMG5_int       nbdy,nbdy2,base ;
@@ -489,8 +489,8 @@ MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,MM
     ne = mesh->ne;
     nd = 0;
     nbdy = nbdy2 = 0;
-    memset(cs,0,10*sizeof(int));
-    memset(ds,0,10*sizeof(int));
+    memset(cs,0,10*sizeof(MMG5_int));
+    memset(ds,0,10*sizeof(MMG5_int));
 
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];

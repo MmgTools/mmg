@@ -445,8 +445,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
   MMG5_hedge    *ph;
   MMG5_int       *adja,nump,k,k1;
   int            ns,ilist,cur;
-  MMG5_int       list[MMG3D_LMAX+2],base,ia,ib,a,b;
-  int            key,jj;
+  MMG5_int       list[MMG3D_LMAX+2],base,ia,ib,a,b,key,jj;
   int8_t         j,l,i;
   uint8_t        ie;
 
@@ -932,8 +931,8 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
   MMG5_pPoint          ppt;
   MMG5_int             k,*adja,*list1,*list2,aux;
   MMG5_int             na, nb, piv,lists[MMG3D_LMAX+2], base;
+  MMG5_int             idp, fstart, nvstart, adj;
   int                  ilists, iopp, ipiv,*ilist1,*ilist2;
-  int                  idp, fstart, nvstart, adj;
   int                  ifac,idx,idx2,idx_tmp,i1,isface;
   double               *n1,*n2,nt[3],ps1,ps2;
   int8_t               i;

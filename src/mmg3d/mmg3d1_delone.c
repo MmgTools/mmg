@@ -70,13 +70,13 @@ int8_t  ddb;
  */
 static inline int
 MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_int ne,
-                 int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn,int it) {
+                 MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn,int it) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
-  double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+  double        len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int           ilist,ilists;
   MMG5_int      src,k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],ref,base;
   int16_t       tag;
@@ -916,9 +916,9 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  */
 static int
 MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
-  int        nfilt,ifilt,ier;
+  int        ier;
   int        it,maxit,noptim;
-  MMG5_int   ns,nc,ne,nnm,nm,nnf,nf,nnc,nns;
+  MMG5_int   ns,nc,ne,nnm,nm,nnf,nf,nnc,nns,nfilt,ifilt;
   double     maxgap,dd,declic,declicsurf;
 
   /* Iterative mesh modifications */
@@ -989,7 +989,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
 
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nm+nf > 0)
-      fprintf(stdout,"     %8d filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
+      fprintf(stdout,"     %8"MMG5_PRId" filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
               " %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ifilt,ns,nc,nf,nm);
 
     /*optimization*/
@@ -1011,7 +1011,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
-      fprintf(stdout,"     %8d filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
+      fprintf(stdout,"     %8"MMG5_PRId" filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
               " %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter.\n",nfilt,nns,nnc,nnf,nnm, it);
     }
   }

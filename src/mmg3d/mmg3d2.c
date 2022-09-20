@@ -1131,7 +1131,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 #endif
       np = MMG3D_newPt(mesh,c,0,src);
       if ( !np ) {
-        int oldnpmax = mesh->npmax;
+        MMG5_int oldnpmax = mesh->npmax;
         MMG3D_POINT_REALLOC(mesh,sol,np,MMG5_GAP,
                              fprintf(stderr,"\n  ## Error: %s: unable to"
                                      " allocate a new point\n",__func__);
@@ -1666,7 +1666,8 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  */
 int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndepmin,MMG5_int ndepplus,MMG5_int refmin,MMG5_int refplus,int8_t isminp,int8_t isplp) {
   MMG5_pTetra    pt,pt1;
-  int            ilist,cur,stor;
+  int            ilist,cur;
+  MMG5_int       stor;
   MMG5_int       ref,nump,numq,list[MMG3D_LMAX+2],*adja,*adja1,iel,jel,ndepmq,ndeppq,base;
   int8_t         i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 

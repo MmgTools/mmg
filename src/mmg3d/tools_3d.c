@@ -39,7 +39,7 @@
 extern int8_t ddb;
 
 /** Return 1 if reference ref is in the br table, 0 otherwise */
-int MMG5_isbr(MMG5_pMesh mesh,int ref) {
+int MMG5_isbr(MMG5_pMesh mesh,MMG5_int ref) {
   int k;
 
   for(k=0; k<mesh->info.nbr; k++)

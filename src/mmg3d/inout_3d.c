@@ -2627,7 +2627,7 @@ int MMG3D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTetra       pt;
   MMG5_int          k,i,ne;
-  int               idx;
+  MMG5_int          idx;
   char              *ptr,*data;
 
   if ( !mesh->na ) {
@@ -2690,7 +2690,7 @@ int MMG3D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
       for ( i=1; i<=mesh->dim+1; ++i ) {
         /* The triangle conventions is that no neighbors <=> -1 */
         idx = ( mesh->adja[4*(k-1)+i] > 0 ) ? mesh->adja[4*(k-1)+i]/4 : -1;
-        fprintf(inm, "%d ",idx);
+        fprintf(inm, "%"MMG5_PRId" ",idx);
       }
       /* Save bdy marker */
       fprintf(inm, "\n");

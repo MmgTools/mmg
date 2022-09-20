@@ -219,9 +219,9 @@ inline double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  *
  */
 int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
-                         double* lmin, double* lmax, int* ned, MMG5_int* amin,
+                         double* lmin, double* lmax, MMG5_int* ned, MMG5_int* amin,
                          MMG5_int* bmin, MMG5_int* amax,
-                         MMG5_int* bmax, int* nullEdge, int8_t metRidTyp,
+                         MMG5_int* bmax, MMG5_int* nullEdge, int8_t metRidTyp,
                          double** bd_in, MMG5_int hl[9] )
 {
   MMG5_pTetra     pt;
@@ -341,7 +341,7 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
 int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
   return 1;
   double     avlen, lmin, lmax;
-  int        ned, nullEdge;
+  MMG5_int   ned, nullEdge;
   MMG5_int   amin, bmin, amax, bmax, hl[9];
   double     *bd;
 
@@ -375,7 +375,7 @@ int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
  *
  */
 void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,double *avg,
-                         double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,int his[5],int imprim) {
+                         double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,MMG5_int his[5],int imprim) {
   MMG5_pTetra    pt;
   double         rap;
   MMG5_int       k,ok,nex;
@@ -459,7 +459,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,
  *
  */
 int MMG3D_displayQualHisto(MMG5_int ne,double max,double avg,double min,MMG5_int iel,
-                           MMG5_int good,MMG5_int med,int his[5],MMG5_int nrid,int optimLES,
+                           MMG5_int good,MMG5_int med,MMG5_int his[5],MMG5_int nrid,int optimLES,
                            int imprim) {
 
   fprintf(stdout,"\n  -- MESH QUALITY");
@@ -493,7 +493,7 @@ int MMG3D_displayQualHisto(MMG5_int ne,double max,double avg,double min,MMG5_int
  *
  */
 int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min,MMG5_int iel,
-                                    MMG5_int good,MMG5_int med,int his[5],MMG5_int nrid,int optimLES,
+                                    MMG5_int good,MMG5_int med,MMG5_int his[5],MMG5_int nrid,int optimLES,
                                     int imprim)
 {
   const double les_ticks[6] = {0,0.6,0.9,0.93,0.99,1};
@@ -510,7 +510,7 @@ int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min
         assert ( min >= max );
         for ( i=0; i<5; ++i ) {
           if ( max < les_ticks[i+1] && min >= les_ticks[i] ) {
-            fprintf(stdout,"     %5.2f < Q < %5.2f   %7d   %6.2f %%\n",
+            fprintf(stdout,"     %5.2f < Q < %5.2f   %7"MMG5_PRId"   %6.2f %%\n",
                     les_ticks[i],les_ticks[i+1],his[i],
                     100.*((float)his[i]/(float)ne));
           }
@@ -526,7 +526,7 @@ int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min
         fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( (float)med/(float)ne));
         imax = MG_MIN(4,(int)(5.*max));
         for (i=imax; i>=(int)(5*min); i--) {
-          fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+          fprintf(stdout,"     %5.1f < Q < %5.1f   %7"MMG5_PRId"   %6.2f %%\n",
                   i/5.,i/5.+0.2,his[i],100.*((float)his[i]/(float)ne));
         }
         if ( nrid ) {
@@ -558,7 +558,7 @@ int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min
  *
  */
 void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,double *avg,
-                        double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,int his[5],int imprim) {
+                        double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,MMG5_int his[5],int imprim) {
   MMG5_pTetra   pt;
   double        rap;
   MMG5_int      k,ok,nex;
@@ -631,8 +631,8 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,d
  */
 int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
-  int         k,his[5];
-  MMG5_int    med,good,iel,ne;
+  int         k;
+  MMG5_int    med,good,iel,ne,his[5];
 
   ne = iel = good = med = 0;
   for ( k=0; k<5; ++k ) {
@@ -679,7 +679,7 @@ int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,double *avg,
-                         double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,int his[5],
+                         double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,MMG5_int his[5],
                          MMG5_int *nrid,int imprim) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
@@ -765,7 +765,8 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
   double      rapmin,rapmax,rapavg;
-  int         k,his[5];
+  int         k;
+  MMG5_int    his[5];
   MMG5_int    med,good,iel,ne,nrid;
 
   nrid = ne = iel = good = med = 0;

@@ -347,7 +347,7 @@ void MMG5_freeXTets(MMG5_pMesh mesh) {
  */
 void MMG5_freeXPrisms(MMG5_pMesh mesh) {
   MMG5_pPrism pp;
-  int    k;
+  MMG5_int    k;
 
   for (k=1; k<=mesh->nprism; k++) {
     pp      = &mesh->prism[k];

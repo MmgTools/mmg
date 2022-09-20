@@ -357,19 +357,19 @@ int MMG5_lapantilap(MMG5_pMesh,double *);
 int MMG5_ppgdisp(MMG5_pMesh,double *);
 int MMG5_denoisbdy(MMG5_pMesh);
 int MMG3D_displayQualHisto(MMG5_int,double,double,double,MMG5_int,MMG5_int,MMG5_int,
-                           int his[5],MMG5_int,int,int);
+                           MMG5_int his[5],MMG5_int,int,int);
 int MMG3D_displayQualHisto_internal(MMG5_int,double,double,double,MMG5_int,MMG5_int,MMG5_int,
-                                    int his[5],MMG5_int,int,int);
+                                    MMG5_int his[5],MMG5_int,int,int);
 void MMG3D_computeInqua(MMG5_pMesh,MMG5_pSol,MMG5_int*,double*,double*,double*,MMG5_int*,MMG5_int*,
-                        MMG5_int*,int his[5],int);
+                        MMG5_int*,MMG5_int his[5],int);
 int  MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeOutqua(MMG5_pMesh,MMG5_pSol,MMG5_int*,double*,double*,double*,MMG5_int*,MMG5_int*,
-                         MMG5_int*,int his[5],MMG5_int*,int);
+                         MMG5_int*,MMG5_int his[5],MMG5_int*,int);
 int  MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,MMG5_int*,double*,double*,double*,MMG5_int*,MMG5_int*,
-                         MMG5_int*,int his[5],int);
-int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,int*,MMG5_int*,MMG5_int*,
-                        MMG5_int*,MMG5_int*,int*,int8_t,double**, MMG5_int [9] );
+                         MMG5_int*,MMG5_int his[5],int);
+int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,MMG5_int*,MMG5_int*,MMG5_int*,
+                        MMG5_int*,MMG5_int*,MMG5_int*,int8_t,double**, MMG5_int [9] );
 int  MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,int8_t);
 int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);
 int  MMG5_intregmet(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,double, double*);
@@ -393,7 +393,7 @@ int  MMG3D_printEigenv(double dm[3],double vp[3][3]);
 /* rmc option */
 double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
 int    MMG3D_rmc(MMG5_pMesh ,MMG5_pSol );
-int    MMG5_isbr(MMG5_pMesh ,int );
+int    MMG5_isbr(MMG5_pMesh ,MMG5_int );
 
 
 /* tools_3d.c */

@@ -2196,8 +2196,8 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
   int           it,itv,maxit;
-  int           i,j,npmaster,npslave,ier;
-  MMG5_int      nup,nu,nupv,k,np0,np1;
+  int           i,j,ier;
+  MMG5_int      nup,nu,nupv,k,np0,np1,npmaster,npslave;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ** Grading required points.\n");

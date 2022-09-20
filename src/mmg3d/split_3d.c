@@ -510,7 +510,7 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,MMG5_int *list,MM
   MMG5_pTetra          pt,pt1;
   MMG5_xTetra          xt,xt1;
   MMG5_pxTetra         pxt0;
-  int                  iel;
+  MMG5_int             iel;
   MMG5_int             jel;
   int8_t               ie,isxt,isxt1,i;
   const uint8_t       *taued;
@@ -1133,7 +1133,8 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
 static inline
 int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,MMG5_int *newtet,
                         MMG5_pTetra *pt,MMG5_xTetra *xt,MMG5_pxTetra *pxt0) {
-  int       iel,i,j;
+  MMG5_int       iel;
+  int            i,j;
 
   /* The first tetra is the one that is splitted so it already exists */
   for ( i=1; i<ne; ++i ) {
@@ -4696,8 +4697,8 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
                     MMG5_int* list,int ret,double crit) {
   MMG5_pTetra   pt0,pt1;
   double        cal,critloc;
-  int           l,na,ipb,lon;
-  MMG5_int      jel;
+  int           l,ipb,lon;
+  MMG5_int      jel,na;
 
   lon = ret/2;
   critloc = 1.;

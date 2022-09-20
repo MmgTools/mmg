@@ -145,10 +145,10 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int ili
   MMG5_pxTetra  pxt0;
   MMG5_int      base,*adja,*adjb,iel,jel,old,v[3],iadr;
   int           i,j,k,l,m,size;
-  MMG5_int      vois[4],iadrold;
+  MMG5_int      vois[4],iadrold,ielnum[3*MMG3D_LONMAX+1];
   short         i1;
   char          alert;
-  int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1];
+  int           isused = 0,ixt;
   MMG5_Hash     hedg;
 #ifndef NDEBUG
   MMG5_int      tref;

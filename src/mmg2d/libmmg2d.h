@@ -972,8 +972,8 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG5_int* ref,
-                        int* isCorner, int* isRequired);
+  LIBMMG2D_EXPORT int  MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG5_int* ref,
+                                        int* isCorner, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first dimension.
@@ -1051,8 +1051,9 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref
-                         ,int* isRequired);
+  LIBMMG2D_EXPORT int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0,
+                                         MMG5_int* v1, MMG5_int* v2, MMG5_int* ref
+                                         ,int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the triangles vertices
