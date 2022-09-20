@@ -347,7 +347,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
                            int8_t ptMeditRef,int8_t eltMeditRef,int nsols) {
   vtkSmartPointer<vtkDataArray> ptar = NULL, car = NULL;
   int                           ier;
-  MMG5_int                      nref = 0; 
+  MMG5_int                      nref = 0;
   static int8_t                 mmgWarn1 = 0;
 
   // Point transfers in Mmg data structure
@@ -361,10 +361,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     // Check that we get 1 data only
     assert ( ptar->GetNumberOfComponents() == 1 );
 
-    int np = ptar->GetNumberOfTuples();
+    MMG5_int np = ptar->GetNumberOfTuples();
     if ( np != mesh->np ) {
-      printf( "  ## Error: Point data size (%d) differs from the number of"
-              " vertices (%d)\n",np,mesh->np);
+      printf( "  ## Error: Point data size (%" MMG5_PRId ") differs from the number of"
+              " vertices (%" MMG5_PRId ")\n",np,mesh->np);
       return -1;
     }
     // read vertices and vertices refs
@@ -398,12 +398,12 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
   assert ( (mesh->npi == mesh->np) || !mesh->npi );
 
   mesh->npi = 0;
-  int nqi   = 0;
-  int npri  = 0;
-  int na    = 0;
-  int nbl_a = 0;
-  int nt    = 0;
-  int nbl_t = 0;
+  MMG5_int nqi   = 0;
+  MMG5_int npri  = 0;
+  MMG5_int na    = 0;
+  MMG5_int nbl_a = 0;
+  MMG5_int nt    = 0;
+  MMG5_int nbl_t = 0;
 
   // Get pointer toward cells data containing element refs
   vtkIdType numCells = (*dataset)->GetNumberOfCells();
@@ -417,9 +417,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     // Check that we get 1 data only
     assert ( car->GetNumberOfComponents() == 1 );
 
-    int ne = car->GetNumberOfTuples();
+    MMG5_int ne = car->GetNumberOfTuples();
     if ( ne != numCells ) {
-      printf( "  ## Error: Cell data size (%d) differs from the number of"
+      printf( "  ## Error: Cell data size (%" MMG5_PRId ") differs from the number of"
               " cells (%lld)\n",ne,numCells);
       return -1;
     }
@@ -663,8 +663,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           psl->np = ar->GetNumberOfTuples();
           if ( mesh->np != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
-                    "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
-                    "THE SOLUTION (%d) \n",mesh->np,psl->np);
+                    "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF VERTICES IN "
+                    "THE SOLUTION (%" MMG5_PRId ") \n",mesh->np,psl->np);
             return -1;
           }
 
@@ -705,8 +705,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
           switch ( psl->type ) {
           case ( 1 ): case ( 2 ):
-            for (int k=1; k<=psl->np; k++) {
-              int iadr = k*psl->size;
+            for (MMG5_int k=1; k<=psl->np; k++) {
+              MMG5_int iadr = k*psl->size;
               ar->GetTuple ( k-1, &psl->m[iadr] );
             }
             break;
@@ -715,9 +715,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
             // anisotropic sol
             double dbuf[9];
 
-            for (int k=1; k<=psl->np; k++) {
+            for (MMG5_int k=1; k<=psl->np; k++) {
               ar->GetTuple ( k-1, dbuf );
-              int iadr = psl->size*k;
+              MMG5_int iadr = psl->size*k;
 
               if ( !metricData ) {
                 // Non symmetric tensor
@@ -795,8 +795,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           psl->np = ar->GetNumberOfTuples();
           if ( numCells != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
-                    "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
-                    "THE SOLUTION (%d) \n",mesh->ne,psl->np);
+                    "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF CELLS DATA IN "
+                    "THE SOLUTION (%" MMG5_PRId ") \n",mesh->ne,psl->np);
             return -1;
           }
 
@@ -831,8 +831,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
           switch ( psl->type ) {
           case ( 1 ): case ( 2 ):
-            for (int k=1; k<=psl->np; k++) {
-              int iadr = k*psl->size;
+            for (MMG5_int k=1; k<=psl->np; k++) {
+              MMG5_int iadr = k*psl->size;
               ar->GetTuple ( k-1, &psl->m[iadr] );
             }
             break;
@@ -841,9 +841,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
             // anisotropic sol
             double dbuf[9];
 
-            for (int k=1; k<=psl->np; k++) {
+            for (MMG5_int k=1; k<=psl->np; k++) {
               ar->GetTuple ( k-1, dbuf );
-              int iadr = psl->size*k;
+              MMG5_int iadr = psl->size*k;
 
               // Non symmetric tensor
               if ( psl->dim ==2 ) {
