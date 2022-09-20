@@ -293,7 +293,7 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG5_int ned, double *avlen,
  */
 void MMG5_displayLengthHisto_internal( MMG5_int ned,MMG5_int amin,
                                        MMG5_int bmin, double lmin,MMG5_int amax, MMG5_int bmax,
-                                       double lmax,int nullEdge,double *bd,
+                                       double lmax,MMG5_int nullEdge,double *bd,
                                        MMG5_int *hl,int8_t shift,int imprim)
 {
   int    k;
@@ -323,7 +323,7 @@ void MMG5_displayLengthHisto_internal( MMG5_int ned,MMG5_int amin,
                 hl[8],100.*(hl[8]/(float)ned));
     }
     if ( nullEdge )
-      fprintf(stdout,"\n     WARNING: unable to compute the length of %d"
+      fprintf(stdout,"\n     WARNING: unable to compute the length of %"MMG5_PRId
               " edges\n",nullEdge);
   }
 }

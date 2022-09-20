@@ -112,24 +112,8 @@ void MMG2D_excfun(int sigid) {
   exit(EXIT_FAILURE);
 }
 
-typedef struct squeue {
-  int    *stack,cur;
-} Queue;
-typedef Queue * pQueue;
-
-typedef struct {
-  int     size;
-  int    *head;
-  int    *link;
-} Bucket;
-typedef Bucket * pBucket;
-
-
 static const int MMG2D_iare[3][2] = {{1,2},{2,0},{0,1}};
-static const int MMG2D_iopp[3][2] = {{1,2},{0,2},{0,1}};
 static const unsigned int MMG2D_idir[5] = {0,1,2,0,1};
-static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
-
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
@@ -196,7 +180,6 @@ void MMG2D_delPt(MMG5_pMesh mesh,MMG5_int ip) ;
 void MMG5_delEdge(MMG5_pMesh mesh,MMG5_int iel);
 MMG5_int MMG2D_newElt(MMG5_pMesh mesh);
 int  MMG2D_delElt(MMG5_pMesh mesh,MMG5_int iel);
-int MMG5_getnElt(MMG5_pMesh mesh,MMG5_int n);
 int MMG2D_zaldy(MMG5_pMesh mesh);
 size_t MMG5_memSize(void);
 int MMG2D_memOption(MMG5_pMesh mesh);
@@ -229,12 +212,6 @@ int MMG2D_locateEdge(MMG5_pMesh ,MMG5_int ,MMG5_int ,MMG5_int* ,MMG5_int* ) ;
 int MMG2D_bdryenforcement(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_settagtriangles(MMG5_pMesh ,MMG5_pSol );
 MMG5_int MMG2D_findtrianglestate(MMG5_pMesh ,MMG5_int ,MMG5_int ,MMG5_int ,MMG5_int ,MMG5_int ,MMG5_int );
-
-pQueue MMG2D_kiuini(MMG5_pMesh mesh,int nbel,double declic,MMG5_int base);
-void MMG2D_kiufree(pQueue q);
-int MMG2D_kiudel(pQueue q,int iel);
-int MMG2D_kiuput(pQueue q,int iel);
-int MMG2D_kiupop(pQueue q);
 
 int MMG2D_baseBdry(MMG5_pMesh mesh);
 

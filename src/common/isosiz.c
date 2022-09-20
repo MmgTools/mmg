@@ -128,7 +128,7 @@ void MMG5_gradation_info ( MMG5_pMesh mesh ) {
  */
 int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip0,MMG5_int ip1 ) {
   MMG5_pPoint p0,p1;
-  MMG5_int    j;
+  int    j;
   double      len,dist;
 
   /* Compute the euclidean edge length */
@@ -203,8 +203,8 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
  */
 int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pTria  pt;
-  int         i,j,iad0,iad1;
-  MMG5_int    k,ip0,ip1;
+  int         i,j;
+  MMG5_int    k,ip0,ip1,iad0,iad1;
 
   if ( ismet ) {
     for ( k=1; k<=mesh->nt; k++ ) {
@@ -279,7 +279,8 @@ int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,h1,h2,hn,val;
-  int               it,maxit,nup,nu;
+  int               it,maxit;
+  MMG5_int          nup,nu;
   MMG5_int          ip1,ip2,k;
   int8_t            i,j,i1,i2;
 
@@ -295,7 +296,8 @@ int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   hgrad = mesh->info.hgrad;
-  it = nup = 0;
+  it = 0;
+  nup = 0;
   maxit = 100;
 
   do {
@@ -351,7 +353,7 @@ int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation: %7"MMG5_PRId" updated, %d iter.\n",nup,it);
   }
 
   return 1;

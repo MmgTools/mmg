@@ -517,20 +517,20 @@ typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
+  MMG5_int      *br; /*!< list of based references to which an implicit surface can be attached */
+  MMG5_int      isoref; /*!< isovalue reference in ls mode */
+  MMG5_int      nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   int           mem,npar,npari;
   int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
-  int           *br; /*!< list of based references to which an implicit surface can be attached */
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */
   int           nmati,nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
-  int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   int8_t        nreg; /*!< normal regularization */
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
-  int           isoref; /*!< isovalue reference in ls mode */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
@@ -602,8 +602,8 @@ typedef struct {
   int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
   MMG5_int  npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  MMG5_int  nquad,nprism; /* number of quadrangles and prisms */
-  int       nsols; /* number of solutions (metric excluded) in the solution file */
+  MMG5_int  nquad,nprism; /*!< number of quadrangles and prisms */
+  int       nsols; /*!< number of solutions (metric excluded) in the solution file (lower than \a NSOLS_MAX)*/
   MMG5_int  nc1;
   MMG5_int  base; /*!< Used with \a flag to know if an entity has been
                     treated */

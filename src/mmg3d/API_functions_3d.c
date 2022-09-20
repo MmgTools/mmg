@@ -1928,8 +1928,8 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
   MMG5_int    k;
 
   if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-    fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %d reference.\n",
-            __func__,mesh->info.isoref);
+    fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %"MMG5_PRId
+            " reference.\n",__func__,mesh->info.isoref);
 
   /* Skip triangles with mesh->info.isoref refs */
   k = 1;
@@ -2238,7 +2238,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
                  printf("  Exit program.\n");
                  return 0);
-    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,MMG5_int,return 0);
 
     for (k=0; k<mesh->info.nbr; k++)
       mesh->info.br[k] = 0;

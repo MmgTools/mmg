@@ -287,7 +287,7 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
  * coor \a c of the curve edge's mid-point for a regular or reference point.
  *
  */
-void MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, MMG5_Bezier b,
+void MMG5_fillDefmetregSys( MMG5_int k, MMG5_pPoint p0, int i0, MMG5_Bezier b,
                              double r[3][3], double c[3],
                              double *lispoi,
                              double tAA[6], double tAb[3] )
@@ -2259,11 +2259,11 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
  * Standard gradation procedure.
  *
  */
-int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
+MMG5_int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
-  int          nup,nu,maxit,ier;
-  MMG5_int     k,np1,np2;
+  int          maxit;
+  MMG5_int     ier,k,np1,np2,nup,nu;
   int8_t       i;
 
   /** Mark the edges belonging to a required entity */
@@ -2307,7 +2307,7 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
   while( ++(*it) < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,(*it));
+    fprintf(stdout,"     gradation: %7"MMG5_PRId" updated, %d iter.\n",nup,(*it));
 
   return nup;
 }
@@ -2326,8 +2326,8 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
-  int               it,maxit,nup,nu,ier;
-  MMG5_int          k,np1,np2,npslave,npmaster;
+  int               it,maxit,ier;
+  MMG5_int          k,np1,np2,npslave,npmaster,nup,nu;
   int8_t            i;
 
 
@@ -2386,7 +2386,7 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 && nup ) {
-    fprintf(stdout,"     gradation (required): %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation (required): %7"MMG5_PRId" updated, %d iter.\n",nup,it);
   }
 
   return 1;

@@ -58,13 +58,13 @@
 int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1,pt2;
   MMG5_hedge     *ph;
-  int            kk;
+  MMG5_int       kk;
   MMG5_int       *adja,hmax,k,ia,ib,jel,lel,dup,nmf;
   int8_t         i,i1,i2,j,l;
-  unsigned int   key;
+  MMG5_int       key;
 
   /* adjust hash table params */
-  hmax =(int)(3.71*mesh->np);
+  hmax =(MMG5_int)(3.71*mesh->np);
   hash->siz  = mesh->np;
   hash->max  = hmax + 1;
   hash->nxt  = hash->siz;

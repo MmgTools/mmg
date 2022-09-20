@@ -766,7 +766,7 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
 
 MMG5_int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_LMAX])
 {
-  int start;
+  MMG5_int start;
 
   if ( !mesh->tria ) return 0;
 
@@ -853,7 +853,7 @@ MMG5_int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start,
 
 int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, int *ied)
 {
-  int val;
+  MMG5_int val;
 
   val = mesh->edge[ked].base;
 
@@ -872,9 +872,10 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, int *ie
 
 int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2], int ied[2])
 {
-  int ier,itri;
+  int ier;
+  MMG5_int itri;
 #ifndef NDEBUG
-  int ia0,ib0,ia1,ib1;
+  MMG5_int ia0,ib0,ia1,ib1;
 #endif
 
   ktri[0]  =  ktri[1] = 0;

@@ -124,9 +124,9 @@ double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2
 /* print histo of edge lengths */
 int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
-  double        lavg,len,ecart,som,lmin,lmax;
-  int           navg,ia,ipa,ipb,nullEdge;
-  MMG5_int      iamin,ibmin,iamax,ibmax,hl[9];
+  double        lavg,len,lmin,lmax;
+  int           ia,ipa,ipb;
+  MMG5_int      iamin,ibmin,iamax,ibmax,hl[9],nullEdge,navg;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   MMG5_int      k,l;
 
@@ -134,7 +134,6 @@ int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   lavg  = 0.0;
   lmin  = 1.e20;
   lmax  = 0.0;
-  som   = 0.0;
   iamin = 0;
   ibmin = 0;
   iamax = 0;
@@ -160,13 +159,7 @@ int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
         len = MMG2D_lencurv_iso(mesh,sol,pt->v[ipa],pt->v[ipb]);
 
       navg++;
-      ecart = len;
       lavg += len;
-
-      /* update efficiency index */
-      if ( ecart > 1.0 )  ecart = 1.0 / ecart;
-
-      som  += (ecart - 1.0);
 
       /* find largest, smallest edge */
       if (len < lmin) {

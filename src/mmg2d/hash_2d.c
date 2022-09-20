@@ -335,7 +335,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
-  int             ia;
+  MMG5_int        ia;
   MMG5_int        k;
   int8_t          ier;
   uint8_t         i,i1,i2;

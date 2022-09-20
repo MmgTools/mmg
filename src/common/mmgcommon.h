@@ -356,15 +356,15 @@ size_t myfree(void *ptr) {
     if reallocation failed. Memset to 0 for the new values of table. */
 #define MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
   {                                                                     \
-    int    gap;                                                         \
+    MMG5_int    gap;                                                    \
                                                                         \
     assert ( mesh->memCur < mesh->memMax );                             \
                                                                         \
-    gap = (int)(wantedGap * initSize);                                  \
+    gap = (MMG5_int)(wantedGap * initSize);                             \
     if ( !gap ) gap     = 1;                                            \
                                                                         \
     if ( mesh->memMax < mesh->memCur + gap*sizeof(type) ) {             \
-      gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
+      gap = (MMG5_int)((mesh->memMax-mesh->memCur)/sizeof(type));       \
       if(gap<1) {                                                       \
         fprintf(stderr,"  ## Error:");                                  \
         fprintf(stderr," unable to allocate %s.\n",message);            \
@@ -578,7 +578,7 @@ typedef struct MMG5_iNode_s {
 
 /* Functions declarations */
  void          MMG5_version(MMG5_pMesh,char*);
- extern void MMG5_nsort(int ,double *,int8_t *);
+ extern void MMG5_nsort(int8_t ,double *,int8_t *);
  extern void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm);
  extern double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
  extern double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
@@ -612,14 +612,14 @@ typedef struct MMG5_iNode_s {
  void          MMG5_displayLengthHisto(MMG5_pMesh,MMG5_int,double*,MMG5_int,MMG5_int,double,
                                         MMG5_int,MMG5_int,double,int,double*,MMG5_int*,int8_t);
  void          MMG5_displayLengthHisto_internal( MMG5_int,MMG5_int,MMG5_int,double,
-                                                 MMG5_int,MMG5_int,double, int,double*,
+                                                 MMG5_int,MMG5_int,double, MMG5_int,double*,
                                                  MMG5_int*,int8_t,int);
  short         MMG5_dikmov(MMG5_pMesh,MMG5_pSol,short*,short,
                            MMG5_int chkmovmesh(MMG5_pMesh,MMG5_pSol,short,MMG5_int*));
  int           MMG5_minQualCheck ( MMG5_int iel, double minqual, double alpha );
  int           MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                                    MMG5_Bezier*,double r[3][3],double gv[2]);
- void          MMG5_fillDefmetregSys( int, MMG5_pPoint, int, MMG5_Bezier,double r[3][3],
+ void          MMG5_fillDefmetregSys( MMG5_int, MMG5_pPoint, int, MMG5_Bezier,double r[3][3],
                                        double *, double *, double *, double *);
  void          MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi );
  MMG5_int      MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_int,MMG5_int);
@@ -720,7 +720,7 @@ int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t );
 void MMG5_mark_pointsOnReqEdge_fromTria ( MMG5_pMesh mesh );
 int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
 int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
-int  MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it);
+MMG5_int  MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it);
 int  MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int  MMG5_simred2d(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
 int  MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],double dn[3],double vp[3][3]);

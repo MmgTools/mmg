@@ -50,12 +50,7 @@
 
 #define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);return e;}
 
-typedef struct MeshGraphHash_ {
-  int vertNum;
-  int vertEnd;
-} MeshGraphHash;
-
-int    _SCOTCHintSort2asc1(SCOTCH_Num * sortPartTb, int vertNbr);
+int    _SCOTCHintSort2asc1(SCOTCH_Num * sortPartTb, MMG5_int vertNbr);
 int    MMG5_kPartBoxCompute(SCOTCH_Graph*, MMG5_int, MMG5_int, SCOTCH_Num*,MMG5_pMesh);
 void   MMG5_swapNod(MMG5_pMesh,MMG5_pPoint, double*, MMG5_pSol,MMG5_int*, MMG5_int, MMG5_int, int);
 

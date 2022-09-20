@@ -35,6 +35,10 @@
 
 #include "mmgcommon.h"
 
+/**
+ * swap bytes if needed (conversion from big/little endian toward little/big
+ * endian)
+ */
 int MMG5_swapbin(int sbin)
 {
   int inv;
@@ -48,22 +52,18 @@ int MMG5_swapbin(int sbin)
   p[3] = p_in[0];
 
   return inv;
-  /*unsigned char c1, c2, c3, c4;
-
-    c1 = sbin & 255;
-    c2 = (sbin >> 8) & 255;
-    c3 = (sbin >> 16) & 255;
-    c4 = (sbin >> 24) & 255;
-
-    return ((int)c1 << 24) + ((int)c2 << 16) + ((int)c3 << 8) + c4;   */
-
 }
+
+/**
+ * swap bytes if needed (conversion from big/little endian toward little/big
+ * endian)
+ */
 MMG5_int MMG5_swapbin_int(MMG5_int sbin)
 {
   MMG5_int out;
-  char *p_in = (char *) &sbin;
-  char *p_out = (char *) &out;
-  int i;
+  char     *p_in = (char *) &sbin;
+  char     *p_out = (char *) &out;
+  int8_t   i;
 
   for(i=0;i<8;i++)
   {
@@ -72,6 +72,11 @@ MMG5_int MMG5_swapbin_int(MMG5_int sbin)
 
   return out;
 }
+
+/**
+ * swap bytes if needed (conversion from big/little endian toward little/big
+ * endian)
+ */
 float MMG5_swapf(float sbin)
 {
   float out;
@@ -84,12 +89,17 @@ float MMG5_swapf(float sbin)
 
   return out;
 }
+
+/**
+ * swap bytes if needed (conversion from big/little endian toward little/big
+ * endian)
+ */
 double MMG5_swapd(double sbin)
 {
   double out;
-  char *p_in = (char *) &sbin;
-  char *p_out = (char *) &out;
-  int i;
+  char   *p_in = (char *) &sbin;
+  char   *p_out = (char *) &out;
+  int8_t i;
 
   for(i=0;i<8;i++)
   {
@@ -652,8 +662,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   MMG5_pSol     psl;
   double        dbuf[9];
   float         fbuf[9],fc;
-  int           i,iadr,ier;
-  MMG5_int      l,nref,nbl_t,nbl_a,k,v[4],nt,na,nq,ne,npr,idx,ref,num;
+  int           i,ier;
+  MMG5_int      l,nref,nbl_t,nbl_a,k,v[4],nt,na,nq,ne,npr,idx,ref,num,iadr;
   int           typ,tagNum;
   int           isol;
   int8_t        metricData;

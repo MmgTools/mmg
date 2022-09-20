@@ -30,7 +30,7 @@
 @DEF_POSIX@
 @DEF_GNU@
 
-@DEF_MMG_INT@ /*!< Integer type for C */
+@DEF_MMG5_INT@ /*!< Integer type for C */
 
 @DEF_MMG5_PRId@ /*!< Printing format for MMG5_int type */
 

@@ -111,7 +111,7 @@ short MMG5_dikmov ( MMG5_pMesh mesh,MMG5_pSol disp,short *lastt,short shortmax,
  */
 int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
-  int         k;
+  MMG5_int    k;
   char        data[256],*ptr;
 
   strcpy(data,disp->namein);

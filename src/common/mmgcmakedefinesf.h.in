@@ -24,6 +24,6 @@
 #ifndef MMGCMAKEDEFINEF_H
 #define MMGCMAKEDEFINEF_H
 
-@DEF_MMGF_INT@ /*!< Integer type for fortran */
+@DEF_MMG5F_INT@ /*!< Integer type for fortran */
 
 #endif

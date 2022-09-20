@@ -123,21 +123,6 @@ int MMG2D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
   return 1;
 }
 
-
-/* check if n elets available */
-int MMG5_getnElt(MMG5_pMesh mesh,MMG5_int n) {
-  MMG5_int     curiel;
-
-  if ( !mesh->nenil )  return 0;
-  curiel = mesh->nenil;
-  do {
-    curiel = mesh->tria[curiel].v[2];
-  }
-  while (--n);
-
-  return n == 0;
-}
-
 /**
  * \param mesh pointer toward the mesh structure
  *

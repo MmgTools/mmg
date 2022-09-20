@@ -140,7 +140,8 @@ void MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi ) {
  *
  */
 int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
-  int         npar,k,ier;
+  MMG5_int    k;
+  int         npar,ier;
 
   /** Count the number of different boundary references and list it */
   (*bdryRefs) = NULL;

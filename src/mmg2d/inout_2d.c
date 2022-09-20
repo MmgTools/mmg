@@ -900,8 +900,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   long        posnp;
   int         iswp,ier,meshDim,*type,nsols,dim;
-  int         k,ver,bin;
-  MMG5_int    np;
+  int         ver,bin;
+  MMG5_int    k,np;
 
   /** Read the file header */
   meshDim = 2;

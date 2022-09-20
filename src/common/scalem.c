@@ -134,7 +134,17 @@ int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
   return 1;
 }
 
-
+/**
+ * \param met pointer toward metric.
+ * \param ip pointer toward global index of point on which metric has to be truncated
+ * \param isqhmin inverse square of hmin (min edge size)
+ * \param isqhmax inverse square of hmax (max edge size)
+ *
+ * \return 0 if fail, 1 if succeed
+ *
+ * Truncation of anisotropic metric at point \a ip by \a hmin and \a hmax.
+ *
+ */
 int MMG5_truncate_met3d(MMG5_pSol met, MMG5_int ip, double isqhmin, double isqhmax) {
   double        v[3][3],lambda[3],*m;
   int           i;

@@ -228,10 +228,10 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     mesh->info.nbr   = val;
     mesh->info.nbri  = 0;
-    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(MMG5_int),"References",
                   printf("  Exit program.\n");
                   return 0);
-    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,MMG5_int,return 0);
 
     for (k=0; k<mesh->info.nbr; k++)
       mesh->info.br[k] = 0;
@@ -1001,7 +1001,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs) {
   MMG5_pTria ptt;
   double vol;
   int ip;
-  MMG5_int  j,i,tmp; 
+  MMG5_int  j,i,tmp;
 
   mesh->xt = 0;
   for (i=1;i<=mesh->nt;i++)
