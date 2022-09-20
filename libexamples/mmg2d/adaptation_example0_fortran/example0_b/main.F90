@@ -165,7 +165,7 @@ PROGRAM main
 #elif MMG_VERSION_LE(5,4)
   CALL MMG2D_Get_meshSize(mmgMesh,np,nt,na,ier)
 #else
-  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,INT(0,KIND(ikind)),na,ier)
+  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,%val(INT(0,KIND(ikind))),na,ier)
 #endif
 
   IF ( ier /= 1 ) CALL EXIT(108)
