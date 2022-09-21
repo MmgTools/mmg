@@ -102,7 +102,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 }
 
 
-int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val){
   int k;
 
   switch ( iparam ) {

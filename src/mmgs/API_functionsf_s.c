@@ -636,7 +636,7 @@ FORTRAN_NAME(MMGS_CHK_MESHDATA,mmgs_chk_meshdata,
  * See \ref MMGS_Set_iparameter function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_IPARAMETER,mmgs_set_iparameter,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, int *val, int* retval),
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, MMG5_int *val, int* retval),
              (mesh,sol,iparam,val,retval)){
   *retval = MMGS_Set_iparameter(*mesh,*sol,*iparam,*val);
   return;
@@ -646,7 +646,7 @@ FORTRAN_NAME(MMGS_SET_IPARAMETER,mmgs_set_iparameter,
  * See \ref MMGS_Get_iparameter function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_IPARAMETER,mmgs_get_iparameter,
-             (MMG5_pMesh *mesh, int *iparam, int* retval),
+             (MMG5_pMesh *mesh, int *iparam, MMG5_int* retval),
              (mesh,iparam,retval)){
   *retval = MMGS_Get_iparameter(*mesh,*iparam);
   return;

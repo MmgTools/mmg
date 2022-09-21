@@ -1156,13 +1156,14 @@ enum MMG3D_Param {
  * >   SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     MMG5_DATA_PTR_T               :: sol\n
- * >     INTEGER, INTENT(IN)           :: iparam,val\n
+ * >     INTEGER, INTENT(IN)           :: iparam\n
+ * >     MMG5F_INT, INTENT(IN)         :: val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
  LIBMMG3D_EXPORT int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
-                                           int val);
+                                           MMG5_int val);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure (unused).
@@ -1897,12 +1898,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_IPARAMETER(mesh,iparam,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: iparam\n
+ * >     MMG5F_INT, INTENT(IN)         :: iparam\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
+ LIBMMG3D_EXPORT int MMG3D_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
 
 /**
  * \param mesh pointer toward the mesh structure.

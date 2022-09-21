@@ -1298,7 +1298,7 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
-int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val){
   MMG5_int k;
 
   switch ( iparam ) {
@@ -1403,7 +1403,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   return 1;
 }
 
-int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
+int MMGS_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam) {
 
   switch ( iparam ) {
     /* Integer parameters */

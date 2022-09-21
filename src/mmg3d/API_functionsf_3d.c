@@ -894,7 +894,7 @@ FORTRAN_NAME(MMG3D_ADD_VERTEX,mmg3d_add_vertex,
  * See \ref MMG3D_Set_iparameter function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_IPARAMETER,mmg3d_set_iparameter,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, int *val, int* retval),
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, MMG5_int *val, int* retval),
              (mesh,sol,iparam,val,retval)){
   *retval = MMG3D_Set_iparameter(*mesh,*sol,*iparam,*val);
   return;
@@ -904,7 +904,7 @@ FORTRAN_NAME(MMG3D_SET_IPARAMETER,mmg3d_set_iparameter,
  * See \ref MMG3D_Get_iparameter function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_IPARAMETER,mmg3d_get_iparameter,
-             (MMG5_pMesh *mesh, int *iparam, int* retval),
+             (MMG5_pMesh *mesh, int *iparam, MMG5_int* retval),
              (mesh,iparam,retval)){
   *retval = MMG3D_Get_iparameter(*mesh,*iparam);
   return;

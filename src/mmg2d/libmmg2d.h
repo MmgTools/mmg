@@ -230,12 +230,13 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     MMG5_DATA_PTR_T               :: sol\n
- * >     INTEGER, INTENT(IN)           :: iparam,val\n
+ * >     INTEGER, INTENT(IN)           :: iparam\n
+ * >     MMG5F_INT, INTENT(IN)         :: val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val);
+  LIBMMG2D_EXPORT int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val);
 
 /**
  * \param mesh pointer toward the mesh structure.

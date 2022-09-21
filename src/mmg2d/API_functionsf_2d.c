@@ -150,7 +150,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
  * See \ref MMG2D_Set_iparameter function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_IPARAMETER,mmg2d_set_iparameter,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, int *val, int* retval),
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, MMG5_int *val, int* retval),
              (mesh,sol,iparam,val,retval)){
   *retval = MMG2D_Set_iparameter(*mesh,*sol,*iparam,*val);
   return;

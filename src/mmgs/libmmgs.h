@@ -835,12 +835,13 @@ LIBMMGS_EXPORT int MMGS_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
  * >   SUBROUTINE MMGS_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     MMG5_DATA_PTR_T               :: sol\n
- * >     INTEGER, INTENT(IN)           :: iparam,val\n
+ * >     INTEGER, INTENT(IN)           :: iparam\n
+ * >     MMG5F_INT, INTENT(IN)         :: val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, int val);
+LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, MMG5_int val);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure (unused).
@@ -1291,12 +1292,12 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_IPARAMETER(mesh,iparam,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: iparam\n
+ * >     MMG5F_INT, INTENT(IN)         :: iparam\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam);
+LIBMMGS_EXPORT int MMGS_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
 
 /* input/output functions */
 /**
