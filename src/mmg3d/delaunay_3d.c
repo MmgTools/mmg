@@ -52,9 +52,9 @@
 #define MMG3D_KTC    13
 
 /* hash mesh edge v[0],v[1] (face i of iel) */
-int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,MMG5_int *v) {
-  MMG5_int       *adja,iadr,jel,mins,maxs;
-  int            j,key;
+int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int iel,int i,MMG5_int *v) {
+  MMG5_int       key,*adja,iadr,jel,mins,maxs;
+  int            j;
   MMG5_hedge     *ha;
 
   /* compute key */
@@ -81,7 +81,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,MMG5_int *
       j    = ha->k % 4;
       iadr = (jel-1)*4 + 1;
       adja = &mesh->adja[iadr];
-      adja[j] = iel*4 + i;
+      adja[j] = iel*4 + (MMG5_int)i;
       return 1;
     }
     else {
@@ -96,7 +96,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,MMG5_int *
           j    = ha->k % 4;
           iadr = (jel-1)*4 + 1;
           adja = &mesh->adja[iadr];
-          adja[j] = iel*4 + i;
+          adja[j] = iel*4 + (MMG5_int)i;
           return 1;
         }
       }
@@ -105,7 +105,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,MMG5_int *
     ha        = &hash->item[hash->nxt];
     ha->a     = mins;
     ha->b     = maxs;
-    ha->k     = iel*4 + i;
+    ha->k     = iel*4 + (MMG5_int)i;
     hash->nxt = ha->nxt;
     ha->nxt   = 0;
 
@@ -120,7 +120,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,MMG5_int *
   /* insert */
   ha->a = mins;
   ha->b = maxs;
-  ha->k = iel*4 + i;
+  ha->k = iel*4 + (MMG5_int)i;
   ha->nxt = 0;
 
   return 1;
