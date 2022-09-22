@@ -118,7 +118,7 @@ PROGRAM main
   ! a) give info for the metric: the metric is applied on vertex
   !    entities, number of vertices np is recoverd using get_meshSize and the sol
   !    is tensorial
-  CALL MMGS_Get_meshSize(mmgMesh,np,0_immg,0_immg,ier)
+  CALL MMGS_Get_meshSize(mmgMesh,np,%val(0_immg),%val(0_immg),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(204)
   ENDIF
