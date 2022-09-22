@@ -841,7 +841,7 @@ void MMG3D_mergeBranchesRec(MMG3D_PROctree_s* q0, MMG3D_PROctree_s* q, int dim, 
 
     assert(*index+q->nbVer<=nv);
 
-    memcpy(&(q0->v[*index]), q->v, q->nbVer*sizeof(int));
+    memcpy(&(q0->v[*index]), q->v, q->nbVer*sizeof(MMG5_int));
     (*index)+= q->nbVer;
     for(i = 0; i<(*index); ++i)
       assert(q0->v[i]>0);
@@ -1097,7 +1097,7 @@ void MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
     nVer |= nVer >> 16;
     nVer++;
     nVer = (nVer < nv) ? nVer : (int)(((q->nbVer-0.1)/nv+1)*nv);
-    (*s2) += nVer*sizeof(int);
+    (*s2) += nVer*sizeof(MMG5_int);
     (*s1) += sizeof(MMG3D_PROctree_s);
   }else
   {
