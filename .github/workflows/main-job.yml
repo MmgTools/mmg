@@ -126,7 +126,7 @@ jobs:
                 vtk: off
                 int: int64_t
 
-             - os: windows-2022
+              - os: windows-2022
                 pattern: off
                 pointmap: off
                 scotch: off
