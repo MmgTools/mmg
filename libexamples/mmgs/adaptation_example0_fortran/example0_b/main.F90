@@ -19,14 +19,16 @@ PROGRAM main
   CHARACTER(len=300) :: exec_name,fileout
 
   !> To save final mesh in a file
-  INTEGER          :: inm=10
+  INTEGER           :: inm=10
   !> To manually recover the mesh
-  MMG5F_INT        :: k, np, nt, na, nc, nr, nreq
-  INTEGER          :: typEntity, typSol
-  MMG5F_INT        :: ref, Tria(3), Edge(2)
-  DOUBLE PRECISION :: Point(3),Sol
+  INTEGER(MMG5F_INT):: k, np, nt, na, nc, nr, nreq
+  INTEGER           :: typEntity, typSol
+  INTEGER(MMG5F_INT):: ref, Tria(3), Edge(2)
+  DOUBLE PRECISION  :: Point(3),Sol
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner, required, ridge
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,E14.8,1X,I3)"
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   PRINT*,"  -- TEST MMGSLIB"
 
@@ -74,72 +76,72 @@ PROGRAM main
   !! Note that coordinates must be in double precision to match with the coordinate
   !! size in the C-library
   ref = 0
-  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 0.0D0, ref, INT(1,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 0.0D0, ref, 1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 0.0D0, ref, INT(2,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 0.0D0, ref, 2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 1.0D0, ref, INT(3,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 1.0D0, ref, 3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 1.0D0, ref, INT(4,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 1.0D0, ref, 4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 0.0D0, ref, INT(5,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 0.0D0, ref, 5_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 0.0D0, ref, INT(6,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 0.0D0, ref, 6_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 1.0D0, ref, INT(7,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 1.0D0, ref, 7_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 1.0D0, ref, INT(8,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 1.0D0, ref, 8_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 0.0D0, ref, INT(9,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 0.0D0, ref, 9_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 0.0D0, ref, INT(10,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 0.0D0, ref, 10_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 1.0D0, ref, INT(11,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 1.0D0, ref, 11_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 1.0D0, ref, INT(12,KIND(ref)),ier)
+  CALL MMGS_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 1.0D0, ref, 12_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
 
   !> d) give the triangles (not mandatory): for each triangle,
   !!    give the vertices index, the reference and the position of the triangle
-  CALL MMGS_Set_triangle(mmgMesh, INT( 1,KIND(ref)), INT( 4,KIND(ref)), INT( 8,KIND(ref)), INT(3,KIND(ref)),INT( 1,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  1_immg,  4_immg,  8_immg, 3_immg, 1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 1,KIND(ref)), INT( 2,KIND(ref)), INT( 4,KIND(ref)), INT(3,KIND(ref)),INT( 2,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  1_immg,  2_immg,  4_immg, 3_immg, 2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 8,KIND(ref)), INT( 3,KIND(ref)), INT( 7,KIND(ref)), INT(3,KIND(ref)),INT( 3,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  8_immg,  3_immg,  7_immg, 3_immg, 3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 5,KIND(ref)), INT( 8,KIND(ref)), INT( 6,KIND(ref)), INT(3,KIND(ref)),INT( 4,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  5_immg,  8_immg,  6_immg, 3_immg, 4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 5,KIND(ref)), INT( 6,KIND(ref)), INT( 2,KIND(ref)), INT(3,KIND(ref)),INT( 5,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  5_immg,  6_immg,  2_immg, 3_immg, 5_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 5,KIND(ref)), INT( 2,KIND(ref)), INT( 1,KIND(ref)), INT(3,KIND(ref)),INT( 6,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  5_immg,  2_immg,  1_immg, 3_immg, 6_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 5,KIND(ref)), INT( 1,KIND(ref)), INT( 8,KIND(ref)), INT(3,KIND(ref)),INT( 7,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  5_immg,  1_immg,  8_immg, 3_immg, 7_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 7,KIND(ref)), INT( 6,KIND(ref)), INT( 8,KIND(ref)), INT(3,KIND(ref)),INT( 8,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  7_immg,  6_immg,  8_immg, 3_immg, 8_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 4,KIND(ref)), INT( 3,KIND(ref)), INT( 8,KIND(ref)), INT(3,KIND(ref)),INT( 9,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  4_immg,  3_immg,  8_immg, 3_immg, 9_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 2,KIND(ref)), INT( 3,KIND(ref)), INT( 4,KIND(ref)), INT(3,KIND(ref)),INT(10,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  2_immg,  3_immg,  4_immg, 3_immg,10_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 9,KIND(ref)), INT( 3,KIND(ref)), INT( 2,KIND(ref)), INT(4,KIND(ref)),INT(11,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  9_immg,  3_immg,  2_immg, 4_immg,11_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT(11,KIND(ref)), INT( 9,KIND(ref)), INT(12,KIND(ref)), INT(4,KIND(ref)),INT(12,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh, 11_immg,  9_immg, 12_immg, 4_immg,12_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 7,KIND(ref)), INT(11,KIND(ref)), INT(12,KIND(ref)), INT(4,KIND(ref)),INT(13,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  7_immg, 11_immg, 12_immg, 4_immg,13_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 6,KIND(ref)), INT( 7,KIND(ref)), INT(10,KIND(ref)), INT(4,KIND(ref)),INT(14,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  6_immg,  7_immg, 10_immg, 4_immg,14_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 6,KIND(ref)), INT(10,KIND(ref)), INT( 9,KIND(ref)), INT(4,KIND(ref)),INT(15,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  6_immg, 10_immg,  9_immg, 4_immg,15_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 6,KIND(ref)), INT( 9,KIND(ref)), INT( 2,KIND(ref)), INT(4,KIND(ref)),INT(16,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  6_immg,  9_immg,  2_immg, 4_immg,16_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT(12,KIND(ref)), INT(10,KIND(ref)), INT( 7,KIND(ref)), INT(4,KIND(ref)),INT(17,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh, 12_immg, 10_immg,  7_immg, 4_immg,17_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT(12,KIND(ref)), INT( 9,KIND(ref)), INT(10,KIND(ref)), INT(4,KIND(ref)),INT(18,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh, 12_immg,  9_immg, 10_immg, 4_immg,18_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 3,KIND(ref)), INT(11,KIND(ref)), INT( 7,KIND(ref)), INT(4,KIND(ref)),INT(19,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  3_immg, 11_immg,  7_immg, 4_immg,19_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMGS_Set_triangle(mmgMesh, INT( 9,KIND(ref)), INT(11,KIND(ref)), INT( 3,KIND(ref)), INT(4,KIND(ref)),INT(20,KIND(ref)),ier)
+  CALL MMGS_Set_triangle(mmgMesh,  9_immg, 11_immg,  3_immg, 4_immg,20_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
 
   !> 3) Build sol in MMG5 format

@@ -19,7 +19,7 @@ PROGRAM main
 
   !! To manually recover the mesh
   INTEGER            :: nsol,typSol(MMG5_NSOLS_MAX)
-  MMG5F_INT          :: np,j
+  INTEGER(MMG5F_INT) :: np,j
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE :: sols
 
   CHARACTER(len=300) :: exec_name,filename,fileout,option

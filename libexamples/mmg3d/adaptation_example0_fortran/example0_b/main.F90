@@ -19,16 +19,18 @@ PROGRAM main
   CHARACTER(len=300) :: exec_name,fileout
 
   !> To save final mesh in a file
-  INTEGER          :: inm=10
+  INTEGER           :: inm=10
   !> To manually recover the mesh
-  MMG5F_INT        :: k, np, ne, nt, na, nc, nr, nreq, ref
-  MMG5F_INT        :: Tetra(4), Tria(3), Edge(2),zero_ikind,ikind
-  INTEGER          :: typEntity, typSol
-  DOUBLE PRECISION :: Point(3),Sol
+  INTEGER(MMG5F_INT):: k, np, ne, nt, na, nc, nr, nreq, ref
+  INTEGER(MMG5F_INT):: Tetra(4), Tria(3), Edge(2)
+  INTEGER           :: typEntity, typSol
+  DOUBLE PRECISION  :: Point(3),Sol
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner, required, ridge
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,E14.8,1X,I3)"
-  MMG5F_INT,DIMENSION(2) :: ktet
+  INTEGER(MMG5F_INT),DIMENSION(2) :: ktet
   INTEGER,DIMENSION(2)   :: iface
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   PRINT*,"  -- TEST MMG3DLIB"
 
@@ -58,7 +60,7 @@ PROGRAM main
   CALL MMG3D_Init_mesh(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
-  CALL MMG3D_SET_IPARAMETER(mmgMesh,mmgSol,MMG3D_IPARAM_verbose,5,ier)
+  CALL MMG3D_SET_IPARAMETER(mmgMesh,mmgSol,MMG3D_IPARAM_verbose,5_immg,ier)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
@@ -70,8 +72,7 @@ PROGRAM main
   np = 12
   ne = 12
   nt = 20
-  zero_ikind = 0
-  CALL MMG3D_Set_meshSize(mmgMesh,np,ne,zero_ikind,nt,zero_ikind,zero_ikind,ier)
+  CALL MMG3D_Set_meshSize(mmgMesh,np,ne,0_immg,nt,0_immg,0_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(101)
 
   !> b) give the vertices: for each vertex, give the coordinates, the reference
@@ -79,135 +80,103 @@ PROGRAM main
   !! Note that coordinates must be in double precision to match with the coordinate
   !! size in the C-library
 
-  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 0.0D0, zero_ikind, INT( 1,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 0.0D0, 0_immg,  1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 0.0D0, zero_ikind, INT( 2,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 0.0D0, 0_immg,  2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 1.0D0, zero_ikind, INT( 3,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 0.0D0, 1.0D0, 0_immg,  3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 1.0D0, zero_ikind, INT( 4,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 0.0D0, 1.0D0, 0_immg,  4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 0.0D0, zero_ikind, INT( 5,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 0.0D0, 0_immg,  5_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 0.0D0, zero_ikind, INT( 6,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 0.0D0, 0_immg,  6_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 1.0D0, zero_ikind, INT( 7,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.5D0, 1.0D0, 1.0D0, 0_immg,  7_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 1.0D0, zero_ikind, INT( 8,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 0.0D0, 1.0D0, 1.0D0, 0_immg,  8_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 0.0D0, zero_ikind, INT( 9,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 0.0D0, 0_immg,  9_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 0.0D0, zero_ikind, INT(10,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 0.0D0, 0_immg, 10_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 1.0D0, zero_ikind, INT(11,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 0.0D0, 1.0D0, 0_immg, 11_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 1.0D0, zero_ikind, INT(12,KIND(ikind)),ier)
+  CALL MMG3D_Set_vertex(mmgMesh, 1.0D0, 1.0D0, 1.0D0, 0_immg, 12_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
 
   !> c) give the tetrahedras: for each tetrahedra,
   !!    give the vertices index, the reference and the position of the tetra
   ref = 1
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 1,KIND(ikind)), INT( 4,KIND(ikind)),&
-       INT( 2,KIND(ikind)), INT( 8,KIND(ikind)),ref,INT( 1,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  1_immg,  4_immg, 2_immg,  8_immg,ref, 1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 8,KIND(ikind)), INT( 3,KIND(ikind)),&
-       INT( 2,KIND(ikind)), INT( 7,KIND(ikind)),ref,INT( 2,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  8_immg,  3_immg, 2_immg,  7_immg,ref, 2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 5,KIND(ikind)), INT( 2,KIND(ikind)),&
-       INT( 6,KIND(ikind)), INT( 8,KIND(ikind)),ref,INT( 3,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  5_immg,  2_immg, 6_immg,  8_immg,ref, 3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 5,KIND(ikind)), INT( 8,KIND(ikind)),&
-       INT( 1,KIND(ikind)), INT( 2,KIND(ikind)),ref,INT( 4,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  5_immg,  8_immg, 1_immg,  2_immg,ref, 4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 7,KIND(ikind)), INT( 2,KIND(ikind)),&
-       INT( 8,KIND(ikind)), INT( 6,KIND(ikind)),ref,INT( 5,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  7_immg,  2_immg, 8_immg,  6_immg,ref, 5_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 2,KIND(ikind)), INT( 4,KIND(ikind)),&
-       INT( 3,KIND(ikind)), INT( 8,KIND(ikind)),ref,INT( 6,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  2_immg,  4_immg, 3_immg,  8_immg,ref, 6_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
   ref = 2
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 9,KIND(ikind)), INT( 2,KIND(ikind)),&
-       INT( 3,KIND(ikind)), INT( 7,KIND(ikind)),ref,INT( 7,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  9_immg,  2_immg, 3_immg,  7_immg,ref, 7_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 7,KIND(ikind)), INT(11,KIND(ikind)),&
-       INT( 9,KIND(ikind)), INT(12,KIND(ikind)),ref,INT( 8,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  7_immg, 11_immg, 9_immg, 12_immg,ref, 8_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 6,KIND(ikind)), INT( 9,KIND(ikind)),&
-       INT(10,KIND(ikind)), INT( 7,KIND(ikind)),ref,INT( 9,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  6_immg,  9_immg,10_immg,  7_immg,ref, 9_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 6,KIND(ikind)), INT( 7,KIND(ikind)),&
-       INT( 2,KIND(ikind)), INT( 9,KIND(ikind)),ref,INT(10,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  6_immg,  7_immg, 2_immg,  9_immg,ref,10_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT(12,KIND(ikind)), INT( 9,KIND(ikind)),&
-       INT( 7,KIND(ikind)), INT(10,KIND(ikind)),ref,INT(11,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh, 12_immg,  9_immg, 7_immg, 10_immg,ref,11_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG3D_Set_tetrahedron(mmgMesh, INT( 9,KIND(ikind)), INT( 3,KIND(ikind)),&
-       INT(11,KIND(ikind)), INT( 7,KIND(ikind)),ref,INT(12,KIND(ikind)),ier)
+  CALL MMG3D_Set_tetrahedron(mmgMesh,  9_immg,  3_immg,11_immg,  7_immg,ref,12_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
 
   !> d) give the triangles (not mandatory): for each triangle,
   !!    give the vertices index, the reference and the position of the triangle
   ref = 3
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 1,KIND(ikind)), INT( 4,KIND(ikind)),&
-       INT( 8,KIND(ikind)), ref,INT( 1,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  1_immg,  4_immg, 8_immg, ref, 1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 1,KIND(ikind)), INT( 2,KIND(ikind)),&
-       INT( 4,KIND(ikind)), ref,INT( 2,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  1_immg,  2_immg, 4_immg, ref, 2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 8,KIND(ikind)), INT( 3,KIND(ikind)),&
-       INT( 7,KIND(ikind)), ref,INT( 3,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  8_immg,  3_immg, 7_immg, ref, 3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 5,KIND(ikind)), INT( 8,KIND(ikind)),&
-       INT( 6,KIND(ikind)), ref,INT( 4,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  5_immg,  8_immg, 6_immg, ref, 4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 5,KIND(ikind)), INT( 6,KIND(ikind)),&
-       INT( 2,KIND(ikind)), ref,INT( 5,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  5_immg,  6_immg, 2_immg, ref, 5_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 5,KIND(ikind)), INT( 2,KIND(ikind)),&
-       INT( 1,KIND(ikind)), ref,INT( 6,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  5_immg,  2_immg, 1_immg, ref, 6_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 5,KIND(ikind)), INT( 1,KIND(ikind)),&
-       INT( 8,KIND(ikind)), ref,INT( 7,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  5_immg,  1_immg, 8_immg, ref, 7_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 7,KIND(ikind)), INT( 6,KIND(ikind)),&
-       INT( 8,KIND(ikind)), ref,INT( 8,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  7_immg,  6_immg, 8_immg, ref, 8_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 4,KIND(ikind)), INT( 3,KIND(ikind)),&
-       INT( 8,KIND(ikind)), ref,INT( 9,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  4_immg,  3_immg, 8_immg, ref, 9_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 2,KIND(ikind)), INT( 3,KIND(ikind)),&
-       INT( 4,KIND(ikind)), ref,INT(10,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  2_immg,  3_immg, 4_immg, ref,10_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
   ref = 4
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 9,KIND(ikind)), INT( 3,KIND(ikind)),&
-       INT( 2,KIND(ikind)), ref,INT(11,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  9_immg,  3_immg, 2_immg, ref,11_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT(11,KIND(ikind)), INT( 9,KIND(ikind)),&
-       INT(12,KIND(ikind)), ref,INT(12,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh, 11_immg,  9_immg,12_immg, ref,12_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 7,KIND(ikind)), INT(11,KIND(ikind)),&
-       INT(12,KIND(ikind)), ref,INT(13,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  7_immg, 11_immg,12_immg, ref,13_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 6,KIND(ikind)), INT( 7,KIND(ikind)),&
-       INT(10,KIND(ikind)), ref,INT(14,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  6_immg,  7_immg,10_immg, ref,14_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 6,KIND(ikind)), INT(10,KIND(ikind)),&
-       INT( 9,KIND(ikind)), ref,INT(15,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  6_immg, 10_immg, 9_immg, ref,15_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 6,KIND(ikind)), INT( 9,KIND(ikind)),&
-       INT( 2,KIND(ikind)), ref,INT(16,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  6_immg,  9_immg, 2_immg, ref,16_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT(12,KIND(ikind)), INT(10,KIND(ikind)),&
-       INT( 7,KIND(ikind)), ref,INT(17,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh, 12_immg, 10_immg, 7_immg, ref,17_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT(12,KIND(ikind)), INT( 9,KIND(ikind)),&
-       INT(10,KIND(ikind)), ref,INT(18,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh, 12_immg,  9_immg,10_immg, ref,18_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 3,KIND(ikind)), INT(11,KIND(ikind)),&
-       INT( 7,KIND(ikind)), ref,INT(19,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  3_immg, 11_immg, 7_immg, ref,19_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG3D_Set_triangle(mmgMesh, INT( 9,KIND(ikind)), INT(11,KIND(ikind)),&
-       INT( 3,KIND(ikind)), ref,INT(20,KIND(ikind)),ier)
+  CALL MMG3D_Set_triangle(mmgMesh,  9_immg, 11_immg, 3_immg, ref,20_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
 
   !> 3) Build sol in MMG5 format
@@ -254,7 +223,7 @@ PROGRAM main
   WRITE(inm,*) "Dimension 3"
 
   !> a) get the size of the mesh: vertices, tetra,prisms, triangles, quads,edges
-  CALL MMG3D_Get_meshSize(mmgMesh,np,ne,%val(zero_ikind),nt,%val(zero_ikind),na,ier)
+  CALL MMG3D_Get_meshSize(mmgMesh,np,ne,%val(0_immg),nt,%val(0_immg),na,ier)
   IF ( ier /= 1 ) CALL EXIT(108)
 
   ! Table to know if a vertex is corner

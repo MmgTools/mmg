@@ -99,7 +99,7 @@ int main (int argc, char ** argv)
     fprintf(file, "#define MMG5_DATA_PTR_T INTEGER(kind=%d)\n",
             (int)sizeof(void*));
     fprintf(file, "#include \"mmgversion.h\"\n");
-    fprintf(file, "#include \"mmgcmakedefinesf.h\"\n");
+    fprintf(file, "#include \"mmgcmakedefinesf.h\"\n\n");
   }
   fclose(file);
 

@@ -231,7 +231,7 @@ LIBMMGS_EXPORT int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const 
  * >   SUBROUTINE MMGS_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER, INTENT(IN)           :: typEntity,typSol\n
- * >     MMG5F_INT, INTENT(IN)         :: np\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: np\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -254,7 +254,7 @@ LIBMMGS_EXPORT int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const 
  * >   SUBROUTINE MMGS_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER, INTENT(IN)           :: nsols\n
- * >     MMG5F_INT, INTENT(IN)         :: nentities\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: nentities\n
  * >     INTEGER, INTENT(IN)           :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -276,7 +276,7 @@ LIBMMGS_EXPORT int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,i
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_MESHSIZE(mesh,np,nt,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT                     :: np,nt,na\n
+ * >     INTEGER(MMG5F_INT)            :: np,nt,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -300,7 +300,7 @@ LIBMMGS_EXPORT int  MMGS_Set_meshSize(MMG5_pMesh mesh, MMG5_int np, MMG5_int nt,
  * >   SUBROUTINE MMGS_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(IN)      :: c0,c1,c2\n
- * >     MMG5F_INT, INTENT(IN)         :: ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -321,10 +321,10 @@ LIBMMGS_EXPORT int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs array)
  * > ! SUBROUTINE MMGS_SET_VERTICES(mesh,vertices,refs,retval)\n
- * > !   MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !   REAL(KIND=8), DIMENSION(*),INTENT(IN) :: vertices\n
- * > !   MMG5F_INT,DIMENSION(*), INTENT(IN)       :: refs\n
- * > !   INTEGER, INTENT(OUT)          :: retval\n
+ * > !   MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * > !   REAL(KIND=8), DIMENSION(*),INTENT(IN)       :: vertices\n
+ * > !   INTEGER(MMG5F_INT),DIMENSION(*), INTENT(IN) :: refs\n
+ * > !   INTEGER, INTENT(OUT)                        :: retval\n
  * > ! END SUBROUTINE\n
  *
  */
@@ -344,7 +344,7 @@ LIBMMGS_EXPORT int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,v2,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -364,9 +364,9 @@ LIBMMGS_EXPORT int  MMGS_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs array)
  * >  ! SUBROUTINE MMGS_SET_TRIANGLES(mesh,tria,refs,retval)\n
- * >  !   MMG5_DATA_PTR_T,INTENT(INOUT)      :: mesh\n
- * >  !   MMG5F_INT,DIMENSION(*), INTENT(IN) :: tria,refs\n
- * >  !   INTEGER, INTENT(OUT)               :: retval\n
+ * >  !   MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >  !   INTEGER(MMG5F_INT),DIMENSION(*), INTENT(IN) :: tria,refs\n
+ * >  !   INTEGER, INTENT(OUT)                        :: retval\n
  * >  ! END SUBROUTINE\n
  *
  */
@@ -385,7 +385,7 @@ LIBMMGS_EXPORT int  MMGS_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)          :: v0,v1,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -401,7 +401,7 @@ LIBMMGS_EXPORT int  MMGS_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CORNER(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -418,7 +418,7 @@ LIBMMGS_EXPORT int  MMGS_Set_corner(MMG5_pMesh mesh, MMG5_int k);
  *
  * >   SUBROUTINE MMGS_UNSET_CORNER(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -434,7 +434,7 @@ LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_REQUIREDVERTEX(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -450,7 +450,7 @@ LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -467,7 +467,7 @@ LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -484,7 +484,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -501,7 +501,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_RIDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -518,7 +518,7 @@ LIBMMGS_EXPORT int  MMGS_Set_ridge(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_RIDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -535,7 +535,7 @@ LIBMMGS_EXPORT int  MMGS_Unset_ridge(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_REQUIREDEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -552,7 +552,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_REQUIREDEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -571,7 +571,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGES(mesh,edges,refs,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: edges(*),refs(*)\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: edges(*),refs(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -591,7 +591,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: refs(*),edges(*)\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: refs(*),edges(*)\n
  * >     INTEGER, INTENT(OUT)          :: areRequired(*),areRidges(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -614,7 +614,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     REAL(KIND=8), INTENT(IN)      :: n0,n1,n2\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -633,7 +633,7 @@ LIBMMGS_EXPORT int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double 
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TRIANGLEQUALITY(mesh,met,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -653,7 +653,7 @@ LIBMMGS_EXPORT int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double 
  * >   SUBROUTINE MMGS_SET_SCALARSOL(met,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: s\n
- * >     MMG5F_INT, INTENT(IN)         :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -669,9 +669,9 @@ LIBMMGS_EXPORT int  MMGS_Set_scalarSol(MMG5_pSol met, double s,MMG5_int pos);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SCALARSOLS(met,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)         :: met\n
  * >     REAL(KIND=8),DIMENSION(*), INTENT(IN) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                  :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -692,7 +692,7 @@ LIBMMGS_EXPORT int  MMGS_Set_scalarSols(MMG5_pSol met, double *s);
  * >   SUBROUTINE MMGS_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: vx,vy,vz\n
- * >     MMG5F_INT, INTENT(IN)         :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -708,9 +708,9 @@ LIBMMGS_EXPORT int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VECTORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
- * >     REAL(KIND=8),DIMENSION(*), INTENT(IN)      :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)         :: met\n
+ * >     REAL(KIND=8),DIMENSION(*), INTENT(IN) :: sols\n
+ * >     INTEGER, INTENT(OUT)                  :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -734,7 +734,7 @@ LIBMMGS_EXPORT int MMGS_Set_vectorSols(MMG5_pSol met, double *sols);
  * >   SUBROUTINE MMGS_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: m11,m12,m13,m22,m23,m33\n
- * >     MMG5F_INT, INTENT(IN)         :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -773,7 +773,7 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  * >   SUBROUTINE MMGS_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
  * >     INTEGER, INTENT(IN)                    :: i\n
- * >     MMG5F_INT, INTENT(IN)                  :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)         :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
@@ -833,11 +833,11 @@ LIBMMGS_EXPORT int MMGS_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5_DATA_PTR_T               :: sol\n
- * >     INTEGER, INTENT(IN)           :: iparam\n
- * >     MMG5F_INT, INTENT(IN)         :: val\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     MMG5_DATA_PTR_T                :: sol\n
+ * >     INTEGER, INTENT(IN)            :: iparam\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: val\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -878,11 +878,11 @@ LIBMMGS_EXPORT int  MMGS_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dpara
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_LOCALPARAMETER(mesh,sol,typ,ref,hmin,hmax,hausd,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typ\n
- * >     MMG5F_INT, INTENT(IN)         :: ref\n
- * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh,sol\n
+ * >     INTEGER, INTENT(IN)            :: typ\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: ref\n
+ * >     REAL(KIND=8), INTENT(IN)       :: hmin,hmax,hausd\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -902,7 +902,7 @@ LIBMMGS_EXPORT int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int 
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_MESHSIZE(mesh,np,nt,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT                     :: np,nt,na\n
+ * >     INTEGER(MMG5F_INT)            :: np,nt,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -922,7 +922,7 @@ LIBMMGS_EXPORT int  MMGS_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* n
  * >   SUBROUTINE MMGS_GET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER                       :: typEntity,typSol\n
- * >     MMG5F_INT                     :: np\n
+ * >     INTEGER(MMG5F_INT)            :: np\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -945,7 +945,7 @@ LIBMMGS_EXPORT int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEnt
  * >   SUBROUTINE MMGS_GET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER                       :: nsols\n
- * >     MMG5F_INT                     :: nentities\n
+ * >     INTEGER(MMG5F_INT)            :: nentities\n
  * >     INTEGER                       :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -971,7 +971,7 @@ LIBMMGS_EXPORT int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEnt
  * >   SUBROUTINE MMGS_GET_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2\n
- * >     MMG5F_INT                     :: ref\n
+ * >     INTEGER(MMG5F_INT)            :: ref\n
  * >     INTEGER                       :: isCorner,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -998,7 +998,7 @@ LIBMMGS_EXPORT int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, dou
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2\n
  * >     INTEGER                       :: isCorner,isRequired\n
- * >     MMG5F_INT                     :: ref,idx\n
+ * >     INTEGER(MMG5F_INT)            :: ref,idx\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1028,7 +1028,7 @@ LIBMMGS_EXPORT int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, dou
  * > !                                areRequired,retval)\n
  * > !    MMG5_DATA_PTR_T,INTENT(INOUT)          :: mesh\n
  * > !    REAL(KIND=8),DIMENSION(*), INTENT(OUT) :: vertices\n
- * > !    MMG5F_INT, DIMENSION(*)                :: refs\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*)       :: refs\n
  * > !    INTEGER, DIMENSION(*)                  :: areCorners,areRequired\n
  * > !    INTEGER, INTENT(OUT)                   :: retval\n
  * > !  END SUBROUTINE\n
@@ -1050,10 +1050,10 @@ LIBMMGS_EXPORT int  MMGS_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_in
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TRIANGLE(mesh,v0,v1,v2,ref,isRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)        :: v0,v1,v2,ref\n
- * >     INTEGER                       :: isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: v0,v1,v2,ref\n
+ * >     INTEGER                        :: isRequired\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1075,11 +1075,11 @@ LIBMMGS_EXPORT int  MMGS_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs and areRequired arrays)
  * > !  SUBROUTINE MMGS_GET_TRIANGLES(mesh,tria,refs,areRequired,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT)       :: mesh\n
- * > !    MMG5F_INT, DIMENSION(*),INTENT(OUT) :: tria\n
- * > !    MMG5F_INT, DIMENSION(*)             :: refs\n
- * > !    INTEGER, DIMENSION(*)               :: areRequired\n
- * > !    INTEGER, INTENT(OUT)                :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*),INTENT(OUT) :: tria\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*)             :: refs\n
+ * > !    INTEGER, DIMENSION(*)                        :: areRequired\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
@@ -1098,11 +1098,11 @@ LIBMMGS_EXPORT int  MMGS_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_EDGE(mesh,e0,e1,ref,isRidge,isRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)        :: e0,e1\n
- * >     MMG5F_INT                     :: ref\n
- * >     INTEGER                       :: isRidge,isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: e0,e1\n
+ * >     INTEGER(MMG5F_INT)             :: ref\n
+ * >     INTEGER                        :: isRidge,isRequired\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1123,7 +1123,7 @@ LIBMMGS_EXPORT int  MMGS_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, M
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     REAL(KIND=8)                  :: n0,n1,n2\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1157,9 +1157,9 @@ LIBMMGS_EXPORT int  MMGS_Get_scalarSol(MMG5_pSol met, double* s);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_SCALARSOLS(met,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: met\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1192,9 +1192,9 @@ LIBMMGS_EXPORT int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, dou
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_VECTORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: met\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1231,9 +1231,9 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, do
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TENSORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)           :: met\n
  * >     REAL(KIND=8), DIMENSION(*), INTENT(OUT) :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1253,7 +1253,7 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * >   SUBROUTINE MMGS_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
  * >     INTEGER, INTENT(IN)                    :: i\n
- * >     MMG5F_INT, INTENT(IN)                  :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)         :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
  * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
@@ -1291,9 +1291,9 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_IPARAMETER(mesh,iparam,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: iparam\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: iparam\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1933,9 +1933,9 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_NUMBEROFNONBDYEDGES(mesh,nb_edges,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)        :: nb_edges\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: nb_edges\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1956,11 +1956,11 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_NONBDYEDGE(mesh,e0,e1,ref,idx,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)        :: e0,e1\n
- * >     MMG5F_INT                     :: ref\n
- * >     MMG5F_INT, INTENT(IN)         :: idx\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: e0,e1\n
+ * >     INTEGER(MMG5F_INT)             :: ref\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: idx\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2088,10 +2088,10 @@ LIBMMGS_EXPORT void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ADJATRI(mesh,kel,listri,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)       :: mesh\n
- * >     MMG5F_INT, INTENT(IN)                :: kel\n
- * >     MMG5F_INT, DIMENSION(3), INTENT(OUT) :: listri\n
- * >     INTEGER, INTENT(OUT)                 :: retval\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)                :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)                :: kel\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(3), INTENT(OUT) :: listri\n
+ * >     INTEGER, INTENT(OUT)                          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2111,10 +2111,10 @@ LIBMMGS_EXPORT int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int list
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ADJAVERTICESFAST(mesh,ip,start,lispoi,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)               :: mesh\n
- * >     MMG5F_INT, INTENT(IN)                        :: ip,start\n
- * >     MMG5F_INT, DIMENSION(MMGS_LMAX), INTENT(OUT) :: lispoi\n
- * >     MMG5F_INT, INTENT(OUT)                       :: retval\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)                        :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)                        :: ip,start\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(MMGS_LMAX), INTENT(OUT) :: lispoi\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT)                       :: retval\n
  * >   END SUBROUTINE\n
  *
  */

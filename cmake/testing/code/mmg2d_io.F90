@@ -18,6 +18,8 @@ PROGRAM main
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,argc,by_array
   CHARACTER(len=300) :: exec_name,filein,fileout,option
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   PRINT*,"  -- TEST MMG2DLIB"
 
@@ -56,7 +58,7 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! Disable corner detection to check the corner setting
-  call mmg2d_set_iparameter(mmgMesh,mmgSol,MMG2D_IPARAM_angle,0,ier)
+  call mmg2d_set_iparameter(mmgMesh,mmgSol,MMG2D_IPARAM_angle,0_immg,ier)
 
   !! remesh function
   CALL MMG2D_mmg2dlib(mmgMesh,mmgSol,ier)
@@ -89,10 +91,10 @@ subroutine loadmesh(mesh,filename,by_array)
   integer, intent(in) :: by_array
 
   INTEGER :: ier
-  MMG5F_INT :: i,np,nc,ne,nt,nq
+  INTEGER(MMG5F_INT) :: i,np,nc,ne,nt,nq
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: vert
-  MMG5F_INT, dimension(:,:), allocatable :: edg,tri,quad
-  MMG5F_INT, dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref,corner
+  INTEGER(MMG5F_INT), dimension(:,:), allocatable :: edg,tri,quad
+  INTEGER(MMG5F_INT), dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref,corner
 
 
   !! Parse file
@@ -239,17 +241,16 @@ subroutine loadmesh(mesh,filename,by_array)
 end subroutine loadmesh
 
 subroutine writemesh(mesh,filename,by_array)
-  implicit NONE
 
   MMG5_DATA_PTR_T, intent(inout) :: mesh
   character(len=*), intent(in)   :: filename
   integer, intent(in) :: by_array
 
-  MMG5F_INT :: k,np,nc,ne,nt,nq,nreq,zero_ikind
+  INTEGER(MMG5F_INT) :: k,np,nc,ne,nt,nq,nreq
   INTEGER :: inm=13,ier
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: vert
-  MMG5F_INT, dimension(:,:), allocatable :: edg,tri,quad
-  MMG5F_INT, dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref
+  INTEGER(MMG5F_INT), dimension(:,:), allocatable :: edg,tri,quad
+  INTEGER(MMG5F_INT), dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner,required
 
   !> a) get the size of the mesh: vertices, tetra, triangles, edges
@@ -278,7 +279,6 @@ subroutine writemesh(mesh,filename,by_array)
   WRITE(inm,*) "Vertices"
   WRITE(inm,*) np
 
-  zero_ikind = 0;
   if ( 0== by_array ) then
      DO k=1, np
         !> b) Vertex recovering
@@ -321,19 +321,19 @@ subroutine writemesh(mesh,filename,by_array)
         IF ( required(k)/=0 )  nreq=nreq+1
      ENDDO
 
-     CALL MMG2D_Get_edges(mesh, edg, edg_ref,%val(zero_ikind),%val(zero_ikind),ier)
+     CALL MMG2D_Get_edges(mesh, edg, edg_ref,%val(0),%val(0),ier)
      IF ( ier /= 1 ) THEN
         print*, "Fail to get edges"
         CALL EXIT(102)
      ENDIF
 
-     CALL MMG2D_Get_triangles(mesh, tri, tri_ref,%val(zero_ikind),ier)
+     CALL MMG2D_Get_triangles(mesh, tri, tri_ref,%val(0),ier)
      IF ( ier /= 1 ) THEN
         print*, "Fail to get trias"
         CALL EXIT(102)
      ENDIF
 
-     CALL MMG2D_Get_quadrilaterals(mesh,quad,quad_ref,%val(zero_ikind),ier)
+     CALL MMG2D_Get_quadrilaterals(mesh,quad,quad_ref,%val(0),ier)
      IF ( ier /= 1 ) THEN
         print*, "Fail to get quads"
         CALL EXIT(102)

@@ -48,6 +48,9 @@ PROGRAM main
   INTEGER            :: ier,argc
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
 
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
+
   WRITE(*,*) "  -- TEST MMGSLIB"
 
   argc =  COMMAND_ARGUMENT_COUNT();
@@ -82,7 +85,7 @@ PROGRAM main
   !!------------------- Level set discretization option ---------------------
   ! Ask for level set discretization: note that it is important to do this step
   ! here because in iso mode, some filters are applied at mesh loading
-  CALL MMGS_Set_iparameter(mmgMesh,mmgLs,MMGS_IPARAM_iso, 1,ier)
+  CALL MMGS_Set_iparameter(mmgMesh,mmgLs,MMGS_IPARAM_iso, 1_immg,ier)
   IF ( ier == 0 )  CALL EXIT(101)
 
   !> 2) Build mesh in MMG5 format

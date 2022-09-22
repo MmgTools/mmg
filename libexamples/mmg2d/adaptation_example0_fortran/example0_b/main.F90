@@ -19,14 +19,16 @@ PROGRAM main
   CHARACTER(len=300) :: exec_name,fileout
 
   !> To save final mesh in a file
-  INTEGER          :: inm=10
+  INTEGER           :: inm=10
   !> To manually recover the mesh
-  MMG5F_INT        :: k,np, nt, na, nc, nr, nreq,ikind
-  INTEGER          :: typEntity, typSol
-  MMG5F_INT        :: ref, Tria(3), Edge(2)
-  DOUBLE PRECISION :: Point(3),Sol
+  INTEGER(MMG5F_INT):: k,np, nt, na, nc, nr, nreq
+  INTEGER           :: typEntity, typSol
+  INTEGER(MMG5F_INT):: ref, Tria(3), Edge(2)
+  DOUBLE PRECISION  :: Point(3),Sol
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner, required, ridge
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,I3)"
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   PRINT*,"  -- TEST MMG2DLIB"
 
@@ -65,13 +67,13 @@ PROGRAM main
   ! by Mmg
 #ifndef MMG_VERSION_LE
  !! a) give the size of the mesh: 4 vertices, 2 triangles, 4 edges
-  CALL MMG2D_Set_meshSize(mmgMesh,INT(4,KIND(ikind)),INT(2,KIND(ikind)),INT(4,KIND(ikind)),ier)
+  CALL MMG2D_Set_meshSize(mmgMesh,4_immg,2_immg,4_immg,ier)
 #elif MMG_VERSION_LE(5,4)
  !! a) give the size of the mesh: 4 vertices, 2 triangles, 4 edges
-  CALL MMG2D_Set_meshSize(mmgMesh,INT(4,KIND(ikind)),INT(2,KIND(ikind)),INT(4,KIND(ikind)),ier)
+  CALL MMG2D_Set_meshSize(mmgMesh,4_immg,2_immg,4_immg,ier)
 #else
   !! a) give the size of the mesh: 4 vertices, 2 triangles, 0 quads, 4 edges
-  CALL MMG2D_Set_meshSize(mmgMesh,INT(4,KIND(ikind)),INT(2,KIND(ikind)),INT(0,KIND(ikind)),INT(4,KIND(ikind)),ier)
+  CALL MMG2D_Set_meshSize(mmgMesh,4_immg,2_immg,0_immg,4_immg,ier)
 #endif
 
   IF ( ier /= 1 ) CALL EXIT(101)
@@ -81,34 +83,34 @@ PROGRAM main
   !! Note that coordinates must be in double precision to match with the coordinate
   !! size in the C-library
   ref = 0
-  CALL MMG2D_Set_vertex(mmgMesh, 0.0D0, 0.0D0, ref, INT(1,KIND(ikind)),ier)
+  CALL MMG2D_Set_vertex(mmgMesh, 0.0D0, 0.0D0, ref, 1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG2D_Set_vertex(mmgMesh, 1.0D0, 0.0D0, ref, INT(2,KIND(ikind)),ier)
+  CALL MMG2D_Set_vertex(mmgMesh, 1.0D0, 0.0D0, ref, 2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG2D_Set_vertex(mmgMesh, 1.0D0, 1.0D0, ref, INT(3,KIND(ikind)),ier)
+  CALL MMG2D_Set_vertex(mmgMesh, 1.0D0, 1.0D0, ref, 3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
-  CALL MMG2D_Set_vertex(mmgMesh, 0.0D0, 1.0D0, ref, INT(4,KIND(ikind)),ier)
+  CALL MMG2D_Set_vertex(mmgMesh, 0.0D0, 1.0D0, ref, 4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(102)
 
 
   !> c) give the triangles: for each triangle,
   !!    give the vertices index, the reference and the position of the triangle
   ref = 1
-  CALL MMG2D_Set_triangle(mmgMesh,INT(1,KIND(ikind)),INT(2,KIND(ikind)),INT(4,KIND(ikind)),ref,INT(1,KIND(ikind)),ier)
+  CALL MMG2D_Set_triangle(mmgMesh,1_immg,2_immg,4_immg,ref,1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
-  CALL MMG2D_Set_triangle(mmgMesh,INT(2,KIND(ikind)),INT(3,KIND(ikind)),INT(4,KIND(ikind)),ref,INT(2,KIND(ikind)),ier)
+  CALL MMG2D_Set_triangle(mmgMesh,2_immg,3_immg,4_immg,ref,2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(103)
 
 
   !> c) give the edges: for each edge,
   !!    give the vertices index, the reference and the position of the edge
-  CALL MMG2D_Set_edge(mmgMesh,  INT(1,KIND(ikind)),INT(2,KIND(ikind)),INT(1,KIND(ikind)),INT(1,KIND(ikind)),ier)
+  CALL MMG2D_Set_edge(mmgMesh,  1_immg,2_immg,1_immg,1_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG2D_Set_edge(mmgMesh,  INT(2,KIND(ikind)),INT(3,KIND(ikind)),INT(2,KIND(ikind)),INT(2,KIND(ikind)),ier)
+  CALL MMG2D_Set_edge(mmgMesh,  2_immg,3_immg,2_immg,2_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG2D_Set_edge(mmgMesh,  INT(3,KIND(ikind)),INT(4,KIND(ikind)),INT(3,KIND(ikind)),INT(3,KIND(ikind)),ier)
+  CALL MMG2D_Set_edge(mmgMesh,  3_immg,4_immg,3_immg,3_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
-  CALL MMG2D_Set_edge(mmgMesh,  INT(4,KIND(ikind)),INT(1,KIND(ikind)),INT(4,KIND(ikind)),INT(4,KIND(ikind)),ier)
+  CALL MMG2D_Set_edge(mmgMesh,  4_immg,1_immg,4_immg,4_immg,ier)
   IF ( ier /= 1 ) CALL EXIT(104)
 
   !> 3) Build sol in MMG5 format
@@ -165,7 +167,7 @@ PROGRAM main
 #elif MMG_VERSION_LE(5,4)
   CALL MMG2D_Get_meshSize(mmgMesh,np,nt,na,ier)
 #else
-  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,%val(INT(0,KIND(ikind))),na,ier)
+  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,%val(0_immg),na,ier)
 #endif
 
   IF ( ier /= 1 ) CALL EXIT(108)

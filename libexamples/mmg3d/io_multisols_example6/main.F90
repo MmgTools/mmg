@@ -18,7 +18,7 @@ PROGRAM main
   INTEGER            :: ier,argc,opt,i4
 
   !! To manually recover the mesh
-  MMG5F_INT          :: np,j
+  INTEGER(MMG5F_INT) :: np,j
   INTEGER            :: nsol,typSol(MMG5_NSOLS_MAX)
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE :: sols
 
