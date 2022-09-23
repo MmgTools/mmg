@@ -494,7 +494,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
           b = pt->v[MMG5_iare[ie][1]];
           ia  = MG_MIN(a,b);
           ib  = MG_MAX(a,b);
-          key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+          key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
           ph  = &hash->item[key];
 
           if ( ph->a == ia && ph->b == ib )

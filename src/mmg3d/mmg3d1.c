@@ -862,6 +862,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   }
 
   for (k=1; k<=mesh->ne; k++) {
+    /* Remark: we can have int32 overflow on large meshes for base field..*/
     base = ++mesh->base;
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )   continue;
@@ -879,7 +880,12 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];
 
-        if ( p0->flag == base )  continue;
+        if ( p0->flag == base ) {
+          /* I think that we can't pass here because we break the loop when base
+           * is setted and just after we increment it */
+          assert(0);
+          continue;
+        }
         else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
 
 
