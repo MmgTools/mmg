@@ -61,7 +61,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
   MMG5_int       kk;
   MMG5_int       *adja,hmax,k,ia,ib,jel,lel,dup,nmf;
   int8_t         i,i1,i2,j,l;
-  MMG5_int       key;
+  int64_t        key;
 
   /* adjust hash table params */
   hmax =(MMG5_int)(3.71*mesh->np);
@@ -102,7 +102,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+      key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
       ph  = &hash->item[key];
 
       /* store edge */
@@ -217,7 +217,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+      key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
       ph  = &hash->item[key];
 
       if ( ph->a == 0 )  continue;
@@ -285,14 +285,15 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
  **/
 MMG5_int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,MMG5_int ic,MMG5_int k) {
   MMG5_hedge     *ph;
-  MMG5_int       key,mins,maxs,sum,j;
+  int64_t        key;
+  MMG5_int       mins,maxs,sum,j;
 
   mins = MG_MIN(ia,MG_MIN(ib,ic));
   maxs = MG_MAX(ia,MG_MAX(ib,ic));
 
   /* compute key */
   sum = ia + ib + ic;
-  key = (MMG5_KA*mins + MMG5_KB*maxs) % hash->siz;
+  key = (MMG5_KA*(int64_t)mins + MMG5_KB*(int64_t)maxs) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a ) {
@@ -343,11 +344,12 @@ MMG5_int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,M
  */
 int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
   MMG5_hedge  *ph;
-  MMG5_int    key,ia,ib,j;
+  int64_t     key;
+  MMG5_int    ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a == ia && ph->b == ib )
@@ -397,11 +399,12 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_in
  */
 int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
   MMG5_hedge  *ph;
-  MMG5_int    key,ia,ib;
+  int64_t     key;
+  MMG5_int    ia,ib;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   while ( ph->a ) {
@@ -433,11 +436,12 @@ int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
  */
 int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int16_t tag) {
   MMG5_hedge  *ph;
-  MMG5_int    key,ia,ib,j;
+  int64_t     key;
+  MMG5_int    ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a ) {
@@ -490,13 +494,14 @@ int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int1
  */
 MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
   MMG5_hedge  *ph;
-  MMG5_int    key,ia,ib;
+  int64_t     key;
+  MMG5_int    ia,ib;
 
   if ( !hash->item ) return 0;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( !ph->a )  return 0;
