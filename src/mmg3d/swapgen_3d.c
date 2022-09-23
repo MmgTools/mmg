@@ -268,7 +268,7 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int64_t *list,
+int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nconf,int ilist,int64_t *list,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;

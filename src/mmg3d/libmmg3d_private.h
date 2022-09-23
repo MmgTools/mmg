@@ -337,7 +337,7 @@ int  MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh,MMG5_int,int,int,MMG5_pxTetra
                                         double[3],double[3], double[3] );
 int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int64_t*, int, MMG5_int, MMG5_int,int8_t);
 int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int64_t*,int,MMG5_int,MMG3D_pPROctree,int8_t);
-int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int64_t*,MMG3D_pPROctree,int8_t);
+int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,MMG5_int, int, int64_t*,MMG3D_pPROctree,int8_t);
 MMG5_int  MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,MMG5_int,int,int*,int64_t*,double,int8_t);
 int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,int,int,MMG5_int,int);
 int  MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);

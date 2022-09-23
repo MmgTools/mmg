@@ -623,9 +623,9 @@ MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
                 MMG3D_pPROctree PROctree,int typchk,MMG5_int testmark) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int           ilist,it,nconf,maxit,ier;
+  int           ilist,it,maxit,ier;
   int64_t       list[MMG3D_LMAX+2];
-  MMG5_int      k,ns,nns;
+  MMG5_int      k,ns,nns,nconf;
   int8_t        i;
 
   maxit = 2;
