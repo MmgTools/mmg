@@ -412,7 +412,8 @@ static inline
 int  MMG3D_chkcoquilface(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
   MMG5_pxTetra pxt;
-  MMG5_int k,it1,it2,list[MMG3D_LMAX+2];
+  MMG5_int k,it1,it2;
+  int64_t list[MMG3D_LMAX+2];
   int i,j,ret;
   int8_t ia;
 
@@ -766,7 +767,8 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
   MMG5_pTetra      pt,pt1;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0,p1;
-  MMG5_int         k,ntet,ned,np,list[MMG3D_LMAX+2],np1,ischk,npchk,iel;
+  MMG5_int         k,ntet,ned,np,np1,ischk,npchk,iel;
+  int64_t          list[MMG3D_LMAX+2];
   int              nf,ilist,l;
   int8_t           i0,j,i,i1,ia,ier;
 

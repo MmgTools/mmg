@@ -48,7 +48,8 @@ int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint    ppt,pptb,ppta;
 
   int            it,lon,l;
-  MMG5_int       k,i,list[MMG3D_LMAX+2],iel,ipt,ipta,iptb;
+  int64_t        list[MMG3D_LMAX+2];
+  MMG5_int       k,i,iel,ipt,ipta,iptb;
   int            maxiter;
   MMG5_int       ipt0,ipt1,ipt2,ipt3,*compt;
   double         vol,ax,ay,az,bx,by,bz;

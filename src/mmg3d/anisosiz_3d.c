@@ -196,7 +196,8 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha, hausd,hausd_v;
-  MMG5_int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int           lists[MMG3D_LMAX+2];
+  int64_t            listv[MMG3D_LMAX+2];
   int                k,ilist,ifac,isloc,init_s,ilists,ilistv;
   MMG5_int           idp,iel;
   uint8_t            i,i0,i1,i2;
@@ -562,6 +563,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,
     }
     assert(i0!=3);
 
+    assert( 0<=ifac && ifac<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
     assert(pt->xt);
     pxt = &mesh->xtetra[pt->xt];
@@ -610,7 +612,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
   MMG5_pxPoint  px0;
   MMG5_Bezier   b;
   MMG5_pPar     par;
-  MMG5_int      lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int      lists[MMG3D_LMAX+2];
+  int64_t       listv[MMG3D_LMAX+2];
   int           k,ilists,ilistv,ilist;
   MMG5_int      iel,ipref[2],idp;
   int           ifac,isloc;
@@ -804,7 +807,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
 
     // i0  = MMG5_idir[ifac][i];
     // i1  = MMG5_idir[ifac][MMG5_inxt2[i]];
-
+    assert( 0<=ifac && ifac<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
     MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
@@ -878,7 +881,8 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, 
   MMG5_pxPoint   px0;
   MMG5_Bezier    b;
   MMG5_pPar      par;
-  MMG5_int       lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int       lists[MMG3D_LMAX+2];
+  int64_t        listv[MMG3D_LMAX+2];
   int            k,ilist,ilists,ilistv;
   int            ifac,isloc;
   MMG5_int       iel,idp;
@@ -1031,7 +1035,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, 
 
     // i0  = MMG5_idir[ifac][i];
     // i1  = MMG5_idir[ifac][MMG5_inxt2[i]];
-
+    assert( 0<=ifac && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
     MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
@@ -1101,9 +1105,9 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   MMG5_pPoint   ppt;
   MMG5_pPar     par;
   double        isqhmax,isqhmin,*m;
-  MMG5_int      list[MMG3D_LMAX+2],k,ip;
+  MMG5_int      k,ip;
+  int64_t       list[MMG3D_LMAX+2];
   int           l,i,j,isloc,ilist;
-  static int8_t mmgWarn = 0;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);

@@ -78,7 +78,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
   MMG5_pxPoint  pxp;
   double        len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int           ilist,ilists;
-  MMG5_int      src,k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],ref,base;
+  MMG5_int      src,k,ip1,ip2,ip,iq,lists[MMG3D_LMAX+2],ref,base;
+  int64_t       list[MMG3D_LMAX+2];
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;
@@ -173,6 +174,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
           if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
             continue;
           else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            assert( 0<=i && i<4 && "unexpected local face idx");
             MMG5_tet2tri(mesh,k,i,&ptt);
             MMG5_nortri(mesh,&ptt,no1);
             if ( !MG_GET(pxt->ori,i) ) {
@@ -196,6 +198,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
           if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
             goto collapse;
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            assert( 0<=i && i<4 && "unexpected local face idx");
             MMG5_tet2tri(mesh,k,i,&ptt);
             MMG5_nortri(mesh,&ptt,no1);
           }
@@ -432,6 +435,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       j  = MMG5_iarfinv[i][imin];
       i1 = MMG5_idir[i][MMG5_inxt2[j]];
       i2 = MMG5_idir[i][MMG5_iprv2[j]];
+      assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
+      assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
       ip = pt->v[i1];
       iq = pt->v[i2];
       p0 = &mesh->point[ip];
@@ -533,6 +538,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
             if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
               continue;
             else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+              assert( 0<=i && i<4 && "unexpected local face idx");
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
             }
@@ -551,6 +557,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
             if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
               goto collapse2;
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+              assert( 0<=i && i<4 && "unexpected local face idx");
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
             }

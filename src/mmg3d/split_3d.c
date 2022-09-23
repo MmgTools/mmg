@@ -273,6 +273,8 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int
 
   /** Store the first boundary triangle (the one that is created in the boundary
    * face that we split) */
+  assert(iface >=0 && iface < 4 && "local face idx");
+
   MMG5_tet2tri(mesh,start,iface,&tt0);
 
   iedge = MMG5_iarfinv[iface][ia];
@@ -319,7 +321,7 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int
  * position o and tag \a tag, to be inserted at an edge, whose shell is passed.
  *
  */
-int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int ip) {
+int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int ip) {
   MMG5_pTetra    pt,pt0;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    ppt0;
@@ -465,8 +467,9 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , MMG5_int start, int8_t iface, int ia,
                          double n[3]                                     )
 {
   MMG5_Tria tt;
-  int       iedgeOpp,it;
-  MMG5_int  list[MMG3D_LMAX+2],it1,it2;
+  int       iedgeOpp;
+  int64_t   list[MMG3D_LMAX+2];
+  MMG5_int  it1,it2,it;
 
   iedgeOpp = MMG5_iarf[iface][ia];
 
@@ -484,6 +487,7 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , MMG5_int start, int8_t iface, int ia,
   else {
     it = it2;
   }
+  assert ( it/4>0 && 0<=it%4 && it%4<4 && "unexpected idx for tetra or local face idx" );
   MMG5_tet2tri(mesh,it/4,it%4,&tt);
 
   /** Compute the normal of the second triangle */
@@ -506,7 +510,7 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , MMG5_int start, int8_t iface, int ia,
  *
  */
 static inline
-int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,MMG5_int *list,MMG5_int *newtet,uint8_t tau[4]) {
+int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,int64_t *list,MMG5_int *newtet,uint8_t tau[4]) {
   MMG5_pTetra          pt,pt1;
   MMG5_xTetra          xt,xt1;
   MMG5_pxTetra         pxt0;
@@ -610,7 +614,7 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,MMG5_int *list,MM
  * sense).
  *
  */
-int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *list, int ret, MMG5_int ip,
+int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int ip,
                   int cas,int8_t metRidTyp,int8_t chkRidTet){
   MMG5_pTetra          pt,pt1,pt0;
   double               lmin,lmax,len;
@@ -4694,7 +4698,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
  */
 static inline
 int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
-                    MMG5_int* list,int ret,double crit) {
+                   int64_t* list,int ret,double crit) {
   MMG5_pTetra   pt0,pt1;
   double        cal,critloc;
   int           l,ipb,lon;
@@ -4752,7 +4756,8 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
   MMG5_pPoint  p0,p1;
   double       o[3];
   int          warn,lon,ier;
-  MMG5_int     src,list[MMG3D_LMAX+2],i0,i1,ip;
+  int64_t      list[MMG3D_LMAX+2];
+  MMG5_int     src,i0,i1,ip;
   int16_t      tag;
 
   warn = 0;

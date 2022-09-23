@@ -1015,7 +1015,7 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
  * ball of point must be provided).
  *
  */
-int MMG3D_localParamReg(MMG5_pMesh mesh,MMG5_int ip,MMG5_int *listv,int ilistv,
+int MMG3D_localParamReg(MMG5_pMesh mesh,MMG5_int ip,int64_t *listv,int ilistv,
                          MMG5_int *lists,int ilists,
                          double* hausd_ip,double *hmin_ip,double *hmax_ip) {
 
@@ -1144,7 +1144,8 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,MMG5_int iel,int iface,int ia,
   double        hausd, hmin, hmax;
   int           l,k,isloc;
   int           ilistv;
-  MMG5_int      listv[MMG3D_LMAX+2],ifac1,ifac2;
+  int64_t       listv[MMG3D_LMAX+2];
+  MMG5_int      ifac1,ifac2;
   static int8_t mmgWarn0;
 
 

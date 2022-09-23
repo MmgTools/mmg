@@ -138,7 +138,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int iel,int i,MMG5_
  * Insertion of the vertex \a ip. The cavity of \a ip become its ball.
  *
  */
-int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int ilist) {
+int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,int64_t *list,int ilist) {
   MMG5_pPoint   ppt;
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt;
@@ -350,7 +350,7 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int ili
  * Cavity correction for quality (aniso).
  *
  */
-static int MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,MMG5_int* list,
+static int MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int64_t* list,
                                 int ilist,int nedep,double volmin) {
   MMG5_pPoint   ppt,p1,p2,p3;
   MMG5_pTetra   pt;
@@ -477,7 +477,7 @@ static int MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,MMG5_int* li
  *
  */
 static int
-MMG5_correction_iso(MMG5_pMesh mesh,int ip,MMG5_int *list,int ilist,int nedep,double volmin) {
+MMG5_correction_iso(MMG5_pMesh mesh,int ip,int64_t *list,int ilist,int nedep,double volmin) {
   MMG5_pPoint ppt,p1,p2,p3;
   MMG5_pTetra      pt;
   double           dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
@@ -579,7 +579,7 @@ MMG5_correction_iso(MMG5_pMesh mesh,int ip,MMG5_int *list,int ilist,int nedep,do
  * Mark elements in cavity and update the list of tetra in the cavity.
  *
  */
-int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel,int ip,MMG5_int* list,int lon,double volmin) {
+int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel,int ip,int64_t* list,int lon,double volmin) {
   MMG5_pPoint    ppt;
   MMG5_pTetra    pt,pt1;
   double         c[3],eps,dd,ray,ux,uy,uz,crit;
@@ -739,7 +739,7 @@ int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel,int ip,MMG5_int* 
  * Mark elements in cavity and update the list of tetra in the cavity.
  *
  */
-int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int iel,int ip,MMG5_int *list,int lon,double volmin) {
+int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int iel,int ip,int64_t *list,int lon,double volmin) {
   MMG5_pPoint      ppt;
   MMG5_pTetra      pt,pt1;
   double           c[3],crit,dd,eps,ray,ct[12];

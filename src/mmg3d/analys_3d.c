@@ -372,7 +372,8 @@ int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  MMG5_int      k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int      k,lists[MMG3D_LMAX+2];
+  int64_t       listv[MMG3D_LMAX+2];
   int           ilists,ilistv;
   int           i0,ier;
   int8_t        i,j;

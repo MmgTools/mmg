@@ -108,7 +108,8 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
   double         len,lmax,o[3],hma2;
   double         *m1,*m2,*mp;
   int            ilist,ier;
-  MMG5_int       src,ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2],iadr;
+  MMG5_int       src,ns,k,ip,ip1,ip2,iadr;
+  int64_t        list[MMG3D_LMAX+2];
   int8_t         imax,i,i1,i2;
   static int8_t  mmgWarn0 = 0;
 
@@ -272,7 +273,8 @@ MMG5_int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctre
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          ilist,it,maxit,ier;
-  MMG5_int     list[MMG3D_LMAX+2],k,nconf,ns,nns;
+  MMG5_int     k,nconf,ns,nns;
+  int64_t      list[MMG3D_LMAX+2];
   int8_t       i;
 
   maxit = 2;
@@ -322,7 +324,8 @@ MMG5_int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   int           ier,ilistv,it;
-  MMG5_int      k,nm,nnm,listv[MMG3D_LMAX+2],base;
+  MMG5_int      k,nm,nnm,base;
+  int64_t       listv[MMG3D_LMAX+2];
   uint8_t       i;
   int           maxit;
 
@@ -382,7 +385,8 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pPoint p0,p1;
   double      ll,ux,uy,uz,hmi2;
   int         ilist;
-  MMG5_int    k,nc,list[MMG3D_LMAX+2],nnm,base;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    k,nc,nnm,base;
   int         ier;
   int8_t      i,j,ip,iq,isnm;
 
@@ -404,6 +408,8 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
       for (j=0; j<3; j++) {
         ip = MMG5_idir[i][MMG5_inxt2[j]];
         iq = MMG5_idir[i][MMG5_iprv2[j]];
+        assert( 0<=ip && ip<4 && "unexpected local index for vertex");
+        assert( 0<=iq && iq<4 && "unexpected local index for vertex");
 
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];

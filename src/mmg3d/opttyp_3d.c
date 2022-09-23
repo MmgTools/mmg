@@ -328,7 +328,8 @@ static int MMG3D_typelt(MMG5_pMesh mesh,MMG5_int iel,int *item) {
 int MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int k,int iar) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_int      list[MMG3D_LMAX+2],nconf;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      nconf;
   int           lon,ier;
   double        OCRIT = 1.01;
 

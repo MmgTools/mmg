@@ -54,7 +54,7 @@ extern int8_t ddb;
  * provided).
  *
  */
-int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
+int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
                     MMG5_int it1,MMG5_int it2,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
@@ -104,6 +104,8 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
   assert(it2);
   iel2 = it2 / 4;
   ifa2 = it2 % 4;
+  assert( 0<=ifa1 && ifa1<4 && "unexpected local face idx");
+  assert( 0<=ifa2 && ifa2<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
   MMG5_tet2tri(mesh,iel2,ifa2,&tt2);
 
@@ -462,7 +464,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
  * Swap boundary edge whose shell is provided.
  *
  */
-int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int it1,
+int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int it1,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;

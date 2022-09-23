@@ -247,6 +247,7 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nump,MMG5_int *lists,
     iel   = lists[k] / 4;
     iface = lists[k] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,iface,&tt);
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
@@ -647,7 +648,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    p0,p1;
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
-  MMG5_int       lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],k,ip0,ip1;
+  MMG5_int       lists[MMG3D_LMAX+2],k,ip0,ip1;
+  int64_t        listv[MMG3D_LMAX+2];
   int            ilists,ilistv,l;
   int            kk,isloc;
   int8_t         ismet;

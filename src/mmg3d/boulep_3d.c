@@ -51,7 +51,7 @@ extern MMG5_Info  info;
  * of the tetra, jel = local index of p within kel.
  *
  */
-int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, MMG5_int * list){
+int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, int64_t * list){
   MMG5_pTetra  pt,pt1;
   MMG5_int     base,*adja,nump,k,k1;
   int          ilist,cur;
@@ -59,6 +59,7 @@ int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, MMG5_int * list){
 
   base = ++mesh->base;
   pt   = &mesh->tetra[start];
+  assert( 0<=ip && ip<4 && "unexpected local index for vertex");
   nump = pt->v[ip];
 
   /* Store initial tetrahedron */
@@ -583,7 +584,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
  *
  */
 int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
-                        MMG5_int *listv,int *ilistv,MMG5_int *lists,int*ilists, int isnm)
+                        int64_t *listv,int *ilistv,MMG5_int *lists,int*ilists, int isnm)
 {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
@@ -744,7 +745,8 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  *
  */
 int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
-                       MMG5_int *listv,int *ilistv,MMG5_int *lists,int *ilists,MMG5_int *refmin,MMG5_int *refplus,int isnm)
+                          int64_t *listv,int *ilistv,MMG5_int *lists,int *ilists,
+                          MMG5_int *refmin,MMG5_int *refplus,int isnm)
 {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
@@ -1372,9 +1374,9 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
  * Find all tets sharing edge ia of tetra start.
  *
  */
-int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,MMG5_int * list) {
+int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t * list) {
   MMG5_pTetra   pt;
-  MMG5_int      *adja,piv,adj,na,nb;
+  MMG5_int      *adja,piv,na,nb,adj;
   int           ilist;
   int8_t        i;
   static int8_t mmgErr0=0, mmgErr1=0;
@@ -1386,7 +1388,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,MMG5_int * list) {
   na   = pt->v[ MMG5_iare[ia][0] ];
   nb   = pt->v[ MMG5_iare[ia][1] ];
   ilist = 0;
-  list[ilist] = 6*start+ia;
+  list[ilist] = 6*(int64_t)start+ia;
   ilist++;
 
   adja = &mesh->adja[4*(start-1)+1];
@@ -1400,7 +1402,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,MMG5_int * list) {
     /* identification of edge number in tetra adj */
     if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,0,&mmgErr1,&i) ) return -1;
 
-    list[ilist] = 6*adj +i;
+    list[ilist] = 6*(int64_t)adj +i;
     ilist++;
     /* overflow */
     if ( ilist > MMG3D_LMAX-3 ) {
@@ -1438,7 +1440,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,MMG5_int * list) {
   ilist = 0;
 
   /* Start back everything from this tetra adj */
-  list[ilist] = 6*adj + i;
+  list[ilist] = 6*(int64_t)adj + i;
   ilist++;
   /* overflow */
   if ( ilist > MMG3D_LMAX-3 ) {
@@ -1471,7 +1473,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,MMG5_int * list) {
     /* identification of edge number in tetra adj */
     if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,0,&mmgErr1,&i) ) return -1;
 
-    list[ilist] = 6*adj +i;
+    list[ilist] = 6*(int64_t)adj +i;
     ilist++;
     /* overflow */
     if ( ilist > MMG3D_LMAX-2 ) {
@@ -1644,7 +1646,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
  *
  */
 int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_int nb,int8_t iface,
-                               int8_t ia,MMG5_int *list,int *ilist,MMG5_int *it1,MMG5_int *it2,
+                               int8_t ia,int64_t *list,int *ilist,MMG5_int *it1,MMG5_int *it2,
                                MMG5_int *piv,MMG5_int *adj,int8_t *hasadja,int *nbdy,int silent) {
 
   MMG5_pTetra   pt;
@@ -1692,7 +1694,7 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
     ier = MMG5_coquilTravel(mesh,na,nb,adj,piv,&iface,&i);
 
     /* fill the shell */
-    list[(*ilist)] = 6*pradj +pri;
+    list[(*ilist)] = 6*(int64_t)pradj +pri;
     (*ilist)++;
 
     /* overflow */
@@ -1745,7 +1747,7 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
  *
  */
 void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,
-                                     int8_t *ia,MMG5_int *list,int *ilist,MMG5_int *it1,
+                                     int8_t *ia,int64_t *list,int *ilist,MMG5_int *it1,
                                      MMG5_int *pradj,MMG5_int *adj) {
 
   MMG5_pTetra   pt;
@@ -1800,7 +1802,7 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,
  *
  * \warning Don't work if \a ia has only one boundary face in its shell.
  */
-int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,MMG5_int *list,
+int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,int64_t *list,
                      MMG5_int *it1,MMG5_int *it2, int silent) {
   MMG5_pTetra   pt;
   MMG5_int      piv,adj,na,nb,pradj;
@@ -1873,7 +1875,7 @@ int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,MMG5_int 
     ier = MMG5_openCoquilTravel( mesh, na, nb, &adj, &piv, &iface, &i );
     if ( ier<0 ) return -1;
 
-    list[ilist] = 6*pradj +i;
+    list[ilist] = 6*(int64_t)pradj +i;
     ilist++;
     /* overflow */
     if ( ilist > MMG3D_LMAX-2 ) {

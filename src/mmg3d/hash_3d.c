@@ -460,7 +460,8 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
   MMG5_pxTetra        pxt;
   MMG5_pTria          ptt;
   MMG5_hedge          *ph;
-  MMG5_int            adj,pradj,piv,list[MMG3D_LMAX+2];
+  MMG5_int            adj,pradj,piv;
+  int64_t             list[MMG3D_LMAX+2];
   MMG5_int            k,l,i1,i2,na,nb,ia,it1,it2, nr;
   MMG5_int            start;
   int                 ilist,nbdy,ipa,ipb;

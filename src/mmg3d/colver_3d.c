@@ -41,7 +41,7 @@ extern int8_t  ddb;
 /** Check whether collapse ip -> iq could be performed, ip internal ;
  *  'mechanical' tests (positive jacobian) are not performed here */
 int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
-                    int8_t iedg,MMG5_int *list,int ilist,int8_t typchk) {
+                    int8_t iedg,int64_t *list,int ilist,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
   double        calold,calnew,caltmp,ll,lon;
@@ -371,7 +371,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
  * \remark we don't check edge lengths.
  */
 int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
-                    int8_t iedg,MMG5_int *listv,int ilistv,MMG5_int *lists,int ilists,
+                    int8_t iedg,int64_t *listv,int ilistv,MMG5_int *lists,int ilists,
                     MMG5_int refmin,MMG5_int refplus, int8_t typchk,int isnm,int8_t isnmint) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
@@ -427,6 +427,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   for (l=0; l<ilistv; l++) {
     iel = listv[l] / 4;
     ipp = listv[l] % 4;
+    assert(iel && ipp >=0 && ipp < 4 && "unexpected tetra or local vertex idx");
+
     pt  = &mesh->tetra[iel];
 
     if ( !isnmint ) {
@@ -513,6 +515,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   for (l=1; l<ilists-1; l++) {
     iel  = lists[l] / 4;
     iopp = lists[l] % 4;
+    assert(iel && iopp >=0 && iopp < 4 && "unexpected tetra or local vertex idx");
+
     pt   = &mesh->tetra[iel];
     pxt  = &mesh->xtetra[pt->xt];
     assert(pt->xt);
@@ -1079,7 +1083,7 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *t
  * (i.e. approximation of the surface, etc... must be performed outside).
  *
  */
-MMG5_int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist,int8_t indq,int8_t typchk) {
+MMG5_int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ilist,int8_t indq,int8_t typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;

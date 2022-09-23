@@ -55,7 +55,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *list,int ilist,
+int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *list,int ilist,
                        int improve) {
 
 
@@ -188,7 +188,7 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, M
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
                           int ilistv,MMG5_int *lists,int ilists,
                           int improveSurf, int improveVol) {
   MMG5_pTetra       pt,pt0;
@@ -244,6 +244,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     pt     = &mesh->tetra[iel];
     pxt    = &mesh->xtetra[pt->xt];
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,iface,&tt);
 
     if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
@@ -349,6 +350,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   k           = lists[ilists-1] / 4;
   iface       = lists[ilists-1] % 4;
 
+  assert( 0<=iface && iface<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,k,iface,&tt);
   for( i=0 ; i<3 ; i++ )
     if ( tt.v[i] == ip0 )      break;
@@ -363,6 +365,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     k     = lists[l] / 4;
     iface = lists[l] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,k,iface,&tt);
     calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
 
@@ -492,7 +495,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  */
 static inline
-int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree,int64_t *listv,
                             int ilistv, MMG5_int *lists, int ilists,int improve,const int16_t edgTag){
   MMG5_pTetra           pt,pt0;
   MMG5_pPoint           p0,ppt0;
@@ -748,6 +751,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   iel         = lists[ilists-1] / 4;
   iface       = lists[ilists-1] % 4;
 
+  assert( 0<=iface && iface<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,iel,iface,&tt);
   for( i=0 ; i<3 ; i++ ) {
     if ( tt.v[i] == ip0 ) {
@@ -766,6 +770,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     iel         = lists[l] / 4;
     iface       = lists[l] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,iface,&tt);
     caltmp = MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
@@ -891,7 +896,7 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree,int64_t *listv,
                           int ilistv, MMG5_int *lists, int ilists,int improve){
 
   return MMG3D_movbdycurvept_ani(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_REF);
@@ -915,7 +920,7 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,int64_t *listv,
                           int ilistv, MMG5_int *lists, int ilists,
                           int improve){
   return MMG3D_movbdycurvept_ani(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_NOM);
@@ -938,7 +943,7 @@ int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree,int64_t *listv,
                           int ilistv,MMG5_int *lists,int ilists,
                           int improve) {
   return MMG3D_movbdycurvept_ani(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_GEO);

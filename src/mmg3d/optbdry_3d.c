@@ -49,7 +49,8 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   /* double        *n; */
-  MMG5_int      ier/*,lists[MMG3D_LMAX+2]*/,base,listv[MMG3D_LMAX+2];
+  int64_t       listv[MMG3D_LMAX+2];
+  MMG5_int      ier/*,lists[MMG3D_LMAX+2]*/,base;
   int           i0,i,j/*,ilists*/,ilistv;
   int           /* improve,*/ internal,nm,/*maxit,*/ns;
 
@@ -161,7 +162,7 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
   MMG5_pTetra pt;
   double      len;
   int         ied,iedg,iq,i1,ilistcol;
-  MMG5_int    listcol[MMG3D_LMAX+2];
+  int64_t     listcol[MMG3D_LMAX+2];
   int         ier;
   int8_t      iface,ief;
 
@@ -187,6 +188,7 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
     }
     i1    = MMG5_idir[iface][MMG5_inxt2[ief]];
 
+    assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
     ilistcol = MMG5_boulevolp(mesh,k,i1,listcol);
 
     ilistcol = MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
@@ -219,7 +221,8 @@ int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
                        MMG5_int k,int i) {
   MMG5_pTetra pt;
   int         il,ilist,ip;
-  MMG5_int    iel,list[MMG3D_LMAX+2];
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    iel;
 
   pt = &mesh->tetra[k];
 
@@ -227,6 +230,7 @@ int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
     return 0;
   }
 
+  assert( 0<=i && i<4 && "unexpected local index for vertex");
   ilist = MMG5_boulevolp(mesh,k,i,list);
   if (ilist > 30 ) return 0;
 
@@ -256,7 +260,8 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_in
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          ib,i,j;
-  MMG5_int     list[MMG3D_LMAX+2],ipb,it1,it2;
+  int64_t      list[MMG3D_LMAX+2];
+  MMG5_int     ipb,it1,it2;
   int          iedg,ier,ilist,ied,ia,ret,imove;
 
   imove = 0;

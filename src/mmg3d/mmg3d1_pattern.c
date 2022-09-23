@@ -55,7 +55,8 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  MMG5_pxTetra  pxt;
  MMG5_pPoint   p0,p1;
  double        len,lmax,o[3];
- MMG5_int      ns,src,k,ip,ip1,ip2,list[MMG3D_LMAX+2];
+ MMG5_int      ns,src,k,ip,ip1,ip2;
+ int64_t       list[MMG3D_LMAX+2];
  int           ier,ilist;
  int8_t        imax,j,i,i1,i2,ifa0,ifa1;
  int8_t        chkRidTet;
@@ -188,7 +189,8 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
   double        len,lmin;
-  MMG5_int      k,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],nc;
+  MMG5_int      k,ip,iq,lists[MMG3D_LMAX+2],nc;
+  int64_t       list[MMG3D_LMAX+2];
   int           ilist,ier,ilists;
   int16_t       tag;
   int8_t        imin,j,i,i1,i2,ifa0,ifa1;
@@ -231,6 +233,8 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     j  = MMG5_iarfinv[i][imin];
     i1 = MMG5_idir[i][MMG5_inxt2[j]];
     i2 = MMG5_idir[i][MMG5_iprv2[j]];
+    assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
+    assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
     ip = pt->v[i1];
     iq = pt->v[i2];
     p0 = &mesh->point[ip];

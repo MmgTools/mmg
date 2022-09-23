@@ -55,7 +55,7 @@
  *
  */
 MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
-                    int *ilist,MMG5_int *list,double crit,int8_t typchk) {
+                    int *ilist,int64_t *list,double crit,int8_t typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double         calold,calnew,caltmp;
@@ -74,7 +74,7 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
   /* Store shell of ia in list, and associated pseudo polygon in pol */
   (*ilist) = 0;
   npol = 0;
-  list[(*ilist)] = 6*start+ia;
+  list[(*ilist)] = 6*(int64_t)start+ia;
   (*ilist)++;
   adja = &mesh->adja[4*(start-1)+1];
   adj  = adja[MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
@@ -106,7 +106,7 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
     /* identification of edge number in tetra adj */
     if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
 
-    list[(*ilist)] = 6*adj +i;
+    list[(*ilist)] = 6*(int64_t)adj +i;
     (*ilist)++;
     /* overflow */
     if ( (*ilist) > MMG3D_LMAX-3 )  return 0;
@@ -268,7 +268,7 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,MMG5_int *list,
+int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int64_t *list,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;

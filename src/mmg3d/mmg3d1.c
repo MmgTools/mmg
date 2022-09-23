@@ -57,6 +57,8 @@ void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt) {
   MMG5_pxTetra pxt;
   int8_t       i;
 
+  assert ( 0<=ie && ie<4 && "unexpected local face idx");
+
   pt = &mesh->tetra[k];
   memset(ptt,0,sizeof(MMG5_Tria));
   ptt->v[0] = pt->v[MMG5_idir[ie][0]];
@@ -241,7 +243,7 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
  * considered edge, starting from o point.
  *
  */
-int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int ip) {
+int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int ip) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p0,p1,ppt;
   int          it,maxit;
@@ -551,7 +553,8 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
   MMG5_pxTetra  pxt;
   int           it,ilist,ret,maxit;
   int8_t        i,j,ia,ier;
-  MMG5_int      k,list[MMG3D_LMAX+2],it1,it2,ns,nns;
+  MMG5_int      k,it1,it2,ns,nns;
+  int64_t       list[MMG3D_LMAX+2];
 
   it = nns = 0;
   maxit = 2;
@@ -621,7 +624,8 @@ MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int           ilist,it,nconf,maxit,ier;
-  MMG5_int      list[MMG3D_LMAX+2],k,ns,nns;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      k,ns,nns;
   int8_t        i;
 
   maxit = 2;
@@ -687,8 +691,9 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
   MMG5_pxTetra  pxt;
   MMG5_Tria     tt;
   double        *n,caltri;
-  int           ier,ilists,ilistv,it;
-  MMG5_int      i,k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],nm,nnm,ns,base;
+  int           ier,ilists,ilistv,it,i;
+  MMG5_int      k,lists[MMG3D_LMAX+2],nm,nnm,ns,base;
+  int64_t       listv[MMG3D_LMAX+2];
   uint8_t       j,i0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -724,6 +729,7 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
             /* skip required faces */
             if( pxt->ftag[i] & MG_REQ ) continue;
 
+            assert( 0<=i && i<4 && "unexpected local face idx");
             MMG5_tet2tri(mesh,k,i,&tt);
             caltri = MMG5_caltri(mesh,met,&tt);
 
@@ -742,6 +748,7 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
             else if ( (ppt->tag & MG_PARBDY)  || (ppt->tag & MG_PARBDYBDY) ) continue; /* skip parallel points seen by non-required faces */
             else if ( ppt->tag & MG_NOM ){
               if ( ppt->xp && mesh->xpoint[ppt->xp].nnor ) {
+                assert( 0<=i0 && i0<4 && "unexpected local index for vertex");
                 ilistv = MMG5_boulevolp(mesh,k,i0,listv);
                 if ( !ilistv )  continue;
                 /* Iso for now */
@@ -798,6 +805,7 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
             }
           }
           else if ( moveVol && (pt->qual < clickVol) ) {
+            assert( 0<=i0 && i0<4 && "unexpected local index for vertex");
             ilistv = MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
             ier = MMG5_movintpt(mesh,met,PROctree,listv,ilistv,improveVol);
@@ -838,7 +846,8 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPar       par;
   double          ll,ux,uy,uz,hmi2;
   int             ilists,ilist;
-  MMG5_int        base,k,nc,nnm,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],refmin,refplus;
+  MMG5_int        base,k,nc,nnm,lists[MMG3D_LMAX+2],refmin,refplus;
+  int64_t         list[MMG3D_LMAX+2];
   int             l,kk,isloc,ifac1;
   int16_t         tag,isnm,isnmint;
   int8_t          i,j,ip,iq;
@@ -890,6 +899,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             /* Catch an exterior non manifold point by an external face */
             if ( isnm ) {
               if ( isnmint ) {
+                assert( 0<=ip && ip<4 && "unexpected local index for vertex");
                 ilist = MMG5_boulevolp(mesh,k,ip,list);
               }
               else {
@@ -906,6 +916,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             }
           }
           else {
+            assert( 0<=ip && ip<4 && "unexpected local index for vertex");
             ilist = MMG5_boulevolp(mesh,k,ip,list);
           }
         }
@@ -1019,6 +1030,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             if ( p0->tag > tag ) continue;
             if ( isnm ) {
               if ( isnmint ) {
+                assert( 0<=ip && ip<4 && "unexpected local index for vertex");
                 ilist = MMG5_boulevolp(mesh,k,ip,list);
               }
               else {
@@ -1035,6 +1047,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             }
           }
           else {
+            assert( 0<=ip && ip<4 && "unexpected local index for vertex");
             ilist = MMG5_boulevolp(mesh,k,ip,list);
           }
         }
@@ -1463,6 +1476,10 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
   int       ier;
   static int8_t warn_n = 0;
 
+  assert ( 0<=i && i<4 && "unexpected local idx for face" );
+  assert ( 0<=j && j<3 && "unexpected local edg odx in face" );
+
+  assert( 0<=i && i<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,k,i,&ptt);
   MMG5_nortri(mesh,&ptt,no1);
   if ( !MG_GET(pxt->ori,i) ) {
@@ -1546,7 +1563,8 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   MMG5_pxPoint pxp;
   double       o[3],to[3],no1[3],no2[3],v[3];
   int          ilist;
-  MMG5_int     src,ip,ip1,ip2,list[MMG3D_LMAX+2],ref;
+  MMG5_int     src,ip,ip1,ip2,ref;
+  int64_t      list[MMG3D_LMAX+2];
   int          ier;
   int16_t      tag;
   int8_t       j,i,i1,i2,ifa0,ifa1;
@@ -1582,6 +1600,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
     if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) { return 0; }
 
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
       if ( !MG_GET(pxt->ori,i) ) {
@@ -1603,6 +1622,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   else if ( tag & MG_REF ) {
     if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) { return 0; }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
       if ( !MG_GET(pxt->ori,i) ) {
@@ -1616,6 +1636,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
     if ( !MMG5_norface(mesh,k,i,v) ) { return 0; }
     if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) { return 0; }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
       if ( !MG_GET(pxt->ori,i) ) {
@@ -1865,6 +1886,7 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       if ( !MG_GET(pxt->ori,i) ) continue;
 
       /* virtual triangle */
+      assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
 
       if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
@@ -1955,6 +1977,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       }
 
       /* virtual triangle */
+      assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
 
       if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
@@ -2066,6 +2089,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
                 /* Compute tangent and normal with respect to the face ifac */
                 /* virtual triangle */
+                assert( 0<=ifac && ifac<4 && "unexpected local face idx");
                 MMG5_tet2tri(mesh,k,ifac,&ptt2);
 
                 /* geometric support */
@@ -2114,6 +2138,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       /* virtual triangle */
       memset(&ptt,0,sizeof(MMG5_Tria));
       if ( pt->xt && pxt->ftag[i] && pxt->ftag[i] != MG_OLDPARBDY ) {
+        assert( 0<=i && i<4 && "unexpected local face idx");
         MMG5_tet2tri(mesh,k,i,&ptt);
       }
 
