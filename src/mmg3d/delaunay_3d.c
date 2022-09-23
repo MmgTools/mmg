@@ -66,8 +66,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int iel,int i,MMG5_
     mins = v[1];
     maxs = v[0];
   }
-  key = MMG3D_KTA*mins + MMG3D_KTB*maxs;
-  key = key % hash->siz;
+  key = (MMG3D_KTA*(int64_t)mins + MMG3D_KTB*(int64_t)maxs)%hash->siz;
   ha  = &hash->item[key];
 
   if ( ha->a ) {

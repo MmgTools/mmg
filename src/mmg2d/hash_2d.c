@@ -77,8 +77,7 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
       }
 
       /* compute key */
-      key = KTA*(int64_t)mins + KTB*(int64_t)maxs;
-      key = key % hsize + 1;
+      key = (KTA*(int64_t)mins + KTB*(int64_t)maxs)%hsize+1;
 
       /* insert */
       iadr = 3*(k-1) + i+1;
@@ -208,8 +207,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
       }
 
       /* compute key */
-      key = KTA*(int64_t)mins + KTB*(int64_t)maxs;
-      key = key % hsize + 1;
+      key = (KTA*(int64_t)mins + KTB*(int64_t)maxs)%hsize+1;
 
       /* insert */
       iadr++;
