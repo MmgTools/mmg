@@ -56,14 +56,15 @@
  * check if geometry preserved by collapsing edge i
  *
  */
-int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk,
-           double (*MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,int ,int,int8_t),
+int chkcol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *list,int8_t typchk,
+           double (*MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,MMG5_int ,MMG5_int,int8_t),
            double (*MMGS_caltri)(MMG5_pMesh,MMG5_pSol,MMG5_pTria)) {
   MMG5_pTria     pt,pt0,pt1,pt2;
   MMG5_pPoint    p1,p2;
   double         len,lon,ps,cosnold,cosnnew,kal,n0old[3],n1old[3],n00old[3];
   double         n0new[3],n1new[3],n00new[3];
-  int            *adja,jel,kel,ip1,ip2,l,ll,ilist;
+  MMG5_int       *adja,jel,kel,ip1,ip2,l,ll;
+  int            ilist;
   int8_t         i1,i2,j,jj,j2,lj,open,voy;
 
   pt0 = &mesh->tria[0];
@@ -104,7 +105,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk,
     if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
       pt1 = &mesh->tria[jel];
-      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     }
 
     /* analyze ball */
@@ -193,7 +194,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk,
       if ( MG_EDG(pt->tag[j]) ) {
         jel = list[ilist-2] / 3;
         pt1 = &mesh->tria[jel];
-        if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+        if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
       }
     }
   }
@@ -250,7 +251,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk,
 
     jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     p1 = &mesh->point[pt->v[i1]];
@@ -276,10 +277,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk,
 }
 
 /* collapse edge i of k, i1->i2 */
-int colver(MMG5_pMesh mesh,int *list,int ilist) {
+int colver(MMG5_pMesh mesh,MMG5_int *list,int ilist) {
   MMG5_pTria    pt,pt1,pt2;
-  int     *adja,k,iel,jel,kel,ip1,ip2;
-  int8_t   i,i1,i2,j,jj,open;
+  MMG5_int      *adja,k,iel,jel,kel,ip1,ip2;
+  int8_t        i,i1,i2,j,jj,open;
 
   iel = list[0] / 3;
   i1  = list[0] % 3;
@@ -366,9 +367,9 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
  * ball of the collapsed point of size 3: the collapsed point is removed.
  *
  */
-int colver3(MMG5_pMesh mesh,int* list) {
+int colver3(MMG5_pMesh mesh,MMG5_int* list) {
   MMG5_pTria   pt,pt1,pt2;
-  int          *adja,iel,jel,kel,mel,ip;
+  MMG5_int     *adja,iel,jel,kel,mel,ip;
   int8_t       i,i1,j,j1,j2,k,m;
 
   /* update of new point for triangle list[0] */
@@ -429,9 +430,9 @@ int colver3(MMG5_pMesh mesh,int* list) {
 
 
 /* collapse point along open ridge */
-int colver2(MMG5_pMesh mesh,int* list) {
+int colver2(MMG5_pMesh mesh,MMG5_int* list) {
   MMG5_pTria   pt,pt1;
-  int          *adja,iel,jel,kel,ip;
+  MMG5_int     *adja,iel,jel,kel,ip;
   int8_t       i1,i2,jj,j2,k;
 
   /* update of new point for triangle list[0] */
@@ -469,12 +470,13 @@ int colver2(MMG5_pMesh mesh,int* list) {
 }
 
 /* collapse edge i of k, i1->i2 */
-int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
+int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew;
   double         n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  int            list[MMGS_LMAX+2],jel,ip2,l,ilist;
+  MMG5_int       list[MMGS_LMAX+2],jel,ip2,l;
+  int            ilist;
   int8_t         i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];
@@ -500,7 +502,7 @@ int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
 #ifndef NDEBUG
   /* check for open ball */
   int8_t opn;
-  int *adja = &mesh->adja[3*(k-1)+1];
+  MMG5_int *adja = &mesh->adja[3*(k-1)+1];
   opn = adja[i] == 0;
   assert ( opn == open );
 #endif
@@ -509,7 +511,7 @@ int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
     /* check references */
     jel = list[1] / 3;
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
 
     /* analyze ball */
     assert ( ilist-1+open > 1 );
@@ -566,7 +568,7 @@ int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
       pt  = &mesh->tria[jel];
       jel = list[ilist-2] / 3;
       pt1 = &mesh->tria[jel];
-      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     }
 
     return colver(mesh,list,ilist);
@@ -590,7 +592,7 @@ int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
     j   = list[1] % 3;
     jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     p1 = &mesh->point[pt->v[i1]];

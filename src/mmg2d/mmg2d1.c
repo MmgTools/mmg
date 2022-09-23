@@ -38,7 +38,8 @@
    typchk = 1 -> adaptation based on edge lengths
    typchk = 2 -> adaptation based on lengths calculated in metric met */
 int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
-  int      it,maxit,ns,nc,nsw,nns,nnc,nnsw;
+  int       it,maxit;
+  MMG5_int  ns,nc,nsw,nns,nnc,nnsw;
 
   nns = nnc = nnsw = 0;
   it = 0;
@@ -79,7 +80,6 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       ns = 0;
       nc = 0;
     }
-
     /* Swap edges */
     if ( !mesh->info.noswap ) {
       nsw = MMG2D_swpmsh(mesh,met,typchk);
@@ -95,25 +95,26 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     nnsw += nsw;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nsw);
-    if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nsw);
+    if ( it > 3 && MMG5_abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nsw >0 );
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnsw,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %d iter.\n",nns,nnc,nnsw,it);
   }
   return 1;
 }
 
 /* Travel triangles and split long edges according to patterns */
-int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
   MMG5_Hash       hash;
   double          len,s,o[2],no[2];
-  int             ns,nc,npinit,ni,k,nt,ip1,ip2,ip,it,vx[3];
+  int             it;
+  MMG5_int        ni,npinit,ns,nc,k,nt,ip1,ip2,ip,vx[3];
   int8_t          i,ic,i1,i2,ier;
   static int8_t   mmgWarn0=0;
 
@@ -229,10 +230,9 @@ int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     if ( nc > 0 ) ns++;
   }
   if ( mesh->info.ddebug && ns ) {
-    fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
+    fprintf(stdout,"     %" MMG5_PRId " analyzed  %" MMG5_PRId " proposed\n",mesh->nt,ns);
     fflush(stdout);
   }
-
   /* Step 3: Simulate splitting and delete points leading to an invalid configuration */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
@@ -298,10 +298,10 @@ int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   while ( ni >0 && ++it <20 );
 
   if ( mesh->info.ddebug && nc ) {
-    fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
+    fprintf(stdout,"     %" MMG5_PRId " corrected,  %" MMG5_PRId " invalid\n",nc,ni);
     fflush(stdout);
   }
-
+  
   /* step 4: effective splitting */
   ns = 0;
   nt = mesh->nt;
@@ -341,7 +341,7 @@ int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     if ( !ier ) return -1;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
   MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
@@ -357,12 +357,13 @@ int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
  * Find acceptable position for splitting.
  *
  */
-int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pTria   pt;
   MMG5_pPoint  pa,pb,ps;
   double       o[3][2],p[3][2];
   float        to,tp,t;
-  int          ia,ib,ier,it,maxit;
+  MMG5_int     ia,ib;
+  int          ier,it,maxit;
   int8_t       i,i1,i2;
 
   pt = &mesh->tria[k];
@@ -433,12 +434,15 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 }
 
 /* Travel triangles and collapse short edges */
-int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   double       ux,uy,ll,hmin2;
-  int          list[MMG2D_LONMAX+2],ilist,nc,k;
+  MMG5_int     k;
+  int          ilist;
+  MMG5_int     nc;
   uint8_t      i,i1,i2,open;
+  MMG5_int     list[MMG2D_LONMAX+2];
 
   nc = 0;
   hmin2 = mesh->info.hmin * mesh->info.hmin;
@@ -501,15 +505,17 @@ int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   }
 
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
-    fprintf(stdout,"     %8d vertices removed\n",nc);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices removed\n",nc);
 
   return nc;
 }
 
 /* Travel triangles and swap edges to improve quality */
-int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria pt;
-  int        it,maxit,ns,nns,k;
+  int        it,maxit;
+  MMG5_int   ns,nns;
+  MMG5_int   k;
   uint8_t    i;
 
   it = nns = 0;
@@ -534,8 +540,7 @@ int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   }
   while ( ns > 0 && ++it<maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-    fprintf(stdout,"     %8d edge swapped\n",nns);
-
+    fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
   return nns;
 }
 
@@ -543,7 +548,8 @@ int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 /* Mesh adaptation routine for the final stage of the algorithm: intertwine splitting
  based on patterns, collapses, swaps and vertex relocations.*/
 int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
-  int                  maxit,it,nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
+  int                  maxit,it;
+  MMG5_int             nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
 
   nns = nnc = nnsw = nnm = it = 0;
   maxit = 5;
@@ -569,7 +575,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       ns = 0;
       nc = 0;
     }
-
+    
     if ( !mesh->info.noswap ) {
       nsw = MMG2D_swpmsh(mesh,met,2);
       if ( nsw < 0 ) {
@@ -598,9 +604,9 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     nnm  += nm;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nsw+nm > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nsw,nm);
-    if ( ns < 10 && abs(nc-ns) < 3 )  break;
-    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nsw,nm);
+    if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
+    else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && (nc+ns+nsw+nm > 0) );
 
@@ -614,10 +620,9 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     nnm += nm;
   }
-
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
   }
   return 1;
 }
@@ -632,10 +637,11 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
  * edges are only splitted on a one-by-one basis
  *
  */
-int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria         pt;
   double             lmax,len;
-  int                k,ns,nt,ip,ier;
+  MMG5_int           ip,ns,k,nt;
+  int                ier;
   int8_t             i,i1,i2,imax;
 
   ns = 0;
@@ -672,7 +678,6 @@ int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       return ns;
     }
     else if ( ip > 0 ) {
-
       ier = MMG2D_split1b(mesh,k,imax,ip);
 
       /* Lack of memory; abort the routine */
@@ -692,9 +697,11 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            len;
-  int               k,nc,ilist,list[MMG2D_LONMAX+2];
+  MMG5_int          k,nc;
+  int               ilist;
   int8_t            i,i1,i2,open;
-
+  MMG5_int          list[MMG2D_LONMAX+2];
+  
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -745,11 +752,13 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* Analyze points to relocate them according to a quality criterion */
-int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
+MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
   MMG5_pTria           pt;
   MMG5_pPoint          p0;
-  int                  base,k,nnm,nm,ns,it,ilist,list[MMG2D_LONMAX+2];
+  MMG5_int             nnm,nm,ns,k;
+  int                  it,ilist;
   int8_t               i,ier;
+  MMG5_int             base,list[MMG2D_LONMAX+2];
 
   it = nnm = 0;
   base = 0;
@@ -788,12 +797,12 @@ int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8" MMG5_PRId " moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while ( ++it < maxit && nm > 0 );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
-    fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %d iter.\n",nnm,it);
 
   return nnm;
 }
@@ -826,9 +835,9 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Stage 2: creation of a computational mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ){
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
-
+}
   if ( !MMG2D_defsiz(mesh,met) ) {
     fprintf(stderr,"  ## Metric undefined. Exit program.\n");
     return 0;

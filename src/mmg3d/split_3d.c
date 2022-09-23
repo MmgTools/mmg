@@ -50,7 +50,7 @@ extern int8_t  ddb;
  *
  */
 static inline
-void MMG3D_split1_cfg(int flag,uint8_t *tau,const uint8_t **taued) {
+void MMG3D_split1_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued) {
 
   /* default is case 1 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -91,7 +91,7 @@ void MMG3D_split1_cfg(int flag,uint8_t *tau,const uint8_t **taued) {
  * Simulate the splitting of 1 edge of element
  *
  */
-int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4];
@@ -133,11 +133,11 @@ int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 1 edge of tetra \a k.
  *
  */
-int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt,pt1;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
-  int                 iel;
+  MMG5_int            iel;
   int8_t              i,isxt,isxt1;
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -264,8 +264,8 @@ nextstep1:
  *
  */
 static inline
-int MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, int8_t   iface, int8_t ia,
-                           int        idx  , int  ip   , double n0[3])
+int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int8_t ia,
+                           MMG5_int        idx  , MMG5_int  ip   , double n0[3])
 {
   MMG5_Tria tt0;
   double    n1[3];
@@ -273,6 +273,8 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, int8_t   iface, int8_t i
 
   /** Store the first boundary triangle (the one that is created in the boundary
    * face that we split) */
+  assert(iface >=0 && iface < 4 && "local face idx");
+
   MMG5_tet2tri(mesh,start,iface,&tt0);
 
   iedge = MMG5_iarfinv[iface][ia];
@@ -319,14 +321,15 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, int8_t   iface, int8_t i
  * position o and tag \a tag, to be inserted at an edge, whose shell is passed.
  *
  */
-int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
+int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int ip) {
   MMG5_pTetra    pt,pt0;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    ppt0;
   double         calold,calnew,caltmp;
   double         n0[6],n1[6];
-  int            j,k,iel,ilist,idx,iface,ier,sum1,sum2,mins1,mins2,maxs1,maxs2;
-  int            is0,is1,is2;
+  int            j,k,ilist,idx,iface,ier;
+  MMG5_int       iel,sum1,sum2,mins1,mins2,maxs1,maxs2;
+  MMG5_int       is0,is1,is2;
   int8_t         ie,ia,ib,complete,wrongOri;
 
   ilist = ret / 2;
@@ -460,11 +463,13 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * tetra \a start through the edge \a ia (in local numbering of the face).
  *
  */
-int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
+int MMG3D_normalAdjaTri(MMG5_pMesh mesh , MMG5_int start, int8_t iface, int ia,
                          double n[3]                                     )
 {
   MMG5_Tria tt;
-  int       iedgeOpp,list[MMG3D_LMAX+2],it1,it2,it;
+  int       iedgeOpp;
+  int64_t   list[MMG3D_LMAX+2];
+  MMG5_int  it1,it2,it;
 
   iedgeOpp = MMG5_iarf[iface][ia];
 
@@ -482,6 +487,7 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
   else {
     it = it2;
   }
+  assert ( it/4>0 && 0<=it%4 && it%4<4 && "unexpected idx for tetra or local face idx" );
   MMG5_tet2tri(mesh,it/4,it%4,&tt);
 
   /** Compute the normal of the second triangle */
@@ -504,18 +510,19 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
  *
  */
 static inline
-int MMG5_split1b_eltspl(MMG5_pMesh mesh,int ip,int k,int *list,int *newtet,uint8_t tau[4]) {
+int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,int64_t *list,MMG5_int *newtet,uint8_t tau[4]) {
   MMG5_pTetra          pt,pt1;
   MMG5_xTetra          xt,xt1;
   MMG5_pxTetra         pxt0;
-  int                  iel,jel;
+  MMG5_int             iel;
+  MMG5_int             jel;
   int8_t               ie,isxt,isxt1,i;
   const uint8_t       *taued;
 
   iel = list[k] / 6;
   ie  = list[k] % 6;
   pt = &mesh->tetra[iel];
-  jel = abs(newtet[k]);
+  jel = MMG5_abs(newtet[k]);
   pt1 = &mesh->tetra[jel];
 
   pxt0 = 0;
@@ -529,7 +536,7 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,int ip,int k,int *list,int *newtet,uint8
     memset(&xt1,0, sizeof(MMG5_xTetra));
   }
 
-  int flag = 0;
+  MMG5_int flag = 0;
   MG_SET(flag,ie);
   MMG3D_split1_cfg(flag,tau,&taued);
 
@@ -607,15 +614,16 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,int ip,int k,int *list,int *newtet,uint8
  * sense).
  *
  */
-int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
+int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int ip,
                   int cas,int8_t metRidTyp,int8_t chkRidTet){
   MMG5_pTetra          pt,pt1,pt0;
   double               lmin,lmax,len;
-  int                  ilist,k,open,iel,jel,newtet[MMG3D_LMAX+2],nump,*adja,j;
-  int                 *adjan,nei2,nei3,mel;
+  int                  ilist,k,open,j;
+  MMG5_int             iel,jel,newtet[MMG3D_LMAX+2],nump,*adja;
+  MMG5_int             *adjan,nei2,nei3,mel;
   int8_t               ie,i,voy;
   uint8_t              tau[4];
-  const uint8_t       *taued;
+  const uint8_t        *taued;
 
   ilist = ret / 2;
   open  = ret % 2;
@@ -653,7 +661,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt0 = &mesh->tetra[0];
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
 
-      int flag = 0;
+      MMG5_int flag = 0;
       MG_SET(flag,ie);
       MMG3D_split1_cfg(flag,tau,&taued);
 
@@ -699,7 +707,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     ie  = list[k] % 6;
     pt  = &mesh->tetra[iel];
 
-    int flag = 0;
+    MMG5_int flag = 0;
     MG_SET(flag,ie);
     MMG3D_split1_cfg(flag,tau,&taued);
 
@@ -711,7 +719,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                           MMG5_INCREASE_MEM_MESSAGE();
                           k--;
                           for ( ; k>=0 ; --k ) {
-                            if ( !MMG3D_delElt(mesh,abs(newtet[k])) ) return -1;
+                            if ( !MMG3D_delElt(mesh,MMG5_abs(newtet[k])) ) return -1;
                           }
                           return -1);
       pt  = &mesh->tetra[iel];
@@ -736,7 +744,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     /* Update of adjacency relations */
     iel = list[0] / 6;
     pt = &mesh->tetra[iel];
-    jel = abs(newtet[0]);
+    jel = MMG5_abs(newtet[0]);
     pt1 = &mesh->tetra[jel];
 
     adja = &mesh->adja[4*(iel-1)+1];
@@ -782,7 +790,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
-    jel = abs(newtet[k]);
+    jel = MMG5_abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
 
     adja = &mesh->adja[4*(iel-1)+1];
@@ -796,10 +804,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       if ( (list[1] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[0],newtet[1]) ) {  //new elt of list[0] goes with new elt of list[1]
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*abs(newtet[1])+(nei2 %4);
+          adjan[tau[2]] = 4*MMG5_abs(newtet[1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*abs(newtet[1])+(nei2 %4);
+          adja[tau[2]] = 4*MMG5_abs(newtet[1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
@@ -812,10 +820,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           assert((list[ilist-1] / 6) == (nei3 / 4));
           if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[3]] = nei3;
-            adjan[tau[3]] = 4*abs(newtet[ilist-1])+(nei3 %4);
+            adjan[tau[3]] = 4*MMG5_abs(newtet[ilist-1])+(nei3 %4);
           }
           else {
-            adja[tau[3]] = 4*abs(newtet[ilist-1])+(nei3 %4);
+            adja[tau[3]] = 4*MMG5_abs(newtet[ilist-1])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
@@ -825,10 +833,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
         assert((list[1] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[0],newtet[1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*abs(newtet[1])+(nei3 %4);
+          adjan[tau[3]] = 4*MMG5_abs(newtet[1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*abs(newtet[1])+(nei3 %4);
+          adja[tau[3]] = 4*MMG5_abs(newtet[1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
@@ -841,10 +849,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           assert((list[ilist-1]) / 6 == (nei2 / 4));
           if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[2]] = nei2;
-            adjan[tau[2]] = 4*abs(newtet[ilist-1])+(nei2 %4);
+            adjan[tau[2]] = 4*MMG5_abs(newtet[ilist-1])+(nei2 %4);
           }
           else {
-            adja[tau[2]] = 4*abs(newtet[ilist-1])+(nei2 %4);
+            adja[tau[2]] = 4*MMG5_abs(newtet[ilist-1])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
         }
@@ -855,10 +863,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       if ( (list[ilist-2] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*abs(newtet[ilist-2])+(nei2 %4);
+          adjan[tau[2]] = 4*MMG5_abs(newtet[ilist-2])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*abs(newtet[ilist-2])+(nei2 %4);
+          adja[tau[2]] = 4*MMG5_abs(newtet[ilist-2])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
@@ -871,10 +879,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           assert((list[0]) / 6 == (nei3 / 4));
           if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[3]] = nei3;
-            adjan[tau[3]] = 4*abs(newtet[0])+(nei3 %4);
+            adjan[tau[3]] = 4*MMG5_abs(newtet[0])+(nei3 %4);
           }
           else {
-            adja[tau[3]] = 4*abs(newtet[0])+(nei3 %4);
+            adja[tau[3]] = 4*MMG5_abs(newtet[0])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
@@ -884,10 +892,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
         assert((list[ilist-2] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*abs(newtet[ilist-2])+(nei3 %4);
+          adjan[tau[3]] = 4*MMG5_abs(newtet[ilist-2])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*abs(newtet[ilist-2])+(nei3 %4);
+          adja[tau[3]] = 4*MMG5_abs(newtet[ilist-2])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
@@ -900,10 +908,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           assert((list[0]) / 6 == (nei2 / 4));
           if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[2]] = nei2;
-            adjan[tau[2]] = 4*abs(newtet[0])+(nei2 %4);
+            adjan[tau[2]] = 4*MMG5_abs(newtet[0])+(nei2 %4);
           }
           else {
-            adja[tau[2]] = 4*abs(newtet[0])+(nei2 %4);
+            adja[tau[2]] = 4*MMG5_abs(newtet[0])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
         }
@@ -914,20 +922,20 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       if ( (list[k-1] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*abs(newtet[k-1])+(nei2 %4);
+          adjan[tau[2]] = 4*MMG5_abs(newtet[k-1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*abs(newtet[k-1])+(nei2 %4);
+          adja[tau[2]] = 4*MMG5_abs(newtet[k-1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
         assert((list[k+1]) / 6 == (nei3 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*abs(newtet[k+1])+(nei3 %4);
+          adjan[tau[3]] = 4*MMG5_abs(newtet[k+1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*abs(newtet[k+1])+(nei3 %4);
+          adja[tau[3]] = 4*MMG5_abs(newtet[k+1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
       }
@@ -936,20 +944,20 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
         assert((list[k-1] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*abs(newtet[k-1])+(nei3 %4);
+          adjan[tau[3]] = 4*MMG5_abs(newtet[k-1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*abs(newtet[k-1])+(nei3 %4);
+          adja[tau[3]] = 4*MMG5_abs(newtet[k-1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
         assert((list[k+1]) / 6 == (nei2 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*abs(newtet[k+1])+(nei2 %4);
+          adjan[tau[2]] = 4*MMG5_abs(newtet[k+1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*abs(newtet[k+1])+(nei2 %4);
+          adja[tau[2]] = 4*MMG5_abs(newtet[k+1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
       }
@@ -994,7 +1002,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
  *
  */
 static inline
-uint8_t MMG3D_split2sf_cfg(int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTetra pt) {
+uint8_t MMG3D_split2sf_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTetra pt) {
   uint8_t imin;
 
   /* identity is case 48 */
@@ -1064,7 +1072,7 @@ uint8_t MMG3D_split2sf_cfg(int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTet
  * Simulate split of two edges that belong to a common face
  *
  */
-int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
+int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4],imin;
@@ -1127,9 +1135,10 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
  *
  */
 static inline
-int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,int *newtet,
+int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,MMG5_int *newtet,
                         MMG5_pTetra *pt,MMG5_xTetra *xt,MMG5_pxTetra *pxt0) {
-  int          iel,i,j;
+  MMG5_int       iel;
+  int            i,j;
 
   /* The first tetra is the one that is splitted so it already exists */
   for ( i=1; i<ne; ++i ) {
@@ -1180,7 +1189,7 @@ int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,int *newtet,
  */
 static inline
 void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
-                       int *newtet,MMG5_pTetra *pt,int8_t metRidTyp) {
+                       MMG5_int *newtet,MMG5_pTetra *pt,int8_t metRidTyp) {
   int i;
 
   if ( (!metRidTyp) && met->m && met->size>1 ) {
@@ -1216,12 +1225,12 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
  * Split of two edges that belong to a common face : 1 tetra becomes 3
  *
  */
-int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp){
+int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp){
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
   int                 i,flg;
-  int                 newtet[3];
+  MMG5_int            newtet[3];
   int8_t              imin,firstxt,isxt[3];
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -1356,7 +1365,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
  *  Simulate split of two opposite edges.
  *
  */
-int MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
+int MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4];
@@ -1418,12 +1427,12 @@ int MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
  * Split of two OPPOSITE edges
  *
  */
-int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
-  int                 newtet[4];
+  MMG5_int            newtet[4];
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -1559,7 +1568,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
 }
 
 /** Simulate split of 1 face (3 edges) */
-int MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4];
@@ -1630,12 +1639,12 @@ int MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * 1 face (3 edges) subdivided
  *
  */
-int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
-  int                 newtet[4];
+  MMG5_int            newtet[4];
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -1778,7 +1787,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
  *  Simulate split of 3 edges in cone configuration.
  *
  */
-int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4],ia,ib;
@@ -1959,12 +1968,12 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 3 edge in cone configuration
  *
  */
-int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
-  int                 newtet[4];
+  MMG5_int            newtet[4];
   int8_t              flg,firstxt,isxt[4],ia,ib;
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -2274,7 +2283,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
  *
  */
 static inline
-void MMG3D_configSplit3op(MMG5_pTetra pt,int vx[6],uint8_t tau[4],
+void MMG3D_configSplit3op(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                            const uint8_t **taued,
                            uint8_t sym[4],uint8_t symed[6],
                            uint8_t *ip0,uint8_t *ip1,
@@ -2430,7 +2439,7 @@ void MMG3D_configSplit3op(MMG5_pTetra pt,int vx[6],uint8_t tau[4],
  *  Simulate split of 3 edges in opposite configuration.
  *
  */
-int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1,ie2,ie3;
@@ -2562,15 +2571,15 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 3 opposite edges in a tetra
  *
  */
-int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRidTyp){
+int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int8_t metRidTyp){
   MMG5_pTetra          pt[5];
   MMG5_xTetra          xt[5];
   MMG5_pxTetra         pxt0;
-  int                  iel;
-  int                  newtet[5];
+  MMG5_int             iel;
+  MMG5_int             newtet[5];
   uint8_t              imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
   uint8_t              ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
-  const uint8_t       *taued=NULL;
+  const uint8_t        *taued=NULL;
   const int            ne=4;
 
   pt[0]  = &mesh->tetra[k];
@@ -2952,14 +2961,14 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
  * NEEDED ?
  *
  */
-int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,int8_t metRidTyp) {
+MMG5_int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k,int8_t metRidTyp) {
   MMG5_pTetra   pt[4];
   MMG5_pPoint   ppt;
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
-  int           i,ib,iadr,*adja,adj1,adj2,adj3;
-  int           src,newtet[4];
+  MMG5_int      ib,iadr,*adja,adj1,adj2,adj3,newtet[4],src;
+  int           i;
   uint8_t       isxt[4],firstxt;
   const int     ne=4;
 
@@ -3162,7 +3171,7 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,int8_t metRidTyp) {
  *
  */
 static inline
-void MMG3D_configSplit4sf(MMG5_pTetra pt,int vx[6],uint8_t tau[4],
+void MMG3D_configSplit4sf(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                           const uint8_t **taued, uint8_t *imin23,uint8_t *imin12) {
 
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -3239,7 +3248,7 @@ void MMG3D_configSplit4sf(MMG5_pTetra pt,int vx[6],uint8_t tau[4],
  *  Simulate split of 4 edges in a configuration when 3 lie on the same face.
  *
  */
-int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4];
@@ -3342,11 +3351,11 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 4 edges in a configuration when 3 lie on the same face
  *
  */
-int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
-  int                 newtet[6];
+  MMG5_int            newtet[6];
   int8_t              firstxt,isxt[6],j,i;
   uint8_t             tau[4],imin23,imin12;
   const uint8_t       *taued = NULL;
@@ -3543,7 +3552,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
  *  Simulate split of 4 edges in opposite configuration.
  *
  */
-int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4];
@@ -3664,11 +3673,11 @@ int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 4 edges in a configuration when no 3 edges lie on the same face
  *
  */
-int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
-  int                 newtet[6];
+  MMG5_int            newtet[6];
   int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -3901,7 +3910,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
  *
  */
 static inline
-void MMG3D_configSplit5(MMG5_pTetra pt,int vx[6],uint8_t tau[4],
+void MMG3D_configSplit5(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                         const uint8_t **taued,uint8_t *imin) {
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
@@ -3950,7 +3959,7 @@ void MMG3D_configSplit5(MMG5_pTetra pt,int vx[6],uint8_t tau[4],
  *  Simulate split of 5 edges.
  *
  */
-int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
   uint8_t             tau[4];
@@ -4041,12 +4050,12 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 5 edges
  *
  */
-int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra         pt[7];
   MMG5_xTetra         xt[7];
   MMG5_pxTetra        pxt0;
   int                 i,j;
-  int                 newtet[7];
+  MMG5_int            newtet[7];
   int8_t              firstxt,isxt[7];
   uint8_t             tau[4],imin;
   const uint8_t       *taued=NULL;
@@ -4246,7 +4255,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
  *  Simulate split of 6 edges.
  *
  */
-int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   MMG5_pTetra         pt,pt0;
   double              vold,vnew;
 
@@ -4315,12 +4324,12 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * split all faces (6 edges)
  *
  */
-int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) {
+int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra    pt[8];
   MMG5_xTetra    xt0,xt;
   MMG5_pxTetra   pxt;
-  int            i,j,iel,nxt0;
-  int            newtet[8];
+  int            i,j;
+  MMG5_int       iel,newtet[8],nxt0;
   int8_t         isxt0,isxt;
   const int8_t   ne=8;
 
@@ -4688,11 +4697,12 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
  *
  */
 static inline
-int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
-                    int* list,int ret,double crit) {
+int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
+                   int64_t* list,int ret,double crit) {
   MMG5_pTetra   pt0,pt1;
   double        cal,critloc;
-  int           l,jel,na,ipb,lon;
+  int           l,ipb,lon;
+  MMG5_int      jel,na;
 
   lon = ret/2;
   critloc = 1.;
@@ -4709,7 +4719,7 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
     na  = list[l] % 6;
     pt1 = &mesh->tetra[jel];
 
-    memcpy(pt0->v,pt1->v,4*sizeof(int));
+    memcpy(pt0->v,pt1->v,4*sizeof(MMG5_int));
     ipb = MMG5_iare[na][0];
     pt0->v[ipb] = ip;
     cal = MMG5_caltet(mesh,met,pt0);
@@ -4718,7 +4728,7 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
       return 0;
     }
 
-    memcpy(pt0->v,pt1->v,4*sizeof(int));
+    memcpy(pt0->v,pt1->v,4*sizeof(MMG5_int));
     ipb = MMG5_iare[na][1];
     pt0->v[ipb] = ip;
     cal = MMG5_caltet(mesh,met,pt0);
@@ -4740,12 +4750,14 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
  * Split edge iar of iel and verify that every new tet have a better quality than crit
  *
  */
-int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
+MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, double crit){
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
   double       o[3];
-  int          src,list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
+  int          warn,lon,ier;
+  int64_t      list[MMG3D_LMAX+2];
+  MMG5_int     src,i0,i1,ip;
   int16_t      tag;
 
   warn = 0;

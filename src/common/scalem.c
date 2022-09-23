@@ -45,7 +45,7 @@
  */
 int MMG5_boundingBox(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
-  int            k,i;
+  MMG5_int       k,i;
   double         dd;
 
   /* compute bounding box */
@@ -134,13 +134,23 @@ int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
   return 1;
 }
 
-
-int MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax) {
+/**
+ * \param met pointer toward metric.
+ * \param ip pointer toward global index of point on which metric has to be truncated
+ * \param isqhmin inverse square of hmin (min edge size)
+ * \param isqhmax inverse square of hmax (max edge size)
+ *
+ * \return 0 if fail, 1 if succeed
+ *
+ * Truncation of anisotropic metric at point \a ip by \a hmin and \a hmax.
+ *
+ */
+int MMG5_truncate_met3d(MMG5_pSol met, MMG5_int ip, double isqhmin, double isqhmax) {
   double        v[3][3],lambda[3],*m;
   int           i;
   static int8_t mmgWarn = 0;
 
-  m = &met->m[met->size*ip];
+  m = &met->m[(MMG5_int)met->size*ip];
 
   if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
     if ( !mmgWarn ) {
@@ -194,7 +204,8 @@ int MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax) {
  *
  */
 int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
-  int    k,ier;
+  MMG5_int      k;
+  int           ier;
   static int8_t mmgWarn0 = 0;
 
   ++mesh->base;
@@ -247,7 +258,8 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
  *
  */
 int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
-  int    k,i,ier,iadr;
+  MMG5_int    k,iadr;
+  int         i,ier;
 
   dd = 1.0 / (dd*dd);
 
@@ -287,7 +299,7 @@ int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
 int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
   double      hmin,hmax;
-  int         k;
+  MMG5_int    k;
 
   /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
    * (resp. sethmax) is not setted too */
@@ -352,7 +364,7 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
  */
 int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
-  int         k,iadr;
+  MMG5_int    k,iadr;
   double      isqhmin, isqhmax;
   double      lambda[2],vp[2][2];
 
@@ -440,7 +452,7 @@ int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
  */
 int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
-  int         k,iadr;
+  MMG5_int    k,iadr;
   double      isqhmin, isqhmax, isqhmaxcoe;
   double      lambda[3],vp[3][3];
 
@@ -520,7 +532,7 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
       met->m[iadr+3] = isqhmax;
       met->m[iadr+4] = 0.;
       met->m[iadr+5] = isqhmax;
-    }
+  }
   }
 
   if ( mesh->info.ddebug ) {
@@ -549,7 +561,7 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
 int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd) {
   MMG5_pPoint    ppt;
   MMG5_pPar      par;
-  int            k,i;
+  MMG5_int       k,i;
   int8_t         hsizOrOptim;
 
   /* sol is a level-set or a displacement so it cannot be an aniso metric */
@@ -650,16 +662,16 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     if ( !MMG5_scale_scalarMetric ( mesh, met, dd ) ) {
       return 0;
     }
-  }
+        }
   else if ( met->size == (mesh->dim-1)*3 ) {
     /* anisotropic metric: met->size=3 in 2D and 6 in 3D */
     if ( !MMG5_scale_tensorMetric ( mesh, met, dd ) ) {
-      return 0;
-    }
-  }
+          return 0;
+        }
+          }
   else {
     fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
-  }
+   }
 
   return 1;
 }
@@ -677,7 +689,8 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   double          dd;
-  int             k,i,iadr;
+  int             i;
+  MMG5_int        k,iadr;
   MMG5_pPar       par;
 
   /* de-normalize coordinates */

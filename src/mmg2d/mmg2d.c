@@ -49,7 +49,8 @@ static void MMG5_endcod(void) {
  */
 static inline
 int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
-  int         npar,k,ier;
+  int         npar,ier;
+  MMG5_int    k;
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
@@ -98,7 +99,7 @@ int MMG2D_writeLocalParamAtEdg( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Edge %e %e %e \n",cur->val,
+    fprintf(out,"%"MMG5_PRId" Edge %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }
@@ -459,7 +460,7 @@ int main(int argc,char *argv[]) {
               " AND A SOLUTION IN ADAPTATION MODE.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
-
+    
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 

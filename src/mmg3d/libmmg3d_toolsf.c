@@ -58,7 +58,7 @@ FORTRAN_NAME(MMG3D_SETFUNC,mmg3d_setfunc,
  * See \ref MMG3D_Get_numberOfNonBdyTriangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_NUMBEROFNONBDYTRIANGLES,mmg3d_get_numberofnonbdytriangles,
-             (MMG5_pMesh *mesh,int* nb_tria, int* retval),
+             (MMG5_pMesh *mesh,MMG5_int* nb_tria, int* retval),
              (mesh,nb_tria,retval)) {
   *retval =  MMG3D_Get_numberOfNonBdyTriangles(*mesh,nb_tria);
   return;
@@ -68,8 +68,8 @@ FORTRAN_NAME(MMG3D_GET_NUMBEROFNONBDYTRIANGLES,mmg3d_get_numberofnonbdytriangles
  * See \ref MMG3D_Get_nonBdyTriangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_NONBDYTRIANGLE,mmg3d_get_nonbdytriangle,
-             (MMG5_pMesh *mesh,int* v0, int* v1,int* v2,int *ref,
-              int* idx,int* retval),
+             (MMG5_pMesh *mesh,MMG5_int* v0, MMG5_int* v1,MMG5_int* v2,MMG5_int *ref,
+              MMG5_int* idx,int* retval),
              (mesh,v0,v1,v2,ref,idx,retval)) {
   *retval =  MMG3D_Get_nonBdyTriangle(*mesh,v0,v1,v2,ref,*idx);
   return;
@@ -140,7 +140,7 @@ FORTRAN_NAME(MMG3D_DESTOCKOPTIONS,mmg3d_destockoptions,
  */
 FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
              (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *sol,double *critmin, double *lmin,
-              double *lmax, int *eltab,int *metRidTyp,int *retval),
+              double *lmax, MMG5_int *eltab,int *metRidTyp,int *retval),
              (mesh,met,sol,critmin,lmin,lmax,eltab,metRidTyp,retval)) {
   int8_t tmp = (int8_t)(*metRidTyp);
 
@@ -155,7 +155,7 @@ FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
  */
 FORTRAN_NAME(MMG3D_SEARCHQUA,mmg3d_searchqua,
              (MMG5_pMesh *mesh,MMG5_pSol *met,double *critmin,
-              int *eltab,int8_t *metRidTyp),
+              MMG5_int *eltab,int8_t *metRidTyp),
              (mesh,met,critmin,eltab,metRidTyp)) {
   MMG3D_searchqua(*mesh,*met,*critmin,eltab,*metRidTyp);
   return;
@@ -166,7 +166,7 @@ FORTRAN_NAME(MMG3D_SEARCHQUA,mmg3d_searchqua,
  */
 FORTRAN_NAME(MMG3D_SEARCHLEN,mmg3d_searchlen,
              (MMG5_pMesh *mesh,MMG5_pSol *met, double *lmin,
-              double *lmax, int *eltab,int8_t *metRidTyp,int *retval),
+              double *lmax, MMG5_int *eltab,int8_t *metRidTyp,int *retval),
              (mesh,met,lmin,lmax,eltab,metRidTyp,retval)) {
   *retval = MMG3D_searchlen(*mesh,*met,*lmin,*lmax,eltab,*metRidTyp);
   return;
@@ -176,7 +176,7 @@ FORTRAN_NAME(MMG3D_SEARCHLEN,mmg3d_searchlen,
  * See \ref MMG3D_Get_tetFromTria function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TETFROMTRIA,mmg3d_get_tetfromtria,
-             (MMG5_pMesh *mesh,int *ktri, int *ktet, int *iface,int *retval),
+             (MMG5_pMesh *mesh,MMG5_int *ktri, MMG5_int *ktet, int *iface,int *retval),
              (mesh,ktri,ktet,iface,retval)) {
 
   *retval = MMG3D_Get_tetFromTria(*mesh,*ktri,ktet,iface);
@@ -187,7 +187,7 @@ FORTRAN_NAME(MMG3D_GET_TETFROMTRIA,mmg3d_get_tetfromtria,
  * See \ref MMG3D_Get_tetsFromTria function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TETSFROMTRIA,mmg3d_get_tetsfromtria,
-             (MMG5_pMesh *mesh,int *ktri, int ktet[2], int iface[2],int *retval),
+             (MMG5_pMesh *mesh,MMG5_int *ktri, MMG5_int ktet[2], int iface[2],int *retval),
              (mesh,ktri,ktet,iface,retval)) {
 
   *retval = MMG3D_Get_tetsFromTria(*mesh,*ktri,ktet,iface);
@@ -198,7 +198,7 @@ FORTRAN_NAME(MMG3D_GET_TETSFROMTRIA,mmg3d_get_tetsfromtria,
  * See \ref MMG3D_Get_adjaTet function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_ADJATET,mmg3d_get_adjatet,
-               (MMG5_pMesh *mesh,int* kel, int listet[4], int* retval),
+               (MMG5_pMesh *mesh,MMG5_int* kel, MMG5_int listet[4], int* retval),
                (mesh,kel,listet,retval)) {
   *retval =  MMG3D_Get_adjaTet(*mesh,*kel,listet);
   return;

@@ -394,7 +394,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 
 void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   MMG5_pPoint ppt;
-  int         k,iadr;
+  MMG5_int    k,iadr;
 
   if ( met->size == 1 ) {
     for (k=1; k<=mesh->np; k++) {
@@ -708,19 +708,19 @@ const char* MMG5_Get_tagName(int tag)
 
   if ( tag & MG_REQ) {
     strcat(tags_name,"Required ");
-  }
+      }
 
   if ( tag & MG_NOM) {
     strcat(tags_name,"Non-manifold ");
-  }
+      }
 
   if ( tag & MG_BDY) {
     strcat(tags_name,"Boundary ");
-  }
+      }
 
   if ( tag & MG_CRN) {
     strcat(tags_name,"Corner ");
-  }
+    }
 
   if ( tag & MG_NOSURF) {
     strcat(tags_name,"Nosurf ");
@@ -740,7 +740,7 @@ const char* MMG5_Get_tagName(int tag)
 
   if ( tag & MG_PARBDY) {
     strcat(tags_name,"Parbdy ");
-  }
+    }
   strcat(tags_name,"tag(s).");
 
   return tags_name;

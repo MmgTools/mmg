@@ -112,7 +112,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[1]));
 
   if ( met->np && ( met->np != mesh->np ) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",met->np,mesh->np);
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %" MMG5_PRId " != %" MMG5_PRId "\n",met->np,mesh->np);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
   else if ( met->size!=1 && met->size!=3 ) {
@@ -152,8 +152,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   MMG2D_Set_commonFunc();
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* Data analysis */
@@ -267,7 +267,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
  */
 static inline
 int MMG2D_restart(MMG5_pMesh mesh){
-  int k;
+  MMG5_int k;
 
   /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {
@@ -369,7 +369,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",met->np,mesh->np);
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %" MMG5_PRId " != %" MMG5_PRId "\n",met->np,mesh->np);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }  else if ( met->size!=1 && met->size!=3 ) {
     fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
@@ -386,8 +386,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG2D_Set_commonFunc();
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* analysis */
@@ -408,10 +408,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG5_int),"adjacency table",
                printf("  Exit program.\n");
                return MMG5_STRONGFAILURE);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return MMG5_STRONGFAILURE);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG5_int,return MMG5_STRONGFAILURE);
 
   /* Delaunay triangulation of the set of points contained in the mesh,
    * enforcing the edges of the mesh */
@@ -633,8 +633,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8"MMG5_PRId"\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8"MMG5_PRId"\n",mesh->ntmax);
   }
 
   /* reset fem value to user setting (needed for multiple library call) */
@@ -804,7 +804,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
   int       ier;
-  int       k,*invalidTris;
+  MMG5_int  k,*invalidTris;
 
   assert ( mesh );
   assert ( disp );
@@ -891,8 +891,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* Analysis */
@@ -942,7 +942,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     if ( mesh->info.imprim > 1 ) {
       printf("     List of invalid trias: ");
       for ( k=0; k<-ier; ++k ) {
-        printf("%d ",MMG2D_indElt(mesh,invalidTris[k]));
+        printf("%" MMG5_PRId " ",MMG2D_indElt(mesh,invalidTris[k]));
       }
       printf("\n\n");
     }

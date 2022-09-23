@@ -36,10 +36,10 @@
 /* Version of edge swapping specific to the boundary enforcement stage in Delaunay meshing;
    the quality of the resulting criterion should be > crit.
    list returns both modified triangles */
-int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,int8_t i,double crit,int *list) {
+int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int8_t i,double crit,MMG5_int *list) {
   MMG5_pTria         pt,pt1,pt0;
   double             cal1,cal2,area1,area2,arean1,arean2;
-  int                *adja,*adja1,k1,k2,k3,vo2,vo3,num1,numa1;
+  MMG5_int           *adja,*adja1,k1,k2,k3,vo2,vo3,num1,numa1;
   int8_t             i1,i2,j,j1,j2;
 
   adja = &mesh->adja[3*(k-1)+1];
@@ -99,7 +99,7 @@ int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,int8_t i,double crit,in
 
   /* Update edge references */
 #ifndef NDEBUG
-  int num = pt->edg[i];
+  MMG5_int num = pt->edg[i];
   assert ( !num );
 #endif
   num1 = pt->edg[i1];
@@ -125,10 +125,10 @@ int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,int8_t i,double crit,in
 }
 
 /* Check whether swap of edge i in triangle k is valid, and suitable for the mesh */
-int MMG2D_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,int8_t i,int8_t typchk) {
+int MMG2D_chkswp(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int k,int8_t i,int8_t typchk) {
   MMG5_pTria          pt,pt0,pt1;
   double              /*loni,lona,*/cal1,cal2,calnat,calchg;
-  int                 *adja,ip,ip1,ip2,iq,kk;
+  MMG5_int            *adja,ip,ip1,ip2,iq,kk;
   uint8_t             i1,i2,ii,ii1,ii2;
 
   pt0 = &mesh->tria[0];
@@ -218,10 +218,10 @@ int MMG2D_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,int8_t i,int8_t typchk) {
 }
 
 /* Effective swap of edge i in triangle k */
-int MMG2D_swapar(MMG5_pMesh mesh,int k,int8_t i) {
+int MMG2D_swapar(MMG5_pMesh mesh,MMG5_int k,int8_t i) {
   MMG5_pTria    pt,pt1;
-  int     *adja,adj,k11,k21;
-  int8_t   i1,i2,j,jj,j2,v11,v21;
+  MMG5_int      *adja,adj,k11,k21;
+  int8_t        i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
   if ( MG_EDG(pt->tag[i]) || MG_SIN(pt->tag[i]) )  return 0;

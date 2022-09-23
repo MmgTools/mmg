@@ -59,7 +59,8 @@ static void MMG5_endcod(void) {
  *
  */
 int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
-  int         npar,k,ier;
+  int         npar,ier;
+  MMG5_int    k;
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
@@ -107,7 +108,7 @@ int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Tetrahedron %e %e %e \n",cur->val,
+    fprintf(out,"%"MMG5_PRId" Tetrahedron %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }

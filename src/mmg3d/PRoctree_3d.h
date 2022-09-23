@@ -34,7 +34,7 @@
 typedef struct MMG3D_PROctree_s
 {
   struct MMG3D_PROctree_s* branches; /*!< pointer toward the subtrees of the current PROctree */
-  int* v;      /*!< vertex index */
+  MMG5_int* v;      /*!< vertex index */
   int  nbVer;  /*!< number of vertices in the sub tree */
   int  depth; /*!< sub tree depth */
 } MMG3D_PROctree_s;
@@ -63,20 +63,20 @@ int MMG3D_intersectRect(double *rectin, double *rectinout);
 int MMG3D_getListSquareRec(MMG3D_PROctree_s*,double*,double*,
                             MMG3D_PROctree_s***,double*,double*,double, int, int, int*);
 int  MMG3D_getListSquare(MMG5_pMesh,double*,MMG3D_PROctree*,double*,MMG3D_PROctree_s***);
-int MMG3D_addPROctreeRec(MMG5_pMesh,MMG3D_PROctree_s*,double*, const int, int);
-int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_PROctree* q, const int no);
-int MMG3D_delPROctreeVertex(MMG5_pMesh,MMG3D_PROctree_s* q, int no);
-int MMG3D_movePROctree(MMG5_pMesh, MMG3D_pPROctree,int, double*, double*);
+int MMG3D_addPROctreeRec(MMG5_pMesh,MMG3D_PROctree_s*,double*, const MMG5_int, int);
+int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_PROctree* q, const MMG5_int no);
+int MMG3D_delPROctreeVertex(MMG5_pMesh,MMG3D_PROctree_s* q, MMG5_int no);
+int MMG3D_movePROctree(MMG5_pMesh, MMG3D_pPROctree,MMG5_int, double*, double*);
 void MMG3D_mergeBranchesRec(MMG3D_PROctree_s*, MMG3D_PROctree_s*, int, int , int*);
 void MMG3D_mergeBranches(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int dim, int nv);
-int MMG3D_delPROctreeRec(MMG5_pMesh,MMG3D_PROctree_s*,double*, const int,const int);
+int MMG3D_delPROctreeRec(MMG5_pMesh,MMG3D_PROctree_s*,double*, const MMG5_int,const int);
 int MMG3D_delPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no);
 void MMG3D_printArbreDepth(MMG3D_PROctree_s* q, int depth, int nv, int dim);
 void MMG3D_printArbre(MMG3D_PROctree* q);
 void  MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim, int*,int*);
 int*  MMG3D_sizeArbre(MMG3D_PROctree* q, int dim);
-int  MMG3D_PROctreein_iso(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,int,double);
-int  MMG3D_PROctreein_ani(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,int,double);
+int  MMG3D_PROctreein_iso(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,MMG5_int,double);
+int  MMG3D_PROctreein_ani(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,MMG5_int,double);
 int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim);
 
 #endif

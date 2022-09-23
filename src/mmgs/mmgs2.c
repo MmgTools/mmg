@@ -51,10 +51,10 @@
  *
  */
 static int
-MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
+MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  int              *adja,k,ip1,ip2,end1;
+  MMG5_int         *adja,k,ip1,ip2,end1;
   int8_t           i,i1,smsgn;
   static int8_t    mmgWarn=0;
 
@@ -117,7 +117,7 @@ MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
   if ( k != end1 ) {
     if ( !mmgWarn ) {
       mmgWarn = 1;
-      fprintf(stderr,"\n  ## Warning: %s: triangle %d, point %d; unsnap \n",
+      fprintf(stderr,"\n  ## Warning: %s: triangle %" MMG5_PRId ", point %" MMG5_PRId "; unsnap \n",
               __func__,start,mesh->tria[start].v[istart]);
     }
     return 0;
@@ -140,7 +140,8 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
-  int           k,nc,ns,ip,ip1,ip2;
+  MMG5_int      nc,ns,ip;
+  MMG5_int      k,ip1,ip2;
   int8_t        i;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
@@ -166,7 +167,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+        fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
                 "previous value : %E\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
@@ -200,7 +201,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
   /* memory free */
   MMG5_DEL_MEM(mesh,mesh->adja);
@@ -220,8 +221,8 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \warning i inxt[i] is one edge of the implicit boundary.
  *
  */
-int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
-  int                *adja,k;
+int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
+  MMG5_int           *adja,k;
   int8_t             i,i1;
 
   k = start;
@@ -316,7 +317,8 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
 static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
-  int             *adja,k,cnt,iel;
+  MMG5_int        *adja,k;
+  MMG5_int        cnt,iel;
   int8_t          i,i1;
   static int8_t   mmgWarn0 = 0;
 
@@ -387,9 +389,10 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
 static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
-  MMG5_Hash   hash;
+  MMG5_Hash    hash;
   double       c[3],v0,v1,s;
-  int          vx[3],nb,k,ip0,ip1,np,ns,nt,ier;
+  MMG5_int     vx[3],k,np;
+  MMG5_int     ip0,ip1,ns,nt,ier,nb;
   int8_t       ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -486,7 +489,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
     pt->flag = 0;
-    memset(vx,0,3*sizeof(int));
+    memset(vx,0,3*sizeof(MMG5_int));
     for (ia=0; ia<3; ia++) {
       vx[ia] = MMG5_hashGet(&hash,pt->v[MMG5_inxt2[ia]],pt->v[MMG5_iprv2[ia]]);
       if ( vx[ia] ) {
@@ -526,7 +529,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
 
   /* reset point flags */
   for (k=1; k<=mesh->np; k++)
@@ -547,7 +550,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
-  int          k,ip,ip1;
+  MMG5_int     k,ip,ip1;
   int8_t       nmns,npls,nz,i;
 
   for (k=1; k<=mesh->nt; k++) {

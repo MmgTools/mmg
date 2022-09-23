@@ -105,6 +105,7 @@ SET( mmgs_headers
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
+  ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h
   ${COMMON_BINARY_DIR}/mmgversion.h
   )
 IF (NOT WIN32 OR MINGW)

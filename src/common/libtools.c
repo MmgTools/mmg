@@ -99,8 +99,8 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
           (mesh->info.hgradreq < 0) ? mesh->info.hgradreq : exp(mesh->info.hgradreq) );
 }
 
-int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
-                      int split,int rin,int rex){
+int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,
+                      int split,MMG5_int rin,MMG5_int rex){
   MMG5_pMat mat;
   int k;
 
@@ -140,7 +140,7 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
                 __func__);
-        fprintf(stderr," for material of ref %d\n",ref);
+        fprintf(stderr," for material of ref %" MMG5_PRId "\n",ref);
       }
       return 1;
     }
@@ -171,7 +171,7 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
   return 1;
 }
 
-int MMG5_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,int br) {
+int MMG5_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br) {
 
   (void)sol;
 

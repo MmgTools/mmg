@@ -54,7 +54,7 @@ extern int8_t ddb;
  * \f$ p_1-p_2 \f$ must not be a ridge.
  *
  * */
-int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,double mr[6]) {
+int intregmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,double mr[6]) {
   MMG5_pTria     pt;
 
   pt  = &mesh->tria[k];
@@ -74,9 +74,9 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,double mr[6]
  * Linear interpolation of sizemap along edge i of tria k.
  *
  */
-int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
+int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria pt;
-  int        ip1,ip2;
+  MMG5_int   ip1,ip2;
   int8_t     i1,i2;
 
   pt  = &mesh->tria[k];
@@ -101,12 +101,13 @@ int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
  * \a k for special storage of ridges metrics (after defsiz call).
  *
  */
-int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
+int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  go;
   double        *m;
-  int           ip1, ip2, i1, i2;
+  int           i1, i2;
+  MMG5_int      ip1, ip2;
 
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];
@@ -140,10 +141,11 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
  * \a k for classic storage of ridges metrics (before defsiz call).
  *
  */
-int MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
+int MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria    pt;
   double        *mr,*m,*n;
-  int           ip1, ip2, i1, i2;
+  int           i1, i2;
+  MMG5_int      ip1, ip2;
 
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];

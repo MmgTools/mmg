@@ -160,7 +160,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
  * at pointing towards direction of n1 at interpolated point.
  *
  */
-int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
+int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1, MMG5_int ip2,double s,
                     double v[3],double mr[6]) {
   MMG5_pxPoint   go1,go2;
   MMG5_pPoint    p1,p2;
@@ -508,7 +508,8 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
   double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
-  int            ip1,ip2,nstep,l;
+  int            nstep,l;
+  MMG5_int       ip1,ip2;
   int8_t         i1,i2;
   static int     warn=0,warnnorm=0;
 
@@ -663,10 +664,10 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
               " interpolation.\n", __func__);
 
       if ( mesh->info.ddebug ) {
-        fprintf(stderr," points: %d: %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip1),
+        fprintf(stderr," points: %"MMG5_PRId": %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip1),
                 mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
                 MMG5_Get_tagName(mesh->point[ip1].tag));
-        fprintf(stderr,"         %d: %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip2),
+        fprintf(stderr,"         %"MMG5_PRId": %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip2),
                 mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
                 MMG5_Get_tagName(mesh->point[ip2].tag));
 

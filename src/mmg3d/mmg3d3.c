@@ -46,7 +46,7 @@ extern int8_t  ddb;
 double MMG5_estavglen(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
   MMG5_pPoint p1,p2;
-  int         k,na;
+  MMG5_int    k,na;
   double      len,lent,dna;
   int8_t      i,i1,i2;
 
@@ -101,13 +101,15 @@ inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  * Split edges of length bigger than MMG3D_LOPTL, in the Lagrangian mode.
  *
  */
-static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
+static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1;
   double         len,lmax,o[3],hma2;
   double         *m1,*m2,*mp;
-  int            k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr,src;
+  int            ilist,ier;
+  MMG5_int       src,ns,k,ip,ip1,ip2,iadr;
+  int64_t        list[MMG3D_LMAX+2];
   int8_t         imax,i,i1,i2;
   static int8_t  mmgWarn0 = 0;
 
@@ -151,7 +153,7 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
     if ( imax==-1 ) {
       if ( !mmgWarn0 ){
         mmgWarn0 = 1;
-        fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %d are required"
+        fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %" MMG5_PRId " are required"
                 " or of length null.\n",__func__,k);
       }
       continue;
@@ -190,7 +192,7 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
 
     if ( !ip )  {
       /* reallocation of point table */
-      int oldnpmax = mesh->npmax;
+      MMG5_int oldnpmax = mesh->npmax;
       MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG,src);
       if( disp->m ) {
         MMG5_ADD_MEM(mesh,(disp->size*(mesh->npmax-disp->npmax))*sizeof(double),
@@ -267,10 +269,12 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
  * Internal edge flipping in the Lagrangian mode; only affects tetra marked with it
  *
  */
-int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PROctree,int itdeg) {
+MMG5_int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PROctree,int itdeg) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int          list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
+  int          ilist,it,maxit,ier;
+  MMG5_int     k,nconf,ns,nns;
+  int64_t      list[MMG3D_LMAX+2];
   int8_t       i;
 
   maxit = 2;
@@ -316,11 +320,13 @@ int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PRO
  * Analyze tetrahedra marked with it and move internal points so as to make mesh more uniform.
  *
  */
-int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
+MMG5_int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
-  int           k,ier,nm,nnm,listv[MMG3D_LMAX+2],ilistv,it;
-  uint8_t       i,base;
+  int           ier,ilistv,it;
+  MMG5_int      k,nm,nnm,base;
+  int64_t       listv[MMG3D_LMAX+2];
+  uint8_t       i;
   int           maxit;
 
   base = 1;
@@ -374,11 +380,13 @@ int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
  * Attempt to collapse small internal edges in the Lagrangian mode; only affects tetras marked with it.
  *
  */
-static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
+static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTetra pt;
   MMG5_pPoint p0,p1;
   double      ll,ux,uy,uz,hmi2;
-  int         k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
+  int         ilist;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    k,nc,nnm,base;
   int         ier;
   int8_t      i,j,ip,iq,isnm;
 
@@ -400,6 +408,8 @@ static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
       for (j=0; j<3; j++) {
         ip = MMG5_idir[i][MMG5_inxt2[j]];
         iq = MMG5_idir[i][MMG5_iprv2[j]];
+        assert( 0<=ip && ip<4 && "unexpected local index for vertex");
+        assert( 0<=iq && iq<4 && "unexpected local index for vertex");
 
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];
@@ -454,11 +464,12 @@ static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  * valid mesh.
  *
  */
-int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
+MMG5_int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG5_int *tetIdx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
-  int          k,np,idx;
+  MMG5_int     k,np;
+  MMG5_int     idx;
   int8_t       i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
@@ -496,7 +507,7 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[4][3],ocal,ncal;
-  int           k,np;
+  MMG5_int      k,np;
   int8_t        i,j;
 
   tau = (double)t /MMG3D_SHORTMAX;
@@ -563,12 +574,14 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
  *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
  *
  */
-int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) {
-  double  avlen,tau,hmintmp,hmaxtmp;
-  int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
-  int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl,ninvalidTets;
-  short   t,lastt;
-  int8_t  ier;
+int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int **invalidTets) {
+  double   avlen,tau,hmintmp,hmaxtmp;
+  int      itdc,itmn,maxitmn,maxitdc,iit,warn;
+  MMG5_int nspl,ns,nm,nc,k;
+  MMG5_int nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl;
+  MMG5_int ninvalidTets;
+  short    t,lastt;
+  int8_t   ier;
 
   maxitmn = 10;
   maxitdc = 100;
@@ -667,17 +680,15 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
           }
 
           /* Relocate vertices of tetra which have been distorted in the displacement process */
-          if ( !mesh->info.nomove ) {
-            nm = MMG5_movtetlag(mesh,met,itdc);
-            if ( nm < 0 ) {
-              fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
-              return 0;
-            }
+          nm = MMG5_movtetlag(mesh,met,itdc);
+          if ( nm < 0 ) {
+            fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
+            return 0;
           }
 
           if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (nspl+nc+ns+nm > 0) )
-            printf(" %d edges splitted, %d vertices collapsed, %d elements"
-                   " swapped, %d vertices moved.\n",nspl,nc,ns,nm);
+            printf(" %" MMG5_PRId " edges splitted, %" MMG5_PRId " vertices collapsed, %" MMG5_PRId " elements"
+                   " swapped, %" MMG5_PRId " vertices moved.\n",nspl,nc,ns,nm);
           nnspl+= nspl;
           nnm  += nm;
           nnc  += nc;
@@ -685,9 +696,8 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
         }
         /* Five iterations of local remeshing have been performed: print final stats */
         if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
-          printf(" %d edges splitted, %d vertices collapsed, %d elements"
-                 " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
-
+          printf(" %" MMG5_PRId " edges splitted, %" MMG5_PRId " vertices collapsed, %" MMG5_PRId " elements"
+                 " swapped, %" MMG5_PRId " vertices moved.\n",nnspl,nnc,nns,nnm);
       }
 
       nnnspl += nnspl;
@@ -705,8 +715,9 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
     }
 
     if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
-      printf(" %d edges splitted, %d vertices collapsed, %d elements"
-             " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+      printf(" %"MMG5_PRId" edges splitted, %"MMG5_PRId" vertices collapsed,"
+             " %"MMG5_PRId" elements swapped, %"MMG5_PRId" vertices moved.\n",
+             nnnspl,nnnc,nnns,nnnm);
 
     if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
@@ -716,7 +727,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   mesh->info.hmax = hmaxtmp;
 
   if ( tau < MMG5_EPSD2 ) {
-    MMG5_SAFE_CALLOC(*invalidTets,mesh->np,int,
+    MMG5_SAFE_CALLOC(*invalidTets,mesh->np,MMG5_int,
                      printf("## Warning: Not enough memory to keep track of"
                             " the invalid tetrahedron.\n");
                      MMG5_DEL_MEM(mesh,disp->m);

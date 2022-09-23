@@ -45,8 +45,8 @@
  */
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
@@ -55,7 +55,7 @@ static int setadj(MMG5_pMesh mesh){
 
   nvf = nf = ncc = ned = 0;
 
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -117,7 +117,7 @@ static int setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        if ( MMG5_abs(pt1->ref) != MMG5_abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
@@ -142,7 +142,7 @@ static int setadj(MMG5_pMesh mesh){
           /* Moebius strip */
           assert ( pt1->base );
           if ( pt1->base < 0 ) {
-            pt1->ref      = -abs(pt1->ref);
+            pt1->ref      = -MMG5_abs(pt1->ref);
             /* Add MG_NOM flag because it allows neighbours to have non
              * consistent orientations */
             pt->tag[i]   |= MG_REF + MG_NOM;
@@ -226,15 +226,15 @@ static int setadj(MMG5_pMesh mesh){
   }
 
   if ( mesh->info.ddebug ) {
-    fprintf(stdout,"  a- ridges: %d found.\n",nr);
-    fprintf(stdout,"  a- requir: %d found.\n",nreq);
-    fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
-    fprintf(stdout,"  a- orient: %d flipped\n",nf);
+    fprintf(stdout,"  a- ridges: %" MMG5_PRId " found.\n",nr);
+    fprintf(stdout,"  a- requir: %" MMG5_PRId " found.\n",nreq);
+    fprintf(stdout,"  a- connex: %" MMG5_PRId " connected component(s)\n",ncc);
+    fprintf(stdout,"  a- orient: %" MMG5_PRId " flipped\n",nf);
   }
   else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
-    fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+    fprintf(stdout,"     Connected component: %" MMG5_PRId ",  genus: %" MMG5_PRId ",   reoriented: %" MMG5_PRId "\n",ncc,gen,nf);
+    fprintf(stdout,"     Edges: %" MMG5_PRId ",  tagged: %" MMG5_PRId ",  ridges: %" MMG5_PRId ", required: %" MMG5_PRId ", refs: %" MMG5_PRId "\n",
             ned,nr+nre+nreq,nr,nreq,nre);
   }
 
@@ -252,8 +252,8 @@ static int setadj(MMG5_pMesh mesh){
 static void nmpoints(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
-  int        k,np,numt,iel,jel,nmp,*adja;
-  int8_t     i0,i1,i,jp;
+  MMG5_int        k,np,numt,iel,jel,nmp,*adja;
+  int8_t          i0,i1,i,jp;
   
   nmp = 0;
   /* Initialize point flags */
@@ -338,15 +338,16 @@ static void nmpoints(MMG5_pMesh mesh) {
     mesh->point[k].s = 0;
 
   if ( nmp && abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ## %d non manifold points detected\n",nmp);
+    fprintf(stdout,"  ## %" MMG5_PRId " non manifold points detected\n",nmp);
 }
 
 /** improve badly shaped elts for isotropic mesh */
 /* static int delbad(MMG5_pMesh mesh) { */
 /*   MMG5_pTria    pt; */
 /*   MMG5_pPoint   p[3]; */
-/*   double   s,kal,declic,ux,uy,uz,vx,vy,vz; */
-/*   int     *adja,k,iel,nd,ndd,it; */
+/*   double        s,kal,declic,ux,uy,uz,vx,vy,vz; */
+/*   MMG5_int      *adja,k,iel,nd,ndd; */
+/*   int           it; */
 /*   int8_t   i,ia,i1,i2,j,typ; */
 
 /*   it = ndd = 0; */
@@ -422,12 +423,12 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*       } */
 /*     } */
 /*     ndd += nd; */
-/*     if ( nd && (mesh->info.ddebug || mesh->info.imprim < -1) )  fprintf(stdout,"     %d improved\n",nd); */
+/*     if ( nd && (mesh->info.ddebug || mesh->info.imprim < -1) )  fprintf(stdout,"     %" MMG5_PRId " improved\n",nd); */
 /*   } */
 /*   while ( nd > 0 && ++it < 5 ); */
 
 /*   if ( abs(mesh->info.imprim) > 4 ) */
-/*     fprintf(stdout,"     %d bad elements improved\n",ndd); */
+/*     fprintf(stdout,"     %" MMG5_PRId " bad elements improved\n",ndd); */
 
 /*   return 1; */
 /* } */
@@ -442,9 +443,9 @@ static void nmpoints(MMG5_pMesh mesh) {
  */
 static int setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
-  double   n1[3],n2[3],dhd;
-  int     *adja,k,kk,nr;
-  int8_t   i,ii,i1,i2;
+  double        n1[3],n2[3],dhd;
+  MMG5_int      *adja,k,kk,nr;
+  int8_t        i,ii,i1,i2;
 
   nr = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -478,7 +479,7 @@ static int setdhd(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 4 && nr > 0 )
-    fprintf(stdout,"     %d ridges updated\n",nr);
+    fprintf(stdout,"     %" MMG5_PRId " ridges updated\n",nr);
 
   return 1;
 }
@@ -495,7 +496,8 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,nre;
+  int            xp,nr,ns;
   int8_t         i;
 
   nre = nc = 0;
@@ -576,7 +578,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
-    fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
+    fprintf(stdout,"     %" MMG5_PRId " corners, %" MMG5_PRId " singular points detected\n",nc,nre);
   return 1;
 }
 
@@ -598,7 +600,7 @@ static int norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_pxPoint   go;
   double         n[3],dd;
-  int            *adja,k,kk,ier,xp,nn,nt,nf,nnr;
+  MMG5_int       *adja,k,kk,ier,xp,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
@@ -725,8 +727,8 @@ static int norver(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 4 && nn+nt > 0 ) {
     if ( nnr )
-      fprintf(stdout,"     %d input normals ignored\n",nnr);
-    fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
+      fprintf(stdout,"     %" MMG5_PRId " input normals ignored\n",nnr);
+    fprintf(stdout,"     %" MMG5_PRId " normals,  %" MMG5_PRId " tangents updated  (%" MMG5_PRId " failed)\n",nn,nt,nf);
   }
 
   return 1;
@@ -743,12 +745,12 @@ static int norver(MMG5_pMesh mesh) {
 int MMGS_remDup(MMG5_pMesh mesh) {
   MMG5_Hash     hash;
   MMG5_pTria    ptt;
-  int           k,jel,dup;
+  MMG5_int      k,jel,dup;
 
   if ( !mesh->nt ) return 1;
 
   /* Hash triangles */
-  if ( ! MMG5_hashNew(mesh,&hash,(int)(0.51*mesh->nt),(int)(1.51*mesh->nt)) ) {
+  if ( ! MMG5_hashNew(mesh,&hash,(MMG5_int)(0.51*mesh->nt),(MMG5_int)(1.51*mesh->nt)) ) {
     return 0;
   }
 
@@ -769,7 +771,7 @@ int MMGS_remDup(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 5 && dup > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
-    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    if ( dup > 0 )  fprintf(stdout," %"MMG5_PRId" duplicate removed",dup);
     fprintf(stdout,"\n");
   }
 

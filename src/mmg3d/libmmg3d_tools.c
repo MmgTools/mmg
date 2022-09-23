@@ -112,8 +112,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 }
 
-int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
-  int idx;
+int MMG3D_Get_adjaTet(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listet[4]) {
+  MMG5_int idx;
 
   if ( ! mesh->adja ) {
     if (! MMG3D_hashTetra(mesh, 0))
@@ -572,7 +572,8 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
-  int        ref,i,j,ret,npar,nbr,br,rin,rex,split;
+  int        i,j,ret,npar,nbr,split;
+  MMG5_int   ref,rin,rex,br;
   char       *ptr,buf[256],data[256];
   FILE       *in;
   fpos_t     position;
@@ -620,7 +621,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
       }
       for (i=0; i<mesh->info.nmat; i++) {
-        MMG_FSCANF(in,"%d",&ref);
+        MMG_FSCANF(in,"%" MMG5_PRId "",&ref);
         fgetpos(in,&position);
         MMG_FSCANF(in,"%255s",data);
         split = MMG5_MMAT_NoSplit;
@@ -628,8 +629,8 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( strcmp(data,"nosplit") ) {
           fsetpos(in,&position);
           split = MMG5_MMAT_Split;
-          MMG_FSCANF(in,"%d",&rin);
-          MMG_FSCANF(in,"%d",&rex);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rin);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rex);
         }
         if ( !MMG3D_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
           return 0;
@@ -650,7 +651,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 
       for (i=0; i<mesh->info.npar; i++) {
-        ret = fscanf(in,"%d %255s ",&ref,buf);
+        ret = fscanf(in,"%" MMG5_PRId " %255s ",&ref,buf);
         if ( ret )
           ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
@@ -681,9 +682,9 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG_FSCANF(in,"%d",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
-      
+
       for (i=0; i<mesh->info.nbr; i++) {
-        MMG_FSCANF(in,"%d",&br);
+        MMG_FSCANF(in,"%" MMG5_PRId "",&br);
         if ( !MMG3D_Set_lsBaseReference(mesh,met,br) ) {
           return 0;
         }
@@ -702,12 +703,13 @@ int MMG3D_freeLocalPar(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
+int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria) {
   MMG5_pTetra pt,pt1;
   MMG5_pPrism pp;
   MMG5_pTria  ptt;
   MMG5_Hash   hash;
-  int         *adja,ref,k,i,j,iel;
+  int         i;
+  MMG5_int    ref,*adja,j,k,iel;
 
   *nb_tria = 0;
   memset ( &hash, 0x0, sizeof(MMG5_Hash));
@@ -810,7 +812,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
       iel = adja[i] / 5;
 
       if ( iel<0 ) {
-        ref = mesh->tetra[abs(iel)].ref;
+        ref = mesh->tetra[MMG5_abs(iel)].ref;
       } else {
         ref = mesh->prism[iel].ref;
       }
@@ -891,7 +893,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
       iel = adja[i] / 5;
 
       if ( iel<0 ) {
-        ref = mesh->tetra[abs(iel)].ref;
+        ref = mesh->tetra[MMG5_abs(iel)].ref;
       } else {
         ref = mesh->prism[iel].ref;
       }
@@ -916,8 +918,8 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
   return 1;
 }
 
-int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,int* v0,int* v1,int* v2,
-                             int* ref,int idx) {
+int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,MMG5_int* v0,MMG5_int* v1,MMG5_int* v2,
+                             MMG5_int* ref,MMG5_int idx) {
   MMG5_pTria ptt;
   size_t     nt_tot=0;
   char       *ptr_c = (char*)mesh->tria;
@@ -933,7 +935,7 @@ int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,int* v0,int* v1,int* v2,
   ptr_c = ptr_c-sizeof(size_t);
   nt_tot = *((size_t*)ptr_c);
 
-  if ( mesh->nt==nt_tot ) {
+  if ( mesh->nt==(MMG5_int)nt_tot ) {
     fprintf(stderr,"\n  ## Error: %s: no internal triangle.\n"
             " Please, call the MMG3D_Get_numberOfNonBdyTriangles function"
             " before the %s one and check that the number of internal"
@@ -942,10 +944,10 @@ int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,int* v0,int* v1,int* v2,
     return 0;
   }
 
-  if ( mesh->nt+idx > nt_tot ) {
-    fprintf(stderr,"\n  ## Error: %s: Can't get the internal triangle of index %d."
+  if ( mesh->nt+idx > (MMG5_int)nt_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal triangle of index %" MMG5_PRId "."
             " Index must be between 1 and %zu.\n",
-            __func__,idx,nt_tot-mesh->nt);
+            __func__,idx,nt_tot-(size_t)mesh->nt);
     return 0;
   }
 
@@ -982,7 +984,7 @@ void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 }
 
 int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin, double lmin,
-                    double lmax, int *eltab,int8_t metRidTyp) {
+                    double lmax, MMG5_int *eltab,int8_t metRidTyp) {
 
   mytime    ctim[TIMEMAX];
   int       ier;
@@ -1076,11 +1078,11 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 }
 
-void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
+void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, MMG5_int *eltab,
                     int8_t metRidTyp) {
   MMG5_pTetra   pt;
-  double   rap;
-  int      k;
+  double        rap;
+  MMG5_int      k;
 
   assert ( met );
 
@@ -1104,8 +1106,8 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
   return;
 }
 
-int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface) {
-  int val;
+int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, MMG5_int ktri, MMG5_int *ktet, int *iface) {
+  MMG5_int val;
 
   val = mesh->tria[ktri].cc;
 
@@ -1123,12 +1125,12 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface) {
 }
 
 
-int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2])
+int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, MMG5_int ktri, MMG5_int ktet[2], int iface[2])
 {
-  int ier;
-  int itet;
+  int      ier;
+  MMG5_int itet;
 #ifndef NDEBUG
-  int ia0,ib0,ic0,ia1,ib1,ic1;
+  MMG5_int ia0,ib0,ic0,ia1,ib1,ic1;
 #endif
 
   ktet[0]  =  ktet[1] = 0;
@@ -1169,11 +1171,11 @@ int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2])
 
 
 int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                    double lmax, int *eltab,int8_t metRidTyp) {
+                    double lmax, MMG5_int *eltab,int8_t metRidTyp) {
   MMG5_pTetra pt;
   MMG5_Hash   hash;
   double      len;
-  int         k,np,nq;
+  MMG5_int    k,np,nq;
   int8_t      ia,i0,i1,ier;
 
   /* Hash all edges in the mesh */
@@ -1243,7 +1245,8 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 static inline
 int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
   MMG5_pTetra pt;
-  int         i,k,ier;
+  MMG5_int    k;
+  int         i,ier;
 
   assert ( mesh->info.optim );
 
@@ -1292,7 +1295,9 @@ int MMG3D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p1,p2;
   double       ux,uy,uz,dd;
-  int          i,k,ia,ib,ipa,ipb,type;
+  MMG5_int     k,ipa,ipb;
+  int          i,ia,ib,type;
+  // we guess that we have less than INT32_MAX edges passing through a point
   int         *mark;
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
@@ -1365,8 +1370,10 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p1,p2;
   double       u[3],dd,tensordot[6];
-  int          i,j,k,iadr,ipa,ipb,type;
-  int         *mark;
+  MMG5_int     k,iadr,ipa,ipb;
+  int          i,j,type;
+  // we guess that we have less than INT32_MAX edges passing through a point
+  int          *mark;
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
@@ -1499,8 +1506,8 @@ int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
-  int    k;
-  double tmp;
+  MMG5_int    k;
+  double      tmp;
 
   if ( met->size!=6 ) { return 1; }
 

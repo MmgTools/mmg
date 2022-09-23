@@ -60,7 +60,7 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 }
 
 /** Calculate length of a curve in the considered isotropic metric */
-double MMG2D_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+double MMG2D_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2) {
   MMG5_pPoint     p1,p2;
   double          h1,h2,len,l,r;
 
@@ -79,7 +79,7 @@ double MMG2D_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 }
 
 /* Calculate length of a curve in the considered anisotropic metric by using a two-point quadrature formula */
-double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2) {
   MMG5_pPoint      p1,p2;
   double           len,*m1,*m2,ux,uy,l1,l2;
   static int8_t    mmgWarn0=0,mmgWarn1=0;
@@ -123,16 +123,17 @@ double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 
 /* print histo of edge lengths */
 int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria       pt;
-  double      lavg,len,ecart,som,lmin,lmax;
-  int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,nullEdge,hl[9];
+  MMG5_pTria    pt;
+  double        lavg,len,lmin,lmax;
+  int           ia,ipa,ipb;
+  MMG5_int      iamin,ibmin,iamax,ibmax,hl[9],nullEdge,navg;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
+  MMG5_int      k,l;
 
   navg  = 0;
   lavg  = 0.0;
   lmin  = 1.e20;
   lmax  = 0.0;
-  som   = 0.0;
   iamin = 0;
   ibmin = 0;
   iamax = 0;
@@ -158,13 +159,7 @@ int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
         len = MMG2D_lencurv_iso(mesh,sol,pt->v[ipa],pt->v[ipb]);
 
       navg++;
-      ecart = len;
       lavg += len;
-
-      /* update efficiency index */
-      if ( ecart > 1.0 )  ecart = 1.0 / ecart;
-
-      som  += (ecart - 1.0);
 
       /* find largest, smallest edge */
       if (len < lmin) {
@@ -195,7 +190,7 @@ int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   MMG5_displayLengthHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
-			   iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
+                          iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
 
 
   return 1;

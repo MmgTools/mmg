@@ -45,7 +45,7 @@
  */
 void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
-  int            k;
+  MMG5_int       k;
 
   /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
    * but that are not really required (-nosurf option) */
@@ -106,14 +106,14 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  */
 int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
 
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -180,7 +180,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        if ( MMG5_abs(pt1->ref) != MMG5_abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
@@ -283,15 +283,15 @@ int MMG5_setadj(MMG5_pMesh mesh){
   }
 
   if ( mesh->info.ddebug ) {
-    fprintf(stdout,"  a- ridges: %d found.\n",nr);
-    fprintf(stdout,"  a- requir: %d found.\n",nreq);
-    fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
-    fprintf(stdout,"  a- orient: %d flipped\n",nf);
+    fprintf(stdout,"  a- ridges: %" MMG5_PRId " found.\n",nr);
+    fprintf(stdout,"  a- requir: %" MMG5_PRId " found.\n",nreq);
+    fprintf(stdout,"  a- connex: %" MMG5_PRId " connected component(s)\n",ncc);
+    fprintf(stdout,"  a- orient: %" MMG5_PRId " flipped\n",nf);
   }
   else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
-    fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+    fprintf(stdout,"     Connected component: %" MMG5_PRId ",  genus: %" MMG5_PRId ",   reoriented: %" MMG5_PRId "\n",ncc,gen,nf);
+    fprintf(stdout,"     Edges: %" MMG5_PRId ",  tagged: %" MMG5_PRId ",  ridges: %" MMG5_PRId ", required: %" MMG5_PRId ", refs: %" MMG5_PRId "\n",
             ned,nr+nre+nreq,nr,nreq,nre);
   }
 
@@ -303,7 +303,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
 int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
-  int          *adja,k,kk,ne,nr;
+  MMG5_int      *adja,k,kk,ne,nr;
   int8_t        i,ii,i1,i2;
 
   ne = nr = 0;
@@ -356,7 +356,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
     }
   }
   if ( abs(mesh->info.imprim) > 3 && nr > 0 )
-    fprintf(stdout,"     %d ridges, %d edges updated\n",nr,ne);
+    fprintf(stdout,"     %" MMG5_PRId " ridges, %" MMG5_PRId " edges updated\n",nr,ne);
 
   return 1;
 }
@@ -372,7 +372,10 @@ int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  int           k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,i0,ier;
+  MMG5_int      k,lists[MMG3D_LMAX+2];
+  int64_t       listv[MMG3D_LMAX+2];
+  int           ilists,ilistv;
+  int           i0,ier;
   int8_t        i,j;
   static int8_t mmgWarn = 0;
 
@@ -442,7 +445,8 @@ int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  int            list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,nre;
+  int            xp,nr,ns;
   int8_t         i;
 
   nre = nc = 0;
@@ -507,7 +511,7 @@ int MMG5_singul(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
-    fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
+    fprintf(stdout,"     %" MMG5_PRId " corners, %" MMG5_PRId " singular points detected\n",nc,nre);
   return 1;
 }
 
@@ -517,7 +521,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_xPoint    *pxp;
   double         n[3],dd;
-  int            *adja,k,kk,ng,nn,nt,nf,nnr;
+  MMG5_int       *adja,k,kk,ng,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
   /* recomputation of normals only if mesh->xpoint has been freed */
@@ -669,8 +673,8 @@ int MMG5_norver(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 ) {
     if ( nnr )
-      fprintf(stdout,"     %d input normals ignored\n",nnr);
-    fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
+      fprintf(stdout,"     %" MMG5_PRId " input normals ignored\n",nnr);
+    fprintf(stdout,"     %" MMG5_PRId " normals,  %" MMG5_PRId " tangents updated  (%" MMG5_PRId " failed)\n",nn,nt,nf);
   }
   return 1;
 }
@@ -688,8 +692,8 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
-  int             k,base;
-  int             *adja;
+  MMG5_int        k;
+  MMG5_int        *adja,base;
   double          n[3],t[3];
   int8_t          i,j,ip,ier;
 
@@ -920,7 +924,7 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
 #ifdef USE_POINTMAP
   /* Initialize source point with input index */
-  int ip;
+  MMG5_int ip;
   for( ip = 1; ip <= mesh->np; ip++ )
     mesh->point[ip].src = ip;
 #endif

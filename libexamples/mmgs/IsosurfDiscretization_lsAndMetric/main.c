@@ -50,7 +50,8 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgLs,mmgMet;
-  int             ier,np,k;
+  MMG5_int        np,k;
+  int             ier;
   char            *inname,*outname,*lsname;
 
   fprintf(stdout,"  -- TEST MMGSLS \n");

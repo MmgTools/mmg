@@ -213,8 +213,8 @@ LIBMMG_CORE_EXPORT void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,doub
  * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
  *
  */
-LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                                          int rin, int rex);
+LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
+                                          MMG5_int rin, MMG5_int rex);
 
 
 /**
@@ -229,7 +229,7 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref
  * references are deleted as spurious volumes by the \a rmc option.
  *
  */
-LIBMMG_CORE_EXPORT int  MMG5_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,int br);
+LIBMMG_CORE_EXPORT int  MMG5_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int br);
 
 /* deallocations */
 LIBMMG_CORE_EXPORT void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);

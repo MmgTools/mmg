@@ -49,13 +49,14 @@
  * Move internal point whose volumic is passed.
  *
  */
-int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   MMG5_Bezier   b;
   double        aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
   double        ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
-  int           ier,iel,ipp,k,kel,npt,ibeg,iend;
+  MMG5_int      k,iel,ipp,ibeg,iend;
+  int           ier,kel,npt;
   int8_t        i0,i1,i2;
   static int8_t mmgErr0=0,mmgErr1=0;
 
@@ -371,7 +372,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
  * edges.
  *
  */
-int MMGS_paramDisp(MMG5_pMesh mesh,int it,int8_t isrid,int ip0,int ip,
+int MMGS_paramDisp(MMG5_pMesh mesh,MMG5_int it,int8_t isrid,MMG5_int ip0,MMG5_int ip,
                    double step,double o[3]) {
   MMG5_pTria  pt;
   MMG5_Bezier b;
@@ -591,13 +592,13 @@ int MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
 }
 
 /* compute movement of a ridge point whose ball (consisting of triangles) is passed */
-int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   MMG5_pTria   pt,pt0;
   MMG5_pxPoint go;
   MMG5_pPoint  p0,p1,p2,ppt0;
   double       step,ll1old,ll1new,ll2old,ll2new,o[3];
   double       nn1[3],nn2[3],to[3],calold,calnew,lam0,lam1,lam2;
-  int          k,iel,ip,ip0,ip1,ip2,it,it1,it2;
+  MMG5_int     k,iel,ip,ip0,ip1,ip2,it,it1,it2;
   int8_t       i0,i1,i2,isrid1,isrid2,isrid;
 
   step   = 0.1;

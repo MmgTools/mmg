@@ -48,6 +48,9 @@ PROGRAM main
   INTEGER            :: ier,argc
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
 
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
+
   WRITE(*,*) "  -- TEST MMGSLIB"
 
   argc =  COMMAND_ARGUMENT_COUNT();
@@ -86,15 +89,15 @@ PROGRAM main
   ! Pass 0_8 (0 at 64 bytes precision) if you don't want to pass the mmgLs
   ! structure (unused argument of Set_iparameter functions), it is equivalent to
   ! pass a pointer toward NULL.
-  CALL MMGS_Set_iparameter(mmgMesh,0_8,MMGS_IPARAM_iso, 1,ier)
+  CALL MMGS_Set_iparameter(mmgMesh,0_8,MMGS_IPARAM_iso, 1_immg,ier)
   IF ( ier == 0 )  CALL EXIT(101)
 
   ! Ask for optim mode: compute the mean of input edge lengths.
-  CALL MMGS_Set_iparameter(mmgMesh,0_8,MMGS_IPARAM_optim, 1,ier)
+  CALL MMGS_Set_iparameter(mmgMesh,0_8,MMGS_IPARAM_optim, 1_immg,ier)
   IF ( ier == 0 )  CALL EXIT(101)
 
   ! Ask to do this with anisotropic metric (unit tensor metric is computed).
-  CALL MMGS_Set_iparameter(mmgMesh,0_8,MMGS_IPARAM_anisosize, 1,ier)
+  CALL MMGS_Set_iparameter(mmgMesh,0_8,MMGS_IPARAM_anisosize, 1_immg,ier)
   IF ( ier == 0 )  CALL EXIT(101)
 
   !> 2) Build mesh in MMG5 format

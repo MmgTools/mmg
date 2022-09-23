@@ -44,7 +44,7 @@
  */
 static int paktri(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
-  int          k;
+  MMG5_int     k;
 
   k = 1;
   do {
@@ -84,10 +84,10 @@ int MMGS_hashTria(MMG5_pMesh mesh) {
   /* tassage */
   if ( !paktri(mesh) )  return 0;
 
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG5_int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG5_int,return 0);
 
   if ( !MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
 
@@ -114,7 +114,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
   MMG5_Hash  hash;
   MMG5_pTria  pt;
   MMG5_pEdge  pa;
-  int         k,ia;
+  MMG5_int    k,ia;
   int8_t      i,i1,i2;
 
   if ( !mesh->na ) return 1;
@@ -169,7 +169,8 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
 int MMGS_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash   hash;
   MMG5_pTria  pt;
-  int         k,tag,nad;
+  MMG5_int    k,nad;
+  int         tag;
   int8_t      i,i1,i2;
 
   /* adjust hash table params */

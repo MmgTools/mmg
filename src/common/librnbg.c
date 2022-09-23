@@ -50,14 +50,14 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG5_int vertNbr, MMG5_int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
-  int boxNbr, vertIdx;
-  SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
-  char s[200];
-  SCOTCH_Num *sortPartTb;
+  MMG5_int     boxNbr, vertIdx;
+  SCOTCH_Num   logMaxVal, SupMaxVal, InfMaxVal, maxVal;
+  char         s[200];
+  SCOTCH_Num   *sortPartTb;
   SCOTCH_Strat strat ;
-  SCOTCH_Arch arch;
+  SCOTCH_Arch  arch;
 
   /* Computing the number of boxes */
   boxNbr = vertNbr / boxVertNbr;
@@ -74,7 +74,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
   else {
     CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
   }
-  sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
+  sprintf(s, "m{vert=%" MMG5_PRId ",low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
   MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return 1);
@@ -156,11 +156,12 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
  *
  */
 void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
-                  MMG5_pSol field,int* perm,int ind1, int ind2, int solsiz) {
+                  MMG5_pSol field,MMG5_int* perm,MMG5_int ind1, MMG5_int ind2, int solsiz) {
   MMG5_Point ptttmp;
   MMG5_pSol  psl;
   MMG5_Sol   soltmp;
-  int        tmp,addr2,addr1,i,pslsiz;
+  int        i,pslsiz;
+  MMG5_int   tmp,addr2,addr1;
 
   /* swap the points */
   memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));
@@ -228,7 +229,7 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
  *
  **/
 int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
-                    MMG5_pSol fields, int *permNodGlob)
+                    MMG5_pSol fields, MMG5_int *permNodGlob)
 {
 
 #ifdef USE_SCOTCH

@@ -54,8 +54,8 @@ extern int8_t ddb;
  * provided).
  *
  */
-int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
-                    int it1,int it2,int8_t typchk) {
+int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
+                    MMG5_int it1,MMG5_int it2,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt0;
@@ -63,7 +63,8 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   MMG5_pPar     par;
   double        b0[3],b1[3],n[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info;
+  MMG5_int      iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,info;
+  int           isloc,l;
   int8_t        ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
 
   iel = list[0] / 6;
@@ -103,6 +104,8 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   assert(it2);
   iel2 = it2 / 4;
   ifa2 = it2 % 4;
+  assert( 0<=ifa1 && ifa1<4 && "unexpected local face idx");
+  assert( 0<=ifa2 && ifa2<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
   MMG5_tet2tri(mesh,iel2,ifa2,&tt2);
 
@@ -383,7 +386,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
     if ( !isshell ) {
       /* Test that we don't recreate an existing elt */
-      int adj = mesh->adja[4*(iel-1)+1+ip];
+      MMG5_int adj = mesh->adja[4*(iel-1)+1+ip];
       if ( adj ) {
         int8_t voy  = adj%4;
         adj /= 4;
@@ -415,7 +418,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
     if ( !isshell ) {
       /* Test that we don't recreate an existing elt */
-      int adj = mesh->adja[4*(iel-1)+1+iq];
+      MMG5_int adj = mesh->adja[4*(iel-1)+1+iq];
       if ( adj ) {
         int8_t voy  = adj%4;
         adj /= 4;
@@ -461,16 +464,17 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  * Swap boundary edge whose shell is provided.
  *
  */
-int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
+int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int it1,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int           iel,iel1,ilist,np,nq,nm,src;
+  int           ilist;
+  MMG5_int      iel,np,nq,nm,src,iel1;
   double        c[3];
   int8_t        ia,iface1,j,ipa,im;
   int           ier;
 #ifndef NDEBUG
-  int           na;
+  MMG5_int      na;
 #endif
 
   iel = list[0] / 6;
@@ -546,7 +550,7 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   }
 
   /* Collapse m on na after taking (new) ball of m */
-  memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+2)*sizeof(MMG5_int));
   for (j=0; j<3; j++) {
     im = MMG5_idir[iface1][j];
     if ( pt1->v[im] == nm )  break;
@@ -596,13 +600,13 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
  * \remark used in anatet4 to remove the tetra with multiple boundary faces.
  *
  */
-int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t metRidTyp,
-                 int ifac,int conf0,int adj,int conf1) {
+int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
+                 int ifac,int conf0,MMG5_int adj,int conf1) {
   MMG5_pTetra   pt0,pt1,ptnew;
   MMG5_xTetra   xt[3];
   MMG5_pxTetra  pxt0,pxt1;
-  int           k1,*adja,iel,np,xt1;
-  int           adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
+  MMG5_int      xt1,k1,*adja,iel,np;
+  MMG5_int      adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
   int8_t        i,isxt[3];
   uint8_t       tau0[4],tau1[4];
   const uint8_t *taued0,*taued1;
