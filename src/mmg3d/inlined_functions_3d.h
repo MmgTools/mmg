@@ -169,14 +169,14 @@ inline double MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
 
-  if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
+  if ( MG_RID(pp1->tag) ) {
     if ( !MMG5_moymet(mesh,met,pt,m1) ) return 0;
   } else {
     for ( i=0; i<6; ++i )
       m1[i] = met->m[6*ip1+i];
   }
 
-  if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
+  if ( MG_RID(pp2->tag) ) {
     if ( !MMG5_moymet(mesh,met,pt,m2) ) return 0;
   } else {
     for ( i=0; i<6; ++i )

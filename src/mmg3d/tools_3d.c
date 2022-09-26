@@ -702,7 +702,7 @@ inline int MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3
     np1[0] = np1[1] = np1[2] = 0;
 
     /* Pathological case : don't move in that case ! */
-    if(((MG_SIN(p0->tag)||(p0->tag & MG_NOM)) && (MG_SIN(p1->tag) || (p1->tag & MG_NOM)))||(ll<MMG5_EPSD)){
+    if ( (MG_SIN_OR_NOM(p0->tag) && MG_SIN_OR_NOM(p1->tag)) || (ll<MMG5_EPSD) ){
         o[0] = 0.5*( p0->c[0] + p1->c[0] );
         o[1] = 0.5*( p0->c[1] + p1->c[1] );
         o[2] = 0.5*( p0->c[2] + p1->c[2] );
@@ -714,7 +714,7 @@ inline int MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3
     il = 1.0 /sqrt(ll);
 
     /* Coordinates of the new tangent and normal */
-    if(MG_SIN(p0->tag)||(p0->tag & MG_NOM)){
+    if ( MG_SIN_OR_NOM(p0->tag) ) {
         if(p1->tag & MG_GEO){
             n1 = &mesh->xpoint[p1->xp].n1[0];
             n2 = &mesh->xpoint[p1->xp].n2[0];
@@ -733,7 +733,7 @@ inline int MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3
         }
         memcpy(np0,np1,3*sizeof(double));
     }
-    else if(MG_SIN(p1->tag) || (p1->tag & MG_NOM)){
+    else if ( MG_SIN_OR_NOM(p1->tag) ) {
         if(p0->tag & MG_GEO){
             n1 = &mesh->xpoint[p0->xp].n1[0];
             n2 = &mesh->xpoint[p0->xp].n2[0];

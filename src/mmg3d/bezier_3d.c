@@ -226,7 +226,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
   }
 
   else {
-    if ( !MG_SIN(p0->tag) && !( p0->tag & MG_NOM ) ) {
+    if ( ! MG_SIN_OR_NOM(p0->tag) ) {
       if ( p0->tag & MG_GEO ) {
         n1 = &(pxp0->n1[0]);
         n2 = &(pxp0->n2[0]);
@@ -241,7 +241,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
         memcpy(np0,&(pxp0->n1[0]),3*sizeof(double));
     }
 
-    if ( !MG_SIN(p1->tag) && !( p1->tag & MG_NOM )) {
+    if ( !MG_SIN_OR_NOM(p1->tag) ) {
       if ( p1->tag & MG_GEO ) {
         n1 = &(pxp1->n1[0]);
         n2 = &(pxp1->n2[0]);
@@ -255,8 +255,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
       else
         memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
     }
-    if ( (MG_SIN(p0->tag) || ( p0->tag & MG_NOM )) &&
-         (MG_SIN(p1->tag) || ( p1->tag & MG_NOM )) ) {
+    if ( MG_SIN_OR_NOM(p0->tag) && MG_SIN_OR_NOM(p1->tag) ) {
       t0[0] = ux * il;
       t0[1] = uy * il;
       t0[2] = uz * il;
@@ -265,8 +264,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
       t1[1] = -uy * il;
       t1[2] = -uz * il;
     }
-    else if ( (!MG_SIN(p0->tag) && !( p0->tag & MG_NOM)) &&
-              ( MG_SIN(p1->tag) ||  ( p1->tag & MG_NOM ))) {
+    else if ( (!MG_SIN_OR_NOM(p0->tag)) && MG_SIN_OR_NOM(p1->tag) ) {
       if ( !MMG5_BezierTgt(p0->c,p1->c,np0,np0,t0,t1) ) {
         t0[0] = ux * il;
         t0[1] = uy * il;
@@ -276,8 +274,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
       t1[1] = -uy * il;
       t1[2] = -uz * il;
     }
-    else if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM ) ) &&
-              (!MG_SIN(p1->tag) && !( p1->tag & MG_NOM ))) {
+    else if ( MG_SIN_OR_NOM(p0->tag) && (!MG_SIN_OR_NOM(p1->tag)) ) {
       if ( !MMG5_BezierTgt(p0->c,p1->c,np1,np1,t0,t1) ) {
         t1[0] = - ux * il;
         t1[1] = - uy * il;
@@ -455,7 +452,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
     n2 = pb->n[i2];
 
     /* check for boundary curve */
-    if ( MG_EDG(pt->tag[i]) || (pt->tag[i] & MG_NOM)) {
+    if ( MG_EDG_OR_NOM(pt->tag[i]) ) {
       if ( MG_SIN(p[i1]->tag) ) {
         t1[0] = ux / l;
         t1[1] = uy / l;
