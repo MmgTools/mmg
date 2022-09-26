@@ -47,6 +47,8 @@ PROGRAM main
   MMG5_DATA_PTR_T    :: mmgLs
   INTEGER            :: ier,argc
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   WRITE(*,*) "  -- TEST MMG2DLIB"
 
@@ -85,7 +87,7 @@ PROGRAM main
   !
   ! Pass 0_8 (0 at 64 bytes precision) if you don't want to pass the mmgLs
   ! structure (unused argument of Set_iparameter functions).
-  CALL MMG2D_Set_iparameter(mmgMesh,0_8,MMG2D_IPARAM_iso, 1,ier)
+  CALL MMG2D_Set_iparameter(mmgMesh,0_8,MMG2D_IPARAM_iso, 1_immg,ier)
   IF ( ier == 0 )  CALL EXIT(101)
 
   ! Ask for constant edge size of length 0.1.

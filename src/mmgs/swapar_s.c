@@ -55,16 +55,17 @@
  * approximation purposes
  *
  */
-int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk,
-           double (*MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,int ,int,int8_t),
+int chkswp(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i,int8_t typchk,
+           double (*MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,MMG5_int ,MMG5_int,int8_t),
            double (*MMGS_caltri)(MMG5_pMesh,MMG5_pSol,MMG5_pTria)) {
   MMG5_pTria    pt,pt0,pt1;
   MMG5_pPoint   p[3],q;
-  MMG5_pPar      par;
-  double   np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3],hausd;
-  double   cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
-  int     *adja,j,kk,l,ip0,ip1,ip2,iq,isloc;
-  int8_t   ii,i1,i2,jj;
+  MMG5_pPar     par;
+  double        np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3],hausd;
+  double        cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
+  MMG5_int      *adja,j,kk,l,ip0,ip1,ip2,iq;
+  int           isloc;
+  int8_t        ii,i1,i2,jj;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
@@ -314,10 +315,10 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk,
  * must be checked outside to prevent the creation of empty elts.
  *
  */
-int swapar(MMG5_pMesh mesh,int k,int i) {
+int swapar(MMG5_pMesh mesh,MMG5_int k,int i) {
   MMG5_pTria    pt,pt1;
-  int     *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
-  int8_t   i1,i2,j,jj,j2,v11,v21;
+  MMG5_int      *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
+  int8_t        i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
   if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return 0;

@@ -64,7 +64,7 @@
 /** Free adja, xtetra and xpoint tables */
 static inline
 void MMGS_Free_topoTables(MMG5_pMesh mesh) {
-  int k;
+  MMG5_int k;
 
   mesh->xp = 0;
   if ( mesh->adja )
@@ -93,8 +93,9 @@ static inline
 int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
-  int           np,nc,nr, k,nt,nbl,imet,imetnew,i,na,jel;
-  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int      iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int      k,nt,np,na,jel,nc,nr,nbl;
+  int           imet,imetnew,i;
   int8_t        i1,i2;
 
   /* Remove non wanted subdomains if needed */
@@ -107,7 +108,7 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
     if ( ppt->tag & MG_CRN )  nc++;
-    ppt->ref = abs(ppt->ref);
+    ppt->ref = MMG5_abs(ppt->ref);
   }
 
   /* compact triangles */
@@ -285,11 +286,11 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+    fprintf(stdout,"     NUMBER OF VERTICES   %8" MMG5_PRId "   CORNERS %8" MMG5_PRId "\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8" MMG5_PRId "\n",mesh->nt);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
+      fprintf(stdout,"     NUMBER OF EDGES      %8" MMG5_PRId "   RIDGES  %8" MMG5_PRId "\n",mesh->na,nr);
   }
   return 1;
 }

@@ -129,104 +129,6 @@ void MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi ) {
   }
 }
 
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param node pointer toward a MMG5_dNode (cell for linked list)
- * \return 1 if we can alloc the node \a node, 0 otherwise.
- *
- * Node allocation.
- *
- */
-static inline
-int MMG5_Alloc_dnode( MMG5_pMesh mesh, MMG5_dNode **node ) {
-
-  MMG5_ADD_MEM(mesh,sizeof(MMG5_dNode),"node for hausdorff eval",
-                return 0;);
-
-  MMG5_SAFE_MALLOC(*node,1,MMG5_dNode,return 0);
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the address of the root of the linked list.
- * \param k integer value to add to the linked list.
- * \param val real value to add to the linked list.
- * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
- *
- * Add a node with integer value \a k and real value \a val to a sorted linked
- * list with unique entries.
- *
- * \remark as the linked list had unique entries, we don't insert a node if it
- * exists.
- *
- */
-int MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int k, double val ) {
-  MMG5_dNode  *newNode, *cur;
-
-  cur = *liLi;
-
-  /* Travel through the linked list and search if the value val exist or, if
-   * not, where to insert it */
-  if ( cur ) {
-    if ( val < (*liLi)->val ) {
-      /* Add a value at the list head */
-      if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
-
-      newNode->val = val;
-      newNode->nxt = (*liLi);
-
-      (*liLi) = newNode;
-
-      return 1;
-
-    }
-    else if (val == (*liLi)->val ) return 0;
-
-    while ( cur->nxt && ( val >= (cur->nxt)->val) )
-      cur = cur->nxt;
-
-    if ( val == cur->val ) return 0;
-
-    if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
-
-    newNode->val = val;
-    newNode->nxt = cur->nxt;
-    cur->nxt = newNode;
-  }
-  else {
-    if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
-
-    newNode->val = val;
-    newNode->nxt = NULL;
-
-    *liLi = newNode;
-  }
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the root of the linked list.
- *
- * Free the memory used by the linked list whose root is \a liLi.
- *
- */
-void MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi ) {
-  MMG5_dNode *cur,*nxt;
-
-  cur = liLi;
-  while (cur) {
-    nxt = cur;
-    cur = cur->nxt;
-
-    MMG5_DEL_MEM(mesh,nxt);
-  }
-}
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param bdryRefs pointer toward the list of the boundary references.
@@ -238,7 +140,8 @@ void MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi ) {
  *
  */
 int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
-  int         npar,k,ier;
+  MMG5_int    k;
+  int         npar,ier;
 
   /** Count the number of different boundary references and list it */
   (*bdryRefs) = NULL;
@@ -286,7 +189,7 @@ int MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Triangle %e %e %e \n",cur->val,
+    fprintf(out,"%"MMG5_PRId" Triangle %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }

@@ -483,10 +483,11 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   return;
 }
 
-int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
+int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  int        *adja,k,i,j,i1,i2,iel;
+  MMG5_int   *adja,k,j,iel;
+  int        i,i1,i2;
 
   *nb_edges = 0;
   if ( mesh->tria ) {
@@ -578,7 +579,7 @@ int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
   return 1;
 }
 
-int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
+int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref, MMG5_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;
@@ -594,7 +595,7 @@ int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
   ptr_c = ptr_c-sizeof(size_t);
   na_tot = *((size_t*)ptr_c);
 
-  if ( mesh->namax==na_tot ) {
+  if ( (size_t)mesh->namax==na_tot ) {
     fprintf(stderr,"\n  ## Error: %s: no internal edge.\n"
             " Please, call the MMGS_Get_numberOfNonBdyEdges function"
             " before the %s one and check that the number of internal"
@@ -602,10 +603,10 @@ int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
             __func__,__func__);
   }
 
-  if ( mesh->namax+idx > na_tot ) {
-    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %d."
+  if ( (size_t)mesh->namax+idx > na_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %" MMG5_PRId "."
             " Index must be between 1 and %zu.\n",
-            __func__,idx,na_tot-mesh->namax);
+            __func__,idx,na_tot-(size_t)mesh->namax);
   }
 
   ped = &mesh->edge[mesh->na+idx];
@@ -620,7 +621,7 @@ int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
   return 1;
 }
 
-int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
+int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
 
   if ( ! mesh->adja ) {
     if (! MMGS_hashTria(mesh))
@@ -634,10 +635,11 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
   return 1;
 }
 
-int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX])
+int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;
-  int k,prevk,nbpoi,iploc,i,i1,i2,*adja;
+  MMG5_int   k,prevk,*adja;
+  int        i,i1,i2,iploc,nbpoi;
 
   pt   = &mesh->tria[start];
 
@@ -653,7 +655,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   do {
     if ( nbpoi == MMGS_LMAX ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
-              " vertices of the vertex %d:\nthe ball of point contain too many"
+              " vertices of the vertex %" MMG5_PRId ":\nthe ball of point contain too many"
               " elements.\n",__func__,ip);
       return 0;
     }
@@ -674,7 +676,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMGS_LMAX ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
-            " vertex %d:\nthe ball of point contain too many elements.\n",
+            " vertex %" MMG5_PRId ":\nthe ball of point contain too many elements.\n",
             __func__,ip);
     return 0;
   }
@@ -693,7 +695,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
 
     if ( nbpoi == MMGS_LMAX ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",
+              " vertex %" MMG5_PRId ":\nthe ball of point contain too many elements.\n",
               __func__,ip);
       return 0;
     }
@@ -721,7 +723,8 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
  */
 static inline
 int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
-  int         i,k,ier;
+  MMG5_int k;
+  int      i,ier;
 
   assert ( mesh->info.optim );
 
@@ -772,7 +775,10 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria   ptt;
   MMG5_pPoint  p1,p2;
   double       ux,uy,uz,dd;
-  int          i,k,ipa,ipb,type;
+  MMG5_int     k,ipa,ipb;
+  int          i,type;
+  //We guess that we have less than INT32_MAX edges
+  // passing through each point
   int          *mark;
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
@@ -845,8 +851,9 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static inline
-int MMGS_unitTensor_3D( MMG5_pMesh mesh,int k,int i,MMG5_pPoint p1,double *m) {
-  int         ilist,j,list[MMGS_LMAX+2];
+int MMGS_unitTensor_3D( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,double *m) {
+  MMG5_int    list[MMGS_LMAX+2];
+  int         ilist,j;
   int8_t      open;
 
   /** Step 1: compute ball of point */
@@ -871,9 +878,9 @@ int MMGS_unitTensor_3D( MMG5_pMesh mesh,int k,int i,MMG5_pPoint p1,double *m) {
   for ( j=0; j<ilist; ++j ) {
     /* Compute euclidean edge length */
     double u[3];
-    int    iel = list[j] / 3;
-    int8_t i1  = list[j] % 3;
-    int8_t i2  = MMG5_inxt2[i1];
+    MMG5_int iel = list[j] / 3;
+    int8_t   i1  = list[j] % 3;
+    int8_t   i2  = MMG5_inxt2[i1];
 
     MMG5_pTria ptt = &mesh->tria[iel];
     MMG5_pPoint p2 = &mesh->point[ptt->v[i2]];
@@ -955,20 +962,21 @@ int MMGS_unitTensor_3D( MMG5_pMesh mesh,int k,int i,MMG5_pPoint p1,double *m) {
  *
  */
 static inline
-int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int k, int i,
+int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int k, int i,
                               int ilist,double r[3][3],double *lispoi,double n[3]) {
   MMG5_pTria  ptt;
   MMG5_pPoint p2;
   double      ux,uy,uz;
-  int         *adja,kold,jold,i1;
+  MMG5_int    *adja,kold;
+  int         jold,i1;
 
   if ( !MMG5_rotmatrix(n,r) ) {
     return 0;
   }
 
   /* Enumeration of the ball starting from a boundary */
-  int iel = k;
-  int j   = i;
+  MMG5_int iel = k;
+  int j        = i;
   do {
     ptt   = &mesh->tria[iel];
     adja  = &mesh->adja[3*(iel-1)+1];
@@ -976,7 +984,7 @@ int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int k, int i,
     kold  = iel;
     jold  = j;
     iel   = adja[i1] / 3;
-    j     = adja[i1] % 3;
+    j     = (int)adja[i1] % 3;
     j     = MMG5_iprv2[j];
   }
   // Remark: here the test k!=start is a security bound: theorically it is
@@ -1004,7 +1012,7 @@ int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int k, int i,
     lispoi[3*idx+3] =  r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
 
     iel       = adja[i1] / 3;
-    j         = adja[i1] % 3;
+    j         = (int)adja[i1] % 3;
     j         = MMG5_inxt2[j];
 
     ++idx;
@@ -1053,11 +1061,12 @@ int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int k, int i,
  *
  */
 static inline
-int MMGS_unitTensor_2D ( MMG5_pMesh mesh,int k,int i,MMG5_pPoint p1,
+int MMGS_unitTensor_2D ( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,
                          double *m,double isqhmax) {
   MMG5_pTria  ptt;
   double      r[3][3],lispoi[3*MMGS_LMAX+1],b0[3],b1[3],b2[3],dd;
-  int         ilist,j,list[MMGS_LMAX+2];
+  MMG5_int    list[MMGS_LMAX+2];
+  int         ilist,j;
   int8_t      opn;
 
   /** Step 1: compute ball of point */
@@ -1242,7 +1251,8 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria   ptt;
   MMG5_pPoint  p1;
   double       *m,tensordot[6];
-  int          i,j,k,iadr,ip,type;
+  MMG5_int     k,iadr,ip;
+  int          i,j,type;
 
   /* Memory alloc */
   if ( met->size!=6 ) {
@@ -1283,8 +1293,8 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MG_EOK(ptt) )  continue;
 
     for (i=0; i<3; i++) {
-      int ipa = ptt->v[MMG5_iprv2[i]];
-      int ipb = ptt->v[MMG5_inxt2[i]];
+      MMG5_int ipa = ptt->v[MMG5_iprv2[i]];
+      MMG5_int ipb = ptt->v[MMG5_inxt2[i]];
       p1  = &mesh->point[ipa];
       MMG5_pPoint p2  = &mesh->point[ipb];
 
@@ -1392,7 +1402,7 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( !ier ) {
           fprintf(stderr,"\n  ## Error: %s: unable to compute anisotropic unit"
-                  " tensor at corner point %d.\n",__func__,MMGS_indPt(mesh,ip));
+                  " tensor at corner point %"MMG5_PRId".\n",__func__,MMGS_indPt(mesh,ip));
           return 0;
         }
         p1->flag = mesh->base;
@@ -1402,7 +1412,7 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
          * tangent plane and computation of the 2D unit tensor */
         if ( ! MMGS_unitTensor_2D( mesh, k, i, p1, m, isqhmax) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to compute anisotropic unit"
-                  " tensor at required point %d.\n",__func__,MMGS_indPt(mesh,ip));
+                  " tensor at required point %"MMG5_PRId".\n",__func__,MMGS_indPt(mesh,ip));
           return 0;
         }
         p1->flag = mesh->base;
@@ -1420,7 +1430,8 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( !ier ) {
           fprintf(stderr,"\n  ## Error: %s: unable to compute anisotropic unit"
-                  " tensor at ridge point %d.\n",__func__,MMGS_indPt(mesh,ip));
+                  " tensor at ridge point %"MMG5_PRId".\n",__func__,
+                  MMGS_indPt(mesh,ip));
         }
         p1->flag = mesh->base;
       }
@@ -1432,7 +1443,8 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( ! MMGS_unitTensor_2D( mesh, k, i, p1, m, isqhmax) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to compute anisotropic unit"
-                  " tensor at required point %d.\n",__func__,MMGS_indPt(mesh,ip));
+                  " tensor at required point %"MMG5_PRId".\n",__func__,
+                  MMGS_indPt(mesh,ip));
           return 0;
         }
         p1->flag = mesh->base;

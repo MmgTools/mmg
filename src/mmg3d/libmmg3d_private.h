@@ -47,7 +47,7 @@ extern "C" {
     of point ip with coordinates o and tag tag*/
 #define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,src ) do    \
   {                                                                     \
-  int klink,oldnpmax;                                                   \
+  MMG5_int klink,oldnpmax;                                              \
   assert ( mesh && mesh->point );                                       \
                                                                         \
   oldnpmax = mesh->npmax;                                               \
@@ -92,7 +92,7 @@ extern "C" {
     of tetra jel */
 #define MMG3D_TETRA_REALLOC(mesh,jel,wantedGap,law ) do                \
   {                                                                     \
-    int klink,oldSiz;                                                   \
+    MMG5_int klink,oldSiz;                                              \
                                                                         \
     oldSiz = mesh->nemax;                                               \
     MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,MMG5_Tetra, \
@@ -104,9 +104,9 @@ extern "C" {
                                                                         \
     if ( mesh->adja ) {                                                 \
       /* adja table */                                                  \
-      MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
+      MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(MMG5_int),            \
                     "larger adja table",law);                           \
-      MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,int     \
+      MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,MMG5_int     \
                           ,"larger adja table",law);                    \
     }                                                                   \
                                                                         \
@@ -190,17 +190,17 @@ static const uint8_t MMG5_permedge[12][6] = {
 
 /* prototypes */
 int  MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp);
-extern int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]);
+extern int MMG5_directsurfball(MMG5_pMesh mesh, MMG5_int ip, MMG5_int *list, int ilist, double n[3]);
 
 int  MMG3D_Init_mesh_var( va_list argptr );
 int  MMG3D_Free_all_var( va_list argptr );
 int  MMG3D_Free_structures_var( va_list argptr );
 int  MMG3D_Free_names_var( va_list argptr );
 void MMG3D_Free_arrays(MMG5_pMesh*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*);
-int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src);
-int  MMG3D_newElt(MMG5_pMesh mesh);
-int  MMG3D_delElt(MMG5_pMesh mesh,int iel);
-void MMG3D_delPt(MMG5_pMesh mesh,int ip);
+MMG5_int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src);
+MMG5_int  MMG3D_newElt(MMG5_pMesh mesh);
+int  MMG3D_delElt(MMG5_pMesh mesh,MMG5_int iel);
+void MMG3D_delPt(MMG5_pMesh mesh,MMG5_int ip);
 int  MMG3D_zaldy(MMG5_pMesh mesh);
 void MMG5_freeXTets(MMG5_pMesh mesh);
 void MMG5_freeXPrisms(MMG5_pMesh mesh);
@@ -210,43 +210,43 @@ int  MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori
 extern int    MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 extern double MMG5_BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
 int  MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]);
-extern int  MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no);
-extern int  MMG5_BezierRef(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no, double *to);
-extern int  MMG5_BezierEdge(MMG5_pMesh mesh,int ip0, int ip1, double b0[3], double b1[3],int8_t isrid, double v[3]);
-extern int  MMG5_BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
-extern int  MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
-int  MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
-int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,int,int,int,int,int8_t*,int8_t* );
-int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, int start, int ip, int *ng, int *nr,int*nm);
-int  MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
-int  MMG5_boulenmInt(MMG5_pMesh mesh, int start, int ip, double t[3]);
-int  MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
-int  MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
-                          int *ilistv,int *lists,int*ilists,int*refmin,int*refplus,int isnm);
-int  MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
-                         int *ilistv,int *lists,int*ilists, int isnm);
-int  MMG5_bouletrid(MMG5_pMesh,int,int,int,int *,int *,int *,int *,int *,int *);
-int  MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
-int  MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia);
-int  MMG5_coquil(MMG5_pMesh mesh, int start, int ia, int * list);
-int  MMG5_coquilface(MMG5_pMesh mesh, int start,int8_t iface,int,int*,int*,int*,int);
-int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,int8_t iface,
-                               int8_t ia,int *list,int *ilist,int *it1,int *it2,
-                               int *piv,int *adj,int8_t *hasadja,int *nbdy,int silent);
-void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,int8_t *iface,int8_t *i,
-                                     int *list,int *ilist,int *it1,int *pradj,
-                                     int *adj);
-void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2);
-int16_t MMG5_coquilTravel(MMG5_pMesh,int,int,int*,int*,int8_t*,int8_t*);
-int16_t MMG5_openCoquilTravel(MMG5_pMesh,int,int,int*,int*,int8_t*,int8_t*);
-int  MMG5_settag(MMG5_pMesh,int,int,int16_t,int);
-int  MMG5_deltag(MMG5_pMesh,int,int,int16_t);
+extern int  MMG5_BezierReg(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double s, double v[3], double *o, double *no);
+extern int  MMG5_BezierRef(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double s, double *o, double *no, double *to);
+extern int  MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double b0[3], double b1[3],int8_t isrid, double v[3]);
+extern int  MMG5_BezierRidge(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double s, double *o, double *no1, double *no2, double *to);
+extern int  MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,double *no,double *to);
+int  MMG5_norface(MMG5_pMesh mesh ,MMG5_int k, int iface, double v[3]);
+int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,MMG5_int,MMG5_int,MMG5_int,int,int8_t*,int8_t* );
+int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int start, int ip, MMG5_int *ng, MMG5_int *nr,MMG5_int *nm);
+int  MMG5_boulenm(MMG5_pMesh mesh, MMG5_int start, int ip, int iface, double n[3],double t[3]);
+int  MMG5_boulenmInt(MMG5_pMesh mesh, MMG5_int start, int ip, double t[3]);
+int  MMG5_boulevolp(MMG5_pMesh mesh, MMG5_int start, int ip, int64_t * list);
+int  MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,int64_t *listv,
+                          int *ilistv,MMG5_int *lists,int*ilists,MMG5_int*refmin,MMG5_int*refplus,int isnm);
+int  MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,int64_t *listv,
+                         int *ilistv,MMG5_int *lists,int*ilists, int isnm);
+int  MMG5_bouletrid(MMG5_pMesh,MMG5_int,int,int,int *,MMG5_int *,int *,MMG5_int *,MMG5_int *,MMG5_int *);
+int  MMG5_startedgsurfball(MMG5_pMesh mesh,MMG5_int nump,MMG5_int numq,MMG5_int *list,int ilist);
+int  MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia);
+int  MMG5_coquil(MMG5_pMesh mesh, MMG5_int start, int ia, int64_t * list);
+int  MMG5_coquilface(MMG5_pMesh mesh, MMG5_int start,int8_t iface,int,int64_t*,MMG5_int*,MMG5_int*,int);
+int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_int nb,int8_t iface,
+                               int8_t ia,int64_t *list,int *ilist,MMG5_int *it1,MMG5_int *it2,
+                               MMG5_int *piv,MMG5_int *adj,int8_t *hasadja,int *nbdy,int silent);
+void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,int8_t *i,
+                                     int64_t *list,int *ilist,MMG5_int *it1,MMG5_int *pradj,
+                                     MMG5_int *adj);
+void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, MMG5_int k1, MMG5_int k2);
+int16_t MMG5_coquilTravel(MMG5_pMesh,MMG5_int,MMG5_int,MMG5_int*,MMG5_int*,int8_t*,int8_t*);
+int16_t MMG5_openCoquilTravel(MMG5_pMesh,MMG5_int,MMG5_int,MMG5_int*,MMG5_int*,int8_t*,int8_t*);
+int  MMG5_settag(MMG5_pMesh,MMG5_int,int,int16_t,int);
+int  MMG5_deltag(MMG5_pMesh,MMG5_int,int,int16_t);
 int  MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash);
-int  MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,int,int8_t,int8_t,int*,int,int8_t);
-int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,int8_t,int8_t,int*,int,int*,int,int,int,int8_t,int,int8_t);
-int  MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,int,int,int8_t,int8_t);
+int  MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,int8_t,int64_t*,int,int8_t);
+int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,int8_t,int64_t*,int,MMG5_int*,int,MMG5_int,MMG5_int,int8_t,int,int8_t);
+int  MMG5_chkmanicoll(MMG5_pMesh,MMG5_int,int,int,MMG5_int,MMG5_int,MMG5_int,MMG5_int,int8_t,int8_t);
 int  MMG5_chkmani(MMG5_pMesh mesh);
-int  MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,int8_t,int8_t);
+MMG5_int  MMG5_colver(MMG5_pMesh,MMG5_pSol,int64_t *,int,int8_t,int8_t);
 int  MMG3D_analys(MMG5_pMesh mesh);
 void MMG3D_set_reqBoundaries(MMG5_pMesh mesh);
 int  MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh);
@@ -256,173 +256,173 @@ int  MMG5_setdhd(MMG5_pMesh mesh);
 int  MMG5_singul(MMG5_pMesh mesh);
 int  MMG3D_nmgeom(MMG5_pMesh mesh);
 int  MMG5_paktet(MMG5_pMesh mesh);
-int  MMG5_hashGetFace(MMG5_Hash*,int,int,int);
+MMG5_int  MMG5_hashGetFace(MMG5_Hash*,MMG5_int,MMG5_int,MMG5_int);
 int  MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash*);
 int  MMG3D_hashPrism(MMG5_pMesh mesh);
-int  MMG5_hashPop(MMG5_Hash *hash,int a,int b);
-int  MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag);
-int  MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag);
-int  MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag);
-int  MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag);
-int  MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax);
+int  MMG5_hashPop(MMG5_Hash *hash,MMG5_int a,MMG5_int b);
+int  MMG5_hPop(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,int16_t *tag);
+int  MMG5_hTag(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,int16_t tag);
+int  MMG5_hGet(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,int16_t *tag);
+int  MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,int16_t tag);
+int  MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int hsiz,MMG5_int hmax);
 int  MMG5_hGeom(MMG5_pMesh mesh);
 int  MMG5_bdryIso(MMG5_pMesh );
 int  MMG5_bdrySet(MMG5_pMesh );
 int  MMG5_bdryUpdate(MMG5_pMesh );
 int  MMG5_bdryPerm(MMG5_pMesh );
 int  MMG5_chkfemtopo(MMG5_pMesh mesh);
-int  MMG5_cntbdypt(MMG5_pMesh mesh, int nump);
+int  MMG5_cntbdypt(MMG5_pMesh mesh, MMG5_int nump);
 size_t MMG5_memSize(void);
 int  MMG3D_memOption(MMG5_pMesh mesh);
 int  MMG3D_memOption_memSet(MMG5_pMesh mesh);
 int  MMG3D_memOption_memRepartition(MMG5_pMesh mesh);
-int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol,int* );
-int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol,int* );
+int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol,MMG5_int* );
+int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol,MMG5_int* );
 int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int  MMG3D_update_xtetra ( MMG5_pMesh mesh );
-int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
-int  MMG3D_setMeshSize_initData(MMG5_pMesh,int,int,int,int,int,int);
+int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,MMG5_int);
+int  MMG3D_setMeshSize_initData(MMG5_pMesh,MMG5_int,MMG5_int,MMG5_int,MMG5_int,MMG5_int,MMG5_int);
 int  MMG3D_setMeshSize_alloc(MMG5_pMesh);
-int  MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp);
-int  MMG5_split1b(MMG5_pMesh,MMG5_pSol,int*,int,int,int,int8_t,int8_t);
-int  MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit);
-int  MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t);
-int  MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
-int  MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
-int  MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t);
-int  MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
-int    MMG3D_optlap(MMG5_pMesh ,MMG5_pSol );
-int  MMG3D_rotate_surfacicBall(MMG5_pMesh,int*,int,int,double r[3][3],double*);
-int    MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree, int *, int , int);
-int    MMG3D_movnormal_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
-int    MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree,int *,int,int);
-int    MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree,int *,int ,int);
-int    MMG3D_movbdyregpt_geom(MMG5_pMesh,int *,const int,const int,double[3],double[3],double[3],double[3]);
+int  MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp);
+int  MMG5_split1b(MMG5_pMesh,MMG5_pSol,int64_t*,int,MMG5_int,int,int8_t,int8_t);
+MMG5_int  MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, double crit);
+int  MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int8_t);
+int  MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+int  MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
+int  MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t);
+MMG5_int  MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t);
+int  MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int64_t *list, int ilist,MMG5_int);
+int  MMG3D_optlap(MMG5_pMesh ,MMG5_pSol );
+int  MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree,int64_t *, int , int);
+int  MMG3D_movnormal_iso(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
+int  MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree,MMG5_int *,int,int);
+int  MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree,int64_t *,int ,int);
+int  MMG3D_rotate_surfacicBall(MMG5_pMesh,MMG5_int*,int,MMG5_int,double r[3][3],double*);
+int  MMG3D_movbdyregpt_geom(MMG5_pMesh,MMG5_int *,const MMG5_int,const MMG5_int,double[3],double[3],double[3],double[3]);
 int    MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
-                             int*, int, int*, int, int ,int);
+                             int64_t*, int, MMG5_int*, int, int ,int);
 int    MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
-                             int*, int, int*, int, int ,int);
-int MMG3D_curveEndingPts(MMG5_pMesh,int*,int,const int16_t,int,int*,int*);
+                             int64_t*, int, MMG5_int*, int, int ,int);
+int MMG3D_curveEndingPts(MMG5_pMesh,MMG5_int*,int,const int16_t,MMG5_int,MMG5_int*,MMG5_int*);
 int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
-                                      MMG3D_pPROctree PROctree, int *listv,
+                                      MMG3D_pPROctree PROctree, int64_t *listv,
                                       int ilistv,int improve,MMG5_pPoint p0,
-                                      int ip0,uint8_t isrid,double o[3],
+                                      MMG5_int ip0,uint8_t isrid,double o[3],
                                       double no[3],double no2[3],double to[3]);
-int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh,MMG5_pPoint,int,int,int,
+int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh,MMG5_pPoint,MMG5_int,MMG5_int,MMG5_int,
                                       double,double,uint8_t,const double,
                                       double[3],double[3],
                                       double[3],double[3],const int16_t);
-int    MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
-                             int*, int ,int);
-int    MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
-                             int*, int ,int);
-int    MMG5_movbdynompt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
-                             int*, int ,int);
-int    MMG5_movbdynomintpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int, int);
-int    MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
-                             int*, int ,int);
-int    MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
-                             int*, int ,int);
-int    MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
-                             int*, int ,int);
-int    MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
-int    MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
-int  MMG3D_normalAdjaTri(MMG5_pMesh,int,int8_t,int,double n[3]);
-int  MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh,int,int,int,MMG5_pxTetra,
+int    MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
+                             MMG5_int*, int ,int);
+int    MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
+                             MMG5_int*, int ,int);
+int    MMG5_movbdynompt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
+                             MMG5_int*, int ,int);
+int    MMG5_movbdynomintpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int, int);
+int    MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
+                             MMG5_int*, int ,int);
+int    MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
+                             MMG5_int*, int ,int);
+int    MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
+                             MMG5_int*, int ,int);
+int    MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
+int    MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
+int  MMG3D_normalAdjaTri(MMG5_pMesh,MMG5_int,int8_t,int,double n[3]);
+int  MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh,MMG5_int,int,int,MMG5_pxTetra,
                                         double[3],double[3], double[3] );
-int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,int8_t);
-int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,MMG3D_pPROctree,int8_t);
-int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,MMG3D_pPROctree,int8_t);
-int  MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,int,int,int*,int*,double,int8_t);
-int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,int,int8_t,int,int,int,int);
+int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int64_t*, int, MMG5_int, MMG5_int,int8_t);
+int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int64_t*,int,MMG5_int,MMG3D_pPROctree,int8_t);
+int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,MMG5_int, int, int64_t*,MMG3D_pPROctree,int8_t);
+MMG5_int  MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,MMG5_int,int,int*,int64_t*,double,int8_t);
+int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,int,int,MMG5_int,int);
 int  MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
-int MMG5_chkptonbdy(MMG5_pMesh,int);
+int MMG5_chkptonbdy(MMG5_pMesh,MMG5_int);
 double MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
 /*function for agressive optimization*/
-  int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,MMG3D_pPROctree ,int);
-int MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,MMG3D_pPROctree ,int ,int );
-int MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,MMG3D_pPROctree ,int ,int ,double );
-int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int );
-int MMG3D_movetetrapoints(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int ) ;
+ MMG5_int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,MMG3D_pPROctree ,MMG5_int);
+int MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,MMG3D_pPROctree ,MMG5_int ,int );
+int MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,MMG3D_pPROctree ,MMG5_int ,int ,double );
+int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,MMG5_int );
+int MMG3D_movetetrapoints(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,MMG5_int ) ;
 
 int MMG5_trydisp(MMG5_pMesh,double *,short);
 int MMG5_dichodisp(MMG5_pMesh,double *);
 int MMG5_lapantilap(MMG5_pMesh,double *);
 int MMG5_ppgdisp(MMG5_pMesh,double *);
 int MMG5_denoisbdy(MMG5_pMesh);
-int MMG3D_displayQualHisto(int,double,double,double,int,int,int,
-                           int his[5],int,int,int);
-int MMG3D_displayQualHisto_internal(int,double,double,double,int,int,int,
-                                    int his[5],int,int,int);
-void MMG3D_computeInqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-                        int*,int his[5],int);
+int MMG3D_displayQualHisto(MMG5_int,double,double,double,MMG5_int,MMG5_int,MMG5_int,
+                           MMG5_int his[5],MMG5_int,int,int);
+int MMG3D_displayQualHisto_internal(MMG5_int,double,double,double,MMG5_int,MMG5_int,MMG5_int,
+                                    MMG5_int his[5],MMG5_int,int,int);
+void MMG3D_computeInqua(MMG5_pMesh,MMG5_pSol,MMG5_int*,double*,double*,double*,MMG5_int*,MMG5_int*,
+                        MMG5_int*,MMG5_int his[5],int);
 int  MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
-void MMG3D_computeOutqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-                         int*,int his[5],int*,int);
+void MMG3D_computeOutqua(MMG5_pMesh,MMG5_pSol,MMG5_int*,double*,double*,double*,MMG5_int*,MMG5_int*,
+                         MMG5_int*,MMG5_int his[5],MMG5_int*,int);
 int  MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
-void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-                         int*,int his[5],int);
-int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,int*,int*,int*,
-                        int*,int*,int*,int8_t,double**, int [9] );
+void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,MMG5_int*,double*,double*,double*,MMG5_int*,MMG5_int*,
+                         MMG5_int*,MMG5_int his[5],int);
+int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,MMG5_int*,MMG5_int*,MMG5_int*,
+                        MMG5_int*,MMG5_int*,MMG5_int*,int8_t,double**, MMG5_int [9] );
 int  MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,int8_t);
-int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
-int  MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,int8_t,double, double*);
-int  MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,int8_t,double, double*);
-int MMG3D_localParamReg(MMG5_pMesh,int,int*,int,int*,int,double*,double*,double*);
-int MMG3D_localParamNm(MMG5_pMesh,int,int,int,double*,double*,double*);
-int  MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc);
+int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);
+int  MMG5_intregmet(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,double, double*);
+int  MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,double, double*);
+int  MMG3D_localParamReg(MMG5_pMesh,MMG5_int,int64_t*,int,MMG5_int*,int,double*,double*,double*);
+int  MMG3D_localParamNm(MMG5_pMesh,MMG5_int,int,int,double*,double*,double*);
+int  MMG3D_mark_packedPoints(MMG5_pMesh mesh,MMG5_int *np,MMG5_int *nc);
 int  MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh);
 int  MMG3D_pack_tetra(MMG5_pMesh mesh);
 int  MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh);
 int  MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol);
 int  MMG3D_update_eltsVertices(MMG5_pMesh mesh);
 int  MMG3D_pack_pointArray(MMG5_pMesh mesh);
-int  MMG3D_pack_points(MMG5_pMesh mesh);
+MMG5_int  MMG3D_pack_points(MMG5_pMesh mesh);
 void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh);
 int  MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
-int  MMG3D_bdryBuild(MMG5_pMesh);
-int MMG3D_printErrorMat(int8_t symmat,double *m,double *mr);
-int MMG3D_printEigenv(double dm[3],double vp[3][3]);
+MMG5_int  MMG3D_bdryBuild(MMG5_pMesh);
+int  MMG3D_printErrorMat(int8_t symmat,double *m,double *mr);
+int  MMG3D_printEigenv(double dm[3],double vp[3][3]);
 
 /* rmc option */
-double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
+double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
 int    MMG3D_rmc(MMG5_pMesh ,MMG5_pSol );
-int    MMG5_isbr(MMG5_pMesh ,int );
+int    MMG5_isbr(MMG5_pMesh ,MMG5_int );
 
 
 /* tools_3d.c */
 void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 
 /* useful functions to debug */
-int  MMG3D_indElt(MMG5_pMesh mesh,int kel);
-int  MMG3D_indPt(MMG5_pMesh mesh,int kp);
+MMG5_int  MMG3D_indElt(MMG5_pMesh mesh,MMG5_int kel);
+MMG5_int  MMG3D_indPt(MMG5_pMesh mesh,MMG5_int kp);
 void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
 void MMG3D_chkpointtag(MMG5_pMesh mesh);
 void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
-int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref);
+int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t tag,MMG5_int ref);
 
 #ifdef USE_SCOTCH
-int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
+int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG5_int*);
 #endif
 
-int    MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
+int    MMG5_meancur(MMG5_pMesh mesh,MMG5_int np,double c[3],int ilist,MMG5_int *list,double h[3]);
 double MMG5_surftri(MMG5_pMesh,int,int);
 double MMG5_timestepMCF(MMG5_pMesh,double);
 int    MMG5_bdyMCF(MMG5_pMesh);
@@ -431,50 +431,51 @@ double MMG5_volint(MMG5_pMesh);
 /* Lagrangian mode functions */
 double MMG5_estavglen(MMG5_pMesh);
 int   MMG5_stiffelt(MMG5_pMesh,int,double*,double*);
-int  MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol, MMG5_pSol,int** );
+int  MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol, MMG5_pSol,MMG5_int** );
 int  MMG5_velextLS(MMG5_pMesh ,MMG5_pSol );
 
 /* Delaunay functions*/
-int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
-int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
-int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin);
+int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,int64_t *list,int ilist);
+int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int iel,int ip,int64_t *list,int lon,double volmin);
+int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int iel,int ip,int64_t *list,int lon,double volmin);
 int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
 /* mmg3d1.c */
-void MMG5_tet2tri(MMG5_pMesh mesh,int k,int8_t ie,MMG5_Tria *ptt);
-int  MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
-int  MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
+void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt);
+int  MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx);
+int  MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int);
 int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori,double,double,int);
-int  MMG3D_splsurfedge( MMG5_pMesh,MMG5_pSol,int,MMG5_pTetra,MMG5_pxTetra,int8_t,
+int  MMG3D_splsurfedge( MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_pTetra,MMG5_pxTetra,int8_t,
                         int8_t,int8_t,int* );
 int  MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, int8_t typchk, int patternMode) ;
-int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
-                  double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
-                  int improveVol,int maxit,int testmark);
-int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
-int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
+MMG5_int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
+                      double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
+                      int improveVol,int maxit,MMG5_int testmark);
+MMG5_int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
+MMG5_int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,MMG5_int);
 
 /* pointers */
-
+/* init structures */
+void  MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
 double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 extern double MMG5_lenedgCoor_iso(double*, double*, double*, double*);
 int    MMG3D_doSol_iso(MMG5_pMesh,MMG5_pSol);
 int    MMG3D_doSol_ani(MMG5_pMesh,MMG5_pSol);
-int    MMG5_intmet_iso(MMG5_pMesh,MMG5_pSol,int,int8_t,int, double);
-int    MMG5_intmet_ani(MMG5_pMesh,MMG5_pSol,int,int8_t,int, double);
-int    MMG3D_intmet33_ani(MMG5_pMesh,MMG5_pSol,int,int8_t,int, double);
-int    MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,int,int,double *);
-int    MMG5_interp4bar33_ani(MMG5_pMesh,MMG5_pSol,int,int,double *);
-int    MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,int,int,double *);
+int    MMG5_intmet_iso(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int, double);
+int    MMG5_intmet_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int, double);
+int    MMG3D_intmet33_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int, double);
+int    MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double *);
+int    MMG5_interp4bar33_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double *);
+int    MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double *);
 int    MMG3D_defsiz_iso(MMG5_pMesh,MMG5_pSol );
 int    MMG3D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    MMG3D_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    MMG3D_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    MMG3D_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
 int    MMG3D_gradsizreq_ani(MMG5_pMesh ,MMG5_pSol );
-double     MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
+double     MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int*,int,double,double);
 int        MMG3D_chk4ridVertices(MMG5_pMesh mesh,MMG5_pTetra pt);
 extern int MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
 int    MMG3D_set_metricAtPointsOnReqEdges (MMG5_pMesh,MMG5_pSol,int8_t);
@@ -494,7 +495,7 @@ static inline
 void MMG5_warnOrientation(MMG5_pMesh mesh) {
   if ( mesh->xt ) {
     if ( mesh->xt != mesh->ne ) {
-      fprintf(stderr,"\n  ## Warning: %s: %d tetra on %d reoriented.\n",
+      fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " tetra on %" MMG5_PRId " reoriented.\n",
               __func__,mesh->xt,mesh->ne);
       fprintf(stderr,"  Your mesh may be non-conform.\n");
     }
@@ -504,7 +505,6 @@ void MMG5_warnOrientation(MMG5_pMesh mesh) {
   }
   mesh->xt = 0;
 }
-
 
 #ifdef __cplusplus
 }

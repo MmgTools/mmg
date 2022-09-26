@@ -51,7 +51,8 @@
 static inline
 int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met, int ani) {
   MMG5_pTria  ptt;
-  int         k,i,ier;
+  MMG5_int    k;
+  int         i,ier;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
@@ -97,10 +98,12 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
-  int             i,k,ib,ipa,ipb;
+  MMG5_int        k,ipa,ipb;
+  int             i,ib;
   int             MMG_inxtt[5] = {0,1,2,0,1};
-  int             *mark;
 
+  // here we guess that we have less than int32 edges passing through a point
+  int             *mark;
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
   /* Memory alloc */
@@ -174,10 +177,12 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd,tensordot[3];
-  int             i,k,ib,iadr,ipa,ipb;
+  MMG5_int        k,ipa,ipb,iadr;
+  int             i,ib;
   int             MMG_inxtt[5] = {0,1,2,0,1};
-  int             *mark;
 
+  // here we guess that we have less than int32 edges passing through a point
+  int             *mark;
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
   /* Memory alloc */

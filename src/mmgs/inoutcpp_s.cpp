@@ -39,7 +39,7 @@
 
 static int MMGS_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
                                     vtkDataSet **dataset, int8_t ptMeditRef,
-                                    int8_t eltMeditRef,int nsols ) {
+                                    int8_t eltMeditRef,MMG5_int nsols ) {
   int ier;
 
   if ( !MMGS_zaldy(mesh) ) {
@@ -79,7 +79,8 @@ int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return -1;
 
 #else
-  int         ier,nsols;
+  int         ier;
+  int         nsols;
   int8_t      ptMeditRef,eltMeditRef,metricData;
   vtkDataSet  *dataset;
 
@@ -119,7 +120,8 @@ int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   return -1;
 
 #else
-  int         ier,nsols;
+  int         ier;
+  int         nsols;
   int8_t      ptMeditRef,eltMeditRef,metricData;
   vtkDataSet  *dataset;
 
@@ -151,7 +153,8 @@ int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return -1;
 
 #else
-  int         ier,nsols;
+  int         ier;
+  int         nsols;
   int8_t      ptMeditRef,eltMeditRef,metricData;
   vtkDataSet *dataset;
 
@@ -191,7 +194,8 @@ int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   return -1;
 
 #else
-  int         ier,nsols;
+  int         ier;
+  int         nsols;
   int8_t      ptMeditRef,eltMeditRef,metricData;
   vtkDataSet *dataset;
 
@@ -223,7 +227,8 @@ int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return -1;
 
 #else
-  int         ier,nsols;
+  int         ier;
+  int         nsols;
   int8_t      ptMeditRef,eltMeditRef,metricData;
   vtkDataSet  *dataset;
 
@@ -263,7 +268,8 @@ int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   return -1;
 
 #else
-  int         ier,nsols;
+  int         ier;
+  int         nsols;
   int8_t      ptMeditRef,eltMeditRef,metricData;
   vtkDataSet  *dataset;
 

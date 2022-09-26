@@ -56,14 +56,15 @@
  *
  */
 int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
-                       int *list,int ilist,int improve) {
-  MMG5_pTetra               pt,pt0;
-  MMG5_pPoint               p0,p1,p2,p3,ppt0;
+                       int64_t *list,int ilist,int improve) {
+  MMG5_pTetra          pt,pt0;
+  MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol;
   double               calold,calnew,callist[MMG3D_LMAX+2];
   double               len1,len2;
   int                  iloc;
-  int                  k,iel,i0;
+  int                  k,i0;
+  MMG5_int             iel;
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -182,14 +183,15 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
  *
  */
 int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
-                          int *list,int ilist,int improve) {
-  MMG5_pTetra               pt,pt0;
-  MMG5_pPoint               p0,p1,p2,p3,ppt0;
+                          MMG5_int *list,int ilist,int improve) {
+  MMG5_pTetra          pt,pt0;
+  MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol;
   double               calold,calnew,callist[MMG3D_LMAX+2];
   double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
   double               u10[3],u20[3],u30[3],oldc[3],coe;
-  int                  k,iel,ifac,iter,maxtou;
+  int                  k,ifac,iter,maxtou;
+  MMG5_int             iel;
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -345,12 +347,13 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
  * Rotation of the oriented surfacic ball of \a ip0.
  *
  */
-int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,int *lists,int ilists,int ip0,
+int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,MMG5_int *lists,int ilists,MMG5_int ip0,
                               double r[3][3],double *lispoi) {
   MMG5_pTetra       pt;
   MMG5_pPoint       p0,p1;
   double            ux,uy,uz,det2d;
-  int               k,l,na,nb,ntempa,ntempb;
+  MMG5_int          k,na,nb,ntempa,ntempb;
+  int               l;
   uint8_t           iface,i;
 
   k     = lists[0] / 4;
@@ -476,8 +479,8 @@ int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,int *lists,int ilists,int ip0,
 * coordinates, normal and tangent and check the geometric approximation.
 *
 */
-int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
-                           const int ip0,double n[3],double lambda[3],double o[3],
+int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,MMG5_int *lists,const MMG5_int kel,
+                           const MMG5_int ip0,double n[3],double lambda[3],double o[3],
                            double no[3]) {
   MMG5_pTetra       pt;
   MMG5_pxTetra      pxt;
@@ -496,6 +499,7 @@ int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
   pxt    = &mesh->xtetra[pt->xt];
   p0     = &mesh->point[ip0];
 
+  assert( 0<=iface && iface<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
@@ -618,8 +622,8 @@ int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv,int *lists,int ilists,
+int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                          int ilistv,MMG5_int *lists,int ilists,
                           int improveSurf,int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pPoint       p0;
@@ -629,7 +633,8 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],o[3],no[3];
   double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
-  int               k,kel,l,ip0,nut,nxp;
+  int               l,nut,nxp;
+  MMG5_int          kel,k,ip0;
   uint8_t           i0,iface,i;
 
   step = 0.1;
@@ -737,6 +742,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     k           = lists[l] / 4;
     iface       = lists[l] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,k,iface,&tt);
     calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
 
@@ -836,11 +842,11 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  */
 static inline
-int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,int *lists,int l,int ip0,
-                                int *ipa,int *ipb,const int16_t edgTag,int *ip) {
+int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int ip0,
+                                MMG5_int *ipa,MMG5_int *ipb,const int16_t edgTag,MMG5_int *ip) {
 
   MMG5_pTetra           pt;
-  int                   iel,iptmpa,iptmpb;
+  MMG5_int              iel,iptmpa,iptmpb;
   int16_t               tag;
   uint8_t               i,ie,iface,iea,ieb;
 
@@ -927,11 +933,12 @@ int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,int *lists,int l,int ip0,
  * direction until meeting the curve edge, then, starting from the end, in the
  * other direction until meeting the second curve edge.
  */
-int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
-                         const int16_t edgTag, int ip0,int *ip1, int *ip2) {
-
+int MMG3D_curveEndingPts(MMG5_pMesh mesh,MMG5_int *lists,int ilists,
+                         const int16_t edgTag, MMG5_int ip0,MMG5_int *ip1,
+                         MMG5_int *ip2) {
   MMG5_pTetra           pt;
-  int                   l,iel,ipa,ipb;
+  MMG5_int              iel,ipa,ipb;
+  int                   l;
   uint8_t               i,iface;
 
   /** a. Travel surface edges in one sense to get the first featured edge.
@@ -1039,15 +1046,16 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,int *lists,int ilists,
  *
  */
 int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
-                                      MMG3D_pPROctree PROctree, int *listv,
+                                      MMG3D_pPROctree PROctree, int64_t *listv,
                                       int ilistv,int improve,MMG5_pPoint p0,
-                                      int ip0,uint8_t isrid,double o[3],
+                                      MMG5_int ip0,uint8_t isrid,double o[3],
                                       double no[3],double no2[3],double to[3]) {
 
   MMG5_pTetra           pt,pt0;
   MMG5_pxPoint          pxp;
   double                calold,calnew,callist[MMG3D_LMAX+2];
-  int                   iel,l;
+  MMG5_int              iel;
+  int                   l;
   int8_t                i0;
 
   /** Check wether all volumes remain positive with new position of the point */
@@ -1131,14 +1139,14 @@ int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
  * accepted.
  *
  */
-int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,int ip0,
-                                      int ip1,int ip2,double ll1old,double ll2old,
+int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int ip0,
+                                      MMG5_int ip1,MMG5_int ip2,double ll1old,double ll2old,
                                       uint8_t isrid,const double step,
                                       double o[3],double no[3],
                                       double no2[3],double to[3],
                                       const int16_t edgTag) {
 
-  int ip;
+  MMG5_int ip;
 
   /** Choose direction of displacement depending on edge lengths */
   if ( ll1old < ll2old ) {
@@ -1188,7 +1196,7 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,int ip0,
   ppt0->ref  = p0->ref;
 
 
-  int nxp = mesh->xp + 1;
+  MMG5_int nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
@@ -1244,8 +1252,8 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,int ip0,
  * metric is not used in lenedg computations).
  */
 static inline
-int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                           int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
+int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                           int ilistv, MMG5_int *lists, int ilists,int improve,const int16_t edgTag){
   MMG5_pTetra           pt;
   MMG5_pxTetra          pxt;
   MMG5_pPoint           p0,p1,p2;
@@ -1253,7 +1261,8 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   MMG5_pPar             par;
   double                ll1old,ll2old,o[3],no[3],no2[3],to[3];
   double                calold,calnew,caltmp,hmax,hausd;
-  int                   l,iel,ip0,ip1,ip2,ip;
+  MMG5_int              iel,ip0,ip1,ip2,ip;
+  int                   l;
   int                   isloc,j;
   uint8_t               i,iface,isrid;
 
@@ -1313,6 +1322,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     iel         = lists[l] / 4;
     iface       = lists[l] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,iface,&tt);
     caltmp = MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
@@ -1425,8 +1435,8 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                         int ilistv, int *lists, int ilists,int improve){
+int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                         int ilistv, MMG5_int *lists, int ilists,int improve){
 
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_REF);
 }
@@ -1449,8 +1459,8 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                         int ilistv, int *lists, int ilists,int improve){
+int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                         int ilistv, MMG5_int *lists, int ilists,int improve){
 
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_NOM);
 }
@@ -1469,14 +1479,15 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
                          int ilistv, int improve){
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
   double            step,ll1old,ll2old,calold,calnew,callist[MMG3D_LMAX+2];
   double            o[3],no[3],to[3];
-  int               ip0,ip1,ip2,ip,iel,ipa,l;
+  int               l;
+  MMG5_int          ip0,ip1,ip2,ip,iel,ipa;
   int8_t            i,i0,ie;
 
   step = 0.1;
@@ -1592,8 +1603,8 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv,int *lists,int ilists,int improve) {
+int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                          int ilistv,MMG5_int *lists,int ilists,int improve) {
 
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_GEO);
 }
@@ -1612,10 +1623,12 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   ppa,ppb,p1,p2,p3;
-  int           j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
+  int           j,iter,maxiter,l,lon;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      ipb,iadr,i1,i2,i3,iel;
   double        *mp,coe,qualtet[MMG3D_LMAX+2];
   double        ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
 
@@ -1730,10 +1743,12 @@ int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
  *
  * \todo to factorize with movv_iso (and movv_ani)?
  */
-int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int         j,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
+  int         j,iter,maxiter,l,lon;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    ipb,iel,i1,i2,i3;
   double      coe,crit,qualtet[MMG3D_LMAX+2];
   double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
 
@@ -1857,10 +1872,12 @@ int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
  *
  * \todo to factorize with movnormal_iso (and movv_ani)?
  */
-int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
+  int         j,iter,maxiter,l,lon;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    ipb,iadr,iel,i1,i2,i3;
   double      hp,coe,crit,qualtet[MMG3D_LMAX+2];;
   double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
 

@@ -188,7 +188,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
  * \f$=\alpha*Id\f$, \f$\alpha =\f$ size.
  *
  */
-static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
+static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface, int ip) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
@@ -196,8 +196,10 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha, hausd,hausd_v;
-  int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilist,ilists,ilistv;
-  int                k,iel,idp,ifac,isloc,init_s;
+  MMG5_int           lists[MMG3D_LMAX+2];
+  int64_t            listv[MMG3D_LMAX+2];
+  int                k,ilist,ifac,isloc,init_s,ilists,ilistv;
+  MMG5_int           idp,iel;
   uint8_t            i,i0,i1,i2;
   static int8_t      mmgWarn = 0;
 
@@ -385,17 +387,18 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
-static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
-                           int iface, int ip)
+static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,
+                           int iface, MMG5_int ip)
 {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_Tria      ptt;
   MMG5_pPoint    p0,p1,p2;
   MMG5_pPar      par;
-  MMG5_Bezier   b;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list;
-  int            list1[MMG3D_LMAX+2],list2[MMG3D_LMAX+2],iprid[2],ier;
+  MMG5_Bezier    b;
+  MMG5_int       iel,idp,*list;
+  int            k,ilist1,ilist2,ilist;
+  MMG5_int       list1[MMG3D_LMAX+2],list2[MMG3D_LMAX+2],iprid[2],ier;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t;
   double         trot[2],u[2],ux,uy,uz,det,bcu[3];
   double         r[3][3],lispoi[3*MMG3D_LMAX+1];
@@ -559,6 +562,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
     }
     assert(i0!=3);
 
+    assert( 0<=ifac && ifac<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
     assert(pt->xt);
     pxt = &mesh->xtetra[pt->xt];
@@ -599,7 +603,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
  * geometric approx of the surface.
  *
  */
-static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
+static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface, int ip) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
@@ -607,8 +611,11 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
   MMG5_pxPoint  px0;
   MMG5_Bezier   b;
   MMG5_pPar     par;
-  int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,ilist;
-  int           k,iel,ipref[2],idp,ifac,isloc;
+  MMG5_int      lists[MMG3D_LMAX+2];
+  int64_t       listv[MMG3D_LMAX+2];
+  int           k,ilists,ilistv,ilist;
+  MMG5_int      iel,ipref[2],idp;
+  int           ifac,isloc;
   double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMG3D_LMAX+1];
   double        ux,uy,uz,det2d,c[3];
   double        tAA[6],tAb[3], hausd;
@@ -799,7 +806,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
 
     // i0  = MMG5_idir[ifac][i];
     // i1  = MMG5_idir[ifac][MMG5_inxt2[i]];
-
+    assert( 0<=ifac && ifac<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
     MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
@@ -865,16 +872,19 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
  * the geometric approx of the surface.
  *
  */
-static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int ip) {
+static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, int ip) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_Tria      ptt;
   MMG5_pPoint    p0,p1;
   MMG5_pxPoint   px0;
-  MMG5_Bezier   b;
+  MMG5_Bezier    b;
   MMG5_pPar      par;
-  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,ilist;
-  int            k,iel,idp,ifac,isloc;
+  MMG5_int       lists[MMG3D_LMAX+2];
+  int64_t        listv[MMG3D_LMAX+2];
+  int            k,ilist,ilists,ilistv;
+  int            ifac,isloc;
+  MMG5_int       iel,idp;
   double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMG3D_LMAX+1];
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd;
@@ -1024,7 +1034,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int i
 
     // i0  = MMG5_idir[ifac][i];
     // i1  = MMG5_idir[ifac][MMG5_inxt2[i]];
-
+    assert( 0<=ifac && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
     MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
@@ -1094,7 +1104,9 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   MMG5_pPoint   ppt;
   MMG5_pPar     par;
   double        isqhmax,isqhmin,*m;
-  int           list[MMG3D_LMAX+2],ilist,k,l,i,j,isloc,ip;
+  MMG5_int      k,ip;
+  int64_t       list[MMG3D_LMAX+2];
+  int           l,i,j,isloc,ilist;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
@@ -1301,7 +1313,8 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   double        mm[6];
-  int           k,l,iploc;
+  MMG5_int      k,l;
+  int           iploc;
   int8_t        ismet;
   int8_t        i;
   static int8_t mmgErr = 0;
@@ -1385,7 +1398,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
             if ( !mmgErr ) {
               fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
-                      " at point %d.\n",__func__,
+                      " at point %" MMG5_PRId ".\n",__func__,
                       MMG3D_indPt(mesh,pt->v[iploc]));
               mmgErr = 1;
             }
@@ -1424,7 +1437,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * is used (gradation with respect to H-variation measure).
  */
 static inline
-int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,int8_t *ridgedir) {
+int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip,double ux,double uy,double uz,double *m,int8_t *ridgedir) {
   MMG5_pPoint  ppt;
   MMG5_pxPoint pxp;
   double *mm,*nn1,*nn2,rbasis[3][3],ps1,ps2;
@@ -1892,8 +1905,8 @@ int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
  *
  */
 static inline
-int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaster,
-                        int npslave) {
+int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int npmaster,
+                        MMG5_int npslave) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ux,uy,uz;
   double         l,difsiz,rbasis1[3][3],rbasis2[3][3];
@@ -2068,8 +2081,8 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0,p1;
   double        *m,mv;
-  int           k,itv,nu,nupv,maxit;
-  int           i,np0,np1,ier;
+  int           i,itv,maxit,ier;
+  MMG5_int      k,np0,np1,nu,nupv;
   static int    mmgWarn = 0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -2116,7 +2129,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !mmgWarn ) {
           mmgWarn = 1;
           fprintf(stderr,"\n  ## Warning: %s: unable to hash at least one edge"
-                  " (tria %d, edge %d).\n",__func__,MMG3D_indElt(mesh,k),i);
+                  " (tria %" MMG5_PRId ", edge %d).\n",__func__,MMG3D_indElt(mesh,k),i);
         }
       }
     }
@@ -2186,7 +2199,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
                      " intersections since iteration %d.\n",__func__,mmgWarn);
     }
 
-    fprintf(stdout,"    gradation: %7d updated, %d iter\n",nupv,itv);
+    fprintf(stdout,"    gradation: %7" MMG5_PRId " updated, %d iter\n",nupv,itv);
   }
   return 1;
 }
@@ -2204,8 +2217,9 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
-  int           k,it,itv,nup,nu,nupv,maxit;
-  int           i,j,np0,np1,npmaster,npslave,ier;
+  int           it,itv,maxit;
+  int           i,j,ier;
+  MMG5_int      nup,nu,nupv,k,np0,np1,npmaster,npslave;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ** Grading required points.\n");
@@ -2238,7 +2252,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               p0  = &mesh->point[np0];
               p1  = &mesh->point[np1];
 
-              if ( abs ( p0->s - p1->s ) < 2 ) {
+              if ( MMG5_abs ( p0->s - p1->s ) < 2 ) {
                 /* No size to propagate */
                 continue;
               }
@@ -2285,7 +2299,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p0  = &mesh->point[np0];
         p1  = &mesh->point[np1];
 
-        if ( abs ( p0->s - p1->s ) < 2 ) {
+        if ( MMG5_abs ( p0->s - p1->s ) < 2 ) {
           /* No size to propagate */
           continue;
         }
@@ -2314,11 +2328,11 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 ) {
     if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
-      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+      fprintf(stdout,"    gradation: %7" MMG5_PRId " updated, %d iter\n",nup+nupv,it+itv);
     }
     else {
-      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
-              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+      fprintf(stdout,"    surface gradation: %7" MMG5_PRId "d updated, % iter\n"
+              "    volume gradation:  %7" MMG5_PRId " updated, %d iter\n",nup,it,nupv,itv);
     }
   }
 

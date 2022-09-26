@@ -33,10 +33,11 @@ static uint8_t iprev[3] = {2,0,1};
    in:  ifirst    : triangle containing p
    iploc     : index of p in start
    out: list  : list of triangles */
-int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
+int MMG2D_boulep(MMG5_pMesh mesh, MMG5_int ifirst, int iploc, MMG5_int * list) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;
-  int    ip,voy,ilist,iel,*adja,i,iadr;
+  MMG5_int    ip,iel,*adja,iadr;
+  int         voy,ilist,i;
 
   if ( ifirst < 1 ) return 0;
   pt = &mesh->tria[ifirst];
@@ -111,11 +112,11 @@ int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
  * of ip in kk.
  *
  */
-int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, double *nn) {
+int MMG2D_boulen(MMG5_pMesh mesh, MMG5_int start,int8_t ip, MMG5_int *pleft, MMG5_int *pright, double *nn) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
-  int               *adja,k,kk,refs;
+  MMG5_int          *adja,k,kk,refs;
   int8_t            notedg;
   int8_t            i,ii,i1,i2;
 
@@ -138,7 +139,7 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, 
 
   if ( kk == start ) {
     fprintf(stderr,"  ## Error: %s: Unable to find a boundary edge in"
-            " the ball of point %d.\n",__func__,MMG2D_indPt(mesh,mesh->tria[start].v[ip]));
+            " the ball of point %" MMG5_PRId ".\n",__func__,MMG2D_indPt(mesh,mesh->tria[start].v[ip]));
     return 0;
   }
 
@@ -228,8 +229,9 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, 
  * crossing ridge.
  *
  */
-int MMG2D_boulet(MMG5_pMesh mesh,int start,int8_t ip,int *list) {
-  int           *adja,k,ilist;
+int MMG2D_boulet(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *list) {
+  MMG5_int      *adja,k;
+  int           ilist;
   int8_t        i,i1,i2;
 
   ilist = 0;
@@ -281,9 +283,9 @@ int MMG2D_boulet(MMG5_pMesh mesh,int start,int8_t ip,int *list) {
  * \a ip2 with their indices.
  *
  */
-int MMG2D_bouleendp(MMG5_pMesh mesh,int start,int8_t ip,int *ip1,int *ip2) {
+int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_int *ip2) {
   MMG5_pTria    pt;
-  int           *adja,k;
+  MMG5_int      *adja,k;
   int8_t        i,i1,i2;
   static int8_t mmgWarn0=0;
 

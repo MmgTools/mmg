@@ -46,8 +46,11 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgLs,mmgMet
-  INTEGER            :: ier,argc,k,np
+  INTEGER            :: ier,argc
+  INTEGER(MMG5F_INT) :: k,np
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   WRITE(*,*) "  -- TEST MMG3DLIB"
 
@@ -87,7 +90,7 @@ PROGRAM main
   !!------------------- Level set discretization option ---------------------
   ! Ask for level set discretization: note that it is important to do this step
   ! here because in iso mode, some filters are applied at mesh loading
-  CALL MMG3D_Set_iparameter(mmgMesh,mmgLs,MMG3D_IPARAM_iso, 1,ier)
+  CALL MMG3D_Set_iparameter(mmgMesh,mmgLs,MMG3D_IPARAM_iso, 1_immg,ier)
   IF ( ier == 0 )  CALL EXIT(101)
 
   !> 2) Build mesh in MMG5 format
@@ -115,7 +118,8 @@ PROGRAM main
   ! a) give info for the metric: the metric is applied on vertex
   !    entities, number of vertices np is recoverd using get_meshSize and the sol
   !    is tensorial
-  CALL MMG3D_Get_meshSize(mmgMesh,np,%val(0),%val(0),%val(0),%val(0),%val(0),ier)
+  CALL MMG3D_Get_meshSize(mmgMesh,np,%val(0_immg),%val(0_immg),&
+       %val(0_immg),%val(0_immg),%val(0_immg),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(204)
   ENDIF

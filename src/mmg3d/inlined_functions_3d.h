@@ -95,8 +95,8 @@ static
 inline double MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                  MMG5_pTetra pt)
 {
-  int    ip1,ip2;
-  int8_t isedg;
+  MMG5_int    ip1,ip2;
+  int8_t      isedg;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -128,7 +128,7 @@ inline double MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 {
   MMG5_pPoint pp1,pp2;
   double      *m1,*m2;
-  int         ip1,ip2;
+  MMG5_int    ip1,ip2;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -161,7 +161,8 @@ inline double MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 {
   MMG5_pPoint pp1,pp2;
   double      m1[6],m2[6];
-  int         ip1,ip2,i;
+  MMG5_int    ip1,ip2;
+  int         i;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -201,8 +202,8 @@ static
 inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                MMG5_pTetra pt)
 {
-  int    ip1,ip2;
-  int8_t isedg;
+  MMG5_int    ip1,ip2;
+  int8_t      isedg;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -230,7 +231,7 @@ inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 static
 inline double MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
                                MMG5_pTetra pt) {
-  int ip1,ip2;
+  MMG5_int ip1,ip2;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -240,7 +241,7 @@ inline double MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
 static
 inline double MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                   MMG5_pTetra pt) {
-  int ip1,ip2;
+  MMG5_int ip1,ip2;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -260,7 +261,7 @@ inline double MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  *
  */
 static
-inline double MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+inline double MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel) {
   MMG5_pTetra     pt;
 
   pt = &mesh->tetra[iel];
@@ -387,7 +388,7 @@ inline double MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
 static
 inline double MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
   double       *a,*b,*c,*d;
-  int          ia, ib, ic, id;
+  MMG5_int     ia, ib, ic, id;
 
   ia = pt->v[0];
   ib = pt->v[1];
@@ -421,7 +422,7 @@ inline double MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double       *a,*b,*c,*d;
   double       mm[6];
-  int          ip[4];
+  MMG5_int     ip[4];
 
   ip[0] = pt->v[0];
   ip[1] = pt->v[1];

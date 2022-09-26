@@ -39,7 +39,7 @@
 extern int8_t ddb;
 
 /** Return 1 if reference ref is in the br table, 0 otherwise */
-int MMG5_isbr(MMG5_pMesh mesh,int ref) {
+int MMG5_isbr(MMG5_pMesh mesh,MMG5_int ref) {
   int k;
 
   for(k=0; k<mesh->info.nbr; k++)
@@ -49,7 +49,7 @@ int MMG5_isbr(MMG5_pMesh mesh,int ref) {
 }
 
 /** Compute normal to face iface of tetra k, exterior to tetra k */
-int MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
+int MMG5_norface(MMG5_pMesh mesh,MMG5_int k,int iface,double n[3]) {
   MMG5_pTetra     pt;
 
   pt = &mesh->tetra[k];
@@ -63,10 +63,11 @@ int MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
     the direct sense with respect to direction n anchored at point ip (ip = global num.):
     return 2 = orientation reversed, 1 otherwise */
-inline int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]){
-    int     j,aux,iel;
-    double  nt[3],ps;
-    uint8_t iface;
+inline int MMG5_directsurfball(MMG5_pMesh mesh, MMG5_int ip, MMG5_int *list, int ilist, double n[3]){
+    int      j;
+    MMG5_int iel,aux;
+    double   nt[3],ps;
+    uint8_t  iface;
 
     iel   = list[0] / 4;
     iface = list[0] % 4;
@@ -87,9 +88,10 @@ inline int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, do
 /** If need be, reorder the surfacic ball of point ip, so that its first element has
     edge (p,q) (nump,q = global num) as edge MMG5_iprv2[ip] of face iface.
     return 2 = orientation reversed, 1 otherwise */
-int MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist) {
+int MMG5_startedgsurfball(MMG5_pMesh mesh,MMG5_int nump,MMG5_int numq,MMG5_int *list,int ilist) {
     MMG5_pTetra pt;
-    int         iel,tmp,l;
+    int         l;
+    MMG5_int    tmp,iel;
     uint8_t     iface,ip,ipt;
 
     iel = list[0]/4;
@@ -140,11 +142,11 @@ int MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist)
  * well as interpolate of normals, tangent for a RIDGE edge
  *
  */
-inline int MMG5_BezierRidge ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
+inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,
                               double *no1,double *no2,double *to ) {
     MMG5_pPoint    p0,p1;
-    double    ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
-    double    ps,ps2,b0[3],b1[3],bn[3],ll,il,ntemp[3],dd,alpha;
+    double         ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
+    double         ps,ps2,b0[3],b1[3],bn[3],ll,il,ntemp[3],dd,alpha;
 
     p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
     p1 = &mesh->point[ip1];
@@ -344,9 +346,9 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o
  * well as interpolate of normals, tangent for a REF edge.
  *
  */
-inline int MMG5_BezierRef ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
+inline int MMG5_BezierRef ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,
                             double *no,double *to) {
-    MMG5_pPoint          p0,p1;
+    MMG5_pPoint     p0,p1;
     double          ux,uy,uz,n01[3],n02[3],n11[3],n12[3],ntemp[3],t0[3],t1[3];
     double          ps,b0[3],b1[3],bn[3],ll,il,dd,alpha,ps2;
 
@@ -517,8 +519,8 @@ inline int MMG5_BezierRef ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
  * well as interpolate of normals, tangent for a NOM edge
  *
  */
-inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
-    MMG5_pPoint      p0,p1;
+inline int MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,double *no,double *to) {
+    MMG5_pPoint p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
     double      t0[3],t1[3],b0[3],b1[3],n0[3],n1[3],bn[3];
     int8_t      intnom;
@@ -684,10 +686,10 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
  * ref vector (normal) for choice of normals if need be
  *
  */
-inline int MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no){
+inline int MMG5_BezierReg(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double s, double v[3], double *o, double *no){
     MMG5_pPoint p0,p1;
-    double b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll;
-    double il,dd,*n1,*n2;
+    double      b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll;
+    double      il,dd,*n1,*n2;
 
     p0 = &mesh->point[ip0];
     p1 = &mesh->point[ip1];
@@ -850,9 +852,9 @@ inline int MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3
 }
 
 /** find the element number in packed numerotation */
-int MMG3D_indElt(MMG5_pMesh mesh, int kel) {
+MMG5_int MMG3D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
     MMG5_pTetra pt;
-    int    ne, k;
+    MMG5_int    ne, k;
 
 #ifndef USE_SCOTCH
     ne = mesh->ne+1;
@@ -906,9 +908,9 @@ int MMG3D_indElt(MMG5_pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-int MMG3D_indPt(MMG5_pMesh mesh, int kp) {
+MMG5_int MMG3D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
     MMG5_pPoint ppt;
-    int         np, k;
+    MMG5_int    np, k;
 
 #ifndef USE_SCOTCH
     np = mesh->np+1;
@@ -966,26 +968,26 @@ int MMG3D_indPt(MMG5_pMesh mesh, int kp) {
 void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
     MMG5_pTetra  pt;
     MMG5_pxTetra pxt;
-    int     k;
-    FILE    *inm;
+    MMG5_int     k;
+    FILE         *inm;
 
     inm = fopen(fileName,"w");
 
-    fprintf(inm,"----------> %d MMG5_TETRAHEDRAS <----------\n",mesh->ne);
+    fprintf(inm,"----------> %" MMG5_PRId " MMG5_TETRAHEDRAS <----------\n",mesh->ne);
     for(k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
-        fprintf(inm,"num %d -> %d %d %d %d\n",k,pt->v[0],pt->v[1],
+        fprintf(inm,"num %" MMG5_PRId " -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",k,pt->v[0],pt->v[1],
                 pt->v[2],pt->v[3]);
-        fprintf(inm,"ref,tag,xt  -> %d %d %d\n",pt->ref,pt->tag,pt->xt);
+        fprintf(inm,"ref,tag,xt  -> %" MMG5_PRId " %d %" MMG5_PRId "\n",pt->ref,pt->tag,pt->xt);
         if ( pt->xt ) {
             pxt = &mesh->xtetra[pt->xt];
             fprintf(inm,"tag   -> %d %d %d %d %d %d\n",pxt->tag[0],pxt->tag[1],
                     pxt->tag[2],pxt->tag[3],pxt->tag[4],pxt->tag[5]);
-            fprintf(inm,"edg   -> %d %d %d %d %d %d\n",pxt->edg[0],pxt->edg[1],
+            fprintf(inm,"edg   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",pxt->edg[0],pxt->edg[1],
                     pxt->edg[2],pxt->edg[3],pxt->edg[4],pxt->edg[5]);
             fprintf(inm,"ftag  -> %d %d %d %d\n",pxt->ftag[0],pxt->ftag[1],
                     pxt->ftag[2],pxt->ftag[3]);
-            fprintf(inm,"ref   -> %d %d %d %d\n",pxt->ref[0],pxt->ref[1],
+            fprintf(inm,"ref   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",pxt->ref[0],pxt->ref[1],
                     pxt->ref[2],pxt->ref[3]);
             fprintf(inm,"ori   -> %d \n",pxt->ori);
         }
@@ -1013,8 +1015,8 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
  * ball of point must be provided).
  *
  */
-int MMG3D_localParamReg(MMG5_pMesh mesh,int ip,int *listv,int ilistv,
-                         int *lists,int ilists,
+int MMG3D_localParamReg(MMG5_pMesh mesh,MMG5_int ip,int64_t *listv,int ilistv,
+                         MMG5_int *lists,int ilists,
                          double* hausd_ip,double *hmin_ip,double *hmax_ip) {
 
   MMG5_pTetra pt;
@@ -1133,15 +1135,17 @@ int MMG3D_localParamReg(MMG5_pMesh mesh,int ip,int *listv,int ilistv,
  * Compute the local parameters at non manifold point \a ip.
  *
  */
-int MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
+int MMG3D_localParamNm(MMG5_pMesh mesh,MMG5_int iel,int iface,int ia,
                          double* hausd_ip,double *hmin_ip,double *hmax_ip) {
 
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPar     par;
   double        hausd, hmin, hmax;
-  int           l,k,isloc,ifac1,ifac2;
-  int           listv[MMG3D_LMAX+2],ilistv;
+  int           l,k,isloc;
+  int           ilistv;
+  int64_t       listv[MMG3D_LMAX+2];
+  MMG5_int      ifac1,ifac2;
   static int8_t mmgWarn0;
 
 
@@ -1281,7 +1285,8 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
   MMG5_pTetra pt;
   MMG5_pPrism pq;
   MMG5_pPoint ppt;
-  int         k,i;
+  int         i;
+  MMG5_int    k;
 
   /* Preserve isolated required points */
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1331,7 +1336,8 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
 static
 void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
   MMG5_pTetra pt;
-  int         k,i,*adja,iadr,iadrv,iv;
+  int         i,iv;
+  MMG5_int    k,*adja,iadr,iadrv;
   int         nfac = 4; // number of faces per elt
 
   for ( k=1 ; k <= mesh->ne ; k++) {

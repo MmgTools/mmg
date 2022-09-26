@@ -42,7 +42,7 @@
  */
 int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
-  int             ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2,iel,nd;
+  MMG5_int        ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2,iel,nd;
   int8_t          i,ii;
   static int8_t   mmgWarn0=0;
 
@@ -89,7 +89,7 @@ int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
   }
   else {
     fprintf(stderr,"\n  ## Error: %s: procedure failed :"
-            " %d indetermined triangles.\n",__func__,nd);
+            " %" MMG5_PRId " indetermined triangles.\n",__func__,nd);
     return 0;
   }
   return 1;
@@ -99,8 +99,8 @@ int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
    in the supplied mesh: in = base ; out = -base ; undetermined = 0*/
 int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria        pt;
-  int               base,nd,iter,maxiter,k;
-  int               ip1,ip2,ip3,ip4;
+  int               iter,maxiter;
+  MMG5_int          base,nd,k,ip1,ip2,ip3,ip4;
 
   /*BB vertex*/
   ip1=(mesh->np-3);
@@ -120,7 +120,7 @@ int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
 
     if(mesh->info.ddebug) {
-      printf(" ** how many undetermined triangles ? %d\n",nd);
+      printf(" ** how many undetermined triangles ? %" MMG5_PRId "\n",nd);
     }
   }
   while (nd && ++iter<maxiter);
@@ -130,7 +130,7 @@ int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 /* Find out whether triangle pt is inside or outside (i.e. contains bb points or not) */
 /* Return <0 value if triangle outside ; > 0 if triangle inside */
-int MMG2D_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4,int base) {
+MMG5_int MMG2D_findtrianglestate(MMG5_pMesh mesh,MMG5_int k,MMG5_int ip1,MMG5_int ip2,MMG5_int ip3,MMG5_int ip4,MMG5_int base) {
   MMG5_pTria       pt;
   int              nb;
   int8_t           i;
@@ -163,12 +163,12 @@ int MMG2D_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip
  * if needed).
  */
 static inline
-int MMG2D_findTria_exhaust(MMG5_pMesh mesh,int k) {
+MMG5_int MMG2D_findTria_exhaust(MMG5_pMesh mesh,MMG5_int k) {
   MMG5_pPoint ppt = &mesh->point[k];
   static int8_t mmgWarn0=0;
 
   /* Find the triangle lel of the mesh containing ppt */
-  int lel = MMG2D_findTria(mesh,k);
+  MMG5_int lel = MMG2D_findTria(mesh,k);
 
   /* Exhaustive search if not found */
   if ( !lel ) {
@@ -186,7 +186,7 @@ int MMG2D_findTria_exhaust(MMG5_pMesh mesh,int k) {
       if ( !mmgWarn0 ) {
         mmgWarn0 = 1;
         fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
-                " for at least vertex %d.\n",__func__,k);
+                " for at least vertex %" MMG5_PRId ".\n",__func__,k);
       }
       return 0;
     }
@@ -206,10 +206,11 @@ int MMG2D_findTria_exhaust(MMG5_pMesh mesh,int k) {
  */
 int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   ppt;
-  int           list[MMG2D_LONMAX],lon;
-  int           k,kk;
-  int           iter,maxiter,ns,nus,nu,nud;
+  int           lon;
+  MMG5_int      k,kk,ns,nus,nu,nud;
+  int           iter,maxiter;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
+  MMG5_int      list[MMG2D_LONMAX];
   const int flag=-10;
 
   for(k=1; k<=mesh->np-4; k++) {
@@ -242,7 +243,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           mmgWarn1 = 1;
           if ( mesh->info.imprim > 6 || mesh->info.ddebug )
 	          fprintf(stderr,"\n  ## Warning: %s: unable to insert "
-		          "at least 1 vertex. (%d)\n",__func__,k);
+		          "at least 1 vertex. (%" MMG5_PRId ")\n",__func__,k);
         }
         continue;
       } else {
@@ -253,7 +254,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
               mmgWarn2 = 1;
               if(mesh->info.imprim > 6 || mesh->info.ddebug)
 	             	fprintf(stderr,"\n  ## Warning: %s: unable to"
-			            " insert at least 1 point with Delaunay (%d)\n",__func__,k);
+			            " insert at least 1 point with Delaunay (%" MMG5_PRId ")\n",__func__,k);
             }
           }
         } else {
@@ -264,15 +265,15 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
 
     if ( abs(mesh->info.imprim) > 4)
-      fprintf(stdout,"     %8d vertex inserted %8d not inserted\n",ns,nu+nud);
+      fprintf(stdout,"     %8" MMG5_PRId " vertex inserted %8" MMG5_PRId " not inserted\n",ns,nu+nud);
     if ( mesh->info.imprim >6 || mesh->info.ddebug )
-      fprintf(stdout,"     unable to insert %8d vertex : cavity %8d -- delaunay %8d \n",nu+nud,nu,nud);
+      fprintf(stdout,"     unable to insert %8" MMG5_PRId " vertex : cavity %8" MMG5_PRId " -- delaunay %8" MMG5_PRId " \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
-	if(abs(nus-ns)) {
+	if(MMG5_abs(nus-ns)) {
     if ( mesh->info.imprim > 6 || mesh->info.ddebug ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to"
-              " insert %8d point with Delaunay \n",__func__,abs(nus-ns));
+              " insert %8" MMG5_PRId " point with Delaunay \n",__func__,MMG5_abs(nus-ns));
       fprintf(stdout,"     try to insert with splitbar\n");
     }
     mmgWarn2 = 0;
@@ -293,15 +294,15 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           mmgWarn2 = 1;
           if ( mesh->info.imprim >6 || mesh->info.ddebug )
             fprintf(stderr,"\n  ## Warning: %s: unable to"
-                    " insert at least 1 point with splitbar (%d)\n",__func__,k);
+                    " insert at least 1 point with splitbar (%" MMG5_PRId ")\n",__func__,k);
         }
       } else {
         ns++;
       }
     }
-    if ( abs(nus-ns) ) {
-      fprintf(stderr,"  ## Warning: %s: %d point(s) not "
-            "inserted. Check your output mesh\n",__func__,abs(nus-ns));
+    if ( MMG5_abs(nus-ns) ) {
+      fprintf(stderr,"  ## Warning: %s: %" MMG5_PRId " point(s) not "
+            "inserted. Check your output mesh\n",__func__,MMG5_abs(nus-ns));
       return 0;
     }
   }
@@ -320,15 +321,17 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
   MMG5_pEdge   ped;
   MMG5_pPoint  ppt;
-  int          k,l,iadr,*adja,ped0,ped1,*list,ipil,ncurc,nref;
-  int          kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel,voy;
+  MMG5_int     k,l,iadr,*adja,ped0,ped1,ipil,ncurc,nref;
+  MMG5_int     kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel;
+  int          voy;
   int8_t       i,i1,i2;
+  MMG5_int     *list;
 
   /* Reset flag field for triangles */
   for(k=1 ; k<=mesh->nt ; k++)
     mesh->tria[k].flag = mesh->mark;
 
-  MMG5_SAFE_CALLOC(list,mesh->nt,int,return 0);
+  MMG5_SAFE_CALLOC(list,mesh->nt,MMG5_int,return 0);
   kinit = 0;
   nref  = 0;
   ip1   =  mesh->np;
@@ -391,7 +394,7 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
 
   if ( mesh->info.imprim > 0  ) {
     /* nref - 1 subdomains because Bounding Box triangles have been counted */
-    fprintf(stdout,"     %8d sub-domains\n",nref-1);
+    fprintf(stdout,"     %8" MMG5_PRId " sub-domains\n",nref-1);
   }
 
   MMG5_SAFE_FREE(list);
@@ -505,7 +508,7 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
 int MMG2D_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria pt;
   double     c[2];
-  int        ip1,ip2,ip3,ip4,jel,kel,iadr,*adja;
+  MMG5_int   ip1,ip2,ip3,ip4,jel,kel,iadr,*adja;
 
   mesh->base = 0;
   assert ( !mesh->nt );

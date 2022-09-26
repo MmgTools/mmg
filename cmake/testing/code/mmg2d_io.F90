@@ -18,6 +18,8 @@ PROGRAM main
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,argc,by_array
   CHARACTER(len=300) :: exec_name,filein,fileout,option
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   PRINT*,"  -- TEST MMG2DLIB"
 
@@ -56,7 +58,7 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! Disable corner detection to check the corner setting
-  call mmg2d_set_iparameter(mmgMesh,mmgSol,MMG2D_IPARAM_angle,0,ier)
+  call mmg2d_set_iparameter(mmgMesh,mmgSol,MMG2D_IPARAM_angle,0_immg,ier)
 
   !! remesh function
   CALL MMG2D_mmg2dlib(mmgMesh,mmgSol,ier)
@@ -88,10 +90,11 @@ subroutine loadmesh(mesh,filename,by_array)
   character(len=*), intent(in)   :: filename
   integer, intent(in) :: by_array
 
-  INTEGER :: i,np,nc,ne,nt,nq,ier
+  INTEGER :: ier
+  INTEGER(MMG5F_INT) :: i,np,nc,ne,nt,nq
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: vert
-  integer, dimension(:,:), allocatable :: edg,tri,quad
-  integer, dimension(:)  , allocatable :: vert_ref,corner,edg_ref,tri_ref,quad_ref
+  INTEGER(MMG5F_INT), dimension(:,:), allocatable :: edg,tri,quad
+  INTEGER(MMG5F_INT), dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref,corner
 
 
   !! Parse file
@@ -238,16 +241,17 @@ subroutine loadmesh(mesh,filename,by_array)
 end subroutine loadmesh
 
 subroutine writemesh(mesh,filename,by_array)
-  implicit NONE
 
   MMG5_DATA_PTR_T, intent(inout) :: mesh
   character(len=*), intent(in)   :: filename
   integer, intent(in) :: by_array
 
-  INTEGER :: k,np,nc,ne,nt,nq,inm=13,ier,nreq
+  INTEGER(MMG5F_INT) :: k,np,nc,ne,nt,nq,nreq
+  INTEGER :: inm=13,ier
   REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE :: vert
-  integer, dimension(:,:), allocatable :: edg,tri,quad
-  integer, dimension(:)  , allocatable :: vert_ref,corner,required,edg_ref,tri_ref,quad_ref
+  INTEGER(MMG5F_INT), dimension(:,:), allocatable :: edg,tri,quad
+  INTEGER(MMG5F_INT), dimension(:)  , allocatable :: vert_ref,edg_ref,tri_ref,quad_ref
+  INTEGER, DIMENSION(:), ALLOCATABLE :: corner,required
 
   !> a) get the size of the mesh: vertices, tetra, triangles, edges
   CALL MMG2D_Get_meshSize(mesh,np,nt,nq,ne,ier)

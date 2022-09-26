@@ -47,7 +47,7 @@
  *
  */
 short MMG5_dikmov ( MMG5_pMesh mesh,MMG5_pSol disp,short *lastt,short shortmax,
-                    int chkmovmesh(MMG5_pMesh,MMG5_pSol,short,int*) ) {
+                    MMG5_int chkmovmesh(MMG5_pMesh,MMG5_pSol,short,MMG5_int*) ) {
   int     it,maxit;
   short   t,tmin,tmax;
   int8_t  ier;
@@ -111,7 +111,7 @@ short MMG5_dikmov ( MMG5_pMesh mesh,MMG5_pSol disp,short *lastt,short shortmax,
  */
 int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
-  int         k;
+  MMG5_int    k;
   char        data[256],*ptr;
 
   strcpy(data,disp->namein);
@@ -122,7 +122,7 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   out = fopen(data,"w");
 
   fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
-  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
+  fprintf(out,"SolAtVertices\n%"MMG5_PRId"\n 1 2\n",disp->np);
 
   /* Print solutions */
   for(k=1; k<= disp->np; k++) {

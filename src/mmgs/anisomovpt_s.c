@@ -46,14 +46,14 @@
  * Compute movement of an internal point whose ball is passed.
  *
  */
-int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    p0,ppt0;
   MMG5_Bezier    pb;
   double         r[3][3],lispoi[3*MMGS_LMAX+1],*m0;//,m[6],mo[6];
   double         gv[2],area,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
   double         calold,calnew,caltmp;
-  int            k,iel,kel,nump,nbeg,nend;
+  MMG5_int       k,iel,kel,nump,nbeg,nend;
   int8_t         i0,i1,i2,ier;
   static int     warn=0;
   static int8_t  mmgErr0=0,mmgErr1=0;
@@ -249,14 +249,14 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 }
 
 /* Compute movement of a ref, or ridge point whose ball is passed */
-int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   MMG5_pTria    pt,pt0;
   MMG5_pPoint   p0,p1,p2,ppt0;
   MMG5_pxPoint  go;
   double        *m0,*m00,step,l1old,l2old,ll1old,ll2old;
   double        lam0,lam1,lam2,o[3],nn1[3],nn2[3],to[3],mo[6];
   double        l1new,l2new,calold,calnew;
-  int           it,it1,it2,ip,ip0,ip1,ip2,k,iel;
+  MMG5_int      it,it1,it2,ip,ip0,ip1,ip2,k,iel;
   int8_t        voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
   static int8_t mmgWarn0 = 0;
 

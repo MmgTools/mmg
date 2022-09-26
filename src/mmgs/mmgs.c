@@ -63,7 +63,8 @@ static void MMG5_endcod(void) {
  */
 static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
-  int        ref,i,j,ret,npar;
+  int        i,j,ret,npar;
+  MMG5_int   ref;
   char       *ptr,buf[256],data[256];
   FILE       *in;
 
@@ -89,7 +90,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* scan line */
     ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) )  break;
-    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    for (i=0; (size_t)i<strlen(data); i++) data[i] = tolower(data[i]);
 
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
@@ -99,7 +100,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
-        MMG_FSCANF(in,"%d %255s ",&ref,buf);
+        MMG_FSCANF(in,"%" MMG5_PRId " %255s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
         if ( !ret ) {
@@ -107,7 +108,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
         }
 
-        for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
+        for (j=0; (size_t)j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
         if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
           if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
