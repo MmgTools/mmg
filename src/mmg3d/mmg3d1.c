@@ -1602,8 +1602,9 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   else if ( ilist < 0 ) { return -1; }
 
   if ( tag & MG_NOM ){
-    if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) { return 0; }
-
+    if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      return 0;
+    }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);

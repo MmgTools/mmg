@@ -954,8 +954,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, 
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   assert( !(p0->tag & MG_NOSURF) );
-  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag)
-              && !(MG_NOM & p0->tag) );
+  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];

@@ -716,7 +716,9 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
         ip = MMG5_idir[i][j];
         p0 = &mesh->point[pt->v[ip]];
         if ( p0->flag == base )  continue;
-        else if ( !(p0->tag & MG_NOM) || (p0->tag & MG_PARBDY) )  continue;
+        else if ( (!(p0->tag & MG_NOM)) || (p0->tag & MG_PARBDY) ) {
+          continue;
+        }
 
         p0->flag = base;
         ier = MMG5_boulenm(mesh,k,ip,i,n,t);

@@ -114,12 +114,12 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
       if ( met->size==6 ) {
         p0 = &mesh->point[nq];
 
-        if ( (p0->tag & MG_GEO) && !(MG_SIN(p0->tag) || p0->tag & MG_NOM) ) {
+        if ( (p0->tag & MG_GEO) && !MG_SIN_OR_NOM(p0->tag) ) {
           i = ip;
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO && !(MG_SIN(p0->tag) || p0->tag & MG_NOM) ) {
+            if ( p0->tag & MG_GEO && !MG_SIN_OR_NOM(p0->tag) ) {
               return 0;
             }
           }
@@ -133,7 +133,7 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO && !(MG_SIN(p0->tag) || p0->tag & MG_NOM) ) {
+            if ( p0->tag & MG_GEO && !MG_SIN_OR_NOM(p0->tag) ) {
               ++nr;
             }
           }
@@ -498,14 +498,13 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 
     /* Prevent from creating a tetra with 4 ridges metrics in aniso mode */
     if ( met && met->m && met->size == 6 ) {
-      if ( (mesh->point[numq].tag & MG_GEO) &&
-           !(MG_SIN(mesh->point[numq].tag) || mesh->point[numq].tag & MG_NOM) ) {
+      if ( (mesh->point[numq].tag & MG_GEO) && !MG_SIN_OR_NOM(mesh->point[numq].tag) ) {
         i  = ipp;
         nr = 0;
         for (iq=0; iq<3; iq++) {
           i = MMG5_inxt3[i];
           if ( (mesh->point[pt->v[i]].tag & MG_GEO) &&
-               (MG_SIN(mesh->point[pt->v[i]].tag) || mesh->point[pt->v[i]].tag & MG_NOM) ) {
+               !MG_SIN_OR_NOM(mesh->point[pt->v[i]].tag) ) {
             ++nr;
           }
         }

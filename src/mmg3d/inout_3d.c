@@ -1722,8 +1722,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-      else if ( (ppt->tag & MG_BDY)
-                && !((ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+      else if ( (ppt->tag & MG_BDY) && !MG_GEO_OR_NOM(ppt->tag) ) {
         nn++;
       }
       if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) nt++;
@@ -1744,8 +1743,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-      else if ( (ppt->tag & MG_BDY)
-                && !((ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+      else if ( (ppt->tag & MG_BDY) && !MG_GEO_OR_NOM(ppt->tag) ) {
         pxp = &mesh->xpoint[ppt->xp];
         if(!bin) {
           fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
@@ -1772,8 +1770,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-      else if ( (ppt->tag & MG_BDY)
-                && !((ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+      else if ( (ppt->tag & MG_BDY) && !MG_GEO_OR_NOM(ppt->tag & MG_GEO) ) {
         if(!bin) {
           fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nn);
         } else {
@@ -1801,7 +1798,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
+        else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
           } else {
@@ -1828,7 +1825,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
+        else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nt);
           } else {
