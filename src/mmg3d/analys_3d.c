@@ -526,7 +526,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_int       *adja,k,kk,ng,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
-  /* recomputation of normals only if mesh->xpoint has been freed */
+  /** recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: %s: no research of boundary points"
@@ -536,7 +536,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
     return 1;
   }
 
-  /* identify boundary points */
+  /** Step 1: identify boundary points */
   ++mesh->base;
   mesh->xp = 0;
   nnr      = 0;
@@ -552,7 +552,11 @@ int MMG5_norver(MMG5_pMesh mesh) {
         ppt->flag = mesh->base;
         if ( mesh->nc1 ) {
           if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 ) {
-            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
+            /** input normals are ignored along all type of featured edges (ref,
+             * geo, nom) but it is possible to implement their taking into
+             * account along non-ridges reference edges and external
+             * non-manifold ones. */
+            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || MG_EDG_OR_NOM(ppt->tag) ) {
               ++nnr;
               continue;
             }
