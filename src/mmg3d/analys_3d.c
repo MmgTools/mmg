@@ -760,11 +760,12 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
     if( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) ||
-           p0->xp || (p0->tag & MG_PARBDY) ) continue;
+      if ( p0->tag & MG_CRN || !(p0->tag & MG_NOM) || p0->xp || (p0->tag & MG_PARBDY) ) {
+        continue;
+      }
       ier = MMG5_boulenmInt(mesh,k,i,t);
       if ( ier ) {
         ++mesh->xp;
