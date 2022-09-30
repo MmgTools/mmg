@@ -1855,7 +1855,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_CRN(ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || (MG_CRN & ppt->tag) )  continue;
         else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nt);

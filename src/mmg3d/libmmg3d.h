@@ -136,6 +136,9 @@ enum MMG3D_Param {
  *
  * \remark No fortran interface to allow variadic arguments.
  *
+ * \warning detected bugs:
+ *   - some points along open-boundaries end up with a normal (while they should not)
+ *
  */
  LIBMMG3D_EXPORT int MMG3D_Init_mesh(const int starter,...);
 /**
