@@ -386,9 +386,11 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
     if ( !MMG5_nortri(mesh, &tt, ncur) ) return 0;
 
-//#warning Can we have issue with adding of ridges along nom edges (check with analysis)?
     if ( !MG_GEO_OR_NOM(tt.tag[i]) ) {
       /* Check normal deviation between k and the triangle facing ip0 */
+      /* Note that we don't check the ridge creation along non-manifold edges
+       * because nm edges are skipped while we add ridge tags during analysis
+       * step. */
       ier = MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi);
       if ( ier <= 0 ) {
         return 0;
@@ -633,9 +635,11 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       return 0;
     }
 
-//#warning Same check on ridge crea along noms
     if ( !MG_GEO_OR_NOM(tt.tag[i]) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
+      /* Note that we don't check the ridge creation along non-manifold edges
+       * because nm edges are skipped while we add ridge tags during analysis
+       * step. */
       int16_t ier2 = MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
       if ( ier2 <=0 ) {
         return 0;

@@ -145,9 +145,9 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
               adja[i] = 3*jel+j;
               adjt[3*(jel-1)+1+j] = 3*k + i;
             }
-            pt->tag[i] |= MG_GEO + MG_NOM;
-            pt1->tag[j] |= MG_GEO + MG_NOM;
-            pt2->tag[l] |= MG_GEO + MG_NOM;
+            pt->tag[i] |= MG_NOM;
+            pt1->tag[j] |= MG_NOM;
+            pt2->tag[l] |= MG_NOM;
             nmf++;
             ++ph->s;
           }

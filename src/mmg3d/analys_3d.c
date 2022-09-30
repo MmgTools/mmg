@@ -102,6 +102,7 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * to inherit this tag from.
  *
  * \remark REQ, NOSURF, etc... tags are added only inside xtetra.
+ * \remark In openbdy mode, all non-manifold edges are marked as opnbdy.
  *
  */
 int MMG5_setadj(MMG5_pMesh mesh){
@@ -155,9 +156,13 @@ int MMG5_setadj(MMG5_pMesh mesh){
         }
 
         /* open boundary */
-        tag = MG_GEO;
+        tag = 0;
         if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
+          /* Mark non-manifold edges and open-boundary ones: note that in open
+           * boundary mode, all non-manifold edges are marked as open (because
+           * at least one of the triangles that shares the edge has no
+           * adjacent). */
           tag += MG_NOM;
           pt->tag[i] |= tag;
           mesh->point[ip1].tag |= tag;
@@ -322,15 +327,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
 
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
-      if ( !kk ) {
-        pt->tag[i] |= MG_GEO;
-        i1 = MMG5_inxt2[i];
-        i2 = MMG5_inxt2[i1];
-        mesh->point[pt->v[i1]].tag |= MG_GEO;
-        mesh->point[pt->v[i2]].tag |= MG_GEO;
-        nr++;
-      }
-      else if ( k < kk ) {
+      if ( kk && k < kk ) {
         pt1 = &mesh->tria[kk];
         /* reference curve */
         if ( pt1->ref != pt->ref ) {
@@ -342,7 +339,15 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
           mesh->point[pt->v[i2]].tag |= MG_REF;
           ne++;
         }
-        /* check angle w. neighbor */
+
+        /* check angle w. neighbor. */
+        if ( (pt->tag[i] & MG_NOM) || (pt1->tag[ii] & MG_NOM) ) {
+#warning test to not skip nm edges while computing ridges
+          /* Non-manifold edges are skipped: if we choose
+           * to analyze their angle, we have to check the normal deviation during
+           * mesh adaptation (which is not done for now). */
+          continue;
+        }
         MMG5_nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
         if ( dhd <= mesh->info.dhd ) {
