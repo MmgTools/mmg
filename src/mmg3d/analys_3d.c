@@ -580,7 +580,11 @@ int MMG5_norver(MMG5_pMesh mesh) {
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
+
+      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )
+      {
+        continue;
+      }
 
       /* C1 point */
       if ( !MG_EDG(ppt->tag) ) {

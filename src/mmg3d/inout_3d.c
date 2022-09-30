@@ -1478,7 +1478,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       if(!bin) {
-        fprintf(inm,"%.15lg %.15lg %.15lg %" MMG5_PRId "\n",ppt->c[0],ppt->c[1],ppt->c[2],MMG5_abs(ppt->ref));
+        fprintf(inm,"%.15lg %.15lg %.15lg %" MMG5_PRId "\n",
+                ppt->c[0],ppt->c[1],ppt->c[2],MMG5_abs(ppt->ref));
       } else {
         fwrite((unsigned char*)&ppt->c[0],MMG5_SD,1,inm);
         fwrite((unsigned char*)&ppt->c[1],MMG5_SD,1,inm);
