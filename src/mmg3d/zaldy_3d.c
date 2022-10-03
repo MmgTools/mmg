@@ -216,6 +216,36 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
 
+  if ( sizeof(MMG5_int) == sizeof(int32_t) ) {
+    /** Check that we will not overflow int32_max when allocating adja array */
+
+    int coef;
+    if ( mesh->nprism ) {
+      coef = 5;
+    }
+    else {
+      coef = 4;
+    }
+
+    /* maximal number of triangles, taking the
+     * computation of adjacency relationships into account */
+    int32_t int32_nemax = (INT32_MAX-(coef+1))/coef;
+
+    if ( int32_nemax < mesh->nemax ) {
+      if ( int32_nemax <= mesh->ne ) {
+        /* No possible allocation without int32 overflow */
+        fprintf(stderr,"\n  ## Error: %s: with %" MMG5_PRId " tetrahedra Mmg will overflow"
+                " the 32-bit integer.\n",__func__,mesh->ne);
+        fprintf(stderr,"Please, configure Mmg with MMG5_INT=int64_t argument.\n");
+        return 0;
+      }
+      else {
+        /* Correction of maximal number of tetrahedra */
+        mesh->nemax = int32_nemax;
+      }
+    }
+  }
+
   /* check if the memory asked is enough to load the mesh*/
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %zu\n",

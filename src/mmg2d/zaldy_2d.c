@@ -179,6 +179,36 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->namax = MG_MIN(mesh->namax,ctri*npadd+mesh->na);
 
+  if ( sizeof(MMG5_int) == sizeof(int32_t) ) {
+    /** Check that we will not overflow int32_max when allocating adja array */
+
+    int coef;
+    if ( mesh->nquad ) {
+      coef = 4;
+    }
+    else {
+      coef = 3;
+    }
+
+    /* maximal number of triangles, taking the
+     * computation of adjacency relationships into account */
+    int32_t int32_ntmax = (INT32_MAX-(coef+1))/coef;
+
+    if ( int32_ntmax < mesh->ntmax ) {
+      if ( int32_ntmax <= mesh->nt ) {
+        /* No possible allocation without int32 overflow */
+        fprintf(stderr,"\n  ## Error: %s: with %" MMG5_PRId " triangles Mmg will overflow"
+                " the 32-bit integer.\n",__func__,mesh->nt);
+        fprintf(stderr,"Please, configure Mmg with MMG5_INT=int64_t argument.\n");
+        return 0;
+      }
+      else {
+        /* Correction of maximal number of triangles */
+        mesh->ntmax = int32_ntmax;
+      }
+    }
+  }
+
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %zu\n",
             mesh->memMax/MMG5_MILLION);

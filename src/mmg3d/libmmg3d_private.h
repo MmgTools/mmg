@@ -90,29 +90,42 @@ extern "C" {
 
 /** Reallocation of tetra table and creation
     of tetra jel */
-#define MMG3D_TETRA_REALLOC(mesh,jel,wantedGap,law ) do                \
+#define MMG3D_TETRA_REALLOC(mesh,jel,wantedGap,law ) do                 \
   {                                                                     \
-    MMG5_int klink,oldSiz;                                              \
+  MMG5_int klink,oldSiz;                                                \
                                                                         \
-    oldSiz = mesh->nemax;                                               \
-    MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,MMG5_Tetra, \
-                       "larger tetra table",law);                       \
+  oldSiz = mesh->nemax;                                                 \
                                                                         \
-    mesh->nenil = mesh->ne+1;                                           \
-    for (klink=mesh->nenil; klink<mesh->nemax-1; klink++)               \
-      mesh->tetra[klink].v[3]  = klink+1;                               \
+  int max_factor;                                                       \
+  if ( mesh->nprism ) {                                                 \
+    /* If mesh contains prisms, we need to compute 5*tet_ids to hash faces in
+     * chkBdryTria so we can't create a mesh larger than INT32_MAX/5 */ \
+    max_factor = 5;                                                     \
+  }                                                                     \
+  else {                                                                \
+    /* With only tetra, maximal number of tetra is INT32_MAX/4 */       \
+    max_factor = 4;                                                     \
+  }                                                                     \
+  MMG5_CHK_INT32_OVERFLOW(wantedGap,oldSiz,max_factor,max_factor+1,law);\
                                                                         \
-    if ( mesh->adja ) {                                                 \
-      /* adja table */                                                  \
-      MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(MMG5_int),            \
-                    "larger adja table",law);                           \
-      MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,MMG5_int     \
-                          ,"larger adja table",law);                    \
-    }                                                                   \
+  MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,MMG5_Tetra,  \
+                    "larger tetra table",law);                          \
+                                                                        \
+  mesh->nenil = mesh->ne+1;                                             \
+  for (klink=mesh->nenil; klink<mesh->nemax-1; klink++)                 \
+    mesh->tetra[klink].v[3]  = klink+1;                                 \
+                                                                        \
+  if ( mesh->adja ) {                                                   \
+    /* adja table */                                                    \
+    MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(MMG5_int),          \
+                 "larger adja table",law);                              \
+    MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,MMG5_int   \
+                       ,"larger adja table",law);                       \
+  }                                                                     \
                                                                         \
     /* We try again to add the point */                                 \
-    jel = MMG3D_newElt(mesh);                                           \
-    if ( !jel ) {law;}                                                  \
+  jel = MMG3D_newElt(mesh);                                             \
+  if ( !jel ) {law;}                                                    \
   }while(0)
 
 /* numerical accuracy */

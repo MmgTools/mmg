@@ -1497,53 +1497,53 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         }
       }
     }
-  }
 
-  /* Detect the triangles at the interface of the prisms and tetra (they have been
-   * counted twice) */
-  if ( ! MMG5_hashNew(mesh,&hashTri,0.51*ntmesh,1.51*ntmesh) ) return 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
+    /* Detect the triangles at the interface of the prisms and tetra (they have been
+     * counted twice) */
+    if ( ! MMG5_hashNew(mesh,&hashTri,0.51*ntmesh,1.51*ntmesh) ) return 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
 
-    adja = &mesh->adja[4*(k-1)+1];
-    for (i=0; i<4; i++) {
-      adj = adja[i];
-      if ( adj ) continue;
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
+        adj = adja[i];
+        if ( adj ) continue;
 
-      ia = pt->v[MMG5_idir[i][0]];
-      ib = pt->v[MMG5_idir[i][1]];
-      ic = pt->v[MMG5_idir[i][2]];
-      if ( !MMG5_hashFace(mesh,&hashTri,ia,ib,ic,5*k+i) ) {
-        MMG5_DEL_MEM(mesh,hashTri.item);
-        return 0;
+        ia = pt->v[MMG5_idir[i][0]];
+        ib = pt->v[MMG5_idir[i][1]];
+        ic = pt->v[MMG5_idir[i][2]];
+        if ( !MMG5_hashFace(mesh,&hashTri,ia,ib,ic,5*k+i) ) {
+          MMG5_DEL_MEM(mesh,hashTri.item);
+          return 0;
+        }
       }
     }
-  }
 
-  /* Fill the adjacency relationship between prisms and tetra (fill adjapr with
-   * a negative value to mark this special faces) */
-  for (k=1; k<=mesh->nprism; k++) {
-    pp = &mesh->prism[k];
-    if ( !MG_EOK(pp) )  continue;
+    /* Fill the adjacency relationship between prisms and tetra (fill adjapr with
+     * a negative value to mark this special faces) */
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) )  continue;
 
-    adja = &mesh->adjapr[5*(k-1)+1];
-    for (i=0; i<2; i++) {
-      adj = adja[i];
-      if ( adj ) continue;
+      adja = &mesh->adjapr[5*(k-1)+1];
+      for (i=0; i<2; i++) {
+        adj = adja[i];
+        if ( adj ) continue;
 
-      ia = pp->v[MMG5_idir_pr[i][0]];
-      ib = pp->v[MMG5_idir_pr[i][1]];
-      ic = pp->v[MMG5_idir_pr[i][2]];
+        ia = pp->v[MMG5_idir_pr[i][0]];
+        ib = pp->v[MMG5_idir_pr[i][1]];
+        ic = pp->v[MMG5_idir_pr[i][2]];
 
-      j = MMG5_hashGetFace(&hashTri,ia,ib,ic);
-      if ( !j ) continue;
+        j = MMG5_hashGetFace(&hashTri,ia,ib,ic);
+        if ( !j ) continue;
 
-      --ntmesh;
-      adja[i] = -j;
+        --ntmesh;
+        adja[i] = -j;
+      }
     }
+    MMG5_DEL_MEM(mesh,hashTri.item);
   }
-  MMG5_DEL_MEM(mesh,hashTri.item);
 
   /** Step 2: detect the extra boundaries (that will be ignored) provided by the
    * user */
