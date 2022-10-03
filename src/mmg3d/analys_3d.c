@@ -728,14 +728,15 @@ int MMG5_norver(MMG5_pMesh mesh) {
  * information.
  *
  * Following list summerizes computed data depending on point type:
- *  - Non-manifold external point (MG_NOM): xp, tangent, normal n1, nnor=0
- *  - Non-manifold internal point (MG_NOM): xp, tangent, no normal, nnor=1
+ *  - Non-manifold external point along connex mesh part (MG_NOM): xp, tangent, normal n1, nnor=0
+ *  - Non-manifold external point along edge or point connected mesh part (MG_NOM): no xp,no tangent,no normal,nnor=0
+ *  - Non-manifold not required internal point (MG_NOM+MG_REQ): xp, tangent, no normal, nnor=1.
+ *  - Non-manifold required internal point (MG_NOM+MG_REQ): no xp, no tangent, no normal, nnor=1.
  *  - Non-manifold open-boundary (MG_OPNBDY) edges are treated like others:
  *    - if we are along a "truly" open boundary, it is an internal nm edge so
  * we don't have any normal;
  *    - if the edge is marked as open while being only non-manifold, we may
  * compute a normal (along an external boundary) or not (along an internal one).
- *  - Required points are treated exactly as others;
  *  - We don't compute anything along corner points.
  */
 int MMG3D_nmgeom(MMG5_pMesh mesh){
@@ -797,7 +798,16 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
 
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->tag & MG_CRN || !(p0->tag & MG_NOM) || p0->xp || (p0->tag & MG_PARBDY) ) {
+      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) || p0->xp || (p0->tag & MG_PARBDY) ) {
+        /* CRN points are skipped because we skip REQ points.
+         * For connex meshes it is possible
+         * to compute the tangent at required points but it is not if the mesh
+         * contains some edge or point-connections: all points along such a feature line are marked
+         * as required by the previous loop because \ref MMB5_boulnm fails, thus we pass here
+         * even if the line belongs to a surface. Then \ref MMG5_boulenmInt fails too and
+         * we end up without normals and tangents. For sake of simplicity and because normals
+         * and tangents at required points are not used for remahsing, we choose to skip all
+         * internal REQ points. */
         continue;
       }
       ier = MMG5_boulenmInt(mesh,k,i,t);
@@ -844,13 +854,15 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
  *      Following list summerizes computed (and not computed) data depending on
  *      point type:
  *         - Corner point (MG_CRN): no computation (and no xpoint);
+ *         - Required points have different treatment depending if they are along
+ * a 'regular' surf point, along an internal or external non-manifold edge, along
+ * a non connex mesh part(so they may have a xpoint, a tangent and a normal or not)
+ * but their normal is not used during remeshing. See comments in \ref MMG3D_nmgeom
  *         - Reference point (MG_REF): xpoint, tangent, 1 normal;
  *         - Ridge point (MG_GEO): xp, tangent,2 normals;
  *         - Non-manifold point (MG_NOM): xp, tangent, no normal if internal,
  *           1 normal if external
  *         - Open boundary points (MG_OPNBDY) are treated as nm points.
- *         - Required points are analyzed using their other flags (so they may have an
- * xpoint and a normal) but their normal is not used during remeshing.
  *
  */
 int MMG3D_analys(MMG5_pMesh mesh) {

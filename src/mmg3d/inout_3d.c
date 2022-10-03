@@ -1722,27 +1722,19 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     /* Count tangents and normals */
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || (!ppt->flag) || (MG_CRN & ppt->tag) ) {
-        /* We compute normals at required points in analysis thus it works to
-         * save it at the end of the process */
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+        /* We compute normals at some required points but not all of them in analysis
+         * thus it don't works to save it at the end of the process */
         continue;
       }
-      else if ( ppt->tag & MG_BDY ) {
-        assert ( ppt->xp && "missing xpoint at non-corner bdy point");
-        /* Bdy point */
-        if ( MG_NOM & ppt->tag ) {
-          /* non-manifold point: it has a unique normal if pxp->nnor==0 */
-          if ( mesh->xpoint[ppt->xp].nnor==0 ) {
-            nn++;
-          }
-        }
-        else if ( !(MG_GEO & ppt->tag) ) {
-          /* Bdy non-ridge point */
-          nn++;
-        }
+      else if ( (ppt->tag & MG_BDY)
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+         /* Indeed non-manifold point along connected mesh have a unique normal if
+          * pxp->nnor==0 but saving it gives a weird visualization and keeping the
+          * normal info is useless. */
+        nn++;
       }
-      if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
-        /* Ref, ridge and non-manifold points have tangents (see analysis) */
+      if ( MG_EDG_OR_NOM(ppt->tag) ) {
         nt++;
       }
     }
@@ -1761,21 +1753,18 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || (!ppt->flag) || (MG_CRN & ppt->tag) ) {
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
         continue;
       }
-      else if ( ppt->tag & MG_BDY ) {
-        assert ( ppt->xp && "missing xpoint at non-corner bdy point");
+      else if ( (ppt->tag & MG_BDY)
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
-
-        if ( ((MG_NOM & ppt->tag) && (pxp->nnor==0)) || !MG_GEO_OR_NOM(ppt->tag) ) {
-          if(!bin) {
-            fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-          } else {
-            fwrite((unsigned char*)&pxp->n1[0],MMG5_SD,1,inm);
-            fwrite((unsigned char*)&pxp->n1[1],MMG5_SD,1,inm);
-            fwrite((unsigned char*)&pxp->n1[2],MMG5_SD,1,inm);
-          }
+        if(!bin) {
+          fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
+        } else {
+          fwrite((unsigned char*)&pxp->n1[0],MMG5_SD,1,inm);
+          fwrite((unsigned char*)&pxp->n1[1],MMG5_SD,1,inm);
+          fwrite((unsigned char*)&pxp->n1[2],MMG5_SD,1,inm);
         }
       }
     }
@@ -1794,20 +1783,17 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     nn = 0;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || (!ppt->flag) || (MG_CRN & ppt->tag) ) {
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
         continue;
       }
-      else if ( ppt->tag & MG_BDY ) {
-        assert ( ppt->xp  && "missing xpoint at non-corner bdy point" );
-        pxp = &mesh->xpoint[ppt->xp];
-        if ( ((MG_NOM & ppt->tag) && (pxp->nnor==0)) || !MG_GEO_OR_NOM(ppt->tag) ) {
-          if(!bin) {
-            fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nn);
-          } else {
-            fwrite(&ppt->tmp,MMG5_SW,1,inm);
-            ++nn;
-            fwrite(&nn,MMG5_SW,1,inm);
-          }
+      else if ( (ppt->tag & MG_BDY)
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM) ) ) {
+        if(!bin) {
+          fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nn);
+        } else {
+          fwrite(&ppt->tmp,MMG5_SW,1,inm);
+          ++nn;
+          fwrite(&nn,MMG5_SW,1,inm);
         }
       }
     }
@@ -1828,7 +1814,9 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || (!ppt->flag) || (MG_CRN & ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+          continue;
+        }
         else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
@@ -1855,7 +1843,9 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || (!ppt->flag) || (MG_CRN & ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+          continue;
+        }
         else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nt);

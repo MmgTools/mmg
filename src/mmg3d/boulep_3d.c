@@ -292,7 +292,10 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
   }
   while ( 4*k+iopp != fstart );
 
-  if ( (nr > 0 && nnm > 0) || nnm != 2 )  return 0;
+  if ( (nr > 0 && nnm > 0) || nnm != 2 ) {
+    /* We pass here for non-manifold meshes with only edge connection */
+    return 0;
+  }
 
   dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
   if ( dd > MMG5_EPSD2 ) {
@@ -322,7 +325,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
   return 1;
 }
 
-/** 
+/**
  * \param mesh pointer toward the mesh  structure.
  * \param start tetra index.
  * \param ip point index.
@@ -332,7 +335,10 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  * Travel the ball of the internal non manifold point ip in tetra start
  * and calculate the tangent vector to the underlying curve.
  *
-*/
+ * \remark we are not able to compute tangent along non-manifold points for
+ * edge-connected meshes. In this case the point doesn't have xpoint nor tangent
+ * or normal.
+ */
 int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
@@ -340,23 +346,23 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_int       base,k,kk,ip0,ip1,nump,na,nb,list[MMG3D_LMAX+2],*adja;
   int            cur,ilist;
   int8_t         i,j,ii,ie;
-  
+
   base = ++mesh->base;
   ip0 = ip1 = 0;
   cur = ilist = 0;
-  
+
   /* Store initial tetrahedron */
   pt = &mesh->tetra[start];
   nump = pt->v[ip];
   list[0] = 4*start+ip;
   pt->flag = base;
   ilist++;
-  
+
   while ( cur < ilist ) {
     k = list[cur] / 4;
     i = list[cur] % 4;
     pt = &mesh->tetra[k];
-    
+
     /* If pt bears geometric information, search for endpoints of the NOM curve of ppt */
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
@@ -388,34 +394,39 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
         }
       }
     }
-    
+
     /* Pile up tetrahedra in the ball of nump */
     adja = &mesh->adja[4*(k-1)+1];
-    
+
     for (j=0; j<3; j++) {
       i = MMG5_inxt3[i];
       kk = adja[i] / 4;
-      assert ( kk );
-      
+      assert ( kk && "point is not an internal nm-point");
+
+      if ( !kk ) {
+        /* point is not an internal non manifold point */
+        return 0;
+      }
+
       pt1 = &mesh->tetra[kk];
       if ( pt1->flag == base ) continue;
-      
+
       for (ii=0; ii<4; ii++)
         if ( pt1->v[ii] == nump ) break;
       assert ( ii < 4 );
-      
+
       list[ilist] = 4*kk+ii;
       pt1->flag = base;
       if ( ilist > MMG3D_LMAX-3 )  return 0;
       ilist++;
     }
-    
+
     cur++;
   }
-  
+
   /* At this point, the two points connected to ppt via the NOM curve are ip0 and ip1 */
   MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
-  
+
   dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
   if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
@@ -423,7 +434,7 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
     t[1] *= dd;
     t[2] *= dd;
   }
-  
+
   return 1;
 }
 
