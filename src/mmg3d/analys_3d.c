@@ -342,7 +342,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
 
         /* check angle w. neighbor. */
         if ( (pt->tag[i] & MG_NOM) || (pt1->tag[ii] & MG_NOM) ) {
-#warning test to not skip nm edges while computing ridges
+//#warning test to not skip nm edges while computing ridges
           /* Non-manifold edges are skipped: if we choose
            * to analyze their angle, we have to check the normal deviation during
            * mesh adaptation (which is not done for now). */
