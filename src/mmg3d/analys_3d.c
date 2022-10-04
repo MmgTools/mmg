@@ -325,11 +325,29 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
       if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
            (pt->tag[i] & MG_BDY) ) continue;
 
+      if ( pt->tag[i] & MG_NOM ) {
+        /* 1. We don't compute ridges along non-manifold edges because: if we
+         * choose to analyze their angle, we have to check the normal deviation
+         * during mesh adaptation (which is not done for now).
+         *
+         * 2. Do not analyze if nm edges are MG_REF ones because we can't
+         * analyze if adjacent tria have same refs due to non-consistency of
+         * adjacency building.
+         */
+        continue;
+      }
+
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
+
       if ( kk && k < kk ) {
         pt1 = &mesh->tria[kk];
         /* reference curve */
+        /* Remark: along non-manifold edges we store only adjacency relationship
+         * between 2 surface parts (other are considered without adja). As we
+         * don't ensure consistency in the choic of the surface we cannot rely
+         * on the current test to detect ref edges. For this reason, all
+         * non-manifold edges have to be marked as reference. */
         if ( pt1->ref != pt->ref ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
@@ -341,13 +359,6 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
         }
 
         /* check angle w. neighbor. */
-        if ( (pt->tag[i] & MG_NOM) || (pt1->tag[ii] & MG_NOM) ) {
-//#warning test to not skip nm edges while computing ridges
-          /* Non-manifold edges are skipped: if we choose
-           * to analyze their angle, we have to check the normal deviation during
-           * mesh adaptation (which is not done for now). */
-          continue;
-        }
         MMG5_nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
         if ( dhd <= mesh->info.dhd ) {
