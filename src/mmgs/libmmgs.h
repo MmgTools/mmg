@@ -2161,6 +2161,22 @@ LIBMMGS_EXPORT int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3]
 LIBMMGS_EXPORT void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 /**
+ * \param mesh pointer toward mesh sructure
+ *
+ * \return 1 if successful, 0 otherwise.
+ *
+ * Clean data (triangles and edges) linked to isosurface.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_CLEAN_ISOSURF(mesh,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)      :: mesh\n
+ * >     INTEGER, INTENT(OUT)             :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+ LIBMMGS_EXPORT int MMGS_Clean_isoSurf(MMG5_pMesh mesh);
+
+/**
  * Set common pointer functions between mmgs and mmg3d to the matching mmgs
  * functions.
  */

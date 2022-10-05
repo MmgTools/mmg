@@ -1552,3 +1552,8 @@ void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return;
 }
+
+int MMGS_Clean_isoSurf(MMG5_pMesh mesh) {
+
+  return MMG5_Clean_isoEdges(mesh);
+}
