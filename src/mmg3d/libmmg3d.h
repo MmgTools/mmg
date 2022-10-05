@@ -2992,6 +2992,22 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
 
 /**
+ * \param mesh pointer toward mesh sructure
+ *
+ * \return 1 if successful, 0 otherwise.
+ *
+ * Clean data (triangles and edges) linked to isosurface.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_CLEAN_ISOSURF(mesh,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)      :: mesh\n
+ * >     INTEGER, INTENT(OUT)             :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  LIBMMG3D_EXPORT int MMG3D_Clean_isoSurf(MMG5_pMesh mesh);
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param sol pointer toward the solution structure
  *

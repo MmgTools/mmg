@@ -1555,3 +1555,139 @@ void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
   return;
 }
 
+/**
+ * \param mesh pointer toward mesh
+ * \param pa pointer toward edge
+ *
+ * Clean tags linked to iso surface discretization (MG_CRN, MG_ISO) along edge.
+ *
+ */
+static inline
+void MMG3D_Clean_isoTags(MMG5_pMesh mesh,MMG5_pEdge pa) {
+  /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+  if ( MG_REQ & mesh->point[pa->a].tag ) {
+    mesh->point[pa->a].tag &= ~MG_REQ;
+  }
+  if ( MG_REQ & mesh->point[pa->b].tag ) {
+    mesh->point[pa->b].tag &= ~MG_REQ;
+  }
+  if ( MG_CRN & mesh->point[pa->a].tag ) {
+    mesh->point[pa->a].tag &= ~MG_CRN;
+  }
+  if ( MG_CRN & mesh->point[pa->b].tag ) {
+    mesh->point[pa->b].tag &= ~MG_CRN;
+  }
+}
+
+int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
+  MMG5_int   k,nref;
+
+  nref = 0;
+
+  /** Step 1: a. deletion of triangles that belong to isosurf */
+  if ( mesh->tria ) {
+
+    MMG5_int nt = mesh->nt;
+    k  = 1;
+    do {
+      MMG5_pTria ptt = &mesh->tria[k];
+
+      if ( !MG_EOK(ptt) ) {
+        continue;
+      }
+
+      if ( MMG5_abs(ptt->ref) == mesh->info.isoref ) {
+        /* Current tria will be suppressed: search last non isosurf tria to fill
+         * empty position */
+        MMG5_pTria ptt1 = &mesh->tria[mesh->nt];
+        assert( ptt1 );
+
+        while ( ((!MG_EOK(ptt1)) || (MMG5_abs(ptt1->ref) == mesh->info.isoref))
+                && k < mesh->nt ) {
+          --mesh->nt;
+          ptt1 = &mesh->tria[mesh->nt];
+        }
+        memcpy(ptt,ptt1,sizeof(MMG5_Tria));
+
+      }
+      /* Initially negative refs were used to mark isosurface: keep following
+       * piece of code for retrocompatibility */
+      if ( ptt->ref < 0 ) {
+        ptt->ref = -ptt->ref;
+        ++nref;
+      }
+    }
+    while ( ++k < mesh->nt );
+
+    if( !mesh->nt ) {
+      MMG5_DEL_MEM(mesh,mesh->tria);
+    }
+    else if ( mesh->nt < nt ) {
+      MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
+                   fprintf(stderr,"  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,
+                         "triangles",return 0);
+    }
+  }
+
+  /** Step 2: deletion of edges that belong to isosurf */
+  if ( mesh->edge ) {
+    MMG5_int na = mesh->na;
+
+    k  = 1;
+    do {
+
+      MMG5_pEdge pa = &mesh->edge[k];
+      if ( !pa->a ) {
+        continue;
+      }
+
+      if ( MMG5_abs(pa->ref) == mesh->info.isoref ) {
+        /* Current tria will be suppressed */
+        /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+        MMG3D_Clean_isoTags(mesh,pa);
+
+        /* Do not delete ridge */
+        if ( !(pa->tag & MG_GEO) ) {
+          /* search last non isosurf tria to fill empty position */
+          MMG5_pEdge pa1 = &mesh->edge[mesh->na];
+          assert( pa1 );
+
+          while ( ((!pa1->a) ||
+                   ( (MMG5_abs(pa1->ref) == mesh->info.isoref) && (!(pa1->tag & MG_GEO)) ) )
+                  && (k < mesh->na) ) {
+            if ( pa1->a ) {
+              /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+              MMG3D_Clean_isoTags(mesh,pa1);
+            }
+            --mesh->na;
+            pa1 = &mesh->edge[mesh->na];
+          }
+          memcpy(pa,pa1,sizeof(MMG5_Edge));
+        }
+      }
+
+      /* Initially negative refs were used to mark isosurface: keep following
+       * piece of code for retrocompatibility */
+      if ( pa->ref < 0 ) {
+        pa->ref = -pa->ref;
+        ++nref;
+      }
+    }
+    while ( ++k < mesh->na );
+
+    if( !mesh->na ) {
+      MMG5_DEL_MEM(mesh,mesh->edge);
+    }
+    else if ( mesh->na < na ) {
+      MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
+                   fprintf(stderr,"  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,
+                         "edges",return 0);
+    }
+  }
+
+  return 1;
+}
