@@ -689,7 +689,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
           iel = adja[i] / 4;
 
           if ( iel < 0) {
-            /* Edge at the in erface between a quad and a tria: treated from the tria */
+            /* Edge at the interface between a quad and a tria: treated from the tria */
             continue;
           }
 

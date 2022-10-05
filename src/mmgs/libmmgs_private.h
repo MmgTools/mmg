@@ -92,12 +92,15 @@ extern "C" {
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define MMGS_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                 \
+#define MMGS_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                  \
   {                                                                     \
-    MMG5_int klink,oldSiz;                                                   \
+    MMG5_int klink,oldSiz;                                              \
                                                                         \
     oldSiz = mesh->ntmax;                                               \
-    MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria, \
+                                                                        \
+    MMG5_CHK_INT32_OVERFLOW(wantedGap,oldSiz,3,5,law);                  \
+                                                                        \
+    MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria,  \
                        "larger tria table",law);                        \
                                                                         \
     mesh->nenil = mesh->nt+1;                                           \
@@ -106,14 +109,14 @@ extern "C" {
                                                                         \
     if ( mesh->adja ) {                                                 \
       /* adja table */                                                  \
-      MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(MMG5_int),            \
+      MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(MMG5_int),        \
                     "larger adja table",law);                           \
-      MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG5_int     \
+      MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG5_int \
                           ,"larger adja table",law);                    \
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
-    jel = MMGS_newElt(mesh);                                           \
+    jel = MMGS_newElt(mesh);                                            \
     if ( !jel ) {law;}                                                  \
   }while(0)
 

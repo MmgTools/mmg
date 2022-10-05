@@ -335,6 +335,36 @@ size_t myfree(void *ptr) {
     (ptr) = tmp;                                                        \
   }while(0)
 
+/** Check for int32 overflow when trying to reallocate coef*oldSiz+shift array */
+#define MMG5_CHK_INT32_OVERFLOW(wantedGap,oldSiz,coef,shift,law) do     \
+  {                                                                     \
+    /* Check for int32 overflow */                                      \
+    if ( sizeof(MMG5_int) == sizeof(int32_t) ) {                        \
+      MMG5_int gap_loc = (MMG5_int)((wantedGap) * (oldSiz));            \
+      if ( !gap_loc ) gap_loc     = 1;                                  \
+                                                                        \
+      int32_t max_ne = (INT32_MAX-(shift))/(coef);                      \
+      if ( max_ne < (oldSiz)+gap_loc ) {                                \
+        /* Detected overflow, target maximal possible size */           \
+        gap_loc = max_ne-(oldSiz);                                      \
+        if ( gap_loc <=0 ) {                                            \
+          /* No possibe realloc without int overflow */                 \
+          fprintf(stderr,"  ## Error: %s: %d: Unable to reallocate adja array" \
+                  " without int overflow.\n",__func__,__LINE__);        \
+          gap_loc = 0;                                                  \
+          law;                                                          \
+        }                                                               \
+        else {                                                          \
+          wantedGap = (float)gap_loc/(float)oldSiz;                     \
+          printf("wantGap has been modified %15f\n",wantedGap);         \
+          wantedGap = (double)gap_loc/(double)oldSiz;                   \
+          printf("DwantGap has been modified %15fl\n",wantedGap);       \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+  }while(0)
+
+
 /** safe reallocation with memset at 0 for the new values of tab */
 #define MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,law) do \
   {                                                                     \
@@ -365,7 +395,7 @@ size_t myfree(void *ptr) {
                                                                         \
     assert ( mesh->memCur < mesh->memMax );                             \
                                                                         \
-    gap = (MMG5_int)(wantedGap * initSize);                             \
+    gap = (MMG5_int)(floor(wantedGap * initSize));                      \
     if ( !gap ) gap     = 1;                                            \
                                                                         \
     if ( mesh->memMax < mesh->memCur + gap*sizeof(type) ) {             \

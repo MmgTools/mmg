@@ -148,13 +148,26 @@ static const unsigned int MMG2D_idir[5] = {0,1,2,0,1};
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define MMG2D_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                 \
+#define MMG2D_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                  \
   {                                                                     \
    MMG5_int klink,oldSiz;                                               \
                                                                         \
    oldSiz = mesh->ntmax;                                                \
-   MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria,  \
-                      "larger tria table",law);                         \
+                                                                        \
+  int max_factor;                                                       \
+  if ( mesh->nquad ) {                                                  \
+    /* If mesh contains quads, we need to compute 4*tet_quad to hash quads when
+     * packing the mesh so we can't create a mesh larger than INT32_MAX/4 */ \
+    max_factor = 4;                                                     \
+  }                                                                     \
+  else {                                                                \
+    /* With only tria, maximal number of tetra is INT32_MAX/3 */        \
+    max_factor = 3;                                                     \
+  }                                                                     \
+  MMG5_CHK_INT32_OVERFLOW(wantedGap,oldSiz,max_factor,max_factor+2,law);\
+                                                                        \
+  MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria,    \
+                    "larger tria table",law);                           \
                                                                         \
    mesh->nenil = mesh->nt+1;                                            \
    for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)                \
@@ -162,14 +175,14 @@ static const unsigned int MMG2D_idir[5] = {0,1,2,0,1};
                                                                         \
    if ( mesh->adja ) {                                                  \
      /* adja table */                                                   \
-     MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(MMG5_int),             \
+     MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(MMG5_int),         \
                    "larger adja table",law);                            \
-     MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG5_int      \
+     MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG5_int  \
                          ,"larger adja table",law);                     \
    }                                                                    \
                                                                         \
    /* We try again to add the point */                                  \
-   jel = MMG2D_newElt(mesh);                                           \
+   jel = MMG2D_newElt(mesh);                                            \
    if ( !jel ) {law;}                                                   \
    }while(0)
 

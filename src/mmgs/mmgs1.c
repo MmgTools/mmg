@@ -1271,7 +1271,8 @@ static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 /* analyze triangles and split or collapse to match gradation */
 static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
   int         it,maxit;
-  MMG5_int    nnc,nns,nnf,nnm,nc,ns,nf,nm;
+  int64_t     nnc,nns,nnf,nnm;
+  MMG5_int    nc,ns,nf,nm;
 
   /* iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
@@ -1379,7 +1380,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nns,nnc,nnf,nnm,it);
+      fprintf(stdout,"     %8" PRId64 " splitted, %8" PRId64 " collapsed, %8" PRId64 " swapped, %8" PRId64 " moved, %d iter. \n",nns,nnc,nnf,nnm,it);
   }
   return 1;
 }
