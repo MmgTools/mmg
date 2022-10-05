@@ -169,6 +169,7 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s
         t0[2] = uz * il;
     }
     else {
+      /* It is ok to pass here for nm points because they have always a tangent */
       memcpy(t0,&(p0->n[0]),3*sizeof(double));
       ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
       if ( ps < 0.0 ) {
@@ -177,12 +178,14 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s
         t0[2] *= -1.0;
       }
     }
+
     if ( MG_SIN(p1->tag) ) {
         t1[0] = -ux * il;
         t1[1] = -uy * il;
         t1[2] = -uz * il;
     }
     else {
+        /* It is ok to pass here for nm points because they have always a tangent */
         memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
@@ -210,7 +213,7 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s
     o[2] = (1.0-s)*(1.0-s)*(1.0-s)*p0->c[2] + 3.0*s*(1.0-s)*(1.0-s)*b0[2] + \
         3.0*s*s*(1.0-s)*b1[2] + s*s*s*p1->c[2];
 
-    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+   if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       /* In this case, the tangent orientation depends on the triangle from
        * which we see the ridge */
       memcpy(to,t0,3*sizeof(double));
@@ -372,6 +375,7 @@ inline int MMG5_BezierRef ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,d
         t0[2] = uz * il;
     }
     else {
+        /* nm points have a tangent so its ok to get it here */
         memcpy(t0,&(p0->n[0]),3*sizeof(double));
         ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
         if ( ps < 0.0 ) {
@@ -386,6 +390,7 @@ inline int MMG5_BezierRef ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,d
         t1[2] = -uz * il;
     }
     else {
+        /* nm points have a tangent so its ok to get it here */
         memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {

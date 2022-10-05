@@ -149,7 +149,8 @@ MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
  *
  */
 inline int
-MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],double b1[3],int8_t ised, double v[3]) {
+MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],
+                double b1[3],int8_t ised, double v[3]) {
   MMG5_pPoint   p0,p1;
   MMG5_pxPoint  pxp0,pxp1;
   double        ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
@@ -170,6 +171,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],double b1
     pxp0 = 0;
 
   if ( !MG_SIN(p1->tag) ) {
+     /* Remark: all nom points have xpoints */
     assert(p1->xp);
     pxp1 = &mesh->xpoint[p1->xp];
   }
@@ -351,6 +353,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
       }
     }
     else if( p[i]->tag & MG_NOM){
+      /* Remark: external nom points have 1 normal, internal ones have no normals */
       MMG5_nortri(mesh,pt,pb->n[i]);
       if ( !ori ) {
         pb->n[i][0] *= -1.0;
@@ -444,7 +447,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
     uy = p[i2]->c[1] - p[i1]->c[1];
     uz = p[i2]->c[2] - p[i1]->c[2];
 
-    ll = ux*ux + uy*uy + uz*uz;   // A PROTEGER !!!!
+    ll = ux*ux + uy*uy + uz*uz;
     l  = sqrt(ll);
 
     /* choose normals */
@@ -459,6 +462,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         t1[2] = uz / l;
       }
       else {
+        /* Nom points have a tangent so its ok to pass here */
         memcpy(t1,&pb->t[i1],3*sizeof(double));
         ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
         if(ps < 0.0){
@@ -473,6 +477,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         t2[2] = - uz / l;
       }
       else {
+        /* Nom points have a tangent so its ok to pass here */
         memcpy(t2,&pb->t[i2],3*sizeof(double));
         ps = -(t2[0]*ux + t2[1]*uy + t2[2]*uz);
         if(ps < 0.0){
@@ -602,7 +607,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
       uz *= dd;
     }
 
-    /* corners */
+    /* corners and required points: no tangent */
     if ( MG_SIN(pb->p[1]->tag) ) {
       pb->t[1][0] = ux;
       pb->t[1][1] = uy;
@@ -639,7 +644,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
       uz *= dd;
     }
 
-    /* corners */
+    /* corners and required points: no tangent */
     if ( MG_SIN(pb->p[0]->tag) ) {
       pb->t[0][0] = ux;
       pb->t[0][1] = uy;
