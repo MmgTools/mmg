@@ -96,7 +96,7 @@ int MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     }
 
     /* Take metric at control point */
-    if ( !(MG_GEO & pt->tag[i2]) ) {
+    if ( !MG_GEO_OR_NOM(pt->tag[i2]) ) {
       int ier = MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m);
       if ( !ier ) {
         if ( mesh->info.ddebug ) {
