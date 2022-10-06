@@ -663,6 +663,9 @@ static int norver(MMG5_pMesh mesh) {
         if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
         else if ( !MG_EDG(pt->tag[i1]) )  continue;
 
+        /* As we skip non-manifold point, the edge should be manifold */
+        assert ( (!(MG_NOM & pt->tag[i1])) && "Unexpected non-manifold edge" );
+
         ier = MMG5_boulen(mesh,mesh->adja,k,i,n);
         if ( !ier )  continue;
 

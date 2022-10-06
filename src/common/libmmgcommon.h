@@ -404,6 +404,16 @@ LIBMMG_CORE_EXPORT const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
 LIBMMG_CORE_EXPORT const char* MMG5_Get_typeName(enum MMG5_type typ);
 
 
+/**
+ * \param mesh pointer toward mesh
+ *
+ * \return 1 if successful, 0 otherwise
+ *
+ * Clean non-ridge edges belonging to isosurface.
+ *
+ */
+LIBMMG_CORE_EXPORT int MMG5_Clean_isoEdges(MMG5_pMesh mesh);
+
 #ifdef __cplusplus
 }
 #endif

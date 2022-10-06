@@ -1183,3 +1183,12 @@ FORTRAN_NAME(MMGS_SAVEALLSOLS,mmgs_saveallsols,
 
   return;
 }
+
+/**
+ * See \ref MMGS_Clean_isoSurf function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_CLEAN_ISOSURF,mmgs_clean_isosurf,
+             (MMG5_pMesh *mesh, int* retval), (mesh, retval)) {
+  *retval = MMGS_Clean_isoSurf(*mesh);
+  return;
+}

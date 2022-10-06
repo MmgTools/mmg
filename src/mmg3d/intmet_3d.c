@@ -274,13 +274,13 @@ int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,
   pp2 = &mesh->point[ip2];
 
   // build metric at ma and mb points
-  if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
+  if ( MG_RID(pp1->tag) ) {
     if (!MMG5_moymet(mesh,met,pt,m1)) return 0;
   } else {
     for ( l=0; l<6; ++l )
       m1[l] = met->m[6*ip1+l];
   }
-  if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
+  if ( MG_RID(pp2->tag) ) {
     if (!MMG5_moymet(mesh,met,pt,m2)) return 0;
   } else {
     for ( l=0; l<6; ++l )
@@ -396,7 +396,7 @@ int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
 
   pt  = &mesh->tetra[k];
   pp1 = &mesh->point[pt->v[0]];
-  if(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) {
+  if ( MG_SIN_OR_NOM(pp1->tag) ) {
     for (i=0; i<6; i++) {
       dm0[i] = met->m[met->size*pt->v[0]+i];
     }
@@ -408,7 +408,7 @@ int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
     }
   }
   pp2 = &mesh->point[pt->v[1]];
-  if(MG_SIN(pp2->tag) || (MG_NOM & pp2->tag)) {
+  if ( MG_SIN_OR_NOM(pp2->tag) ) {
     for (i=0; i<6; i++) {
       dm1[i] = met->m[met->size*pt->v[1]+i];
     }
@@ -420,7 +420,7 @@ int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
     }
   }
   pp3 = &mesh->point[pt->v[2]];
-  if(MG_SIN(pp3->tag) || (MG_NOM & pp3->tag)) {
+  if ( MG_SIN_OR_NOM(pp3->tag) ) {
     for (i=0; i<6; i++) {
       dm2[i] = met->m[met->size*pt->v[2]+i];
     }
@@ -432,7 +432,7 @@ int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
     }
   }
   pp4 = &mesh->point[pt->v[3]];
-  if(MG_SIN(pp4->tag) || (MG_NOM & pp4->tag)) {
+  if ( MG_SIN_OR_NOM(pp4->tag) ) {
     for (i=0; i<6; i++) {
       dm3[i] = met->m[met->size*pt->v[3]+i];
     }

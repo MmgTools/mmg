@@ -294,7 +294,7 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int
   /** Compute the normal of the first triangle */
   if ( !MMG5_nortri(mesh, &tt0, n0) ) return -1;
 
-  if ( tt0.tag[iploc] & MG_GEO || tt0.tag[iploc] & MG_NOM ) return 1;
+  if ( MG_GEO_OR_NOM(tt0.tag[iploc]) ) return 1;
 
   /** Compute the normal of the second triangle (triangle adjacent to the first
    * through the edge iploc) */
@@ -411,7 +411,7 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_in
       else {
         /* don't check if it is a ridge edge or if we have already cross 2
          * boundaries */
-        if ( complete || pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM )
+        if ( complete || MG_GEO_OR_NOM(pxt->tag[ie]) )
           continue;
 
         /* We are manifold thus we have exactly two faces in our shell: check

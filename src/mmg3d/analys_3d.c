@@ -102,12 +102,13 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * to inherit this tag from.
  *
  * \remark REQ, NOSURF, etc... tags are added only inside xtetra.
+ * \remark In openbdy mode, all non-manifold edges are marked as opnbdy.
  *
  */
 int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nm,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
@@ -155,9 +156,13 @@ int MMG5_setadj(MMG5_pMesh mesh){
         }
 
         /* open boundary */
-        tag = MG_GEO;
+        tag = 0;
         if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
+          /* Mark non-manifold edges and open-boundary ones: note that in open
+           * boundary mode, all non-manifold edges are marked as open (because
+           * at least one of the triangles that shares the edge has no
+           * adjacent). */
           tag += MG_NOM;
           pt->tag[i] |= tag;
           mesh->point[ip1].tag |= tag;
@@ -264,7 +269,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
   }
 
   /* bilan */
-  nr = nre = nreq = nt = 0;
+  nr = nm = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -276,6 +281,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
+        if ( pt->tag[i] & MG_NOM )  nm++;
         if ( pt->tag[i] & MG_REF )  nre++;
         if ( pt->tag[i] & MG_REQ )  nreq++;
       }
@@ -284,6 +290,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
 
   if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %" MMG5_PRId " found.\n",nr);
+    fprintf(stdout,"  a- nm    : %" MMG5_PRId " found.\n",nm);
     fprintf(stdout,"  a- requir: %" MMG5_PRId " found.\n",nreq);
     fprintf(stdout,"  a- connex: %" MMG5_PRId " connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %" MMG5_PRId " flipped\n",nf);
@@ -318,19 +325,29 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
       if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
            (pt->tag[i] & MG_BDY) ) continue;
 
+      if ( pt->tag[i] & MG_NOM ) {
+        /* 1. We don't compute ridges along non-manifold edges because: if we
+         * choose to analyze their angle, we have to check the normal deviation
+         * during mesh adaptation (which is not done for now).
+         *
+         * 2. Do not analyze if nm edges are MG_REF ones because we can't
+         * analyze if adjacent tria have same refs due to non-consistency of
+         * adjacency building.
+         */
+        continue;
+      }
+
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
-      if ( !kk ) {
-        pt->tag[i] |= MG_GEO;
-        i1 = MMG5_inxt2[i];
-        i2 = MMG5_inxt2[i1];
-        mesh->point[pt->v[i1]].tag |= MG_GEO;
-        mesh->point[pt->v[i2]].tag |= MG_GEO;
-        nr++;
-      }
-      else if ( k < kk ) {
+
+      if ( kk && k < kk ) {
         pt1 = &mesh->tria[kk];
         /* reference curve */
+        /* Remark: along non-manifold edges we store only adjacency relationship
+         * between 2 surface parts (other are considered without adja). As we
+         * don't ensure consistency in the choic of the surface we cannot rely
+         * on the current test to detect ref edges. For this reason, all
+         * non-manifold edges have to be marked as reference. */
         if ( pt1->ref != pt->ref ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
@@ -340,7 +357,8 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
           mesh->point[pt->v[i2]].tag |= MG_REF;
           ne++;
         }
-        /* check angle w. neighbor */
+
+        /* check angle w. neighbor. */
         MMG5_nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
         if ( dhd <= mesh->info.dhd ) {
@@ -515,7 +533,26 @@ int MMG5_singul(MMG5_pMesh mesh) {
   return 1;
 }
 
-/** compute normals at C1 vertices, for C0: tangents */
+/**
+ * \param mesh pointer toward mesh
+ * \return 1 if successful, 0 if failed
+ *
+ * Compute normals at C1 vertices, for C0: tangents.
+ *
+ * Following list summerizes computed (and not computed) data depending on
+ * point type:
+ *  - Corner point (MG_CRN): nothing (and no xpoint);
+ *  - Reference point (MG_REF): xp, tangent (ppt->n), 1 normal (pxp->n1);
+ *  - Ridge point (MG_GEO): xp, tangent,2 normals (pxp->n1 and n2);
+ *  - Non-manifold point (MG_NOM) are not filled here but in \a nmgeom function
+ *  - Open boundary points (MG_OPNBDY) are non-manifold so they are filled in nmgeom too.
+ *  - Required points are analyzed using their other flags (so they may have an
+ * xpoint and a normal) but their normal is not used during remeshing.
+ *
+ * Normals at regular boundary points can be provided by users but are ignored
+ * along featured edges.
+ *
+ */
 int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
@@ -524,7 +561,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_int       *adja,k,kk,ng,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
-  /* recomputation of normals only if mesh->xpoint has been freed */
+  /** recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: %s: no research of boundary points"
@@ -534,7 +571,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
     return 1;
   }
 
-  /* identify boundary points */
+  /** Step 1: identify boundary points */
   ++mesh->base;
   mesh->xp = 0;
   nnr      = 0;
@@ -550,7 +587,11 @@ int MMG5_norver(MMG5_pMesh mesh) {
         ppt->flag = mesh->base;
         if ( mesh->nc1 ) {
           if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 ) {
-            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
+            /** input normals are ignored along all type of featured edges (ref,
+             * geo, nom) but it is possible to implement their taking into
+             * account along non-ridges reference edges and external
+             * non-manifold ones. */
+            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || MG_EDG_OR_NOM(ppt->tag) ) {
               ++nnr;
               continue;
             }
@@ -561,13 +602,13 @@ int MMG5_norver(MMG5_pMesh mesh) {
     }
   }
 
-  /* memory to store normals for boundary points */
+  /** Step 2: Allocate memory to store normals for boundary points */
   mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
 
   MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
   MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,return 0);
 
-  /* compute normals + tangents */
+  /** Step 3: compute normals + tangents */
   nn = ng = nt = nf = 0;
   mesh->xp = 0;
   ++mesh->base;
@@ -578,9 +619,13 @@ int MMG5_norver(MMG5_pMesh mesh) {
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
 
-      /* C1 point */
+      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )
+      {
+        continue;
+      }
+
+      /** At C1 point */
       if ( !MG_EDG(ppt->tag) ) {
 
         if ( (!mesh->nc1) ||
@@ -606,13 +651,19 @@ int MMG5_norver(MMG5_pMesh mesh) {
 
       }
 
-      /* along ridge-curve */
+      /** along ridge-curve */
       i1  = MMG5_inxt2[i];
-      if ( !MG_EDG(pt->tag[i1]) )  continue;
-      else if ( !MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
+      if ( !MG_EDG(pt->tag[i1]) ) {
+        continue;
+      }
+
+      /* As we skip non-manifold point, the edge should be manifold */
+      assert ( (!(MG_NOM & pt->tag[i1])) && "Unexpected non-manifold edge" );
+      if ( !MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
         ++nf;
         continue;
       }
+
       ++mesh->xp;
       if(mesh->xp > mesh->xpmax){
         MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
@@ -623,7 +674,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
       pxp = &mesh->xpoint[ppt->xp];
       memcpy(pxp->n1,n,3*sizeof(double));
 
-      if ( pt->tag[i1] & MG_GEO && adja[i1] > 0 ) {
+      if ( (pt->tag[i1] & MG_GEO) && adja[i1] > 0 ) {
         kk = adja[i1] / 3;
         ii = adja[i1] % 3;
         ii = MMG5_inxt2[ii];
@@ -633,7 +684,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
         }
         memcpy(pxp->n2,n,3*sizeof(double));
 
-        /* compute tangent as intersection of n1 + n2 */
+        /** Along ridge: compute tangent as intersection of n1 + n2 */
         ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
         ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
         ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
@@ -687,6 +738,17 @@ int MMG5_norver(MMG5_pMesh mesh) {
  * Define continuous geometric support at non manifold vertices, using volume
  * information.
  *
+ * Following list summerizes computed data depending on point type:
+ *  - Non-manifold external point along connex mesh part (MG_NOM): xp, tangent, normal n1, nnor=0
+ *  - Non-manifold external point along edge or point connected mesh part (MG_NOM): no xp,no tangent,no normal,nnor=0
+ *  - Non-manifold not required internal point (MG_NOM+MG_REQ): xp, tangent, no normal, nnor=1.
+ *  - Non-manifold required internal point (MG_NOM+MG_REQ): no xp, no tangent, no normal, nnor=1.
+ *  - Non-manifold open-boundary (MG_OPNBDY) edges are treated like others:
+ *    - if we are along a "truly" open boundary, it is an internal nm edge so
+ * we don't have any normal;
+ *    - if the edge is marked as open while being only non-manifold, we may
+ * compute a normal (along an external boundary) or not (along an internal one).
+ *  - We don't compute anything along corner points.
  */
 int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
@@ -708,7 +770,9 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
         ip = MMG5_idir[i][j];
         p0 = &mesh->point[pt->v[ip]];
         if ( p0->flag == base )  continue;
-        else if ( !(p0->tag & MG_NOM) || (p0->tag & MG_PARBDY) )  continue;
+        else if ( (!(p0->tag & MG_NOM)) || (p0->tag & MG_PARBDY) ) {
+          continue;
+        }
 
         p0->flag = base;
         ier = MMG5_boulenm(mesh,k,ip,i,n,t);
@@ -742,11 +806,21 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
     if( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) ||
-           p0->xp || (p0->tag & MG_PARBDY) ) continue;
+      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) || p0->xp || (p0->tag & MG_PARBDY) ) {
+        /* CRN points are skipped because we skip REQ points.
+         * For connex meshes it is possible
+         * to compute the tangent at required points but it is not if the mesh
+         * contains some edge or point-connections: all points along such a feature line are marked
+         * as required by the previous loop because \ref MMB5_boulnm fails, thus we pass here
+         * even if the line belongs to a surface. Then \ref MMG5_boulenmInt fails too and
+         * we end up without normals and tangents. For sake of simplicity and because normals
+         * and tangents at required points are not used for remahsing, we choose to skip all
+         * internal REQ points. */
+        continue;
+      }
       ier = MMG5_boulenmInt(mesh,k,i,t);
       if ( ier ) {
         ++mesh->xp;
@@ -778,7 +852,30 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   return 1;
 }
 
-/** preprocessing stage: mesh analysis */
+/**
+ * \param mesh pointer toward mesh
+ * \return 1 if successful, 0 if fail
+ *
+ * preprocessing stage: mesh analysis.
+ *
+ * At the end of this function:
+ *   1. triangles have been deleted and stored in xtetra;
+ *   2. Boundary point have been analyzed and associated to xpoints (if needed).
+ *      If computed tangent is stored in ppt->n and normals in pxp->n1 and pxp->n2.
+ *      Following list summerizes computed (and not computed) data depending on
+ *      point type:
+ *         - Corner point (MG_CRN): no computation (and no xpoint);
+ *         - Required points have different treatment depending if they are along
+ * a 'regular' surf point, along an internal or external non-manifold edge, along
+ * a non connex mesh part(so they may have a xpoint, a tangent and a normal or not)
+ * but their normal is not used during remeshing. See comments in \ref MMG3D_nmgeom
+ *         - Reference point (MG_REF): xpoint, tangent, 1 normal;
+ *         - Ridge point (MG_GEO): xp, tangent,2 normals;
+ *         - Non-manifold point (MG_NOM): xp, tangent, no normal if internal,
+ *           1 normal if external
+ *         - Open boundary points (MG_OPNBDY) are treated as nm points.
+ *
+ */
 int MMG3D_analys(MMG5_pMesh mesh) {
   MMG5_Hash hash;
   int       ier;

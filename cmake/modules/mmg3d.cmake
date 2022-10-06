@@ -132,6 +132,13 @@ IF ( LIBMMG3D_SHARED )
 ENDIF()
 
 # mmg3d header files needed for library
+#
+# Remark: header installation would need to be cleaned, for now, to allow
+# independent build of each project and because mmgs and mmg2d have been added
+# to mmg3d without rethinking the install architecture, the header files that
+# are common between codes are copied in all include directories (mmg/,
+# mmg/mmg3d/, mmg/mmgs/, mmg/mmg2d/).  they are also copied in build directory
+# to enable library call without installation.
 SET( mmg3d_headers
   ${MMG3D_SOURCE_DIR}/mmg3d_export.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h

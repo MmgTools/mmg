@@ -131,7 +131,8 @@ IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" OR USE_V
     ENDIF()
 
   ELSEIF ( USE_VTK )
-    # USE_VTK is not empty so user explicitely ask for VTK: raise an error
+    # USE_VTK is not empty so user explicitely ask for VTK...
+    # but it is not found: raise an error
     MESSAGE(FATAL_ERROR "VTK library not found.")
   ENDIF()
 ENDIF()

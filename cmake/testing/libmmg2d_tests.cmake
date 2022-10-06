@@ -23,7 +23,7 @@
 
 ###############################################################################
 #####
-#####        Build Mmg2d library executables and add tests if needed
+#####        Build executables
 #####
 ###############################################################################
 
@@ -43,7 +43,7 @@ SET ( MMG2D_LIB_TESTS
   )
 
 # Additional tests that needs to download ci meshes
-IF ( MMG2D_CI )
+IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
   LIST ( APPEND MMG2D_LIB_TESTS test_api2d_0 )
 ENDIF ( )
 
@@ -63,7 +63,14 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   )
 
 # Additional tests that needs to download ci meshes
-IF ( MMG2D_CI )
+#
+# Remark: as they are piece of code, it would be probably better to keep it in
+# the mmg repository (so we have versionning). Other pieces of code
+# (compare-para-tria and ridge-preservation-in-ls-mode) are hosted in the repo,
+# I don't think that there is a reason for the difference in the choice of
+# hosting...
+
+IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
   LIST ( APPEND MMG2D_LIB_TESTS_MAIN_PATH
     ${MMG2D_CI_TESTS}/API_tests/2d.c
     )
@@ -97,7 +104,7 @@ IF ( CMAKE_Fortran_COMPILER )
     test_io2d_fortran
     )
   # Additional tests that needs to download ci meshes
-  IF ( MMG2D_CI )
+  IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     LIST ( APPEND MMG2D_LIB_TESTS test_api2d_fortran_0 )
   ENDIF( )
 
@@ -114,7 +121,7 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg2d_io.F90
     )
   # Additional tests that needs to download ci meshes
-  IF ( MMG2D_CI )
+  IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     LIST ( APPEND MMG2D_LIB_TESTS_MAIN_PATH
       ${MMG2D_CI_TESTS}/API_tests/2d.F90
       )
@@ -147,113 +154,119 @@ SET ( src_test_met2d
 ADD_LIBRARY_TEST ( test_met2d "${src_test_met2d}" copy_2d_headers ${lib_name} ${lib_type})
 TARGET_LINK_LIBRARIES ( test_met2d PRIVATE ${M_LIB} )
 
-IF ( BUILD_TESTING )
+###############################################################################
+#####
+#####  Add tests if needed
+#####
+###############################################################################
 
-  SET(LIBMMG2D_ADP0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example0_a )
-  SET(LIBMMG2D_ADP0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example0_b )
-  SET(LIBMMG2D_ADP1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example1 )
-  SET(LIBMMG2D_ADP2 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example2 )
-  SET(LIBMMG2D_GENE0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_gene_example0 )
-  SET(LIBMMG2D_LS0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_ls_example0 )
-  SET(LIBMMG2D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsOnly )
-  SET(LIBMMG2D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsAndMetric )
-  SET(TEST_API2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_0)
-  SET(TEST_MET2D ${EXECUTABLE_OUTPUT_PATH}/test_met2d)
+ADD_TEST(NAME libmmg2d_adp_example0_a
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example0_a
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
+  )
+ADD_TEST(NAME libmmg2d_adp_example0_b
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example0_b
+  "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_b.o.mesh"
+  )
+ADD_TEST(NAME libmmg2d_adp_example1
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example1
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_1-dom.o"
+  )
+ADD_TEST(NAME libmmg2d_adp_example2
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example2
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_2-dom.o"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_2-dom-end.o"
+  )
+ADD_TEST(NAME libmmg2d_gene_example0
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_gene_example0
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example0/carretest.mesh"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_Generation_0-carre.o"
+  )
+ADD_TEST(NAME libmmg2d_ls0_io_0
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_ls_example0
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "0"
+  )
+ADD_TEST(NAME libmmg2d_ls0_io_1
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_ls_example0
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "1"
+  )
+ADD_TEST(NAME libmmg2d_lsOnly
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsOnly
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_lsOnly_multimat.o"
+  )
+ADD_TEST(NAME libmmg2d_lsAndMetric
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsAndMetric
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+  "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+  "${CTEST_OUTPUT_DIR}/libmmg2d_lsAndMetric_multimat.o"
+  )
 
+IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
+  ADD_TEST(NAME test_api2d_0
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_api2d_0
+    "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
+    "${CTEST_OUTPUT_DIR}/test_API2d.o"
+    )
+ENDIF()
 
-  ADD_TEST(NAME libmmg2d_adp_example0_a   COMMAND ${LIBMMG2D_ADP0_a}
-    "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
+ADD_TEST(NAME test_met2d   COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_met2d  )
+
+IF ( CMAKE_Fortran_COMPILER)
+  ADD_TEST(NAME libmmg2d_fortran_a
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a
+    "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"
+    "${CTEST_OUTPUT_DIR}/libmmg2d-Adaptation_Fortran_0_a-init.o"
     )
-  ADD_TEST(NAME libmmg2d_adp_example0_b   COMMAND ${LIBMMG2D_ADP0_b}
-    "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_b.o.mesh"
+  ADD_TEST(NAME libmmg2d_fortran_b
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b
+    "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_Fortran_0_b.o"
     )
-  ADD_TEST(NAME libmmg2d_adp_example1   COMMAND ${LIBMMG2D_ADP1}
-    "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_1-dom.o"
-    )
-  ADD_TEST(NAME libmmg2d_adp_example2   COMMAND ${LIBMMG2D_ADP2}
-    "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_2-dom.o"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_2-dom-end.o"
-    )
-  ADD_TEST(NAME libmmg2d_gene_example0   COMMAND ${LIBMMG2D_GENE0}
-    "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example0/carretest.mesh"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_Generation_0-carre.o"
-    )
-  ADD_TEST(NAME libmmg2d_ls0_io_0   COMMAND ${LIBMMG2D_LS0}
+  ADD_TEST(NAME libmmg2d_fortran_io_0
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_io
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "0"
+    "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "0"
     )
-  ADD_TEST(NAME libmmg2d_ls0_io_1   COMMAND ${LIBMMG2D_LS0}
+  ADD_TEST(NAME libmmg2d_fortran_io_1
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_io
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
-    "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "1"
+    "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "1"
     )
-  ADD_TEST(NAME libmmg2d_lsOnly   COMMAND ${LIBMMG2D_LSONLY}
+  ADD_TEST(NAME libmmg2d_fortran_lsOnly
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_lsOnly
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
     "${CTEST_OUTPUT_DIR}/libmmg2d_lsOnly_multimat.o"
     )
-  ADD_TEST(NAME libmmg2d_lsAndMetric   COMMAND ${LIBMMG2D_LSANDMETRIC}
+  ADD_TEST(NAME libmmg2d_fortran_lsAndMetric
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_lsAndMetric
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
     "${CTEST_OUTPUT_DIR}/libmmg2d_lsAndMetric_multimat.o"
     )
-  ADD_TEST(NAME test_api2d_0   COMMAND ${TEST_API2D_EXEC0}
-    "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
-    "${CTEST_OUTPUT_DIR}/test_API2d.o"
-    )
-  ADD_TEST(NAME test_met2d   COMMAND ${TEST_MET2D}
-    )
 
-
-  IF ( CMAKE_Fortran_COMPILER)
-    SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a )
-    SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b )
-    SET(LIBMMG2D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_io )
-    SET(LIBMMG2D_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_lsOnly )
-    SET(LIBMMG2D_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_lsAndMetric )
-    SET(TEST_API2D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_fortran_0)
-    SET(TEST_IO2D_FORTRAN_EXEC ${EXECUTABLE_OUTPUT_PATH}/test_io2d_fortran)
-
-
-    ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a}
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"
-      "${CTEST_OUTPUT_DIR}/libmmg2d-Adaptation_Fortran_0_a-init.o"
-      )
-    ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b}
-      "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_Fortran_0_b.o"
-      )
-    ADD_TEST(NAME libmmg2d_fortran_io_0   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
-      "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "0"
-      )
-    ADD_TEST(NAME libmmg2d_fortran_io_1   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
-      "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "1"
-      )
-    ADD_TEST(NAME libmmg2d_fortran_lsOnly   COMMAND ${LIBMMG2D_EXECFORTRAN_LSONLY}
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
-      "${CTEST_OUTPUT_DIR}/libmmg2d_lsOnly_multimat.o"
-      )
-    ADD_TEST(NAME libmmg2d_fortran_lsAndMetric   COMMAND ${LIBMMG2D_EXECFORTRAN_LSANDMETRIC}
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
-      "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
-      "${CTEST_OUTPUT_DIR}/libmmg2d_lsAndMetric_multimat.o"
-      )
-    ADD_TEST(NAME test_api2d_fortran_0   COMMAND ${TEST_API2D_FORTRAN_EXEC0}
+  IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
+    ADD_TEST(NAME test_api2d_fortran_0
+      COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_api2d_fortran_0
       "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
       "${CTEST_OUTPUT_DIR}/test_API2d.o"
       )
-    ADD_TEST(NAME test_io2d_fortran_scalar   COMMAND ${TEST_IO2D_FORTRAN_EXEC}
+    ADD_TEST(NAME test_io2d_fortran_scalar
+      COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_io2d_fortran
       "${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh"
       "${CTEST_OUTPUT_DIR}/hybrid-2d-scal.o" 0
       )
-    ADD_TEST(NAME test_io2d_fortran_array   COMMAND ${TEST_IO2D_FORTRAN_EXEC}
+    ADD_TEST(NAME test_io2d_fortran_array
+      COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_io2d_fortran
       "${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh"
       "${CTEST_OUTPUT_DIR}/hybrid-2d-array.o" 1
       )
-
   ENDIF()
+
 ENDIF ( )

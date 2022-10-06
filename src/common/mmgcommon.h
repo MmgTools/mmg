@@ -153,9 +153,14 @@ extern "C" {
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 
+#define MG_SIN(tag)        ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
+#define MG_SIN_OR_NOM(tag) ( MG_SIN(tag) || (tag & MG_NOM) ) /**< Corner, Required or non-manifold */
+#define MG_RID(tag)        ( ( !( MG_SIN_OR_NOM(tag)) )  && ( tag & MG_GEO ) ) /**< Non-singular ridge point (so ridge metric in aniso mode) */
+
 #define MG_EDG(tag) ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
-#define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
-#define MG_RID(tag) ((!( MG_SIN(tag)||(tag & MG_NOM))) &&  tag & MG_GEO ) /**< Non-singular ridge point (so ridge metric in aniso mode) */
+#define MG_GEO_OR_NOM(tag) (( tag & MG_GEO ) || ( tag & MG_NOM )) /**< Ridge or non-manifold */
+#define MG_EDG_OR_NOM(tag) ( MG_EDG(tag) || (tag & MG_NOM ) ) /**< Edge, ridge or non-manifold */
+
 
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */

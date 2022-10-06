@@ -126,7 +126,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   MMG5_int    nppar,nedpar,ntpar,nqpar,nepar;
   MMG5_int    k,ip,idn;
   int         i,bdim,binch,iswp,bpos;
-  MMG5_int    *ina,v[3],nt,na,nr,ia,aux,nref,ref;
+  MMG5_int    na,nr,ia,aux,nref,ref;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
   posnp = posnt = posne = posncor = 0;
@@ -136,7 +136,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   ncor = ned = npreq = ntreq = nqreq = nereq = nedreq = nr = ng = 0;
   nppar = nedpar = ntpar = nqpar = nepar = 0;
   iswp = 0;
-  ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
   nref = 0;
 
@@ -543,76 +542,26 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   }
 
   /* read mesh triangles */
-  nt = mesh->nt;
   if ( mesh->nt ) {
     rewind(inm);
     fseek(inm,posnt,SEEK_SET);
     /* Skip triangles with mesh->info.isoref refs */
-    if( mesh->info.iso ) {
-      mesh->nt = 0;
-      MMG5_SAFE_CALLOC(ina,nt+1,MMG5_int,return -1);
-
-      for (k=1; k<=nt; k++) {
-        if (!bin) {
-          MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&v[0],&v[1],&v[2],&ref);
-        }
-        else {
-          for (i=0 ; i<3 ; i++) {
-            MMG_FREAD(&v[i],MMG5_SW,1,inm);
-            if(iswp) v[i]=MMG5_SWAPBIN(v[i]);
-          }
-          MMG_FREAD(&ref,MMG5_SW,1,inm);
-          if(iswp) ref=MMG5_SWAPBIN(ref);
-        }
-        if( MMG5_abs(ref) != mesh->info.isoref ) {
-          pt1 = &mesh->tria[++mesh->nt];
-          pt1->v[0] = v[0];
-          pt1->v[1] = v[1];
-          pt1->v[2] = v[2];
-          pt1->ref = ref;
-          ina[k]=mesh->nt;
-          if ( pt1->ref < 0 ) {
-            pt1->ref = -pt1->ref;
-            ++nref;
-          }
-        }
-        else {
-          /* To uncomment when the normals reading will be enabled in iso mode */
-          /* Mark the mesh->info.isoref point to be able to delete the normal at points */
-          /* mesh->point[v[0]].xp = -1; */
-          /* mesh->point[v[1]].xp = -1; */
-          /* mesh->point[v[2]].xp = -1; */
-        }
+    for (k=1; k<=mesh->nt; k++) {
+      pt1 = &mesh->tria[k];
+      if (!bin) {
+        MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       }
-      if( !mesh->nt )
-        MMG5_DEL_MEM(mesh,mesh->tria);
-
-      else if ( mesh->nt < nt ) {
-        MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
-                      fprintf(stderr,"  Exit program.\n");
-                      return -1);
-        MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,
-                            "triangles",return -1);
+      else {
+        for (i=0 ; i<3 ; i++) {
+          MMG_FREAD(&pt1->v[i],MMG5_SW,1,inm);
+          if(iswp) pt1->v[i]=MMG5_SWAPBIN(pt1->v[i]);
+        }
+        MMG_FREAD(&pt1->ref,MMG5_SW,1,inm);
+        if(iswp) pt1->ref=MMG5_SWAPBIN(pt1->ref);
       }
-    }
-    else {
-      for (k=1; k<=mesh->nt; k++) {
-        pt1 = &mesh->tria[k];
-        if (!bin) {
-          MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
-        }
-        else {
-          for (i=0 ; i<3 ; i++) {
-            MMG_FREAD(&pt1->v[i],MMG5_SW,1,inm);
-            if(iswp) pt1->v[i]=MMG5_SWAPBIN(pt1->v[i]);
-          }
-          MMG_FREAD(&pt1->ref,MMG5_SW,1,inm);
-          if(iswp) pt1->ref=MMG5_SWAPBIN(pt1->ref);
-        }
-        if ( pt1->ref < 0 ) {
-          pt1->ref = -pt1->ref;
-          ++nref;
-        }
+      if ( pt1->ref < 0 ) {
+        pt1->ref = -pt1->ref;
+        ++nref;
       }
     }
     /* get required triangles */
@@ -631,21 +580,10 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
           fprintf(stderr,"\n  ## Warning: %s: required triangle number %8d"
                   " ignored.\n",__func__,i);
         } else {
-          if( mesh->info.iso ){
-            if( ina[i] == 0 ) continue;
-            else {
-              pt1 = &mesh->tria[ina[i]];
-              pt1->tag[0] |= MG_REQ;
-              pt1->tag[1] |= MG_REQ;
-              pt1->tag[2] |= MG_REQ;
-            }
-          }
-          else{
-            pt1 = &mesh->tria[i];
-            pt1->tag[0] |= MG_REQ;
-            pt1->tag[1] |= MG_REQ;
-            pt1->tag[2] |= MG_REQ;
-          }
+          pt1 = &mesh->tria[i];
+          pt1->tag[0] |= MG_REQ;
+          pt1->tag[1] |= MG_REQ;
+          pt1->tag[2] |= MG_REQ;
         }
       }
     }
@@ -665,26 +603,13 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
           fprintf(stderr,"\n  ## Warning: %s: parallel triangle number %8d"
                   " ignored.\n",__func__,i);
         } else {
-          if( mesh->info.iso ){
-            if( ina[i] == 0 ) continue;
-            else {
-              pt1 = &mesh->tria[ina[i]];
-              pt1->tag[0] |= MG_PARBDY;
-              pt1->tag[1] |= MG_PARBDY;
-              pt1->tag[2] |= MG_PARBDY;
-            }
-          }
-          else{
-            pt1 = &mesh->tria[i];
-            pt1->tag[0] |= MG_PARBDY;
-            pt1->tag[1] |= MG_PARBDY;
-            pt1->tag[2] |= MG_PARBDY;
-          }
+          pt1 = &mesh->tria[i];
+          pt1->tag[0] |= MG_PARBDY;
+          pt1->tag[1] |= MG_PARBDY;
+          pt1->tag[2] |= MG_PARBDY;
         }
       }
     }
-    if ( mesh->info.iso )
-      MMG5_SAFE_FREE(ina);
   } //end if mesh->nt
 
   /* read mesh quadrilaterals */
@@ -696,7 +621,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       pq1 = &mesh->quadra[k];
       if (!bin) {
         MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&pq1->v[0],&pq1->v[1],&pq1->v[2],
-               &pq1->v[3],&pq1->ref);
+                   &pq1->v[3],&pq1->ref);
       }
       else {
         for (i=0 ; i<4 ; i++) {
@@ -763,13 +688,9 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
     }
   } //end if mesh->nquad
 
-    /* read mesh edges */
+  /* read mesh edges */
   if ( mesh->na ) {
     na = mesh->na;
-    if (mesh->info.iso ) {
-      mesh->na = 0;
-      MMG5_SAFE_CALLOC(ina,na+1,MMG5_int,return -1);
-    }
 
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
@@ -792,41 +713,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
         pa->ref = -pa->ref;
         ++nref;
       }
-
-      if ( mesh->info.iso ) {
-        if( pa->ref != mesh->info.isoref ) {
-          ++mesh->na;
-          memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(MMG5_Edge));
-          ina[k] = mesh->na;
-        }
-        else {
-          /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
-          if ( MG_REQ & mesh->point[pa->a].tag ) {
-            mesh->point[pa->a].tag &= ~MG_REQ;
-          }
-          if ( MG_REQ & mesh->point[pa->b].tag ) {
-            mesh->point[pa->b].tag &= ~MG_REQ;
-          }
-          if ( MG_CRN & mesh->point[pa->a].tag ) {
-            mesh->point[pa->a].tag &= ~MG_CRN;
-          }
-          if ( MG_CRN & mesh->point[pa->b].tag ) {
-            mesh->point[pa->b].tag &= ~MG_CRN;
-          }
-        }
-      }
-    }
-    if ( mesh->info.iso ) {
-      if( !mesh->na )
-        MMG5_DEL_MEM(mesh,mesh->edge);
-      else if ( mesh->na < na ) {
-        MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
-                      fprintf(stderr,"  Exit program.\n");
-                      MMG5_SAFE_FREE(ina);
-                      return -1);
-        MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",
-                            MMG5_SAFE_FREE(ina);return -1);
-      }
     }
 
     /* get ridges */
@@ -846,18 +732,8 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
                   __func__,ia);
           continue;
         }
-        if( mesh->info.iso ){
-          if( ina[ia] == 0 )
-            continue;
-          else {
-            pa = &mesh->edge[ina[ia]];
-            pa->tag |= MG_GEO;
-          }
-        }
-        else{
-          pa = &mesh->edge[ia];
-          pa->tag |= MG_GEO;
-        }
+        pa = &mesh->edge[ia];
+        pa->tag |= MG_GEO;
       }
     }
     /* get required edges */
@@ -877,18 +753,8 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
                   " ignored.\n",__func__,ia,na);
           continue;
         }
-        if( mesh->info.iso ){
-          if( ina[ia] == 0 ) continue;
-          else {
-            pa = &mesh->edge[ina[ia]];
-            pa->tag |= MG_REQ;
-          }
-        }
-        else{
-          pa = &mesh->edge[ia];
-          pa->tag |= MG_REQ;
-        }
-
+        pa = &mesh->edge[ia];
+        pa->tag |= MG_REQ;
       }
     }
     /* get parallel edges */
@@ -908,22 +774,10 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
                   " ignored.\n",__func__,ia,na);
           continue;
         }
-        if( mesh->info.iso ){
-          if( ina[ia] == 0 ) continue;
-          else {
-            pa = &mesh->edge[ina[ia]];
-            pa->tag |= MG_PARBDY;
-          }
-        }
-        else{
-          pa = &mesh->edge[ia];
-          pa->tag |= MG_PARBDY;
-        }
-
+        pa = &mesh->edge[ia];
+        pa->tag |= MG_PARBDY;
       }
     }
-    if (mesh->info.iso )
-      MMG5_SAFE_FREE(ina);
   }
 
   /* read mesh tetrahedra */
@@ -1478,7 +1332,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       if(!bin) {
-        fprintf(inm,"%.15lg %.15lg %.15lg %" MMG5_PRId "\n",ppt->c[0],ppt->c[1],ppt->c[2],MMG5_abs(ppt->ref));
+        fprintf(inm,"%.15lg %.15lg %.15lg %" MMG5_PRId "\n",
+                ppt->c[0],ppt->c[1],ppt->c[2],MMG5_abs(ppt->ref));
       } else {
         fwrite((unsigned char*)&ppt->c[0],MMG5_SD,1,inm);
         fwrite((unsigned char*)&ppt->c[1],MMG5_SD,1,inm);
@@ -1721,11 +1576,21 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     /* Count tangents and normals */
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+        /* We compute normals at some required points but not all of them in analysis
+         * thus it don't works to save it at the end of the process */
+        continue;
+      }
       else if ( (ppt->tag & MG_BDY)
-                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+         /* Indeed non-manifold point along connected mesh have a unique normal if
+          * pxp->nnor==0 but saving it gives a weird visualization and keeping the
+          * normal info is useless. */
         nn++;
-      if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) nt++;
+      }
+      if ( MG_EDG_OR_NOM(ppt->tag) ) {
+        nt++;
+      }
     }
 
     /* write normals */
@@ -1742,7 +1607,9 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+        continue;
+      }
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
@@ -1770,9 +1637,11 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     nn = 0;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+        continue;
+      }
       else if ( (ppt->tag & MG_BDY)
-                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM) ) ) {
         if(!bin) {
           fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nn);
         } else {
@@ -1799,8 +1668,10 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+          continue;
+        }
+        else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
           } else {
@@ -1826,8 +1697,10 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
-        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) ) {
+          continue;
+        }
+        else if ( MG_EDG_OR_NOM(ppt->tag) ) {
           if(!bin) {
             fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nt);
           } else {

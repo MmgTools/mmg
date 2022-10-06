@@ -1427,3 +1427,12 @@ FORTRAN_NAME(MMG3D_SWITCH_METRIC_STORAGE,mmg3d_swith_metricstorage,
 
   return;
 }
+
+/**
+ * See \ref MMG3D_Clean_isoSurf function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_CLEAN_ISOSURF,mmg3d_clean_isosurf,
+             (MMG5_pMesh *mesh, int* retval), (mesh, retval)) {
+  *retval = MMG3D_Clean_isoSurf(*mesh);
+  return;
+}

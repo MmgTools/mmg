@@ -292,7 +292,10 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
   }
   while ( 4*k+iopp != fstart );
 
-  if ( (nr > 0 && nnm > 0) || nnm != 2 )  return 0;
+  if ( (nr > 0 && nnm > 0) || nnm != 2 ) {
+    /* We pass here for non-manifold meshes with only edge connection */
+    return 0;
+  }
 
   dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
   if ( dd > MMG5_EPSD2 ) {
@@ -322,7 +325,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
   return 1;
 }
 
-/** 
+/**
  * \param mesh pointer toward the mesh  structure.
  * \param start tetra index.
  * \param ip point index.
@@ -332,7 +335,10 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  * Travel the ball of the internal non manifold point ip in tetra start
  * and calculate the tangent vector to the underlying curve.
  *
-*/
+ * \remark we are not able to compute tangent along non-manifold points for
+ * edge-connected meshes. In this case the point doesn't have xpoint nor tangent
+ * or normal.
+ */
 int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
@@ -340,23 +346,23 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_int       base,k,kk,ip0,ip1,nump,na,nb,list[MMG3D_LMAX+2],*adja;
   int            cur,ilist;
   int8_t         i,j,ii,ie;
-  
+
   base = ++mesh->base;
   ip0 = ip1 = 0;
   cur = ilist = 0;
-  
+
   /* Store initial tetrahedron */
   pt = &mesh->tetra[start];
   nump = pt->v[ip];
   list[0] = 4*start+ip;
   pt->flag = base;
   ilist++;
-  
+
   while ( cur < ilist ) {
     k = list[cur] / 4;
     i = list[cur] % 4;
     pt = &mesh->tetra[k];
-    
+
     /* If pt bears geometric information, search for endpoints of the NOM curve of ppt */
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
@@ -388,34 +394,39 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
         }
       }
     }
-    
+
     /* Pile up tetrahedra in the ball of nump */
     adja = &mesh->adja[4*(k-1)+1];
-    
+
     for (j=0; j<3; j++) {
       i = MMG5_inxt3[i];
       kk = adja[i] / 4;
-      assert ( kk );
-      
+      assert ( kk && "point is not an internal nm-point");
+
+      if ( !kk ) {
+        /* point is not an internal non manifold point */
+        return 0;
+      }
+
       pt1 = &mesh->tetra[kk];
       if ( pt1->flag == base ) continue;
-      
+
       for (ii=0; ii<4; ii++)
         if ( pt1->v[ii] == nump ) break;
       assert ( ii < 4 );
-      
+
       list[ilist] = 4*kk+ii;
       pt1->flag = base;
       if ( ilist > MMG3D_LMAX-3 )  return 0;
       ilist++;
     }
-    
+
     cur++;
   }
-  
+
   /* At this point, the two points connected to ppt via the NOM curve are ip0 and ip1 */
   MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
-  
+
   dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
   if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
@@ -423,7 +434,7 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
     t[1] *= dd;
     t[2] *= dd;
   }
-  
+
   return 1;
 }
 
@@ -434,13 +445,14 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
  * \param ip local index of the point in the tetrahedra \a start.
  * \param ng pointer toward the number of ridges.
  * \param nr pointer toward the number of reference edges.
+ * \param nm pointer toward the number of non-manifold edges.
  * \return ns the number of special edges passing through ip, -1 if fail.
  *
  * Count the numer of ridges and reference edges incident to
  * the vertex \a ip when ip is non-manifold.
  *
  */
-int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int *ng,MMG5_int *nr){
+int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int *ng,MMG5_int *nr,MMG5_int *nm){
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_hedge    *ph;
@@ -472,7 +484,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
   list[0] = 4*start + ip;
   ilist = 1;
 
-  *ng = *nr = ns = 0;
+  *ng = *nr = *nm = ns = 0;
 
   /* Explore list and travel by adjacency through elements sharing p */
   cur = 0;
@@ -487,7 +499,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
       for (l=0; l<3; ++l) {
         ie = MMG5_arpt[i][l];
 
-        if ( MG_EDG(pxt->tag[ie]) ) {
+        if ( MG_EDG(pxt->tag[ie]) || (MG_NOM & pxt->tag[ie]) ) {
           /* Seek if we have already seen the edge. If not, hash it and
            * increment ng or nr.*/
           a = pt->v[MMG5_iare[ie][0]];
@@ -526,10 +538,19 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
           ph->b = ib;
           ph->nxt = 0;
 
-          if ( pxt->tag[ie] & MG_GEO )
+          /* Order of following tests impacts the ridge and non-manifold edges
+           * count (an edge that has both tags pass only in first test) but
+           * should not influence the setting for corners and required tags in
+           * setVertexNmTag function) */
+          if ( pxt->tag[ie] & MG_GEO ) {
             ++(*ng);
-          else if ( pxt->tag[ie] & MG_REF )
+          }
+          else if ( pxt->tag[ie] & MG_NOM ) {
+            ++(*nm);
+          }
+          else if ( pxt->tag[ie] & MG_REF ) {
             ++(*nr);
+          }
           ++ns;
         }
       }
@@ -569,14 +590,14 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
  * \param ilistv pointer toward the computed volumic ball size.
  * \param lists pointer toward the computed surfacic ball.
  * \param ilists pointer toward the computed surfacic ball size.
- * \param isnm is the looked point \a ip non-manifold?
+ * \param isnm 1 if \a ip is non-manifold, 0 otherwise.
  * \return -1 if fail, 1 otherwise.
  *
  * Compute the volumic ball of a SURFACE point \a p, as well as its surfacic
  * ball, starting from tetra \a start, with point \a ip, and face \a if in tetra
- * volumic ball.
- * \a listv[k] = 4*number of tet + index of point surfacic ball.
- * \a lists[k] = 4*number of tet + index of face.
+ * volumic ball:
+ *   - \a listv[k] = 4* tet index + index of point surfacic ball.
+ *   - \a lists[k] = 4* tet index + index of boundary face.
  *
  * \warning Don't work for a non-manifold point if \a start has an adjacent
  * through \a iface (for example : a non-manifold subdomain). Thus, if \a ip is
@@ -613,6 +634,9 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
     /* A boundary face has been hit : change travel edge */
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
+
+    assert ( mesh->tetra[k].xt && "tetra of surfacic ball has a xtetra (bdy face) ");
+
     if ( *ilists >= MMG3D_LMAX ) {
       if ( !mmgErr0 ) {
         fprintf(stderr,"\n  ## Warning: %s: problem in surface remesh process."

@@ -1294,6 +1294,12 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
 
+  /* clean old isosurface */
+  if ( !MMG3D_Clean_isoSurf(mesh) ) {
+    fprintf(stderr,"\n  ## Unable to clean old isosurface.\n");
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  }
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim > 0 )

@@ -458,6 +458,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,1) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
@@ -729,6 +730,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     }
     MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,1) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
@@ -904,7 +906,6 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( !MMG5_scaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   if ( mesh->nt && !MMG2D_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
@@ -917,6 +918,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) )
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,1) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);

@@ -80,8 +80,9 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
   /* No swap of geometric edge */
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    if ( (pxt->edg[ia]>0) || MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
-         (pxt->tag[ia] & MG_NOM) )  return 0;
+    if ( (pxt->edg[ia]>0) || MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
+      return 0;
+    }
   }
 
   /* No swap when either internal or external component has only 1 element */
@@ -142,8 +143,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
   }
 
   /* Check normal deviation with neighbours */
-  if ( ! ( ( tt1.tag[MMG5_iprv2[ia1]] & MG_GEO ) ||
-           ( tt1.tag[MMG5_iprv2[ia1]] & MG_NOM ) ) ) {
+  if ( !MG_GEO_OR_NOM( tt1.tag[MMG5_iprv2[ia1]] ) ) {
     ier = MMG3D_normalAdjaTri(mesh,iel1,ifa1,MMG5_iprv2[ia1],n);
     if ( ier < 0 ) return -1;
     else if ( !ier ) return 0;
@@ -152,8 +152,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
     if ( ps < mesh->info.dhd )  return 0;
   }
 
-  if ( !( (tt2.tag[MMG5_inxt2[ia2]] & MG_GEO ) ||
-          (tt2.tag[MMG5_inxt2[ia2]] & MG_NOM ) ) ) {
+  if ( !MG_GEO_OR_NOM( tt2.tag[MMG5_inxt2[ia2]]) ) {
     ier = MMG3D_normalAdjaTri(mesh,iel2,ifa2,MMG5_inxt2[ia2],n);
     if ( ier<0 ) return -1;
     else if ( !ier ) return 0;
@@ -162,8 +161,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
     if ( ps < mesh->info.dhd )  return 0;
   }
 
-  if ( ! ( (tt1.tag[MMG5_inxt2[ia1]] & MG_GEO ) ||
-           (tt1.tag[MMG5_inxt2[ia1]] & MG_NOM ) ) ) {
+  if ( !MG_GEO_OR_NOM( tt1.tag[MMG5_inxt2[ia1]] ) ) {
     ier = MMG3D_normalAdjaTri(mesh,iel1,ifa1,MMG5_inxt2[ia1],n);
     if ( ier<0 ) return -1;
     else if ( !ier ) return 0;
@@ -172,8 +170,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
     if ( ps < mesh->info.dhd )  return 0;
   }
 
-  if ( ! ( (tt2.tag[MMG5_iprv2[ia2]] & MG_GEO ) ||
-           (tt2.tag[MMG5_iprv2[ia2]] & MG_NOM ) ) ) {
+  if ( !MG_GEO_OR_NOM(tt2.tag[MMG5_iprv2[ia2]]) ) {
     ier = MMG3D_normalAdjaTri(mesh,iel2,ifa2,MMG5_iprv2[ia2],n);
     if ( ier<0 ) return -1;
     else if ( !ier ) return 0;

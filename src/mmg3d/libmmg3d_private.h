@@ -152,6 +152,7 @@ extern "C" {
 #define MMG3D_SHORTMAX     0x7fff
 
 #define MMG3D_VOLFRAC      1.e-5
+#define MMG3D_MOVSTEP 0.1
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
 static const uint8_t MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
@@ -229,7 +230,7 @@ extern int  MMG5_BezierRidge(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double 
 extern int  MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,double *no,double *to);
 int  MMG5_norface(MMG5_pMesh mesh ,MMG5_int k, int iface, double v[3]);
 int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,MMG5_int,MMG5_int,MMG5_int,int,int8_t*,int8_t* );
-int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int start, int ip, MMG5_int *ng, MMG5_int *nr);
+int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int start, int ip, MMG5_int *ng, MMG5_int *nr,MMG5_int *nm);
 int  MMG5_boulenm(MMG5_pMesh mesh, MMG5_int start, int ip, int iface, double n[3],double t[3]);
 int  MMG5_boulenmInt(MMG5_pMesh mesh, MMG5_int start, int ip, double t[3]);
 int  MMG5_boulevolp(MMG5_pMesh mesh, MMG5_int start, int ip, int64_t * list);
@@ -330,6 +331,16 @@ int    MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
                              int64_t*, int, MMG5_int*, int, int ,int);
 int    MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
                              int64_t*, int, MMG5_int*, int, int ,int);
+int MMG3D_curveEndingPts(MMG5_pMesh,MMG5_int*,int,const int16_t,MMG5_int,MMG5_int*,MMG5_int*);
+int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
+                                      MMG3D_pPROctree PROctree, int64_t *listv,
+                                      int ilistv,int improve,MMG5_pPoint p0,
+                                      MMG5_int ip0,uint8_t isrid,double o[3],
+                                      double no[3],double no2[3],double to[3]);
+int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh,MMG5_pPoint,MMG5_int,MMG5_int,MMG5_int,
+                                      double,double,uint8_t,const double,
+                                      double[3],double[3],
+                                      double[3],double[3],const int16_t);
 int    MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,
                              MMG5_int*, int ,int);
 int    MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int,

@@ -626,7 +626,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pPoint         ppt;
   MMG5_Hash           hash;
   int                 i,ier;
-  MMG5_int            k,base,np,nc, nre, ng, nrp;
+  MMG5_int            k,base,np,nc,nm,nre, ng, nrp;
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
@@ -659,17 +659,26 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
       if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
 
-      ier = MMG5_boulernm(mesh,&hash, k, i, &ng, &nrp);
+      ier = MMG5_boulernm(mesh,&hash, k, i, &ng, &nrp, &nm);
       if ( ier < 0 ) return 0;
       else if ( !ier ) continue;
 
-      if ( (ng+nrp) > 2 ) {
+      if ( (ng+nrp+nm) > 2 ) {
+        /* More than 2 feature edges are passing through the point: point is
+         * marked as corner */
         ppt->tag |= MG_CRN + MG_REQ;
         ppt->tag &= ~MG_NOSURF;
         nre++;
         nc++;
       }
-      else if ( (ng == 1) && (nrp == 1) ) {
+      else if ( (ng == 2) || (nrp == 2) || (nm == 2) ) {
+        /* Exactly 2 edges of same type are passing through the point: do
+         * nothing */
+        continue;
+      }
+      else if ( (ng+nrp+nm) == 2 ) {
+        /* 2 edges of different type are passing through the point: point is
+         * marked as required */
         ppt->tag |= MG_REQ;
         ppt->tag &= ~MG_NOSURF;
         nre++;
@@ -680,11 +689,17 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
         nre++;
         nc++;
       }
-      else if ( ng == 1 && !nrp ){
+      else if ( (ng+nrp+nm) == 1 ){
+        /* Only 1 feature edge is passing through the point: point is
+         * marked as corner */
+        assert ( (ng == 1) || (nrp==1) || (nm==1) );
         ppt->tag |= MG_CRN + MG_REQ;
         ppt->tag &= ~MG_NOSURF;
         nre++;
         nc++;
+      }
+      else {
+        assert ( 0 && "unexpected case");
       }
     }
   }
@@ -1111,7 +1126,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         i1  = MMG5_inxt2[i];
         i2  = MMG5_iprv2[i];
         kk  = adja[i] / 3;
-        if ( !kk || pt->tag[i] & MG_NOM ) {
+        if ( (!kk) || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
               pt->edg[i] = ( pt->edg[i] != 0 ) ?  -MMG5_abs(pt->edg[i]) : mesh->info.isoref;

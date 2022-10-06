@@ -41,21 +41,19 @@
 int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
-  MMG5_pEdge  ped;
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
   long        posnp,posnt,posne,posncor,posnq,posned,posnr;
   long        posntreq,posnpreq,posnormal,posnc1;
-  MMG5_int    k,ia,nq,nri,ip,idn,ng,npreq,nref,ref;
+  MMG5_int    k,ia,nq,nri,ip,idn,ng,npreq,nref;
   int         i;
   MMG5_int    ncor,nedreq,ntreq,posnedreq,bpos;
   int         binch,bin,iswp,bdim;
-  MMG5_int    na,*ina,a,b;
+  MMG5_int    na;
   char        *ptr,*data;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
-  ina = NULL;
   posnp = posnt = posne = posncor = posnq = 0;
   posned = posnr = posnpreq = posntreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
@@ -489,77 +487,25 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
 
-    /* Skip edges with mesh->info.isoref refs */
-    if( mesh->info.iso ) {
-      mesh->na = 0;
-      MMG5_SAFE_CALLOC(ina,na+1,MMG5_int,return -1);
-
-      for (k=1; k<=na; k++) {
-        if (!bin) {
-          MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&a,&b,&ref);
-        }
-        else {
-          MMG_FREAD(&a,MMG5_SW,1,inm);
-          if(iswp) a=MMG5_SWAPBIN(a);
-          MMG_FREAD(&b,MMG5_SW,1,inm);
-          if(iswp) b=MMG5_SWAPBIN(b);
-          MMG_FREAD(&ref,MMG5_SW,1,inm);
-          if(iswp) ref=MMG5_SWAPBIN(ref);
-        }
-
-        if ( ref < 0 ) {
-          ref = -ref;
-          ++nref;
-        }
-
-        if ( ref != mesh->info.isoref ) {
-          ped = &mesh->edge[++mesh->na];
-          ped->a   = a;
-          ped->b   = b;
-          ped->ref = ref;
-          ina[k]   = mesh->na;
-        }
-        else {
-          /* Remove MG_REQ and MG_CRN tags on ISO edges */
-          if ( MG_REQ & mesh->point[a].tag ) { mesh->point[a].tag &= ~MG_REQ; }
-          if ( MG_REQ & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_REQ; }
-          if ( MG_CRN & mesh->point[a].tag ) { mesh->point[a].tag &= ~MG_CRN; }
-          if ( MG_CRN & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_CRN; }
-        }
+    for (k=1; k<=mesh->na; k++) {
+      if (!bin) {
+        MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&mesh->edge[k].a,&mesh->edge[k].b,&mesh->edge[k].ref);
       }
-      if( !mesh->na ){
-        MMG5_DEL_MEM(mesh,mesh->edge);
+      else {
+        MMG_FREAD(&mesh->edge[k].a,MMG5_SW,1,inm);
+        if(iswp) mesh->edge[k].a=MMG5_SWAPBIN(mesh->edge[k].a);
+        MMG_FREAD(&mesh->edge[k].b,MMG5_SW,1,inm);
+        if(iswp) mesh->edge[k].b=MMG5_SWAPBIN(mesh->edge[k].b);
+        MMG_FREAD(&mesh->edge[k].ref,MMG5_SW,1,inm);
+        if(iswp) mesh->edge[k].ref=MMG5_SWAPBIN(mesh->edge[k].ref);
       }
-
-      else if ( mesh->na < na ) {
-        MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
-                     fprintf(stderr,"  Exit program.\n");
-                     MMG5_SAFE_FREE(ina);
-                     return -1);
-        MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges",return -1);
+      if ( mesh->edge[k].ref < 0 ) {
+        mesh->edge[k].ref = -mesh->edge[k].ref;
+        ++nref;
       }
-    }
-    else {
-      for (k=1; k<=mesh->na; k++) {
-        if (!bin) {
-          MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&mesh->edge[k].a,&mesh->edge[k].b,&mesh->edge[k].ref);
-        }
-        else {
-          MMG_FREAD(&mesh->edge[k].a,MMG5_SW,1,inm);
-          if(iswp) mesh->edge[k].a=MMG5_SWAPBIN(mesh->edge[k].a);
-          MMG_FREAD(&mesh->edge[k].b,MMG5_SW,1,inm);
-          if(iswp) mesh->edge[k].b=MMG5_SWAPBIN(mesh->edge[k].b);
-          MMG_FREAD(&mesh->edge[k].ref,MMG5_SW,1,inm);
-          if(iswp) mesh->edge[k].ref=MMG5_SWAPBIN(mesh->edge[k].ref);
-        }
-        if ( mesh->edge[k].ref < 0 ) {
-          mesh->edge[k].ref = -mesh->edge[k].ref;
-          ++nref;
-        }
-        mesh->edge[k].tag |= MG_REF;
-        mesh->point[mesh->edge[k].a].tag |= MG_REF;
-        mesh->point[mesh->edge[k].b].tag |= MG_REF;
-      }
+      mesh->edge[k].tag |= MG_REF;
+      mesh->point[mesh->edge[k].a].tag |= MG_REF;
+      mesh->point[mesh->edge[k].b].tag |= MG_REF;
     }
 
     /* get ridges */
@@ -579,14 +525,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
                   __func__,ia);
         }
         else {
-          if( mesh->info.iso ){
-            if( ina[ia] == 0 ) continue;
-            else
-              mesh->edge[ina[ia]].tag |= MG_GEO;
-          }
-          else {
-            mesh->edge[ia].tag |= MG_GEO;
-          }
+          mesh->edge[ia].tag |= MG_GEO;
         }
       }
     }
@@ -607,18 +546,10 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
                   __func__,ia);
         }
         else {
-          if( mesh->info.iso ){
-            if( ina[ia] == 0 ) continue;
-            else
-              mesh->edge[ina[ia]].tag |= MG_REQ;
-          }
-          else
-            mesh->edge[ia].tag |= MG_REQ;
+          mesh->edge[ia].tag |= MG_REQ;
         }
       }
     }
-    if ( mesh->info.iso )
-      MMG5_SAFE_FREE(ina);
   }
 
   /* read geometric entities */

@@ -220,7 +220,7 @@ int MMG2D_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double*
 MMG5_int MMG2D_isInTriangle(MMG5_pMesh ,MMG5_int,double c[2]);
 int MMG2D_cutEdge(MMG5_pMesh ,MMG5_pTria ,MMG5_pPoint ,MMG5_pPoint );
 int MMG2D_cutEdgeTriangle(MMG5_pMesh ,MMG5_int ,MMG5_int ,MMG5_int );
-int MMG2D_findTria(MMG5_pMesh ,MMG5_int );
+MMG5_int MMG2D_findTria(MMG5_pMesh ,MMG5_int );
 int MMG2D_locateEdge(MMG5_pMesh ,MMG5_int ,MMG5_int ,MMG5_int* ,MMG5_int* ) ;
 int MMG2D_bdryenforcement(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_settagtriangles(MMG5_pMesh ,MMG5_pSol );
@@ -302,8 +302,6 @@ int MMG2D_split1b(MMG5_pMesh ,MMG5_int ,int8_t ,MMG5_int );
 int MMG2D_movedgpt(MMG5_pMesh ,MMG5_pSol ,int ,MMG5_int *,int8_t );
 int MMG2D_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,MMG5_int *,int8_t );
 int MMG2D_movintpt_ani(MMG5_pMesh ,MMG5_pSol ,int ,MMG5_int *,int8_t );
-int MMG2D_chkmsh(MMG5_pMesh );
-int MMG2D_chkor(MMG5_pMesh );
 int MMG2D_savenor_db(MMG5_pMesh ,char*,int8_t );
 int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char*,int8_t );
 int MMG2D_velextLS(MMG5_pMesh ,MMG5_pSol );

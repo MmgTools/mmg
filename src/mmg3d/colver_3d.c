@@ -78,20 +78,21 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
     /* prevent from recreating internal edge between boundaries */
     p0 = &mesh->point[nq];
     if ( mesh->info.fem==typchk ) {
-      if ( !(p0->tag & MG_PARBDY) ) {
-        if ( p0->tag & MG_BDY ) {
-          i = ip;
-          for (jj=0; jj<3; jj++) {
-            i = MMG5_inxt3[i];
-            p0 = &mesh->point[pt->v[i]];
-            if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) )  return 0;
-          }
-        }
-      }
-
-      /* Prevent from creating a tetra with 4 bdy vertices */
       p0 = &mesh->point[nq];
       if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) {
+        i = ip;
+        for (jj=0; jj<3; jj++) {
+          i = MMG5_inxt3[i];
+          p0 = &mesh->point[pt->v[i]];
+          if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ){
+            return 0;
+          }
+        }
+
+        /* Prevent from creating a tetra with 4 bdy vertices */
+        // Algiane (2022) this test is useless I think (because we forbid the
+        // creation of internal edges between boundary points)
+#ifndef NDEBUG
         i  = ip;
         nr = 0;
         for (jj=0; jj<3; jj++) {
@@ -99,34 +100,48 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
           p0 = &mesh->point[pt->v[i]];
           if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) ++nr;
         }
-        if ( nr==3 ) return 0;
+        if ( nr==3 ) {
+          assert ( 0 && "Uncomment this test, it is not useless");
+          return 0;
+        }
+#endif
       }
     }
     else {
       /* In aniso : prevent from creating a tetra with 4 ridges vertices or
-       * internal edges between to ridges (unable to split it after because of
+       * internal edges between two ridges (unable to split it after because of
        * the ridge metric) */
       if ( met->size==6 ) {
         p0 = &mesh->point[nq];
 
-        if ( p0->tag & MG_GEO ) {
+        if ( (p0->tag & MG_GEO) && !MG_SIN_OR_NOM(p0->tag) ) {
           i = ip;
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO )  return 0;
+            if ( p0->tag & MG_GEO && !MG_SIN_OR_NOM(p0->tag) ) {
+              return 0;
+            }
           }
-        }
 
-        if ( p0->tag & MG_GEO ) {
+          // Algiane (2022) this test is useless because we forbid the creation of
+          // internal edges between boundary points but we can keep it in case we
+          // comment the previous test
+#ifndef NDEBUG
           i  = ip;
           nr = 0;
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO ) ++nr;
+            if ( p0->tag & MG_GEO && !MG_SIN_OR_NOM(p0->tag) ) {
+              ++nr;
+            }
           }
-          if ( nr==3 ) return 0;
+          if ( nr==3 ) {
+            assert ( 0 && "Uncomment this test, it is not useless");
+            return 0;
+          }
+#endif
         }
       }
     }
@@ -278,8 +293,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
   assert ( mesh->tetra[k].xt && "initial tetra is not boundary");
   pxt = &mesh->xtetra[mesh->tetra[k].xt];
 
-  if ( !( (pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]] & MG_GEO) ||
-          (pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
+  if ( !( MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]]) ||
+          MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]])   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
@@ -324,8 +339,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
 
   pxt      = &mesh->xtetra[mesh->tetra[jel1].xt];
 
-  if ( !( (pxt->tag[MMG5_iarf[jface1][MMG5_iprv2[j1]]] & MG_GEO) ||
-          (pxt->tag[MMG5_iarf[jface1][MMG5_inxt2[j1]]] & MG_GEO)   ) ) {
+  if ( !( MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[jface1][MMG5_iprv2[j1]]]) ||
+          MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[jface1][MMG5_inxt2[j1]]])   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
@@ -481,15 +496,20 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
       }
     }
 
-    /* Prevent from creating a tetra with 4 ridges vertices */
-    if ( mesh->point[numq].tag & MG_GEO ) {
-      i  = ipp;
-      nr = 0;
-      for (iq=0; iq<3; iq++) {
-        i = MMG5_inxt3[i];
-        if ( mesh->point[pt->v[i]].tag & MG_GEO ) ++nr;
+    /* Prevent from creating a tetra with 4 ridges metrics in aniso mode */
+    if ( met && met->m && met->size == 6 ) {
+      if ( (mesh->point[numq].tag & MG_GEO) && !MG_SIN_OR_NOM(mesh->point[numq].tag) ) {
+        i  = ipp;
+        nr = 0;
+        for (iq=0; iq<3; iq++) {
+          i = MMG5_inxt3[i];
+          if ( (mesh->point[pt->v[i]].tag & MG_GEO) &&
+               !MG_SIN_OR_NOM(mesh->point[pt->v[i]].tag) ) {
+            ++nr;
+          }
+        }
+        if ( nr==3 ) return 0;
       }
-      if ( nr==3 ) return 0;
     }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -543,8 +563,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 
     iedgeOpp =  MMG5_iarf[iopp][ia];
 
-    if ( ! ( (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ||
-             (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+    if ( ! ( MG_GEO_OR_NOM(mesh->xtetra[pt->xt].tag[iedgeOpp])) ) {
 
       ier = MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nadja);
       if ( ier < 0 )  return -1;
@@ -572,8 +591,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 
       iedgeOpp =  MMG5_iarf[iopp2][ipp];
 
-      if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
-               (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+      if ( ! ( MG_GEO_OR_NOM(mesh->xtetra[pt1->xt].tag[iedgeOpp] ) ) ) {
         ier = MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
 
         if ( ier < 0 )  return -1;
@@ -590,7 +608,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
       ia = MMG5_iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
-      if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
+      if ( !MG_GEO_OR_NOM(mesh->xtetra[pt->xt].tag[ia]) ) {
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
 
@@ -709,8 +727,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 
   iedgeOpp =  MMG5_iarf[iopp2][ipp];
 
-  if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
-           (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+  if ( ! ( MG_GEO_OR_NOM(mesh->xtetra[pt1->xt].tag[iedgeOpp]) ) ) {
+
     ier = MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
     if ( ier < 0 )  return -1;
     else if ( !ier ) return 0;

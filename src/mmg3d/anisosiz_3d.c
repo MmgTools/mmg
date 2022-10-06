@@ -118,7 +118,7 @@ int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   n = 0;
   for(i=0 ; i<4 ; i++) {
     ppt = &mesh->point[pt->v[i]];
-    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    if ( MG_RID(ppt->tag) ) continue;
     n++;
   }
 
@@ -153,7 +153,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
   for (k=0; k<6; ++k) mm[k] = 0.;
   for(i=0 ; i<4 ; i++) {
     ppt = &mesh->point[pt->v[i]];
-    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    if ( MG_RID(ppt->tag) ) continue;
     n++;
     mp = &met->m[6*pt->v[i]];
     for (k=0; k<6; ++k) {
@@ -183,9 +183,9 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
  * (in tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
- * Define metric map at a SINGULARITY of the geometry, associated to
- * the geometric approx of the surface. metric \f$=\alpha*Id\f$, \f$\alpha =\f$
- * size.
+ * Define metric map at a SINGULARITY (corner, required or non-manifold points)
+ * of the geometry, associated to the geometric approx of the surface. metric
+ * \f$=\alpha*Id\f$, \f$\alpha =\f$ size.
  *
  */
 static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface, int ip) {
@@ -292,8 +292,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
      * p1=mesh->point[pt->v[i1]]: p0 is singular */
     MMG5_norpts(mesh,pt->v[i0],pt->v[i1],pt->v[i2],n);
 
-    MMG5_BezierEdge(mesh,idp,pt->v[i1],b0,b1,
-                     MG_EDG(pxt->tag[MMG5_iarf[ifac][i]]),n);
+    MMG5_BezierEdge(mesh,idp,pt->v[i1],b0,b1,MG_EDG_OR_NOM(pxt->tag[MMG5_iarf[ifac][i]]),n);
 
     /* tangent vector */
     tau[0] = 3.0*(b0[0] - p0->c[0]);
@@ -955,8 +954,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, 
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   assert( !(p0->tag & MG_NOSURF) );
-  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag)
-              && !(MG_NOM & p0->tag) );
+  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -1302,6 +1300,12 @@ int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
  * Define size at points by intersecting the surfacic metric and the
  * physical metric.
  *
+ *
+ * 1. On singular (CRN, REQ, NOM) points, the metric on P is made isotropic.
+ * 2. On non-singular ridge points, the metric is forced to be aligned with the
+ *    ridge directions and surface normals.
+ * 3. On regular boundary points, the metric can be anisotropic on the tangent
+ *    plane, but it is forced to be aligned to the normal direction.
  */
 int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
@@ -1378,7 +1382,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
-        if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
+        if ( MG_SIN_OR_NOM(ppt->tag) ) {
           if ( !MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
         }
         else if ( ppt->tag & MG_GEO ) {
@@ -1441,7 +1445,7 @@ int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip,double ux,
   mm  = &met->m[6*ip];
 
 
-  if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ){
+  if( MG_SIN_OR_NOM(ppt->tag) ){
 
     /* no normal, no tangent plane */
     memcpy(m,mm,6*sizeof(double));
@@ -1517,7 +1521,7 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
  *
  * Use metric intersection to gradate the anisotropic metric on point P, given
  * the metric extended from point Q on the edge PQ.
- * 1. On singular points, the metric on P is isotropic (as in MMG5_defmetsin)
+ * 1. On singular (CRN, REQ, NOM) points, the metric on P is isotropic (as in MMG5_defmetsin)
  *    and should remain isotropic.
  * 2. On non-singular ridge points, the metric on P should remain aligned with
  *    the ridge directions (thus it is not possible to apply metric intersection,
@@ -1533,7 +1537,7 @@ static inline
 void MMG3D_gradSimred(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
   double tol = MMG5_EPS;
 
-  if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+  if ( MG_SIN_OR_NOM(ppt->tag) ) {
     double dm[3],dmext[3],vp[3][3],beta;
 
     /* Simultaneous reduction basis */
@@ -1561,7 +1565,7 @@ void MMG3D_gradSimred(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6]
     }
 
   }
-  else if( ppt->tag & MG_GEO ) {
+  else if ( ppt->tag & MG_GEO ) {
     MMG5_pxPoint pxp;
     double mr[6],mrext[6],dm[3],dmext[3];
     double u[3],r[3][3],*t,*n;
@@ -1725,7 +1729,7 @@ void MMG5_grad2metVol_setmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8
   ppt = &mesh->point[ip];
   mm = &met->m[6*ip];
 
-  if( !(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && ppt->tag & MG_GEO ) {
+  if ( MG_RID(ppt->tag) ) {
     MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
     double mr[6];
     double u[3],r[3][3],*t,*n;
@@ -1922,8 +1926,8 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int np
   cfg_m2 = 0;
   ier = 0;
 
-  if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
-    if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+  if ( MG_RID(p1->tag) ) {
+    if ( MG_RID(p2->tag) ) {
       // The volume gradation from ridge point toward another ridge point is
       // bugged...
       return 0;
@@ -1932,16 +1936,18 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int np
     /* Recover normal and metric associated to p1 */
     if( !MMG5_buildridmet(mesh,met,npmaster,ux,uy,uz,m1,rbasis1) ) { return 0; }
   }
-  else
+  else {
     memcpy(m1,mm1,6*sizeof(double));
+  }
 
-  if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+  if ( MG_RID(p2->tag) ) {
     /* Recover normal and metric associated to p2 */
     cfg_m2 = MMG5_buildridmet(mesh,met,npslave,ux,uy,uz,m2,rbasis2);
     if( !cfg_m2 ) { return 0; }
   }
-  else
+  else {
     memcpy(m2,mm2,6*sizeof(double));
+  }
 
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
@@ -1966,7 +1972,7 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int np
   }
 
   /* Metric update using the simultaneous reduction technique */
-  if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
+  if( MG_SIN_OR_NOM(p2->tag) ) {
     /* We choose to not respect the gradation in order to restrict the influence
      * of the singular points. Thus:
      * lambda_new = = 0.5 lambda_1 + 0.5 lambda_new = lambda_1 + 0.5 beta.
@@ -2056,6 +2062,17 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int np
  *
  * Enforces mesh gradation by truncating metric field.
  *
+ * 1. On singular (CRN, REQ, NOM) points, the metric on P is isotropic
+ *    (as in MMG5_defmetsin) and should remain isotropic.
+ * 2. On non-singular ridge points, the metric on P should remain aligned with
+ *    the ridge directions (thus it is not possible to apply metric intersection,
+ *    sizes are truncated instead).
+ * 3. On regular boundary points, the metric can be anisotropic on the tangent
+ *    plane, but it should remain aligned to the normal direction (thus,
+ *    intersection is used only in the tangent plane and sizes are truncated in
+ *    the normal direction).
+ * 4. On interior volume points, 3D metric intersection can be used.
+ *
  */
 int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_Hash     edgeTable;
@@ -2074,7 +2091,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !MG_VOK(p1) ) continue;
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) continue;
+    if ( MG_SIN_OR_NOM(p1->tag) ) continue;
     if ( !(p1->tag & MG_GEO) ) continue;
 
     m = &met->m[6*k];

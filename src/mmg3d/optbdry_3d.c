@@ -322,9 +322,9 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_in
       ia  = MMG5_iarf[i][j];
 
       /* No swap of geometric edge */
-      if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
-           (pxt->tag[ia] & MG_NOM) )
+      if ( MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
         continue;
+      }
 
       ret = MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
       ilist = ret / 2;

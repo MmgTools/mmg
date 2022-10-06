@@ -104,7 +104,7 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *
  * \param mesh pointer toward the mesh structure.
  * \param adjt pointer toward the table of triangle adjacency.
  * \param start index of triangle where we start to work.
- * \param ip index of vertex where the normal is computed.
+ * \param ip local index of vertex where the normal is computed.
  * \param nn pointer toward the computed tangent.
  * \return 0 if fail, 1 otherwise.
  *
@@ -120,6 +120,10 @@ int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *nn)
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;
   nn[0] = nn[1] = nn[2] = 0.0;
+
+  /* Ensure point is manifold (i.e., all edges passing through point are
+   * manifold */
+  assert ( (!(MG_NOM & mesh->point[pt->v[ip]].tag)) && "Unexpected non-manifold point" );
 
   /* store neighbors */
   k  = start;
