@@ -433,7 +433,13 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       p0 = &mesh->point[ip];
       p1 = &mesh->point[iq];
 
-      if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
+      /* Ignore OLDPARBDY tag of p0 */
+      int16_t tag = p0->tag;
+      tag &= ~MG_OLDPARBDY;
+      if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+        /* Unable to merge edge: pass to next element */
+        continue;
+      }
 
       ilist = 0;
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
@@ -776,7 +782,13 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       p0 = &mesh->point[ip];
       p1 = &mesh->point[iq];
 
-      if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
+      /* Ignore OLDPARBDY tag of p0 */
+      int16_t tag = p0->tag;
+      tag &= ~MG_OLDPARBDY;
+      if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+        /* Unable to merge edge: pass to next element */
+        continue;
+      }
 
       ilist = 0;
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
