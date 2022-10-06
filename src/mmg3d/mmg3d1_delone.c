@@ -91,7 +91,6 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
   countMemFailure = 0;
 
-
   base = ++mesh->mark;
 
   if ( met->size==6 )  chkRidTet=1;
@@ -301,15 +300,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
         /* End of case of a bdy face */
       }
       else if(pt->xt){
-        /** Tetra has a xtetra but the longest edge do not belong to a bdy
-         * face: do nothing */
-        // Remark (Algiane): I don't know why we do nothing here: I have deleted
-        // dead code that was an attempt to split the edge using pattern
+        /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
+         * do nothing to avoid splitting of a bdy edge from a non bdy face (due
+         * to collapses, a tetra with no bdy faces may have a xtetra and
+         * boundary tags or no tags on boundary edge). */
         continue;
       }
       else {
         /** Case of a tetra without xtetra (no boundary faces): split non-bdy
-         * edges with Delauney kernel.*/
+         * edges with Delauney kernel. */
         /* Note that it is possible that non bdy tetra contains a bdy edge, here
          * only non bdy edge are considered */
         ilist = MMG5_coquil(mesh,k,imax,list);
@@ -664,14 +663,14 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
           /* End of case of a bdy face */
         }
         else if(pt->xt){
-          /** Tetra has a xtetra but the longest edge do not belong to a bdy
-           * face: do nothing */
-          // Remark (Algiane): I don't know why we do nothing here: I have deleted
-          // dead code that was an attempt to split the edge using pattern
+          /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
+           * do nothing to avoid splitting of a bdy edge from a non bdy face (due
+           * to collapses, a tetra with no bdy faces may have a xtetra and
+           * boundary tags or no tags on boundary edge). */
           continue;
         } else {
           /** Case of a tetra without xtetra (no boundary faces): split non-bdy
-           * edges with Delauney kernel.*/
+           * edges with Delauney kernel. */
           /* Note that it is possible that non bdy tetra contains a bdy edge, here
            * only non bdy edge are considered */
           ilist = MMG5_coquil(mesh,k,imax,list);
@@ -741,7 +740,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
                 goto collapse2;//continue;
               }
               else {
-                /*allocation problem ==> savemesh*/
+                /* Allocation problem ==> savemesh */
                 MMG3D_delPt(mesh,ip);
                 return 0;
               }
