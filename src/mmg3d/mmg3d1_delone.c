@@ -45,6 +45,8 @@ int8_t  ddb;
 
 #define MMG3D_LOPTLMMG5_DEL     1.41
 #define MMG3D_LOPTSMMG5_DEL     0.6
+#define MMG3D_LFILTS_DEL        0.7
+#define MMG3D_LFILTL_DEL        0.2
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -56,7 +58,6 @@ int8_t  ddb;
  * \param nc pointer to store the number of collapse.
  * \param warn pointer to store a flag that warn the user in case of
  * reallocation difficulty.
- * \param it iteration index.
  * \return -1 if fail and we don't save the mesh, 0 if fail but we try to save
  * the mesh, 1 otherwise.
  *
@@ -66,7 +67,7 @@ int8_t  ddb;
  */
 static inline int
 MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_int ne,
-                 MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn,int it) {
+                 MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
@@ -82,14 +83,14 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
   double        lmin,lfilt;
   int           imin;
   int           ii;
-  double        lmaxtet,lmintet,volmin;
+  double        lmaxtet,lmintet;
   int           imaxtet,imintet,countMemFailure;
   int8_t        chkRidTet;
   static int8_t mmgWarn0 = 0;
+  const double  volmin = MMG5_EPSOK;
 
   countMemFailure = 0;
 
-  volmin=1e-15;
 
   base = ++mesh->mark;
 
@@ -349,9 +350,11 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
         /* Delaunay */
         if ( lmax<1.6 ) {
-          lfilt = 0.7;
+          lfilt = MMG3D_LFILTS_DEL;
         }
-        else lfilt = 0.2;
+        else {
+          lfilt = MMG3D_LFILTL_DEL;
+        }
 
         ier = 1;
         if ( *PROctree ) {
@@ -703,9 +706,11 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
           /* Delaunay */
           if ( lmaxtet<1.6 ) {
-            lfilt = 0.7;
+            lfilt = MMG3D_LFILTS_DEL;
           }
-          else lfilt = 0.2;
+          else {
+            lfilt = MMG3D_LFILTL_DEL;
+          }
 
           if ( *PROctree && MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt) <=0 ) {
             /* PROctree allocated and PROctreein refuse the insertion */
@@ -932,7 +937,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
       ns = nc = 0;
       ifilt = 0;
       ne = mesh->ne;
-      ier = MMG5_boucle_for(mesh,met,PROctree,ne,&ifilt,&ns,&nc,warn,it);
+      ier = MMG5_boucle_for(mesh,met,PROctree,ne,&ifilt,&ns,&nc,warn);
       if ( ier<=0 ) return -1;
     } /* End conditional loop on mesh->info.noinsert */
     else  ns = nc = ifilt = 0;
