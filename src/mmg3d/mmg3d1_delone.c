@@ -247,11 +247,11 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
     else if ( !ier ) {
       /* Unable to split edge: pass to next elt */
-      return 0;//continue;
+      return 0;
     }
     else if ( ier == 1 ) {
       /* Unable to split edge: try to collapse shortest edge */
-      return 1;//goto collapse
+      return 1;
     }
 
     /** b/ Edge splitting */
@@ -268,7 +268,8 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
                           return 1,
                           o,tag,src);
     }
-    if ( met->m ) {
+
+    if ( met && met->m ) {
       if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
         MMG3D_delPt(mesh,ip);
         return 1;
@@ -328,7 +329,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       else
         memcpy(pxp->n1,no1,3*sizeof(double));
     }
-    return 2; // continue or break
+    return 2;
     /* End of case of a bdy face */
   }
   else if(pt->xt){
@@ -352,7 +353,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
     else if(ilist%2) {
       /* Edge is bdy: we want to treat it from a bdy face */
-      return 1; // goto collapse(2)
+      return 1;
     }
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
@@ -371,7 +372,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
                           return 1,
                           o,MG_NOTAG,src);
     }
-    if ( met->m ) {
+    if ( met && met->m ) {
       if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
         MMG3D_delPt(mesh,ip);
         return 1;
