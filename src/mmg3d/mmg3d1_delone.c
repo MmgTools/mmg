@@ -49,6 +49,129 @@ int8_t  ddb;
 #define MMG3D_LFILTL_DEL        0.2
 
 /**
+ * \param mesh pointer toward mesh
+ * \param k index of input tetra
+ * \param imax index of edge in tetra \a k
+ * \param i index of boundary face of tetra from which we will work
+ * \param j index of edge in face \a i
+ * \param pxt boundary tetra associated to \a k
+ * \param ip1 first vertex of edge \a i
+ * \param ip2 second vertex of edge \a i
+ * \param p0 point \a ip1
+ * \param p1 point \a ip2
+ * \param ref edge ref (to fill)
+ * \param tag edge tag (to fill)
+ * \param o coordinates of new point along bezier edge (to fill)
+ * \param to tangent at new point \a o (to fill if needed)
+ * \param no1 first normal at new point \a o (to fill if needed)
+ * \param no2 second normal at new point (to fill if needed)
+ * \param list pointer toward edge shell (to fill)
+ * \param ilist 2x edge shell size (+1 for a bdy edge)
+ *
+ * \return -1 for strong failure
+ * \return 0 if we fail to compute new point and want to pass to next elt of the main loop
+ * \return 1 if we fail to compute new point and want to try to collapse to short edge
+ * \return 2 if we can compute new point.
+ *
+ * Build Bezier edge from the boundary face of a boundary tetra and compute
+ * position and feature of new point along this edge.
+ *
+ */
+static inline
+int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
+                              int8_t imax,int8_t i, int8_t j,
+                              MMG5_pxTetra pxt,
+                              MMG5_int ip1,MMG5_int ip2,
+                              MMG5_pPoint p0, MMG5_pPoint p1,
+                              MMG5_int *ref,int16_t *tag,
+                              double o[3],double to[3],double no1[3],
+                              double no2[3],int64_t *list,int *ilist) {
+  MMG5_Tria   ptt;
+  double      v[3];
+
+  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) {
+    return 0; //continue;
+  }
+  if ( !(MG_GET(pxt->ori,i)) ) {
+    return 0;
+  }
+
+  *ref = pxt->edg[MMG5_iarf[i][j]];
+  *tag = pxt->tag[MMG5_iarf[i][j]];
+  if ( (*tag) & MG_REQ ) {
+    return 0;
+  }
+
+  (*tag) |= MG_BDY;
+  *ilist = MMG5_coquil(mesh,k,imax,list);
+  if ( !(*ilist) ) {
+    return 0;
+  }
+  else if ( (*ilist)<0 ) {
+    return -1;
+  }
+
+  /** a/ computation of bezier edge */
+  if ( (*tag) & MG_NOM ){
+    /* Edge is non-manifold */
+    if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      /* Unable to treat edge: pass to next elt */
+      return 0;
+    }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+#warning dead code due to test at beginning of function
+      if ( !MG_GET(pxt->ori,i) ) {
+        no1[0] *= -1.0;
+        no1[1] *= -1.0;
+        no1[2] *= -1.0;
+      }
+    }
+  }
+  else if ( (*tag) & MG_GEO ) {
+    /* Edge is ridge */
+    if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) {
+      /* Unable to treat edge: pass to next elt */
+#warning why a continue here?
+      return 0;
+    }
+
+    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+        return -1;
+      }
+    }
+  }
+  else if ( (*tag) & MG_REF ) {
+    /* Edge is ref */
+    if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      /* Unable to treat long edge: try to collapse short one */
+      return 1;
+    }
+    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+#warning creation of sin-sin ref edge to see if it works without normal realloc
+      assert( 0<=i && i<4 && "unexpected local face idx");
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+    }
+  }
+  else {
+    /* Longest edge is regular */
+    if ( !MMG5_norface(mesh,k,i,v) ) {
+      /* Unable to treat long edge: try to collapse short one */
+      return 1;
+    }
+    if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) {
+      /* Unable to treat longest edge: try to collapse the shorter one */
+      return 1;
+    }
+  }
+  return 2;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param PROctree pointer toward the PROctree structure.
@@ -70,13 +193,12 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
                  MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
-  double        len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int           ilist,ilists;
-  MMG5_int      src,k,ip1,ip2,ip,iq,lists[MMG3D_LMAX+2],ref,base;
+  double        len,lmax,o[3],to[3],no1[3],no2[3];
   int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      lists[MMG3D_LMAX+2],src,k,ip1,ip2,ip,iq,ref,base;
+  int           ilist,ilists;
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;
@@ -157,69 +279,20 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
         /** Edge belongs to a boundary face: try to split using patterns */
-        if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
-        if ( !(MG_GET(pxt->ori,i)) ) continue;
-        ref = pxt->edg[MMG5_iarf[i][j]];
-        tag = pxt->tag[MMG5_iarf[i][j]];
-        if ( tag & MG_REQ )  continue;
-        tag |= MG_BDY;
-        ilist = MMG5_coquil(mesh,k,imax,list);
-        if ( !ilist )  continue;
-        else if ( ilist<0 ) return -1;
-
-        /** a/ computation of bezier edge */
-        if ( tag & MG_NOM ){
-          /* Edge is non-manifold */
-          if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
-            /* Unable to treat edge: pass to next elt */
-            continue;
-          }
-          else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            assert( 0<=i && i<4 && "unexpected local face idx");
-            MMG5_tet2tri(mesh,k,i,&ptt);
-            MMG5_nortri(mesh,&ptt,no1);
-            if ( !MG_GET(pxt->ori,i) ) {
-              no1[0] *= -1.0;
-              no1[1] *= -1.0;
-              no1[2] *= -1.0;
-            }
-          }
+        /* Construction of bezier edge */
+        int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
+                                            &ref,&tag,o,to,no1,no2,list,&ilist);
+        if ( ier < 0 ) {
+          /* Strong failure */
+          return -1;
         }
-        else if ( tag & MG_GEO ) {
-          /* Edge is ridge */
-          if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) {
-            /* Unable to treat edge: pass to next elt */
-            continue;
-          }
-
-          if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
-              return -1;
-            }
-          }
+        else if ( !ier ) {
+          /* Unable to treat edge: pass to next elt */
+          continue;
         }
-        else if ( tag & MG_REF ) {
-          /* Edge is ref */
-          if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) {
-            /* Unable to treat longest edge: try to collapse the shorter one */
-            goto collapse;
-          }
-          if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            assert( 0<=i && i<4 && "unexpected local face idx");
-            MMG5_tet2tri(mesh,k,i,&ptt);
-            MMG5_nortri(mesh,&ptt,no1);
-          }
-        }
-        else {
-          /* Longest edge is regular */
-          if ( !MMG5_norface(mesh,k,i,v) ) {
-            /* Unable to treat longest edge: try to collapse the shorter one */
-            goto collapse;
-          }
-          if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) {
-            /* Unable to treat longest edge: try to collapse the shorter one */
-            goto collapse;
-          }
+        else if ( ier == 1 ) {
+          /* Unable to treat edge: try to collapse shortest edge */
+          goto collapse;
         }
 
         /** b/ Edge splitting */
@@ -468,6 +541,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       }
       else {
         /* Case of an internal face */
+#warning move this call after test on bdy tag
         ilist = MMG5_boulevolp(mesh,k,i1,list);
 
         if ( p0->tag & MG_BDY )  continue;
@@ -523,65 +597,21 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
           /** Edge belongs to a boundary face: try to split using patterns */
-          if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
-          if ( !(MG_GET(pxt->ori,i)) ) continue;
-          ref = pxt->edg[MMG5_iarf[i][j]];
-          tag = pxt->tag[MMG5_iarf[i][j]];
-          if ( tag & MG_REQ )  continue;
-          tag |= MG_BDY;
-          ilist = MMG5_coquil(mesh,k,imax,list);
-          if ( !ilist )  continue;
-          else if ( ilist<0 ) return -1;
-
-          /** a/ computation of bezier edge */
-          if ( tag & MG_NOM ){
-            /* Edge is non-manifold */
-            if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
-              /* Unable to treat edge: pass to next elt */
-              continue;
-            }
-            else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              assert( 0<=i && i<4 && "unexpected local face idx");
-              MMG5_tet2tri(mesh,k,i,&ptt);
-              MMG5_nortri(mesh,&ptt,no1);
-            }
-          }
-          else if ( tag & MG_GEO ) {
-            /* Edge is ridge */
-            if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) {
-              /* Unable to treat edge: pass to next elt */
-              continue;
-            }
-
-            if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
-                return -1;
-              }
-            }
-          }
-          else if ( tag & MG_REF ) {
-            /* Edge is ref */
-            if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) {
-              /* Unable to treat long edge: try to collapse short one */
-              goto collapse2;
-            }
-            if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              assert( 0<=i && i<4 && "unexpected local face idx");
-              MMG5_tet2tri(mesh,k,i,&ptt);
-              MMG5_nortri(mesh,&ptt,no1);
-            }
-          }
-          else {
-            /* Longest edge is regular */
-            if ( !MMG5_norface(mesh,k,i,v) ) {
-              /* Unable to treat long edge: try to collapse short one */
-              goto collapse2;
-            }
-            if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) {
-              /* Unable to treat longest edge: try to collapse the shorter one */
-              goto collapse2;
-            }
-          }
+        /* Construction of bezier edge */
+        int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
+                                            &ref,&tag,o,to,no1,no2,list,&ilist);
+        if ( ier < 0 ) {
+          /* Strong failure */
+          return -1;
+        }
+        else if ( !ier ) {
+          /* Unable to treat edge: pass to next elt */
+          continue;
+        }
+        else if ( ier == 1 ) {
+          /* Unable to treat edge: try to collapse shortest edge */
+          goto collapse2;
+        }
 
           /** b/ Edge splitting */
 #ifdef USE_POINTMAP
