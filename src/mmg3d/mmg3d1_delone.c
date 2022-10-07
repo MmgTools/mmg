@@ -722,6 +722,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
           if ( ier < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
+            MMG3D_delPt(mesh,ip);
             return -1;
           }
           else if ( ier == 0 || ier == 2 ) {
