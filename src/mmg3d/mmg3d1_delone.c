@@ -674,20 +674,20 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       /* Unable to treat largest edge: pass to next element */
       continue;
     }
-    else if ( ier == 1 ) {
-      /* Unable to treat largest edge: try to collapse shortest one */
-      goto collapse;
-    }
     else if ( ier == 2 ) {
       /* Edge has been splitted: pass to next element */
       continue;
     }
+    assert ( (ier==1 || ier==3) && "Check return val of delone_split");
 
-  collapse:
     if ( countMemFailure > 10 ) {
       printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
       return -1;
     }
+
+    /** If unable to treat largest edge with ier==1 return value or if edge has
+     * not been splitted but slpit_delone has not raised any error: try to
+     * collapse shortest edge. */
 
     /** 2. Try to merge smallest edge: if collapse is not possible, pass to next
      * element */
@@ -739,21 +739,22 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
         /* Unable to treat too large edge: pass to next edge of element */
         continue;
       }
-      else if ( ier == 1 ) {
-        /* Unable to treat too large edge: try to collapse too short one */
-        goto collapse2;
-      }
       else if ( ier == 2 ) {
         /* Edge has been splitted: pass to next element */
         break;
       }
 
-    collapse2:
       if ( countMemFailure > 10 ) {
         fprintf(stderr,"  ## Error:%s: too much reallocation errors."
                 " Exit program.\n",__func__);
         return -1;
       }
+
+      assert ( (ier==1 || ier==3) && "Check return val of delone_split");
+
+      /** If unable to treat too large edge with ier==1 return value or if edge
+       * has not been splitted but slpit_delone has not raised any error: try to
+       * collapse too short edge. */
 
       /** 2. Try to merge smallest edge: if collapse is not possible, pass to
        * next element */
