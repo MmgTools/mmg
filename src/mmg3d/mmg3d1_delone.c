@@ -169,6 +169,147 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param PROctree pointer toward the PROctree structure.
+ * \param k index of tetra in which we work.
+ * \param imin index in \a k of edge that we consider for collapse.
+ * \param lmin length of edge \a imin.
+ * \param nc pointer toward count of collapses (has to be updated)
+ *
+ * \return -1 for strong failure.
+ *
+ * \return 0 if edge should not be collapsed (because sufficiently large or not
+ * possible) and if we want to pass to next loop step (next element or next
+ * tetra edge)
+ *
+ * \return 1 if edge has been collapsed.
+ *
+ * \return 2 if nothing has be done (no error but no collapse).
+ *
+ * Try to collapse edge \a imin it too small.
+ *
+ */
+static inline
+int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
+                                 MMG3D_pPROctree *PROctree,MMG5_int k,
+                                 int imin,double lmin,MMG5_int* nc) {
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPoint   p0,p1;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      lists[MMG3D_LMAX+2],ip1,ip2;
+  int           ilist,ilists;
+  int8_t        j,i,i1,i2,ifa0,ifa1;
+
+  if(lmin > MMG3D_LOPTSMMG5_DEL) {
+    /* Edge is large enough: nothing to do */
+    return 2;
+  }
+
+  // Case of an internal tetra with 4 ridges vertices.
+  if ( lmin == 0 ) {
+    /* Case of an internal tetra with 4 ridges vertices */
+#warning is it possible to merge this edge ??
+    return 0;
+  }
+
+  pt = &mesh->tetra[k];
+  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+  ifa0 = MMG5_ifar[imin][0];
+  ifa1 = MMG5_ifar[imin][1];
+  i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+  j  = MMG5_iarfinv[i][imin];
+  i1 = MMG5_idir[i][MMG5_inxt2[j]];
+  i2 = MMG5_idir[i][MMG5_iprv2[j]];
+
+  assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
+  assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
+
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+  p0  = &mesh->point[ip1];
+  p1  = &mesh->point[ip2];
+
+  /* Ignore OLDPARBDY tag of p0 */
+  int16_t tag = p0->tag;
+  tag &= ~MG_OLDPARBDY;
+  if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+    /* Unable to merge edge: pass to next element */
+    return 0;
+  }
+
+  ilist = 0;
+  if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+    /* Case of a boundary face */
+    tag = pxt->tag[MMG5_iarf[i][j]];
+    if ( tag & MG_REQ ) {
+      return 0;
+    }
+    tag |= MG_BDY;
+    if ( p0->tag > tag ) {
+      return 0;
+    }
+    if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) {
+      return 0;
+    }
+
+    int16_t isnm = (p0->tag & MG_NOM);
+    if (MMG5_boulesurfvolp(mesh,k,i1,i, list,&ilist,lists,&ilists,isnm) < 0 ) {
+      return -1;
+    }
+
+    ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
+    if ( ilist > 0 ) {
+      int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
+      if ( ier < 0 ) {
+        return -1;
+      }
+      else if(ier) {
+        MMG3D_delPt(mesh,ier);
+        (*nc)++;
+        return 1;
+      }
+    }
+    else if (ilist < 0 ) {
+      return -1;
+    }
+  }
+  else {
+    /* Case of an internal face */
+    if ( p0->tag & MG_BDY ) {
+      return 0;
+    }
+
+    ilist = MMG5_boulevolp(mesh,k,i1,list);
+    ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
+    if ( ilist > 0 ) {
+      int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
+      if ( ilist < 0 ) {
+        return 0;
+      }
+
+      if ( ier < 0 ) {
+        return -1;
+      }
+      else if(ier) {
+        if ( *PROctree ) {
+          MMG3D_delPROctree(mesh,*PROctree,ier);
+        }
+        MMG3D_delPt(mesh,ier);
+        (*nc)++;
+        return 1;
+      }
+    }
+    else if (ilist < 0 ) {
+      return -1;
+    }
+  }
+  return 2;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param ne number of elements.
  * \param ifilt pointer to store the number of vertices filtered by the PROctree.
  * \param ns pointer to store the number of vertices insertions.
