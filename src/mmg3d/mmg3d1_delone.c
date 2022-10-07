@@ -128,7 +128,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
     /* Edge is ridge */
     if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) {
       /* Unable to treat edge: pass to next elt */
-#warning why a continue here?
+//#warning why a continue here?
       return 0;
     }
 
@@ -145,7 +145,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
       return 1;
     }
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-#warning creation of sin-sin ref edge to see if it works without normal realloc
+//#warning creation of sin-sin ref edge to see if it works without normal realloc
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
@@ -473,7 +473,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
   // Case of an internal tetra with 4 ridges vertices.
   if ( lmin == 0 ) {
     /* Case of an internal tetra with 4 ridges vertices */
-#warning is it possible to merge this edge ??
+//#warning is it possible to merge this edge ??
     return 0;
   }
 
