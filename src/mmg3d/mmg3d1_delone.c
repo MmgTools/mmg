@@ -90,7 +90,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
   double      v[3];
 
   if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) {
-    return 0; //continue;
+    return 0;
   }
   if ( !(MG_GET(pxt->ori,i)) ) {
     return 0;
@@ -122,12 +122,6 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
-#warning dead code due to test at beginning of function
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
     }
   }
   else if ( (*tag) & MG_GEO ) {
