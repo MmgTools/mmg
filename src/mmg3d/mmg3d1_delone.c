@@ -624,23 +624,22 @@ int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
 
   ier = MMG3D_mmg3d1_delone_split(mesh,met,PROctree,k,imax,lmax,lmaxtet,
                                   chkRidTet,ifilt,ns,warn,&countMemFailure);
-  if ( ier == -2 ) {
-    /* Low failure: try to save mesh and exit lib */
-    return -2;
-  }
-  if ( ier == -1 ) {
+
+  switch ( ier ) {
+  case -2:
+    /*  Low failure: try to save mesh and exit lib */
+  case -1:
     /* Strong failure: exit lib without saving mesh */
-    return -1;
-  }
-  else if ( !ier ) {
+  case 0:
     /* Unable to treat too large edge: pass to next edge of element or to next
      * elt */
-    return 0;
-  }
-  else if ( ier == 2 ) {
+  case 2:
     /* Edge has been splitted: pass to next element */
-    return 2;
+
+    /* For all previous cases, return ier value */
+    return ier;
   }
+
   assert ( (ier==1 || ier==3) && "Check return val of delone_split");
 
   if ( countMemFailure > 10 ) {
@@ -655,19 +654,11 @@ int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
   /** 2. Try to merge small edge: if collapse is not possible, pass to
    * next element */
   ier = MMG3D_mmg3d1_delone_collapse(mesh,met,PROctree,k,imin,lmin,nc);
-  if ( ier < 0 ) {
-    /* Strong failure */
-    return -1;
-  }
-  else if ( !ier ) {
-    /* Unable to treat too small edge: pass to next edge of element */
-    return 0;
-  }
-  else if ( ier == 2 ) {
-    /* Edge has been collapsed: pass to next element */
-    return 2;
-  }
-  return 3;
+
+  /* Strong failure: ier==-1 */
+  /* Unable to treat too small edge: pass to next edge of element: ier==0 */
+  /* Edge has been collapsed: pass to next element: ier==2 */
+  return ier;
 }
 
 /**
@@ -755,22 +746,21 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
     ier = MMG3D_mmg3d1_delone_splcol(mesh,met,PROctree,k,imin,lmin,imax,
                                      lmax,lmax,chkRidTet,ifilt,ns,nc,warn);
 
-    if ( ier == -2 ) {
+    switch ( ier ) {
+    case -2:
       /* Low failure: try to save mesh and exit lib */
       return 0;
-    }
-    if ( ier == -1 ) {
+    case -1:
       /* Strong failure: exit lib without saving mesh */
       return -1;
-    }
-    else if ( !ier ) {
+    case 0:
       /* Unable to treat largest/smallest edge: pass to next element */
       continue;
-    }
-    else if ( ier == 2 ) {
-      /* Edge has been splitted: pass to next element */
+    case 2:
+       /* Edge has been collapsed: pass to next element */
       continue;
     }
+
     assert ( (ier==1 || ier==3) && "Check return val of delone_split");
 
     /** Step 2: longest and shortest edges are stucked => try the other edges */
@@ -795,22 +785,24 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       /** 1. Try to split too long edge */
       ier = MMG3D_mmg3d1_delone_splcol(mesh,met,PROctree,k,imin,lmin,imax,
                                        lmax,lmaxtet,chkRidTet,ifilt,ns,nc,warn);
-      if ( ier == -2 ) {
+
+      switch ( ier ) {
+      case -2:
         /* Low failure: try to save mesh and exit lib */
         return 0;
-      }
-      if ( ier == -1 ) {
+      case -1:
         /* Strong failure: exit lib without saving mesh */
         return -1;
-      }
-      else if ( !ier ) {
-        /* Unable to treat too large edge: pass to next edge of element */
+      case 0:
+        /* Unable to treat largest/smallest edge: pass to next edge of element */
+        continue;
+      case 3:
+        /* Edge has not been splitted: pass to next edge */
         continue;
       }
-      else if ( ier == 2 ) {
-        /* Edge has been splitted: pass to next element */
-        break;
-      }
+      assert ( ier==2 );
+      /* Edge has been splitted: pass to next element */
+      break;
     }
   }
   return 1;
