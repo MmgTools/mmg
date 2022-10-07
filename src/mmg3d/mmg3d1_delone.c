@@ -170,6 +170,273 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
  * \param met pointer toward the metric structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param k index of tetra in which we work.
+ * \param imax index in \a k of edge that we consider for split.
+ * \param lmax length of edge \a imax.
+ * \param lmaxtet length of largest edge of tetra \a k.
+ * \param 1 if we want to check tetra with 4 ridge metrics.
+ * \param ifilt pointer to store the number of vertices filtered by the PROctree.
+ * \param ns pointer toward count of splits (has to be updated)
+ * \param warn pointer to store a flag that warn the user in case of
+ * reallocation error.
+ * \param countMemFailure number of memory errors (to update)
+ *
+ * \return -2 for low failure (mesh has to be saved).
+ *
+ * \return -1 for strong failure.
+ *
+ * \return 0 if edge cannot be splitted and if we want to pass to next loop step
+ * (next element or next tetra edge)
+ *
+ * \return 1 if edge cannot be splitted and we want to try to collapse too long
+ * edge.
+ *
+ * \return 2 if edge has been splitted and we want to treat next element.
+ *
+ * \return 3 if nothing has been done (no error but no split either).
+ *
+ * Try to split \a imax if too large.
+ *
+ */
+static inline
+int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
+                              MMG3D_pPROctree *PROctree,MMG5_int k,
+                              int8_t imax,double lmax,double lmaxtet,
+                              int8_t chkRidTet,MMG5_int *ifilt,MMG5_int *ns,
+                              int *warn,int8_t *countMemFailure ) {
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPoint   p0,p1,ppt;
+  MMG5_pxPoint  pxp;
+  double        o[3],to[3],no1[3],no2[3],lfilt;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      ip1,ip2;
+  MMG5_int      src,ip,ref;
+  int           ilist;
+  int16_t       tag;
+  int8_t        j,i,i1,i2,ifa0,ifa1;
+
+  if ( lmax < MMG3D_LOPTL_DEL )  {
+    /* Edge is small enough: nothing to do */
+    return 3;
+  }
+
+  /** Edge is too long: try to split it */
+  pt = &mesh->tetra[k];
+  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+  /* Try to treat the edge from a bdy face if possible */
+  ifa0 = MMG5_ifar[imax][0];
+  ifa1 = MMG5_ifar[imax][1];
+  i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+  j  = MMG5_iarfinv[i][imax];
+  i1 = MMG5_idir[i][MMG5_inxt2[j]];
+  i2 = MMG5_idir[i][MMG5_iprv2[j]];
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+  p0  = &mesh->point[ip1];
+  p1  = &mesh->point[ip2];
+
+  if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+    /** Edge belongs to a boundary face: try to split using patterns */
+    /* Construction of bezier edge */
+    int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
+                                        &ref,&tag,o,to,no1,no2,list,&ilist);
+    if ( ier < 0 ) {
+      /* Strong failure */
+      return -1;
+    }
+    else if ( !ier ) {
+      /* Unable to split edge: pass to next elt */
+      return 0;//continue;
+    }
+    else if ( ier == 1 ) {
+      /* Unable to split edge: try to collapse shortest edge */
+      return 1;//goto collapse
+    }
+
+    /** b/ Edge splitting */
+#ifdef USE_POINTMAP
+    src = mesh->point[ip1].src;
+#else
+    src = 1;
+#endif
+    ip = MMG3D_newPt(mesh,o,tag,src);
+    if ( !ip ){
+      /* reallocation of point table */
+      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                          *warn=1;++(*countMemFailure);
+                          return 1,
+                          o,tag,src);
+    }
+    if ( met->m ) {
+      if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+        MMG3D_delPt(mesh,ip);
+        return 1;
+      }
+    }
+    ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
+    assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+    if ( ier == 2 || ier < 0 ) {
+      /* sharp angle failure */
+      MMG3D_delPt(mesh,ip);
+      return 1;
+    }
+    else if ( ier == 0 ) {
+      /* very bad quality failure */
+      ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+    }
+    if ( ier == 1 ) {
+      ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+    }
+
+    /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
+    pt = &mesh->tetra[k];
+    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+    if ( ier < 0 ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
+      MMG3D_delPt(mesh,ip);
+      return -1;
+    }
+    else if ( ier == 0 || ier == 2 ) {
+      MMG3D_delPt(mesh,ip);
+      return 1;
+    } else {
+      (*ns)++;
+      ppt = &mesh->point[ip];
+
+      if ( MG_EDG(tag) || (tag & MG_NOM) )
+        ppt->ref = ref;
+      else
+        ppt->ref = pxt->ref[i];
+      ppt->tag = tag;
+
+      pxp = &mesh->xpoint[ppt->xp];
+      if ( tag & MG_NOM ){
+        memcpy(pxp->n1,no1,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
+      }
+      else if ( tag & MG_GEO ) {
+        memcpy(pxp->n1,no1,3*sizeof(double));
+        memcpy(pxp->n2,no2,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
+      }
+      else if ( tag & MG_REF ) {
+        memcpy(pxp->n1,no1,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
+      }
+      else
+        memcpy(pxp->n1,no1,3*sizeof(double));
+    }
+    return 2; // continue or break
+    /* End of case of a bdy face */
+  }
+  else if(pt->xt){
+    /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
+     * do nothing to avoid splitting of a bdy edge from a non bdy face (due
+     * to collapses, a tetra with no bdy faces may have a xtetra and
+     * boundary tags or no tags on boundary edge). */
+    return 0;
+  } else {
+    /** Case of a tetra without xtetra (no boundary faces): split non-bdy
+     * edges with Delauney kernel. */
+    /* Note that it is possible that non bdy tetra contains a bdy edge, here
+     * only non bdy edge are considered */
+    ilist = MMG5_coquil(mesh,k,imax,list);
+    if ( !ilist ){
+      /* Unable to compute edge shell: treat next element */
+      return 0;
+    }
+    else if ( ilist<0 ) {
+      return -1;
+    }
+    else if(ilist%2) {
+      /* Edge is bdy: we want to treat it from a bdy face */
+      return 1; // goto collapse(2)
+    }
+    o[0] = 0.5*(p0->c[0] + p1->c[0]);
+    o[1] = 0.5*(p0->c[1] + p1->c[1]);
+    o[2] = 0.5*(p0->c[2] + p1->c[2]);
+#ifdef USE_POINTMAP
+    src = mesh->point[ip1].src;
+#else
+    src = 1;
+#endif
+    ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
+
+    if ( !ip )  {
+      /* reallocation of point table */
+      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                          *warn=1;++(*countMemFailure);
+                          return 1,
+                          o,MG_NOTAG,src);
+    }
+    if ( met->m ) {
+      if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+        MMG3D_delPt(mesh,ip);
+        return 1;
+      }
+    }
+
+    /* Delaunay */
+    if ( lmaxtet< MMG3D_THRES_DEL ) {
+      lfilt = MMG3D_LFILTS_DEL;
+    }
+    else {
+      lfilt = MMG3D_LFILTL_DEL;
+    }
+
+    int ier = 1;
+    if ( *PROctree ) {
+      ier = MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt);
+    }
+
+    if ( ier == 0 ) {
+      /* PROctree allocated and PROctreein refuse the insertion */
+      MMG3D_delPt(mesh,ip);
+      (*ifilt)++;
+      return 1;
+    }
+    else if ( ier < 0 ) {
+      /* PROctree allocated but PROctreein fail due to lack of memory */
+      MMG3D_freePROctree ( mesh,PROctree );
+      MMG3D_delPt(mesh,ip);
+      (*ifilt)++;
+      return 1;
+    } else {
+      int lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,MMG5_EPSOK);
+      if ( lon < 1 ) {
+        MMG3D_delPt(mesh,ip);
+        return 1;
+      } else {
+        int ret = MMG5_delone(mesh,met,ip,list,lon);
+        if ( ret > 0 ) {
+          if ( *PROctree )
+            MMG3D_addPROctree(mesh,*PROctree,ip);
+          (*ns)++;
+          return 2;
+        }
+        else if ( ret == 0 ) {
+          MMG3D_delPt(mesh,ip);
+          return 1;
+        }
+        else {
+          /* Allocation problem ==> savemesh */
+          MMG3D_delPt(mesh,ip);
+          return -2;
+        }
+      }
+    }
+  }
+
+  return 3;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param k index of tetra in which we work.
  * \param imin index in \a k of edge that we consider for collapse.
  * \param lmin length of edge \a imin.
  * \param nc pointer toward count of collapses (has to be updated)
