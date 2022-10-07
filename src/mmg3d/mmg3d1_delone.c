@@ -450,9 +450,9 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
  * \return 0 if edge cannot be collapsed and if we want to pass to next loop
  * step (next element or next tetra edge)
  *
- * \return 1 if edge has been collapsed.
+ * \return 2 if edge has been collapsed.
  *
- * \return 2 if nothing has been done (no error but no collapse either).
+ * \return 3 if nothing has been done (no error but no collapse either).
  *
  * Try to collapse edge \a imin it too small.
  *
@@ -471,7 +471,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
 
   if(lmin > MMG3D_LOPTS) {
     /* Edge is large enough: nothing to do */
-    return 2;
+    return 3;
   }
 
   // Case of an internal tetra with 4 ridges vertices.
@@ -536,7 +536,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
       else if(ier) {
         MMG3D_delPt(mesh,ier);
         (*nc)++;
-        return 1;
+        return 2;
       }
     }
     else if (ilist < 0 ) {
@@ -566,14 +566,108 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
         }
         MMG3D_delPt(mesh,ier);
         (*nc)++;
-        return 1;
+        return 2;
       }
     }
     else if (ilist < 0 ) {
       return -1;
     }
   }
-  return 2;
+  return 3;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param k index of tetra in which we work.
+ * \param imin index in \a k of edge that we consider for split.
+ * \param lmin length of edge \a imax.
+ * \param imax index in \a k of edge that we consider for split.
+ * \param lmax length of edge \a imax.
+ * \param lmaxtet length of largest edge of tetra \a k.
+ * \param 1 if we want to check tetra with 4 ridge metrics.
+ * \param ifilt pointer to store the number of vertices filtered by the PROctree.
+ * \param ns pointer toward count of splits (has to be updated)
+ * \param nc pointer toward count of collapses (has to be updated)
+ * \param warn pointer to store a flag that warn the user in case of
+ * reallocation error.
+ *
+ * \return -2 for low failure (mesh has to be saved).
+ *
+ * \return -1 for strong failure.
+ *
+ * \return 0 if edge cannot be modified and if we want to pass to next loop step
+ * (next element or next tetra edge)
+ *
+ * \return 1 if edge cannot be modified and we want to treat next elt
+ *
+ * \return 2 if edge has been modified and we want to treat next element.
+ *
+ * \return 3 if nothing has been done (no error but no edge modification either).
+ *
+ * Try to split \a imax edge if too large and to collapse \a imin edge if too
+ * small.
+ *
+ */
+static inline
+int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
+                               MMG3D_pPROctree *PROctree,MMG5_int k,
+                               int8_t imin,double lmin,
+                               int8_t imax,double lmax,double lmaxtet,
+                               int8_t chkRidTet,MMG5_int *ifilt,
+                               MMG5_int *ns,MMG5_int *nc,
+                               int *warn ) {
+
+  int ier;
+  int8_t countMemFailure = 0;
+
+  ier = MMG3D_mmg3d1_delone_split(mesh,met,PROctree,k,imax,lmax,lmaxtet,
+                                  chkRidTet,ifilt,ns,warn,&countMemFailure);
+  if ( ier == -2 ) {
+    /* Low failure: try to save mesh and exit lib */
+    return -2;
+  }
+  if ( ier == -1 ) {
+    /* Strong failure: exit lib without saving mesh */
+    return -1;
+  }
+  else if ( !ier ) {
+    /* Unable to treat too large edge: pass to next edge of element or to next
+     * elt */
+    return 0;
+  }
+  else if ( ier == 2 ) {
+    /* Edge has been splitted: pass to next element */
+    return 2;
+  }
+  assert ( (ier==1 || ier==3) && "Check return val of delone_split");
+
+  if ( countMemFailure > 10 ) {
+    printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
+    return -1;
+  }
+
+  /** If unable to treat edge with ier==1 return value or if edge has
+   * not been splitted but slpit_delone has not raised any error: try to
+   * collapse short edge. */
+
+  /** 2. Try to merge small edge: if collapse is not possible, pass to
+   * next element */
+  ier = MMG3D_mmg3d1_delone_collapse(mesh,met,PROctree,k,imin,lmin,nc);
+  if ( ier < 0 ) {
+    /* Strong failure */
+    return -1;
+  }
+  else if ( !ier ) {
+    /* Unable to treat too small edge: pass to next edge of element */
+    return 0;
+  }
+  else if ( ier == 2 ) {
+    /* Edge has been collapsed: pass to next element */
+    return 2;
+  }
+  return 3;
 }
 
 /**
@@ -603,10 +697,8 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
   double        lmin;
   double        lmaxtet,lmintet;
   int           ier,imaxtet,imintet;
-  int8_t        imin,imax,chkRidTet,countMemFailure;
+  int8_t        imin,imax,chkRidTet;
   static int8_t mmgWarn0 = 0;
-
-  countMemFailure = 0;
 
   base = ++mesh->mark;
 
@@ -660,8 +752,9 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       continue;
     }
 
-    ier = MMG3D_mmg3d1_delone_split(mesh,met,PROctree,k,imax,lmax,lmax,
-                                    chkRidTet,ifilt,ns,warn,&countMemFailure);
+    ier = MMG3D_mmg3d1_delone_splcol(mesh,met,PROctree,k,imin,lmin,imax,
+                                     lmax,lmax,chkRidTet,ifilt,ns,nc,warn);
+
     if ( ier == -2 ) {
       /* Low failure: try to save mesh and exit lib */
       return 0;
@@ -671,7 +764,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       return -1;
     }
     else if ( !ier ) {
-      /* Unable to treat largest edge: pass to next element */
+      /* Unable to treat largest/smallest edge: pass to next element */
       continue;
     }
     else if ( ier == 2 ) {
@@ -679,31 +772,6 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       continue;
     }
     assert ( (ier==1 || ier==3) && "Check return val of delone_split");
-
-    if ( countMemFailure > 10 ) {
-      printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
-      return -1;
-    }
-
-    /** If unable to treat largest edge with ier==1 return value or if edge has
-     * not been splitted but slpit_delone has not raised any error: try to
-     * collapse shortest edge. */
-
-    /** 2. Try to merge smallest edge: if collapse is not possible, pass to next
-     * element */
-    ier = MMG3D_mmg3d1_delone_collapse(mesh,met,PROctree,k,imin,lmin,nc);
-    if ( ier < 0 ) {
-      /* Strong failure */
-      return -1;
-    }
-    else if ( !ier ) {
-      /* Unable to treat smallest edge: pass to next element */
-      continue;
-    }
-    else if ( ier == 1 ) {
-      /* Smallest edge has been collapsed: pass to next element */
-      continue;
-    }
 
     /** Step 2: longest and shortest edges are stucked => try the other edges */
     imaxtet = imax;
@@ -725,8 +793,8 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       lmin = len;
 
       /** 1. Try to split too long edge */
-      ier = MMG3D_mmg3d1_delone_split(mesh,met,PROctree,k,imax,lmax,lmaxtet,
-                                      chkRidTet,ifilt,ns,warn,&countMemFailure);
+      ier = MMG3D_mmg3d1_delone_splcol(mesh,met,PROctree,k,imin,lmin,imax,
+                                       lmax,lmaxtet,chkRidTet,ifilt,ns,nc,warn);
       if ( ier == -2 ) {
         /* Low failure: try to save mesh and exit lib */
         return 0;
@@ -741,34 +809,6 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
       }
       else if ( ier == 2 ) {
         /* Edge has been splitted: pass to next element */
-        break;
-      }
-
-      if ( countMemFailure > 10 ) {
-        fprintf(stderr,"  ## Error:%s: too much reallocation errors."
-                " Exit program.\n",__func__);
-        return -1;
-      }
-
-      assert ( (ier==1 || ier==3) && "Check return val of delone_split");
-
-      /** If unable to treat too large edge with ier==1 return value or if edge
-       * has not been splitted but slpit_delone has not raised any error: try to
-       * collapse too short edge. */
-
-      /** 2. Try to merge smallest edge: if collapse is not possible, pass to
-       * next element */
-      ier = MMG3D_mmg3d1_delone_collapse(mesh,met,PROctree,k,imin,lmin,nc);
-      if ( ier < 0 ) {
-        /* Strong failure */
-        return -1;
-      }
-      else if ( !ier ) {
-        /* Unable to treat too small edge: pass to next edge of element */
-        continue;
-      }
-      else if ( ier == 1 ) {
-        /* Edge has been collapsed: pass to next element */
         break;
       }
     }
