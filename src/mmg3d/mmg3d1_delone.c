@@ -730,9 +730,6 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
             goto collapse2;
           } else {
             (*ns)++;
-            // if ( *PROctree )
-            //   MMG3D_addPROctree(mesh,*PROctree,ip);
-
             ppt = &mesh->point[ip];
 
             if ( MG_EDG(tag) || (tag & MG_NOM) )
@@ -816,8 +813,20 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
             lfilt = MMG3D_LFILTL_DEL;
           }
 
-          if ( *PROctree && MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt) <=0 ) {
+          ier = 1;
+          if ( *PROctree ) {
+            ier = MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt);
+          }
+
+          if ( ier == 0 ) {
             /* PROctree allocated and PROctreein refuse the insertion */
+            MMG3D_delPt(mesh,ip);
+            (*ifilt)++;
+            goto collapse2;
+          }
+          else if ( ier < 0 ) {
+            /* PROctree allocated but PROctreein fail due to lack of memory */
+            MMG3D_freePROctree ( mesh,PROctree );
             MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
