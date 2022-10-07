@@ -27,12 +27,10 @@
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
  *
  * Perform volume and surface mesh adaptation in delaunay mode (\a
  * MMG_PATTERN preprocessor flag set to OFF).
  *
- * \todo Clean the boucle for (code copy...)
  */
 
 #include "libmmg3d.h"
@@ -90,24 +88,29 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
   double      v[3];
 
   if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) {
+    /* Skip edge with extremities on parallel interfaces */
     return 0;
   }
   if ( !(MG_GET(pxt->ori,i)) ) {
+    /* Treat triangles at interface of 2 subdomains from well oriented face */
     return 0;
   }
 
   *ref = pxt->edg[MMG5_iarf[i][j]];
   *tag = pxt->tag[MMG5_iarf[i][j]];
   if ( (*tag) & MG_REQ ) {
+    /* No need to split required edges */
     return 0;
   }
 
   (*tag) |= MG_BDY;
   *ilist = MMG5_coquil(mesh,k,imax,list);
   if ( !(*ilist) ) {
+    /* On of the tetra of the edge shell is required: we cannot split the edge */
     return 0;
   }
   else if ( (*ilist)<0 ) {
+    /* Shell computation has failed */
     return -1;
   }
 
