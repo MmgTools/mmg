@@ -443,13 +443,12 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
  *
  * \return -1 for strong failure.
  *
- * \return 0 if edge should not be collapsed (because sufficiently large or not
- * possible) and if we want to pass to next loop step (next element or next
- * tetra edge)
+ * \return 0 if edge cannot be collapsed and if we want to pass to next loop
+ * step (next element or next tetra edge)
  *
  * \return 1 if edge has been collapsed.
  *
- * \return 2 if nothing has be done (no error but no collapse).
+ * \return 2 if nothing has been done (no error but no collapse either).
  *
  * Try to collapse edge \a imin it too small.
  *
@@ -457,7 +456,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
 static inline
 int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
                                  MMG3D_pPROctree *PROctree,MMG5_int k,
-                                 int imin,double lmin,MMG5_int* nc) {
+                                 int8_t imin,double lmin,MMG5_int* nc) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
@@ -591,27 +590,17 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
  *
  */
 static inline int
-MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_int ne,
-                 MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
+MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
+                MMG5_int ne,MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_pPoint   p0,p1,ppt;
-  MMG5_pxPoint  pxp;
-  double        len,lmax,o[3],to[3],no1[3],no2[3];
-  int64_t       list[MMG3D_LMAX+2];
-  MMG5_int      lists[MMG3D_LMAX+2],src,k,ip1,ip2,ip,iq,ref,base;
-  int           ilist,ilists;
-  int16_t       tag;
-  int8_t        imax,j,i,i1,i2,ifa0,ifa1;
-  int           lon,ret,ier;
-  double        lmin,lfilt;
-  int           imin;
-  int           ii;
+  double        len,lmax;
+  MMG5_int      k,base;
+  double        lmin;
   double        lmaxtet,lmintet;
-  int           imaxtet,imintet,countMemFailure;
-  int8_t        chkRidTet;
+  int           ier,imaxtet,imintet;
+  int8_t        imin,imax,chkRidTet,countMemFailure;
   static int8_t mmgWarn0 = 0;
-  const double  volmin = MMG5_EPSOK;
 
   countMemFailure = 0;
 
@@ -629,6 +618,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
     /** Step 1: find longest and shortest edge  (and try to manage them) */
     imax = -1; lmax = 0.0;
     imin = -1; lmin = DBL_MAX;
+    int ii;
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
       len = MMG5_lenedg(mesh,met,ii,pt);
@@ -642,6 +632,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
         imin = ii;
       }
     }
+    /* Check that we have found valid edges */
     if ( imax==-1 ) {
       if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
         if ( !mmgWarn0 ) {
@@ -665,215 +656,27 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       continue;
     }
 
-    if ( lmax >= MMG3D_LOPTL_DEL )  {
-      /** 1. Edge is too long: try to split it */
-      /* Try to treat the edge from a bdy face if possible */
-      ifa0 = MMG5_ifar[imax][0];
-      ifa1 = MMG5_ifar[imax][1];
-      i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-      j  = MMG5_iarfinv[i][imax];
-      i1 = MMG5_idir[i][MMG5_inxt2[j]];
-      i2 = MMG5_idir[i][MMG5_iprv2[j]];
-      ip1 = pt->v[i1];
-      ip2 = pt->v[i2];
-      p0  = &mesh->point[ip1];
-      p1  = &mesh->point[ip2];
-
-      if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-        /** Edge belongs to a boundary face: try to split using patterns */
-        /* Construction of bezier edge */
-        int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
-                                            &ref,&tag,o,to,no1,no2,list,&ilist);
-        if ( ier < 0 ) {
-          /* Strong failure */
-          return -1;
-        }
-        else if ( !ier ) {
-          /* Unable to treat edge: pass to next elt */
-          continue;
-        }
-        else if ( ier == 1 ) {
-          /* Unable to treat edge: try to collapse shortest edge */
-          goto collapse;
-        }
-
-        /** b/ Edge splitting */
-#ifdef USE_POINTMAP
-        src = mesh->point[ip1].src;
-#else
-        src = 1;
-#endif
-        ip = MMG3D_newPt(mesh,o,tag,src);
-        if ( !ip ) {
-          /* reallocation of point table */
-          MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                               *warn=1;++countMemFailure;
-                               goto collapse,
-                               o,tag,src);
-        }
-        if ( met->m ) {
-          if ( MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
-            MMG3D_delPt(mesh,ip);
-            goto collapse;
-          }
-        }
-        ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-        assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
-         if ( ier == 2 || ier < 0 ) {
-          /* sharp angle failure */
-          MMG3D_delPt(mesh,ip);
-          goto collapse;
-        }
-        else if ( ier == 0 ) {
-          /* very bad quality failure */
-          ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
-        }
-        if ( ier == 1 ) {
-          ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
-        }
-
-        /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
-        pt = &mesh->tetra[k];
-        pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
-        if ( ier < 0 ) {
-          fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-          MMG3D_delPt(mesh,ip);
-          return -1;
-        }
-        else if ( ier == 0 || ier == 2 ) {
-          MMG3D_delPt(mesh,ip);
-          goto collapse;
-        } else {
-          (*ns)++;
-
-          ppt = &mesh->point[ip];
-          if ( MG_EDG(tag) || (tag & MG_NOM) )
-            ppt->ref = ref;
-          else
-            ppt->ref = pxt->ref[i];
-          ppt->tag = tag;
-
-          pxp = &mesh->xpoint[ppt->xp];
-          if ( tag & MG_NOM ){
-            memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(ppt->n,to,3*sizeof(double));
-          }
-          else if ( tag & MG_GEO ) {
-            memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(pxp->n2,no2,3*sizeof(double));
-            memcpy(ppt->n,to,3*sizeof(double));
-          }
-          else if ( tag & MG_REF ) {
-            memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(ppt->n,to,3*sizeof(double));
-          }
-          else
-            memcpy(pxp->n1,no1,3*sizeof(double));
-        }
-        continue;
-        /* End of case of a bdy face */
-      }
-      else if(pt->xt){
-        /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
-         * do nothing to avoid splitting of a bdy edge from a non bdy face (due
-         * to collapses, a tetra with no bdy faces may have a xtetra and
-         * boundary tags or no tags on boundary edge). */
-        continue;
-      }
-      else {
-        /** Case of a tetra without xtetra (no boundary faces): split non-bdy
-         * edges with Delauney kernel. */
-        /* Note that it is possible that non bdy tetra contains a bdy edge, here
-         * only non bdy edge are considered */
-        ilist = MMG5_coquil(mesh,k,imax,list);
-        if ( !ilist ) {
-          /* Unable to compute edge shell: treat next element */
-          continue;
-        }
-        else if ( ilist<0 ) {
-          return -1;
-        }
-        else if(ilist%2) {
-          /* Edge is bdy: we want to treat it from a bdy face */
-          goto collapse;
-        }
-        o[0] = 0.5*(p0->c[0] + p1->c[0]);
-        o[1] = 0.5*(p0->c[1] + p1->c[1]);
-        o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef USE_POINTMAP
-        src = mesh->point[ip1].src;
-#else
-        src = 1;
-#endif
-        ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
-
-        if ( !ip )  {
-          /* reallocation of point table */
-          MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                               *warn=1;++countMemFailure;
-                               goto collapse,
-                               o,MG_NOTAG,src);
-        }
-        if ( met->m ) {
-          if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-            MMG3D_delPt(mesh,ip);
-            goto collapse;
-          }
-        }
-
-        /* Delaunay */
-        if ( lmax < MMG3D_THRES_DEL ) {
-          lfilt = MMG3D_LFILTS_DEL;
-        }
-        else {
-          lfilt = MMG3D_LFILTL_DEL;
-        }
-
-        ier = 1;
-        if ( *PROctree ) {
-          ier = MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt);
-        }
-
-        if ( ier == 0 ) {
-          /* PROctree allocated and PROctreein refuse the insertion */
-          MMG3D_delPt(mesh,ip);
-          (*ifilt)++;
-          goto collapse;
-        }
-        else if ( ier < 0 ) {
-          /* PROctree allocated but PROctreein fail due to lack of memory */
-          MMG3D_freePROctree ( mesh,PROctree );
-          MMG3D_delPt(mesh,ip);
-          (*ifilt)++;
-          goto collapse;
-
-        } else {
-          lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
-          if ( lon < 1 ) {
-            MMG3D_delPt(mesh,ip);
-            goto collapse;
-          } else {
-            ret = MMG5_delone(mesh,met,ip,list,lon);
-            if ( ret > 0 ) {
-              if ( *PROctree ) {
-                MMG3D_addPROctree(mesh,*PROctree,ip);
-              }
-              (*ns)++;
-              continue;
-            }
-            else if ( ret == 0 ) {
-              MMG3D_delPt(mesh,ip);
-              goto collapse;
-            }
-            else {
-              /* allocation problem ==> saveMesh */
-              MMG3D_delPt(mesh,ip);
-              return 0;
-            }
-          }
-        }
-      }
+    ier = MMG3D_mmg3d1_delone_split(mesh,met,PROctree,k,imax,lmax,lmax,
+                                    chkRidTet,ifilt,ns,warn,&countMemFailure);
+    if ( ier == -2 ) {
+      /* Low failure: try to save mesh and exit lib */
+      return 0;
+    }
+    if ( ier == -1 ) {
+      /* Strong failure: exit lib without saving mesh */
+      return -1;
+    }
+    else if ( !ier ) {
+      /* Unable to treat largest edge: pass to next element */
+      continue;
+    }
+    else if ( ier == 1 ) {
+      /* Unable to treat largest edge: try to collapse shortest one */
+      goto collapse;
+    }
+    else if ( ier == 2 ) {
+      /* Edge has been splitted: pass to next element */
+      continue;
     }
 
   collapse:
@@ -916,212 +719,29 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       lmax = len;
       imin = ii;
       lmin = len;
-      if ( lmax >= MMG3D_LOPTL_DEL )  {
-        /** 1. Edge is too long: try to split it */
-        /* Try to treat the edge from a bdy face if possible */
-        ifa0 = MMG5_ifar[imax][0];
-        ifa1 = MMG5_ifar[imax][1];
-        i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-        j  = MMG5_iarfinv[i][imax];
-        i1 = MMG5_idir[i][MMG5_inxt2[j]];
-        i2 = MMG5_idir[i][MMG5_iprv2[j]];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        p0  = &mesh->point[ip1];
-        p1  = &mesh->point[ip2];
 
-        if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-          /** Edge belongs to a boundary face: try to split using patterns */
-        /* Construction of bezier edge */
-        int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
-                                            &ref,&tag,o,to,no1,no2,list,&ilist);
-        if ( ier < 0 ) {
-          /* Strong failure */
-          return -1;
-        }
-        else if ( !ier ) {
-          /* Unable to split edge: pass to next elt */
-          continue;
-        }
-        else if ( ier == 1 ) {
-          /* Unable to split edge: try to collapse shortest edge */
-          goto collapse2;
-        }
-
-          /** b/ Edge splitting */
-#ifdef USE_POINTMAP
-          src = mesh->point[ip1].src;
-#else
-          src = 1;
-#endif
-          ip = MMG3D_newPt(mesh,o,tag,src);
-          if ( !ip ){
-            /* reallocation of point table */
-            MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                 *warn=1;++countMemFailure;
-                                 goto collapse2
-                                 ,o,tag,src);
-          }
-          if ( met->m ) {
-            if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              MMG3D_delPt(mesh,ip);
-              goto collapse2;
-            }
-          }
-          ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-          assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
-          if ( ier == 2 || ier < 0 ) {
-            /* sharp angle failure */
-            MMG3D_delPt(mesh,ip);
-            goto collapse2;
-          }
-          else if ( ier == 0 ) {
-            /* very bad quality failure */
-            ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
-          }
-          if ( ier == 1 ) {
-            ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
-          }
-
-          /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
-          pt = &mesh->tetra[k];
-          pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
-          if ( ier < 0 ) {
-            fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-            MMG3D_delPt(mesh,ip);
-            return -1;
-          }
-          else if ( ier == 0 || ier == 2 ) {
-            MMG3D_delPt(mesh,ip);
-            goto collapse2;
-          } else {
-            (*ns)++;
-            ppt = &mesh->point[ip];
-
-            if ( MG_EDG(tag) || (tag & MG_NOM) )
-              ppt->ref = ref;
-            else
-              ppt->ref = pxt->ref[i];
-            ppt->tag = tag;
-
-            pxp = &mesh->xpoint[ppt->xp];
-            if ( tag & MG_NOM ){
-              memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(ppt->n,to,3*sizeof(double));
-            }
-            else if ( tag & MG_GEO ) {
-              memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(pxp->n2,no2,3*sizeof(double));
-              memcpy(ppt->n,to,3*sizeof(double));
-            }
-            else if ( tag & MG_REF ) {
-              memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(ppt->n,to,3*sizeof(double));
-            }
-            else
-              memcpy(pxp->n1,no1,3*sizeof(double));
-          }
-          break; // continue;
-          /* End of case of a bdy face */
-        }
-        else if(pt->xt){
-          /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
-           * do nothing to avoid splitting of a bdy edge from a non bdy face (due
-           * to collapses, a tetra with no bdy faces may have a xtetra and
-           * boundary tags or no tags on boundary edge). */
-          continue;
-        } else {
-          /** Case of a tetra without xtetra (no boundary faces): split non-bdy
-           * edges with Delauney kernel. */
-          /* Note that it is possible that non bdy tetra contains a bdy edge, here
-           * only non bdy edge are considered */
-          ilist = MMG5_coquil(mesh,k,imax,list);
-          if ( !ilist ){
-            /* Unable to compute edge shell: treat next element */
-            continue;
-          }
-          else if ( ilist<0 ) {
-            return -1;
-          }
-          else if(ilist%2) {
-            /* Edge is bdy: we want to treat it from a bdy face */
-            goto collapse2; //bdry edge
-          }
-          o[0] = 0.5*(p0->c[0] + p1->c[0]);
-          o[1] = 0.5*(p0->c[1] + p1->c[1]);
-          o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef USE_POINTMAP
-          src = mesh->point[ip1].src;
-#else
-          src = 1;
-#endif
-          ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
-
-          if ( !ip )  {
-            /* reallocation of point table */
-            MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                 *warn=1;++countMemFailure;
-                                 goto collapse2,
-                                 o,MG_NOTAG,src);
-          }
-          if ( met->m ) {
-            if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              MMG3D_delPt(mesh,ip);
-              goto collapse2;
-            }
-          }
-
-          /* Delaunay */
-          if ( lmaxtet< MMG3D_THRES_DEL ) {
-            lfilt = MMG3D_LFILTS_DEL;
-          }
-          else {
-            lfilt = MMG3D_LFILTL_DEL;
-          }
-
-          ier = 1;
-          if ( *PROctree ) {
-            ier = MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt);
-          }
-
-          if ( ier == 0 ) {
-            /* PROctree allocated and PROctreein refuse the insertion */
-            MMG3D_delPt(mesh,ip);
-            (*ifilt)++;
-            goto collapse2;
-          }
-          else if ( ier < 0 ) {
-            /* PROctree allocated but PROctreein fail due to lack of memory */
-            MMG3D_freePROctree ( mesh,PROctree );
-            MMG3D_delPt(mesh,ip);
-            (*ifilt)++;
-            goto collapse2;
-          } else {
-            lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
-            if ( lon < 1 ) {
-              MMG3D_delPt(mesh,ip);
-              goto collapse2;
-            } else {
-              ret = MMG5_delone(mesh,met,ip,list,lon);
-              if ( ret > 0 ) {
-                if ( *PROctree )
-                  MMG3D_addPROctree(mesh,*PROctree,ip);
-                (*ns)++;
-                break;//continue;
-              }
-              else if ( ret == 0 ) {
-                MMG3D_delPt(mesh,ip);
-                goto collapse2;//continue;
-              }
-              else {
-                /* Allocation problem ==> savemesh */
-                MMG3D_delPt(mesh,ip);
-                return 0;
-              }
-            }
-          }
-        }
+      /** 1. Try to split too long edge */
+      ier = MMG3D_mmg3d1_delone_split(mesh,met,PROctree,k,imax,lmax,lmaxtet,
+                                      chkRidTet,ifilt,ns,warn,&countMemFailure);
+      if ( ier == -2 ) {
+        /* Low failure: try to save mesh and exit lib */
+        return 0;
+      }
+      if ( ier == -1 ) {
+        /* Strong failure: exit lib without saving mesh */
+        return -1;
+      }
+      else if ( !ier ) {
+        /* Unable to treat too large edge: pass to next edge of element */
+        continue;
+      }
+      else if ( ier == 1 ) {
+        /* Unable to treat too large edge: try to collapse too short one */
+        goto collapse2;
+      }
+      else if ( ier == 2 ) {
+        /* Edge has been splitted: pass to next element */
+        break;
       }
 
     collapse2:
