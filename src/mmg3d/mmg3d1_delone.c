@@ -590,7 +590,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
  *
  */
 static inline int
-MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
+MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
                 MMG5_int ne,MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -857,7 +857,7 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  *
  */
 static int
-MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
+MMG5_adpdel(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
   int        ier;
   int        it,maxit,noptim;
   MMG5_int   ns,nc,ne,nnm,nm,nnf,nf,nnc,nns,nfilt,ifilt;
@@ -877,7 +877,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
       ns = nc = 0;
       ifilt = 0;
       ne = mesh->ne;
-      ier = MMG5_boucle_for(mesh,met,PROctree,ne,&ifilt,&ns,&nc,warn);
+      ier = MMG5_adpsplcol(mesh,met,PROctree,ne,&ifilt,&ns,&nc,warn);
       if ( ier<=0 ) return -1;
     } /* End conditional loop on mesh->info.noinsert */
     else  ns = nc = ifilt = 0;
@@ -1076,7 +1076,7 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   maxit  = 10;
   crit   = MMG3D_SSWAPIMPROVE;
   declic = 0.7/MMG3D_ALPHAD;
-  /*mark reinitialization in order to see at least one time each tetra*/
+  /* mark reinitialization in order to see at least one time each tetra */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     pt->mark = mesh->mark;
@@ -1085,7 +1085,7 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   do {
   ++mesh->mark;
 
-    /* treatment of bad elements*/
+    /* treatment of bad elements */
     if(it < 5) {
       nw = MMG3D_opttyp(mesh,met,PROctree,mesh->mark-1);
     }
@@ -1179,15 +1179,14 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
   MMG5_int  nnf,nf;
   int       warn,ns;
 
-  /*initial swap*/
+  /** Step 1: few iters of swaps */
   if ( !mesh->info.noswap ) {
-    nf = MMG5_swpmsh(mesh,met,*PROctree,2);
-    if ( nf < 0 ) {
+    nnf = MMG5_swpmsh(mesh,met,*PROctree,2);
+    if ( nnf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
               __func__);
       return 0;
     }
-    nnf = nf;
     nf = MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,*PROctree,2,mesh->mark-2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh. Exiting.\n",
@@ -1195,17 +1194,19 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
       return 0;
     }
     nnf+=nf;
-  } else  nnf = nf = 0;
+  } else {
+    nnf = nf = 0;
+  }
 
   if ( mesh->info.ddebug ) {
     fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7"MMG5_PRId"\n",nnf);
     MMG3D_outqua(mesh,met);
   }
 
-  /* Iterative mesh modifications */
+  /** Step 2: few iters of splits, collapses, swaps and moves */
   warn = 0;
 
-  ns = MMG5_adpsplcol(mesh,met,PROctree,&warn);
+  ns = MMG5_adpdel(mesh,met,PROctree,&warn);
 
   if ( ns < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to complete mesh. Exit program.\n",
@@ -1226,6 +1227,8 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
   if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
+  /** Step 3: Last wave of improvements: few iters of bad elts treatment, swaps
+   * and moves */
   if(mesh->info.optimLES) {
     if(!MMG5_optetLES(mesh,met,*PROctree)) return 0;
   }
