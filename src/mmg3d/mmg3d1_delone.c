@@ -43,10 +43,10 @@
 
 int8_t  ddb;
 
-#define MMG3D_LOPTLMMG5_DEL     1.41
-#define MMG3D_LOPTSMMG5_DEL     0.6
-#define MMG3D_LFILTS_DEL        0.7
-#define MMG3D_LFILTL_DEL        0.2
+#define MMG3D_THRES_DEL     1.6
+#define MMG3D_LOPTL_DEL     1.41
+#define MMG3D_LFILTS_DEL    0.7
+#define MMG3D_LFILTL_DEL    0.2
 
 /**
  * \param mesh pointer toward mesh
@@ -199,7 +199,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
   int           ilist,ilists;
   int8_t        j,i,i1,i2,ifa0,ifa1;
 
-  if(lmin > MMG3D_LOPTSMMG5_DEL) {
+  if(lmin > MMG3D_LOPTS) {
     /* Edge is large enough: nothing to do */
     return 2;
   }
@@ -319,8 +319,8 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
  * \return -1 if fail and we don't save the mesh, 0 if fail but we try to save
  * the mesh, 1 otherwise.
  *
- * \a adpsplcol loop: split edges longer than \ref MMG3D_LOPTLMMG5_DEL and
- * collapse edges shorter than \ref MMG3D_LOPTSMMG5_DEL.
+ * \a adpsplcol loop: split edges longer than \ref MMG3D_LOPTL_DEL and
+ * collapse edges shorter than \ref MMG3D_LOPTS.
  *
  */
 static inline int
@@ -398,7 +398,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       continue;
     }
 
-    if ( lmax >= MMG3D_LOPTLMMG5_DEL )  {
+    if ( lmax >= MMG3D_LOPTL_DEL )  {
       /** 1. Edge is too long: try to split it */
       /* Try to treat the edge from a bdy face if possible */
       ifa0 = MMG5_ifar[imax][0];
@@ -556,7 +556,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
         }
 
         /* Delaunay */
-        if ( lmax<1.6 ) {
+        if ( lmax < MMG3D_THRES_DEL ) {
           lfilt = MMG3D_LFILTS_DEL;
         }
         else {
@@ -640,8 +640,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
-      if ( (ii==imintet) && (lmintet < MMG3D_LOPTSMMG5_DEL)) continue;
-      if ( (ii==imaxtet) && (lmaxtet > MMG3D_LOPTLMMG5_DEL) ) continue;
+      if ( (ii==imintet) && (lmintet < MMG3D_LOPTS)) continue;
+      if ( (ii==imaxtet) && (lmaxtet > MMG3D_LOPTL_DEL) ) continue;
 
       len = MMG5_lenedg(mesh,met,ii,pt);
 
@@ -649,7 +649,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       lmax = len;
       imin = ii;
       lmin = len;
-      if ( lmax >= MMG3D_LOPTLMMG5_DEL )  {
+      if ( lmax >= MMG3D_LOPTL_DEL )  {
         /** 1. Edge is too long: try to split it */
         /* Try to treat the edge from a bdy face if possible */
         ifa0 = MMG5_ifar[imax][0];
@@ -806,7 +806,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
           }
 
           /* Delaunay */
-          if ( lmaxtet<1.6 ) {
+          if ( lmaxtet< MMG3D_THRES_DEL ) {
             lfilt = MMG3D_LFILTS_DEL;
           }
           else {
@@ -965,8 +965,8 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
  *
- * Split edges longer than \ref MMG3D_LOPTLMMG5_DEL and collapse edges shorter
- * than \ref MMG3D_LOPTSMMG5_DEL.
+ * Split edges longer than \ref MMG3D_LOPTL_DEL and collapse edges shorter
+ * than \ref MMG3D_LOPTS.
  *
  */
 static int
