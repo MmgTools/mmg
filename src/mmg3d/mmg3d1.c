@@ -1421,7 +1421,7 @@ split:
  *
  */
 static inline int
-MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
+MMG3D_update_rid_geom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
   double dd,to[3];
 
   dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
@@ -2105,7 +2105,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
                 ier = MMG3D_bezierInt(&pb2,&uv[j2][0],o,no,to);
                 assert(ier);
 
-                if ( !MMG3D_storeGeom(ppt,pxp,no) ) continue;
+                if ( !MMG3D_update_rid_geom(ppt,pxp,no) ) continue;
               }
             }
           }
@@ -2120,7 +2120,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
 
-          if ( !MMG3D_storeGeom(ppt,pxp,no) ) continue;
+          if ( !MMG3D_update_rid_geom(ppt,pxp,no) ) continue;
         }
       }
     }
