@@ -244,18 +244,18 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     /* Construction of bezier edge */
     int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
                                         &ref,&tag,o,to,no1,no2,list,&ilist);
-    if ( ier < 0 ) {
+    switch (ier) {
+    case -1:
       /* Strong failure */
-      return -1;
-    }
-    else if ( !ier ) {
+    case 0:
       /* Unable to split edge: pass to next elt */
-      return 0;
-    }
-    else if ( ier == 1 ) {
+    case 1:
       /* Unable to split edge: try to collapse shortest edge */
-      return 1;
+
+      /* For all previous cases, return ier */
+      return ier;
     }
+    assert ( ier==2 && "unexpected return value for build_bezierEdge");
 
     /** b/ Edge splitting */
 #ifdef USE_POINTMAP
@@ -272,20 +272,25 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
                           o,tag,src);
     }
 
+    ier = 1;
     if ( met && met->m ) {
-      if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-        MMG3D_delPt(mesh,ip);
-        return 1;
-      }
+      ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
     }
-    ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-    assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
-    if ( ier == 2 || ier < 0 ) {
-      /* sharp angle failure */
+    if ( ier<=0 ) {
       MMG3D_delPt(mesh,ip);
       return 1;
     }
-    else if ( ier == 0 ) {
+    else {
+      /* Simulation only if intmet call is successful */
+      ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
+    }
+
+    if ( ier == 2 || ier < 0 ) {
+      /* int met failure or sharp angle failure */
+      MMG3D_delPt(mesh,ip);
+      return 1;
+    }
+    if ( ier == 0 ) {
       /* very bad quality failure */
       ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
     }
@@ -302,36 +307,39 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       MMG3D_delPt(mesh,ip);
       return -1;
     }
-    else if ( ier == 0 || ier == 2 ) {
+    if ( ier == 0 || ier == 2 ) {
       MMG3D_delPt(mesh,ip);
       return 1;
-    } else {
-      (*ns)++;
-      ppt = &mesh->point[ip];
-
-      if ( MG_EDG(tag) || (tag & MG_NOM) )
-        ppt->ref = ref;
-      else
-        ppt->ref = pxt->ref[i];
-      ppt->tag = tag;
-
-      pxp = &mesh->xpoint[ppt->xp];
-      if ( tag & MG_NOM ){
-        memcpy(pxp->n1,no1,3*sizeof(double));
-        memcpy(ppt->n,to,3*sizeof(double));
-      }
-      else if ( tag & MG_GEO ) {
-        memcpy(pxp->n1,no1,3*sizeof(double));
-        memcpy(pxp->n2,no2,3*sizeof(double));
-        memcpy(ppt->n,to,3*sizeof(double));
-      }
-      else if ( tag & MG_REF ) {
-        memcpy(pxp->n1,no1,3*sizeof(double));
-        memcpy(ppt->n,to,3*sizeof(double));
-      }
-      else
-        memcpy(pxp->n1,no1,3*sizeof(double));
     }
+
+    (*ns)++;
+    ppt = &mesh->point[ip];
+
+    if ( MG_EDG(tag) || (tag & MG_NOM) ) {
+      ppt->ref = ref;
+    }
+    else {
+      ppt->ref = pxt->ref[i];
+    }
+    ppt->tag = tag;
+
+    pxp = &mesh->xpoint[ppt->xp];
+    if ( tag & MG_NOM ){
+      memcpy(pxp->n1,no1,3*sizeof(double));
+      memcpy(ppt->n,to,3*sizeof(double));
+    }
+    else if ( tag & MG_GEO ) {
+      memcpy(pxp->n1,no1,3*sizeof(double));
+      memcpy(pxp->n2,no2,3*sizeof(double));
+      memcpy(ppt->n,to,3*sizeof(double));
+    }
+    else if ( tag & MG_REF ) {
+      memcpy(pxp->n1,no1,3*sizeof(double));
+      memcpy(ppt->n,to,3*sizeof(double));
+    }
+    else
+      memcpy(pxp->n1,no1,3*sizeof(double));
+
     return 2;
     /* End of case of a bdy face */
   }
@@ -341,7 +349,8 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
      * to collapses, a tetra with no bdy faces may have a xtetra and
      * boundary tags or no tags on boundary edge). */
     return 0;
-  } else {
+  }
+  else {
     /** Case of a tetra without xtetra (no boundary faces): split non-bdy
      * edges with Delauney kernel. */
     /* Note that it is possible that non bdy tetra contains a bdy edge, here
@@ -358,6 +367,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       /* Edge is bdy: we want to treat it from a bdy face */
       return 1;
     }
+
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -375,11 +385,14 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
                           return 1,
                           o,MG_NOTAG,src);
     }
+
+    int ier = 1;
     if ( met && met->m ) {
-      if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-        MMG3D_delPt(mesh,ip);
-        return 1;
-      }
+      ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
+    }
+    if ( ier<=0 ) {
+      MMG3D_delPt(mesh,ip);
+      return 1;
     }
 
     /* Delaunay */
@@ -390,7 +403,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       lfilt = MMG3D_LFILTL_DEL;
     }
 
-    int ier = 1;
+    ier = 1;
     if ( *PROctree ) {
       ier = MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt);
     }
@@ -401,36 +414,37 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       (*ifilt)++;
       return 1;
     }
-    else if ( ier < 0 ) {
+
+    if ( ier < 0 ) {
       /* PROctree allocated but PROctreein fail due to lack of memory */
       MMG3D_freePROctree ( mesh,PROctree );
       MMG3D_delPt(mesh,ip);
       (*ifilt)++;
       return 1;
-    } else {
-      int lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,MMG5_EPSOK);
-      if ( lon < 1 ) {
-        MMG3D_delPt(mesh,ip);
-        return 1;
-      } else {
-        int ret = MMG5_delone(mesh,met,ip,list,lon);
-        if ( ret > 0 ) {
-          if ( *PROctree )
-            MMG3D_addPROctree(mesh,*PROctree,ip);
-          (*ns)++;
-          return 2;
-        }
-        else if ( ret == 0 ) {
-          MMG3D_delPt(mesh,ip);
-          return 1;
-        }
-        else {
-          /* Allocation problem ==> savemesh */
-          MMG3D_delPt(mesh,ip);
-          return -2;
-        }
-      }
     }
+
+    int lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,MMG5_EPSOK);
+    if ( lon < 1 ) {
+      MMG3D_delPt(mesh,ip);
+      return 1;
+    }
+
+    int ret = MMG5_delone(mesh,met,ip,list,lon);
+    if ( ret > 0 ) {
+      if ( *PROctree ) {
+        MMG3D_addPROctree(mesh,*PROctree,ip);
+      }
+      (*ns)++;
+      return 2;
+    }
+    if ( ret == 0 ) {
+      MMG3D_delPt(mesh,ip);
+      return 1;
+    }
+
+    /* Allocation problem ==> savemesh */
+    MMG3D_delPt(mesh,ip);
+    return -2;
   }
 
   return 3;
