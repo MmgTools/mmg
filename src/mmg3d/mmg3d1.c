@@ -44,6 +44,53 @@
 extern int8_t ddb;
 
 /**
+ * \param mesh pointer toward mesh
+ * \param ppt pointer toward point whose geom data have to be updated
+ * \param tag point tag
+ * \param nmref ref that has to be setted at point \a ppt if point is non-manifold
+ * \param edgref ref that has to be setted at point \a ppt if point is manifold (edg ref)
+ * \param no1 normal that has to be setted at point \a ppt (if needed)
+ * \param no2 normal that has to be setted at point \a ppt (if needed)
+ * \param to tangent that has to be setted at point \a ppt (if needed)
+ *
+ * Set geometric info (ref, tag, normals and tangent) at point \a ppt.
+ *
+ */
+void MMG3D_set_geom(MMG5_pMesh mesh, MMG5_pPoint ppt,
+                    int16_t tag,MMG5_int nmref,MMG5_int edgref,
+                    double no1[3],double no2[3],double to[3]) {
+
+  if ( MG_EDG_OR_NOM(tag) ) {
+    ppt->ref = nmref;
+  }
+  else {
+    ppt->ref = edgref;
+  }
+
+  MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
+  if ( tag & MG_NOM ){
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    memcpy(ppt->n,to,3*sizeof(double));
+    return;
+  }
+  else if ( tag & MG_GEO ) {
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    memcpy(pxp->n2,no2,3*sizeof(double));
+    memcpy(ppt->n,to,3*sizeof(double));
+    return;
+  }
+  else if ( tag & MG_REF ) {
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    memcpy(ppt->n,to,3*sizeof(double));
+    return;
+  }
+  else {
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    return;
+  }
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param k tetrahedron index.
  * \param ie face index of tetrahedron.
@@ -1565,7 +1612,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
                        int8_t chkRidTet,int *warn ) {
   MMG5_Tria    ptt;
   MMG5_pPoint  p0,p1,ppt;
-  MMG5_pxPoint pxp;
   double       o[3],to[3],no1[3],no2[3],v[3];
   int          ilist;
   MMG5_int     src,ip,ip1,ip2,ref;
@@ -1707,28 +1753,8 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   }
 
   ppt = &mesh->point[ip];
-  if ( MG_EDG_OR_NOM(tag) )
-    ppt->ref = ref;
-  else
-    ppt->ref = pxt->ref[i];
 
-  pxp = &mesh->xpoint[ppt->xp];
-  if ( tag & MG_NOM ){
-    memcpy(pxp->n1,no1,3*sizeof(double));
-    memcpy(ppt->n,to,3*sizeof(double));
-  }
-  else if ( tag & MG_GEO ) {
-    memcpy(pxp->n1,no1,3*sizeof(double));
-    memcpy(pxp->n2,no2,3*sizeof(double));
-    memcpy(ppt->n,to,3*sizeof(double));
-  }
-  else if ( tag & MG_REF ) {
-    memcpy(pxp->n1,no1,3*sizeof(double));
-    memcpy(ppt->n,to,3*sizeof(double));
-  }
-  else {
-    memcpy(pxp->n1,no1,3*sizeof(double));
-  }
+  MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
 
   return 1;
 }

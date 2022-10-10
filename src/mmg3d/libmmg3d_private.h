@@ -455,6 +455,7 @@ int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
 /* mmg3d1.c */
+void MMG3D_set_geom(MMG5_pMesh,MMG5_pPoint,int16_t,MMG5_int,MMG5_int,double[3],double[3],double[3]);
 void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt);
 int  MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx);
 int  MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int);

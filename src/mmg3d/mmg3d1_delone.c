@@ -209,7 +209,6 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt;
-  MMG5_pxPoint  pxp;
   double        o[3],to[3],no1[3],no2[3],lfilt;
   int64_t       list[MMG3D_LMAX+2];
   MMG5_int      ip1,ip2;
@@ -315,30 +314,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     (*ns)++;
     ppt = &mesh->point[ip];
 
-    if ( MG_EDG(tag) || (tag & MG_NOM) ) {
-      ppt->ref = ref;
-    }
-    else {
-      ppt->ref = pxt->ref[i];
-    }
-    ppt->tag = tag;
-
-    pxp = &mesh->xpoint[ppt->xp];
-    if ( tag & MG_NOM ){
-      memcpy(pxp->n1,no1,3*sizeof(double));
-      memcpy(ppt->n,to,3*sizeof(double));
-    }
-    else if ( tag & MG_GEO ) {
-      memcpy(pxp->n1,no1,3*sizeof(double));
-      memcpy(pxp->n2,no2,3*sizeof(double));
-      memcpy(ppt->n,to,3*sizeof(double));
-    }
-    else if ( tag & MG_REF ) {
-      memcpy(pxp->n1,no1,3*sizeof(double));
-      memcpy(ppt->n,to,3*sizeof(double));
-    }
-    else
-      memcpy(pxp->n1,no1,3*sizeof(double));
+    MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
 
     return 2;
     /* End of case of a bdy face */
