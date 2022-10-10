@@ -96,8 +96,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
     return 0;
   }
 
-  *ref = pxt->edg[MMG5_iarf[i][j]];
-  *tag = pxt->tag[MMG5_iarf[i][j]];
+  *ref = pxt->edg[imax];
+  *tag = pxt->tag[imax];
   if ( (*tag) & MG_REQ ) {
     /* No need to split required edges */
     return 0;
@@ -229,7 +229,10 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
   /* Try to treat the edge from a bdy face if possible */
   ifa0 = MMG5_ifar[imax][0];
   ifa1 = MMG5_ifar[imax][1];
-  i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+
+  int16_t is_ifa1_bdy = (pxt->ftag[ifa1] & MG_BDY);
+
+  i  = (pt->xt && is_ifa1_bdy) ? ifa1 : ifa0;
   j  = MMG5_iarfinv[i][imax];
   i1 = MMG5_idir[i][MMG5_inxt2[j]];
   i2 = MMG5_idir[i][MMG5_iprv2[j]];
