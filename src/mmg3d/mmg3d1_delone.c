@@ -279,10 +279,9 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       MMG3D_delPt(mesh,ip);
       return 1;
     }
-    else {
-      /* Simulation only if intmet call is successful */
-      ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-    }
+
+    /* Simulation only if intmet call is successful */
+    ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
 
     if ( ier == 2 || ier < 0 ) {
       /* int met failure or sharp angle failure */
