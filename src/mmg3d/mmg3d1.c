@@ -1954,7 +1954,10 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
     if ( ier==-1 ) { return -1; }
     else if ( !ier ) { continue; }
-    else if ( ier==2 ) { break; }
+    else if ( ier==2 ) {
+      /* Unable to split due to lack of memory */
+      return ns;
+    }
 
     ++ns;
   }

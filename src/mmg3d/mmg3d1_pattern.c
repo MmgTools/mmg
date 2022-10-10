@@ -107,15 +107,18 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     p0  = &mesh->point[ip1];
     p1  = &mesh->point[ip2];
 
-    /* Case of a boundary face */
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+      /* Case of a boundary face */
       if ( !(MG_GET(pxt->ori,i)) ) continue;
 
       ier = MMG3D_splsurfedge( mesh,met,k,pt,pxt,imax,2,chkRidTet,warn );
 
       if ( ier==-1 ) { return -1; }
       else if ( !ier ) { continue; }
-      else if ( ier==2 ) { break; }
+      else if ( ier==2 ) {
+        /* Unable to split due to lack of memory */
+        return ns;
+      }
 
       ++ns;
     }
