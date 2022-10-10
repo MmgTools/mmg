@@ -164,6 +164,11 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
       /* Unable to treat longest edge: try to collapse the shorter one */
       return 1;
     }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+    }
   }
   return 2;
 }
