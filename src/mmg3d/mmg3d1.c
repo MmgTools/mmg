@@ -1655,7 +1655,10 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   p0  = &mesh->point[ip1];
   p1  = &mesh->point[ip2];
 
-  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) return 0;
+  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) {
+    /* Skip edge with extremities on parallel interfaces */
+    return 0;
+  }
 
   int8_t ori = MG_GET(pxt->ori,i);
   if ( !ori ) {
@@ -1670,16 +1673,27 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   ref = pxt->edg[imax];
   tag = pxt->tag[imax];
 
-  if ( tag & MG_REQ ) { return 0; }
+  if ( tag & MG_REQ ) {
+    /* No need to split required edges */
+    return 0;
+  }
 
   tag |= MG_BDY;
 
   ilist = MMG5_coquil(mesh,k,imax,list);
-  if ( !ilist )  return 0;
-  else if ( ilist < 0 ) { return -1; }
+  if ( !ilist ){
+    /* On of the tetra of the edge shell is required: we cannot split the edge */
+    return 0;
+  }
+  else if ( ilist < 0 ){
+    /* Shell computation has failed */
+    return -1;
+  }
 
+  /** a/ computation of bezier edge */
   if ( tag & MG_NOM ){
     if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      /* Unable to treat edge */
       return 0;
     }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
@@ -1694,16 +1708,22 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
     }
   }
   else if ( tag & MG_GEO ) {
-    if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) { return 0; }
-
-    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+    /* Edge is ridge */
+    if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) {
+      /* Unable to treat edge */
+      return 0;
+    }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
         return -1;
       }
     }
   }
   else if ( tag & MG_REF ) {
-    if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) { return 0; }
+    if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      /* Unable to treat edge */
+      return 0;
+    }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
@@ -1716,8 +1736,14 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
     }
   }
   else {
-    if ( !MMG5_norface(mesh,k,i,v) ) { return 0; }
-    if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) { return 0; }
+    if ( !MMG5_norface(mesh,k,i,v) ) {
+      /* Unable to treat edge */
+      return 0;
+    }
+    if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) {
+      /* Unable to treat longest edge */
+      return 0;
+    }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
@@ -1760,7 +1786,13 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
     }
   }
   ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+
+#ifndef NDEBUG
+  if ( mesh->info.ddebug ) {
+    assert ( (ier != -1) && "simbulgept failure" );
+  }
+#endif
+
   if ( ier < 0 || ier == 2 ) {
     MMG3D_delPt(mesh,ip);
     return 0;
