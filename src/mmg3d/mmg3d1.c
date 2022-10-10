@@ -1625,7 +1625,28 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   /* proceed edges according to lengths */
   ifa0 = MMG5_ifar[imax][0];
   ifa1 = MMG5_ifar[imax][1];
-  i  = (pxt->ftag[ifa1] & MG_BDY) ? ifa1 : ifa0;
+
+  /* Search for a boundary face with suitable orientation to treat the edge */
+  /* Default face */
+  i = ifa0;
+  if ( pt->xt ) {
+    int16_t is_ifa0_bdy = (pxt->ftag[ifa0] & MG_BDY);
+    int16_t is_ifa1_bdy = (pxt->ftag[ifa1] & MG_BDY);
+
+    if ( is_ifa0_bdy && is_ifa1_bdy ) {
+      /* Two bdy faces: search if one has a suitable orientation */
+      int8_t  ifa1_ori    = MG_GET(pxt->ori,i);
+      i = ifa1_ori ? ifa1 : ifa0;
+    }
+    else if ( is_ifa1_bdy ) {
+      /* only ifa1 is boundary: no need to check for orientation (if it has a
+       * bad ori we will quit the function later) */
+      i = ifa1;
+    }
+    /* For all other cases (only ifa0 is bdy or no bdy face), we use default
+     * face (ifa0) */
+  }
+
   j  = MMG5_iarfinv[i][imax];
   i1 = MMG5_idir[i][MMG5_inxt2[j]];
   i2 = MMG5_idir[i][MMG5_iprv2[j]];
@@ -1635,6 +1656,16 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   p1  = &mesh->point[ip2];
 
   if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) return 0;
+
+  int8_t ori = MG_GET(pxt->ori,i);
+  if ( !ori ) {
+    if ( mesh->info.ddebug ) {
+      fprintf(stderr,"  ## Warning: %s: edge is skipped because face has wrong"
+             " orientation.\n",__func__);
+    }
+    /* Treat triangles at interface of 2 subdomains from well oriented face */
+    return 0;
+  }
 
   ref = pxt->edg[imax];
   tag = pxt->tag[imax];
