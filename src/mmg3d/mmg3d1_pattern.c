@@ -146,17 +146,20 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                              break
                              ,o,MG_NOTAG,src);
       }
-      if ( met->m ) {
+
+      ier = 1;
+      if ( met && met->m ) {
         ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
-        if ( !ier ) {
-          MMG3D_delPt(mesh,ip);
-          return -1;
-        }
-        else if (ier < 0 ) {
-          MMG3D_delPt(mesh,ip);
-          continue;
-        }
       }
+      if ( !ier ) {
+        MMG3D_delPt(mesh,ip);
+        return -1;
+      }
+      else if (ier < 0 ) {
+        MMG3D_delPt(mesh,ip);
+        continue;
+      }
+
       ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
       if ( ier == 1 )
         ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
