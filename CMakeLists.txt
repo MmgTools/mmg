@@ -101,6 +101,7 @@ IF (NOT WIN32 OR MINGW)
     COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
     COMMENT "Getting git commit hash"
+    BYPRODUCTS ${COMMON_BINARY_DIR}/git_log_mmg.h
   )
 ENDIF ()
 
