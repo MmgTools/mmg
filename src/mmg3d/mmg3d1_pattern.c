@@ -58,7 +58,7 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  MMG5_int      ns,src,k,ip,ip1,ip2;
  int64_t       list[MMG3D_LMAX+2];
  int           ier,ilist;
- int8_t        imax,j,i,i1,i2,ifa0,ifa1;
+ int8_t        imax,j,i,i1,i2;
  int8_t        chkRidTet;
  static int8_t mmgWarn    = 0;
 
@@ -96,17 +96,6 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     if ( lmax < MMG3D_LOPTL )  continue;
 
     /* proceed edges according to lengths */
-    ifa0 = MMG5_ifar[imax][0];
-    ifa1 = MMG5_ifar[imax][1];
-    i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-    j  = MMG5_iarfinv[i][imax];
-    i1 = MMG5_idir[i][MMG5_inxt2[j]];
-    i2 = MMG5_idir[i][MMG5_iprv2[j]];
-    ip1 = pt->v[i1];
-    ip2 = pt->v[i2];
-    p0  = &mesh->point[ip1];
-    p1  = &mesh->point[ip2];
-
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       /* Case of a boundary face */
       if ( !(MG_GET(pxt->ori,i)) ) continue;
@@ -124,6 +113,8 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     }
     else {
       /* Case of an internal face */
+      MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
+
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = MMG5_coquil(mesh,k,imax,list);
       if ( !ilist ) continue;
@@ -199,7 +190,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   int64_t       list[MMG3D_LMAX+2];
   int           ilist,ier,ilists;
   int16_t       tag;
-  int8_t        imin,j,i,i1,i2,ifa0,ifa1;
+  int8_t        imin,j,i,i1,i2;
   static int8_t mmgWarn = 0;
 
   nc = 0;
@@ -233,19 +224,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     // Case of an internal tetra with 4 ridges vertices.
     if ( lmin == 0 ) continue;
 
-    ifa0 = MMG5_ifar[imin][0];
-    ifa1 = MMG5_ifar[imin][1];
-    i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-    j  = MMG5_iarfinv[i][imin];
-    i1 = MMG5_idir[i][MMG5_inxt2[j]];
-    i2 = MMG5_idir[i][MMG5_iprv2[j]];
-    assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
-    assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
-    ip = pt->v[i1];
-    iq = pt->v[i2];
-    p0 = &mesh->point[ip];
-    p1 = &mesh->point[iq];
-    if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
+    MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip,&iq,&p0,&p1);
 
 
     /* Case of a boundary face */

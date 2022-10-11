@@ -329,7 +329,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
   int64_t       list[MMG3D_LMAX+2];
   MMG5_int      lists[MMG3D_LMAX+2],ip1,ip2;
   int           ilist,ilists;
-  int8_t        j,i,i1,i2,ifa0,ifa1;
+  int8_t        j,i,i1,i2;
 
   if(lmin > MMG3D_LOPTS) {
     /* Edge is large enough: nothing to do */
@@ -339,27 +339,14 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
   // Case of an internal tetra with 4 ridges vertices.
   if ( lmin == 0 ) {
     /* Case of an internal tetra with 4 ridges vertices */
-//#warning is it possible to merge this edge ??
+#warning is it possible to merge this edge ??
     return 0;
   }
 
   pt = &mesh->tetra[k];
   pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
-  ifa0 = MMG5_ifar[imin][0];
-  ifa1 = MMG5_ifar[imin][1];
-  i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-  j  = MMG5_iarfinv[i][imin];
-  i1 = MMG5_idir[i][MMG5_inxt2[j]];
-  i2 = MMG5_idir[i][MMG5_iprv2[j]];
-
-  assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
-  assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
-
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
-  p0  = &mesh->point[ip1];
-  p1  = &mesh->point[ip2];
+  MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
   /* Ignore OLDPARBDY tag of p0 */
   int16_t tag = p0->tag;

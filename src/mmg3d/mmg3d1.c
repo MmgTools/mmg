@@ -1803,44 +1803,12 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   int64_t      list[MMG3D_LMAX+2];
   int          ier;
   int16_t      tag;
-  int8_t       j,i,i1,i2,ifa0,ifa1;
+  int8_t       j,i,i1,i2;
 
   assert ( pxt == &mesh->xtetra[pt->xt] );
 
   /* proceed edges according to lengths */
-  ifa0 = MMG5_ifar[imax][0];
-  ifa1 = MMG5_ifar[imax][1];
-
-  /* An edge can be at the interface of a boundary face with good orientation
-   * and of another one with bad orientation: ensure to treat the edge from the
-   * suitable face */
-  /* Default face */
-  i = ifa0;
-  if ( pt->xt ) {
-    int16_t is_ifa0_bdy = (pxt->ftag[ifa0] & MG_BDY);
-    int16_t is_ifa1_bdy = (pxt->ftag[ifa1] & MG_BDY);
-
-    if ( is_ifa0_bdy && is_ifa1_bdy ) {
-      /* Two bdy faces: search if one has a suitable orientation */
-      int8_t  ifa1_ori    = MG_GET(pxt->ori,i);
-      i = ifa1_ori ? ifa1 : ifa0;
-    }
-    else if ( is_ifa1_bdy ) {
-      /* only ifa1 is boundary: no need to check for orientation (if it has a
-       * bad ori we will quit the function later) */
-      i = ifa1;
-    }
-    /* For all other cases (only ifa0 is bdy or no bdy face), we use default
-     * face (ifa0) */
-  }
-
-  j  = MMG5_iarfinv[i][imax];
-  i1 = MMG5_idir[i][MMG5_inxt2[j]];
-  i2 = MMG5_idir[i][MMG5_iprv2[j]];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
-  p0  = &mesh->point[ip1];
-  p1  = &mesh->point[ip2];
+  MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
   ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,&ref,&tag,
                                o,to,no1,no2,list,&ilist);
