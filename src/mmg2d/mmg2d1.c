@@ -301,7 +301,7 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     fprintf(stdout,"     %" MMG5_PRId " corrected,  %" MMG5_PRId " invalid\n",nc,ni);
     fflush(stdout);
   }
-  
+
   /* step 4: effective splitting */
   ns = 0;
   nt = mesh->nt;
