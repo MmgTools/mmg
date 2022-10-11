@@ -1716,6 +1716,67 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
 }
 
 /**
+ * \param mesh pointer toward mesh
+ * \param pt pointer toward tetra on which we work
+ * \param ied index in tetra \a pt of edge on which we work
+ * \param i index of a face of \a pt that contains \a ied. If possible we choose
+ * a boundary face with suitable orientation (to fill)
+ * \param j local index of edge \a ied in face \a i (to fill)
+ * \param i1 local index in tetra \a pt of first extremity of edge \a ied (to fill)
+ * \param i2 local index in tetra \a pt of second extremity of edge \a ied (to fill)
+ * \param ip1 global index first extremity of edge \a ied (to fill)
+ * \param ip2 global index in tetra \a pt of second extremity of edge \a ied (to fill)
+ * \param p0 pointer toward first extremity of edge \a ied (to fill)
+ * \param p1 pointer toward second extremity of edge \a ied (to fill)
+ *
+ * Search a face from wich we car reach edge \a ied. If a boundary face with
+ * good orientation exists it is choosed prior to another face, otherwise, if
+ * possible, we choose a boundary face. Fill data needed to work on edge.
+ *
+ */
+void MMG3D_find_bdyface_from_edge(MMG5_pMesh mesh,MMG5_pTetra pt,int8_t ied,
+                                  int8_t *i,int8_t *j,int8_t*i1,int8_t*i2,
+                                  MMG5_int*ip1,MMG5_int*ip2,MMG5_pPoint *p0,MMG5_pPoint *p1) {
+
+  int8_t ifa0 = MMG5_ifar[ied][0];
+  int8_t ifa1 = MMG5_ifar[ied][1];
+
+  /** An edge can be at the interface of a boundary face with good orientation
+   * and of another one with bad orientation: ensure to treat the edge from the
+   * suitable face */
+  /* Default face */
+  MMG5_pxTetra pxt = pt->xt? &mesh->xtetra[pt->xt] : 0;
+
+  (*i) = ifa0;
+  if ( pt->xt ) {
+    int16_t is_ifa0_bdy = (pxt->ftag[ifa0] & MG_BDY);
+    int16_t is_ifa1_bdy = (pxt->ftag[ifa1] & MG_BDY);
+
+    if ( is_ifa0_bdy && is_ifa1_bdy ) {
+      /* Two bdy faces: search if one has a suitable orientation */
+      int8_t  ifa1_ori    = MG_GET(pxt->ori,(*i));
+      (*i) = ifa1_ori ? ifa1 : ifa0;
+    }
+    else if ( is_ifa1_bdy ) {
+      /* only ifa1 is boundary: no need to check for orientation (if it has a
+       * bad ori we will quit the function later) */
+      (*i) = ifa1;
+    }
+    /* For all other cases (only ifa0 is bdy or no bdy face), we use default
+     * face (ifa0) */
+  }
+
+  (*j)   = MMG5_iarfinv[*i][ied];
+  (*i1)  = MMG5_idir[*i][MMG5_inxt2[*j]];
+  (*i2)  = MMG5_idir[*i][MMG5_iprv2[*j]];
+  (*ip1) = pt->v[*i1];
+  (*ip2) = pt->v[*i2];
+  (*p0)  = &mesh->point[*ip1];
+  (*p1)  = &mesh->point[*ip2];
+
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of the tetra to split.

@@ -92,8 +92,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
   MMG5_int      ip1,ip2;
   MMG5_int      src,ip;
   int           ilist;
-  int16_t       is_ifa1_bdy;
-  int8_t        j,i,i1,i2,ifa0,ifa1;
+  int8_t        j,i,i1,i2;
 
   if ( lmax < MMG3D_LOPTL_DEL )  {
     /* Edge is small enough: nothing to do */
@@ -101,29 +100,10 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
   }
 
   /** Edge is too long: try to split it */
-  /* Try to treat the edge from a bdy face if possible */
-  ifa0 = MMG5_ifar[imax][0];
-  ifa1 = MMG5_ifar[imax][1];
-
   pt = &mesh->tetra[k];
+  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    is_ifa1_bdy = (pxt->ftag[ifa1] & MG_BDY);
-  }
-  else {
-    pxt = NULL;
-    is_ifa1_bdy = 0;
-  }
-
-  i  = (pxt && is_ifa1_bdy) ? ifa1 : ifa0;
-  j  = MMG5_iarfinv[i][imax];
-  i1 = MMG5_idir[i][MMG5_inxt2[j]];
-  i2 = MMG5_idir[i][MMG5_iprv2[j]];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
-  p0  = &mesh->point[ip1];
-  p1  = &mesh->point[ip2];
+  MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
   if ( pxt && (pxt->ftag[i] & MG_BDY) ) {
     /** Edge belongs to a boundary face: try to split using patterns */
