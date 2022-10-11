@@ -687,9 +687,9 @@ int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
  * collapse edges shorter than \ref MMG3D_LOPTS.
  *
  */
-static inline int
-MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
-                MMG5_int ne,MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
+static inline
+int MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
+                   MMG5_int ne,MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        len,lmax;
@@ -826,8 +826,8 @@ MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
  * Mesh optimization during insertion phase.
  *
  */
-static int
-MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
+static
+int MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   int           it,maxit;
   MMG5_int      nf,nnf,nnm,nm,nw;
   double        crit;
@@ -902,8 +902,8 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * than \ref MMG3D_LOPTS.
  *
  */
-static int
-MMG5_adpdel(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
+static
+int MMG5_adpdel(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
   int        ier;
   int        it,maxit,noptim;
   MMG5_int   ns,nc,ne,nnm,nm,nnf,nf,nnc,nns,nfilt,ifilt;
@@ -1016,8 +1016,8 @@ MMG5_adpdel(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) 
  * Mesh optimization for LES computation (improve the element skewness).
  *
  */
-static int
-MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
+static
+int MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   int       it,maxit;
   MMG5_int  nnf,nf,nw,nm,nnm;
   double    declic;
@@ -1110,8 +1110,8 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * Mesh optimization using egde swapping and point relocation.
  *
  */
-static int
-MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
+static
+int MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   MMG5_pTetra   pt;
   int           it,maxit;
   MMG5_int      nnf,nf,nw,k,nnm,nm;
@@ -1219,9 +1219,9 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * prescribed metric.
  *
  */
-static int
-MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
-                   MMG5_int * permNodGlob) {
+static
+int MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
+                       MMG5_int * permNodGlob) {
   MMG5_int  nnf,nf;
   int       warn,ns;
 
