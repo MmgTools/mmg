@@ -38,6 +38,8 @@ extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh
+ * \param init_cc 1 if we need to reinitialized \a cc field of tria because
+ * setadj has already been called (isosurf mode)
  *
  * \return 1 if success, 0 if fail
  *
@@ -45,7 +47,7 @@ extern int8_t ddb;
  * count number of subdomains or connected components
  *
  */
-int MMG2D_setadj(MMG5_pMesh mesh) {
+int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
   MMG5_int         *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
@@ -57,6 +59,13 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
 
   /** Step 1: Tags setting from triangles analysis */
   MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
+
+  /* Reinitialization of cc field (as we pass in steadj more than once) */
+  if ( init_cc ) {
+    for ( k=1; k<=mesh->nt; ++k ) {
+      mesh->tria[k].cc = 0;
+    }
+  }
 
   /* Initialization of the pile */
   ncc = 1;
@@ -87,7 +96,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
           pt1 = &mesh->tria[kk];
 
           if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
-            /* Remove BDY/REF and GEO edge tags but required tag must be keeped
+            /* Remove BDY/REF and GEO edge tags but required tag must be kept
              * (to preserve required tria info) */
             pt->tag[i] &= ~MG_REF;
             pt->tag[i] &= ~MG_BDY;
@@ -774,6 +783,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
+  
   /* Creation quadrilaterals adjacency relations in the mesh */
   if ( !MMG2D_hashQuad(mesh) ) {
      fprintf(stderr,"\n  ## Quadrilaterals hashing problem. Exit program.\n");
@@ -781,7 +791,16 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   }
 
   /* Set tags to triangles from geometric configuration */
-  if ( !MMG2D_setadj(mesh) ) {
+  int8_t init_cc  = 0;
+  if ( mesh->info.isosurf ) {
+    init_cc = 1;
+  }
+
+  /** \warning possible time improvment here: in lssurf mode, the second call of
+   * #MMG2D_setadj only adds BDY tag to points that has been inserted by the
+   * level-set splitting (the rest of the job of setadj has alredy be done by
+   * the first call).  */
+  if ( !MMG2D_setadj(mesh,init_cc) ) {
     fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return 0;
   }

@@ -42,8 +42,13 @@
  *
  * Compute key for the material in the hash table.
  */
-static MMG5_int MMG5_InvMat_key(MMG5_pInvMat pim,MMG5_int ref) {
-  return (ref - pim->offset);
+static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
+
+  int key = ref - pim->offset;
+
+  assert ( key >= 0 && "offset is not equal to maximal reference" );
+
+  return key;
 }
 
 /**
@@ -65,8 +70,8 @@ static int MMG5_InvMat_code(int k,int attr) {
  *
  * Get index of the parent material from lookup table.
  */
-static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,MMG5_int ref) {
-  MMG5_int key = MMG5_InvMat_key(pim,ref);
+static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
+  int key = MMG5_InvMat_key(pim,ref);
   /* The parent index is stored as 4*(k+1) */
   return (pim->lookup[key] / 4 - 1);
 }
@@ -80,8 +85,8 @@ static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,MMG5_int ref) {
  * Get attribute of the child material (nosplit/split/plus/minus) from lookup
  * table.
  */
-static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,MMG5_int ref) {
-  MMG5_int key = MMG5_InvMat_key(pim,ref);
+static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,int ref) {
+  int key = MMG5_InvMat_key(pim,ref);
   /* The nosplit/split/plus/minus attribute is stored as the rest of the
    * integer division. */
   return (pim->lookup[key] % 4);
@@ -94,7 +99,7 @@ static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,MMG5_int ref) {
  *
  * Check if a material reference already exists in the material lookup table.
  */
-static int MMG5_InvMat_check(MMG5_pInvMat pim,MMG5_int key) {
+static int MMG5_InvMat_check(MMG5_pInvMat pim,int key) {
   return pim->lookup[key] ? 0 : 1;
 }
 
@@ -107,8 +112,8 @@ static int MMG5_InvMat_check(MMG5_pInvMat pim,MMG5_int key) {
  * Raise an error if trying to overwrite a reference entry in the material
  * lookup table.
  */
-static void MMG5_InvMat_error(MMG5_pInvMat pim,MMG5_int ref,int k) {
-  fprintf(stderr,"\n   ## Error: Trying to overwrite material reference %" MMG5_PRId ""
+static void MMG5_InvMat_error(MMG5_pInvMat pim,int ref,int k) {
+  fprintf(stderr,"\n   ## Error: Trying to overwrite material reference %d"
     " (from LSReferences line %d) with another entry from LSReferences line %d."
     ,ref,MMG5_InvMat_getIndex(pim,ref)+1,k+1);
   fprintf(stderr,"\n             Check your LSReferences table: each material"
@@ -124,7 +129,7 @@ static void MMG5_InvMat_error(MMG5_pInvMat pim,MMG5_int ref,int k) {
  */
 static int MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
   MMG5_pMat pm;
-  MMG5_int  key;
+  int       key;
 
   /* Get material */
   pm = &mesh->info.mat[k];
@@ -175,7 +180,7 @@ static int MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
  * Get reference of the parent material in multimaterial mode.
  *.
  */
-static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,MMG5_int ref,MMG5_int *pref) {
+static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *pref) {
   MMG5_pMat pm;
   int       k;
 
@@ -183,7 +188,17 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,MMG5_int ref,M
   k = MMG5_InvMat_getIndex(pim,ref);
 
   /* Material not found in the table */
-  if( k == -1 ) return 0;
+  if( k == -1 ) {
+    fprintf(stderr,"\n  ## Warning: %s: material %d not found in table.\n",
+            __func__,ref);
+    fprintf(stderr,"              Please ensure that you provide all mesh"
+            " references in the material map\n"
+            "              (that is, the whole list of"
+            " surface materials in lssurf mode,\n"
+            "              and the whole list of domain"
+            " materials in ls mode).\n" );
+    return 0;
+  }
 
   /* Get the material in the lookup table and return the parent reference */
   pm = &mesh->info.mat[k];
@@ -201,7 +216,7 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,MMG5_int ref,M
  * split reference ref. Allow the call in non-multimaterial mode.
  *
  */
-int MMG5_getStartRef(MMG5_pMesh mesh,MMG5_int ref,MMG5_int *pref) {
+int MMG5_getStartRef(MMG5_pMesh mesh,int ref,int *pref) {
   MMG5_pInvMat pim;
 
   /* No multi-materials nor single material reference preservation */
@@ -227,12 +242,12 @@ int MMG5_getStartRef(MMG5_pMesh mesh,MMG5_int ref,MMG5_int *pref) {
  * Print materials lookup table.
  */
 static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
-  MMG5_int ref,pref;
+  int ref,pref;
 
   /* Scan all references in the table limits, some may not exist */
   for( ref = pim->offset; ref < pim->offset + pim->size; ref++ ) {
     if( !MMG5_InvMat_getParent(mesh,pim,ref,&pref) ) continue;
-    printf("%" MMG5_PRId " (%" MMG5_PRId "): %" MMG5_PRId " %d\n",ref,MMG5_InvMat_key(pim,ref),pref,
+    printf("%d (%d): %d %d\n",ref,MMG5_InvMat_key(pim,ref),pref,
         MMG5_InvMat_getAttrib(pim,ref));
   }
 }
@@ -317,7 +332,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   MMG5_pMat    pm;
   MMG5_pInvMat pim;
   int          k;
-  MMG5_int     refmax,refmin;
+  int          refmax,refmin;
 
   /* Nothing to do if no multi-material option */
   if( !mesh->info.nmat ) return 1;
@@ -336,7 +351,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   refmax = 0;
   refmin = INT_MAX;
 
-  /* Look for the max/min reference */
+  /* Look for the max/min reference provided in material table */
   for( k = 0; k < mesh->info.nmat; k++ ) {
     pm = &mesh->info.mat[k];
     /* Update max and min val for original ref */
@@ -349,6 +364,23 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
     /* Update max and min val with exterior ref */
     if( pm->rex > refmax ) refmax = pm->rex;
     if( pm->rex < refmin ) refmin = pm->rex;
+  }
+
+  /* Look for the max/min reference of tetra, triangles and edges provided
+   * inside the mesh (worst case to avoid memory error when checking the
+   * the inverse map). Looking at vertices is useless as
+   * we will never check for the mapping of reference of vertices */
+  for ( k=1; k<=mesh->ne; ++k ) {
+    if( mesh->tetra[k].ref > refmax ) refmax = mesh->tetra[k].ref;
+    if( mesh->tetra[k].ref < refmin ) refmin = mesh->tetra[k].ref;
+  }
+  for ( k=1; k<=mesh->nt; ++k ) {
+    if( mesh->tria[k].ref > refmax ) refmax = mesh->tria[k].ref;
+    if( mesh->tria[k].ref < refmin ) refmin = mesh->tria[k].ref;
+  }
+  for ( k=1; k<=mesh->na; ++k ) {
+    if( mesh->edge[k].ref > refmax ) refmax = mesh->edge[k].ref;
+    if( mesh->edge[k].ref < refmin ) refmin = mesh->edge[k].ref;
   }
 
   /* Get span of the lookup table */
@@ -366,7 +398,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
       return 0;
   }
 
-//  MMG5_InvMat_print(mesh,pim);
+  // MMG5_InvMat_print(mesh,pim);
   return 1;
 }
 
@@ -374,14 +406,14 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
  * \param mesh   pointer toward the mesh structure.
  * \param ref    initial reference.
  * \param refint internal reference after ls discretization.
- * \param refint internal reference after ls discretization.
+ * \param refext external reference after ls discretization.
  * \return 1 if entity can be splitted, 0 if cannot be splitted.
  *
  * Identify whether an entity with reference ref should be split, and the
  * labels of the resulting entities.
  *
  */
-int MMG5_isSplit(MMG5_pMesh mesh,MMG5_int ref,MMG5_int *refint,MMG5_int *refext) {
+int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
   MMG5_pInvMat pim;
   MMG5_pMat    pm;
   int          k;
@@ -417,7 +449,7 @@ int MMG5_isSplit(MMG5_pMesh mesh,MMG5_int ref,MMG5_int *refint,MMG5_int *refext)
  * Identify whether an entity with reference ref should not be split.
  *
  */
-int MMG5_isNotSplit(MMG5_pMesh mesh,MMG5_int ref) {
+int MMG5_isNotSplit(MMG5_pMesh mesh,int ref) {
   MMG5_pInvMat pim;
 
   /* Split material by default if not in multi-material mode */
@@ -441,7 +473,7 @@ int MMG5_isNotSplit(MMG5_pMesh mesh,MMG5_int ref) {
  * Identify whether a face is on the discrete level set or not.
  *
  */
-int MMG5_isLevelSet(MMG5_pMesh mesh,MMG5_int ref0,MMG5_int ref1) {
+int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
   MMG5_pInvMat pim;
   int8_t       found0,found1;
 

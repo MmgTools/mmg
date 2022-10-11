@@ -349,7 +349,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
       continue;
     }
 
-    /* Otherwise there is no reason to have required tags on edges */
+    /* Otherwise there is no reason to have required tags on tria edges */
     for ( ia = 0; ia < 3; ++ia ) {
       pt->tag[ia] &= ~MG_REQ;
     }

@@ -879,7 +879,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
 int MMG3D_analys(MMG5_pMesh mesh) {
   MMG5_Hash hash;
   int       ier;
-
+  
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** SURFACE ANALYSIS\n");

@@ -319,6 +319,16 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           }
           else i--;
         }
+        else if ( !strcmp(argv[i],"-lssurf") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isosurf,1) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
+        }
         break;
       case 'm':
         if ( !strcmp(argv[i],"-met") ) {
@@ -549,7 +559,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   }
 
   /* adp mode: if the metric name has been stored in sol, move it in met */
-  if ( met->namein==NULL && sol && sol->namein && !(mesh->info.iso || mesh->info.lag>=0) ) {
+  if ( met->namein==NULL && sol && sol->namein && !(mesh->info.iso || mesh->info.isosurf || mesh->info.lag>=0) ) {
     if ( !MMG3D_Set_inputSolName(mesh,met,sol->namein) )
       return 0;
     MMG5_DEL_MEM(mesh,sol->namein);
@@ -557,7 +567,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 
   /* default : store solution (resp. displacement) name in iso
    * (resp. lagrangian) mode, metric name otherwise */
-  tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  tmp = ( mesh->info.iso || mesh->info.isosurf || mesh->info.lag >=0 ) ? sol : met;
   assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMG3D_Set_inputSolName(mesh,tmp,"") ) { return 0; }
@@ -682,7 +692,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG_FSCANF(in,"%d",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
-
+      
       for (i=0; i<mesh->info.nbr; i++) {
         MMG_FSCANF(in,"%" MMG5_PRId "",&br);
         if ( !MMG3D_Set_lsBaseReference(mesh,met,br) ) {

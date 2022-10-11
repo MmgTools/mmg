@@ -258,7 +258,7 @@ typedef struct {
   double   hmin; /*!< minimal size for edges */
   double   hmax; /*!< maximal size for edges */
   double   hausd; /*!< Hausdorff value */
-  MMG5_int ref; /*!< Reference value */
+  int      ref; /*!< Reference value */
   int8_t   elt; /*!< Element type */
 } MMG5_Par; typedef MMG5_Par * MMG5_pPar;
 
@@ -269,18 +269,16 @@ typedef struct {
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
-  double   n[3]; /*!< Unitary normal (regular points) or unitary tangent (ridge
-                  * and ref points) for mmgs and unitary tangent (if needed) for
-                  * mmg3d */
+  double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
 #ifdef USE_POINTMAP
-  MMG5_int src; /*!< Source point in input mesh */
+  int      src; /*!< Source point in input mesh */
 #endif
-  MMG5_int ref; /*!< Reference of point */
-  MMG5_int xp; /*!< Surface point number */
-  MMG5_int tmp; /*!< Index of point in the saved mesh (we don't count
+  int      ref; /*!< Reference of point */
+  int      xp; /*!< Surface point number */
+  int      tmp; /*!< Index of point in the saved mesh (we don't count
                   the unused points)*/
-  MMG5_int flag; /*!< Flag to know if we have already treated the point */
-  MMG5_int s;
+  int      flag; /*!< Flag to know if we have already treated the point */
+  int      s;
   int16_t  tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
   int8_t   tagdel; /*!< Tag for delaunay */
@@ -303,9 +301,9 @@ typedef MMG5_xPoint * MMG5_pxPoint;
  * \brief Structure to store edges of a MMG mesh.
  */
 typedef struct {
-  MMG5_int a,b; /*!< Extremities of the edge */
-  MMG5_int ref; /*!< Reference of the edge */
-  MMG5_int base; /*!< 2Donly: used to store the tria+ tria edge indices
+  int      a,b; /*!< Extremities of the edge */
+  int      ref; /*!< Reference of the edge */
+  int      base; /*!< 2Donly: used to store the tria+ tria edge indices
                    that allow to access to the edge */
   int16_t  tag; /*!< Binary flags */
 } MMG5_Edge;
@@ -331,14 +329,14 @@ typedef MMG5_Edge * MMG5_pEdge;
  */
 typedef struct {
   double   qual;   /*Quality of the triangle*/
-  MMG5_int v[3]; /*!< Vertices of the triangle */
-  MMG5_int ref; /*!< Reference of the triangle */
-  MMG5_int base;
-  MMG5_int cc; /*!< used to store the tetra + tetra face indices
+  int      v[3]; /*!< Vertices of the triangle */
+  int      ref; /*!< Reference of the triangle */
+  int      base;
+  int      cc; /*!< used to store the tetra + tetra face indices
                  that allow to access to the tria */
-  MMG5_int edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
+  int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
-  MMG5_int flag;
+  int      flag;
   int16_t  tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
   } MMG5_Tria;
@@ -364,10 +362,10 @@ typedef MMG5_Tria * MMG5_pTria;
  *
  */
 typedef struct {
-  MMG5_int v[4]; /*!< Vertices of the quadrangle */
-  MMG5_int ref; /*!< Reference of the quadrangle */
-  MMG5_int base;
-  MMG5_int edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
+  int      v[4]; /*!< Vertices of the quadrangle */
+  int      ref; /*!< Reference of the quadrangle */
+  int      base;
+  int      edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of quadrangle */
   int16_t  tag[4]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of quadrangle */
@@ -400,13 +398,13 @@ typedef MMG5_Quad * MMG5_pQuad;
  */
 typedef struct {
   double   qual; /*!< Quality of the element */
-  MMG5_int v[4]; /*!< Vertices of the tetrahedron */
-  MMG5_int ref; /*!< Reference of the tetrahedron */
-  MMG5_int base;
-  MMG5_int mark; /*!< Used for delaunay */
-  MMG5_int xt; /*!< Index of the surface \ref MMG5_xTetra associated to
+  int      v[4]; /*!< Vertices of the tetrahedron */
+  int      ref; /*!< Reference of the tetrahedron */
+  int      base;
+  int      mark; /*!< Used for delaunay */
+  int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
                  the tetrahedron*/
-  MMG5_int flag;
+  int      flag;
   int16_t  tag;
 } MMG5_Tetra;
 typedef MMG5_Tetra * MMG5_pTetra;
@@ -416,9 +414,9 @@ typedef MMG5_Tetra * MMG5_pTetra;
  * \brief Structure to store the surface tetrahedra of a MMG mesh.
  */
 typedef struct {
-  MMG5_int ref[4]; /*!< ref[i] is the reference of the opposite triangle to the
+  int      ref[4]; /*!< ref[i] is the reference of the opposite triangle to the
                      \f$i^{th}\f$ vertex of the tetrahedron;*/
-  MMG5_int edg[6]; /*!< edg[i] contains the reference of the
+  int      edg[6]; /*!< edg[i] contains the reference of the
                      \f$i^{th}\f$ edge of the tetrahedron */
   int16_t  ftag[4]; /*!< ftag[i] contains the tag associated to the
                       \f$i^{th}\f$ face of the tetrahedron */
@@ -460,11 +458,11 @@ typedef MMG5_xTetra * MMG5_pxTetra;
  *
  */
 typedef struct {
-  MMG5_int v[6]; /*!< Vertices of the prism */
-  MMG5_int ref; /*!< Reference of the prism */
-  MMG5_int base;
-  MMG5_int flag;
-  MMG5_int xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
+  int      v[6]; /*!< Vertices of the prism */
+  int      ref; /*!< Reference of the prism */
+  int      base;
+  int      flag;
+  int      xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
                   the prism*/
   int8_t   tag;
 } MMG5_Prism;
@@ -475,15 +473,15 @@ typedef MMG5_Prism * MMG5_pPrism;
  * \brief Structure to store the surface prism of a MMG mesh.
  */
 typedef struct {
-  MMG5_int ref[5]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5},
+  int      ref[5]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5},
                     * ref[2]={0,3,4,1}, ref[3]={0,2,5,1} */
-  MMG5_int edg[9]; /*!< edges references:
+  int      edg[9]; /*!< edges references:
                     * edg[0]={0,1},edg[1]={0,2},edg[2]={0,3},edg[3]={1,2},
                     * edg[4]={1,4},edg[5]={2,5},edg[6]={3,4},edg[7]={3,5},
                     * edg[8]={4,5}*/
-  int16_t  ftag[5]; /*!< ftag[i] contains the tag associated to the
+  int16_t ftag[5]; /*!< ftag[i] contains the tag associated to the
                       \f$i^{th}\f$ face of the prism */
-  int16_t  tag[9]; /*!< tag[i] contains the tag associated to the
+  int16_t tag[9]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of the prism */
 } MMG5_xPrism;
 typedef MMG5_xPrism * MMG5_pxPrism;
@@ -493,8 +491,8 @@ typedef MMG5_xPrism * MMG5_pxPrism;
  * \brief To store user-defined references in the mesh (useful in LS mode)
  */
 typedef struct {
-  int8_t   dospl;
-  MMG5_int ref,rin,rex;
+  int8_t dospl;
+  int    ref,rin,rex;
 } MMG5_Mat;
 typedef MMG5_Mat * MMG5_pMat;
 
@@ -503,9 +501,9 @@ typedef MMG5_Mat * MMG5_pMat;
  * \brief To store lookup table for references in the mesh (useful in LS mode)
  */
 typedef struct {
-  MMG5_int offset;
-  MMG5_int size;
-  int      *lookup;
+  int offset;
+  int size;
+  int *lookup;
 } MMG5_InvMat;
 typedef MMG5_InvMat * MMG5_pInvMat;
 
@@ -517,20 +515,21 @@ typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
-  MMG5_int      *br; /*!< list of based references to which an implicit surface can be attached */
-  MMG5_int      isoref; /*!< isovalue reference in ls mode */
-  MMG5_int      nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   int           mem,npar,npari;
   int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
+  int           *br; /*!< list of based references to which an implicit surface can be attached */
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */
   int           nmati,nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
+  int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   int8_t        nreg; /*!< normal regularization */
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
+  int           isoref; /*!< isovalue reference in ls mode */
+  int8_t        isosurf; /*!< level-set discretization mode on the surface */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
@@ -541,7 +540,7 @@ typedef struct {
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  uint8_t       ani, optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t       optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
   uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
@@ -552,11 +551,11 @@ typedef struct {
  * \brief Cell of the hash table of geom edges.
  */
 typedef struct {
-  MMG5_int     a; /*!< First extremity of edge */
-  MMG5_int     b;  /*!< Second extremity of edge */
-  MMG5_int     ref; /*!< Reference or idx (2D) of edge */
-  MMG5_int     nxt; /*!< Next element of hash table */
-  int16_t      tag; /*!< tag of edge */
+  int     a; /*!< First extremity of edge */
+  int     b;  /*!< Second extremity of edge */
+  int     ref; /*!< Reference or idx (2D) of edge */
+  int     nxt; /*!< Next element of hash table */
+  int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
 
 /**
@@ -565,7 +564,7 @@ typedef struct {
  */
 typedef struct {
   MMG5_hgeom  *geom;
-  MMG5_int    siz,max,nxt;
+  int         siz,max,nxt;
 } MMG5_HGeom;
 
 
@@ -574,9 +573,9 @@ typedef struct {
  * \brief Used to hash edges (memory economy compared to \ref MMG5_hgeom).
  */
 typedef struct {
-  MMG5_int   a,b,nxt;
-  MMG5_int   k; /*!< k = point along edge a b or triangle index */
-  MMG5_int   s;
+  int   a,b,nxt;
+  int   k; /*!< k = point along edge a b or triangle index */
+  int   s;
 } MMG5_hedge;
 
 /**
@@ -585,8 +584,8 @@ typedef struct {
  * instead of \ref MMG5_hgeom (memory economy).
  */
 typedef struct {
-  MMG5_int     siz,max,nxt;
-  MMG5_hedge   *item;
+  int     siz,max,nxt;
+  MMG5_hedge  *item;
 } MMG5_Hash;
 
 /**
@@ -601,35 +600,36 @@ typedef struct {
   int       ver; /*!< Version of the mesh file */
   int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
-  MMG5_int  npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  MMG5_int  nquad,nprism; /*!< number of quadrangles and prisms */
-  int       nsols; /*!< number of solutions (metric excluded) in the solution file (lower than \a NSOLS_MAX)*/
-  MMG5_int  nc1;
-  MMG5_int  base; /*!< Used with \a flag to know if an entity has been
+  int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
+  int       nquad,nprism; /* number of quadrangles and prisms */
+  int       nsols; /* number of solutions (metric excluded) in the solution file */
+  int       nc1;
+
+  int       base; /*!< Used with \a flag to know if an entity has been
                     treated */
-  MMG5_int  mark; /*!< Flag for delaunay (to know if an entity has
+  int       mark; /*!< Flag for delaunay (to know if an entity has
                     been treated) */
-  MMG5_int  xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
-  MMG5_int  npnil; /*!< Index of first unused point */
-  MMG5_int  nenil; /*!< Index of first unused element */
-  MMG5_int  nanil; /*!< Index of first unused edge (2d only)*/
-  MMG5_int  *adja; /*!< Table of tetrahedron adjacency: if
+  int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
+  int       npnil; /*!< Index of first unused point */
+  int       nenil; /*!< Index of first unused element */
+  int       nanil; /*!< Index of first unused edge (2d only)*/
+  int      *adja; /*!< Table of tetrahedron adjacency: if
                     \f$adja[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
                     faces \a j and \a l (resp.) */
-  MMG5_int  *adjt; /*!< Table of triangles adjacency: if
+  int      *adjt; /*!< Table of triangles adjacency: if
                     \f$adjt[3*(i-1)+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ triangles are adjacent and share their
                     edges \a j and \a l (resp.) */
-  MMG5_int  *adjapr; /*!< Table of prisms adjacency: if
+  int      *adjapr; /*!< Table of prisms adjacency: if
                     \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
-  MMG5_int  *adjq; /*!< Table of quadrangles adjacency: if
+  int      *adjq; /*!< Table of quadrangles adjacency: if
                     \f$adjq[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ quadrilaterals are adjacent and share their
                     edges \a j and \a l (resp.) */
-  int       *ipar;  /*!< Store indices of the local parameters */
+  int      *ipar;   /*!< Store indices of the local parameters */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
@@ -654,16 +654,16 @@ typedef MMG5_Mesh  * MMG5_pMesh;
 typedef struct {
   int       ver; /* Version of the solution file */
   int       dim; /* Dimension of the solution file*/
-  MMG5_int  np; /* Number of points of the solution */
-  MMG5_int  npmax; /* Maximum number of points */
-  MMG5_int  npi; /* Temporary number of points (internal use only) */
+  int       np; /* Number of points of the solution */
+  int       npmax; /* Maximum number of points */
+  int       npi; /* Temporary number of points (internal use only) */
   int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
   int       entities; /* Type of the solution (scalar, vectorial of tensorial) */
   double    *m; /*!< Solution values */
   double    umin,umax; /*!<Min/max values for the solution */
-  char      *namein; /*!< Input solution file name */
-  char      *nameout; /*!< Output solution file name */
+  char     *namein; /*!< Input solution file name */
+  char     *nameout; /*!< Output solution file name */
 } MMG5_Sol;
 typedef MMG5_Sol * MMG5_pSol;
 

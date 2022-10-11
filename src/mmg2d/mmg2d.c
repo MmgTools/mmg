@@ -334,7 +334,7 @@ int main(int argc,char *argv[]) {
   if ( mesh->info.lag >= 0 ) {
     sol = disp;
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     sol = ls;
   }
   else {
@@ -375,7 +375,7 @@ int main(int argc,char *argv[]) {
       MMG5_DEL_MEM(mesh,ls->namein);
     }
 
-    if ( mesh->info.lag >= 0 || mesh->info.iso ) {
+    if ( mesh->info.lag >= 0 || mesh->info.iso || mesh->info.isosurf ) {
       /* displacement or isovalue are mandatory */
       if (  MMG2D_loadSol(mesh,sol,sol->namein) < 1 ) {
         /* displacement or isovalue are mandatory */
@@ -391,7 +391,7 @@ int main(int argc,char *argv[]) {
       }
     }
     /* In iso mode: read metric if any */
-    if ( mesh->info.iso && met->namein ) {
+    if ( ( mesh->info.iso || mesh->info.isosurf ) && met->namein ) {
       if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
@@ -419,7 +419,7 @@ int main(int argc,char *argv[]) {
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     if ( ls->m == NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
@@ -446,7 +446,7 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_mmg2dmov(mesh,met,disp);
   }
   /* Level Set mode */
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     ier = MMG2D_mmg2dls(mesh,ls,met);
   }
   /* Mesh generation mode */
