@@ -136,6 +136,9 @@ enum MMG3D_Param {
  *
  * \remark No fortran interface to allow variadic arguments.
  *
+ * \warning detected bugs:
+ *   - some points along open-boundaries end up with a normal (while they should not)
+ *
  */
  LIBMMG3D_EXPORT int MMG3D_Init_mesh(const int starter,...);
 /**
@@ -253,13 +256,14 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typEntity,np,typSol\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: np\n
+ * >     INTEGER, INTENT(IN)           :: typEntity,typSol\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
-                         int np, int typSol);
+                         MMG5_int np, int typSol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -277,14 +281,15 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: nsols,nentities\n
+ * >     INTEGER, INTENT(IN)           :: nsols\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: nentities\n
  * >     INTEGER, INTENT(IN)           :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
-                                                   int nentities, int *typSol);
+                                                   MMG5_int nentities, int *typSol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -303,13 +308,13 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_MESHSIZE(mesh,np,ne,nprism,nt,nquad,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER                       :: np,ne,nprism,nt,nquad,na\n
+ * >     INTEGER(MMG5F_INT)            :: np,ne,nprism,nt,nquad,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT  int  MMG3D_Set_meshSize(MMG5_pMesh mesh,int np,int ne,int nprism,
-                                          int nt,int nquad,int na);
+  LIBMMG3D_EXPORT int  MMG3D_Set_meshSize(MMG5_pMesh mesh,MMG5_int np,MMG5_int ne,MMG5_int nprism,
+                                          MMG5_int nt,MMG5_int nquad,MMG5_int na);
 
 /* init structure datas */
 /**
@@ -328,13 +333,13 @@ enum MMG3D_Param {
  * >   SUBROUTINE MMG3D_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(IN)      :: c0,c1,c2\n
- * >     INTEGER, INTENT(IN)           :: ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT  int  MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-                                        double c2, int ref,int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
+                                        double c2, MMG5_int ref,MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param vertices table of the points coor.
@@ -351,13 +356,13 @@ enum MMG3D_Param {
  *
  * > !  SUBROUTINE MMG3D_SET_VERTICES(mesh,vertices,refs,retval)\n
  * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    REAL(KIND=8), INTENT(IN) :: vertices(*)\n
- * > !    INTEGER,INTENT(IN)       :: refs(*)\n
+ * > !    REAL(KIND=8), INTENT(IN)      :: vertices(*)\n
+ * > !    INTEGER(MMG5F_INT),INTENT(IN) :: refs(*)\n
  * > !    INTEGER, INTENT(OUT)          :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT  int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
+  LIBMMG3D_EXPORT int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG5_int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of tetrahedron.
@@ -374,13 +379,14 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,v2,v3,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
-                                            int v2, int v3, int ref, int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
+                                            MMG5_int v2, MMG5_int v3, MMG5_int ref, MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tetra vertices of the tetras of the mesh
@@ -395,14 +401,15 @@ enum MMG3D_Param {
  * order to allow to pass \%val(0) instead of the refs array)
  *
  * > !  SUBROUTINE MMG3D_SET_TETRAHEDRA(mesh,tetra,refs,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    INTEGER, DIMENSION(*), INTENT(IN) :: tetra,refs\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*), INTENT(IN) :: tetra\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*), INTENT(IN) :: refs\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra,
-                                            int *refs);
+  LIBMMG3D_EXPORT int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra,
+                                            MMG5_int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of prism.
@@ -421,13 +428,13 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PRISM(mesh,v0,v1,v2,v3,v4,v5,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: v0,v1,v2,v3,v4,v5,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,v2,v3,v4,v5,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
-                                     int v2, int v3, int v4, int v5, int ref, int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
+                                      MMG5_int v2, MMG5_int v3, MMG5_int v4, MMG5_int v5, MMG5_int ref, MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param prisms vertices of the prisms of the mesh
@@ -442,14 +449,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * order to allow to pass \%val(0) instead of the refs array)
  *
  * > !  SUBROUTINE MMG3D_SET_PRISMS(mesh,prisms,refs,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    INTEGER, DIMENSION(*), INTENT(IN) :: prisms,refs\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*), INTENT(IN) :: prisms\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*), INTENT(IN) :: refs\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms,
-                                        int *refs);
+  LIBMMG3D_EXPORT int  MMG3D_Set_prisms(MMG5_pMesh mesh, MMG5_int *prisms,
+                                        MMG5_int *refs);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -466,13 +474,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: v0,v1,v2,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)         :: v0,v1,v2,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
-                                         int v2, int ref,int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
+                                          MMG5_int v2, MMG5_int ref,MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the tria vertices
@@ -487,13 +495,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * order to allow to pass \%val(0) instead of the refs array)
  *
  * > !  SUBROUTINE MMG3D_SET_TRIANGLES(mesh,tria,refs,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh\n
- * > !    INTEGER,DIMENSION(*), INTENT(IN) :: tria,refs\n
- * > !    INTEGER, INTENT(OUT)             :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * > !    INTEGER(MMG5F_INT),DIMENSION(*), INTENT(IN) :: tria\n
+ * > !    INTEGER(MMG5F_INT),DIMENSION(*), INTENT(IN) :: refs\n
+ * > !    INTEGER, INTENT(OUT)                        :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+  LIBMMG3D_EXPORT int  MMG3D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of quadrilateral.
@@ -510,13 +519,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,v2,v3,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
-                                              int v2, int v3, int ref,int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
+                                               MMG5_int v2, MMG5_int v3, MMG5_int ref,MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quads vertices
@@ -531,13 +540,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * order to allow to pass \%val(0) instead of the refs array)
  *
  * > !  SUBROUTINE MMG3D_SET_QUADRILATERALS(mesh,quads,refs,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh\n
- * > !    INTEGER,DIMENSION(*), INTENT(IN) :: quads,refs\n
- * > !    INTEGER, INTENT(OUT)             :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * > !    INTEGER(MMG5F_INT),DIMENSION(*), INTENT(IN) :: quads\n
+ * > !    INTEGER(MMG5F_INT),DIMENSION(*), INTENT(IN) :: refs\n
+ * > !    INTEGER, INTENT(OUT)                        :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs);
+ LIBMMG3D_EXPORT int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, MMG5_int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first extremity of the edge.
@@ -552,12 +562,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: v0,v1,ref,pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
+ LIBMMG3D_EXPORT int  MMG3D_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int ref,MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -568,12 +578,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_CORNER(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_corner(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_corner(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -586,12 +596,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * >   SUBROUTINE MMG3D_UNSET_CORNER(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_corner(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -603,12 +613,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDVERTEX(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -620,12 +630,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -637,12 +647,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRON(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -655,12 +665,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDTETRAHEDRON(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -672,14 +682,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRA(mesh,reqIdx,nreq,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
- * >     INTEGER, INTENT(IN)           :: nreq\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)              :: nreq\n
+ * >     INTEGER, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, MMG5_int *reqIdx, MMG5_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -692,14 +702,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDTETRAHEDRA(mesh,reqIdx,nreq,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
- * >     INTEGER, INTENT(IN)           :: nreq\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)              :: nreq\n
+ * >     INTEGER, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, MMG5_int *reqIdx, MMG5_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -711,12 +721,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -728,12 +738,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -745,14 +755,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTRIANGLES(mesh,reqIdx,nreq,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
- * >     INTEGER, INTENT(IN)           :: nreq\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)              :: nreq\n
+ * >     INTEGER, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, MMG5_int *reqIdx, MMG5_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -764,14 +774,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDTRIANGLES(mesh,reqIdx,nreq,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
- * >     INTEGER, INTENT(IN)           :: nreq\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)              :: nreq\n
+ * >     INTEGER, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, MMG5_int *reqIdx, MMG5_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -784,12 +794,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -802,12 +812,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_PARALLELTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -820,14 +830,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLES(mesh,parIdx,npar,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, DIMENSION(*),INTENT(IN) :: parIdx\n
- * >     INTEGER, INTENT(IN)           :: npar\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(*),INTENT(IN) :: parIdx\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)              :: npar\n
+ * >     INTEGER, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+ LIBMMG3D_EXPORT int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, MMG5_int *parIdx, MMG5_int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -840,14 +850,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_PARALLELTRIANGLES(mesh,parIdx,npar,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, DIMENSION(*),INTENT(IN) :: parIdx\n
- * >     INTEGER, INTENT(IN)           :: npar\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)               :: mesh\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(*),INTENT(IN) :: parIdx\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)              :: npar\n
+ * >     INTEGER, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, MMG5_int *parIdx, MMG5_int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -859,12 +869,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_RIDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_ridge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_ridge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -876,12 +886,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_RIDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_ridge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_ridge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -893,12 +903,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -910,12 +920,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
+ LIBMMG3D_EXPORT int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -931,14 +941,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     REAL(KIND=8), INTENT(IN)      :: n0,n1,n2\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1,
-                                               double n2) ;
+  LIBMMG3D_EXPORT int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double n0, double n1,
+                                                double n2) ;
 
 /**
  * \param met pointer toward the sol structure.
@@ -953,12 +963,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * >   SUBROUTINE MMG3D_SET_SCALARSOL(met,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: s\n
- * >     INTEGER, INTENT(IN)           :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,MMG5_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions values.
@@ -969,13 +979,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SCALARSOLS(met,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)         :: met\n
  * >     REAL(KIND=8),DIMENSION(*), INTENT(IN) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                  :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
+  LIBMMG3D_EXPORT int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
 /**
  * \param met pointer toward the sol structure.
  * \param vx x value of the vectorial solution.
@@ -991,13 +1001,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * >   SUBROUTINE MMG3D_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: vx,vy,vz\n
- * >     INTEGER, INTENT(IN)           :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
-                                         int pos);
+  LIBMMG3D_EXPORT int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
+                                          MMG5_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the vectorial solutions
@@ -1008,9 +1018,9 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_VECTORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
- * >     REAL(KIND=8),DIMENSION(*), INTENT(IN)      :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)         :: met\n
+ * >     REAL(KIND=8),DIMENSION(*), INTENT(IN) :: sols\n
+ * >     INTEGER, INTENT(OUT)                  :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1033,13 +1043,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * >   SUBROUTINE MMG3D_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: m11,m12,m13,m22,m23,m33\n
- * >     INTEGER, INTENT(IN)           :: pos\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
  LIBMMG3D_EXPORT int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
-                                         double m22,double m23, double m33, int pos);
+                                         double m22,double m23, double m33, MMG5_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the tensorial solutions.
@@ -1050,13 +1060,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TENSORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)         :: met\n
  * >     REAL(KIND=8),DIMENSION(*), INTENT(IN) :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                  :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
+  LIBMMG3D_EXPORT int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1071,14 +1081,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     INTEGER, INTENT(IN)           :: i,pos\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)         :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1093,14 +1104,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     INTEGER, INTENT(IN)           :: i\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  LIBMMG3D_EXPORT int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1137,7 +1148,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
 /** functions to set parameters */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward the sol structure (unused).
  * \param iparam integer parameter to set (see \a MMG3D_Param structure).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -1146,17 +1157,19 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: iparam,val\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     MMG5_DATA_PTR_T                :: sol\n
+ * >     INTEGER, INTENT(IN)            :: iparam\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: val\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
  LIBMMG3D_EXPORT int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
-                                           int val);
+                                           MMG5_int val);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward the sol structure (unused).
  * \param dparam double parameter to set (see \a MMG3D_Param structure).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -1165,7 +1178,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     MMG5_DATA_PTR_T               :: sol\n
  * >     INTEGER, INTENT(IN)           :: dparam\n
  * >     REAL(KIND=8), INTENT(IN)      :: val\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
@@ -1191,14 +1205,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * >   SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,& \n
  * >                                       hmin,hmax,hausd,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typ,ref\n
+ * >     INTEGER, INTENT(IN)           :: typ\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref\n
  * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
-                                               int ref,double hmin,double hmax,double hausd);
+  LIBMMG3D_EXPORT int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
+                                                MMG5_int ref,double hmin,double hmax,double hausd);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1214,13 +1229,36 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: ref,split,rin,rex\n
+ * >     INTEGER, INTENT(IN)           :: split\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rin,rex\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                                         int rin, int rex);
+ LIBMMG3D_EXPORT int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
+                                         MMG5_int rin, MMG5_int rex);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param br new level-set base reference.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set a new level-set base reference of ref \a br in ls discretization
+ * mode. Base references are boundary conditions to which implicit domain can
+ * be attached. All implicit volumes that are not attached to listed base
+ * references are deleted as spurious volumes by the \a rmc option.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_LSBASEREFERENCE(mesh,sol,br,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER(MMG5F_INT)            :: br\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int br);
+
 
 /** recover datas */
 /**
@@ -1239,13 +1277,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_MESHSIZE(mesh,np,ne,nprism,nt,nquad,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER                       :: np,ne,nprism,nt,nquad,na\n
+ * >     INTEGER(MMG5F_INT)            :: np,ne,nprism,nt,nquad,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne,int *nprism, int* nt,
-                                         int* nquad, int* na);
+  LIBMMG3D_EXPORT int  MMG3D_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* ne,MMG5_int *nprism, MMG5_int* nt,
+                                          MMG5_int* nquad, MMG5_int* na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1261,13 +1299,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER                       :: typEntity,np,typSol\n
+ * >     INTEGER                       :: typEntity,typSol\n
+ * >     INTEGER(MMG5F_INT)            :: np\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
-                                        int* np,int* typSol);
+  LIBMMG3D_EXPORT int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
+                                         MMG5_int* np,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of sol structure.
@@ -1283,14 +1322,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER                       :: nsols,nentities\n
+ * >     INTEGER                       :: nsols\n
+ * >     INTEGER(MMG5F_INT)            :: nentities\n
  * >     INTEGER                       :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
-                                                   int* nentities,int* typSol);
+  LIBMMG3D_EXPORT int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
+                                                    MMG5_int* nentities,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first
@@ -1312,13 +1352,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * >                               retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2\n
- * >     INTEGER                       :: ref,isCorner,isRequired\n
+ * >     INTEGER(MMG5F_INT)            :: ref\n
+ * >     INTEGER                       :: isCorner,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
-                                       int* ref,int* isCorner, int* isRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
+                                        MMG5_int* ref,int* isCorner, int* isRequired);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1338,13 +1379,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * >   SUBROUTINE MMG3D_GETBYIDX_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,idx,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2\n
- * >     INTEGER                       :: ref,isCorner,isRequired,idx\n
+ * >     INTEGER(MMG5F_INT)            :: ref,idx\n
+ * >     INTEGER                       :: isCorner,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-                                           int* isCorner, int* isRequired,int idx);
+ LIBMMG3D_EXPORT int  MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, MMG5_int* ref,
+                                            int* isCorner, int* isRequired,MMG5_int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1367,15 +1409,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * > ! SUBROUTINE MMG3D_GET_VERTICES(mesh,vertices,refs,areCorners,&\n
  * > !                               areRequired,retval)\n
- * > !   MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !   MMG5_DATA_PTR_T,INTENT(INOUT)          :: mesh\n
  * > !   REAL(KIND=8),DIMENSION(*), INTENT(OUT) :: vertices\n
- * > !   INTEGER, DIMENSION(*)                  :: refs,areCorners,areRequired\n
- * > !   INTEGER, INTENT(OUT)          :: retval\n
+ * > !   INTEGER(MMG5F_INT), DIMENSION(*)       :: refs\n
+ * > !   INTEGER, DIMENSION(*)                  :: areCorners,areRequired\n
+ * > !   INTEGER, INTENT(OUT)                   :: retval\n
  * > ! END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
-                                         int* areCorners, int* areRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_int* refs,
+                                          int* areCorners, int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of tetrahedron.
@@ -1393,15 +1436,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,isRequired,&\n
  * >                                    retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: v0,v1,v2,v3\n
- * >     INTEGER                       :: ref,isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: v0,v1,v2,v3\n
+ * >     INTEGER(MMG5F_INT)             :: ref\n
+ * >     INTEGER                        :: isRequired\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                                            int* v3,int* ref, int* isRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,
+                                             MMG5_int* v3,MMG5_int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tetra pointer toward the table of the tetrahedra vertices.
@@ -1420,15 +1464,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * > !  SUBROUTINE MMG3D_GET_TETRAHEDRA(mesh,tetra,refs,areRequired,&\n
  * > !                                   retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: tetra\n
- * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*),INTENT(OUT) :: tetra\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*)             :: refs\n
+ * > !    INTEGER, DIMENSION(*)                        :: areRequired\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int* tetra,int* refs,
-                                           int* areRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, MMG5_int* tetra,MMG5_int* refs,
+                                            int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of prism.
@@ -1448,15 +1493,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_PRISM(mesh,v0,v1,v2,v3,v4,v5,ref,isRequired,&\n
  * >                                    retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: v0,v1,v2,v3,v4,v5\n
- * >     INTEGER                       :: ref,isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)   :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT) :: v0,v1,v2,v3,v4,v5\n
+ * >     INTEGER(MMG5F_INT)              :: ref\n
+ * >     INTEGER                         :: isRequired\n
+ * >     INTEGER, INTENT(OUT)            :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                                      int* v3,int* v4,int* v5,int* ref, int* isRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_prism(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,
+                                       MMG5_int* v3,MMG5_int* v4,MMG5_int* v5,MMG5_int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param prisms pointer toward the table of the prisms vertices.
@@ -1475,15 +1521,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * > !  SUBROUTINE MMG3D_GET_PRISMS(mesh,prisms,refs,areRequired,&\n
  * > !                              retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: prisms\n
- * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*),INTENT(OUT) :: prisms\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*)             :: refs\n
+ * > !    INTEGER, DIMENSION(*)                        :: areRequired\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_prisms(MMG5_pMesh mesh, int* prisms,int* refs,
-                                       int* areRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_prisms(MMG5_pMesh mesh, MMG5_int* prisms,MMG5_int* refs,
+                                        int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of triangle.
@@ -1498,15 +1545,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TRIANGLE(mesh,v0,v1,v2,ref,isRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: v0,v1,v2\n
- * >     INTEGER                       :: ref,isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)   :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT) :: v0,v1,v2\n
+ * >     INTEGER(MMG5F_INT)              :: ref\n
+ * >     INTEGER                         :: isRequired\n
+ * >     INTEGER, INTENT(OUT)            :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
-                                         int* isRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref,
+                                          int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the triangles vertices
@@ -1524,15 +1572,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * instead of the refs or areRequired arrays)
  *
  * > !  SUBROUTINE MMG3D_GET_TRIANGLES(mesh,tria,refs,areRequired,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: tria\n
- * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*),INTENT(OUT) :: tria\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*)             :: refs\n
+ * > !    INTEGER, DIMENSION(*)                        :: areRequired\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
-                                          int* areRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int* refs,
+                                           int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of quadrilateral.
@@ -1548,15 +1597,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,isRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: v0,v1,v2,v3\n
- * >     INTEGER                       :: ref,isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)   :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT) :: v0,v1,v2,v3,ref\n
+ * >     INTEGER                         :: isRequired\n
+ * >     INTEGER, INTENT(OUT)            :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
-                                              int* ref, int* isRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,MMG5_int* v3,
+                                               MMG5_int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quadrilaterals vertices
@@ -1574,15 +1623,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * instead of the refs or areRequired arrays)
  *
  * > !  SUBROUTINE MMG3D_GET_QUADRILATERALS(mesh,quads,refs,areRequired,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: quads\n
- * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)                :: mesh\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*),INTENT(OUT) :: quads\n
+ * > !    INTEGER(MMG5F_INT), DIMENSION(*)             :: refs\n
+ * > !    INTEGER, DIMENSION(*)                        :: areRequired\n
+ * > !    INTEGER, INTENT(OUT)                         :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int* quads, int* refs,
-                                               int* areRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int* quads, MMG5_int* refs,
+                                                int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param e0 pointer toward the first extremity of the edge.
@@ -1596,15 +1646,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_EDGE(mesh,e0,e1,ref,isRidge,isRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: e0,e1\n
- * >     INTEGER                       :: ref,isRidge,isRequired\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)   :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT) :: e0,e1\n
+ * >     INTEGER(MMG5F_INT)              :: ref\n
+ * >     INTEGER                         :: isRidge,isRequired\n
+ * >     INTEGER, INTENT(OUT)            :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
-                                     int* isRidge, int* isRequired);
+  LIBMMG3D_EXPORT int  MMG3D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref,
+                                      int* isRidge, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -1616,13 +1667,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_EDGES(mesh,edges,refs,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: edges(*),refs(*)\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: edges(*)\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: refs(*)\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Set_edges(MMG5_pMesh mesh, int *edges, int* refs);
+  LIBMMG3D_EXPORT int MMG3D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, MMG5_int* refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -1636,15 +1688,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: edges(*)\n
- * >     INTEGER, INTENT(OUT)          :: refs(*),areRequired(*),areRidges(*)\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: edges(*)\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: refs(*)\n
+ * >     INTEGER, INTENT(OUT)           :: areRequired(*),areRidges(*)\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
-                                     int *areRidges,int *areRequired);
+  LIBMMG3D_EXPORT int MMG3D_Get_edges(MMG5_pMesh mesh,MMG5_int *edges,MMG5_int* refs,
+                                      int *areRidges,int *areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k point index
@@ -1659,13 +1712,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     REAL(KIND=8)                  :: n0,n1,n2\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1,
+ LIBMMG3D_EXPORT int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double *n0, double *n1,
                                                double *n2) ;
 
 /**
@@ -1679,12 +1732,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETRAHEDRONQUALITY(mesh,met,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
- * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: k\n
  * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+  LIBMMG3D_EXPORT double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k);
 
 /**
  * \param met pointer toward the sol structure.
@@ -1712,9 +1765,9 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_SCALARSOLS(met,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: met\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1747,9 +1800,9 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_VECTORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: met\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1786,9 +1839,9 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TENSORSOLS(met,sols,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)           :: met\n
  * >     REAL(KIND=8), DIMENSION(*), INTENT(OUT) :: sols\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1806,14 +1859,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     INTEGER, INTENT(IN)           :: i,pos\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)         :: pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1828,14 +1882,14 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     INTEGER, INTENT(IN)           :: i\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     INTEGER, INTENT(IN)                    :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  LIBMMG3D_EXPORT int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1847,12 +1901,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_IPARAMETER(mesh,iparam,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: iparam\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: iparam\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
+ LIBMMG3D_EXPORT int MMG3D_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1872,13 +1926,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_ADD_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: v0,v1,v2,v3,ref\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
-                                            int v2, int v3, int ref);
+  LIBMMG3D_EXPORT int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
+                                             MMG5_int v2, MMG5_int v3, MMG5_int ref);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1895,15 +1949,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_ADD_VERTEX(mesh,c0,c1,c2,ref,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     REAL(KIND=8), INTENT(IN)      :: c0,c1,c2\n
- * >     INTEGER, INTENT(IN)           :: ref\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)   :: mesh\n
+ * >     REAL(KIND=8), INTENT(IN)        :: c0,c1,c2\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)  :: ref\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT) :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
-                                       double c2, int ref);
+  LIBMMG3D_EXPORT MMG5_int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
+                                             double c2, MMG5_int ref);
 
 /* input/output functions */
 /**
@@ -2617,16 +2671,16 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,sol,critmin,lmin,lmax,eltab,&\n
  * >                               metridtyp,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met,sol\n
- * >     REAL(KIND=8), INTENT(IN)            :: critmin,lmin,lmax\n
- * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
- * >     INTEGER, INTENT(IN)                 :: metridtyp\n
- * >     INTEGER, INTENT(OUT)                :: retval\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)               :: mesh,met,sol\n
+ * >     REAL(KIND=8), INTENT(IN)                     :: critmin,lmin,lmax\n
+ * >     INTEGER(MMG5F_INT),DIMENSION(*), INTENT(OUT) :: eltab\n
+ * >     INTEGER, INTENT(IN)                          :: metridtyp\n
+ * >     INTEGER, INTENT(OUT)                         :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
-                                       double lmin, double lmax, int *eltab,int8_t metRidTyp);
+                                       double lmin, double lmax, MMG5_int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2640,15 +2694,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SEARCHQUA(mesh,met,critmin,eltab,metridtyp)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met\n
- * >     REAL(KIND=8), INTENT(IN)            :: critmin\n
- * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
- * >     INTEGER, INTENT(IN)                 :: metridtyp\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)               :: mesh,met\n
+ * >     REAL(KIND=8), INTENT(IN)                     :: critmin\n
+ * >     INTEGER(MMG5F_INT),DIMENSION(*), INTENT(OUT) :: eltab\n
+ * >     INTEGER, INTENT(IN)                          :: metridtyp\n
  * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin,
-                                        int *eltab,int8_t metRidTyp);
+                                        MMG5_int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2666,17 +2720,17 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SEARCHLEN(mesh,met,lmin,lmax,eltab,metridtyp,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met\n
- * >     REAL(KIND=8), INTENT(IN)            :: lmin,lmax\n
- * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
- * >     INTEGER, INTENT(IN)                 :: metridtyp\n
- * >     INTEGER, INTENT(OUT)                :: retval\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)               :: mesh,met\n
+ * >     REAL(KIND=8), INTENT(IN)                     :: lmin,lmax\n
+ * >     INTEGER(MMG5F_INT),DIMENSION(*), INTENT(OUT) :: eltab\n
+ * >     INTEGER, INTENT(IN)                          :: metridtyp\n
+ * >     INTEGER, INTENT(OUT)                         :: retval\n
  * >   END SUBROUTINE\n
  *
  *
  */
   LIBMMG3D_EXPORT int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                                       double lmax,int *eltab,int8_t  metRidTyp);
+                                       double lmax,MMG5_int *eltab,int8_t  metRidTyp);
 
 /** Utils */
 /**
@@ -2693,14 +2747,14 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ADJATET(mesh,kel,listet,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh\n
- * >     INTEGER, INTENT(IN)                :: kel\n
- * >     INTEGER, DIMENSION(4), INTENT(OUT) :: listet\n
- * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)                :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)                :: kel\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(4), INTENT(OUT) :: listet\n
+ * >     INTEGER, INTENT(OUT)                          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int listet[4]);
+  LIBMMG3D_EXPORT int MMG3D_Get_adjaTet(MMG5_pMesh mesh,MMG5_int kel, MMG5_int listet[4]);
 /**
  * \param ca pointer toward the coordinates of the first edge's extremity.
  * \param cb pointer toward the coordinates of the second edge's extremity.
@@ -2756,7 +2810,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met);
+  LIBMMG3D_EXPORT extern int (*MMG3D_doSol)(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -2825,13 +2879,13 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_NUMBEROFNONBDYTRIANGLESS(mesh,nb_tria,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: nb_tria\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)   :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT) :: nb_tria\n
+ * >     INTEGER, INTENT(OUT)            :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria);
+  LIBMMG3D_EXPORT int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2849,15 +2903,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_NONBDYTRIANGLE(mesh,v0,v1,v2,ref,idx,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: v0,v1,v2\n
- * >     INTEGER                       :: ref\n
- * >     INTEGER, INTENT(IN)           :: idx\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT):: v0,v1,v2\n
+ * >     INTEGER(MMG5F_INT)             :: ref\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN) :: idx\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref, int idx);
+  LIBMMG3D_EXPORT int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref, MMG5_int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2875,13 +2929,14 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
- * >     INTEGER, INTENT(IN)                      :: ktri\n
- * >     INTEGER, INTENT(OUT)                     :: ktet,iface\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)           :: ktri\n
+ * >     INTEGER(MMG5F_INT), INTENT(OUT)          :: ktet\n
+ * >     INTEGER, INTENT(OUT)                     :: iface\n
  * >     INTEGER, INTENT(OUT)                     :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
+  LIBMMG3D_EXPORT int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, MMG5_int ktri, MMG5_int *ktet, int *iface);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2900,14 +2955,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETSFROMTRIA(mesh,ktri,ktet,iface,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
- * >     INTEGER, INTENT(IN)                      :: ktri\n
- * >     INTEGER, DIMENSION(2), INTENT(OUT)       :: ktet,iface\n
- * >     INTEGER, INTENT(OUT)                     :: retval\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)                  :: mesh\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN)               :: ktri\n
+ * >     INTEGER(MMG5F_INT), DIMENSION(2), INTENT(OUT):: ktet\n
+ * >     INTEGER, DIMENSION(2), INTENT(OUT)           :: iface\n
+ * >     INTEGER, INTENT(OUT)                         :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2]);
+  LIBMMG3D_EXPORT int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, MMG5_int ktri, MMG5_int ktet[2], int iface[2]);
 
 /**
  * \param m upper part of a symetric matric diagonalizable in |R
@@ -2934,6 +2990,22 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  */
   LIBMMG3D_EXPORT int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
+
+/**
+ * \param mesh pointer toward mesh sructure
+ *
+ * \return 1 if successful, 0 otherwise.
+ *
+ * Clean data (triangles and edges) linked to isosurface.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_CLEAN_ISOSURF(mesh,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)      :: mesh\n
+ * >     INTEGER, INTENT(OUT)             :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  LIBMMG3D_EXPORT int MMG3D_Clean_isoSurf(MMG5_pMesh mesh);
 
 /**
  * \param mesh pointer toward the mesh structure

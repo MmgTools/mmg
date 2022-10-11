@@ -101,8 +101,8 @@ ENDIF ( )
 SET ( USE_VTK "" CACHE STRING "Use VTK I/O (ON, OFF or <empty>)" )
 SET_PROPERTY(CACHE USE_VTK PROPERTY STRINGS "ON" "OFF" "")
 
-IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" )
-  # USE_VTK is not false, ie that it is true or empty (or contains a fake value)
+IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" OR USE_VTK )
+  # Variable is not provided by the user or is setted to on
 
   # Handle vtk components name change between v8.2 and v9
   # Before v9
@@ -131,7 +131,8 @@ IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" )
     ENDIF()
 
   ELSEIF ( USE_VTK )
-    # USE_VTK is not empty so user explicitely ask for VTK: raise an error
+    # USE_VTK is not empty so user explicitely ask for VTK...
+    # but it is not found: raise an error
     MESSAGE(FATAL_ERROR "VTK library not found.")
   ENDIF()
 ENDIF()

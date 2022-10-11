@@ -20,17 +20,19 @@ on:
 # job
 jobs:
   ci:
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
 
     # Launch a matrix of jobs
     strategy:
         fail-fast: false
         matrix:
-            os: [ubuntu-20.04,macos-10.15]
+            os: [ubuntu-20.04,macos-12]
             pattern: [on,off]
             pointmap: [off]
             scotch: [on,off]
             vtk: [off]
+            int: [int32_t]
 
             include:
               # test vtk only without scotch and with delaunay insertion (more
@@ -40,12 +42,14 @@ jobs:
                 pointmap: off
                 scotch: off
                 vtk: on
+                int: int32_t
 
-              - os: macos-10.15
+              - os: macos-12
                 pattern: off
                 pointmap: off
                 scotch: off
                 vtk: on
+                int: int32_t
 
               # Test pointmap with scotch except on windows
               - os: ubuntu-20.04
@@ -53,12 +57,14 @@ jobs:
                 pointmap: on
                 scotch: on
                 vtk: off
+                int: int32_t
 
-              - os: macos-10.15
+              - os: macos-12
                 pattern: off
                 pointmap: on
                 scotch: on
                 vtk: off
+                int: int32_t
 
               # Add windows basic test (matrix is not testable as dependencies
               # don't build with MSVC)
@@ -67,12 +73,14 @@ jobs:
                 pointmap: off
                 scotch: off
                 vtk: off
+                int: int32_t
 
               - os: windows-2022
                 pattern: on
                 pointmap: off
                 scotch: off
                 vtk: off
+                int: int32_t
 
               # Add test for pointmap only if pattern off
               - os: windows-2022
@@ -80,6 +88,50 @@ jobs:
                 pointmap: on
                 scotch: off
                 vtk: off
+                int: int32_t
+
+              # Test int64_t build on all archi, and try to cover all code
+              - os: ubuntu-20.04
+                pattern: on
+                pointmap: on
+                scotch: on
+                vtk: on
+                int: int64_t
+
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int64_t
+
+              - os: macos-12
+                pattern: on
+                pointmap: on
+                scotch: on
+                vtk: on
+                int: int64_t
+
+              - os: macos-12
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int64_t
+
+              - os: windows-2022
+                pattern: on
+                pointmap: on
+                scotch: off
+                vtk: off
+                int: int64_t
+
+              - os: windows-2022
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int64_t
 
     steps:
       - name: Print options and set environment variables
@@ -89,6 +141,7 @@ jobs:
             Pattern: ${{ matrix.pattern }},
             Scotch:  ${{ matrix.scotch }},
             VTK:     ${{ matrix.vtk }},
+            int:     ${{ matrix.int }},
             Build:   ${{ inputs.cmake_build_type }}"
 
           # gfortran compiler and scotch makefile depends on the os
@@ -177,6 +230,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch \
             -DUSE_VTK=${{ matrix.vtk }} \
+            -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
@@ -197,6 +251,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch \
             -DUSE_VTK=${{ matrix.vtk }} \
+            -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
             -DLIBMMGS_STATIC=OFF \
             -DLIBMMG2D_STATIC=OFF \
@@ -216,6 +271,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch \
             -DUSE_VTK=${{ matrix.vtk }} \
+            -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
@@ -234,8 +290,9 @@ jobs:
           path: |
             build/bin
 
-      - name: Test Mmg
-        if: matrix.vtk == 'off'
+      - name: Test Mmg with in32_t integers
+        # Run long tests only with vtk off and int32_t integers
+        if: matrix.vtk == 'off' && matrix.int == 'int32_t'
         run: |
           cd build
           ctest --timeout 7200 -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}

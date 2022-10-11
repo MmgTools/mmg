@@ -66,7 +66,7 @@ int MMG2D_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double*
 }
 
 /** Check whether c lies in triangle k; return k if so, 0 otherwise */
-int MMG2D_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
+MMG5_int MMG2D_isInTriangle(MMG5_pMesh mesh,MMG5_int k,double c[2]) {
   MMG5_pTria      pt;
   double          det,l1,l2,l3;
   int8_t          ier;
@@ -126,7 +126,7 @@ int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb)
 
 /* Return i+1>0 if Edge ia-ib intersects triangle k at edge i, 0 if
    it does not intersect k, and return -3 if edge ia-ib is one edge of k*/
-int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
+int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,MMG5_int k,MMG5_int ia,MMG5_int ib) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2,p3,ppa,ppb;
   double       a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
@@ -211,10 +211,16 @@ int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   return 0;
 }
 
-/** Return the index of one triangle containing ip */
-int MMG2D_findTria(MMG5_pMesh mesh,int ip) {
+/**
+ * \param mesh pointer toward mesh
+ * \param ip point index
+ * \return index of one elt containing k or 0 (if no elt is found)
+ *
+ * Return the index of one triangle containing k.
+ */
+MMG5_int MMG2D_findTria(MMG5_pMesh mesh,MMG5_int ip) {
   MMG5_pTria    pt,pt1;
-  int           iel,base,iadr,*adja,iter,ier;
+  MMG5_int      iel,base,iadr,*adja,iter,ier;
   int           mvDir[3],jel,i;
   double        l1,l2,l3,det,eps;
   static int8_t mmgWarn0 = 0;
@@ -320,12 +326,12 @@ int MMG2D_findTria(MMG5_pMesh mesh,int ip) {
  * and \a iare is an intersected edge.
  *
  */
-int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
+int MMG2D_locateEdge(MMG5_pMesh mesh,MMG5_int ia,MMG5_int ib,MMG5_int* kdep,MMG5_int* list) {
   MMG5_pTria         pt;
   MMG5_pPoint        ppt1,ppt2,ppt3,ppt4,ppa,ppb;
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   double             niaib,npti;
-  int                iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
+  MMG5_int           iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
   static int8_t      mmgWarn=0;
   //int       ktemp;
 
@@ -349,7 +355,7 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   }
 
   if ( mesh->info.ddebug || mesh->info.imprim > 6 )
-    printf(" Try to enforce edge %d %d\n",ia,ib);
+    printf(" Try to enforce edge %" MMG5_PRId " %" MMG5_PRId "\n",ia,ib);
 
   mesh->base += 2;
   do {
@@ -578,8 +584,8 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr,"\n  ## Error: %s: unexpected failure."
-                " Check your initial data and/or report the bug. lon:%d. %e %e %e\n"
-                " tria %d: %d %d %d,\n",
+                " Check your initial data and/or report the bug. lon:%" MMG5_PRId ". %e %e %e\n"
+                " tria %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId ",\n",
                 __func__,lon, area1,area2,area3,k,mesh->tria[k].v[0],
                 mesh->tria[k].v[1],mesh->tria[k].v[2]);
       }
@@ -587,7 +593,7 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
 
     //ktemp = k;
-    /* printf("adj (base) pour le tri %d : %d(%d) %d(%d) %d(%d)\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base */
+    /* printf("adj (base) pour le tri %" MMG5_PRId " : %" MMG5_PRId "(%" MMG5_PRId ") %" MMG5_PRId "(%" MMG5_PRId ") %" MMG5_PRId "(%" MMG5_PRId ")\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base */
     /*        ,adja[1]/3,mesh->tria[adja[1]/3].base>=mesh->base,adja[2]/3,mesh->tria[adja[2]/3].base>=mesh->base); */
     k = adja[0] / 3;
     if ((mesh->tria[k].base>=mesh->base) || !k || !mesh->tria[k].v[0]) {

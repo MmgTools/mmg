@@ -61,6 +61,8 @@ ADD_TEST(NAME mmgs_val
   COMMAND ${EXECUT_MMGS} -val
   ${MMGS_CI_TESTS}/Teapot/teapot
   )
+SET_PROPERTY(TEST mmgs_val
+  PROPERTY WILL_FAIL TRUE)
 
 # nsd
 ADD_TEST(NAME mmgs_nsd24
@@ -68,13 +70,16 @@ ADD_TEST(NAME mmgs_nsd24
   ${MMGS_CI_TESTS}/Teapot/teapot
   -out ${CTEST_OUTPUT_DIR}/mmgs_nsd24.o.meshb)
 
-#ADD_TEST(NAME mmgs_default
-#  COMMAND ${EXECUT_MMGS} -default
-#  ${MMGS_CI_TESTS}/Teapot/teapot
-#  -out ${CTEST_OUTPUT_DIR}/mmgs_memOption.o.meshb)
-
-SET_PROPERTY(TEST mmgs_val #mmgs_default
-  PROPERTY WILL_FAIL TRUE)
+ADD_TEST(NAME mmgs_locParamCrea
+  COMMAND ${EXECUT_MMGS} -v 5 -default
+  ${MMGS_CI_TESTS}/LocParamsCrea/circle2refs.mesh)
+SET_TESTS_PROPERTIES ( mmgs_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmgs_locParamCrea )
+ADD_TEST(NAME mmgs_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMGS_CI_TESTS}/LocParamsCrea/circle2refs.mmgs)
+SET_TESTS_PROPERTIES ( mmgs_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmgs_locParamCrea )
 
 ###############################################################################
 #####
@@ -217,7 +222,7 @@ endif()
 
 ####### -met option
 ADD_TEST(NAME mmgs_2squares-withMet
-  COMMAND ${EXECUT_MMGS} -v 5
+  COMMAND ${EXECUT_MMGS} -v 5 -d
   ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-met.o.meshb)
 
@@ -291,6 +296,22 @@ ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-nonzero.o.meshb)
 
+# optim + aniso option with corners
+ADD_TEST(NAME mmgs_CubeOptimAni
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/CubeOptimAni/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmgs_CubeOptimAni-cube.o.meshb)
+
+# optim + aniso option for open surface
+ADD_TEST(NAME mmgs_OpnbdyOptimAni-circle
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/OpnbdyOptimAni/cercle-3D.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-circle.o.meshb)
+
+ADD_TEST(NAME mmgs_OpnbdyOptimAni-adap1
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/OpnbdyOptimAni/adap1-3D.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-adap1.o.meshb)
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmgs_LSMultiMat_optim
@@ -305,6 +326,13 @@ ADD_TEST(NAME mmgs_LSMultiMat_optimAni
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optimAni.o.meshb)
+
+SET(passRegex "## ERROR: MISMATCH OPTIONS: OPTIM OPTION IS NOT AVAILABLE")
+
+SET_PROPERTY(TEST mmgs_LSMultiMat_optim
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+SET_PROPERTY(TEST mmgs_LSMultiMat_optimAni
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 # ls discretisation + hsiz option
 ADD_TEST(NAME mmgs_LSMultiMat_hsiz

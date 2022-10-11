@@ -38,6 +38,7 @@
 
 #include "libmmg3d.h"
 #include "inlined_functions_3d.h"
+#include "mmg3dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -49,15 +50,16 @@
  * Split edges of length bigger than MMG3D_LOPTL.
  *
  */
-static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
- MMG5_pTetra  pt;
- MMG5_pxTetra pxt;
- MMG5_pPoint  p0,p1;
- double       len,lmax,o[3];
- int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,src;
- int          ns,ier;
- int8_t       imax,j,i,i1,i2,ifa0,ifa1;
- int8_t       chkRidTet;
+static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
+ MMG5_pTetra   pt;
+ MMG5_pxTetra  pxt;
+ MMG5_pPoint   p0,p1;
+ double        len,lmax,o[3];
+ MMG5_int      ns,src,k,ip,ip1,ip2;
+ int64_t       list[MMG3D_LMAX+2];
+ int           ier,ilist;
+ int8_t        imax,j,i,i1,i2,ifa0,ifa1;
+ int8_t        chkRidTet;
  static int8_t mmgWarn    = 0;
 
   *warn=0;
@@ -182,13 +184,14 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  * Collapse edges of length smaller than MMG3D_LOPTS.
  *
  */
-static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
   double        len,lmin;
-  int           k,ip,iq,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,nc;
-  int           ier;
+  MMG5_int      k,ip,iq,lists[MMG3D_LMAX+2],nc;
+  int64_t       list[MMG3D_LMAX+2];
+  int           ilist,ier,ilists;
   int16_t       tag;
   int8_t        imin,j,i,i1,i2,ifa0,ifa1;
   static int8_t mmgWarn = 0;
@@ -230,6 +233,8 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     j  = MMG5_iarfinv[i][imin];
     i1 = MMG5_idir[i][MMG5_inxt2[j]];
     i2 = MMG5_idir[i][MMG5_iprv2[j]];
+    assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
+    assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
     ip = pt->v[i1];
     iq = pt->v[i2];
     p0 = &mesh->point[ip];
@@ -283,8 +288,9 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
  * prescribed metric.
  *
  */
-static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
-  int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
+  int      it1,it,maxit;
+  MMG5_int nf,nnf,nnm,nm,nnc,nc,nns,ns;
   int      warn;//,nw;
 
   /* Iterative mesh modifications */
@@ -349,9 +355,9 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     nnm += nm;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
-    if ( ns < 10 && abs(nc-ns) < 3 )  break;
-    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nf,nm);
+    if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
+    else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && nc+ns > 0 );
 
@@ -412,7 +418,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && /*nw+*/nf+nm > 0 ){
       fprintf(stdout,"                                            ");
-      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+      fprintf(stdout,"%8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nf,nm);
     }
   }
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
@@ -430,12 +436,12 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
 
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
-    fprintf(stdout,"                  %8d moved\n",nm);
+    fprintf(stdout,"                  %8" MMG5_PRId " moved\n",nm);
   }
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved,"
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved,"
               " %d iter. \n",
               nns,nnc,nnf,nnm,it+it1);
   }
@@ -452,7 +458,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
  * Main adaptation routine.
  *
  */
-int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
+int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");

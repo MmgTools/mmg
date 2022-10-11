@@ -41,19 +41,19 @@
 int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
-  MMG5_pEdge  ped;
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
-  long         posnp,posnt,posne,posncor,posnq,posned,posnr;
+  long        posnp,posnt,posne,posncor,posnq,posned,posnr;
   long        posntreq,posnpreq,posnormal,posnc1;
-  int         i,k,ia,nq,nri,ip,idn,ng,npreq;
-  int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
-  int         na,*ina,a,b,ref,nref;
+  MMG5_int    k,ia,nq,nri,ip,idn,ng,npreq,nref;
+  int         i;
+  MMG5_int    ncor,nedreq,ntreq,posnedreq,bpos;
+  int         binch,bin,iswp,bdim;
+  MMG5_int    na;
   char        *ptr,*data;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
-  ina = NULL;
   posnp = posnt = posne = posncor = posnq = 0;
   posned = posnr = posnpreq = posntreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
@@ -114,48 +114,48 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         }
         continue;
       } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
-        MMG_FSCANF(inm,"%d",&mesh->npi);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&mesh->npi);
         posnp = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"RequiredVertices",strlen("RequiredVertices"))) {
-        MMG_FSCANF(inm,"%d",&npreq);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&npreq);
         posnpreq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
-        MMG_FSCANF(inm,"%d",&mesh->nti);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&mesh->nti);
         posnt = ftell(inm);
         continue;
       }
       else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
-        MMG_FSCANF(inm,"%d",&ntreq);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&ntreq);
         posntreq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
-        MMG_FSCANF(inm,"%d",&nq);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&nq);
         posnq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Corners",strlen("Corners"))) {
-        MMG_FSCANF(inm,"%d",&ncor);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&ncor);
         posncor = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Edges",strlen("Edges"))) {
-        MMG_FSCANF(inm,"%d",&mesh->na);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&mesh->na);
         posned = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"RequiredEdges",strlen("RequiredEdges"))) {
-        MMG_FSCANF(inm,"%d",&nedreq);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&nedreq);
         posnedreq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Ridges",strlen("Ridges"))) {
-        MMG_FSCANF(inm,"%d",&nri);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&nri);
         posnr = ftell(inm);
         continue;
       } else if(!ng && !strncmp(chaine,"Normals",strlen("Normals"))) {
-        MMG_FSCANF(inm,"%d",&ng);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&ng);
         posnormal = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"NormalAtVertices",strlen("NormalAtVertices"))) {
-        MMG_FSCANF(inm,"%d",&mesh->nc1);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&mesh->nc1);
         posnc1 = ftell(inm);
         continue;
       }
@@ -189,7 +189,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->npi,MMG5_SW,1,inm);
-        if(iswp) mesh->npi=MMG5_swapbin(mesh->npi);
+        if(iswp) mesh->npi=MMG5_SWAPBIN(mesh->npi);
         posnp = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -198,7 +198,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&npreq,MMG5_SW,1,inm);
-        if(iswp) npreq=MMG5_swapbin(npreq);
+        if(iswp) npreq=MMG5_SWAPBIN(npreq);
         posnpreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -207,7 +207,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->nti,MMG5_SW,1,inm);
-        if(iswp) mesh->nti=MMG5_swapbin(mesh->nti);
+        if(iswp) mesh->nti=MMG5_SWAPBIN(mesh->nti);
         posnt = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -216,7 +216,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&ntreq,MMG5_SW,1,inm);
-        if(iswp) ntreq=MMG5_swapbin(ntreq);
+        if(iswp) ntreq=MMG5_SWAPBIN(ntreq);
         posntreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -225,7 +225,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&nq,MMG5_SW,1,inm);
-        if(iswp) nq=MMG5_swapbin(nq);
+        if(iswp) nq=MMG5_SWAPBIN(nq);
         posnq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -234,7 +234,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&ncor,MMG5_SW,1,inm);
-        if(iswp) ncor=MMG5_swapbin(ncor);
+        if(iswp) ncor=MMG5_SWAPBIN(ncor);
         posncor = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -243,7 +243,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->na,MMG5_SW,1,inm);
-        if(iswp) mesh->na=MMG5_swapbin(mesh->na);
+        if(iswp) mesh->na=MMG5_SWAPBIN(mesh->na);
         posned = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -252,7 +252,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&nedreq,MMG5_SW,1,inm);
-        if(iswp) nedreq=MMG5_swapbin(nedreq);
+        if(iswp) nedreq=MMG5_SWAPBIN(nedreq);
         posnedreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -261,7 +261,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&nri,MMG5_SW,1,inm);
-        if(iswp) nri=MMG5_swapbin(nri);
+        if(iswp) nri=MMG5_SWAPBIN(nri);
         posnr = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -270,7 +270,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&ng,MMG5_SW,1,inm);
-        if(iswp) ng=MMG5_swapbin(ng);
+        if(iswp) ng=MMG5_SWAPBIN(ng);
         posnormal = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -279,7 +279,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->nc1,MMG5_SW,1,inm);
-        if(iswp) mesh->nc1=MMG5_swapbin(mesh->nc1);
+        if(iswp) mesh->nc1=MMG5_SWAPBIN(mesh->nc1);
         posnc1 = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -315,7 +315,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           MMG_FSCANF(inm,"%f",&fc);
           ppt->c[i] = (double) fc;
         }
-        MMG_FSCANF(inm,"%d",&ppt->ref);
+        MMG_FSCANF(inm,"%" MMG5_PRId "",&ppt->ref);
       } else {
         for (i=0 ; i<3 ; i++) {
           MMG_FREAD(&fc,MMG5_SW,1,inm);
@@ -323,11 +323,11 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           ppt->c[i] = (double) fc;
         }
         MMG_FREAD(&ppt->ref,MMG5_SW,1,inm);
-        if(iswp) ppt->ref=MMG5_swapbin(ppt->ref);
+        if(iswp) ppt->ref=MMG5_SWAPBIN(ppt->ref);
       }
     } else {
       if (!bin) {
-        MMG_FSCANF(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
+        MMG_FSCANF(inm,"%lf %lf %lf %" MMG5_PRId "",&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
       }
       else {
         for (i=0 ; i<3 ; i++) {
@@ -335,7 +335,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           if(iswp) ppt->c[i]=MMG5_swapd(ppt->c[i]);
         }
         MMG_FREAD(&ppt->ref,MMG5_SW,1,inm);
-        if(iswp) ppt->ref=MMG5_swapbin(ppt->ref);
+        if(iswp) ppt->ref=MMG5_SWAPBIN(ppt->ref);
       }
     }
     if ( ppt->ref < 0 ) {
@@ -352,15 +352,15 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     for (k=1; k<=mesh->nti; k++) {
       pt1 = &mesh->tria[k];
       if (!bin) {
-        MMG_FSCANF(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+        MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       }
       else {
         for (i=0 ; i<3 ; i++) {
           MMG_FREAD(&pt1->v[i],MMG5_SW,1,inm);
-          if(iswp) pt1->v[i]=MMG5_swapbin(pt1->v[i]);
+          if(iswp) pt1->v[i]=MMG5_SWAPBIN(pt1->v[i]);
         }
         MMG_FREAD(&pt1->ref,MMG5_SW,1,inm);
-        if(iswp) pt1->ref=MMG5_swapbin(pt1->ref);
+        if(iswp) pt1->ref=MMG5_SWAPBIN(pt1->ref);
       }
       for (i=0; i<3; i++) {
         ppt = &mesh->point[pt1->v[i]];
@@ -407,17 +407,17 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       pt2 = &mesh->tria[mesh->nti];
 
       if (!bin) {
-        MMG_FSCANF(inm,"%d %d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt2->v[2],&pt1->ref);
+        MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt2->v[2],&pt1->ref);
       }
       else {
         for (i=0 ; i<3 ; i++) {
           MMG_FREAD(&pt1->v[i],MMG5_SW,1,inm);
-          if(iswp) pt1->v[i]=MMG5_swapbin(pt1->v[i]);
+          if(iswp) pt1->v[i]=MMG5_SWAPBIN(pt1->v[i]);
         }
         MMG_FREAD(&pt2->v[2],MMG5_SW,1,inm);
-        if(iswp) pt2->v[2]=MMG5_swapbin(pt2->v[2]);
+        if(iswp) pt2->v[2]=MMG5_SWAPBIN(pt2->v[2]);
         MMG_FREAD(&pt1->ref,MMG5_SW,1,inm);
-        if(iswp) pt1->ref=MMG5_swapbin(pt1->ref);
+        if(iswp) pt1->ref=MMG5_SWAPBIN(pt1->ref);
       }
       if ( pt1->ref < 0 ) {
         pt1->ref = -pt1->ref;
@@ -487,77 +487,25 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
 
-    /* Skip edges with mesh->info.isoref refs */
-    if( mesh->info.iso ) {
-      mesh->na = 0;
-      MMG5_SAFE_CALLOC(ina,na+1,int,return -1);
-
-      for (k=1; k<=na; k++) {
-        if (!bin) {
-          MMG_FSCANF(inm,"%d %d %d",&a,&b,&ref);
-        }
-        else {
-          MMG_FREAD(&a,MMG5_SW,1,inm);
-          if(iswp) a=MMG5_swapbin(a);
-          MMG_FREAD(&b,MMG5_SW,1,inm);
-          if(iswp) b=MMG5_swapbin(b);
-          MMG_FREAD(&ref,MMG5_SW,1,inm);
-          if(iswp) ref=MMG5_swapbin(ref);
-        }
-
-        if ( ref < 0 ) {
-          ref = -ref;
-          ++nref;
-        }
-
-        if ( ref != mesh->info.isoref ) {
-          ped = &mesh->edge[++mesh->na];
-          ped->a   = a;
-          ped->b   = b;
-          ped->ref = ref;
-          ina[k]   = mesh->na;
-        }
-        else {
-          /* Remove MG_REQ and MG_CRN tags on ISO edges */
-          if ( MG_REQ & mesh->point[a].tag ) { mesh->point[a].tag &= ~MG_REQ; }
-          if ( MG_REQ & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_REQ; }
-          if ( MG_CRN & mesh->point[a].tag ) { mesh->point[a].tag &= ~MG_CRN; }
-          if ( MG_CRN & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_CRN; }
-        }
+    for (k=1; k<=mesh->na; k++) {
+      if (!bin) {
+        MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&mesh->edge[k].a,&mesh->edge[k].b,&mesh->edge[k].ref);
       }
-      if( !mesh->na ){
-        MMG5_DEL_MEM(mesh,mesh->edge);
+      else {
+        MMG_FREAD(&mesh->edge[k].a,MMG5_SW,1,inm);
+        if(iswp) mesh->edge[k].a=MMG5_SWAPBIN(mesh->edge[k].a);
+        MMG_FREAD(&mesh->edge[k].b,MMG5_SW,1,inm);
+        if(iswp) mesh->edge[k].b=MMG5_SWAPBIN(mesh->edge[k].b);
+        MMG_FREAD(&mesh->edge[k].ref,MMG5_SW,1,inm);
+        if(iswp) mesh->edge[k].ref=MMG5_SWAPBIN(mesh->edge[k].ref);
       }
-
-      else if ( mesh->na < na ) {
-        MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
-                     fprintf(stderr,"  Exit program.\n");
-                     MMG5_SAFE_FREE(ina);
-                     return -1);
-        MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges",return -1);
+      if ( mesh->edge[k].ref < 0 ) {
+        mesh->edge[k].ref = -mesh->edge[k].ref;
+        ++nref;
       }
-    }
-    else {
-      for (k=1; k<=mesh->na; k++) {
-        if (!bin) {
-          MMG_FSCANF(inm,"%d %d %d",&mesh->edge[k].a,&mesh->edge[k].b,&mesh->edge[k].ref);
-        }
-        else {
-          MMG_FREAD(&mesh->edge[k].a,MMG5_SW,1,inm);
-          if(iswp) mesh->edge[k].a=MMG5_swapbin(mesh->edge[k].a);
-          MMG_FREAD(&mesh->edge[k].b,MMG5_SW,1,inm);
-          if(iswp) mesh->edge[k].b=MMG5_swapbin(mesh->edge[k].b);
-          MMG_FREAD(&mesh->edge[k].ref,MMG5_SW,1,inm);
-          if(iswp) mesh->edge[k].ref=MMG5_swapbin(mesh->edge[k].ref);
-        }
-        if ( mesh->edge[k].ref < 0 ) {
-          mesh->edge[k].ref = -mesh->edge[k].ref;
-          ++nref;
-        }
-        mesh->edge[k].tag |= MG_REF;
-        mesh->point[mesh->edge[k].a].tag |= MG_REF;
-        mesh->point[mesh->edge[k].b].tag |= MG_REF;
-      }
+      mesh->edge[k].tag |= MG_REF;
+      mesh->point[mesh->edge[k].a].tag |= MG_REF;
+      mesh->point[mesh->edge[k].b].tag |= MG_REF;
     }
 
     /* get ridges */
@@ -566,25 +514,18 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       fseek(inm,posnr,SEEK_SET);
       for (k=1; k<=nri; k++) {
         if(!bin) {
-          MMG_FSCANF(inm,"%d",&ia);
+          MMG_FSCANF(inm,"%" MMG5_PRId "",&ia);
         }
         else {
           MMG_FREAD(&ia,MMG5_SW,1,inm);
-          if(iswp) ia=MMG5_swapbin(ia);
+          if(iswp) ia=MMG5_SWAPBIN(ia);
         }
         if ( (ia>na) || (ia<0) ) {
-          fprintf(stderr,"\n  ## Warning: %s: ridge number %8d ignored.\n",
+          fprintf(stderr,"\n  ## Warning: %s: ridge number %8" MMG5_PRId " ignored.\n",
                   __func__,ia);
         }
         else {
-          if( mesh->info.iso ){
-            if( ina[ia] == 0 ) continue;
-            else
-              mesh->edge[ina[ia]].tag |= MG_GEO;
-          }
-          else {
-            mesh->edge[ia].tag |= MG_GEO;
-          }
+          mesh->edge[ia].tag |= MG_GEO;
         }
       }
     }
@@ -594,29 +535,21 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       fseek(inm,posnedreq,SEEK_SET);
       for (k=1; k<=nedreq; k++) {
         if(!bin) {
-          MMG_FSCANF(inm,"%d",&ia);
+          MMG_FSCANF(inm,"%" MMG5_PRId "",&ia);
         }
         else {
           MMG_FREAD(&ia,MMG5_SW,1,inm);
-          if(iswp) ia=MMG5_swapbin(ia);
+          if(iswp) ia=MMG5_SWAPBIN(ia);
         }
         if ( (ia>na) || (ia<0) ) {
-          fprintf(stderr,"\n  ## Warning: %s: required edge number %8d ignored\n",
+          fprintf(stderr,"\n  ## Warning: %s: required edge number %8" MMG5_PRId " ignored\n",
                   __func__,ia);
         }
         else {
-          if( mesh->info.iso ){
-            if( ina[ia] == 0 ) continue;
-            else
-              mesh->edge[ina[ia]].tag |= MG_REQ;
-          }
-          else
-            mesh->edge[ia].tag |= MG_REQ;
+          mesh->edge[ia].tag |= MG_REQ;
         }
       }
     }
-    if ( mesh->info.iso )
-      MMG5_SAFE_FREE(ina);
   }
 
   /* read geometric entities */
@@ -672,13 +605,13 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
     for (k=1; k<=mesh->nc1; k++) {
       if (!bin) {
-        MMG_FSCANF(inm,"%d %d",&ip,&idn);
+        MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId "",&ip,&idn);
       }
       else {
         MMG_FREAD(&ip,MMG5_SW,1,inm);
-        if(iswp) ip=MMG5_swapbin(ip);
+        if(iswp) ip=MMG5_SWAPBIN(ip);
         MMG_FREAD(&idn,MMG5_SW,1,inm);
-        if(iswp) idn=MMG5_swapbin(idn);
+        if(iswp) idn=MMG5_SWAPBIN(idn);
       }
       if ( idn > 0 && ip < mesh->np+1 )
         memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
@@ -688,17 +621,17 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   if ( nref ) {
     fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
-    fprintf(stdout,"         WARNING : %d entities with unexpected refs (ref< 0).\n",nref);
+    fprintf(stdout,"         WARNING : %" MMG5_PRId " entities with unexpected refs (ref< 0).\n",nref);
     fprintf(stdout,"                   We take their absolute values.\n");
     fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d / %8d   CORNERS/REQ. %d / %d\n",mesh->npi,mesh->npmax,ncor,npreq);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d / %8d\n",mesh->nti,mesh->ntmax);
+    fprintf(stdout,"     NUMBER OF VERTICES   %8" MMG5_PRId " / %8" MMG5_PRId "   CORNERS/REQ. %" MMG5_PRId " / %" MMG5_PRId "\n",mesh->npi,mesh->npmax,ncor,npreq);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8" MMG5_PRId " / %8" MMG5_PRId "\n",mesh->nti,mesh->ntmax);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES %6d\n",mesh->na,nri);
+      fprintf(stdout,"     NUMBER OF EDGES      %8" MMG5_PRId "  RIDGES %6" MMG5_PRId "\n",mesh->na,nri);
   }
   fclose(inm);
   return 1;
@@ -707,7 +640,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;
-  int         ier,bin,iswp,nelts,nsols;
+  int         ier,bin,iswp,nsols;
+  MMG5_int    nelts;
 
   mesh->dim = 3;
 
@@ -758,7 +692,7 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( sol ) {
     /* Check the metric type */
-    ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+    ier = MMG5_chkMetricType(mesh,&sol->type,&sol->entities,inm);
   }
 
   return ier;
@@ -767,7 +701,8 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;
-  int         ier,bin,iswp,nelts,nsols;
+  int         ier,bin,iswp,nsols;
+  MMG5_int    nelts;
 
   mesh->dim = 3;
 
@@ -904,8 +839,8 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;
   MMG5_pxPoint go;
-  int          k,np,nt,nc,ng,nn,nr,nre,ntreq;
-  int          bin,binch,bpos;
+  MMG5_int     k,np,nt,nc,ng,nn,nr,nre,ntreq,bpos;
+  int          bin,binch;
   // int          outm;
   char         *data,*ptr,chaine[MMG5_FILESTR_LGTH];
 
@@ -988,7 +923,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   if(!bin) {
     strcpy(&chaine[0],"\n\nVertices\n");
     fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",np);
+    fprintf(inm,"%" MMG5_PRId "\n",np);
   } else {
     binch = 4; //Vertices
     fwrite(&binch,MMG5_SW,1,inm);
@@ -1000,12 +935,12 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       if(!bin) {
-        fprintf(inm,"%.15lg %.15lg %.15lg %d\n",ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
+        fprintf(inm,"%.15lg %.15lg %.15lg %" MMG5_PRId "\n",ppt->c[0],ppt->c[1],ppt->c[2],MMG5_abs(ppt->ref));
       } else {
         fwrite((unsigned char*)&ppt->c[0],MMG5_SD,1,inm);
         fwrite((unsigned char*)&ppt->c[1],MMG5_SD,1,inm);
         fwrite((unsigned char*)&ppt->c[2],MMG5_SD,1,inm);
-        ppt->ref = abs(ppt->ref);
+        ppt->ref = MMG5_abs(ppt->ref);
         fwrite((unsigned char*)&ppt->ref,MMG5_SW,1,inm);
       }
       if ( !((ppt->tag & MG_GEO) || ppt->tag & MG_CRN) )  nn++;
@@ -1024,7 +959,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nCorners\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nc);
+      fprintf(inm,"%" MMG5_PRId "\n",nc);
     } else {
       binch = 13; //
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1036,7 +971,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
         if(!bin) {
-          fprintf(inm,"%d\n",ppt->tmp);
+          fprintf(inm,"%" MMG5_PRId "\n",ppt->tmp);
         } else {
           fwrite(&ppt->tmp,MMG5_SW,1,inm);
         }
@@ -1047,7 +982,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nRequiredVertices\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nre);
+      fprintf(inm,"%" MMG5_PRId "\n",nre);
     } else {
       binch = 15; //
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1059,7 +994,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_REQ ) {
         if(!bin) {
-          fprintf(inm,"%d\n",ppt->tmp);
+          fprintf(inm,"%" MMG5_PRId "\n",ppt->tmp);
         } else {
           fwrite(&ppt->tmp,MMG5_SW,1,inm);
         }
@@ -1072,7 +1007,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nEdges\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",mesh->na);
+      fprintf(inm,"%" MMG5_PRId "\n",mesh->na);
     } else {
       binch = 5; //Edges
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1083,7 +1018,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     nre = nr = 0;
     for (k=1; k<=mesh->na; k++) {
       if(!bin) {
-        fprintf(inm,"%d %d %d\n",
+        fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
                 mesh->edge[k].a,mesh->edge[k].b,mesh->edge[k].ref);
       } else {
         fwrite(&mesh->edge[k].a,MMG5_SW,1,inm);
@@ -1098,7 +1033,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRidges\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d\n",nr);
+        fprintf(inm,"%" MMG5_PRId "\n",nr);
       } else {
         binch = 14; //Ridges
         fwrite(&binch,MMG5_SW,1,inm);
@@ -1109,7 +1044,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       for (k=1; k<=mesh->na; k++) {
         if ( mesh->edge[k].tag & MG_GEO ) {
           if(!bin) {
-            fprintf(inm,"%d\n",k);
+            fprintf(inm,"%" MMG5_PRId "\n",k);
           } else {
             fwrite(&k,MMG5_SW,1,inm);
           }
@@ -1120,7 +1055,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredEdges\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d\n",nre);
+        fprintf(inm,"%" MMG5_PRId "\n",nre);
       } else {
         binch = 16; //RequiredEdges
         fwrite(&binch,MMG5_SW,1,inm);
@@ -1131,7 +1066,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       for (k=1; k<=mesh->na; k++)
         if ( mesh->edge[k].tag & MG_REQ )  {
           if(!bin) {
-            fprintf(inm,"%d\n",k);
+            fprintf(inm,"%" MMG5_PRId "\n",k);
           } else {
             fwrite(&k,MMG5_SW,1,inm);
           }
@@ -1144,7 +1079,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nTriangles\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nt);
+      fprintf(inm,"%" MMG5_PRId "\n",nt);
     } else {
       binch = 6; //Triangles
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1158,13 +1093,13 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       pt = &mesh->tria[k];
       if ( MG_EOK(pt) ) {
         if(!bin) {
-          fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                  ,mesh->point[pt->v[2]].tmp,abs(pt->ref));
+          fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                  ,mesh->point[pt->v[2]].tmp,MMG5_abs(pt->ref));
         } else {
           fwrite(&mesh->point[pt->v[0]].tmp,MMG5_SW,1,inm);
           fwrite(&mesh->point[pt->v[1]].tmp,MMG5_SW,1,inm);
           fwrite(&mesh->point[pt->v[2]].tmp,MMG5_SW,1,inm);
-          pt->ref = abs(pt->ref);
+          pt->ref = MMG5_abs(pt->ref);
           fwrite(&pt->ref,MMG5_SW,1,inm);
         }
 
@@ -1177,7 +1112,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d\n",ntreq);
+        fprintf(inm,"%" MMG5_PRId "\n",ntreq);
       } else {
         binch = 17; //ReqTriangles
         fwrite(&binch,MMG5_SW,1,inm);
@@ -1189,7 +1124,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
         pt = &mesh->tria[k];
         if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && pt->tag[2] & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d\n",k);
+            fprintf(inm,"%" MMG5_PRId "\n",k);
           } else {
             fwrite(&k,MMG5_SW,1,inm);
           }
@@ -1205,7 +1140,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nNormals\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nn);
+      fprintf(inm,"%" MMG5_PRId "\n",nn);
     } else {
       binch = 60; //normals
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1241,7 +1176,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nNormalAtVertices\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nn);
+      fprintf(inm,"%" MMG5_PRId "\n",nn);
     } else {
       binch = 20; //normalatvertices
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1254,7 +1189,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && !((ppt->tag & MG_GEO) || (ppt->tag & MG_CRN) ) ) {
         if(!bin) {
-          fprintf(inm,"%d %d\n",ppt->tmp,++nn);
+          fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++nn);
         } else {
           fwrite(&ppt->tmp,MMG5_SW,1,inm);
           ++nn;
@@ -1290,7 +1225,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nTangents\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ng);
+      fprintf(inm,"%" MMG5_PRId "\n",ng);
     } else {
       binch = 59; //tangent
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1313,7 +1248,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nTangentAtVertices\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ng);
+      fprintf(inm,"%" MMG5_PRId "\n",ng);
     } else {
       binch = 61; //tangentatvertices
       fwrite(&binch,MMG5_SW,1,inm);
@@ -1326,7 +1261,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && MG_EDG(ppt->tag) ) {
         if(!bin) {
-          fprintf(inm,"%d %d\n",ppt->tmp,++ng);
+          fprintf(inm,"%" MMG5_PRId " %" MMG5_PRId "\n",ppt->tmp,++ng);
         } else {
           fwrite(&ppt->tmp,MMG5_SW,1,inm);
           ++ng;
@@ -1337,13 +1272,13 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   }
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",nt);
+    fprintf(stdout,"     NUMBER OF VERTICES   %8" MMG5_PRId "  CORNERS    %6" MMG5_PRId "\n",np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8" MMG5_PRId "\n",nt);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES     %6d\n",mesh->na,nr);
+      fprintf(stdout,"     NUMBER OF EDGES      %8" MMG5_PRId "  RIDGES     %6" MMG5_PRId "\n",mesh->na,nr);
     if ( nn+ng )
-      fprintf(stdout,"     NUMBER OF NORMALS    %8d  TANGENTS   %6d\n",nn,ng);
+      fprintf(stdout,"     NUMBER OF NORMALS    %8" MMG5_PRId "  TANGENTS   %6" MMG5_PRId "\n",nn,ng);
   }
   /*fin fichier*/
   if(!bin) {
@@ -1373,8 +1308,8 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
 
   FILE       *inm;
   long        posnp;
-  int         iswp,ier,dim;
-  int         k,ver,bin,np,nsols,*type;
+  int         iswp,ier,*type,ver,bin,nsols,dim;
+  MMG5_int    k,np;
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,3,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
@@ -1391,14 +1326,17 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
 
   if ( mesh->np != np ) {
     fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
-            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
-            "THE SOLUTION (%d) \n",mesh->np,np);
+            "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%" MMG5_PRId ") \n",mesh->np,np);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;
   }
 
-  ier = MMG5_chkMetricType(mesh,type,inm);
+  /* #MMG5_loadSolHeader function reads only solution at vertices so we don't
+      have to check the entites on which the metric applies */
+  int entities = MMG5_Vertex;
+  ier = MMG5_chkMetricType(mesh,type,&entities,inm);
   if ( ier < 1 ) {
     MMG5_SAFE_FREE(type);
     return ier;
@@ -1443,10 +1381,10 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
 
 int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
-  FILE       *inm;
+  FILE        *inm;
   long        posnp;
-  int         iswp,ier,dim;
-  int         j,k,ver,bin,np,nsols,*type;
+  int         iswp,ier,*type,ver,bin,nsols,dim;
+  MMG5_int    j,k,np;
   char        data[16];
   static char mmgWarn = 0;
 
@@ -1457,8 +1395,8 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   if ( mesh->np != np ) {
     fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
-            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
-            "THE SOLUTION (%d) \n",mesh->np,np);
+            "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%" MMG5_PRId ") \n",mesh->np,np);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;
@@ -1487,7 +1425,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
     /* Give an arbitrary name to the solution because the Medit format has non
      * name field */
-    sprintf(data,"sol_%d",j);
+    sprintf(data,"sol_%" MMG5_PRId "",j);
     if ( !MMGS_Set_inputSolName(mesh,psl,data) ) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
@@ -1540,7 +1478,8 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  int          binch,bpos,bin,ier,k;
+  int          binch,bin,ier;
+  MMG5_int     bpos,k;
 
   if ( !met->m ) {
     fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
@@ -1577,8 +1516,9 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol    psl;
   FILE*        inm;
   MMG5_pPoint  ppt;
-  int          binch,bpos,bin,ier,k,j,npointSols,ncellSols;
-  int          *type,*size,*entities;
+  int          binch,bin,ier,npointSols,ncellSols;
+  int          *type,*entities,j,*size;
+  MMG5_int     k,bpos;
 
   if ( !(*sol)[0].m )  return -1;
 
@@ -1600,7 +1540,7 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
       ++ncellSols;
     }
     else {
-      printf("\n  ## Warning: %s: unexpected entity type for solution %d: %s."
+      printf("\n  ## Warning: %s: unexpected entity type for solution %" MMG5_PRId ": %s."
              "\n Ignored.\n",
              __func__,k,MMG5_Get_entitiesName((*sol)[k].entities));
     }

@@ -33,7 +33,9 @@
  */
 
 #include "libmmgs_private.h"
+#include "mmgsexterns.h"
 #include "mmgexterns.h"
+#include "inlined_functions.h"
 
 extern int8_t ddb;
 
@@ -47,12 +49,13 @@ extern int8_t ddb;
  * Find acceptable position for splitting.
  *
  */
-int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pTria   pt;
   MMG5_pPoint  pa,pb,ps;
   double       o[3][3],p[3][3];
   float        to,tp,t;
-  int          i1,i2,ia,ib,ier,it,maxit;
+  MMG5_int     ia,ib;
+  int          i1,i2,ier,it,maxit;
   int8_t       i,j;
 
   pt = &mesh->tria[k];
@@ -150,10 +153,11 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Find acceptable position for MMG5_split1b, starting from point ip.
  *
  */
-int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
+int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int iel, int ia, MMG5_int ip) {
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1,ppt;
-  int          np,nq,it,maxit,i1,i2;
+  MMG5_int     np,nq;
+  int          it,maxit,i1,i2;
   double       m[3],o[3],tp,to,t;
   int8_t       ier;
 
@@ -207,14 +211,14 @@ int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
 /* check if edge need to be split and return a binary coding the numbers of the
  * edges of tria iel that should be split according to a hausdorff distance
  * criterion */
-int chkedg(MMG5_pMesh mesh,int iel) {
+int chkedg(MMG5_pMesh mesh,MMG5_int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
   MMG5_pPar     par;
-  double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
-  int      l,isloc;
-  int8_t   i,i1,i2;
+  double        n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
+  double        ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
+  int           l,isloc;
+  int8_t        i,i1,i2;
   static int8_t mmgWarn0 = 0, mmgWarn1 = 0;
 
   pt   = &mesh->tria[iel];
@@ -386,10 +390,53 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   return pt->flag;
 }
 
+/**
+ * \param met pointer toward met structure
+ * \param typchk type of check to perform: 1 for first stage (adaptation to
+ * capture roughly the surface mesh), 2 for second stage of adaptation
+ * (rough capture of input metric).
+ *
+ * Assign functions for computation of edge lengths and tria qualities: they are
+ * now used in first stage of adaptation to ensure that, if we enter with a
+ * mesh+metric already adapted, we don't delete entierly the work done (massive
+ * collapses on planar surfaces for example).
+ *
+ */
+static inline
+void MMGS_set_localFunc ( MMG5_pSol met, int8_t typchk,
+                          double (**MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,MMG5_int ,MMG5_int,int8_t),
+                          double (**MMGS_caltri)(MMG5_pMesh,MMG5_pSol,MMG5_pTria)) {
+
+  if ( met->m ) {
+    if ( (typchk == 1) && (met->size == 6) ) {
+      *MMGS_lenEdg = MMG5_lenSurfEdg33_ani;
+      *MMGS_caltri = MMG5_caltri33_ani;
+    }
+    else if ( typchk == 2 ) {
+      *MMGS_lenEdg = MMG5_lenSurfEdg;
+      *MMGS_caltri = MMG5_calelt;
+    }
+    else {
+      *MMGS_lenEdg = MMG5_lenSurfEdg_iso;
+      *MMGS_caltri = MMG5_caltri_iso;
+    }
+  }
+
+}
+
+
 static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
-  int      k,it,ns,nns,maxit;
-  int8_t   i;
+  int           it,maxit;
+  MMG5_int      k,ns,nns;
+  int8_t        i;
+
+  /* Local function pointer toward the suitable functions to use for edge length
+   * and quality computation depending on the adaptation phase */
+  double (*MMGS_lenEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t ) = NULL;
+  double (*MMGS_caltri)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_pTria pt ) = MMG5_caltri_iso;
+
+  MMGS_set_localFunc ( met, typchk, &MMGS_lenEdg, &MMGS_caltri);
 
   it = nns = 0;
   maxit = 2;
@@ -402,7 +449,8 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
       for (i=0; i<3; i++) {
         if ( MS_SIN(pt->tag[i]) || MG_EDG(pt->tag[i]) )  continue;
-        else if ( chkswp(mesh,met,k,i,typchk) ) {
+        else if ( chkswp(mesh,met,k,i,typchk,
+                         MMGS_lenEdg,MMGS_caltri) ) {
           ns += swapar(mesh,k,i);
           break;
         }
@@ -412,7 +460,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   }
   while ( ns > 0 && ++it < maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-    fprintf(stdout,"     %8d edge swapped\n",nns);
+    fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
 
   return nns;
 }
@@ -421,8 +469,9 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int      it,k,ier,base,nm,ns,nnm,list[MMGS_LMAX+2],ilist;
-  int8_t   i;
+  int           it,ier,ilist;
+  MMG5_int      k,base,list[MMGS_LMAX+2],nm,ns,nnm;
+  int8_t        i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -443,7 +492,9 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 
         if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
           continue;
-        ilist = boulet(mesh,k,i,list);
+
+        int8_t dummy;
+        ilist = boulet(mesh,k,i,list,&dummy);
 
         if ( ilist < 1 ) continue;
 
@@ -464,12 +515,12 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8" MMG5_PRId " moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while ( ++it < maxit && nm > 0);
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
-    fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %d iter.\n",nnm,it);
 
   return nnm;
 }
@@ -486,7 +537,8 @@ static inline
 int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 {
   MMG5_pTria   pt;
-  int          vx[3],k,i,i1,i2;
+  MMG5_int     vx[3],k;
+  int          i,i1,i2;
 
   /* Delete the useless added points */
   for (k=1; k<=mesh->nt; k++) {
@@ -502,7 +554,7 @@ int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
         MMGS_delPt(mesh,vx[i]);
         if ( !MMG5_hashUpdate(&hash,pt->v[i1],pt->v[i2],0) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to delete point idx"
-                  " along edge %d %d.\n", __func__,
+                  " along edge %" MMG5_PRId " %" MMG5_PRId ".\n", __func__,
                   MMGS_indPt(mesh,pt->v[i1]),
                   MMGS_indPt(mesh,pt->v[i2]));
           MMG5_DEL_MEM(mesh,hash.item);
@@ -527,11 +579,13 @@ int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p1,p2;
-  MMG5_Hash    hash;
-  MMG5_Bezier  pb;
+  MMG5_Hash     hash;
+  MMG5_Bezier   pb;
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
-  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,it;
+  int           i,ier,it;
+  MMG5_int      ns,nc,ni,ic;
+  MMG5_int      k,nt,vx[3],j,ip,ip1,ip2;
   int8_t        i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
@@ -741,7 +795,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( nc > 0 )  ++ns;
   }
   if ( mesh->info.ddebug && ns ) {
-    fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
+    fprintf(stdout,"     %" MMG5_PRId " analyzed  %" MMG5_PRId " proposed\n",mesh->nt,ns);
     fflush(stdout);
   }
 
@@ -818,7 +872,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               if ( !MMG5_hashUpdate(&hash,pt->v[MMG5_iprv2[i]],
                                      pt->v[MMG5_inxt2[i]],0) ) {
                 fprintf(stderr,"\n  ## Error: %s: unable to delete point"
-                        " idx along edge %d %d.\n",
+                        " idx along edge %" MMG5_PRId " %" MMG5_PRId ".\n",
                         __func__,MMGS_indPt(mesh,pt->v[MMG5_iprv2[i]]),
                         MMGS_indPt(mesh,pt->v[MMG5_inxt2[i]]));
                 MMG5_DEL_MEM(mesh,hash.item);
@@ -835,7 +889,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   while( ni > 0 && ++it < 40 );
 
   if ( mesh->info.ddebug && nc ) {
-    fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
+    fprintf(stdout,"     %" MMG5_PRId " corrected,  %" MMG5_PRId " invalid\n",nc,ni);
     fflush(stdout);
   }
 
@@ -880,7 +934,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( !ier ) return -1;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
   MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
@@ -897,13 +951,14 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Check if splitting edge \a i of element \a k is ok.
  *
  */
-int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
+MMG5_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
   MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  go;
   MMG5_Bezier   b;
   double        s,uv[2],o[3],no[3],to[3];
-  int           *adja,jel,ip,ier;
+  int           ier;
+  MMG5_int      ip,*adja,jel;
   int8_t        i1,i2,j,jj,j2;
 
   if ( mesh->xp > mesh->xpmax-2 )  return 0;
@@ -957,14 +1012,31 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   return ip;
 }
 
-/* attempt to collapse small edges */
-static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
+/**
+ * \param mesh pointer toward mesh structure
+ * \param met pointer toward met structure
+ * \param typchk type of check to perform: 1 for first stage (adaptation to
+ * capture roughly the surface mesh), 2 for second stage of adaptation
+ * (rough capture of input metric).
+ *
+ * Attempt to collapse small edges
+ *
+ */
+static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  int           list[MMGS_LMAX+2],ilist,k,nc,l,isloc,ier;
+  MMG5_int      nc,list[MMGS_LMAX+2],k;
+  int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
+
+  /* Local function pointer toward the suitable functions to use for edge length
+   * and quality computation depending on the adaptation phase */
+  double (*MMGS_lenEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t ) = NULL;
+  double (*MMGS_caltri)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_pTria pt ) = MMG5_caltri_iso;
+
+  MMGS_set_localFunc ( met, typchk, &MMGS_lenEdg, &MMGS_caltri);
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1018,7 +1090,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       }
 
       /* check if geometry preserved */
-      ilist = chkcol(mesh,met,k,i,list,typchk);
+      ilist = chkcol(mesh,met,k,i,list,typchk,MMGS_lenEdg,MMGS_caltri);
 
       int8_t open = (mesh->adja[3*(k-1)+1+i] == 0);
 
@@ -1043,7 +1115,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     }
   }
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
-    fprintf(stdout,"     %8d vertices removed\n",nc);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices removed\n",nc);
 
   return nc;
 }
@@ -1057,12 +1129,13 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Split edges of length bigger than MMGS_LOPTL.
  *
  */
-static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG5_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
-  double   len,lmax;
-  int      ip,k,ns,ier;
-  int8_t   i,i1,i2,imax;
+  double        len,lmax;
+  int           ier;
+  MMG5_int      ip,ns,k;
+  int8_t        i,i1,i2,imax;
 
   ns = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1132,12 +1205,13 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
  * Collapse edges of length smaller than MMGS_LOPTS.
  *
  */
-static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
-  double   len;
-  int      k,list[MMGS_LMAX+2],ilist,nc,ier;
-  int8_t   i,i1,i2;
+  double        len;
+  MMG5_int      nc,k,list[MMGS_LMAX+2];
+  int           ier,ilist;
+  int8_t        i,i1,i2;
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1166,7 +1240,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       else if ( p1->tag > p2->tag || p1->tag > pt->tag[i] )  continue;
 
       /* check if geometry preserved */
-      ilist = chkcol(mesh,met,k,i,list,2);
+      ilist = chkcol(mesh,met,k,i,list,2,MMG5_lenSurfEdg,MMG5_calelt);
 
       int8_t open = (mesh->adja[3*(k-1)+1+i] == 0);
 
@@ -1195,8 +1269,10 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
 /* analyze triangles and split or collapse to match gradation */
-static int adptri(MMG5_pMesh mesh,MMG5_pSol met,int* permNodGlob) {
-  int        it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
+  int         it,maxit;
+  int64_t     nnc,nns,nnf,nnm;
+  MMG5_int    nc,ns,nf,nm;
 
   /* iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
@@ -1247,9 +1323,9 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,int* permNodGlob) {
     nnf += nf;
     nnm += nm;
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf+nm > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
-    if ( ns < 10 && abs(nc-ns) < 3 )  break;
-    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nf,nm);
+    if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
+    else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && nc+ns > 0 );
 
@@ -1284,7 +1360,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,int* permNodGlob) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
-      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+      fprintf(stdout,"%8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nf,nm);
     }
   }
   while( ++it < maxit && nm+nf > 0 );
@@ -1299,19 +1375,20 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,int* permNodGlob) {
   else  nm = 0;
   nnm += nm;
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
-    fprintf(stdout,"                                                              %8d moved\n",nm);
+    fprintf(stdout,"                                                              %8" MMG5_PRId " moved\n",nm);
   }
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
+      fprintf(stdout,"     %8" PRId64 " splitted, %8" PRId64 " collapsed, %8" PRId64 " swapped, %8" PRId64 " moved, %d iter. \n",nns,nnc,nnf,nnm,it);
   }
   return 1;
 }
 
 /* analyze tetrahedra and split if needed */
 static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
-  int     nc,ns,nf,nnc,nns,nnf,it,maxit;
+  MMG5_int     nc,ns,nf,nnc,nns,nnf;
+  int          it,maxit;
 
   /* analyze tetras : initial splitting */
   nns = nnc = nnf = it = 0;
@@ -1360,14 +1437,14 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     nns += ns;
     nnf += nf;
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
-    if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nf);
+    if ( it > 3 && MMG5_abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %d iter.\n",nns,nnc,nnf,it);
   }
 
   return 1;
@@ -1382,7 +1459,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Main adaptation routine.
  *
  */
-int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
+int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
   /* renumbering if available */
   if ( abs(mesh->info.imprim) > 4 )
@@ -1396,6 +1473,15 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     fprintf(stderr,"\n  ## Unable to split mesh-> Exiting.\n");
     return 0;
   }
+
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-1."
+           " (MMG_SAVE_ANATRI1 env variable is exported).\n");
+    return 1;
+  }
+
   /* renumbering if available */
   if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
@@ -1410,6 +1496,14 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     return 0;
   }
 
+ /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
+  }
+
   MMG5_gradation_info(mesh);
   if ( mesh->info.hgrad > 0. ) {
      if (!MMGS_gradsiz(mesh,met) ) {
@@ -1422,9 +1516,24 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     MMGS_gradsizreq(mesh,met);
   }
 
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
+
   if ( !anatri(mesh,met,2) ) {
     fprintf(stderr,"\n  ## Unable to proceed adaptation. Exit program.\n");
     return 0;
+  }
+  /* Debug: export variable MMG_SAVE_ANATRI1 to save adapted mesh at the end of
+   * anatri wave */
+  if ( getenv("MMG_SAVE_ANATRI2") ) {
+    printf("  ## WARNING: EXIT AFTER ANATRI-2."
+           " (MMG_SAVE_ANATRI2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumbering if available */

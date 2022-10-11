@@ -63,7 +63,8 @@ static void MMG5_endcod(void) {
  */
 static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
-  int        ref,i,j,ret,npar;
+  int        i,j,ret,npar;
+  MMG5_int   ref;
   char       *ptr,buf[256],data[256];
   FILE       *in;
 
@@ -89,7 +90,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* scan line */
     ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) )  break;
-    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    for (i=0; (size_t)i<strlen(data); i++) data[i] = tolower(data[i]);
 
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
@@ -99,7 +100,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
-        MMG_FSCANF(in,"%d %255s ",&ref,buf);
+        MMG_FSCANF(in,"%" MMG5_PRId " %255s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
         if ( !ret ) {
@@ -107,7 +108,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
         }
 
-        for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
+        for (j=0; (size_t)j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
         if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
           if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
@@ -244,8 +245,6 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
 
@@ -258,7 +257,6 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
@@ -295,9 +293,9 @@ int main(int argc,char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
 
   /* Version info */
+#ifndef MMG_COMPARABLE_OUTPUT
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
-#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 #endif
 

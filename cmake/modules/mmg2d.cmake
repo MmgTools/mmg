@@ -106,6 +106,13 @@ ENDIF ( )
 #####
 ############################################################################
 # mmg2d header files needed for library
+#
+# Remark: header installation would need to be cleaned, for now, to allow
+# independent build of each project and because mmgs and mmg2d have been added
+# to mmg3d without rethinking the install architecture, the header files that
+# are common between codes are copied in all include directories (mmg/,
+# mmg/mmg3d/, mmg/mmgs/, mmg/mmg2d/).  they are also copied in build directory
+# to enable library call without installation.
 SET( mmg2d_headers
   ${MMG2D_SOURCE_DIR}/mmg2d_export.h
   ${MMG2D_SOURCE_DIR}/libmmg2d.h
@@ -114,6 +121,7 @@ SET( mmg2d_headers
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
+  ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h
   ${COMMON_BINARY_DIR}/mmgversion.h
   )
 IF (NOT WIN32 OR MINGW)

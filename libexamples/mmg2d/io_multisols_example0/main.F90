@@ -15,10 +15,11 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol,mmgMet,tmpSol
-  INTEGER            :: ier,argc,i,j,opt
+  INTEGER            :: ier,argc,i,opt
 
   !! To manually recover the mesh
-  INTEGER            :: nsol,np,typSol(MMG5_NSOLS_MAX)
+  INTEGER            :: nsol,typSol(MMG5_NSOLS_MAX)
+  INTEGER(MMG5F_INT) :: np,j
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE :: sols
 
   CHARACTER(len=300) :: exec_name,filename,fileout,option

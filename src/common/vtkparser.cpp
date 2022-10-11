@@ -81,6 +81,7 @@ vtkDataSet *MMG5_load_vtkXMLFile(const char*fileName)
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, -1 otherwise
 ///
@@ -97,7 +98,8 @@ vtkDataSet *MMG5_load_vtkXMLFile(const char*fileName)
 ///
 static
 int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
-                             int8_t *ptMeditRef, int8_t *eltMeditRef, int *nsols ) {
+                             int8_t *ptMeditRef, int8_t *eltMeditRef,
+                             int *nsols, int8_t *metricData ) {
 
   static int8_t mmgWarn0 = 0;
   static int8_t mmgWarn1 = 0;
@@ -205,7 +207,8 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
             " Ignored.\n",__func__ );
   }
 
-  *nsols = npointData + ncellData - npointRef - ncellRef;
+  *nsols      = npointData + ncellData - npointRef - ncellRef;
+  *metricData = ( nmetricField > 0 );
 
   return 1;
 }
@@ -218,13 +221,15 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 otherwise;
 ///
 /// I/O at Vtp VTK file format.
 ///
 int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
-                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols) {
+                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
+                           int8_t *metricData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -238,7 +243,8 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
   }
 
   // count the number of entities of each type
-  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,nsols );
+  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
+                                     nsols,metricData );
 
   if ( ier != 1 ) {
     return -1;
@@ -254,13 +260,15 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 otherwise;
 ///
 /// I/O at Vtk VTK file format.
 ///
 int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
-                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols) {
+                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
+                           int8_t *metricData ) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -274,7 +282,8 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
   }
 
   // count the number of entities of each type
-  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,nsols );
+  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
+                                     nsols,metricData );
 
   if ( ier != 1 ) {
     return -1;
@@ -290,16 +299,19 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// @param eltMeditRef index of a cell data field that contains references
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 other errors;
 ///
 /// I/O at Vtu VTK file format, part 1: file reading + count of the number of entities.
 ///
 int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
-                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols) {
+                           int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
+                           int8_t *metricData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
+  (*metricData) = 0;
 
   // Read all the data from the file
   try {
@@ -310,7 +322,8 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
   }
 
   // count the number of entities of each type
-  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,nsols );
+  int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
+                                     nsols,metricData );
 
   if ( ier != 1 ) {
     return -1;
@@ -333,7 +346,8 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
                            int8_t ptMeditRef,int8_t eltMeditRef,int nsols) {
   vtkSmartPointer<vtkDataArray> ptar = NULL, car = NULL;
-  int                           nref = 0, ier;
+  int                           ier;
+  MMG5_int                      nref = 0;
   static int8_t                 mmgWarn1 = 0;
 
   // Point transfers in Mmg data structure
@@ -347,10 +361,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     // Check that we get 1 data only
     assert ( ptar->GetNumberOfComponents() == 1 );
 
-    int np = ptar->GetNumberOfTuples();
+    MMG5_int np = ptar->GetNumberOfTuples();
     if ( np != mesh->np ) {
-      printf( "  ## Error: Point data size (%d) differs from the number of"
-              " vertices (%d)\n",np,mesh->np);
+      printf( "  ## Error: Point data size (%" MMG5_PRId ") differs from the number of"
+              " vertices (%" MMG5_PRId ")\n",np,mesh->np);
       return -1;
     }
     // read vertices and vertices refs
@@ -384,12 +398,12 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
   assert ( (mesh->npi == mesh->np) || !mesh->npi );
 
   mesh->npi = 0;
-  int nqi   = 0;
-  int npri  = 0;
-  int na    = 0;
-  int nbl_a = 0;
-  int nt    = 0;
-  int nbl_t = 0;
+  MMG5_int nqi   = 0;
+  MMG5_int npri  = 0;
+  MMG5_int na    = 0;
+  MMG5_int nbl_a = 0;
+  MMG5_int nt    = 0;
+  MMG5_int nbl_t = 0;
 
   // Get pointer toward cells data containing element refs
   vtkIdType numCells = (*dataset)->GetNumberOfCells();
@@ -403,9 +417,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     // Check that we get 1 data only
     assert ( car->GetNumberOfComponents() == 1 );
 
-    int ne = car->GetNumberOfTuples();
+    MMG5_int ne = car->GetNumberOfTuples();
     if ( ne != numCells ) {
-      printf( "  ## Error: Cell data size (%d) differs from the number of"
+      printf( "  ## Error: Cell data size (%" MMG5_PRId ") differs from the number of"
               " cells (%lld)\n",ne,numCells);
       return -1;
     }
@@ -421,7 +435,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     MMG5_pPrism ppr = NULL;
 
     int typ = (*dataset)->GetCellType(k);
-    int ref = 0;
+    MMG5_int ref = 0;
 
     switch ( typ ) {
     case ( VTK_VERTEX ):
@@ -441,7 +455,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         ref = car ? car->GetTuple1(k) : 0;
       }
       /* Skip edges with iso ref */
-      if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
+      if ( mesh->info.iso &&  MMG5_abs(ref) == mesh->info.isoref ) {
         /* Skip this edge */
         ++nbl_a;
       }
@@ -466,7 +480,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       ref = car ? car->GetTuple1(k) : 0;
 
       // Skip edges with iso ref
-      if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
+      if ( mesh->info.iso &&  MMG5_abs(ref) == mesh->info.isoref ) {
         /* Skip this edge */
         ++nbl_a;
       }
@@ -489,7 +503,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       ref = car ? car->GetTuple1(k) : 0;
 
       // skip tria with iso ref in 3D
-      if ( mesh->info.iso && abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
+      if ( mesh->info.iso && MMG5_abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
         /* Skip this edge */
         ++nbl_t;
       }
@@ -649,8 +663,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           psl->np = ar->GetNumberOfTuples();
           if ( mesh->np != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
-                    "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
-                    "THE SOLUTION (%d) \n",mesh->np,psl->np);
+                    "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF VERTICES IN "
+                    "THE SOLUTION (%" MMG5_PRId ") \n",mesh->np,psl->np);
             return -1;
           }
 
@@ -691,8 +705,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
           switch ( psl->type ) {
           case ( 1 ): case ( 2 ):
-            for (int k=1; k<=psl->np; k++) {
-              int iadr = k*psl->size;
+            for (MMG5_int k=1; k<=psl->np; k++) {
+              MMG5_int iadr = k*psl->size;
               ar->GetTuple ( k-1, &psl->m[iadr] );
             }
             break;
@@ -701,9 +715,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
             // anisotropic sol
             double dbuf[9];
 
-            for (int k=1; k<=psl->np; k++) {
+            for (MMG5_int k=1; k<=psl->np; k++) {
               ar->GetTuple ( k-1, dbuf );
-              int iadr = psl->size*k;
+              MMG5_int iadr = psl->size*k;
 
               if ( !metricData ) {
                 // Non symmetric tensor
@@ -779,10 +793,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           auto ar = cd->GetArray(j);
 
           psl->np = ar->GetNumberOfTuples();
-          if ( mesh->ne != psl->np ) {
+          if ( numCells != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
-                    "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
-                    "THE SOLUTION (%d) \n",mesh->ne,psl->np);
+                    "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF CELLS DATA IN "
+                    "THE SOLUTION (%" MMG5_PRId ") \n",mesh->ne,psl->np);
             return -1;
           }
 
@@ -817,8 +831,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
           switch ( psl->type ) {
           case ( 1 ): case ( 2 ):
-            for (int k=1; k<=psl->np; k++) {
-              int iadr = k*psl->size;
+            for (MMG5_int k=1; k<=psl->np; k++) {
+              MMG5_int iadr = k*psl->size;
               ar->GetTuple ( k-1, &psl->m[iadr] );
             }
             break;
@@ -827,9 +841,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
             // anisotropic sol
             double dbuf[9];
 
-            for (int k=1; k<=psl->np; k++) {
+            for (MMG5_int k=1; k<=psl->np; k++) {
               ar->GetTuple ( k-1, dbuf );
-              int iadr = psl->size*k;
+              MMG5_int iadr = psl->size*k;
 
               // Non symmetric tensor
               if ( psl->dim ==2 ) {

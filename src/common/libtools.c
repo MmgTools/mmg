@@ -35,6 +35,32 @@
 #include "mmgcommon.h"
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param dim string dontaining the dimension (3D,2D or S)
+ *
+ * Print MMG release and date
+ */
+void MMG5_version(MMG5_pMesh mesh,char *dim) {
+
+  if ( mesh->info.imprim >= 0 ) {
+#ifndef MMG_COMPARABLE_OUTPUT
+    fprintf(stdout,"\n  %s\n   MODULE MMG%s: %s (%s)\n  %s\n",
+            MG_STR,dim,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
+#else
+    fprintf(stdout,"\n  %s\n   MODULE MMG%s\n  %s\n",
+            MG_STR,dim,MG_STR);
+#endif
+
+#if !defined _WIN32 && !defined MMG_COMPARABLE_OUTPUT
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
+  }
+
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if fail, 1 if success.
  *
@@ -73,10 +99,12 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
           (mesh->info.hgradreq < 0) ? mesh->info.hgradreq : exp(mesh->info.hgradreq) );
 }
 
-int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
-                      int split,int rin,int rex){
+int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,
+                      int split,MMG5_int rin,MMG5_int rex){
   MMG5_pMat mat;
   int k;
+
+  (void)sol;
 
   if ( !mesh->info.nmat ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
@@ -112,7 +140,7 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
                 __func__);
-        fprintf(stderr," for material of ref %d\n",ref);
+        fprintf(stderr," for material of ref %" MMG5_PRId "\n",ref);
       }
       return 1;
     }
@@ -142,6 +170,36 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
 
   return 1;
 }
+
+int MMG5_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br) {
+
+  (void)sol;
+
+  if ( !mesh->info.nbr ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of"
+            " level-set based references",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," based references values. \n");
+    return 0;
+  }
+  if ( mesh->info.nbri >= mesh->info.nbr ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new level-set"
+            " based reference.\n",__func__);
+    fprintf(stderr,"    max number of level-set based references: %d\n",mesh->info.nbr);
+    return 0;
+  }
+  if ( br < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  mesh->info.br[mesh->info.nbri] = br;
+  mesh->info.nbri++;
+
+  return 1;
+}
+
 
 /**
  * \param *prog pointer toward the program name.
@@ -246,4 +304,100 @@ void MMG5_advancedUsage(void) {
   fprintf(stdout,"-nosizreq       disable setting of required edge sizes over required vertices.\n");
   fprintf(stdout,"-hgradreq  val  control gradation from required entities toward others\n");
 
+}
+
+/**
+ * \param mesh pointer toward mesh
+ * \param pa pointer toward edge
+ *
+ * Clean tags linked to iso surface discretization (MG_CRN, MG_ISO) along edge.
+ *
+ */
+static inline
+void MMG5_Clean_isoTags(MMG5_pMesh mesh,MMG5_pEdge pa) {
+  /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+  if ( MG_REQ & mesh->point[pa->a].tag ) {
+    mesh->point[pa->a].tag &= ~MG_REQ;
+  }
+  if ( MG_REQ & mesh->point[pa->b].tag ) {
+    mesh->point[pa->b].tag &= ~MG_REQ;
+  }
+  if ( MG_CRN & mesh->point[pa->a].tag ) {
+    mesh->point[pa->a].tag &= ~MG_CRN;
+  }
+  if ( MG_CRN & mesh->point[pa->b].tag ) {
+    mesh->point[pa->b].tag &= ~MG_CRN;
+  }
+}
+
+/**
+ * \param mesh pointer toward mesh
+ * \param return 1 if successful, 0 if fail
+ *
+ * Clean edges belonging to isosurf, except for ridges.
+ */
+int MMG5_Clean_isoEdges(MMG5_pMesh mesh) {
+  MMG5_int   k,nref;
+
+  nref = 0;
+
+  /** Deletion of edges that belong to isosurf */
+  if ( mesh->edge ) {
+    MMG5_int na = mesh->na;
+
+    k  = 1;
+    do {
+
+      MMG5_pEdge pa = &mesh->edge[k];
+      if ( !pa->a ) {
+        continue;
+      }
+
+      if ( MMG5_abs(pa->ref) == mesh->info.isoref ) {
+        /* Current tria will be suppressed */
+        /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+        MMG5_Clean_isoTags(mesh,pa);
+
+        /* Do not delete ridge */
+        if ( !(pa->tag & MG_GEO) ) {
+          /* search last non isosurf tria to fill empty position */
+          MMG5_pEdge pa1 = &mesh->edge[mesh->na];
+          assert( pa1 );
+
+          while ( ((!pa1->a) ||
+                   ( (MMG5_abs(pa1->ref) == mesh->info.isoref) && (!(pa1->tag & MG_GEO)) ) )
+                  && (k < mesh->na) ) {
+            if ( pa1->a ) {
+              /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+              MMG5_Clean_isoTags(mesh,pa1);
+            }
+            --mesh->na;
+            pa1 = &mesh->edge[mesh->na];
+          }
+          memcpy(pa,pa1,sizeof(MMG5_Edge));
+        }
+      }
+
+      /* Initially negative refs were used to mark isosurface: keep following
+       * piece of code for retrocompatibility */
+      if ( pa->ref < 0 ) {
+        pa->ref = -pa->ref;
+        ++nref;
+      }
+    }
+    while ( ++k < mesh->na );
+
+    if( !mesh->na ) {
+      MMG5_DEL_MEM(mesh,mesh->edge);
+    }
+    else if ( mesh->na < na ) {
+      MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
+                   fprintf(stderr,"  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,
+                         "edges",return 0);
+    }
+  }
+
+  return 1;
 }

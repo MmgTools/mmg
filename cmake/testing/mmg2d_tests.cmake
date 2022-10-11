@@ -52,14 +52,20 @@ ADD_TEST(NAME mmg2d_val
   COMMAND ${EXECUT_MMG2D} -v val
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_val.o.meshb)
-
-#ADD_TEST(NAME mmg2d_default
-#  COMMAND ${EXECUT_MMG2D} -default
-#  ${MMG2D_CI_TESTS}/Circle/cercle
-#  -out ${CTEST_OUTPUT_DIR}/mmg2d_default.o.meshb)
-
-SET_PROPERTY(TEST mmg2d_val #mmg2d_default
+SET_PROPERTY(TEST mmg2d_val
   PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg2d_locParamCrea
+  COMMAND ${EXECUT_MMG2D} -v 5 -default
+  ${MMG2D_CI_TESTS}/LocParamsCrea/circle2refs.mesh)
+
+SET_TESTS_PROPERTIES ( mmg2d_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmg2d_locParamCrea )
+ADD_TEST(NAME mmg2d_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMG2D_CI_TESTS}/LocParamsCrea/circle2refs.mmg2d)
+SET_TESTS_PROPERTIES ( mmg2d_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmg2d_locParamCrea )
 
 ADD_TEST(NAME mmg2d_hsizOption
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
@@ -138,7 +144,7 @@ ADD_TEST(NAME mmg2d_locParam_ani
   -out ${CTEST_OUTPUT_DIR}/locParams-ani.o.meshb)
 
 ADD_TEST(NAME mmg2d_opnbdy_yes
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001 -d
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes.o.meshb)
 
@@ -148,7 +154,7 @@ ADD_TEST(NAME mmg2d_opnbdy_no
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-no.o.meshb)
 
 ADD_TEST(NAME mmg2d_opnbdy_ls
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001 -d
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
   -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-ls.o.meshb)
@@ -386,6 +392,7 @@ ADD_TEST(NAME mmg2d_SquareAniso
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   ${CTEST_OUTPUT_DIR}/mmg2d_SquareAniso-mmg2d_SquareAniso-adap1.o.meshb)
 
+# optim
 ADD_TEST(NAME mmg2d_Circle-optimAni
   COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
@@ -395,6 +402,18 @@ ADD_TEST(NAME mmg2d_Circle-hsizAni
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.01 -A -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
+
+# optim + ani + oprhan + unused point
+ADD_TEST(NAME mmg2d_Disk-optimAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
+  ${MMG2D_CI_TESTS}/Disk/disk-orphan
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optimAni.o.mesh)
+
+# optim + iso + oprhan + unused point
+ADD_TEST(NAME mmg2d_Disk-optim
+  COMMAND ${EXECUT_MMG2D} -v 5 -optim -sol 2
+  ${MMG2D_CI_TESTS}/Disk/disk-orphan
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optim.o.mesh)
 
 ###############################################################################
 #####
@@ -436,13 +455,13 @@ ADD_TEST(NAME mmg2d_NacaGeneration-hsizAni
 
 # non convex test cases
 ADD_TEST(NAME mmg2d_ACDCGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
+  COMMAND ${EXECUT_MMG2D} -v 5 -d
   ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration.o.meshb)
 
 # nsd option: keep only domain of ref 2
 ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
-  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2
+  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2 -d
   ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.meshb)
 
@@ -450,6 +469,11 @@ ADD_TEST(NAME mmg2d_GaronneGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
+
+ADD_TEST(NAME mmg2d_GaronneGeneration2
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GaronneGeneration/garonne.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration2.o.meshb)
 
 ###############################################################################
 #####
@@ -522,6 +546,19 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
   ${MMG2D_CI_TESTS}/LSDiscretization/dom
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
+
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-normc.o.meshb)
 
 # ls + rmc: max pile size bug
 ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile
@@ -621,7 +658,7 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion1_circle-circle.o.meshb
     )
   ADD_TEST(NAME mmg2d_LagMotion2_circle
-    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2
+    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2 -d
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
     -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-circle.o.meshb
     )

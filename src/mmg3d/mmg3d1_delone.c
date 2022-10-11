@@ -37,6 +37,7 @@
 
 #include "libmmg3d.h"
 #include "libmmg3d_private.h"
+#include "mmg3dexterns.h"
 
 #ifndef MMG_PATTERN
 
@@ -67,24 +68,26 @@ int8_t  ddb;
  * collapse edges shorter than \ref MMG3D_LOPTSMMG5_DEL.
  *
  */
-static inline int
-MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
-                 int* ifilt,int* ns,int* nc,int* warn,int it) {
+static inline
+int MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_int ne,
+                    MMG5_int* ifilt,MMG5_int* ns,MMG5_int* nc,int* warn,int it) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
   double        len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int           k,ip,ip1,ip2,src,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
+  int           ilist,ilists;
+  MMG5_int      src,k,ip1,ip2,ip,iq,lists[MMG3D_LMAX+2],ref,base;
+  int64_t       list[MMG3D_LMAX+2];
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;
   double        lmin,lfilt;
-  int           imin,iq;
+  int           imin;
   int           ii;
   double        lmaxtet,lmintet,volmin;
-  int           imaxtet,imintet,base,countMemFailure;
+  int           imaxtet,imintet,countMemFailure;
   int8_t        chkRidTet;
   static int8_t mmgWarn0 = 0;
 
@@ -124,7 +127,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
       if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
-          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
+          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %" MMG5_PRId " are"
                   " boundary and required.\n",
                   __func__,k);
         }
@@ -135,7 +138,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
       if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
-          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
+          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %" MMG5_PRId " are"
                   " boundary and required.\n",
                   __func__,k);
         }
@@ -171,6 +174,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
             continue;
           else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            assert( 0<=i && i<4 && "unexpected local face idx");
             MMG5_tet2tri(mesh,k,i,&ptt);
             MMG5_nortri(mesh,&ptt,no1);
             if ( !MG_GET(pxt->ori,i) ) {
@@ -194,6 +198,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
             goto collapse;
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            assert( 0<=i && i<4 && "unexpected local face idx");
             MMG5_tet2tri(mesh,k,i,&ptt);
             MMG5_nortri(mesh,&ptt,no1);
           }
@@ -430,6 +435,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
       j  = MMG5_iarfinv[i][imin];
       i1 = MMG5_idir[i][MMG5_inxt2[j]];
       i2 = MMG5_idir[i][MMG5_iprv2[j]];
+      assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
+      assert( 0<=i2 && i2<4 && "unexpected local index for vertex");
       ip = pt->v[i1];
       iq = pt->v[i2];
       p0 = &mesh->point[ip];
@@ -531,6 +538,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
             if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
               continue;
             else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+              assert( 0<=i && i<4 && "unexpected local face idx");
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
             }
@@ -549,6 +557,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
             if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
               goto collapse2;
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+              assert( 0<=i && i<4 && "unexpected local face idx");
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
             }
@@ -836,9 +845,10 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
  * Mesh optimization during insertion phase.
  *
  */
-static int
-MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
-  int           it,nnm,nnf,maxit,nm,nf,nw;
+static
+int MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
+  int           it,maxit;
+  MMG5_int      nf,nnf,nnm,nm,nw;
   double        crit;
 
   /* shape optim */
@@ -885,7 +895,7 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
       fprintf(stdout,"                                          ");
-      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
+      fprintf(stdout,"  %8" MMG5_PRId " improved, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nw,nf,nm);
     }
   }
   while( ++it < maxit && nw+nm+nf > 0 );
@@ -894,7 +904,7 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
-              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+              "      %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nnf,nnm,it);
   }
   return 1;
 }
@@ -911,10 +921,11 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * than \ref MMG3D_LOPTSMMG5_DEL.
  *
  */
-static int
-MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
-  int        nfilt,ifilt,ne,ier;
-  int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim;
+static
+int MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
+  int        ier;
+  int        it,maxit,noptim;
+  MMG5_int   ns,nc,ne,nnm,nm,nnf,nf,nnc,nns,nfilt,ifilt;
   double     maxgap,dd,declic,declicsurf;
 
   /* Iterative mesh modifications */
@@ -985,20 +996,20 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
 
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nm+nf > 0)
-      fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
-              " %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
+      fprintf(stdout,"     %8"MMG5_PRId" filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
+              " %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ifilt,ns,nc,nf,nm);
 
     /*optimization*/
-    dd = abs(nc-ns);
+    dd = MMG5_abs(nc-ns);
     if ( !noptim && (it==5 || ((dd < 5) || (dd < 0.05*MG_MAX(nc,ns)) || !(ns+nc))) ) {
       MMG5_optbad(mesh,met,*PROctree);
       noptim = 1;
     }
 
     if( it > 5 ) {
-      //  if ( ns < 10 && abs(nc-ns) < 3 )  break;
-      //else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
-      dd = abs(nc-ns);
+      //  if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
+      //else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+      dd = MMG5_abs(nc-ns);
       if ( dd < 5 || dd < 0.05*MG_MAX(nc,ns) )   break;
       //else if ( it > 12 && nc >= ns )  break;
     }
@@ -1007,8 +1018,8 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
-      fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
-              " %8d swapped, %8d moved, %d iter.\n",nfilt,nns,nnc,nnf,nnm, it);
+      fprintf(stdout,"     %8"MMG5_PRId" filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
+              " %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter.\n",nfilt,nns,nnc,nnf,nnm, it);
     }
   }
 
@@ -1024,10 +1035,11 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
  * Mesh optimization for LES computation (improve the element skewness).
  *
  */
-static int
-MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
-  int it,nnm,nnf,maxit,nm,nf,nw;
-  double declic;
+static
+int MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
+  int       it,maxit;
+  MMG5_int  nnf,nf,nw,nm,nnm;
+  double    declic;
 
   it = nnm = nnf = 0;
   maxit = 10;
@@ -1075,7 +1087,7 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
       fprintf(stdout,"                                          ");
-      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
+      fprintf(stdout,"  %8" MMG5_PRId " improved, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nw,nf,nm);
     }
   }
   while( ++it < maxit && nw+nm+nf > 0 );
@@ -1096,7 +1108,7 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
     fprintf(stdout,"                                            "
             "                                ");
-    fprintf(stdout,"     %8d moved\n",nm);
+    fprintf(stdout,"     %8" MMG5_PRId " moved\n",nm);
   }
 
 
@@ -1104,7 +1116,7 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
-              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+              "      %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nnf,nnm,it);
   }
   return 1;
 }
@@ -1117,10 +1129,11 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * Mesh optimization using egde swapping and point relocation.
  *
  */
-static int
-MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
+static
+int MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   MMG5_pTetra   pt;
-  int           it,nnm,nnf,maxit,nm,nf,nw,k;
+  int           it,maxit;
+  MMG5_int      nnf,nf,nw,k,nnm,nm;
   double        crit,declic;
 
   /* shape optim */
@@ -1178,7 +1191,7 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
       fprintf(stdout,"                                          ");
-      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
+      fprintf(stdout,"  %8" MMG5_PRId " improved, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nw,nf,nm);
     }
 
     if ( it > 3 ) {
@@ -1202,14 +1215,14 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
     fprintf(stdout,"                                            "
             "                                ");
-    fprintf(stdout,"     %8d moved\n",nm);
+    fprintf(stdout,"     %8" MMG5_PRId " moved\n",nm);
   }
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
-              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+              "      %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nnf,nnm,it);
   }
   return 1;
 }
@@ -1225,11 +1238,11 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * prescribed metric.
  *
  */
-static int
-MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
-                   int * permNodGlob) {
-  int      nnf,ns,nf;
-  int      warn;
+static
+int MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
+                       MMG5_int * permNodGlob) {
+  MMG5_int  nnf,nf;
+  int       warn,ns;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
@@ -1250,7 +1263,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
   } else  nnf = nf = 0;
 
   if ( mesh->info.ddebug ) {
-    fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7d\n",nnf);
+    fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7"MMG5_PRId"\n",nnf);
     MMG3D_outqua(mesh,met);
   }
 
@@ -1296,7 +1309,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
  * Main adaptation routine.
  *
  */
-int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
+int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
   MMG3D_pPROctree PROctree = NULL;
 
   if ( abs(mesh->info.imprim) > 4 )
@@ -1316,14 +1329,31 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     return 0;
   }
 
+  /* Debug: export variable MMG_SAVE_ANATET1 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-1."
+           " (MMG_SAVE_ANATET1 env variable is exported).\n");
+    return 1;
+  }
+
   /**--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
+
 
   /* define metric map */
   if ( !MMG3D_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
   }
 
   MMG5_gradation_info(mesh);
@@ -1338,12 +1368,28 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     MMG3D_gradsizreq(mesh,met);
   }
 
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
+
   /*update quality*/
   if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
   if ( !MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_ANATET2 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET2") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-2."
+           " (MMG_SAVE_ANATET2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumerotation if available */

@@ -40,22 +40,25 @@
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
  * \param list pointer toward the computed ball of \a ip.
+ * \param opn 0 for a closed ball, 1 for an open ball.
  * \return the size of the computed ball or 0 if fail.
  *
  * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
  * crossing ridge.
  *
  */
-int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
+int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int           *adja,k,ilist;
+  MMG5_int      *adja,k;
+  int           ilist;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
 
   ppt = &mesh->point[pt->v[ip]];
   ilist = 0;
+  *opn  = 0;
 
   /* store neighbors */
   k = start;
@@ -80,6 +83,7 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   /* check if boundary hit */
   k = start;
   i = ip;
+  *opn = 1;
   do {
     adja = &mesh->adja[3*(k-1)+1];
     i2 = MMG5_iprv2[i];
@@ -104,14 +108,17 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
  * the ball.
  * \param list pointer toward the computed ball of point.
  *
+ * \return size of list if success, -size if overflow, 0 if cfg is non-manifold.
+ *
  * Find all triangles sharing \a ip, \f$list[0] = start\f$ . Do not stop when
  * crossing ridge. Check whether resulting configuration is manifold.
  *
  */
-int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
+int boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int           *adja,k,ilist,base,iel;
+  MMG5_int      *adja,k,iel,base;
+  int           ilist;
   int8_t        i,i1,i2,ia,iq,voy;
 
   base = ++mesh->base;
@@ -248,8 +255,8 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
  * \param il2 pointer toward the second ball size.
  * \param l2 pointer toward the second computed ball (associated to \a n2's
  * side).
- * \param ip0 index of the first extremity of the ridge.
- * \param ip1 index of the second extremity of the ridge.
+ * \param global ip0 index of the first extremity of the ridge.
+ * \param global ip1 index of the second extremity of the ridge.
  * \return 0 if fail, 1 otherwise.
  *
  * Computation of the two balls of a ridge point: the list \a l1 is associated
@@ -257,10 +264,11 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
  * point of the ridge. Both lists are returned enumerated in direct order.
  *
  */
-int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
+int bouletrid(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,int *il1,MMG5_int *l1,int *il2,MMG5_int *l2,MMG5_int *ip0,MMG5_int *ip1) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
-  int          idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  MMG5_int     idp,k,kold,*adja,iel,*list1,*list2,aux;
+  int          *ilist1,*ilist2;
   uint8_t      i,iold,i1,i2,ipn;
   double       *n1,*n2,nt[3],ps1,ps2;
 
