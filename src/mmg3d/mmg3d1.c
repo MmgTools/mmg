@@ -932,8 +932,15 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           assert(0);
           continue;
         }
-        else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
-
+        else {
+          /* Ignore OLDPARBDY tag of p0 */
+          int16_t tag = p0->tag;
+          tag &= ~MG_OLDPARBDY;
+          if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+            /* Unable to merge edge */
+            continue;
+          }
+        }
 
         /* Ball of point: computed here if needed for the local parameter
          * evaluation, after length check otherwise (because the ball

@@ -189,7 +189,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_int      k,ip,iq,lists[MMG3D_LMAX+2],nc;
   int64_t       list[MMG3D_LMAX+2];
   int           ilist,ier,ilists;
-  int16_t       tag;
+  int16_t       tag0,tag;
   int8_t        imin,j,i,i1,i2;
   static int8_t mmgWarn = 0;
 
@@ -199,7 +199,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
-    /* find shortest edge */
+    /** Find shortest edge */
     imin = -1; lmin = DBL_MAX;
     for (i=0; i<6; i++) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
@@ -219,51 +219,77 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       continue;
     }
-    if ( lmin > MMG3D_LOPTS )  continue;
+    if ( lmin > MMG3D_LOPTS ) {
+      /* Edge is large enough: nothing to do */
+      continue;
+    }
 
-    // Case of an internal tetra with 4 ridges vertices.
-    if ( lmin == 0 ) continue;
+    if ( lmin == 0 ) {
+      /* Case of an internal tetra with 4 ridges vertices */
+#warning is it possible to merge this edge ??
+      continue;
+    }
 
     MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip,&iq,&p0,&p1);
 
     /* Ignore OLDPARBDY tag of p0 */
-    tag = p0->tag;
-    tag &= ~MG_OLDPARBDY;
-    if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+    tag0 = p0->tag;
+    tag0 &= ~MG_OLDPARBDY;
+    if ( (tag0 > p1->tag) || (tag0 & MG_REQ) ) {
       /* Unable to merge edge: pass to next element */
       continue;
     }
 
-    /* Case of a boundary face */
+    /** Compute edge shell */
     ilist = 0;
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+      /* Case of a boundary face */
       tag = pxt->tag[MMG5_iarf[i][j]];
-      if ( tag & MG_REQ )  continue;
+      if ( tag & MG_REQ ) {
+        continue;
+      }
       tag |= MG_BDY;
-      if ( p0->tag > tag )   continue;
-      if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
+      tag &= ~MG_OLDPARBDY;
+      if ( tag0 > tag ) {
+        continue;
+      }
+      if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) {
+        continue;
+      }
 
+      int16_t isnm = (p0->tag & MG_NOM);
       if (MMG5_boulesurfvolp(mesh,k,i1,i,
-                              list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+                              list,&ilist,lists,&ilists,isnm) < 0 ) {
         return -1;
+      }
 
       ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
     }
-    /* Case of an internal face */
     else {
+      /* Case of an internal face */
       if ( p0->tag & MG_BDY )  continue;
       ilist = MMG5_boulevolp(mesh,k,i1,list);
       ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
     }
+
+    /** Collapse */
     if ( ilist > 0 ) {
+      /* Checks are ok */
       ier = MMG5_colver(mesh,met,list,ilist,i2,2);
-      if ( ier < 0 )  return -1;
+      if ( ier < 0 ) {
+        /* Colver failure */
+        return -1;
+      }
       else if ( ier ) {
+        /* Collapse is successful */
         MMG3D_delPt(mesh,ier);
         nc++;
       }
     }
-    else if (ilist < 0 )  return -1;
+    else if (ilist < 0 ) {
+      /* Checks have failed (strong failure) */
+      return -1;
+    }
   }
 
   return nc;

@@ -336,7 +336,6 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
     return 3;
   }
 
-  // Case of an internal tetra with 4 ridges vertices.
   if ( lmin == 0 ) {
     /* Case of an internal tetra with 4 ridges vertices */
 #warning is it possible to merge this edge ??
@@ -349,22 +348,24 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
   MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
   /* Ignore OLDPARBDY tag of p0 */
-  int16_t tag = p0->tag;
-  tag &= ~MG_OLDPARBDY;
-  if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+  int16_t tag0 = p0->tag;
+  tag0 &= ~MG_OLDPARBDY;
+  if ( (tag0 > p1->tag) || (tag0 & MG_REQ) ) {
     /* Unable to merge edge: pass to next element */
     return 0;
   }
 
+  /** Compute edge shell */
   ilist = 0;
   if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
     /* Case of a boundary face */
-    tag = pxt->tag[MMG5_iarf[i][j]];
+    int16_t tag = pxt->tag[MMG5_iarf[i][j]];
     if ( tag & MG_REQ ) {
       return 0;
     }
     tag |= MG_BDY;
-    if ( p0->tag > tag ) {
+    tag &= ~MG_OLDPARBDY;
+    if ( tag0 > tag ) {
       return 0;
     }
     if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) {
@@ -403,13 +404,15 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
     if ( ilist > 0 ) {
       int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
       if ( ilist < 0 ) {
+        /* Colver failure */
         return 0;
       }
-
       if ( ier < 0 ) {
+        /* Colver failure */
         return -1;
       }
       else if(ier) {
+        /* Collapse is successful */
         if ( *PROctree ) {
           MMG3D_delPROctree(mesh,*PROctree,ier);
         }
@@ -419,6 +422,7 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
       }
     }
     else if (ilist < 0 ) {
+      /* Checks have failed (strong failure) */
       return -1;
     }
   }
