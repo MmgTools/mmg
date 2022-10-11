@@ -226,6 +226,13 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
     MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip,&iq,&p0,&p1);
 
+    /* Ignore OLDPARBDY tag of p0 */
+    tag = p0->tag;
+    tag &= ~MG_OLDPARBDY;
+    if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+      /* Unable to merge edge: pass to next element */
+      continue;
+    }
 
     /* Case of a boundary face */
     ilist = 0;
