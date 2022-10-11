@@ -208,11 +208,11 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
                               int *warn,int8_t *countMemFailure ) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_pPoint   p0,p1,ppt;
-  double        o[3],to[3],no1[3],no2[3],lfilt;
+  MMG5_pPoint   p0,p1;
+  double        o[3];
   int64_t       list[MMG3D_LMAX+2];
   MMG5_int      ip1,ip2;
-  MMG5_int      src,ip,ref;
+  MMG5_int      src,ip;
   int           ilist;
   int16_t       is_ifa1_bdy;
   int8_t        j,i,i1,i2,ifa0,ifa1;
@@ -250,9 +250,13 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
   if ( pxt && (pxt->ftag[i] & MG_BDY) ) {
     /** Edge belongs to a boundary face: try to split using patterns */
     /* Construction of bezier edge */
-    int16_t tag;
-    int8_t  ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
-                                         &ref,&tag,o,to,no1,no2,list,&ilist);
+    double      to[3],no1[3],no2[3];
+    MMG5_int    ref;
+    int16_t     tag;
+    MMG5_pPoint ppt;
+
+    int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,
+                                        &ref,&tag,o,to,no1,no2,list,&ilist);
     switch (ier) {
     case -1:
       /* Strong failure */
@@ -381,6 +385,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
 
     /* Delaunay */
+    double lfilt;
     if ( lmaxtet< MMG3D_THRES_DEL ) {
       lfilt = MMG3D_LFILTS_DEL;
     }
