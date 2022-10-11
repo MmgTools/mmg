@@ -1510,7 +1510,6 @@ MMG3D_update_rid_geom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  * \param i index of (boundary) face in which we work.
  * \param j local index in face i of the ridge.
  * \param pt tetra to split
- * \param pxt associated xtetra
  * \param no1 first normal at new ridge point (to fill)
  * \param no2 second normal at new ridge point (to fill)
  * \param to tangent ar new ridge point (to fill)
@@ -1519,10 +1518,11 @@ MMG3D_update_rid_geom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  *
  * Compute normals and tangent at new ridge point.
  *
+ * \remark has to be called from a bdy face with suitable orientation (normal
+ * orientation is not checked along edges with 2 singular extremities)
  */
 int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
-                                      MMG5_pxTetra pxt,double no1[3],
-                                      double no2[3], double to[3] ) {
+                                       double no1[3],double no2[3],double to[3] ) {
   MMG5_Tria ptt;
   double    dd;
   int       ier;
@@ -1532,13 +1532,18 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
   assert ( 0<=j && j<3 && "unexpected local edg odx in face" );
 
   assert( 0<=i && i<4 && "unexpected local face idx");
+
+#ifndef NDEBUG
+  /* Check that face is boundary and has a suitable orientation */
+  assert ( mesh->tetra[k].xt && "Tetra is not boundary" );
+
+  MMG5_pxTetra pxt = &mesh->xtetra[ mesh->tetra[k].xt ];
+  assert ( (pxt->ftag[i] & MG_BDY) && "Face is not boundary" );
+  assert ( MG_GET(pxt->ori,i) && "Wrong face orientation" );
+#endif
+
   MMG5_tet2tri(mesh,k,i,&ptt);
   MMG5_nortri(mesh,&ptt,no1);
-  if ( !MG_GET(pxt->ori,i) ) {
-    no1[0] *= -1.0;
-    no1[1] *= -1.0;
-    no1[2] *= -1.0;
-  }
 
   /* In this case, 'to' orientation depends on the edge processing (so on
    * the triangle from which we come) so we can't use it to compute no2. */
@@ -1566,14 +1571,6 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
   }
   else {
     assert ( ier==1 );
-
-    if ( !MG_GET(pxt->ori,i) ) {
-      /* If k belongs to the domain that is not consistent with the normal
-       * orientation, no2 (as no1) has to be inverted */
-      no2[0] *= -1.0;
-      no2[1] *= -1.0;
-      no2[2] *= -1.0;
-    }
 
     /* Compute 'to' as intersection of no1 and no2 */
     to[0] = no1[1]*no2[2] - no1[2]*no2[1];
@@ -1626,7 +1623,9 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   ifa0 = MMG5_ifar[imax][0];
   ifa1 = MMG5_ifar[imax][1];
 
-  /* Search for a boundary face with suitable orientation to treat the edge */
+  /* An edge can be at the interface of a boundary face with good orientation
+   * and of another one with bad orientation: ensure to treat the edge from the
+   * suitable face */
   /* Default face */
   i = ifa0;
   if ( pt->xt ) {
@@ -1700,11 +1699,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
     }
   }
   else if ( tag & MG_GEO ) {
@@ -1714,7 +1708,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
       return 0;
     }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,no1,no2,to) ) {
         return -1;
       }
     }
@@ -1728,11 +1722,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
     }
   }
   else {
@@ -1748,11 +1737,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
     }
   }
 
@@ -1974,6 +1958,7 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     pt->flag = 0;
     pxt = &mesh->xtetra[pt->xt];
 
+    /* Travel well oriented boundary faces to flag edges that have to be cut */
     for (i=0; i<4; i++){
       if ( pxt->ftag[i] & MG_REQ )     continue;
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;

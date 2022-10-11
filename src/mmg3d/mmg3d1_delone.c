@@ -136,7 +136,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
     }
 
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,no1,no2,to) ) {
         return -1;
       }
     }
