@@ -460,6 +460,10 @@ void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt);
 int  MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx);
 int  MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int);
 int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori,double,double,int);
+int8_t MMG3D_build_bezierEdge(MMG5_pMesh,MMG5_int,int8_t,int8_t,int8_t,MMG5_pxTetra,
+                              MMG5_int,MMG5_int,MMG5_pPoint,MMG5_pPoint,
+                              MMG5_int*,int16_t*,double[3],double[3],double[3],
+                              double[3],int64_t*,int*);
 int  MMG3D_splsurfedge( MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_pTetra,MMG5_pxTetra,int8_t,
                         int8_t,int8_t,int* );
 int  MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, int8_t typchk, int patternMode) ;
