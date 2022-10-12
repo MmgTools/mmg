@@ -378,20 +378,6 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
     }
 
     ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
-    if ( ilist > 0 ) {
-      int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
-      if ( ier < 0 ) {
-        return -1;
-      }
-      else if(ier) {
-        MMG3D_delPt(mesh,ier);
-        (*nc)++;
-        return 2;
-      }
-    }
-    else if (ilist < 0 ) {
-      return -1;
-    }
   }
   else {
     /* Case of an internal face */
@@ -401,31 +387,35 @@ int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
 
     ilist = MMG5_boulevolp(mesh,k,i1,list);
     ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
-    if ( ilist > 0 ) {
-      int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
-      if ( ilist < 0 ) {
-        /* Colver failure */
-        return 0;
-      }
-      if ( ier < 0 ) {
-        /* Colver failure */
-        return -1;
-      }
-      else if(ier) {
-        /* Collapse is successful */
-        if ( *PROctree ) {
-          MMG3D_delPROctree(mesh,*PROctree,ier);
-        }
-        MMG3D_delPt(mesh,ier);
-        (*nc)++;
-        return 2;
-      }
+  }
+
+  /** Collapse */
+  if ( ilist > 0 ) {
+    /* Checks are ok */
+    int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
+    if ( ilist < 0 ) {
+      /* Colver failure */
+      return 0;
     }
-    else if (ilist < 0 ) {
-      /* Checks have failed (strong failure) */
-      return -1;
+    if ( ier < 0 ) {
+      /* Colver failure */
+        return -1;
+    }
+    else if(ier) {
+      /* Collapse is successful */
+      if ( *PROctree ) {
+        MMG3D_delPROctree(mesh,*PROctree,ier);
+      }
+      MMG3D_delPt(mesh,ier);
+      (*nc)++;
+      return 2;
     }
   }
+  else if (ilist < 0 ) {
+    /* Checks have failed (strong failure) */
+    return -1;
+  }
+
   return 3;
 }
 
