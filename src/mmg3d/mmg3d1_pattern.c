@@ -171,7 +171,6 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   return ns;
 }
 
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -184,13 +183,10 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
 static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_pPoint   p0,p1;
   double        len,lmin;
-  MMG5_int      k,ip,iq,lists[MMG3D_LMAX+2],nc;
-  int64_t       list[MMG3D_LMAX+2];
-  int           ilist,ier,ilists;
-  int16_t       tag0,tag;
-  int8_t        imin,j,i,i1,i2;
+  MMG5_int      k,nc;
+  int           ier;
+  int8_t        imin,i;
   static int8_t mmgWarn = 0;
 
   nc = 0;
@@ -219,76 +215,20 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       continue;
     }
-    if ( lmin > MMG3D_LOPTS ) {
-      /* Edge is large enough: nothing to do */
-      continue;
-    }
 
-    if ( lmin == 0 ) {
-      /* Case of an internal tetra with 4 ridges vertices */
-#warning is it possible to merge this edge ??
-      continue;
-    }
-
-    MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip,&iq,&p0,&p1);
-
-    /* Ignore OLDPARBDY tag of p0 */
-    tag0 = p0->tag;
-    tag0 &= ~MG_OLDPARBDY;
-    if ( (tag0 > p1->tag) || (tag0 & MG_REQ) ) {
-      /* Unable to merge edge: pass to next element */
-      continue;
-    }
-
-    /** Compute edge shell */
-    ilist = 0;
-    if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-      /* Case of a boundary face */
-      tag = pxt->tag[MMG5_iarf[i][j]];
-      if ( tag & MG_REQ ) {
-        continue;
-      }
-      tag |= MG_BDY;
-      tag &= ~MG_OLDPARBDY;
-      if ( tag0 > tag ) {
-        continue;
-      }
-      if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) {
-        continue;
-      }
-
-      int16_t isnm = (p0->tag & MG_NOM);
-      if (MMG5_boulesurfvolp(mesh,k,i1,i,
-                              list,&ilist,lists,&ilists,isnm) < 0 ) {
-        return -1;
-      }
-
-      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
-    }
-    else {
-      /* Case of an internal face */
-      if ( p0->tag & MG_BDY )  continue;
-      ilist = MMG5_boulevolp(mesh,k,i1,list);
-      ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
-    }
-
-    /** Collapse */
-    if ( ilist > 0 ) {
-      /* Checks are ok */
-      ier = MMG5_colver(mesh,met,list,ilist,i2,2);
-      if ( ier < 0 ) {
-        /* Colver failure */
-        return -1;
-      }
-      else if ( ier ) {
-        /* Collapse is successful */
-        MMG3D_delPt(mesh,ier);
-        nc++;
-      }
-    }
-    else if (ilist < 0 ) {
-      /* Checks have failed (strong failure) */
+    /** Try to collapse this edge */
+    ier = MMG3D_adpcoledg(mesh,met,NULL,k,imin,lmin,&nc);
+    switch ( ier ) {
+    case -1:
+      /* chkcol_bdy failure do to error in edge shell computation */
       return -1;
+    default:
+      assert ( ier==0 || ier==2 || ier==3 );
+      /* Pass to next element for other return values:
+       *  - 0: for colver failure or impossible collapse
+       *  - 2: for successful Collapse
+       *  - 3: if edge is large enough or chkcol_[int|bdy] refuse the collapse
+       * (due to normal deviation, hausdorff check ...) */
     }
   }
 

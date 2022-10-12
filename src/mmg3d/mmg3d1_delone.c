@@ -303,127 +303,6 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
  * \param met pointer toward the metric structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param k index of tetra in which we work.
- * \param imin index in \a k of edge that we consider for collapse.
- * \param lmin length of edge \a imin.
- * \param nc pointer toward count of collapses (has to be updated)
- *
- * \return -1 for strong failure.
- *
- * \return 0 if edge cannot be collapsed and if we want to pass to next loop
- * step (next element or next tetra edge)
- *
- * \return 2 if edge has been collapsed.
- *
- * \return 3 if nothing has been done (no error but no collapse either).
- *
- * Try to collapse edge \a imin it too small.
- *
- */
-static inline
-int MMG3D_mmg3d1_delone_collapse(MMG5_pMesh mesh, MMG5_pSol met,
-                                 MMG3D_pPROctree *PROctree,MMG5_int k,
-                                 int8_t imin,double lmin,MMG5_int* nc) {
-  MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  MMG5_pPoint   p0,p1;
-  int64_t       list[MMG3D_LMAX+2];
-  MMG5_int      lists[MMG3D_LMAX+2],ip1,ip2;
-  int           ilist,ilists;
-  int8_t        j,i,i1,i2;
-
-  if(lmin > MMG3D_LOPTS) {
-    /* Edge is large enough: nothing to do */
-    return 3;
-  }
-
-  if ( lmin == 0 ) {
-    /* Case of an internal tetra with 4 ridges vertices */
-#warning is it possible to merge this edge ??
-    return 0;
-  }
-
-  pt = &mesh->tetra[k];
-  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
-  MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
-
-  /* Ignore OLDPARBDY tag of p0 */
-  int16_t tag0 = p0->tag;
-  tag0 &= ~MG_OLDPARBDY;
-  if ( (tag0 > p1->tag) || (tag0 & MG_REQ) ) {
-    /* Unable to merge edge: pass to next element */
-    return 0;
-  }
-
-  /** Compute edge shell */
-  ilist = 0;
-  if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-    /* Case of a boundary face */
-    int16_t tag = pxt->tag[MMG5_iarf[i][j]];
-    if ( tag & MG_REQ ) {
-      return 0;
-    }
-    tag |= MG_BDY;
-    tag &= ~MG_OLDPARBDY;
-    if ( tag0 > tag ) {
-      return 0;
-    }
-    if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) {
-      return 0;
-    }
-
-    int16_t isnm = (p0->tag & MG_NOM);
-    if (MMG5_boulesurfvolp(mesh,k,i1,i, list,&ilist,lists,&ilists,isnm) < 0 ) {
-      return -1;
-    }
-
-    ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
-  }
-  else {
-    /* Case of an internal face */
-    if ( p0->tag & MG_BDY ) {
-      return 0;
-    }
-
-    ilist = MMG5_boulevolp(mesh,k,i1,list);
-    ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
-  }
-
-  /** Collapse */
-  if ( ilist > 0 ) {
-    /* Checks are ok */
-    int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
-    if ( ilist < 0 ) {
-      /* Colver failure */
-      return 0;
-    }
-    if ( ier < 0 ) {
-      /* Colver failure */
-        return -1;
-    }
-    else if(ier) {
-      /* Collapse is successful */
-      if ( *PROctree ) {
-        MMG3D_delPROctree(mesh,*PROctree,ier);
-      }
-      MMG3D_delPt(mesh,ier);
-      (*nc)++;
-      return 2;
-    }
-  }
-  else if (ilist < 0 ) {
-    /* Checks have failed (strong failure) */
-    return -1;
-  }
-
-  return 3;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param k index of tetra in which we work.
  * \param imin index in \a k of edge that we consider for split.
  * \param lmin length of edge \a imax.
  * \param imax index in \a k of edge that we consider for split.
@@ -496,7 +375,7 @@ int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
 
   /** 2. Try to merge small edge: if collapse is not possible, pass to
    * next element */
-  ier = MMG3D_mmg3d1_delone_collapse(mesh,met,PROctree,k,imin,lmin,nc);
+  ier = MMG3D_adpcoledg(mesh,met,PROctree,k,imin,lmin,nc);
 
   /* Strong failure: ier==-1 */
   /* Unable to treat too small edge: pass to next edge of element: ier==0 */

@@ -466,6 +466,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh,MMG5_int,int8_t,int8_t,int8_t,MMG5_pxTe
                               MMG5_int,MMG5_int,MMG5_pPoint,MMG5_pPoint,
                               MMG5_int*,int16_t*,double[3],double[3],double[3],
                               double[3],int64_t*,int*);
+int MMG3D_adpcoledg(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree*,MMG5_int,int8_t,double,MMG5_int*);
 int  MMG3D_splsurfedge( MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_pTetra,MMG5_pxTetra,int8_t,
                         int8_t,int8_t,int* );
 int  MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, int8_t typchk, int patternMode) ;
