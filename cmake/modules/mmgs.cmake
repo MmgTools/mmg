@@ -39,11 +39,13 @@ FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 #####
 ############################################################################
 
-GENERATE_FORTRAN_HEADER ( mmgs
-  ${MMGS_SOURCE_DIR} libmmgs.h
-  ${MMGS_SHRT_INCLUDE}
-  ${MMGS_BINARY_DIR} libmmgsf.h
-  )
+if (PERL_FOUND)
+  GENERATE_FORTRAN_HEADER ( mmgs
+    ${MMGS_SOURCE_DIR} libmmgs.h
+    ${MMGS_SHRT_INCLUDE}
+    ${MMGS_BINARY_DIR} libmmgsf.h
+    )
+endif (PERL_FOUND)
 
 ###############################################################################
 #####
