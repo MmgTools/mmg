@@ -166,7 +166,10 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k,int i,MMG5_int ip)
 
   pt0  = &mesh->tria[0];
   ppt0 = &mesh->point[0];
-  memcpy(ppt0->c  ,&mesh->point[ip].c  , 3*sizeof(double));
+
+  /* MMG5_calelt function needs the normal(s) at point in aniso mode so we can't
+   * copy only the point coordinates */
+  memcpy(ppt0  ,&mesh->point[ip]  ,sizeof(MMG5_Point));
   ppt0->tag = mesh->point[ip].tag;
 
   memcpy(&met->m[0],&met->m[met->size*ip], met->size*sizeof(double));
