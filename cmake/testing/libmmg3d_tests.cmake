@@ -101,7 +101,7 @@ ELSE ()
 ENDIF ( )
 
 #####         Fortran Tests
-IF ( CMAKE_Fortran_COMPILER )
+IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ENABLE_LANGUAGE ( Fortran )
 
   SET ( MMG3D_LIB_TESTS ${MMG3D_LIB_TESTS}
@@ -138,7 +138,7 @@ IF ( CMAKE_Fortran_COMPILER )
       )
   ENDIF( )
 
-ENDIF ( CMAKE_Fortran_COMPILER )
+ENDIF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
 
 LIST(LENGTH MMG3D_LIB_TESTS nbTests_tmp)
 MATH(EXPR nbTests "${nbTests_tmp} - 1")
@@ -309,7 +309,7 @@ IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
 ENDIF ( )
 
-IF ( CMAKE_Fortran_COMPILER)
+IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ADD_TEST(NAME libmmg3d_fortran_a
     COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a
     "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/cube.mesh"
