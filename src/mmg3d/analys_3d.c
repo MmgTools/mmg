@@ -310,9 +310,75 @@ int MMG5_setadj(MMG5_pMesh mesh){
 int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
-  MMG5_int      *adja,k,kk,ne,nr;
+  MMG5_int      *adja,k,kk,ne,nr,nrrm;
   int8_t        i,ii,i1,i2;
+  static int8_t warn=0;
 
+  /** Step 1: check input ridges provided by the user to remove those ones
+   * between triangles belonging to the same plane. This step has to be done
+   * prior the next one because we want to remove the MG_GEO tag transfered from
+   * ridges that we delete toward vertices by \a MMG5_setadj but we want to
+   * preserve the MG_GEO tags at vertices of ridges that will be added by the
+   * next step. */
+  nrrm = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* triangle normal */
+    MMG5_nortri(mesh,pt,n1);
+    adja = &mesh->adjt[3*(k-1)+1];
+    for (i=0; i<3; i++) {
+      if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+           (pt->tag[i] & MG_BDY) ) continue;
+
+      if ( pt->tag[i] & MG_NOM ) {
+        /* 1. We don't compute ridges along non-manifold edges because: if we
+         * choose to analyze their angle, we have to check the normal deviation
+         * during mesh adaptation (which is not done for now).
+         *
+         * 2. Do not analyze if nm edges are MG_REF ones because we can't
+         * analyze if adjacent tria have same refs due to non-consistency of
+         * adjacency building.
+         */
+        continue;
+      }
+
+      kk  = adja[i] / 3;
+      ii  = adja[i] % 3;
+
+      if ( kk && k < kk ) {
+        pt1 = &mesh->tria[kk];
+        /* check angle w. neighbor. */
+        MMG5_nortri(mesh,pt1,n2);
+        dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
+
+        if ( (pt->tag[i] & MG_GEO) || (pt1->tag[ii] & MG_GEO) ) {
+          /* Edge is provided as ridge by the user: check that it isn't at the
+           * interface of 2 triangles belonging to the same plane */
+          if ( fabs(dhd-1.) < MMG5_EPSOK ) {
+            pt->tag[i]   &= ~MG_GEO;
+            pt1->tag[ii] &= ~MG_GEO;
+            i1 = MMG5_inxt2[i];
+            i2 = MMG5_inxt2[i1];
+            mesh->point[pt->v[i1]].tag &= ~MG_GEO;
+            mesh->point[pt->v[i2]].tag &= ~MG_GEO;
+            nrrm++;
+            if ( !warn ) {
+              fprintf(stdout,"  ## Warning: %s: at least one ridge along flat angle.\n"
+                      "Ridge tag will be removed from edges but spurious tags "
+                      "that may intefere with remeshing may remains on vertices\n",
+                      __func__);
+              warn = 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /** Step 2: check ref and angle with neighbour to update ref tags and
+   * ridge ones */
   ne = nr = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -370,11 +436,27 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
           mesh->point[pt->v[i2]].tag |= MG_GEO;
           nr++;
         }
+        else if ( (pt->tag[i] & MG_GEO) || (pt1->tag[ii] & MG_GEO) ) {
+          /* The MG_GEO tag of a vertex at interface of a "true" ridge and a
+           * "spurious" ridge deleted at step 1 may have been removed by
+           * error */
+          pt->tag[i]   |= MG_GEO;
+          pt1->tag[ii] |= MG_GEO;
+          i1 = MMG5_inxt2[i];
+          i2 = MMG5_inxt2[i1];
+          mesh->point[pt->v[i1]].tag |= MG_GEO;
+          mesh->point[pt->v[i2]].tag |= MG_GEO;
+        }
       }
     }
   }
-  if ( abs(mesh->info.imprim) > 3 && nr > 0 )
-    fprintf(stdout,"     %" MMG5_PRId " ridges, %" MMG5_PRId " edges updated\n",nr,ne);
+  if ( abs(mesh->info.imprim) > 3 && nr > 0 ) {
+    fprintf(stdout,"     %" MMG5_PRId " ridges, %" MMG5_PRId " edges added\n",nr,ne);
+  }
+  if ( abs(mesh->info.imprim) > 3 && nrrm > 0 ) {
+    fprintf(stdout,"     %" MMG5_PRId " ridges removed\n",nrrm);
+  }
+
 
   return 1;
 }
@@ -943,7 +1025,8 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  /* identify connexity and flip orientation of faces if needed */
+  /* identify connexity, flip orientation of faces if needed and transfer
+   * triangle edge tags toward vertices. */
   if ( !MMG5_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     MMG5_DEL_MEM(mesh,hash.item);

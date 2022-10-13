@@ -684,6 +684,10 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,
   if ( !(MG_GEO & p0->tag) )  return 0;
   m = &met->m[6*np0];
   t = &p0->n[0];
+
+  /* Check that ridge tangent is not null */
+  assert ( t[0]*t[0] + t[1]*t[1] + t[2]*t[2] > 0. && "Null tangent");
+
   go = &mesh->xpoint[p0->xp];
 
   /* Decide between the two possible configurations */
@@ -702,6 +706,9 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,
     dv = m[1];
     dn = m[3];
   }
+
+  /* Check that choosed normal is not null */
+  assert ( n1[0]*n1[0] + n1[1]*n1[1] + n1[2]*n1[2] > 0. && "Null normal");
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
   u[1] = n1[2]*t[0] - n1[0]*t[2];
