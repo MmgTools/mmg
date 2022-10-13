@@ -1583,8 +1583,11 @@ int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
           ptt1 = &mesh->tria[mesh->nt];
 
         }
-        memcpy(ptt,ptt1,sizeof(MMG5_Tria));
-        --mesh->nt;
+        if ( ptt != ptt1 ) {
+          /* We don't find any tria to keep after index k */
+          memcpy(ptt,ptt1,sizeof(MMG5_Tria));
+          --mesh->nt;
+        }
       }
       /* Initially negative refs were used to mark isosurface: keep following
        * piece of code for retrocompatibility */
@@ -1595,9 +1598,13 @@ int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
     }
     while ( ++k < mesh->nt );
 
+    /* At the end of the loop, either k==mesh->nt, either k==mesh->nt+1 (because
+     * tria at idx mesh->nt was iso or unused and element mesh->nt+1 has been
+     * copied into k) */
+    assert ( (k==mesh->nt) || (k==mesh->nt+1) );
+
     /* Check if last element is iso */
-    assert ( k==mesh->nt );
-    MMG5_pTria ptt = &mesh->tria[k];
+    MMG5_pTria ptt = &mesh->tria[mesh->nt];
     if ( (!MG_EOK(ptt)) || (MMG5_abs(ptt->ref) == mesh->info.isoref) ) {
       --mesh->nt;
     }
