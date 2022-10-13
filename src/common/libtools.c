@@ -375,6 +375,7 @@ int MMG5_Clean_isoEdges(MMG5_pMesh mesh) {
             pa1 = &mesh->edge[mesh->na];
           }
           memcpy(pa,pa1,sizeof(MMG5_Edge));
+          --mesh->na;
         }
       }
 
@@ -386,6 +387,17 @@ int MMG5_Clean_isoEdges(MMG5_pMesh mesh) {
       }
     }
     while ( ++k < mesh->na );
+
+    /* Check if last edge is iso */
+    assert ( k==mesh->na );
+    MMG5_pEdge pa = &mesh->edge[k];
+    if ( (!pa->a) || (MMG5_abs(pa->a) == mesh->info.isoref) ) {
+      --mesh->na;
+    }
+
+    if ( mesh->info.imprim > 4 ) {
+      fprintf(stdout,"     Deleted iso edges: %" MMG5_PRId "\n",na-mesh->na);
+    }
 
     if( !mesh->na ) {
       MMG5_DEL_MEM(mesh,mesh->edge);

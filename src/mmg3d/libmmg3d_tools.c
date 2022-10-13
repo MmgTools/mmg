@@ -1555,35 +1555,10 @@ void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
   return;
 }
 
-/**
- * \param mesh pointer toward mesh
- * \param pa pointer toward edge
- *
- * Clean tags linked to iso surface discretization (MG_CRN, MG_ISO) along edge.
- *
- */
-static inline
-void MMG3D_Clean_isoTags(MMG5_pMesh mesh,MMG5_pEdge pa) {
-  /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
-  if ( MG_REQ & mesh->point[pa->a].tag ) {
-    mesh->point[pa->a].tag &= ~MG_REQ;
-  }
-  if ( MG_REQ & mesh->point[pa->b].tag ) {
-    mesh->point[pa->b].tag &= ~MG_REQ;
-  }
-  if ( MG_CRN & mesh->point[pa->a].tag ) {
-    mesh->point[pa->a].tag &= ~MG_CRN;
-  }
-  if ( MG_CRN & mesh->point[pa->b].tag ) {
-    mesh->point[pa->b].tag &= ~MG_CRN;
-  }
-}
-
 int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
   MMG5_int   k,nref;
 
   nref = 0;
-
   /** Step 1: a. deletion of triangles that belong to isosurf */
   if ( mesh->tria ) {
 
@@ -1606,9 +1581,10 @@ int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
                 && k < mesh->nt ) {
           --mesh->nt;
           ptt1 = &mesh->tria[mesh->nt];
+
         }
         memcpy(ptt,ptt1,sizeof(MMG5_Tria));
-
+        --mesh->nt;
       }
       /* Initially negative refs were used to mark isosurface: keep following
        * piece of code for retrocompatibility */
@@ -1618,6 +1594,17 @@ int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
       }
     }
     while ( ++k < mesh->nt );
+
+    /* Check if last element is iso */
+    assert ( k==mesh->nt );
+    MMG5_pTria ptt = &mesh->tria[k];
+    if ( (!MG_EOK(ptt)) || (MMG5_abs(ptt->ref) == mesh->info.isoref) ) {
+      --mesh->nt;
+    }
+
+    if ( mesh->info.imprim > 4 ) {
+      fprintf(stdout,"     Deleted iso triangles: %" MMG5_PRId "\n",nt-mesh->nt);
+    }
 
     if( !mesh->nt ) {
       MMG5_DEL_MEM(mesh,mesh->tria);
