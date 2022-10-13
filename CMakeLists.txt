@@ -209,6 +209,10 @@ ELSE ()
   SET(BUILD_MMGS3D OFF)
 ENDIF()
 
+FIND_PACKAGE(Perl)
+IF (NOT PERL_FOUND)
+  message(WARNING "Perl not found -> we do not generate Fortran Headers")
+ENDIF(NOT PERL_FOUND)
 ############################################################################
 #####
 #####         Fortran header: libmmgtypesf.h
@@ -216,11 +220,13 @@ ENDIF()
 ############################################################################
 ADD_EXECUTABLE(genheader ${PROJECT_SOURCE_DIR}/scripts/genheader.c)
 TARGET_LINK_LIBRARIES ( genheader PRIVATE ${LIBRARIES}  )
-GENERATE_FORTRAN_HEADER ( mmg
-  ${COMMON_SOURCE_DIR} libmmgtypes.h
-  ${COMMON_BINARY_DIR}
-  ${COMMON_BINARY_DIR} libmmgtypesf.h
-  )
+IF (PERL_FOUND)
+  GENERATE_FORTRAN_HEADER ( mmg
+    ${COMMON_SOURCE_DIR} libmmgtypes.h
+    ${COMMON_BINARY_DIR}
+    ${COMMON_BINARY_DIR} libmmgtypesf.h
+    )
+ENDIF (PERL_FOUND)
 
 ###############################################################################
 #####

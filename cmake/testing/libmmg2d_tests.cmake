@@ -88,7 +88,7 @@ ELSE ()
 ENDIF ( )
 
 #####         Fortran Tests
-IF ( CMAKE_Fortran_COMPILER )
+IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ENABLE_LANGUAGE ( Fortran )
 
   SET ( MMG2D_LIB_TESTS ${MMG2D_LIB_TESTS}
@@ -128,7 +128,7 @@ IF ( CMAKE_Fortran_COMPILER )
   ENDIF( )
 
 
-ENDIF ( CMAKE_Fortran_COMPILER )
+ENDIF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
 
 LIST(LENGTH MMG2D_LIB_TESTS nbTests_tmp)
 MATH(EXPR nbTests "${nbTests_tmp} - 1")
@@ -218,7 +218,7 @@ ENDIF()
 
 ADD_TEST(NAME test_met2d   COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_met2d  )
 
-IF ( CMAKE_Fortran_COMPILER)
+IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ADD_TEST(NAME libmmg2d_fortran_a
     COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a
     "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"

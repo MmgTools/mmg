@@ -48,7 +48,7 @@ ELSE ()
 ENDIF ( )
 
 #####         Fortran Tests
-IF (CMAKE_Fortran_COMPILER)
+IF (CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ENABLE_LANGUAGE (Fortran)
 
   SET ( MMG_LIB_TESTS ${MMG_LIB_TESTS}
@@ -59,7 +59,7 @@ IF (CMAKE_Fortran_COMPILER)
     ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/main.F90
     )
 
-ENDIF (CMAKE_Fortran_COMPILER)
+  ENDIF (CMAKE_Fortran_COMPILER AND PERL_FOUND)
 
 LIST(LENGTH MMG_LIB_TESTS nbTests_tmp)
 MATH(EXPR nbTests "${nbTests_tmp} - 1")
@@ -86,7 +86,7 @@ IF( MMG_CI )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/cube
     "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_cpp.o")
 
-  IF ( CMAKE_Fortran_COMPILER)
+  IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
     SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
     ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a}
       ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/init
