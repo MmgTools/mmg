@@ -574,15 +574,16 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     if ( nreq || nreqed || ntreq || nqreq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
       if ( nreq )
-        fprintf(stdout,"                  VERTICES       %8" MMG5_PRId " \n",nreq);
+        fprintf(stdout,"               VERTICES       %8" MMG5_PRId " \n",nreq);
       if ( nreqed )
-        fprintf(stdout,"                  EDGES          %8" MMG5_PRId " \n",nreqed);
+        fprintf(stdout,"               EDGES          %8" MMG5_PRId " \n",nreqed);
       if ( ntreq )
-        fprintf(stdout,"                  TRIANGLES      %8" MMG5_PRId " \n",ntreq);
+        fprintf(stdout,"               TRIANGLES      %8" MMG5_PRId " \n",ntreq);
       if ( nqreq )
-        fprintf(stdout,"                  QUADRILATERALS %8" MMG5_PRId " \n",nqreq);
+        fprintf(stdout,"               QUADRILATERALS %8" MMG5_PRId " \n",nqreq);
     }
-    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8" MMG5_PRId " \n",ncor);
+    if(ncor)
+      fprintf(stdout,"     NUMBER OF CORNERS        %8" MMG5_PRId " \n",ncor);
   }
 
   return 1;

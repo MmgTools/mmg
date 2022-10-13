@@ -1000,30 +1000,31 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
     if ( npreq || nedreq || ntreq || nereq || nqreq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
       if ( npreq )
-        fprintf(stdout,"                  VERTICES       %8" MMG5_PRId " \n",npreq);
+        fprintf(stdout,"               VERTICES       %8" MMG5_PRId " \n",npreq);
       if ( nedreq )
-        fprintf(stdout,"                  EDGES          %8" MMG5_PRId " \n",nedreq);
+        fprintf(stdout,"               EDGES          %8" MMG5_PRId " \n",nedreq);
       if ( ntreq )
-        fprintf(stdout,"                  TRIANGLES      %8" MMG5_PRId " \n",ntreq);
+        fprintf(stdout,"               TRIANGLES      %8" MMG5_PRId " \n",ntreq);
       if ( nqreq )
-        fprintf(stdout,"                  QUADRILATERALS %8" MMG5_PRId " \n",nqreq);
+        fprintf(stdout,"               QUADRILATERALS %8" MMG5_PRId " \n",nqreq);
       if ( nereq )
-        fprintf(stdout,"                  TETRAHEDRA    %8" MMG5_PRId " \n",nereq);
+        fprintf(stdout,"               TETRAHEDRA     %8" MMG5_PRId " \n",nereq);
     }
-    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8" MMG5_PRId " \n",ncor);
+    if(ncor)
+      fprintf(stdout,"     NUMBER OF CORNERS        %8" MMG5_PRId " \n",ncor);
 
     if ( nppar || nedpar || ntpar || nepar || nqpar ) {
       fprintf(stdout,"     NUMBER OF PARALLEL ENTITIES: \n");
       if ( nppar )
-        fprintf(stdout,"                  VERTICES       %8" MMG5_PRId " \n",nppar);
+        fprintf(stdout,"               VERTICES       %8" MMG5_PRId " \n",nppar);
       if ( nedpar )
-        fprintf(stdout,"                  EDGES          %8" MMG5_PRId " \n",nedpar);
+        fprintf(stdout,"               EDGES          %8" MMG5_PRId " \n",nedpar);
       if ( ntpar )
-        fprintf(stdout,"                  TRIANGLES      %8" MMG5_PRId " \n",ntpar);
+        fprintf(stdout,"               TRIANGLES      %8" MMG5_PRId " \n",ntpar);
       if ( nqpar )
-        fprintf(stdout,"                  QUADRILATERALS %8" MMG5_PRId " \n",nqpar);
+        fprintf(stdout,"               QUADRILATERALS %8" MMG5_PRId " \n",nqpar);
       if ( nepar )
-        fprintf(stdout,"                  TETRAHEDRA    %8" MMG5_PRId " \n",nepar);
+        fprintf(stdout,"               TETRAHEDRA     %8" MMG5_PRId " \n",nepar);
     }
   }
 
