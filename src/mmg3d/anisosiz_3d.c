@@ -2330,7 +2330,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stdout,"    gradation: %7" MMG5_PRId " updated, %d iter\n",nup+nupv,it+itv);
     }
     else {
-      fprintf(stdout,"    surface gradation: %7" MMG5_PRId "d updated, % iter\n"
+      fprintf(stdout,"    surface gradation: %7" MMG5_PRId " updated, %d iter\n"
               "    volume gradation:  %7" MMG5_PRId " updated, %d iter\n",nup,it,nupv,itv);
     }
   }

@@ -367,7 +367,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
             if ( !warn ) {
               fprintf(stdout,"\n  ## Warning: %s: at least one ridge along flat angle.\n"
                       "              Ridge tag will be removed from edges but vertices can"
-                      " still have tags that intefere with remeshing.\n\n",
+                      " still have tags that interfer with remeshing.\n\n",
                       __func__);
               warn = 1;
             }
