@@ -376,6 +376,12 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         /* Choose the closest normal to our surface to ensure smoothness */
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
+
+        /* Remark (Algiane 10/22) : as we compare absolute values of normals
+         * projection, we can choose the wrong normal when the ridge angle is
+         * almost closed and projection of normal at first triangle and normal
+         * at second triangle (or normal at point related to second surface)
+         * tends to -1 */
         if ( fabs(ps) > fabs(ps2) )
           memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
         else

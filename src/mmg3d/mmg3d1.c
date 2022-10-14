@@ -1945,6 +1945,12 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  *
  * Analyze tetra and split on geometric criterion.
  *
+ * \remark ridge points creation: with fem (finite element method) mode a tetra
+ * cannot have 2 boundary faces. Thus, the ridge point is created from a given
+ * tetra and it is seen a second time from another tetra, which allows to update
+ * its second normal. With nofem mode, a ref edge or ridge can be at the
+ * interface of 2 boundary faces belonging to the same tetra.
+ *
  */
 static MMG5_int
 MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
@@ -2085,6 +2091,8 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           memcpy(ppt->n,to,3*sizeof(double));
 
           if ( mesh->info.fem<typchk ) {
+            /* A ridge can be at the interface of 2 boundary faces of the same
+             * tetra: second normal has to be computed */
             if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
               /* Update the second normal and the tangent at point ip if the edge
                * is shared by 2 faces (if anatet4 is not called, 1 tetra may have
@@ -2112,7 +2120,9 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           nap++;
         }
         else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
-          /* Store the tangent and the second normal at edge */
+          /* Point at the interface of 2 boundary faces belonging to different
+           * tetra : Point has alredy been created from another tetra so we have
+           * to store the tangent and the second normal at edge */
           ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
           assert(ier);
 

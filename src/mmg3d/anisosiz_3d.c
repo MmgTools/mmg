@@ -566,7 +566,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,
     MMG5_tet2tri(mesh,iel,ifac,&ptt);
     assert(pt->xt);
     pxt = &mesh->xtetra[pt->xt];
-    if ( !MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,i)) )  continue;
+    if ( !MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac)) )  continue;
 
     /* Barycentric coordinates of vector u in tria iel */
     detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
