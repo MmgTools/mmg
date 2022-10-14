@@ -708,6 +708,10 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,
   }
 
   /* Check that choosed normal is not null */
+  /* Remark: a null second normal along ridge point in mmg3d may be the
+   * consequence of the computation of the same normal with opposite sign for n1
+   * and n2 at a previously inserted ridge point. This append when the ridge
+   * delimits a closed angle an we choose the wrong point normal in bezierCP. */
   assert ( n1[0]*n1[0] + n1[1]*n1[1] + n1[2]*n1[2] > 0. && "Null normal");
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];

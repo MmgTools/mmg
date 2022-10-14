@@ -318,9 +318,9 @@ MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],
  * \param ori triangle orientation.
  * \return 1.
  *
- * Compute Bezier control points on triangle \a pt (cf. Vlachos)
+ * Compute Bezier control points on triangle \a pt (cf. \cite{vlachos2001curved})
  *
- * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
+ * \todo merge with the MMG5_mmgsBezierCP function and remove the pointer
  * toward this functions.
  */
 int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori) {
@@ -598,7 +598,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
     /* linear interpolation, not used here
        no[i] = pb->n[0][i]*w + pb->n[1][i]*u + pb->n[2][i]*v; */
   }
-  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] >0 );
+  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] > 0. );
 
   /* tangent */
   if ( w < MMG5_EPSD2 ) {
