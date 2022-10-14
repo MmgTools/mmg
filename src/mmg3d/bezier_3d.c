@@ -377,27 +377,31 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
 
-        /* Remark (Algiane 10/22) : as we compare absolute values of normals
-         * projection, we can choose the wrong normal when the ridge angle is
-         * almost closed and projection of normal at first triangle and normal
-         * at second triangle (or normal at point related to second surface)
-         * tends to -1 */
-        if ( fabs(ps) > fabs(ps2) )
+        /* Remark (Algiane 10/22) :
+         *
+         * - prior to commit : we were comparing absolute
+         * values of normals projection (guessing that normals can be bad
+         * oriented). In this case, we can choose the wrong normal (normal at
+         * point related to other portion of surface) when the ridge angle is
+         * almost closed (smallest than 90°) because projection of normal at
+         * first triangle and normal at second triangle (or normal at point
+         * related to second surface) tends to -1 */
+        assert ( ps > 0. || ps2 > 0. && "Unexpected case");
+        if ( ps > ps2 ) {
           memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
-        else
+        }
+        else {
           memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+        }
         memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
 
-        /* Normal reorientation if needed */
+        /* Normal should have suitable orientation */
         ps  = pb->n[i][0]*nt[0] + pb->n[i][1]*nt[1] + pb->n[i][2]*nt[2];
-        if ( ps < 0.0 ) {
-          pb->n[i][0] *= -1.0;
-          pb->n[i][1] *= -1.0;
-          pb->n[i][2] *= -1.0;
-        }
+        assert ( ps > 0. );
       }
-      else
+      else {
         memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+      }
     }
   }
 
