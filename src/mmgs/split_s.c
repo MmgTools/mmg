@@ -163,6 +163,7 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k,int i,MMG5_int ip)
   double         cal;
   MMG5_int       kadja;
   int            iadja,is;
+  static int     mmgErr0 = 0, mmgErr1 = 0;
 
   pt0  = &mesh->tria[0];
   ppt0 = &mesh->point[0];
@@ -174,11 +175,59 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k,int i,MMG5_int ip)
 
   memcpy(&met->m[0],&met->m[met->size*ip], met->size*sizeof(double));
 
-  // Check the validity of the two triangles created from k.
   pt = &mesh->tria[k];
   memcpy(pt0,pt,sizeof(MMG5_Tria));
   is         = MMG5_iprv2[i];
   pt0->v[is] = 0;
+
+  /* For now, if ip is a ridge point, only 1 normal has been computed: allocate
+   * a new xpoint and update the second normal */
+  MMG5_int *adja = &mesh->adja[3*(k-1)+1];
+  kadja = adja[i] / 3;
+  iadja = adja[i] % 3;
+
+  /* update normal n2 if need be */
+  if ( kadja && pt0->tag[i] & MG_GEO ) {
+    MMG5_Bezier b;
+    int ier = MMG5_bezierCP(mesh,&mesh->tria[kadja],&b,1);
+    if ( !ier ) {
+      if( !mmgErr0 ) {
+        mmgErr0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: function MMG5_bezierCP return 0.\n",
+                __func__);
+      }
+      assert(0);
+    }
+    double uv[2],o[3],no[3],to[3];
+    uv[0] = 0.5;
+    uv[1] = 0.5;
+    if ( iadja == 1 )       uv[0] = 0.0;
+    else if ( iadja == 2 )  uv[1] = 0.0;
+
+    ier = MMGS_bezierInt(&b,uv,o,no,to);
+    if ( !ier ) {
+      if( !mmgErr1 ) {
+        mmgErr1 = 1;
+        fprintf(stderr,"  ## Warning: %s: function MMGS_bezierInt return 0.\n",
+                __func__);
+      }
+      assert(0);
+    }
+    MMG5_int nxp = mesh->xp + 1;
+    if ( nxp > mesh->xpmax ) {
+      MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
+                        "larger xpoint table",
+                        return 0);
+    }
+    ppt0->xp = nxp;
+    MMG5_pxPoint go  = &mesh->xpoint[ppt0->xp];
+    memcpy(go->n2,no,3*sizeof(double));
+    assert ( mesh->point[ip].xp && "missing xpoint at ridge point" );
+    MMG5_pxPoint pxp = &mesh->xpoint[mesh->point[ip].xp];
+    memcpy(go->n1,pxp->n1,3*sizeof(double));
+  }
+
+  // Check the validity of the two triangles created from k.
   cal        = MMG5_calelt(mesh,met,pt0);
   if ( cal < MMG5_EPSOK )  return 0;
 
@@ -190,9 +239,6 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k,int i,MMG5_int ip)
 
   // Check the validity of the two triangles created from the triangle adjacent
   // to k by edge i.
-  kadja = mesh->adja[3*(k-1)+i+1]/3;
-  iadja = mesh->adja[3*(k-1)+i+1]%3;
-
   if ( !kadja ) return 1;
 
   pt = &mesh->tria[kadja];
