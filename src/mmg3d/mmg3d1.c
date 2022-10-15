@@ -1682,30 +1682,10 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
       return 0;
     }
   }
-  ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
-  if ( ier < 0 || ier == 2 ) {
-    MMG3D_delPt(mesh,ip);
-    return 0;
-  }
-  else if ( ier == 0 ) {
-    ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
-  }
-  if ( ier == 1 ) { ier = MMG5_split1b(mesh,met,list,ilist,ip,1,typchk-1,chkRidTet); }
 
-  /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
-  pt = &mesh->tetra[k];
-  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
-  if ( ier < 0 ) {
-    fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-    return -1;
-  }
-  else if ( ier == 0 || ier == 2 ) {
-    MMG3D_delPt(mesh,ip);
-    return 0;
-  }
-
+  /* simbulgept needs a valid tangent at ridge point (to build ridge metric in
+   * order to comute edge lengths). Thus we need to store the geometric info of
+   * point here. */
   ppt = &mesh->point[ip];
   if ( MG_EDG_OR_NOM(tag) )
     ppt->ref = ref;
@@ -1728,6 +1708,30 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   }
   else {
     memcpy(pxp->n1,no1,3*sizeof(double));
+  }
+
+  ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
+  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+  if ( ier < 0 || ier == 2 ) {
+    MMG3D_delPt(mesh,ip);
+    return 0;
+  }
+  else if ( ier == 0 ) {
+    ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+  }
+  if ( ier == 1 ) { ier = MMG5_split1b(mesh,met,list,ilist,ip,1,typchk-1,chkRidTet); }
+
+  /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
+  pt = &mesh->tetra[k];
+  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+  if ( ier < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
+    return -1;
+  }
+  else if ( ier == 0 || ier == 2 ) {
+    MMG3D_delPt(mesh,ip);
+    return 0;
   }
 
   return 1;
