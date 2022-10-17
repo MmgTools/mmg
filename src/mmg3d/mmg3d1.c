@@ -2173,11 +2173,6 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         /** Edge analysis */
         /* First: skip edge if required */
         if ( pt->xt && (pxt->tag[ia] & MG_REQ) )  continue;
-        else if ( ptt.tag[j] & MG_REQ ) {
-          // Dead code: to remove (Algiane 05/03/20)?
-          assert ( pt->xt && (pxt->tag[ia] & MG_REQ) );
-          continue;
-        }
 
         /* Second: if possible treat manifold ridges from a boundary face (to
          * ensure the computation of n2) */
