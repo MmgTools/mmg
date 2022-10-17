@@ -260,6 +260,7 @@ int MMG2D_singul(MMG5_pMesh,MMG5_int );
 int MMG2D_analys(MMG5_pMesh );
 int MMG2D_norver(MMG5_pMesh,MMG5_int );
 int MMG2D_regnor(MMG5_pMesh );
+int MMG2D_regver(MMG5_pMesh );
 int MMG2D_boulen(MMG5_pMesh , MMG5_int ,int8_t ,MMG5_int *,MMG5_int *,double *);
 int MMG2D_mmg2d1n(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_anatri(MMG5_pMesh ,MMG5_pSol ,int8_t );

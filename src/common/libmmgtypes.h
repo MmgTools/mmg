@@ -528,6 +528,7 @@ typedef struct {
   int           nmati,nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
   int8_t        nreg; /*!< normal regularization */
+  int8_t        xreg; /*!< vertices regularization */
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */

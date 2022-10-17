@@ -366,6 +366,12 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           return 0;
         }
         break;
+      case 'x':
+        if ( !strcmp(argv[i],"-xreg") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_xreg,1) )
+            return 0;
+        }
+        break;
       case '3':
         if(!strcmp(argv[i],"-3dMedit") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {

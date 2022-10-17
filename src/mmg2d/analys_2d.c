@@ -759,6 +759,180 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Regularize vertices coordinates at boundary non singular edges with a Laplacian /
+ * antilaplacian smoothing
+ *
+ */
+int MMG2D_regver(MMG5_pMesh mesh) {
+  MMG5_pTria            pt;
+  MMG5_pPoint           ppt,p1,p2;
+  double                *tmp,dd,ps,lm1,lm2,cx,cy,ux,uy,nxt,nyt,res,res0,c[2],vol;
+  MMG5_int              k,iel,ip1,ip2,nn,temp,rt;
+  int                   it,maxit,ip,j;
+  int8_t                i,ier;
+
+  it = 0;
+  maxit = 10;
+  res0 = 0.0;
+  nn = 0;
+  lm1 = 0.4;
+  lm2 = 0.399;
+
+  /* Temporary table for coordinates */
+  MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,return 0);
+
+  /* Allocate a seed to each point */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      ppt->s = k;
+    }
+  }
+
+  do {
+    /* Step 1: Laplacian */
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      tmp[2*(k-1)+1] = ppt->c[0];
+      tmp[2*(k-1)+2] = ppt->c[1];
+
+      if ( !MG_VOK(ppt) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
+      if ( !MG_EDG(ppt->tag) ) continue;
+
+      cx = cy = 0;
+      iel = ppt->s;
+      pt  = &mesh->tria[iel];
+      i = 0;
+      if ( pt->v[1] == k ) i = 1;
+      if ( pt->v[2] == k ) i = 2;
+
+      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
+
+      if ( !ier ) {
+        fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
+        MMG5_SAFE_FREE(tmp);
+        return 0;
+      }
+
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      cx += p1->c[0];
+      cy += p1->c[1];
+
+      cx += p2->c[0];
+      cy += p2->c[1];
+      cx *= 0.5;
+      cy *= 0.5;
+
+      /* Laplacian operation */
+      tmp[2*(k-1)+1] = ppt->c[0] + lm1 * (cx - ppt->c[0]);
+      tmp[2*(k-1)+2] = ppt->c[1] + lm1 * (cy - ppt->c[1]);
+    }
+
+    /* Antilaplacian operation */
+    res = 0.0;
+    for (k=1; k<=mesh->np; k++) {
+
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
+      if ( !MG_EDG(ppt->tag) ) continue;
+
+      cx = cy = 0;
+      iel = ppt->s;
+      pt  = &mesh->tria[iel];
+      i = 0;
+      if ( pt->v[1] == k ) i = 1;
+      if ( pt->v[2] == k ) i = 2;
+
+      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
+      if ( !ier ) {
+        fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
+        MMG5_SAFE_FREE(tmp);
+        return 0;
+      }
+
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      cx += tmp[2*(ip1-1)+1];
+      cy += tmp[2*(ip1-1)+2];
+
+      cx += tmp[2*(ip2-1)+1];
+      cy += tmp[2*(ip2-1)+2];
+      cx *= 0.5;
+      cy *= 0.5;
+
+      /* Anti Laplacian operation */
+      c[0] = tmp[2*(k-1)+1] - lm2 * (cx - tmp[2*(k-1)+1]);
+      c[1] = tmp[2*(k-1)+2] - lm2 * (cy - tmp[2*(k-1)+2]);
+      res += (c[0]-ppt->c[0])*(c[0]-ppt->c[0]) + (c[1]-ppt->c[1])*(c[1]-ppt->c[1]);
+      ppt->c[0] = c[0];
+      ppt->c[1] = c[1];
+      nn++;
+    }
+
+    if ( it == 0 ) res0 = res;
+    if ( res0 > MMG5_EPSD ) res = res / res0;
+
+    if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
+      fprintf(stdout,"     iter %5d  res %.3E",it,res);
+      fflush(stdout);
+    }
+  }
+  while ( ++it < maxit && res > MMG5_EPS );
+
+  /* Change orientation of triangles with negative areas*/
+  rt = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    vol = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
+                          mesh->point[pt->v[2]].c);
+
+    if ( vol == 0.0 ) {
+      fprintf(stderr,"\n  ## Error: %s: triangle %" MMG5_PRId " has null area.\n",
+              __func__,k);
+      for ( ip=0; ip<3; ip++ ) {
+        ppt = &mesh->point[pt->v[ip]];
+        for ( j=0; j<3; j++ ) {
+          if ( fabs(ppt->c[j])>0. ) {
+            fprintf(stderr," Check that you don't have a sliver triangle.\n");
+            return 0;
+          }
+        }
+      }
+    }
+    else if(vol < 0) {
+      temp = pt->v[2];
+      pt->v[2] = pt->v[1];
+      pt->v[1] = temp;
+      rt++;
+    }
+    if ( mesh->info.ddebug && (mesh->nt == k) && rt > 0 ) {
+      fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " triangles reoriented\n",
+              __func__,rt);
+    }
+  }
+
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     %" MMG5_PRId " coordinates regularized: %.3e\n",nn,res);
+
+  MMG5_SAFE_FREE(tmp);
+  return 1;
+}
+
 /** preprocessing stage: mesh analysis */
 int MMG2D_analys(MMG5_pMesh mesh) {
 
@@ -802,6 +976,11 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   if ( mesh->info.nreg && !MMG2D_regnor(mesh) ) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
+  }
+  /* Regularize vertix vector field with a Laplacian / anti-laplacian smoothing */
+  if ( mesh->info.xreg && !MMG2D_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in regularizing vertices coordinates. Exit program.\n");
+    return 0;
   }
   if ( mesh->nquad ) MMG5_DEL_MEM(mesh,mesh->adjq);
 
