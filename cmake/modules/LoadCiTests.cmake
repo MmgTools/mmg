@@ -27,6 +27,16 @@
 ###############################################################################
 OPTION ( CI_CONTEXT "Disable network test and download progress bar for CI runs" OFF)
 
+# Continuous integration tests are hosted on the sync server of inria
+# (sync.bordeaux.inria.fr) in the /web/users/html/mmg/ who is published in
+# https://static.bordeaux.inria.fr/mmg/.
+#
+# To add new tests, you will have:
+#  1. to be affiliated to Inria;
+#  2. to ask for an account on the server (https://doc-si.inria.fr/display/SU/Sauvegardes#)
+#  3. to be member of the sedbor group (or to ask to change the directory group)
+#  3. to follow the /web/users/html/mmg/README advices.
+
 MACRO ( DOWNLOAD_TESTS x )
 
   # Check if the tests are up to date
