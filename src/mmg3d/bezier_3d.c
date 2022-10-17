@@ -318,9 +318,9 @@ MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],
  * \param ori triangle orientation.
  * \return 1.
  *
- * Compute Bezier control points on triangle \a pt (cf. Vlachos)
+ * Compute Bezier control points on triangle \a pt (cf. \cite{vlachos2001curved})
  *
- * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
+ * \todo merge with the MMG5_mmgsBezierCP function and remove the pointer
  * toward this functions.
  */
 int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori) {
@@ -376,22 +376,56 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         /* Choose the closest normal to our surface to ensure smoothness */
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
-        if ( fabs(ps) > fabs(ps2) )
-          memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
-        else
-          memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+
+        /** \remark
+         * - prior to commit f57b861966: we were comparing absolute
+         * values of normals projection (guessing that normals can be bad
+         * oriented). In this case, we can choose the wrong normal (normal at
+         * point related to other portion of surface) when the ridge angle is
+         * almost closed (smallest than 90°) because projection of normal at
+         * first triangle and normal at second triangle (or normal at point
+         * related to second surface) tends to -1;
+         *
+         * - the following assert on the positivity of at least one of the
+         * projections may fail but I think that it is not a normal behaviour:
+         * it means that the surface approximation has degenerated. See issue #167
+         */
+        assert ( ps > 0. || ps2 > 0. && "Unexpected case");
+
+        /* As previous assert may fail in some cases, deal with both cases */
+        if ( (ps > 0.) || (ps2 >0.) ) {
+          /* Normal case */
+          if ( ps > ps2 ) {
+            memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+          }
+          else {
+            memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+          }
+        }
+        else {
+          /* I think that tis case is only possible when we face surface
+           * degeneracy: in this case we want to choose the normal whose
+           * projection over the normal at triangle is smallest as possible
+           * (otherwise we will worsen the degeneracy) */
+           if ( ps < ps2 ) {
+            memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+          }
+          else {
+            memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+          }
+        }
         memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
 
-        /* Normal reorientation if needed */
+        /* Normal should have suitable orientation */
         ps  = pb->n[i][0]*nt[0] + pb->n[i][1]*nt[1] + pb->n[i][2]*nt[2];
-        if ( ps < 0.0 ) {
-          pb->n[i][0] *= -1.0;
-          pb->n[i][1] *= -1.0;
-          pb->n[i][2] *= -1.0;
-        }
+        /* This assertion may fail if assertion on ps and ps2 positivity fails:
+         * I think that we don't want to reorient the tangent because we know
+         * that the negativity of projection is not normal */
+        assert ( ps > 0. );
       }
-      else
+      else {
         memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+      }
     }
   }
 
@@ -592,7 +626,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
     /* linear interpolation, not used here
        no[i] = pb->n[0][i]*w + pb->n[1][i]*u + pb->n[2][i]*v; */
   }
-  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] >0 );
+  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] > 0. );
 
   /* tangent */
   if ( w < MMG5_EPSD2 ) {

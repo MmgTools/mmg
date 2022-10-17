@@ -1195,7 +1195,7 @@ int MMG3D_adpcoledg(MMG5_pMesh mesh, MMG5_pSol met,
 
   if ( lmin == 0 ) {
     /* Case of an internal tetra with 4 ridges vertices */
-#warning is it possible to merge this edge ??
+//#warning is it possible to merge this edge ??
     return 0;
   }
 
@@ -1338,7 +1338,7 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPar     par;
   double        ll,o[3],ux,uy,uz,hma2,mincal;
   int           l,memlack,ier;
-  MMG5_int      src,vx[6],ip,ip1,ip2,k,ne,ns,nap;
+  MMG5_int      src,vx[6],ip,ip1,ip2,k,ne,ns,nap; 
   int8_t        i,j,ia;
 
   /** 1. analysis */
@@ -1753,7 +1753,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
                               MMG5_int *ref,int16_t *tag,
                               double o[3],double to[3],double no1[3],
                               double no2[3],int64_t *list,int *ilist) {
-  MMG5_Tria   ptt;
+  MMG5_Tria    ptt;
   double      v[3];
 
   if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) {
@@ -1804,7 +1804,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
       /* Unable to compute geom infos at ridge */
 //#warning why a continue here?
       return 0;
-    }
+  }
     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,no1,no2,to) ) {
         return -1;
@@ -1822,14 +1822,14 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
+      }
     }
-  }
   else {
     /* Longest edge is regular */
     if ( !MMG5_norface(mesh,k,i,v) ) {
       /* Unable to treat long edge: try to collapse short one */
       return 1;
-    }
+  }
     if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) {
       /* Unable to compute geom infos at regular edge */
       return 1;
@@ -1838,8 +1838,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
       assert( 0<=i && i<4 && "unexpected local face idx");
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
+      }
     }
-  }
   return 2;
 }
 
@@ -1986,6 +1986,13 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
       return 0;
     }
   }
+
+  /* simbulgept needs a valid tangent at ridge point (to build ridge metric in
+   * order to comute edge lengths). Thus we need to store the geometric info of
+   * point here. */
+  ppt = &mesh->point[ip];
+  MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
+
   ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
 
 #ifndef NDEBUG
@@ -2015,10 +2022,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
     MMG3D_delPt(mesh,ip);
     return 0;
   }
-
-  ppt = &mesh->point[ip];
-
-  MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
 
   return 1;
 }
@@ -2239,6 +2242,12 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  *
  * Analyze tetra and split on geometric criterion.
  *
+ * \remark ridge points creation: with fem (finite element method) mode a tetra
+ * cannot have 2 boundary faces. Thus, the ridge point is created from a given
+ * tetra and it is seen a second time from another tetra, which allows to update
+ * its second normal. With nofem mode, a ref edge or ridge can be at the
+ * interface of 2 boundary faces belonging to the same tetra.
+ *
  */
 static MMG5_int
 MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
@@ -2379,6 +2388,8 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           memcpy(ppt->n,to,3*sizeof(double));
 
           if ( mesh->info.fem<typchk ) {
+            /* A ridge can be at the interface of 2 boundary faces of the same
+             * tetra: second normal has to be computed */
             if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
               /* Update the second normal and the tangent at point ip if the edge
                * is shared by 2 faces (if anatet4 is not called, 1 tetra may have
@@ -2406,7 +2417,9 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           nap++;
         }
         else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
-          /* Store the tangent and the second normal at edge */
+          /* Point at the interface of 2 boundary faces belonging to different
+           * tetra : Point has alredy been created from another tetra so we have
+           * to store the tangent and the second normal at edge */
           ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
           assert(ier);
 

@@ -153,6 +153,12 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
 
     /* Simulation only if intmet call is successful */
+    /* simbulgept needs a valid tangent at ridge point (to build ridge metric in
+     * order to comute edge lengths). Thus we need to store the geometric info of
+     * point here. */
+    ppt = &mesh->point[ip];
+    MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
+
     ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
 
     if ( ier == 2 || ier < 0 ) {
@@ -183,9 +189,6 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
 
     (*ns)++;
-    ppt = &mesh->point[ip];
-
-    MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
 
     return 2;
     /* End of case of a bdy face */

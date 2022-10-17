@@ -1555,35 +1555,10 @@ void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
   return;
 }
 
-/**
- * \param mesh pointer toward mesh
- * \param pa pointer toward edge
- *
- * Clean tags linked to iso surface discretization (MG_CRN, MG_ISO) along edge.
- *
- */
-static inline
-void MMG3D_Clean_isoTags(MMG5_pMesh mesh,MMG5_pEdge pa) {
-  /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
-  if ( MG_REQ & mesh->point[pa->a].tag ) {
-    mesh->point[pa->a].tag &= ~MG_REQ;
-  }
-  if ( MG_REQ & mesh->point[pa->b].tag ) {
-    mesh->point[pa->b].tag &= ~MG_REQ;
-  }
-  if ( MG_CRN & mesh->point[pa->a].tag ) {
-    mesh->point[pa->a].tag &= ~MG_CRN;
-  }
-  if ( MG_CRN & mesh->point[pa->b].tag ) {
-    mesh->point[pa->b].tag &= ~MG_CRN;
-  }
-}
-
 int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
   MMG5_int   k,nref;
 
   nref = 0;
-
   /** Step 1: a. deletion of triangles that belong to isosurf */
   if ( mesh->tria ) {
 
@@ -1606,9 +1581,13 @@ int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
                 && k < mesh->nt ) {
           --mesh->nt;
           ptt1 = &mesh->tria[mesh->nt];
-        }
-        memcpy(ptt,ptt1,sizeof(MMG5_Tria));
 
+        }
+        if ( ptt != ptt1 ) {
+          /* We don't find any tria to keep after index k */
+          memcpy(ptt,ptt1,sizeof(MMG5_Tria));
+          --mesh->nt;
+        }
       }
       /* Initially negative refs were used to mark isosurface: keep following
        * piece of code for retrocompatibility */
@@ -1618,6 +1597,21 @@ int MMG3D_Clean_isoSurf(MMG5_pMesh mesh) {
       }
     }
     while ( ++k < mesh->nt );
+
+    /* At the end of the loop, either k==mesh->nt, either k==mesh->nt+1 (because
+     * tria at idx mesh->nt was iso or unused and element mesh->nt+1 has been
+     * copied into k) */
+    assert ( (k==mesh->nt) || (k==mesh->nt+1) );
+
+    /* Check if last element is iso */
+    MMG5_pTria ptt = &mesh->tria[mesh->nt];
+    if ( (!MG_EOK(ptt)) || (MMG5_abs(ptt->ref) == mesh->info.isoref) ) {
+      --mesh->nt;
+    }
+
+    if ( mesh->info.imprim > 4 ) {
+      fprintf(stdout,"     Deleted iso triangles: %" MMG5_PRId "\n",nt-mesh->nt);
+    }
 
     if( !mesh->nt ) {
       MMG5_DEL_MEM(mesh,mesh->tria);

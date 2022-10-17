@@ -331,6 +331,31 @@ void MMG5_Clean_isoTags(MMG5_pMesh mesh,MMG5_pEdge pa) {
 }
 
 /**
+  * \param mesh pointer toward mesh
+  * \param pa pointer toward mesh edge
+  *
+  * \return 1 if edge should be removed when cleaning old iso surface, 0 otherwise.
+  *
+  * Check if edge \a pa has to be removed from list of edges when cleaning old
+  * isosurface.
+  *
+  */
+static inline
+int8_t MMG5_should_edge_be_removed(MMG5_pMesh mesh,MMG5_pEdge pa){
+  int8_t to_remove;
+
+  if ( !pa->a ) {
+    to_remove = 1;
+  }
+  else {
+    int8_t not_ridge = !(pa->tag & MG_GEO);
+    to_remove = (MMG5_abs(pa->ref) == mesh->info.isoref) && not_ridge;
+  }
+
+  return to_remove;
+}
+
+/**
  * \param mesh pointer toward mesh
  * \param return 1 if successful, 0 if fail
  *
@@ -364,17 +389,22 @@ int MMG5_Clean_isoEdges(MMG5_pMesh mesh) {
           MMG5_pEdge pa1 = &mesh->edge[mesh->na];
           assert( pa1 );
 
-          while ( ((!pa1->a) ||
-                   ( (MMG5_abs(pa1->ref) == mesh->info.isoref) && (!(pa1->tag & MG_GEO)) ) )
-                  && (k < mesh->na) ) {
+          int8_t to_remove = MMG5_should_edge_be_removed(mesh,pa1);
+
+          while ( to_remove && (k < mesh->na) ) {
             if ( pa1->a ) {
               /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
               MMG5_Clean_isoTags(mesh,pa1);
             }
             --mesh->na;
             pa1 = &mesh->edge[mesh->na];
+            to_remove = MMG5_should_edge_be_removed(mesh,pa1);
           }
-          memcpy(pa,pa1,sizeof(MMG5_Edge));
+          if ( pa != pa1 ) {
+            /* We don't find any edge to keep after index k */
+            memcpy(pa,pa1,sizeof(MMG5_Edge));
+            --mesh->na;
+          }
         }
       }
 
@@ -386,6 +416,21 @@ int MMG5_Clean_isoEdges(MMG5_pMesh mesh) {
       }
     }
     while ( ++k < mesh->na );
+
+    /* At the end of the loop, either k==mesh->na, either k==mesh->na+1 (because
+     * edg at idx mesh->na was iso or unused and element mesh->na+1 has been
+     * copied into k) */
+    assert ( (k==mesh->na) || (k==mesh->na+1) );
+
+    /* Check if last edge is iso */
+    MMG5_pEdge pa = &mesh->edge[mesh->na];
+    if ( (!pa->a) || (MMG5_abs(pa->a) == mesh->info.isoref) ) {
+      --mesh->na;
+    }
+
+    if ( mesh->info.imprim > 4 ) {
+      fprintf(stdout,"     Deleted iso edges: %" MMG5_PRId "\n",na-mesh->na);
+    }
 
     if( !mesh->na ) {
       MMG5_DEL_MEM(mesh,mesh->edge);

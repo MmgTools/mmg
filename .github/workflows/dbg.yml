@@ -106,13 +106,13 @@ jobs:
         shell: bash
 
       # checkout the provided branch name if workflow is manually run
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         if: inputs.branch_name
         with:
           ref: ${{ github.event.inputs.branch }}
 
       # checkout the event branch for automatic workflows
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         if: inputs.branch_name == ''
 
       - name: Print windows arch info
@@ -195,7 +195,7 @@ jobs:
           ${{env.BUILD_CMD}}
 
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Mmg-bin
           path: |
