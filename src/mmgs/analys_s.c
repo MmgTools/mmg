@@ -903,6 +903,13 @@ int MMGS_analys(MMG5_pMesh mesh) {
     }
   }
 
+  /* regularize vertices coordinates */
+  if( !mesh->xp ){
+    if ( mesh->info.xreg && !MMG5_regver(mesh) ){
+      fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+      return 0;
+    }
+  }
   return 1;
 }
 

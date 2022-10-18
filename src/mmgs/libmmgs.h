@@ -71,6 +71,7 @@ enum MMGS_Param {
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
   MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
+  MMGS_IPARAM_xreg,              /*!< [0/1], Disabled/enabled coordinates regularization */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
   MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */

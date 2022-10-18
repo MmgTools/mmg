@@ -978,6 +978,11 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
+  if ( mesh->info.xreg && !MMG5_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+    return 0;
+  }
+
   /* set bdry entities to tetra and fill the orientation field */
   if ( !MMG5_bdrySet(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");

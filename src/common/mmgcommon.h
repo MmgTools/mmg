@@ -691,6 +691,7 @@ typedef struct MMG5_iNode_s {
  int           MMG5_invmat33(double m[3][3],double mi[3][3]);
  int           MMG5_invmat22(double m[2][2],double mi[2][2]);
  int           MMG5_regnor(MMG5_pMesh mesh);
+ int           MMG5_regver(MMG5_pMesh mesh);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,MMG5_int,MMG5_int*,double,double);
  int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*);
