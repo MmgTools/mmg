@@ -639,6 +639,18 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
 
+# ls discretisation + nreg
+ADD_TEST(NAME mmg2d_nreg
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -nreg
+  ${MMG2D_CI_TESTS}/Apple/apple
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_nreg_apple.o.meshb)
+
+# ls discretisation + nreg + nr
+ADD_TEST(NAME mmg2d_nreg_nr
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -nreg -nr
+  ${MMG2D_CI_TESTS}/Apple/apple
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_nreg_nr_apple.o.meshb)
+
 # ls discretisation + xreg
 ADD_TEST(NAME mmg2d_xreg
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg
