@@ -404,10 +404,6 @@ int MMG5_regver(MMG5_pMesh mesh) {
     mesh->point[k].s = 0;
   }
 
-  /* Change orientation of tetraheadra with negative volumes */
-  rt = 0;
-  for (k=1; k<=
-
   if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )

@@ -277,20 +277,30 @@ int MMG2D_boulet(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *list) {
  * \param mesh pointer toward the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
- * \return 1 if success, 0 if fail.
+ * \param list pointer toward the computed ball of \a ip.
+ * \return the size of the computed ball or 0 if fail.
  *
- * Find the two endpoints of the boundary curves joining ip and fill \a ip1 and
- * \a ip2 with their indices.
+ * Find the two endpoints of the boundary curves joining ip, fill \a ip1 and
+ * \a ip2 with their indices and list neighbouring triangles
  *
  */
-int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_int *ip2) {
+int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_int *ip2,MMG5_int *list) {
   MMG5_pTria    pt;
   MMG5_int      *adja,k;
   int8_t        i,i1,i2;
   static int8_t mmgWarn0=0;
+  int           ilist;
 
   *ip1 = 0;
   *ip2 = 0;
+  if ( start < 1 ) return 0;
+  pt = &mesh->tria[start];
+  if ( !MG_EOK(pt) ) return 0;
+
+  /* init list */
+  ilist = 1;
+  if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+  list[ilist-1] = start;
 
   /* Travel elements in the forward sense */
   k = start;
@@ -337,9 +347,15 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
     i  = MMG5_inxt2[i];
+
+    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    if ( k > 0 ) {
+      ++ilist;
+      list[ilist-1] = k;
+    }
   }
   while ( k && k != start );
-  if ( k > 0 ) return 1;
+  if ( k > 0 ) return ilist;
 
   /* Travel the ball in the reverse sense when a boundary is hit, starting from the neighbor of k */
   k = start;
@@ -350,7 +366,11 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
   i = adja[i2] % 3;
   i = MMG5_iprv2[i];
 
-  if ( !k ) return 1;
+  if ( !k ) return ilist;
+
+  if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+  ++ilist;
+  list[ilist-1] = k ;
 
   do {
     pt = &mesh->tria[k];
@@ -395,9 +415,13 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
     if ( k == 0 )  break;
     i  = adja[i2] % 3;
     i  = MMG5_iprv2[i];
+
+    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    ++ilist;
+    list[ilist-1] = k ;
   }
   while ( k );
 
-  return 1;
+  return ilist;
 }
 

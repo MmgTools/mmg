@@ -507,8 +507,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
-  MMG5_int              k,iel,ip1,ip2,nn;
-  int                   it,maxit;
+  MMG5_int              k,iel,ip1,ip2,nn,list[MMG5_LMAX];
+  int                   it,maxit,ilist;
   int8_t                i,ier;
 
   it = 0;
@@ -547,9 +547,9 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
 
-      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
 
-      if ( !ier ) {
+      if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
         return 0;
@@ -643,8 +643,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
 
-      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
-      if ( !ier ) {
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
+      if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
         return 0;
@@ -772,12 +772,12 @@ int MMG2D_regver(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,cx,cy,ux,uy,nxt,nyt,res,res0,c[2],vol;
-  MMG5_int              k,iel,ip1,ip2,nn,temp,rt;
-  int                   it,maxit,ip,j;
+  MMG5_int              k,kt,iel,ip1,ip2,nn,temp,list[MMG5_LMAX];
+  int                   it,maxit,ip,j,ilist,noupdate;
   int8_t                i,ier;
 
   it = 0;
-  maxit = 10;
+  maxit=10;
   res0 = 0.0;
   nn = 0;
   lm1 = 0.4;
@@ -815,9 +815,9 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
 
-      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
 
-      if ( !ier ) {
+      if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
         return 0;
@@ -855,8 +855,8 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
 
-      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
-      if ( !ier ) {
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
+      if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
         return 0;
@@ -876,10 +876,34 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       /* Anti Laplacian operation */
       c[0] = tmp[2*(k-1)+1] - lm2 * (cx - tmp[2*(k-1)+1]);
       c[1] = tmp[2*(k-1)+2] - lm2 * (cy - tmp[2*(k-1)+2]);
-      res += (c[0]-ppt->c[0])*(c[0]-ppt->c[0]) + (c[1]-ppt->c[1])*(c[1]-ppt->c[1]);
-      ppt->c[0] = c[0];
-      ppt->c[1] = c[1];
-      nn++;
+
+      /* Check if updated point creates a triangle with negative area.
+         If it does, the update of coordinates is skipped */
+      noupdate = 0;
+      //fprintf(stdout,"\n ilist = %d \n",ilist);
+      //fprintf(stdout,"\n point = %d \n",MMG2D_indPt(mesh,k));
+      //fprintf(stdout,"coord = %lf %lf \n",ppt->c[0],ppt->c[1]);
+      /* for (kt=0;kt<ilist;kt++) { */
+      /*   fprintf(stdout,"list[%d] = %d \n",kt,list[kt]); */
+      /*   fprintf(stdout,"list[%d] = %d \n",kt,MMG2D_indElt(mesh,list[kt])); */
+      /* } */
+      for (kt=0; kt<ilist;kt++) {
+        pt = &mesh->tria[list[kt]];
+        if ( !MG_EOK(pt) ) continue;
+
+        vol = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
+                              mesh->point[pt->v[2]].c);
+        if ( vol <= 0.0 ) {
+          noupdate = 1;
+          continue;
+        }
+      }
+      if ( !noupdate ) {
+        res += (c[0]-ppt->c[0])*(c[0]-ppt->c[0]) + (c[1]-ppt->c[1])*(c[1]-ppt->c[1]);
+        ppt->c[0] = c[0];
+        ppt->c[1] = c[1];
+        nn++;
+      }
     }
 
     if ( it == 0 ) res0 = res;
@@ -891,40 +915,6 @@ int MMG2D_regver(MMG5_pMesh mesh) {
     }
   }
   while ( ++it < maxit && res > MMG5_EPS );
-
-  /* Change orientation of triangles with negative areas*/
-  rt = 0;
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) ) continue;
-
-    vol = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
-                          mesh->point[pt->v[2]].c);
-
-    if ( vol == 0.0 ) {
-      fprintf(stderr,"\n  ## Error: %s: triangle %" MMG5_PRId " has null area.\n",
-              __func__,k);
-      for ( ip=0; ip<3; ip++ ) {
-        ppt = &mesh->point[pt->v[ip]];
-        for ( j=0; j<3; j++ ) {
-          if ( fabs(ppt->c[j])>0. ) {
-            fprintf(stderr," Check that you don't have a sliver triangle.\n");
-            return 0;
-          }
-        }
-      }
-    }
-    else if(vol < 0) {
-      temp = pt->v[2];
-      pt->v[2] = pt->v[1];
-      pt->v[1] = temp;
-      rt++;
-    }
-    if ( mesh->info.ddebug && (mesh->nt == k) && rt > 0 ) {
-      fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " triangles reoriented\n",
-              __func__,rt);
-    }
-  }
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %" MMG5_PRId " coordinates regularized: %.3e\n",nn,res);
