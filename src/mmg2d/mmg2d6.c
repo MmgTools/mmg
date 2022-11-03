@@ -316,8 +316,8 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t ista
     if ( !mmgWarn ) {
       mmgWarn = 1;
       fprintf(stderr,"\n  ## Warning: %s: unsnap at least 1 point "
-              "(point %" MMG5_PRId " in tri %" MMG5_PRId ").\n",__func__,MMG2D_indElt(mesh,start),
-              MMG2D_indPt(mesh,mesh->tria[start].v[istart]));
+              "(point %" MMG5_PRId " in tri %" MMG5_PRId ").\n",__func__,
+              MMG2D_indPt(mesh,mesh->tria[start].v[istart]),MMG2D_indElt(mesh,start));
     }
     return 0;
   }
