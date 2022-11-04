@@ -1199,7 +1199,7 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
   }
   else if ( (!met) || (!met->m) ) {
     /* in ls mode + -A option, orcal calls caltet_ani that fails */
-    for (i=0; i<ne; i++) {    
+    for (i=0; i<ne; i++) {
       pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
     }
   }
@@ -1838,8 +1838,6 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
   else {
     if ( pt->v[tau[3]] < pt->v[ib] ) {
       ib = tau[3];
-    }
-    else {
     }
   }
 
