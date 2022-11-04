@@ -3988,6 +3988,8 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
+  pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[5]];
+
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
