@@ -760,6 +760,72 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer towards the mesh
+ * \param pt pointer towards current triangle
+ * \param k number of current point
+ * \param c newly computed coordinates (giving negative area)
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative area
+ *
+ */
+static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c) {
+
+  MMG5_pPoint  ppt;
+  double       mid[3],co[3][3],vol,to,tp,t;
+  int          it,maxit,pos,i,j;
+  const double s = 0.5;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  for ( i=0 ; i<3 ; i++ ) {
+    for ( j=0 ; j<3 ; j++ ) {
+      co[i][j] = mesh->point[pt->v[i]].c[j];
+      }
+  }
+
+  i = 0;
+  if ( pt->v[1] == k ) i = 1;
+  if ( pt->v[2] == k ) i = 2;
+
+  do {
+    co[i][0] = ppt->c[0] + t*(c[0] - ppt->c[0]);
+    co[i][1] = ppt->c[1] + t*(c[1] - ppt->c[1]);
+
+    vol = MMG2D_quickarea(co[0],co[1],co[2]);
+
+    if ( vol <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = co[i][0];
+      c[1] = co[i][1];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+
+/**
  * \param mesh pointer toward the mesh
  *
  * \return 0 if fail, 1 if success
@@ -771,7 +837,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 int MMG2D_regver(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
-  double                *tmp,dd,ps,lm1,lm2,cx,cy,ux,uy,nxt,nyt,res,res0,c[2],vol;
+  double                *tmp,dd,ps,lm1,lm2,cx,cy,ux,uy,nxt,nyt,res,res0,c[2],co[3][3],vol;
   MMG5_int              k,kt,iel,ip1,ip2,nn,temp,list[MMG5_LMAX];
   int                   it,maxit,ip,j,ilist,noupdate;
   int8_t                i,ier;
@@ -856,6 +922,7 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       if ( pt->v[2] == k ) i = 2;
 
       ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
+
       if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
@@ -876,25 +943,33 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       /* Anti Laplacian operation */
       c[0] = tmp[2*(k-1)+1] - lm2 * (cx - tmp[2*(k-1)+1]);
       c[1] = tmp[2*(k-1)+2] - lm2 * (cy - tmp[2*(k-1)+2]);
+      c[2] = 0.;
 
       /* Check if updated point creates a triangle with negative area.
          If it does, the update of coordinates is skipped */
       noupdate = 0;
-      //fprintf(stdout,"\n ilist = %d \n",ilist);
-      //fprintf(stdout,"\n point = %d \n",MMG2D_indPt(mesh,k));
-      //fprintf(stdout,"coord = %lf %lf \n",ppt->c[0],ppt->c[1]);
-      /* for (kt=0;kt<ilist;kt++) { */
-      /*   fprintf(stdout,"list[%d] = %d \n",kt,list[kt]); */
-      /*   fprintf(stdout,"list[%d] = %d \n",kt,MMG2D_indElt(mesh,list[kt])); */
-      /* } */
       for (kt=0; kt<ilist;kt++) {
         pt = &mesh->tria[list[kt]];
         if ( !MG_EOK(pt) ) continue;
 
-        vol = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
-                              mesh->point[pt->v[2]].c);
+        for ( i=0 ; i<3 ; i++ ) {
+          for ( j=0 ; j<3 ; j++ ) {
+            co[i][j] = mesh->point[pt->v[i]].c[j];
+          }
+        }
+
+        i = 0;
+        if ( pt->v[1] == k ) i = 1;
+        if ( pt->v[2] == k ) i = 2;
+
+        for ( j=0 ; j<3 ; j++ ) {
+          co[i][j] = c[j];
+        }
+
+        vol = MMG2D_quickarea(co[0],co[1],co[2]);
+
         if ( vol <= 0.0 ) {
-          noupdate = 1;
+          if (!MMG2D_dichotomy(mesh,pt,k,c)) noupdate = 1;
           continue;
         }
       }

@@ -297,15 +297,16 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) ) return 0;
 
-  /* init list */
-  ilist = 1;
-  if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
-  list[ilist-1] = start;
-
   /* Travel elements in the forward sense */
+  ilist= 0;
   k = start;
   i = ip;
   do {
+
+    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    list[ilist] = k;
+    ++ilist;
+
     pt = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
     i1 = MMG5_inxt2[i];
@@ -348,11 +349,6 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
     i  = adja[i1] % 3;
     i  = MMG5_inxt2[i];
 
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
-    if ( k > 0 ) {
-      ++ilist;
-      list[ilist-1] = k;
-    }
   }
   while ( k && k != start );
   if ( k > 0 ) return ilist;
@@ -368,11 +364,12 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
 
   if ( !k ) return ilist;
 
-  if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
-  ++ilist;
-  list[ilist-1] = k ;
-
   do {
+
+    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    list[ilist] = k ;
+    ++ilist;
+
     pt = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
     i1 = MMG5_inxt2[i];
@@ -416,9 +413,6 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
     i  = adja[i2] % 3;
     i  = MMG5_iprv2[i];
 
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
-    ++ilist;
-    list[ilist-1] = k ;
   }
   while ( k );
 
