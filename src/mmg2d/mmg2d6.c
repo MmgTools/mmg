@@ -826,12 +826,12 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             i1 = MMG5_inxt2[i];
             i2 = MMG5_inxt2[i1];
             ip1 = pt1->v[i1];
-            if ( sol->m[ip1]-mesh->info.ls < 0.0 )  {
+            if ( sol->m[ip1] < 0.0 )  {
               onbr = 1;
               break;
             }
             ip2 = pt1->v[i2];
-            if ( sol->m[ip2]-mesh->info.ls < 0.0 )  {
+            if ( sol->m[ip2] < 0.0 )  {
               onbr = 1;
               break;
             }
@@ -845,7 +845,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
           pt1 = &mesh->tria[pile[l]];
           for (i=0; i<3; i++) {
             ip0 = pt1->v[i];
-            if ( sol->m[ip0]-mesh->info.ls < 0.0 ) sol->m[ip0] = mesh->info.ls + 100*MMG5_EPS;
+            if ( sol->m[ip0] < 0.0 ) sol->m[ip0] = 100*MMG5_EPS;
           }
         }
         ncm++;
