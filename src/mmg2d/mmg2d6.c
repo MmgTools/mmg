@@ -259,9 +259,14 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t ista
     if ( pt->ref != refstart && pt->edg[i1] != mesh->info.isoref ) {
       smsgn = 0;
       k = 0;
-    } else
+    } else {
+      /* Evaluation of sign change using following convention: If
+       * travelled in direct sense from a triangle, an edge is considered
+       * without sign change if first vertex is 0. It has a sign change if
+       * second vertex is 0 or if we have 2 vertices with different signs
+       * (otherwise a 0 vertex leads to count 2 sign changes instead of one). */
       smsgn = (fabs(v1) < MMG5_EPS) || ( (fabs(v2) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
-    // smsgn =  MG_SMSGN(v1,v2) ? 1 : 0;
+    }
   }
   while ( smsgn && (k != start) );
 
@@ -302,22 +307,28 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t ista
     if ( pt->ref != refstart && pt->edg[i1] != mesh->info.isoref ) {
       smsgn = 0;
       k = 0;
-    } else
+    } else {
+      /* Evaluation of sign change using following convention: If
+       * travelled in undirect sense from a triangle, an edge is considered
+       * without sign change if second vertex is 0. It has a sign change if
+       * first vertex is 0 or if we have 2 vertices with different signs
+       * (it allows to evaluate the same splitted edges than the first loop). */
       smsgn = (fabs(v2) < MMG5_EPS) || ( (fabs(v1) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
-    // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
+    }
   }
   while ( smsgn && (k != start) );
 
   assert ( k!=start );
 
-  /* If first stop was due to an external boundary, the second one must too;
-     else, the final triangle for the first travel must be that of the second one */
+  /* If first stop was due to an external boundary, the second one must too
+     (k==end1==0); else, the final triangle for the first travel must be that of
+     the second one */
   if ( k != end1 ) {
     if ( !mmgWarn ) {
       mmgWarn = 1;
       fprintf(stderr,"\n  ## Warning: %s: unsnap at least 1 point "
-              "(point %" MMG5_PRId " in tri %" MMG5_PRId ").\n",__func__,MMG2D_indElt(mesh,start),
-              MMG2D_indPt(mesh,mesh->tria[start].v[istart]));
+              "(point %" MMG5_PRId " in tri %" MMG5_PRId ").\n",__func__,
+              MMG2D_indPt(mesh,mesh->tria[start].v[istart]),MMG2D_indElt(mesh,start));
     }
     return 0;
   }
@@ -351,7 +362,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-  
+
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -378,8 +389,14 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
       v1 = sol->m[ip1];
       v2 = sol->m[ip2];
 
-      /* Catch a snapped point by a triangle where there is a sign change */
-      if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
+      /* Catch a snapped point by a triangle where there is a sign change: use
+       * the same convention than in ismaniball to evaluate sign changes. If
+       * travelled in direct sense from a triangle, an edge is considered
+       * without sign change if first vertex is 0. It has a sign change if
+       * second vertex is 0 or if we have 2 vertices with different signs
+       * (otherwise a 0 vertex leads to count 2 sign changes instead of one). */
+      int smsgn = ((fabs(v2) < MMG5_EPS) || MG_SMSGN(v1,v2)) ? 1 : 0;
+      if ( p0->flag && !smsgn ) {
         if ( !MMG2D_ismaniball(mesh,sol,k,i) ) {
           if ( tmp[ip] < 0.0 )
             sol->m[ip] = -100.0*MMG5_EPS;
