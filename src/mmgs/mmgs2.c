@@ -190,13 +190,13 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       v1 = sol->m[ip1];
       v2 = sol->m[ip2];
       if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
-        if ( !MMGS_ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
-          nc++;
-        }
-        p0->flag = 0;
-        tmp[ip]  = 0.0;
+        if ( tmp[ip] < 0.0 )
+          sol->m[ip] = -100.0*MMG5_EPS;
+        else
+          sol->m[ip] = 100.0*MMG5_EPS;
+        nc++;
       }
+      p0->flag = 0;
     }
   }
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
