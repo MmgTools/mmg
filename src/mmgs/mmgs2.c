@@ -75,8 +75,8 @@ MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
 
-    v1 = sol->m[ip1]-mesh->info.ls;
-    v2 = sol->m[ip2]-mesh->info.ls;
+    v1 = sol->m[ip1];
+    v2 = sol->m[ip2];
 
     smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -101,8 +101,8 @@ MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
 
-    v1 = sol->m[ip1]-mesh->info.ls;
-    v2 = sol->m[ip2]-mesh->info.ls;
+    v1 = sol->m[ip1];
+    v2 = sol->m[ip2];
 
     smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -165,15 +165,16 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
-    if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
-      if ( mesh->info.ddebug )
+    if ( fabs(sol->m[k]) < MMG5_EPS ) {
+      if ( mesh->info.ddebug ) {
         fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
                 "previous value : %E\n",__func__,k,fabs(sol->m[k]));
-
-      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
-        (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
+      }
+#warning fixme
+      tmp[k] = ( fabs(sol->m[k]) < MMG5_EPSD ) ?
+        -100.0*MMG5_EPS : sol->m[k];
       p0->flag = 1;
-      sol->m[k] = mesh->info.ls;
+      sol->m[k] = 0.0;
       ns++;
     }
   }
@@ -188,15 +189,15 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       ip2 = pt->v[MMG5_iprv2[i]];
 
       p0 = &mesh->point[ip];
-      v1 = sol->m[ip1]-mesh->info.ls;
-      v2 = sol->m[ip2]-mesh->info.ls;
+      v1 = sol->m[ip1];
+      v2 = sol->m[ip2];
       if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
         if ( !MMGS_ismaniball(mesh,sol,k,i) ) {
           sol->m[ip] = tmp[ip];
           nc++;
         }
         p0->flag = 0;
-        tmp[ip]  = mesh->info.ls;
+        tmp[ip]  = 0.0;
       }
     }
   }
@@ -408,8 +409,8 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       p0  = &mesh->point[ip0];
       p1  = &mesh->point[ip1];
       if ( p0->flag && p1->flag )  continue;
-      v0  = sol->m[ip0]-mesh->info.ls;
-      v1  = sol->m[ip1]-mesh->info.ls;
+      v0  = sol->m[ip0];
+      v1  = sol->m[ip1];
       if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
           p0->flag = ++nb;
@@ -436,8 +437,8 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
       p0 = &mesh->point[ip0];
       p1 = &mesh->point[ip1];
-      v0 = sol->m[ip0]-mesh->info.ls;
-      v1 = sol->m[ip1]-mesh->info.ls;
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
       if ( fabs(v0) < MMG5_EPSD2 || fabs(v1) < MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
       else if ( !p0->flag || !p1->flag )  continue;
@@ -458,7 +459,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
                             return 0
                             ,c,NULL);
       }
-      sol->m[np] = mesh->info.ls;
+      sol->m[np] = 0.0;
 
       /* If user provide a metric, interpolate it at the new point */
       if ( met && met->m ) {
@@ -558,7 +559,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     nmns = npls = nz = 0;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
-      v = sol->m[ip]-mesh->info.ls;
+      v = sol->m[ip];
       if ( v > 0.0 )
         npls++;
       else if ( v < 0.0 )
@@ -585,8 +586,8 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       for (i=0; i<3; i++) {
         ip  = pt->v[MMG5_inxt2[i]];
         ip1 = pt->v[MMG5_iprv2[i]];
-        v   = sol->m[ip] -mesh->info.ls;
-        v1  = sol->m[ip1]-mesh->info.ls;
+        v   = sol->m[ip] ;
+        v1  = sol->m[ip1];
         if ( v == 0.0 && v1 == 0.0) {
           pt->edg[i]  = mesh->info.isoref;
           pt->tag[i] |= MG_REF;
@@ -609,9 +610,14 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
  *
  */
 int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
+  MMG5_int k;
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+
+  /* Work only with the 0 level set */
+  for (k=1; k<= sol->np; k++)
+    sol->m[k] -= mesh->info.ls;
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !MMGS_snpval_ls(mesh,sol) ) {
