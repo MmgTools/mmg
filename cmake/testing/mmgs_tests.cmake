@@ -363,3 +363,44 @@ ADD_TEST(NAME mmgs_LSMultiMat_withMetAndLs
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMetAndLs.o.meshb)
+
+###############################################################################
+#####
+#####         Check snapping (prevision of non-manifold situations)
+#####
+###############################################################################
+#####
+SET(nmRegex "unsnap at least 1 point")
+
+ADD_TEST(NAME mmgs_LSSnapval_manifold1
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmgs_LSSnapval_manifold2
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_manifold2.o.mesh
+  )
+
+SET_PROPERTY(TEST mmgs_LSSnapval_manifold1 mmgs_LSSnapval_manifold2
+  PROPERTY FAIL_REGULAR_EXPRESSION "${nmRegex}")
+
+ADD_TEST(NAME mmgs_LSSnapval_non-manifold1
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/8elts1-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_non-manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmgs_LSSnapval_non-manifold2
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/8elts2-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_non-manifold2.o.mesh
+  )
+SET_PROPERTY(TEST mmgs_LSSnapval_non-manifold1 mmgs_LSSnapval_non-manifold2
+  PROPERTY PASS_REGULAR_EXPRESSION "${nmRegex}")
