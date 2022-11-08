@@ -219,8 +219,20 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
   return 1;
 }
 
-/* Check whether snapping the value of vertex i of k to 0 exactly leads to a non manifold situation
- assumption: the triangle k has vertex i with value 0 and the other two with changing values */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set values.
+ * \param start index of the starting tria
+ * \param istart local index (inside the tria \a start) of the vertex that we check.
+ * \return 1 if success, 0 if fail
+ *
+ * Check whether snapping the value of vertex \a istart of \a start to 0 exactly
+ * leads to a non manifold situation.
+ *
+ * \warning: we assume that the triangle \a start has vertex \a istart
+ * with value 0 and the other two with changing values.
+ *
+ */
 int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
