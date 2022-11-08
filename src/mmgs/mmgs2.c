@@ -170,9 +170,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
         fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
                 "previous value : %E\n",__func__,k,fabs(sol->m[k]));
       }
-#warning fixme
-      tmp[k] = ( fabs(sol->m[k]) < MMG5_EPSD ) ?
-        -100.0*MMG5_EPS : sol->m[k];
+      tmp[k] = sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
       ns++;
