@@ -668,6 +668,7 @@ typedef struct MMG5_iNode_s {
  int           MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
  int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);
  int           MMG5_mmgIntmet33_ani(double*,double*,double*,double);
+ int           MMG5_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart);
  int           MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,MMG5_int,double *,double *);
  size_t        MMG5_memSize(void);
  void          MMG5_memOption_memSet(MMG5_pMesh mesh);
