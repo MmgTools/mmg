@@ -90,7 +90,7 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
   double          hausd,hmin,hmax,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv;
   double          M1,M2,t1[2],t2[2],b1[2],b2[2],*n,*m;
   double          gpp1[2],gpp2[2];
-  MMG5_int        iel,ip,ip1,ip2,it[2],list[MMG2D_LONMAX+2];
+  MMG5_int        iel,ip,ip1,ip2,it[2],list[MMG5_TRIA_LMAX+2];
   int             ilist,l;
   int8_t          isloc,hausdloc;
   int8_t          i0,i1,i2,j;

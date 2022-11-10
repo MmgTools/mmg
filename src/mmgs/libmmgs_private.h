@@ -38,7 +38,6 @@ extern "C" {
 #define MMGS_LLONG     2.0
 #define MMGS_LSHRT     0.3
 
-#define MMGS_LMAX  1024
 #define MMGS_BADKAL      2.e-2
 #define MMGS_NULKAL      1.e-4
 

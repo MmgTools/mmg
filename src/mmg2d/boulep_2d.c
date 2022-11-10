@@ -240,7 +240,7 @@ int MMG2D_boulet(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *list) {
   k = start;
   i = ip;
   do {
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return -ilist;
     list[ilist] = 3*k + i;
     ++ilist;
 
@@ -264,7 +264,7 @@ int MMG2D_boulet(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *list) {
     i  = adja[i2] % 3;
     i  = MMG5_iprv2[i];
 
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return -ilist;
     list[ilist] = 3*k + i;
     ilist++;
   }

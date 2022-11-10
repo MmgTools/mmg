@@ -53,6 +53,16 @@ extern "C" {
 
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/**
+ * Maximum array size when storing list of tria containing a vertex.
+ */
+#define MMG5_TRIA_LMAX  1024
+
+/**
+ * Maximum array size when calling boulep.
+ */
+#define MMG5_LMAX      10240
+
 /** Check if \a a and \a b have the same sign */
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
@@ -96,8 +106,6 @@ extern "C" {
 #define A32TH     0.03125
 
 #define MMG5_MEMMIN 38 /**< minimal memory needed to store the mesh/sol names */
-
-#define MMG5_LMAX      10240
 
 #define MMG5_PATHSEP  '/'
 

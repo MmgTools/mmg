@@ -289,7 +289,7 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   double         hmi2,len;
   MMG5_int       nc,k;
   int            ilist;
-  MMG5_int       list[MMG2D_LONMAX+2];
+  MMG5_int       list[MMG5_TRIA_LMAX+2];
   int8_t         i,i1,i2,open;
 
   nc    = 0;
@@ -395,7 +395,7 @@ MMG5_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0;
   int               it,maxit,ilist;
-  MMG5_int          k,base,list[MMG2D_LONMAX+2],nm,nnm;
+  MMG5_int          k,base,list[MMG5_TRIA_LMAX+2],nm,nnm;
   int8_t            i,ier;
 
   nnm   = 0;

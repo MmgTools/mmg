@@ -64,7 +64,7 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn) {
   k = start;
   i = ip;
   do {
-    if ( ilist > MMGS_LMAX-2 )  return 0;
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return 0;
     list[ilist] = 3*k + i;
     ++ilist;
 
@@ -92,7 +92,7 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn) {
     i  = adja[i2] % 3;
     i  = MMG5_iprv2[i];
 
-    if ( ilist > MMGS_LMAX-2 )  return 0;
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return 0;
     list[ilist] = 3*k + i;
     ilist++;
   }
@@ -135,7 +135,7 @@ int boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
   k = start;
   i = ip;
   do {
-    if ( ilist > MMGS_LMAX-2 )  return -ilist;
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return -ilist;
     list[ilist] = 3*k + i;
     ++ilist;
 
@@ -175,7 +175,7 @@ int boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
       i  = adja[i2] % 3;
       i  = MMG5_iprv2[i];
 
-      if ( ilist > MMGS_LMAX-2 )  return -ilist;
+      if ( ilist > MMG5_TRIA_LMAX-2 )  return -ilist;
       list[ilist] = 3*k + i;
       ilist++;
     }
@@ -330,7 +330,7 @@ int bouletrid(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,int *il1,MMG5_int *l1,i
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( (*ilist1) > MMGS_LMAX-2 )  return 0;
+    if ( (*ilist1) > MMG5_TRIA_LMAX-2 )  return 0;
     list1[(*ilist1)] = 3*k+i;
     (*ilist1)++;
     i1 = MMG5_inxt2[i];
@@ -358,7 +358,7 @@ int bouletrid(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,int *il1,MMG5_int *l1,i
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( *ilist2 > MMGS_LMAX-2 )  return 0;
+    if ( *ilist2 > MMG5_TRIA_LMAX-2 )  return 0;
     list2[*ilist2] = 3*k+i;
     (*ilist2)++;
     i1 = MMG5_inxt2[i];

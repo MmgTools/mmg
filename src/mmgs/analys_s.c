@@ -34,6 +34,7 @@
  */
 
 #include "libmmgs_private.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -496,7 +497,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int       list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,nre;
+  MMG5_int       list[MMG5_TRIA_LMAX+2],listref[MMG5_TRIA_LMAX+2],k,nc,nre;
   int            xp,nr,ns;
   int8_t         i;
 
@@ -510,7 +511,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
       ppt->s++;
       if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&xp,&nr, MMGS_LMAX);
+        ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&xp,&nr, MMG5_TRIA_LMAX);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {

@@ -225,7 +225,7 @@ int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list) {
         }
       }
     }
-    if ( ilist > MMG2D_LONMAX - 3 ) return -1;
+    if ( ilist > MMG5_TRIA_LMAX - 3 ) return -1;
 
     ++ipil;
   }
@@ -253,7 +253,7 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   MMG5_pPoint     ppt;
   MMG5_int        base,*adja,*adjb,iel,jel,old,iadr,size,nei[3],iadrold;
   int             i,j,k;
-  MMG5_int        ielnum[3*MMG2D_LONMAX+1],tref;
+  MMG5_int        ielnum[3*MMG5_TRIA_LMAX+1],tref;
   int8_t          ier;
   short           i1;
   int8_t          alert;
@@ -313,7 +313,7 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   if ( alert )  return 0;
 
   /* Hash table parameters */
-  if ( size >= 3*MMG2D_LONMAX )  return 0;
+  if ( size >= 3*MMG5_TRIA_LMAX )  return 0;
   if ( !MMG5_hashNew(mesh,&hedg,size,3*size) ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to allocate hash table.\n",__func__);
     return -1;

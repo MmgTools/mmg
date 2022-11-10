@@ -235,7 +235,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_int         k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn;
   int              ilist;
   int8_t           i,j,j1,j2;
-  MMG5_int         list[MMG2D_LONMAX+2];
+  MMG5_int         list[MMG5_TRIA_LMAX+2];
 
   /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",

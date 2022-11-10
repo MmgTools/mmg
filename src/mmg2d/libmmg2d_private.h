@@ -55,7 +55,6 @@ extern "C" {
 #define MMG2D_SIZE   0.75
 #define MMG2D_ALPHA  0.28867513459
 #define MMG2D_ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
-#define MMG2D_LONMAX 1024
 #define MMG2D_BADKAL    0.2
 #define MMG2D_NULKAL    1.e-6
 #define MMG2D_ANGCORN   -1.e-6
