@@ -145,8 +145,7 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_int        *adja,k;
   MMG5_int        cnt,iel;
   int8_t          i,i1;
-  static int8_t   mmgWarn0 = 0;
-
+  static int8_t   mmgWarn = 0;
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
   for (k=1; k<=mesh->nt; k++) {
@@ -167,12 +166,11 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
       }
     }
     if( cnt == 3 ) {
-      if ( !mmgWarn0 ) {
-        mmgWarn0 = 1;
+      if ( !mmgWarn ) {
+        mmgWarn = 1;
         fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
                 " edges.\n",__func__);
       }
-      return 0;
     }
   }
 
@@ -187,11 +185,16 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
       adja = &mesh->adja[3*(k-1)+1];
       iel = adja[i] / 3;
 
-      if ( (!iel) || (pt->edg[i] != mesh->info.isoref) ) continue;
+      if (! iel ) continue;
+      if ( pt->edg[i] != mesh->info.isoref ) continue;
 
       i1 = MMG5_inxt2[i];
-      if ( !MMGS_chkmaniball(mesh,k,i1) )
+      if ( !MMGS_chkmaniball(mesh,k,i1) ) {
+        fprintf(stderr,"   *** Topological problem\n");
+        fprintf(stderr,"       non manifold curve at point %" MMG5_PRId " %" MMG5_PRId "\n",pt->v[i1], MMGS_indPt(mesh,pt->v[i1]));
+        fprintf(stderr,"       non manifold curve at tria %" MMG5_PRId " (ip %d)\n", MMGS_indElt(mesh,k),i1);
         return 0;
+      }
     }
   }
 

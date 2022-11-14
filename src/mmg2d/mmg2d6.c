@@ -290,14 +290,19 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
   return 1;
 }
 
-/* Check whether the resulting two subdomains coming from isovalue
- * discretization are manifold */
+/**
+ * \param mesh pointer toward the mesh.
+ * \return 1 if the mesh is manifold, 0 otherwise.
+ *
+ * Check whether the resulting two subdomains occupying mesh are manifold.
+ *
+ */
 int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
-  MMG5_int        *adja,k,iel;
-  int             cnt;
+  MMG5_int        *adja,k;
+  MMG5_int        cnt,iel;
   int8_t          i,i1;
-  static int8_t   mmgWarn=0;
+  static int8_t   mmgWarn = 0;
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
   for (k=1; k<=mesh->nt; k++) {
@@ -354,6 +359,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 
   if ( mesh->info.imprim > 0 || mesh->info.ddebug )
     fprintf(stdout,"  *** Manifold implicit surface.\n");
+
   return 1;
 }
 
