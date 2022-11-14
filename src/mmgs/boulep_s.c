@@ -48,15 +48,10 @@
  *
  */
 int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   ppt;
   MMG5_int      *adja,k;
   int           ilist;
   int8_t        i,i1,i2;
 
-  pt = &mesh->tria[start];
-
-  ppt = &mesh->point[pt->v[ip]];
   ilist = 0;
   *opn  = 0;
 
@@ -76,6 +71,11 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn) {
   }
   while ( k && k != start );
   if ( k > 0 )  return ilist;
+
+  MMG5_pTria    pt;
+  MMG5_pPoint   ppt;
+  pt = &mesh->tria[start];
+  ppt = &mesh->point[pt->v[ip]];
 
   if ( ppt->tag & MG_NOM )
     return 0;

@@ -46,13 +46,15 @@
  */
 static
 int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   p0;
-  double        *tmp,v1,v2;
-  MMG5_int      nc,ns,ip;
-  MMG5_int      k,ip1,ip2;
-  int8_t        i;
+  MMG5_pTria       pt,pt1;
+  MMG5_pPoint      p0;
+  double           v1,v2,*tmp;
+  MMG5_int         k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn;
+  int              ilist;
+  int8_t           i,j,j1,j2;
+  MMG5_int         list[MMG5_TRIA_LMAX+2];
 
+  /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
@@ -114,6 +116,39 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
   }
+
+  /* Check that the ls function does not show isolated spots with 0 values (without sign changes) */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    for (i=0; i<3; i++) {
+      ip = pt->v[i];
+      if ( fabs(sol->m[ip]) >= MMG5_EPS ) continue;
+      npl = nmn = 0;
+      int8_t opn; //unused
+      ilist = boulet(mesh,k,i,list,&opn);
+      for(kk=0; kk<ilist; kk++) {
+        iel = list[kk] / 3;
+        j = list[kk] % 3;
+        j1 = MMG5_inxt2[j];
+        j2 = MMG5_iprv2[i];
+        pt1 = &mesh->tria[iel];
+        ip1 = pt1->v[j1];
+        ip2 = pt1->v[j2];
+        if ( sol->m[ip1] >= MMG5_EPS ) npl = 1;
+        else if ( sol->m[ip1] <= -MMG5_EPS ) nmn = 1;
+
+        if ( sol->m[ip2] >= MMG5_EPS ) npl = 1;
+        else if ( sol->m[ip2] <= -MMG5_EPS ) nmn = 1;
+      }
+
+      if ( npl == 1 && nmn == 0 )
+        sol->m[ip] = 100.0*MMG5_EPS;
+      else if ( npl == 0 && nmn == 1 )
+        sol->m[ip] = -100.0*MMG5_EPS;
+    }
+  }
+
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
