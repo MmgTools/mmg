@@ -153,8 +153,8 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
-    cnt = 0;
     adja = &mesh->adja[3*(k-1)+1];
+    cnt = 0;
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
 
@@ -371,50 +371,59 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
   MMG5_int     k,ip,ip1;
-  int8_t       nmns,npls,nz,i;
+  int8_t       i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    nmns = npls = nz = 0;
+    if ( !MG_EOK(pt) ) continue;
+
+    nmn = npl = nz = 0;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
       v = sol->m[ip];
+
       if ( v > 0.0 )
-        npls++;
+        npl++;
       else if ( v < 0.0 )
-        nmns++;
+        nmn++;
       else
-        nz ++;
+        nz++;
     }
+
     assert(nz < 3);
 
     if ( mesh->info.iso != 2 ) {
       /* Keep the initial triangle references of the mesh */
-      if ( npls ) {
-        assert(!nmns);
+      if ( npl ) {
+        assert( !nmn );
         pt->ref = MG_PLUS;
       }
       else {
-        assert(nmns);
+        assert ( nmn );
         pt->ref = MG_MINUS;
       }
     }
 
-    // Set mesh->info.isoref ref at ls edges
+    /* Set mesh->info.isoref ref at ls edges and at the points of these edges */
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[MMG5_inxt2[i]];
         ip1 = pt->v[MMG5_iprv2[i]];
-        v   = sol->m[ip] ;
+        v   = sol->m[ip];
         v1  = sol->m[ip1];
         if ( v == 0.0 && v1 == 0.0) {
           pt->edg[i]  = mesh->info.isoref;
           pt->tag[i] |= MG_REF;
+          i1 = MMG5_inxt2[i];
+          i2 = MMG5_inxt2[i1];
+          mesh->point[pt->v[i1]].ref = mesh->info.isoref;
+          mesh->point[pt->v[i2]].ref = mesh->info.isoref;
         }
       }
     }
 
   }
+
   return 1;
 }
 
@@ -483,6 +492,7 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);
+  sol->np = 0;
 
   return 1;
 }
