@@ -342,11 +342,6 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       ns++;
       break;
 
-    case 7: /* 3 edges splitted */
-      ier =MMGS_split3(mesh,met,k,vx);
-      ns++;
-      break;
-
     default :
       assert(pt->flag == 0);
       break;
