@@ -236,7 +236,6 @@ double MMG2D_caltri_iso_3pt(double *a,double *b,double *c);
 double MMG2D_voltri(MMG5_pMesh ,MMG5_int ,MMG5_int ,MMG5_int );
 double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
 int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , MMG5_int , int8_t );
-int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);

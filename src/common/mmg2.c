@@ -466,6 +466,122 @@ int MMG5_isLevelSet(MMG5_pMesh mesh,MMG5_int ref0,MMG5_int ref1) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set function.
+ * \return 1 if success, 0 if fail.
+ *
+ * Snap values of the level set function very close to 0 to exactly 0,
+ * and prevent nonmanifold patterns from being generated.
+ *
+ */
+int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pTria       pt,pt1;
+  MMG5_pPoint      p0;
+  double           v1,v2,*tmp;
+  MMG5_int         k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn;
+  int              ilist;
+  int8_t           i,j,j1,j2;
+  MMG5_int         list[MMG5_TRIA_LMAX+2];
+
+  /* Allocate memory for tmp */
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+                fprintf(stderr,"  Exit program.\n");
+                return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
+
+  /* Reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
+  /* Snap values of sol that are close to 0 to 0 exactly */
+  ns = nc = 0;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( !MG_VOK(p0) ) continue;
+    if ( fabs(sol->m[k]) < MMG5_EPS ) {
+      tmp[k] = sol->m[k];
+      p0->flag = 1;
+      sol->m[k] = 0.0;
+      ns++;
+    }
+  }
+
+  /* Check that the snapping process has not led to a nonmanifold situation */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    for (i=0; i<3; i++) {
+      ip = pt->v[i];
+      ip1 = pt->v[MMG5_inxt2[i]];
+      ip2 = pt->v[MMG5_iprv2[i]];
+
+      p0 = &mesh->point[ip];
+      v1 = sol->m[ip1];
+      v2 = sol->m[ip2];
+
+      /* Catch a snapped point by a triangle where there is a sign change: use
+       * the same convention than in ismaniball to evaluate sign changes. If
+       * travelled in direct sense from a triangle, an edge is considered
+       * without sign change if first vertex is 0. It has a sign change if
+       * second vertex is 0 or if we have 2 vertices with different signs
+       * (otherwise a 0 vertex leads to count 2 sign changes instead of one). */
+      int smsgn = ((fabs(v2) < MMG5_EPS) || MG_SMSGN(v1,v2)) ? 1 : 0;
+      if ( p0->flag && !smsgn ) {
+        if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
+          if ( tmp[ip] < 0.0 )
+            sol->m[ip] = -100.0*MMG5_EPS;
+          else
+            sol->m[ip] = 100.0*MMG5_EPS;
+          nc++;
+        }
+        p0->flag = 0;
+      }
+    }
+  }
+
+  /* Check that the ls function does not show isolated spots with 0 values (without sign changes) */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    for (i=0; i<3; i++) {
+      ip = pt->v[i];
+      if ( fabs(sol->m[ip]) >= MMG5_EPS ) continue;
+      npl = nmn = 0;
+      int8_t opn; //unused
+      ilist = MMG5_boulet(mesh,k,i,list,1,&opn);
+      for(kk=0; kk<ilist; kk++) {
+        iel = list[kk] / 3;
+        j = list[kk] % 3;
+        j1 = MMG5_inxt2[j];
+        j2 = MMG5_iprv2[i];
+        pt1 = &mesh->tria[iel];
+        ip1 = pt1->v[j1];
+        ip2 = pt1->v[j2];
+        if ( sol->m[ip1] >= MMG5_EPS ) npl = 1;
+        else if ( sol->m[ip1] <= -MMG5_EPS ) nmn = 1;
+
+        if ( sol->m[ip2] >= MMG5_EPS ) npl = 1;
+        else if ( sol->m[ip2] <= -MMG5_EPS ) nmn = 1;
+      }
+
+      if ( npl == 1 && nmn == 0 )
+        sol->m[ip] = 100.0*MMG5_EPS;
+      else if ( npl == 0 && nmn == 1 )
+        sol->m[ip] = -100.0*MMG5_EPS;
+    }
+  }
+
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
+    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
+
+  /* memory free */
+  MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,tmp);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set values.
  * \param start index of the starting tria
  * \param istart local index (inside the tria \a start) of the vertex that we check.
