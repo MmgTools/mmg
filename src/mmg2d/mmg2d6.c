@@ -239,7 +239,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 return 0);
   MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
@@ -253,7 +253,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < MMG5_EPS ) {
-      tmp[k] =  sol->m[k];
+      tmp[k] = sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
       ns++;

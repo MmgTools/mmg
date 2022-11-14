@@ -60,13 +60,6 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
                 return 0);
   MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
-  /* create tetra adjacency */
-  if ( !MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
-            __func__);
-    return 0;
-  }
-
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
@@ -568,10 +561,17 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     sol->m[k] -= mesh->info.ls;
 
   /* Snap values of level set function if need be, then discretize it */
+  if ( !MMGS_hashTria(mesh) ) {
+    fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
+            __func__);
+    return 0;
+  }
+
   if ( !MMGS_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
+  MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Check the initial mesh adjacencies */
   if ( !MMGS_hashTria(mesh) ) {
