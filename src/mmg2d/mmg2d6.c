@@ -796,7 +796,14 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
 
 }
 
-/* Set references to the new triangles */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set values.
+ * \return 1.
+ *
+ * Set references to tris according to the sign of the level set function.
+ *
+ */
 int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
@@ -833,7 +840,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     }
     else {
       if ( ier ) {
-        assert ( !npl );
+        assert ( nmn );
         pt->ref = refint;
       }
     }
