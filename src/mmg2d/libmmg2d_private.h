@@ -284,7 +284,6 @@ int MMG2D_chkcol(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int *,int8_t);
 int MMG2D_colver(MMG5_pMesh,int,MMG5_int*);
 int MMG2D_colver3(MMG5_pMesh,MMG5_int*);
 int MMG2D_colver2(MMG5_pMesh,MMG5_int*);
-int MMG2D_boulet(MMG5_pMesh,MMG5_int,int8_t,MMG5_int*);
 int MMG2D_bouleendp(MMG5_pMesh,MMG5_int,int8_t,MMG5_int*,MMG5_int*);
 int MMG2D_savemesh_db(MMG5_pMesh ,char* ,int8_t );
 int MMG2D_savemet_db(MMG5_pMesh ,MMG5_pSol ,char* ,int8_t );

@@ -106,7 +106,8 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
   m = &met->m[3*ip];
 
   ip1 = ip2 = 0;
-  ilist = MMG2D_boulet(mesh,k,i,list);
+  int8_t dummy;
+  ilist = MMG5_boulet(mesh,k,i,list,0,&dummy);
 
   /* Local parameters if needed: note that the hausdorff param is only looked if
    * imposed on an edge */

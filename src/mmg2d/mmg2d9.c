@@ -420,7 +420,8 @@ MMG5_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
 
-        ilist = MMG2D_boulet(mesh,k,i,list);
+        int8_t dummy;
+        ilist = MMG5_boulet(mesh,k,i,list,0,&dummy);
 
         if ( MG_EDG(p0->tag) )
           ier = MMG2D_movedgpt(mesh,met,ilist,list,0);

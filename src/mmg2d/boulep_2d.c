@@ -222,61 +222,6 @@ int MMG2D_boulen(MMG5_pMesh mesh, MMG5_int start,int8_t ip, MMG5_int *pleft, MMG
  * \param mesh pointer toward the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
- * \param list pointer toward the computed ball of \a ip.
- * \return the size of the computed ball or 0 if fail.
- *
- * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
- * crossing ridge.
- *
- */
-int MMG2D_boulet(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *list) {
-  MMG5_int      *adja,k;
-  int           ilist;
-  int8_t        i,i1,i2;
-
-  ilist = 0;
-
-  /* store neighbors */
-  k = start;
-  i = ip;
-  do {
-    if ( ilist > MMG5_TRIA_LMAX-2 )  return -ilist;
-    list[ilist] = 3*k + i;
-    ++ilist;
-
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-    k  = adja[i1] / 3;
-    i  = adja[i1] % 3;
-    i  = MMG5_inxt2[i];
-  }
-  while ( k && k != start );
-  if ( k > 0 )  return ilist;
-
-  /* check if boundary hit */
-  k = start;
-  i = ip;
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i2 = MMG5_iprv2[i];
-    k  = adja[i2] / 3;
-    if ( k == 0 )  break;
-    i  = adja[i2] % 3;
-    i  = MMG5_iprv2[i];
-
-    if ( ilist > MMG5_TRIA_LMAX-2 )  return -ilist;
-    list[ilist] = 3*k + i;
-    ilist++;
-  }
-  while ( k );
-
-  return ilist;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param start index of triangle to start.
- * \param ip index of point for wich we compute the ball.
  * \return 1 if success, 0 if fail.
  *
  * Find the two endpoints of the boundary curves joining ip and fill \a ip1 and

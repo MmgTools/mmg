@@ -301,7 +301,8 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
       ip = pt->v[i];
       if ( fabs(sol->m[ip]) >= MMG5_EPS ) continue;
       npl = nmn = 0;
-      ilist = MMG2D_boulet(mesh,k,i,list);
+      int8_t dummy;
+      ilist = MMG5_boulet(mesh,k,i,list,0,&dummy);
       for(kk=0; kk<ilist; kk++) {
         iel = list[kk] / 3;
         j = list[kk] % 3;

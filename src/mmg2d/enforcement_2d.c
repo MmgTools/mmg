@@ -81,7 +81,8 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     else
       j=2;
 
-    lon = MMG2D_boulet(mesh,kdep,j,list);
+    int8_t dummy;
+    lon = MMG5_boulet(mesh,kdep,j,list,0,&dummy);
 
     if ( lon <= 0 ) {
       if ( !mmgWarn0 ) {
