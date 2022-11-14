@@ -189,7 +189,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
             else if ( MS_SIN(ppt->tag) )  continue;
 
             int8_t dummy;
-            lon = boulet(mesh,k,i,list,&dummy);
+            lon = MMG5_boulet(mesh,k,i,list,1,&dummy);
             if ( lon < 1 )  continue;
             for (l=0; l<lon; l++) {
                 kk  = list[l] / 3;

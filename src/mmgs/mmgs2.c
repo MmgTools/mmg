@@ -126,7 +126,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( fabs(sol->m[ip]) >= MMG5_EPS ) continue;
       npl = nmn = 0;
       int8_t opn; //unused
-      ilist = boulet(mesh,k,i,list,&opn);
+      ilist = MMG5_boulet(mesh,k,i,list,1,&opn);
       for(kk=0; kk<ilist; kk++) {
         iel = list[kk] / 3;
         j = list[kk] % 3;

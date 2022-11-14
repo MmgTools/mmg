@@ -136,7 +136,6 @@ int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol,MMG5_int* );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  MMGS_bdryUpdate(MMG5_pMesh mesh);
-int  boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn);
 int  boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list);
 int  bouletrid(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,int *il1,MMG5_int *l1,int *il2,MMG5_int *l2,MMG5_int *ip0,MMG5_int *ip1);
 MMG5_int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);

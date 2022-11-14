@@ -857,7 +857,7 @@ int MMGS_unitTensor_3D( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,double *
   int8_t      open;
 
   /** Step 1: compute ball of point */
-  ilist = boulet(mesh,k,i,list,&open);
+  ilist = MMG5_boulet(mesh,k,i,list,1,&open);
   if ( ilist < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
             __func__);
@@ -1073,7 +1073,7 @@ int MMGS_unitTensor_2D ( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,
 
   /* Possible improvement: if we have called MMGS_unitTensor_3D previously,
    * boulet is already computed */
-  ilist = boulet(mesh,k,i,list,&opn);
+  ilist = MMG5_boulet(mesh,k,i,list,1,&opn);
   if ( ilist < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
             __func__);

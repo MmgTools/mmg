@@ -564,7 +564,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       if ( !ppt->s )  continue;
       int8_t dummy;
-      nr = boulet(mesh,k,i,list,&dummy);
+      nr = MMG5_boulet(mesh,k,i,list,1,&dummy);
       if ( nr != ppt->s ) {
         ppt->tag |= MG_CRN + MG_REQ;
         ppt->s = 0;

@@ -497,7 +497,7 @@ int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
   /* collect all triangles around vertex i1 */
   if ( pt->v[i1] & MG_NOM )  return 0;
 
-  ilist = boulet(mesh,k,i1,list,&open);
+  ilist = MMG5_boulet(mesh,k,i1,list,1,&open);
 
 #ifndef NDEBUG
   /* check for open ball */

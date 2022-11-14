@@ -494,7 +494,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
           continue;
 
         int8_t dummy;
-        ilist = boulet(mesh,k,i,list,&dummy);
+        ilist = MMG5_boulet(mesh,k,i,list,1,&dummy);
 
         if ( ilist < 1 ) continue;
 
