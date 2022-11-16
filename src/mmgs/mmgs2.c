@@ -461,6 +461,13 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
+
+  /* Removal of small parasitic components */
+  if ( mesh->info.rmc > 0. && !MMG5_rmc(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
+    return 0;
+  }
+
   MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Check the initial mesh adjacencies */
