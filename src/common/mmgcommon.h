@@ -788,6 +788,7 @@ int MMG5_getStartRef(MMG5_pMesh ,MMG5_int, MMG5_int *);
 int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
 int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG5_resetRef(MMG5_pMesh );
+int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
 
 /* test functions */
 extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );

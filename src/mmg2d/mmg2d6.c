@@ -325,76 +325,6 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
 
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
- * \return 1.
- *
- * Set references to tris according to the sign of the level set function.
- *
- */
-int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
-  MMG5_pTria    pt;
-  double        v,v1;
-  int           ier;
-  MMG5_int      k,ip,ip1,ref,refint,refext;
-  int8_t        i,i1,i2,nmn,npl,nz;
-
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) ) continue;
-
-    ref = pt->ref;
-    nmn = npl = nz = 0;
-    for (i=0; i<3; i++) {
-      ip = pt->v[i];
-      v = sol->m[ip];
-
-      if ( v > 0.0 )
-        npl++;
-      else if ( v < 0.0 )
-        nmn++;
-      else
-        nz++;
-    }
-
-    assert(nz < 3);
-    ier = MMG5_isSplit(mesh,ref,&refint,&refext);
-
-    if ( ier ) {
-      if ( npl ) {
-        assert ( !nmn );
-        pt->ref = refext;
-      }
-      else {
-        assert ( nmn );
-        pt->ref = refint;
-      }
-    }
-
-    /* Set mesh->info.isoref ref at ls edges and at the points of these edges */
-    if ( nz == 2 ) {
-      for (i=0; i<3; i++) {
-        ip  = pt->v[MMG5_inxt2[i]];
-        ip1 = pt->v[MMG5_iprv2[i]];
-        v   = sol->m[ip];
-        v1  = sol->m[ip1];
-        if ( v == 0.0 && v1 == 0.0) {
-          pt->edg[i]  = mesh->info.isoref;
-          pt->tag[i] |= MG_REF;
-          i1 = MMG5_inxt2[i];
-          i2 = MMG5_inxt2[i1];
-          mesh->point[pt->v[i1]].ref = mesh->info.isoref;
-          mesh->point[pt->v[i2]].ref = mesh->info.isoref;
-        }
-      }
-    }
-
-  }
-
-  return 1;
-}
-
 /* Main function of the -ls mode */
 int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   MMG5_int k;
@@ -447,7 +377,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Set references on the interior / exterior triangles*/
-  if ( !MMG2D_setref_ls(mesh,sol) ) {
+  if ( !MMG5_setref_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
