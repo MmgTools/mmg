@@ -1339,8 +1339,13 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
       mesh->info.isoref   = val;
     break;
   case MMGS_IPARAM_keepRef :
-    if ( val )
+    if ( mesh->info.nmat ) {
+      fprintf(stderr,"\n  ## Warning: %s: multi material mode not compatible with"
+              " references preservation.  Refs preservation disabled.\n",__func__);
+    }
+    else if ( val ) {
       mesh->info.iso      = 2;
+    }
     break;
   case MMGS_IPARAM_numsubdomain :
     mesh->info.nsd = val;
@@ -1409,6 +1414,11 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
       MMG5_DEL_MEM(mesh,mesh->info.mat);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
+    }
+    if ( mesh->info.iso == 2 ) {
+      fprintf(stderr,"\n  ## Warning: %s: multi material mode not compatible with"
+              " references preservation.  Refs preservation disabled.\n",__func__);
+      mesh->info.iso = 1;
     }
     mesh->info.nmat   = val;
     mesh->info.nmati  = 0;

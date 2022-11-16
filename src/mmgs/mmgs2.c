@@ -218,60 +218,74 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
   double       c[3],v0,v1,s;
-  MMG5_int     vx[3],k,np;
+  MMG5_int     vx[3],k,np,refint,refext;
   MMG5_int     ip0,ip1,ns,nt,ier,nb;
   int8_t       ia;
-  /* reset point flags and h */
+
+  /* Reset flag field for points */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
-  /* compute the number nb of intersection points on edges */
+  /* Evaluate the number of intersected edges by the 0 level set */
   nb = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+
     for (ia=0; ia<3; ia++) {
       ip0 = pt->v[MMG5_inxt2[ia]];
       ip1 = pt->v[MMG5_iprv2[ia]];
       p0  = &mesh->point[ip0];
       p1  = &mesh->point[ip1];
-      if ( p0->flag && p1->flag )  continue;
-      v0  = sol->m[ip0];
-      v1  = sol->m[ip1];
+
+      if ( p0->flag && p1->flag ) continue;
+
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
+
       if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
-        if ( !p0->flag ) {
-          p0->flag = ++nb;
-        }
-        if ( !p1->flag ) {
-          p1->flag = ++nb;
-        }
+        nb++;
+        if ( !p0->flag ) p0->flag = nb;
+        if ( !p1->flag ) p1->flag = nb;
       }
     }
   }
-  if ( ! nb )  return 1;
+  if ( !nb ) return 1;
 
-  /* Create intersection points at 0 isovalue and set flags to trias */
-  if ( !MMG5_hashNew(mesh,&hash,nb,3*nb) ) return 0;
+  /* Create the intersection points between the edges in the mesh and the 0
+   * level set */
+  if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) ) continue;
 
     for (ia=0; ia<3; ia++) {
       ip0 = pt->v[MMG5_inxt2[ia]];
       ip1 = pt->v[MMG5_iprv2[ia]];
-      np  = MMG5_hashGet(&hash,ip0,ip1);
-      if ( np )  continue;
+
+      np = MMG5_hashGet(&hash,ip0,ip1);
+      if ( np ) continue;
+
+      /* If user asks to keep input refs, ignore multi-mat mode */
+      if ( mesh->info.iso!=2 ) {
+        if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
+      }
+
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
 
       p0 = &mesh->point[ip0];
       p1 = &mesh->point[ip1];
-      v0 = sol->m[ip0];
-      v1 = sol->m[ip1];
+
       if ( fabs(v0) < MMG5_EPSD2 || fabs(v1) < MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
       else if ( !p0->flag || !p1->flag )  continue;
 
+      /* Intersection point between edge p0p1 and the 0 level set */
       s = v0 / (v0-v1);
-
       s = MG_MAX(MG_MIN(s,1.0-MMG5_EPS),MMG5_EPS);
+
       c[0] = p0->c[0] + s*(p1->c[0]-p0->c[0]);
       c[1] = p0->c[1] + s*(p1->c[1]-p0->c[1]);
       c[2] = p0->c[2] + s*(p1->c[2]-p0->c[2]);
@@ -308,13 +322,14 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
   }
 
-  /* Proceed to splitting, according to flags to tris */
+  /* Proceed to splitting by calling patterns */
   nt  = mesh->nt;
   ns  = 0;
   ier = 1;
   for (k=1; k<=nt; k++) {
+
     pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) ) continue;
     pt->flag = 0;
     memset(vx,0,3*sizeof(MMG5_int));
     for (ia=0; ia<3; ia++) {
@@ -350,6 +365,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
     if ( !ier ) return 0;
   }
+
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
 
@@ -359,6 +375,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
+
 }
 
 /**
