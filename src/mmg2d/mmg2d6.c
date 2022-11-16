@@ -371,14 +371,12 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     assert(nz < 3);
     ier = MMG5_isSplit(mesh,ref,&refint,&refext);
 
-    if ( npl ) {
-      if ( ier ) {
+    if ( ier ) {
+      if ( npl ) {
         assert ( !nmn );
         pt->ref = refext;
       }
-    }
-    else {
-      if ( ier ) {
+      else {
         assert ( nmn );
         pt->ref = refint;
       }
