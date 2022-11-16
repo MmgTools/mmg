@@ -84,6 +84,7 @@ enum MMGS_Param {
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
+  MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
 
@@ -852,7 +853,7 @@ LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int ipara
  * Set double parameter \a dparam at value \a val.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_DPARAMETERS(mesh,sol,dparam,val,retval)\n
+ * >   SUBROUTINE MMGS_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     MMG5_DATA_PTR_T               :: sol\n
  * >     INTEGER, INTENT(IN)           :: dparam\n

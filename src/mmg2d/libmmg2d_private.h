@@ -60,7 +60,6 @@ extern "C" {
 #define MMG2D_ANGCORN   -1.e-6
 #define MMG2D_SHORTMAX     0x7fff
 #define MMG2D_LPARMAX     200
-#define MMG2D_VOLFRAC     1.e-5
 
 #define MMG2D_LLONG  2.0
 #define MMG2D_LSHRT  0.3

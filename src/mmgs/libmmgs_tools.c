@@ -333,9 +333,18 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           return 0;
         }
         break;
-#ifdef USE_SCOTCH
       case 'r':
-        if ( !strcmp(argv[i],"-rn") ) {
+        if ( !strcmp(argv[i],"-rmc") ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_rmc,0) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_rmc,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
+        }
+#ifdef USE_SCOTCH
+        else if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
               if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_renum,atoi(argv[i])) )
@@ -353,8 +362,13 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
             return 0;
           }
         }
-        break;
 #endif
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           /* For retrocompatibility, store the metric if no sol structure available */

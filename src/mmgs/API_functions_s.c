@@ -1504,7 +1504,17 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
       mesh->info.hausd    = val;
     break;
   case MMGS_DPARAM_ls :
-    mesh->info.ls       = val;
+    mesh->info.ls         = val;
+    break;
+  case MMGS_DPARAM_rmc :
+    if ( !val ) {
+      /* Default value */
+      mesh->info.rmc      = MMG5_VOLFRAC;
+    }
+    else {
+      /* User customized value */
+      mesh->info.rmc      = val;
+    }
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);

@@ -340,7 +340,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_rmc :
     if ( !val ) {
       /* Default value */
-      mesh->info.rmc      = MMG2D_VOLFRAC;
+      mesh->info.rmc      = MMG5_VOLFRAC;
     }
     else {
       /* User customized value */
