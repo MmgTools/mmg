@@ -66,7 +66,7 @@ ELSE ()
 ENDIF ( )
 
 #####         Fortran Tests
-IF ( CMAKE_Fortran_COMPILER )
+IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ENABLE_LANGUAGE ( Fortran )
 
   SET ( MMGS_LIB_TESTS ${MMGS_LIB_TESTS}
@@ -93,7 +93,7 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.F90
     )
 
-ENDIF ( CMAKE_Fortran_COMPILER )
+ENDIF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
 
 LIST(LENGTH MMGS_LIB_TESTS nbTests_tmp)
 MATH(EXPR nbTests "${nbTests_tmp} - 1")
@@ -149,7 +149,7 @@ ADD_TEST(NAME libmmgs_lsAndMetric
   "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
   )
 
-IF ( CMAKE_Fortran_COMPILER)
+IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND ) 
   SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
   SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
   SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)

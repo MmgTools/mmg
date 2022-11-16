@@ -113,6 +113,7 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${include_dir} mmg${target_identifier}_export.h
     mmg${target_identifier}_export_header copy_mmg${target_identifier}_export )
 
+  if (PERL_FOUND)
   COPY_HEADER (
     ${COMMON_BINARY_DIR} libmmgtypesf.h
     ${include_dir} libmmgtypesf.h
@@ -128,6 +129,7 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgcmakedefinesf
     copy${target_identifier}_mmgversion
     copy_mmg${target_identifier}_export )
+  endif (PERL_FOUND)
 
   IF (NOT WIN32 OR MINGW)
     COPY_HEADER (

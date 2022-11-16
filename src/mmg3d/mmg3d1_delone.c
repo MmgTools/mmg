@@ -227,6 +227,31 @@ int MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG
             goto collapse;
           }
         }
+
+          ppt = &mesh->point[ip];
+          if ( MG_EDG(tag) || (tag & MG_NOM) )
+            ppt->ref = ref;
+          else
+            ppt->ref = pxt->ref[i];
+          ppt->tag = tag;
+
+          pxp = &mesh->xpoint[ppt->xp];
+          if ( tag & MG_NOM ){
+            memcpy(pxp->n1,no1,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
+          }
+          else if ( tag & MG_GEO ) {
+            memcpy(pxp->n1,no1,3*sizeof(double));
+            memcpy(pxp->n2,no2,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
+          }
+          else if ( tag & MG_REF ) {
+            memcpy(pxp->n1,no1,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
+          }
+          else
+            memcpy(pxp->n1,no1,3*sizeof(double));
+
         ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
         assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
          if ( ier == 2 || ier < 0 ) {
@@ -256,30 +281,6 @@ int MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG
           goto collapse;
         } else {
           (*ns)++;
-
-          ppt = &mesh->point[ip];
-          if ( MG_EDG(tag) || (tag & MG_NOM) )
-            ppt->ref = ref;
-          else
-            ppt->ref = pxt->ref[i];
-          ppt->tag = tag;
-
-          pxp = &mesh->xpoint[ppt->xp];
-          if ( tag & MG_NOM ){
-            memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(ppt->n,to,3*sizeof(double));
-          }
-          else if ( tag & MG_GEO ) {
-            memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(pxp->n2,no2,3*sizeof(double));
-            memcpy(ppt->n,to,3*sizeof(double));
-          }
-          else if ( tag & MG_REF ) {
-            memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(ppt->n,to,3*sizeof(double));
-          }
-          else
-            memcpy(pxp->n1,no1,3*sizeof(double));
         }
         continue;
       }
@@ -586,6 +587,31 @@ int MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG
               goto collapse2;
             }
           }
+          ppt = &mesh->point[ip];
+
+          if ( MG_EDG(tag) || (tag & MG_NOM) )
+            ppt->ref = ref;
+          else
+            ppt->ref = pxt->ref[i];
+          ppt->tag = tag;
+
+          pxp = &mesh->xpoint[ppt->xp];
+          if ( tag & MG_NOM ){
+            memcpy(pxp->n1,no1,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
+          }
+          else if ( tag & MG_GEO ) {
+            memcpy(pxp->n1,no1,3*sizeof(double));
+            memcpy(pxp->n2,no2,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
+          }
+          else if ( tag & MG_REF ) {
+            memcpy(pxp->n1,no1,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
+          }
+          else
+            memcpy(pxp->n1,no1,3*sizeof(double));
+
           ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
           assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
           if ( ier == 2 || ier < 0 ) {
@@ -616,31 +642,6 @@ int MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG
             (*ns)++;
             //~ if ( *PROctree )
               //~ MMG3D_addPROctree(mesh,*PROctree,ip);
-
-            ppt = &mesh->point[ip];
-
-            if ( MG_EDG(tag) || (tag & MG_NOM) )
-              ppt->ref = ref;
-            else
-              ppt->ref = pxt->ref[i];
-            ppt->tag = tag;
-
-            pxp = &mesh->xpoint[ppt->xp];
-            if ( tag & MG_NOM ){
-              memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(ppt->n,to,3*sizeof(double));
-            }
-            else if ( tag & MG_GEO ) {
-              memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(pxp->n2,no2,3*sizeof(double));
-              memcpy(ppt->n,to,3*sizeof(double));
-            }
-            else if ( tag & MG_REF ) {
-              memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(ppt->n,to,3*sizeof(double));
-            }
-            else
-              memcpy(pxp->n1,no1,3*sizeof(double));
           }
           break;//imax continue;
         }

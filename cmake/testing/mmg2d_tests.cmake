@@ -682,3 +682,44 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     )
 
 ENDIF()
+
+###############################################################################
+#####
+#####         Check snapping (prevision of non-manifold situations)
+#####
+###############################################################################
+#####
+SET(nmRegex "unsnap at least 1 point")
+
+ADD_TEST(NAME mmg2d_LSSnapval_manifold1
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmg2d_LSSnapval_manifold2
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_manifold2.o.mesh
+  )
+
+SET_PROPERTY(TEST mmg2d_LSSnapval_manifold1 mmg2d_LSSnapval_manifold2
+  PROPERTY FAIL_REGULAR_EXPRESSION "${nmRegex}")
+
+ADD_TEST(NAME mmg2d_LSSnapval_non-manifold1
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/8elts1-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_non-manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmg2d_LSSnapval_non-manifold2
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/8elts2-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_non-manifold2.o.mesh
+  )
+SET_PROPERTY(TEST mmg2d_LSSnapval_non-manifold1 mmg2d_LSSnapval_non-manifold2
+  PROPERTY PASS_REGULAR_EXPRESSION "${nmRegex}")
