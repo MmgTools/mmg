@@ -289,6 +289,12 @@ ADD_TEST(NAME mmgs_LSMultiMat
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
 
+ADD_TEST(NAME mmgs_LSMultiMat-rmc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3 -rmc
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
+
 # non 0 ls
 ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   COMMAND ${EXECUT_MMGS} -v 5 -ls 0.01 -hausd 0.001
