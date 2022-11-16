@@ -511,5 +511,7 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;
 
+  MMG5_DEL_MEM( mesh,mesh->info.mat );
+
   return 1;
 }

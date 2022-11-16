@@ -206,14 +206,10 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
-      i0 = MMG5_inxt2[i];
-      i1 = MMG5_inxt2[i0];
-
-      ip0 = pt->v[i0];
-      ip1 = pt->v[i1];
-
-      p0 = &mesh->point[ip0];
-      p1 = &mesh->point[ip1];
+      ip0 = pt->v[MMG5_inxt2[i]];
+      ip1 = pt->v[MMG5_iprv2[i]];
+      p0  = &mesh->point[ip0];
+      p1  = &mesh->point[ip1];
 
       if ( p0->flag && p1->flag ) continue;
 
@@ -238,14 +234,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
-      i0 = MMG5_inxt2[i];
-      i1 = MMG5_inxt2[i0];
-
-      ip0 = pt->v[i0];
-      ip1 = pt->v[i1];
-
-      p0 = &mesh->point[ip0];
-      p1 = &mesh->point[ip1];
+      ip0 = pt->v[MMG5_inxt2[i]];
+      ip1 = pt->v[MMG5_iprv2[i]];
 
       np = MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
@@ -255,12 +245,15 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
       v0 = sol->m[ip0];
       v1 = sol->m[ip1];
 
+      p0 = &mesh->point[ip0];
+      p1 = &mesh->point[ip1];
+
       if ( fabs(v0) < MMG5_EPSD2 || fabs(v1) < MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
       else if ( !p0->flag || !p1->flag )  continue;
 
       /* Intersection point between edge p0p1 and the 0 level set */
-      s = v0/(v0-v1);
+      s = v0 / (v0-v1);
       s = MG_MAX(MG_MIN(s,1.0-MMG5_EPS),MMG5_EPS);
 
       c[0] = p0->c[0] + s*(p1->c[0]-p0->c[0]);
@@ -296,11 +289,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     pt->flag = 0;
 
     for (i=0; i<3; i++) {
-      i0 = MMG5_inxt2[i];
-      i1 = MMG5_inxt2[i0];
-
-      ip0 = pt->v[i0];
-      ip1 = pt->v[i1];
+      ip0 = pt->v[MMG5_inxt2[i]];
+      ip1 = pt->v[MMG5_iprv2[i]];
 
       vx[i] = MMG5_hashGet(&hash,ip0,ip1);
 
