@@ -1385,8 +1385,40 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
       mesh->info.par[k].hmin  = mesh->info.hmin;
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
+    break;
+  case MMGS_IPARAM_numberOfLSBaseReferences :
+    if ( mesh->info.br ) {
+      MMG5_DEL_MEM(mesh,mesh->info.br);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new level-set based references values\n",__func__);
+    }
+    mesh->info.nbr   = val;
+    mesh->info.nbri  = 0;
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(MMG5_int),"References",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,MMG5_int,return 0);
+
+    for (k=0; k<mesh->info.nbr; k++)
+      mesh->info.br[k] = 0;
 
     break;
+
+  case MMGS_IPARAM_numberOfMat :
+    if ( mesh->info.mat ) {
+      MMG5_DEL_MEM(mesh,mesh->info.mat);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
+    }
+    mesh->info.nmat   = val;
+    mesh->info.nmati  = 0;
+
+    MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material",
+                 printf("  Exit program.\n");
+                 return 0);
+    MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
+    break;
+
 #ifdef USE_SCOTCH
   case MMGS_IPARAM_renum :
     mesh->info.renum    = val;
@@ -1606,6 +1638,15 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int ref
   mesh->info.npari++;
 
   return 1;
+}
+
+int MMGS_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,
+                       int split,MMG5_int rin,MMG5_int rout){
+  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+}
+
+int MMGS_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br){
+  return MMG5_Set_lsBaseReference(mesh,sol,br);
 }
 
 int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {

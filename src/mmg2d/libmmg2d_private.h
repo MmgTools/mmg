@@ -59,7 +59,6 @@ extern "C" {
 #define MMG2D_NULKAL    1.e-6
 #define MMG2D_ANGCORN   -1.e-6
 #define MMG2D_SHORTMAX     0x7fff
-#define MMG2D_LPARMAX     200
 
 #define MMG2D_LLONG  2.0
 #define MMG2D_LSHRT  0.3
@@ -236,7 +235,6 @@ int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , MMG5_int , int8_t );
 int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);
-int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);

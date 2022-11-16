@@ -30,7 +30,6 @@
  * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
  */
 
 #include "libmmgs_private.h"
@@ -371,15 +370,17 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
  *
  */
 static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
-  MMG5_pTria   pt;
-  double       v,v1;
-  MMG5_int     k,ip,ip1;
-  int8_t       i,i1,i2,nmn,npl,nz;
+  MMG5_pTria    pt;
+  double        v,v1;
+  int           ier;
+  MMG5_int      k,ip,ip1,ref,refint,refext;
+  int8_t        i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
+    ref = pt->ref;
     nmn = npl = nz = 0;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
@@ -395,15 +396,21 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 
     assert(nz < 3);
 
+    /* Keep the initial triangle references of the mesh if iso==2, set
+     * positive and negative ls refs otherwise */
     if ( mesh->info.iso != 2 ) {
-      /* Keep the initial triangle references of the mesh */
-      if ( npl ) {
-        assert( !nmn );
-        pt->ref = MG_PLUS;
-      }
-      else {
-        assert ( nmn );
-        pt->ref = MG_MINUS;
+
+      /* find if current reference should be splitted and the new positive and negative refs */
+      ier = MMG5_isSplit(mesh,ref,&refint,&refext);
+      if ( ier ) {
+        if ( npl ) {
+          assert( !nmn );
+          pt->ref = refext;
+        }
+        else {
+          assert ( nmn );
+          pt->ref = refint;
+        }
       }
     }
 
@@ -470,13 +477,13 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   MMG5_DEL_MEM(mesh,mesh->adja);
 
-  /* Check the initial mesh adjacencies */
-  if ( !MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso != 2 ) {
+    /* Reset the mesh->info.isoref field everywhere it appears */
+    if ( !MMG5_resetRef(mesh) ) {
+      fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
+      return 0;
+    }
   }
-
-  MMG5_DEL_MEM(mesh,mesh->adja);
 
   if ( !MMGS_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");

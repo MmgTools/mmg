@@ -63,6 +63,9 @@ extern "C" {
  */
 #define MMG5_LMAX      10240
 
+/** Maximal number of local parameters */
+#define MMG5_LPARMAX   200
+
 /** Check if \a a and \a b have the same sign */
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
@@ -784,6 +787,7 @@ int MMG5_isNotSplit(MMG5_pMesh ,MMG5_int);
 int MMG5_getStartRef(MMG5_pMesh ,MMG5_int, MMG5_int *);
 int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
 int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
+int MMG5_resetRef(MMG5_pMesh );
 
 /* test functions */
 extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );

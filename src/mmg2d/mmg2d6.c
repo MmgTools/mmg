@@ -33,41 +33,6 @@
 #include "libmmg2d_private.h"
 #include "mmg2dexterns.h"
 
-
-/**
- * \param mesh pointer toward the mesh
- *
- * Reset mesh->info.isoref vertex and edge references to 0.
- *
- */
-int MMG2D_resetRef(MMG5_pMesh mesh) {
-  MMG5_pTria      pt;
-  MMG5_pPoint     p0;
-  MMG5_int        ref,k;
-  int8_t          i;
-
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !pt->v[0] ) continue;
-
-    for (i=0; i<3; i++) {
-      p0 = &mesh->point[pt->v[i]];
-      if ( pt->edg[i] == mesh->info.isoref ) pt->edg[i] = 0;
-      if ( p0->ref == mesh->info.isoref ) p0->ref = 0;
-    }
-  }
-
-  /* Reset the triangle references to their initial distribution */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !pt->v[0] ) continue;
-    if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
-    pt->ref = ref;
-  }
-
-  return 1;
-}
-
 /* Check whether the ball of vertex i in tria start is manifold;
  by assumption, i inxt[i] is one edge of the implicit boundary */
 int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
@@ -481,10 +446,11 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG2D_resetRef(mesh) ) {
+  if ( !MMG5_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
+
 
   /* Effective splitting of the crossed triangles */
   if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
