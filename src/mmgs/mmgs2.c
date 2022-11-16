@@ -46,7 +46,7 @@
  *
  */
 int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
-  MMG5_int           *adja,k;
+  MMG5_int           refstart,*adja,k;
   int8_t             i,i1;
 
   k = start;
@@ -54,12 +54,12 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
 
   i1 = MMG5_iprv2[i];
 
-#ifndef NDEBUG
+
   MMG5_pTria pt = &mesh->tria[start];
   assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==mesh->info.isoref) );
-#endif
 
   /* First travel, while another part of the implicit boundary is not met */
+  refstart = pt->ref;
   do {
     adja = &mesh->adja[3*(k-1)+1];
     i1 = MMG5_inxt2[i];
@@ -67,8 +67,16 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( !k || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
+    if ( !k ) break;
 
+    if ( mesh->info.iso !=2 ) {
+      /* Check tria ref change */
+      if ( mesh->tria[k].ref != refstart) break;
+    }
+    else {
+      /* Check if we cross an isoref edge */
+      if ( mesh->tria[k].edg[i]==mesh->info.isoref ) break;
+    }
     i = MMG5_inxt2[i];
   }
   while ( k!=start );
@@ -84,12 +92,11 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
     adja = &mesh->adja[3*(k-1)+1];
     i1 = MMG5_iprv2[i];
     k = adja[i1] / 3;
-
-    /* Check of the way the point is caught (the left-hand edge is not an external edge) */
-    assert ( k );
-
     i = adja[i1] % 3;
     i = MMG5_iprv2[i];
+
+    /* Tested point is connected to two external edges */
+    if ( k == 0 ) return 1;
 
     do {
       adja = &mesh->adja[3*(k-1)+1];
@@ -98,8 +105,16 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
       k = adja[i1] / 3;
       i = adja[i1] % 3;
 
-      if ( (!k) || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
+      if ( !k ) break;
 
+      if ( mesh->info.iso !=2 ) {
+        /* Check tria ref change */
+        if ( mesh->tria[k].ref == refstart) break;
+      }
+      else {
+        /* Check if we cross an isoref edge */
+        if ( mesh->tria[k].edg[i]==mesh->info.isoref ) break;
+      }
       i = MMG5_iprv2[i];
     }
     while ( k!=start );
@@ -118,7 +133,16 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( (!k) || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
+    if ( !k ) break;
+
+    if ( mesh->info.iso !=2 ) {
+      /* Check tria ref change */
+      if ( mesh->tria[k].ref == refstart) break;
+    }
+    else {
+      /* Check if we cross an isoref edge */
+      if ( mesh->tria[k].edg[i]==mesh->info.isoref ) break;
+    }
 
     i = MMG5_inxt2[i];
   }
@@ -140,7 +164,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
  */
 static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
-  MMG5_pTria      pt;
+  MMG5_pTria      pt,pt1;
   MMG5_int        *adja,k;
   MMG5_int        cnt,iel;
   int8_t          i,i1;
@@ -161,7 +185,16 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
         continue;
       }
       else {
-        if ( pt->edg[i] == mesh->info.isoref ) cnt++;
+        if ( mesh->info.iso !=2 ) {
+          /* Multi-material mode may lead to have only 1 isoref edge around a point
+             (due to nosplit option): check tria ref change */
+          pt1 = &mesh->tria[iel];
+          if ( pt1->ref != pt->ref ) cnt++;
+        }
+        else {
+          /* keep-ref mode: check if isoref edge */
+          if ( pt->edg[i] == mesh->info.isoref ) cnt++;
+        }
       }
     }
     if( cnt == 3 ) {
@@ -185,12 +218,21 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
       iel = adja[i] / 3;
 
       if (! iel ) continue;
-      if ( pt->edg[i] != mesh->info.isoref ) continue;
+
+      if ( mesh->info.iso !=2 ) {
+        /* Check change of tria ref */
+        pt1 = &mesh->tria[iel];
+        if ( pt->ref == pt1->ref || pt->edg[i]!= mesh->info.isoref ) continue;
+      }
+      else {
+        /* Check isoref edge only */
+        if ( pt->edg[i] != mesh->info.isoref ) continue;
+      }
 
       i1 = MMG5_inxt2[i];
       if ( !MMGS_chkmaniball(mesh,k,i1) ) {
         fprintf(stderr,"   *** Topological problem\n");
-        fprintf(stderr,"       non manifold curve at point %" MMG5_PRId " %" MMG5_PRId "\n",pt->v[i1], MMGS_indPt(mesh,pt->v[i1]));
+        fprintf(stderr,"       non manifold curve at point %" MMG5_PRId "\n",pt->v[i1]);
         fprintf(stderr,"       non manifold curve at tria %" MMG5_PRId " (ip %d)\n", MMGS_indElt(mesh,k),i1);
         return 0;
       }
