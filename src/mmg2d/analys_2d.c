@@ -946,7 +946,7 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       c[2] = 0.;
 
       /* Check if updated point creates a triangle with negative area.
-         If it does, the update of coordinates is skipped */
+         If it does, performs a dichotomy to find optimal point */
       noupdate = 0;
       for (kt=0; kt<ilist;kt++) {
         pt = &mesh->tria[list[kt]];
