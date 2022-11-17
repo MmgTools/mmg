@@ -229,6 +229,12 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   for (k=1; k<= sol->np; k++)
     sol->m[k] -= mesh->info.ls;
 
+  /* Transfer the boundary edge references to the triangles */
+  if ( !MMGS_assignEdge(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
+    return 0;
+  }
+
   /* Snap values of level set function if need be, then discretize it */
   if ( !MMGS_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
