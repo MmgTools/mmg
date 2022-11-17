@@ -790,6 +790,7 @@ int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG5_resetRef(MMG5_pMesh );
 int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
 int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart);
+int MMG5_chkmanimesh(MMG5_pMesh mesh);
 
 /* test functions */
 extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );

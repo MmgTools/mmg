@@ -35,96 +35,6 @@
 #include "libmmgs_private.h"
 
 /**
- * \param mesh pointer toward the mesh.
- * \return 1 if the mesh is manifold, 0 otherwise.
- *
- * Check whether the resulting two subdomains occupying mesh are manifold.
- *
- */
-static
-int MMGS_chkmanimesh(MMG5_pMesh mesh) {
-  MMG5_pTria      pt,pt1;
-  MMG5_int        *adja,k;
-  MMG5_int        cnt,iel;
-  int8_t          i,i1;
-  static int8_t   mmgWarn = 0;
-
-  /* First check: check whether one triangle in the mesh has 3 boundary faces */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) ) continue;
-
-    adja = &mesh->adja[3*(k-1)+1];
-    cnt = 0;
-    for (i=0; i<3; i++) {
-      iel = adja[i] / 3;
-
-      if (!iel ) {
-        cnt++;
-        continue;
-      }
-      else {
-        if ( mesh->info.iso !=2 ) {
-          /* Multi-material mode may lead to have only 1 isoref edge around a point
-             (due to nosplit option): check tria ref change */
-          pt1 = &mesh->tria[iel];
-          if ( pt1->ref != pt->ref ) cnt++;
-        }
-        else {
-          /* keep-ref mode: check if isoref edge */
-          if ( pt->edg[i] == mesh->info.isoref ) cnt++;
-        }
-      }
-    }
-    if( cnt == 3 ) {
-      if ( !mmgWarn ) {
-        mmgWarn = 1;
-        fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
-                " edges.\n",__func__);
-      }
-    }
-  }
-
-  /* Second check: check whether the configuration is manifold in the ball of
-     each point; each vertex on the implicit boundary is caught in such a way
-     that i1 inxt[i1] is one edge of the implicit boundary */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) ) continue;
-
-    for (i=0; i<3; i++) {
-      adja = &mesh->adja[3*(k-1)+1];
-      iel = adja[i] / 3;
-
-      if (! iel ) continue;
-
-      if ( mesh->info.iso !=2 ) {
-        /* Check change of tria ref */
-        pt1 = &mesh->tria[iel];
-        if ( pt->ref == pt1->ref || pt->edg[i]!= mesh->info.isoref ) continue;
-      }
-      else {
-        /* Check isoref edge only */
-        if ( pt->edg[i] != mesh->info.isoref ) continue;
-      }
-
-      i1 = MMG5_inxt2[i];
-      if ( !MMG5_chkmaniball(mesh,k,i1) ) {
-        fprintf(stderr,"   *** Topological problem\n");
-        fprintf(stderr,"       non manifold curve at point %" MMG5_PRId "\n",pt->v[i1]);
-        fprintf(stderr,"       non manifold curve at tria %" MMG5_PRId " (ip %d)\n", MMGS_indElt(mesh,k),i1);
-        return 0;
-      }
-    }
-  }
-
-  if ( mesh->info.imprim > 0 || mesh->info.ddebug )
-    fprintf(stdout,"  *** Manifold implicit surface.\n");
-
-  return 1;
-}
-
-/**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set values.
  * \param met pointer toward a metric (non-mandatory).
@@ -364,7 +274,7 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Check that the resulting mesh is manifold */
-  if ( !MMGS_chkmanimesh(mesh) ) {
+  if ( !MMG5_chkmanimesh(mesh) ) {
     fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
     return 0;
   }
