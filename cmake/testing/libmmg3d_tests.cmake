@@ -167,7 +167,9 @@ TARGET_LINK_LIBRARIES ( test_met3d PRIVATE ${M_LIB} )
 
 IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
   SET ( src_test_ridge_preservation_in_ls_mode
+    ${PROJECT_SOURCE_DIR}/src/common/boulep.c
     ${PROJECT_SOURCE_DIR}/src/common/hash.c
+    ${PROJECT_SOURCE_DIR}/src/common/mmgexterns.c
     ${PROJECT_SOURCE_DIR}/src/common/mmg2.c
     ${PROJECT_SOURCE_DIR}/src/common/tools.c
     ${PROJECT_SOURCE_DIR}/src/mmg3d/bezier_3d.c
