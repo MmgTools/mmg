@@ -44,7 +44,7 @@
  * topology: set adjacent, detect Moebius, flip faces, count connected comp.
  *
  */
-static int setadj(MMG5_pMesh mesh){
+int MMGS_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
@@ -807,7 +807,7 @@ int MMGS_analys_for_norver(MMG5_pMesh mesh) {
     }*/
 
   /* identify connexity */
-  if ( !setadj(mesh) ) {
+  if ( !MMGS_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     return 0;
   }
@@ -871,7 +871,7 @@ int MMGS_analys(MMG5_pMesh mesh) {
     }*/
 
   /* identify connexity */
-  if ( !setadj(mesh) ) {
+  if ( !MMGS_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     return 0;
   }

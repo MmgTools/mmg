@@ -241,6 +241,11 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
             __func__);
     return 0;
   }
+  /* identify connexity and reorient triangles (needed for manifoldness checks) */
+  if ( !MMGS_setadj(mesh) ) {
+    fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
+    return 0;
+  }
 
   if ( !MMG5_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");

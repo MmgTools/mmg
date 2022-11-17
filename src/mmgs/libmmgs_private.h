@@ -132,6 +132,7 @@ int  MMGS_analys(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_hashTria(MMG5_pMesh );
+int  MMGS_setadj(MMG5_pMesh mesh);
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol,MMG5_int* );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
