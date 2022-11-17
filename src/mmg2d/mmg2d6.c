@@ -33,77 +33,6 @@
 #include "libmmg2d_private.h"
 #include "mmg2dexterns.h"
 
-/* Check whether the ball of vertex i in tria start is manifold;
- by assumption, i inxt[i] is one edge of the implicit boundary */
-int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
-  MMG5_pTria         pt;
-  MMG5_int           refstart,*adja,k;
-  int8_t             i,i1;
-
-  pt = &mesh->tria[start];
-  k = start;
-  i = istart;
-  refstart = pt->ref;
-
-  /* First travel, while another part of the implicit boundary is not met */
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-
-    k = adja[i1] / 3;
-    i = adja[i1] % 3;
-    i = MMG5_inxt2[i];
-  }
-  while ( k && ( mesh->tria[k].ref == refstart ) );
-
-  /* Case where a boundary is hit: travel in the other sense from start, and make sure
-   that a boundary is hit too */
-  if ( k == 0 ) {
-    k = start;
-    i = istart;
-
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_iprv2[i];
-    k = adja[i1] / 3;
-    i = adja[i1] % 3;
-    i = MMG5_iprv2[i];
-
-    /* Tested point is connected to two external edges */
-    if ( k == 0 ) return 1;
-
-    do {
-      adja = &mesh->adja[3*(k-1)+1];
-      i1 = MMG5_iprv2[i];
-
-      k = adja[i1] / 3;
-      i = adja[i1] % 3;
-      i = MMG5_iprv2[i];
-    }
-    while ( k && ( mesh->tria[k].ref != refstart ) );
-
-    if ( k == 0 ) return 1;
-    else          return 0;
-
-  }
-
-  /* General case: go on travelling until another implicit boundary is met */
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-
-    k = adja[i1] / 3;
-    i = adja[i1] % 3;
-    i = MMG5_inxt2[i];
-  }
-  while ( k && ( mesh->tria[k].ref != refstart ) );
-
-  /* At least 3 boundary segments meeting at p */
-  if ( k != start )
-    return 0;
-
-  return 1;
-}
-
 /**
  * \param mesh pointer toward the mesh.
  * \return 1 if the mesh is manifold, 0 otherwise.
@@ -162,7 +91,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
       if ( pt->ref == pt1->ref || pt->edg[i]!= mesh->info.isoref ) continue;
 
       i1 = MMG5_inxt2[i];
-      if ( !MMG2D_chkmaniball(mesh,k,i1) ) {
+      if ( !MMG5_chkmaniball(mesh,k,i1) ) {
         fprintf(stderr,"   *** Topological problem\n");
         fprintf(stderr,"       non manifold curve at point %" MMG5_PRId " %" MMG5_PRId "\n",pt->v[i1], MMG2D_indPt(mesh,pt->v[i1]));
         fprintf(stderr,"       non manifold curve at tria %" MMG5_PRId " (ip %d)\n", MMG2D_indElt(mesh,k),i1);

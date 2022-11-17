@@ -35,127 +35,6 @@
 #include "libmmgs_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param start index of starting tria.
- * \param istart local index of point that we check (in tria \a start)
- * \return 1 if the ball is manifold, 0 otherwise.
- *
- * Check whether the ball of vertex i in tria start is manifold;
- *
- * \warning i inxt[i] is one edge of the implicit boundary.
- *
- */
-int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
-  MMG5_int           refstart,*adja,k;
-  int8_t             i,i1;
-
-  k = start;
-  i = istart;
-
-  i1 = MMG5_iprv2[i];
-
-
-  MMG5_pTria pt = &mesh->tria[start];
-  assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==mesh->info.isoref) );
-
-  /* First travel, while another part of the implicit boundary is not met */
-  refstart = pt->ref;
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-
-    k = adja[i1] / 3;
-    i = adja[i1] % 3;
-
-    if ( !k ) break;
-
-    if ( mesh->info.iso !=2 ) {
-      /* Check tria ref change */
-      if ( mesh->tria[k].ref != refstart) break;
-    }
-    else {
-      /* Check if we cross an isoref edge */
-      if ( mesh->tria[k].edg[i]==mesh->info.isoref ) break;
-    }
-    i = MMG5_inxt2[i];
-  }
-  while ( k!=start );
-
-  assert(k!=start); //unexpected case
-
-  /* Case where a boundary is hit: travel in the other sense from start, and make sure
-   that a boundary is hit too */
-  if ( k == 0 ) {
-    k = start;
-    i = istart;
-
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_iprv2[i];
-    k = adja[i1] / 3;
-    i = adja[i1] % 3;
-    i = MMG5_iprv2[i];
-
-    /* Tested point is connected to two external edges */
-    if ( k == 0 ) return 1;
-
-    do {
-      adja = &mesh->adja[3*(k-1)+1];
-      i1 = MMG5_iprv2[i];
-
-      k = adja[i1] / 3;
-      i = adja[i1] % 3;
-
-      if ( !k ) break;
-
-      if ( mesh->info.iso !=2 ) {
-        /* Check tria ref change */
-        if ( mesh->tria[k].ref == refstart) break;
-      }
-      else {
-        /* Check if we cross an isoref edge */
-        if ( mesh->tria[k].edg[i]==mesh->info.isoref ) break;
-      }
-      i = MMG5_iprv2[i];
-    }
-    while ( k!=start );
-
-    assert(k!=start); //unexpected case
-
-    return !k;
-  }
-
-  /* General case: go on travelling until another implicit boundary is met */
-  i = MMG5_inxt2[i];
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-
-    k = adja[i1] / 3;
-    i = adja[i1] % 3;
-
-    if ( !k ) break;
-
-    if ( mesh->info.iso !=2 ) {
-      /* Check tria ref change */
-      if ( mesh->tria[k].ref == refstart) break;
-    }
-    else {
-      /* Check if we cross an isoref edge */
-      if ( mesh->tria[k].edg[i]==mesh->info.isoref ) break;
-    }
-
-    i = MMG5_inxt2[i];
-  }
-  while ( k!=start );
-
-  /* At least 3 boundary segments meeting at p */
-  if ( k != start )
-    return 0;
-
-  return 1;
-}
-
-/**
  * \param mesh pointer toward the mesh.
  * \return 1 if the mesh is manifold, 0 otherwise.
  *
@@ -230,7 +109,7 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
       }
 
       i1 = MMG5_inxt2[i];
-      if ( !MMGS_chkmaniball(mesh,k,i1) ) {
+      if ( !MMG5_chkmaniball(mesh,k,i1) ) {
         fprintf(stderr,"   *** Topological problem\n");
         fprintf(stderr,"       non manifold curve at point %" MMG5_PRId "\n",pt->v[i1]);
         fprintf(stderr,"       non manifold curve at tria %" MMG5_PRId " (ip %d)\n", MMGS_indElt(mesh,k),i1);
