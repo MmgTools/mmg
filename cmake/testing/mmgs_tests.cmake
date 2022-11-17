@@ -383,6 +383,12 @@ ADD_TEST(NAME mmgs_LSMultiMat_withMetAndLs
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMetAndLs.o.meshb)
 
+# ls discretization with wrong orientation of input triangles
+ADD_TEST(NAME mmgs_LSTriaOri
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
+  ${MMGS_CI_TESTS}/LSTriaOri/fault.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_LSTriaOri.o.meshb)
+
 ###############################################################################
 #####
 #####         Check snapping (prevision of non-manifold situations)
