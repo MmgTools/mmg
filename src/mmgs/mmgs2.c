@@ -262,7 +262,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   double       c[3],v0,v1,s;
   MMG5_int     vx[3],k,np,refint,refext;
   MMG5_int     ip0,ip1,ns,nt,ier,nb;
-  int8_t       ia;
+  int8_t       i;
 
   /* Reset flag field for points */
   for (k=1; k<=mesh->np; k++)
@@ -274,9 +274,9 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
-    for (ia=0; ia<3; ia++) {
-      ip0 = pt->v[MMG5_inxt2[ia]];
-      ip1 = pt->v[MMG5_iprv2[ia]];
+    for (i=0; i<3; i++) {
+      ip0 = pt->v[MMG5_inxt2[i]];
+      ip1 = pt->v[MMG5_iprv2[i]];
       p0  = &mesh->point[ip0];
       p1  = &mesh->point[ip1];
 
@@ -302,9 +302,9 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
-    for (ia=0; ia<3; ia++) {
-      ip0 = pt->v[MMG5_inxt2[ia]];
-      ip1 = pt->v[MMG5_iprv2[ia]];
+    for (i=0; i<3; i++) {
+      ip0 = pt->v[MMG5_inxt2[i]];
+      ip1 = pt->v[MMG5_iprv2[i]];
 
       np = MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
@@ -346,10 +346,10 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       /* If user provide a metric, interpolate it at the new point */
       if ( met && met->m ) {
         if ( met->size > 1 ) {
-          ier = MMGS_intmet33_ani(mesh,met,k,ia,np,s);
+          ier = MMGS_intmet33_ani(mesh,met,k,i,np,s);
         }
         else {
-          ier = intmet_iso(mesh,met,k,ia,np,s);
+          ier = intmet_iso(mesh,met,k,i,np,s);
         }
         if ( ier <= 0 ) {
           // Unable to compute the metric
@@ -374,10 +374,10 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
     pt->flag = 0;
     memset(vx,0,3*sizeof(MMG5_int));
-    for (ia=0; ia<3; ia++) {
-      vx[ia] = MMG5_hashGet(&hash,pt->v[MMG5_inxt2[ia]],pt->v[MMG5_iprv2[ia]]);
-      if ( vx[ia] ) {
-        MG_SET(pt->flag,ia);
+    for (i=0; i<3; i++) {
+      vx[i] = MMG5_hashGet(&hash,pt->v[MMG5_inxt2[i]],pt->v[MMG5_iprv2[i]]);
+      if ( vx[i] ) {
+        MG_SET(pt->flag,i);
       }
     }
     switch (pt->flag) {
