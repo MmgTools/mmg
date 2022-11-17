@@ -295,6 +295,19 @@ ADD_TEST(NAME mmgs_LSMultiMat-rmc
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmgs_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -rmc
+  ${MMGS_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMGS_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmgs_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls
+  ${MMGS_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMGS_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_LSBaseReferences-normc.o.meshb)
+
 # non 0 ls
 ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   COMMAND ${EXECUT_MMGS} -v 5 -ls 0.01 -hausd 0.001
