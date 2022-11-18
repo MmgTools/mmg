@@ -674,6 +674,27 @@ FORTRAN_NAME(MMGS_SET_LOCALPARAMETER,mmgs_set_localparameter,
 }
 
 /**
+ * See \ref MMGS_Set_multiMat function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_MULTIMAT,mmgs_set_multimat,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, MMG5_int *ref,int *split,
+              MMG5_int* rin,MMG5_int* rex, int* retval),
+             (mesh,sol,ref,split,rin,rex,retval)){
+  *retval = MMGS_Set_multiMat(*mesh,*sol,*ref,*split,*rin,*rex);
+  return;
+}
+
+/**
+ * See \ref MMGS_Set_lsBaseReference function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_LSBASEREFERENCE,mmgs_set_lsbasereference,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *br, int* retval),
+             (mesh,sol,br,retval)){
+  *retval = MMGS_Set_lsBaseReference(*mesh,*sol,*br);
+  return;
+}
+
+/**
  * See \ref MMGS_Free_allSols function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_FREE_ALLSOLS,mmgs_free_allsols,

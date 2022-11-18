@@ -289,6 +289,25 @@ ADD_TEST(NAME mmgs_LSMultiMat
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
 
+ADD_TEST(NAME mmgs_LSMultiMat-rmc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3 -rmc
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
+
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmgs_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -rmc
+  ${MMGS_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMGS_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmgs_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls
+  ${MMGS_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMGS_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_LSBaseReferences-normc.o.meshb)
+
 # non 0 ls
 ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   COMMAND ${EXECUT_MMGS} -v 5 -ls 0.01 -hausd 0.001
@@ -363,3 +382,50 @@ ADD_TEST(NAME mmgs_LSMultiMat_withMetAndLs
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMetAndLs.o.meshb)
+
+# ls discretization with wrong orientation of input triangles
+ADD_TEST(NAME mmgs_LSTriaOri
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
+  ${MMGS_CI_TESTS}/LSTriaOri/fault.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_LSTriaOri.o.meshb)
+
+###############################################################################
+#####
+#####         Check snapping (prevision of non-manifold situations)
+#####
+###############################################################################
+#####
+SET(nmRegex "unsnap at least 1 point")
+
+ADD_TEST(NAME mmgs_LSSnapval_manifold1
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmgs_LSSnapval_manifold2
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_manifold2.o.mesh
+  )
+
+SET_PROPERTY(TEST mmgs_LSSnapval_manifold1 mmgs_LSSnapval_manifold2
+  PROPERTY FAIL_REGULAR_EXPRESSION "${nmRegex}")
+
+ADD_TEST(NAME mmgs_LSSnapval_non-manifold1
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/8elts1-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_non-manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmgs_LSSnapval_non-manifold2
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/8elts2-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_non-manifold2.o.mesh
+  )
+SET_PROPERTY(TEST mmgs_LSSnapval_non-manifold1 mmgs_LSSnapval_non-manifold2
+  PROPERTY PASS_REGULAR_EXPRESSION "${nmRegex}")

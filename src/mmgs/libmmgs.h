@@ -72,9 +72,11 @@ enum MMGS_Param {
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
   MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
+  MMGS_IPARAM_numberOfLSBaseReferences, /*!< [n], Number of base references for bubble removal */
+  MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in ls mode */
   MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
   MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-  MMGS_IPARAM_anisosize,        /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
+  MMGS_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
@@ -84,6 +86,7 @@ enum MMGS_Param {
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
+  MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
 
@@ -852,7 +855,7 @@ LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int ipara
  * Set double parameter \a dparam at value \a val.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_DPARAMETERS(mesh,sol,dparam,val,retval)\n
+ * >   SUBROUTINE MMGS_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     MMG5_DATA_PTR_T               :: sol\n
  * >     INTEGER, INTENT(IN)           :: dparam\n
@@ -888,6 +891,50 @@ LIBMMGS_EXPORT int  MMGS_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dpara
  */
 LIBMMGS_EXPORT int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, MMG5_int ref,
                                             double hmin, double hmax, double hausd);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param ref input tetra reference.
+ * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
+ * \param rin internal reference after ls discretization
+ * \param rex external reference after ls discretization
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rin,rex\n
+ * >     INTEGER, INTENT(IN)           :: split\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  LIBMMGS_EXPORT int  MMGS_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,
+                                        int split,MMG5_int rin, MMG5_int rex);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param br new level-set base reference.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set a new level-set base reference of ref \a br in ls discretization
+ * mode. Based references are boundary conditions to which implicit domain can
+ * be attached. All implicit volumes that are not attached to listed base
+ * references are deleted as spurious volumes by the \a rmc option.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_LSBASEREFERENCE(mesh,sol,br,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: br\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+LIBMMGS_EXPORT int  MMGS_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int br);
 
 /** recover datas */
 /**

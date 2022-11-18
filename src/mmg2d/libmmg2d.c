@@ -54,6 +54,8 @@ void MMG2D_Set_commonFunc(void) {
     MMG5_grad2met_ani = MMG2D_grad2met_ani;
     MMG5_grad2metreq_ani = MMG2D_grad2metreq_ani;
     MMG5_solTruncature_ani = MMG5_2dSolTruncature_ani;
+    MMG5_indPt = MMG2D_indPt;
+    MMG5_indElt = MMG2D_indElt;
 
     return;
 }

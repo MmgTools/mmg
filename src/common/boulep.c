@@ -341,3 +341,73 @@ int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,
   }
   return ns;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of triangle to start.
+ * \param ip index of point for wich we compute the ball.
+ * \param list pointer toward the computed ball of \a ip.
+ * \param s 1 if called from mmgs, 0 if called from mmg2d.
+ * \param opn 0 for a closed ball, 1 for an open ball.
+ * \return the size of the computed ball or 0 if fail.
+ *
+ * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
+ * crossing ridge.
+ *
+ */
+int MMG5_boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t s,int8_t *opn) {
+  MMG5_int      *adja,k;
+  int           ilist;
+  int8_t        i,i1,i2;
+
+  ilist = 0;
+  *opn  = 0;
+
+  /* store neighbors */
+  k = start;
+  i = ip;
+  do {
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return 0;
+    list[ilist] = 3*k + i;
+    ++ilist;
+
+    adja = &mesh->adja[3*(k-1)+1];
+    i1 = MMG5_inxt2[i];
+    k  = adja[i1] / 3;
+    i  = adja[i1] % 3;
+    i  = MMG5_inxt2[i];
+  }
+  while ( k && k != start );
+  if ( k > 0 )  return ilist;
+
+  if ( s ) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
+    pt = &mesh->tria[start];
+    ppt = &mesh->point[pt->v[ip]];
+
+    /* Point along non-manifold edge: we are not able to loop around edge */
+    if ( ppt->tag & MG_NOM )
+      return 0;
+  }
+
+  /* check if boundary hit */
+  k = start;
+  i = ip;
+  *opn = 1;
+  do {
+    adja = &mesh->adja[3*(k-1)+1];
+    i2 = MMG5_iprv2[i];
+    k  = adja[i2] / 3;
+    if ( k == 0 )  break;
+    i  = adja[i2] % 3;
+    i  = MMG5_iprv2[i];
+
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return 0;
+    list[ilist] = 3*k + i;
+    ilist++;
+  }
+  while ( k );
+
+  return ilist;
+}
