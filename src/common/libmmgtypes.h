@@ -542,7 +542,13 @@ typedef struct {
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   uint8_t       ani, optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
+  uint8_t       metRidTyp;
+  /*!< metRidTyp
+   * - in 3D: 0 for a classical storage of the aniso
+   * metric at ridge, 1 for the Mmg storage (modified
+   * by defsiz)
+   * - in 2D: used to detect if we call assignEdge function for the first time inside the library */
+
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
 } MMG5_Info;
