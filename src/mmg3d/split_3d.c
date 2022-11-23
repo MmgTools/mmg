@@ -1271,9 +1271,9 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
     /* Check the projection of the normals at ridge points onto the normal at
      * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
      * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
-     * tau[0]-tau[1]-tau[5], that are, the two faces on both sides of edge
-     * taued[0] */
-    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+     * tau[1]-tau[3]-tau[2], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[4]) ) {
       return 0;
     }
 
