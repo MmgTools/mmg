@@ -1090,12 +1090,12 @@ int MMGS_analys(MMG5_pMesh mesh) {
   }
 
   /* regularize vertices coordinates */
-  if( !mesh->xp ){
-    if ( mesh->info.xreg && !MMGS_regver(mesh) ){
-      fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
-      return 0;
-    }
+  //if( !mesh->xp ){
+  if ( mesh->info.xreg && !MMGS_regver(mesh) ){
+    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+    return 0;
   }
+  //}
   return 1;
 }
 
