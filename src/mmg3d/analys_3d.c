@@ -827,7 +827,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
   MMG5_Tria     tnew;
   double        *tabl,c[3],cprev[3],n[3],nnew[3],*cptr,*nptr,lm1,lm2,dd,cx,cy,cz,nx,ny,nz,res0,res,result;
   int           i,ii,it,nit,ilist,noupdate,ier;
-  MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,*adjatet,iad,v[4];
+  MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,*adjatet,iad,v[4],ntet;
   int64_t       tetlist[MMG5_LMAX];
 
   /* assign seed to vertex */
@@ -838,6 +838,11 @@ int MMG3D_regver(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       if ( !ppt->s )  ppt->s = k;
     }
+  }
+
+   for (k=1; k<=mesh->np; k++) {
+     ppt = &mesh->point[k];
+     ppt->flag = 0;
   }
 
   for (k=1; k<=mesh->ne; k++) {
@@ -992,14 +997,18 @@ int MMG3D_regver(MMG5_pMesh mesh) {
       if ( !noupdate ) {
         iel = ppt->flag;
         ptet = &mesh->tetra[iel];
+
+        if ( !MG_EOK(ptet) ) continue;
+
         i = 0;
         if ( ptet->v[1] == k )  i = 1;
         else if ( ptet->v[2] == k ) i = 2;
+        else if ( ptet->v[3] == k ) i = 3;
         ilist = MMG5_boulevolp(mesh, iel, i, tetlist);
 
         for( kt=0 ; kt<ilist ; kt++ ) {
-          iel = list[kt] / 4;
-          i   = list[kt] % 4;
+          iel = tetlist[kt] / 4;
+          i   = tetlist[kt] % 4;
           ptet = &mesh->tetra[iel];
 
           for ( ii=0 ; ii<4 ; ii++ ) {
@@ -1030,7 +1039,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
       }
       if ( it > 1 && res < MMG5_EPS )  break;
     }
-  /* reset the ppt->s tag */
+  /* reset the ppt->s and ppt->flag tags */
   for (k=1; k<=mesh->np; ++k) {
     mesh->point[k].s    = 0;
     mesh->point[k].flag = 0;
