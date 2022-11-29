@@ -357,7 +357,7 @@ int    MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int64_t*, int
 int    MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
 int    MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
 int  MMG3D_normalAdjaTri(MMG5_pMesh,MMG5_int,int8_t,int,double n[3]);
-int  MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh,MMG5_int,int,int,MMG5_pxTetra,
+int  MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh,MMG5_int,int,int,
                                         double[3],double[3], double[3] );
 int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int64_t*, int, MMG5_int, MMG5_int,int8_t);
 int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int64_t*,int,MMG5_int,MMG3D_pPROctree,int8_t);
@@ -455,10 +455,18 @@ int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
 /* mmg3d1.c */
+void MMG3D_set_geom(MMG5_pMesh,MMG5_pPoint,int16_t,MMG5_int,MMG5_int,double[3],double[3],double[3]);
 void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt);
 int  MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx);
 int  MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int);
 int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori,double,double,int);
+void MMG3D_find_bdyface_from_edge(MMG5_pMesh,MMG5_pTetra,int8_t,int8_t*,int8_t*,
+                                  int8_t*,int8_t*,MMG5_int*,MMG5_int*,MMG5_pPoint*,MMG5_pPoint*);
+int8_t MMG3D_build_bezierEdge(MMG5_pMesh,MMG5_int,int8_t,int8_t,int8_t,MMG5_pxTetra,
+                              MMG5_int,MMG5_int,MMG5_pPoint,MMG5_pPoint,
+                              MMG5_int*,int16_t*,double[3],double[3],double[3],
+                              double[3],int64_t*,int*);
+int MMG3D_adpcoledg(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree*,MMG5_int,int8_t,double,MMG5_int*);
 int  MMG3D_splsurfedge( MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_pTetra,MMG5_pxTetra,int8_t,
                         int8_t,int8_t,int* );
 int  MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, int8_t typchk, int patternMode) ;
