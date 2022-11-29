@@ -215,7 +215,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
     else if(ilist%2) {
       /* Edge is bdy: we want to treat it from a bdy face */
-      return 1;
+      return 0;
     }
 
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
