@@ -96,6 +96,8 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     if ( lmax < MMG3D_LOPTL )  continue;
 
     /* proceed edges according to lengths */
+    MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
+
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       /* Case of a boundary face */
       if ( !(MG_GET(pxt->ori,i)) ) continue;
@@ -113,8 +115,6 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     }
     else {
       /* Case of an internal face */
-      MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
-
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = MMG5_coquil(mesh,k,imax,list);
       if ( !ilist ) continue;
