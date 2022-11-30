@@ -207,23 +207,22 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
      * only non bdy edge are considered */
     int8_t isbdy;
     ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
+
+    if ( ilist > 0 && (!ilist%2) && isbdy ) {
+      puts("We were treating a bdy edge as a non bdy one");
+    }
+
     if ( !ilist ){
       /* Unable to compute edge shell: treat next element */
+      return 0;
+    }
+    else if ( isbdy ) {
+      /* Edge is bdy: skip it (we want to treat it from a bdy tetra) */
       return 0;
     }
     else if ( ilist<0 ) {
       return -1;
     }
-    else if(ilist%2) {
-      /* Edge is bdy: we want to treat it from a bdy face */
-      return 0;
-    }
-
-#warning FIXME
-    /* Edge is bdy: skip it (we want to treat it from a bdy tetra) */
-//    if ( isbdy ) {
-//      return 0;
- //   }
 
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
     o[1] = 0.5*(p0->c[1] + p1->c[1]);

@@ -138,9 +138,7 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
       /* Skip the non-internal edges */
       if ( pxt && (pxt->tag[i] & MG_BDY) )  continue;
 
-      /* Skip boundary edges - WARNING: This also skips edges connecting two
-       * boundary points. */
-#warning too restrictive test
+
       if( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
 
       len = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0])
@@ -172,15 +170,25 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
     p1 = &mesh->point[ip2];
 
     /* Deal only with internal faces */
-#ifndef NDEBUG
-    if ( pxt ) {
-      assert( !(pxt->tag[imax] & MG_BDY) ); }
-#endif
     int8_t isbdy;
     ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
 
     if ( !ilist ) continue;
     else if ( ilist<0 ) return -1;
+    else if ( isbdy ) {
+      /* Skip bdy edges */
+      continue;
+    }
+
+    if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
+      puts("I try to split an internal edge connecting bdy points");
+    }
+
+
+#ifndef NDEBUG
+    if ( pxt ) {
+      assert( !(pxt->tag[imax] & MG_BDY) ); }
+#endif
 
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
