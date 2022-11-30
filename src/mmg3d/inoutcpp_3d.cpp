@@ -79,17 +79,17 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #else
   int         ier,nsols;
-  int8_t      ptMeditRef,eltMeditRef,metricData;
+  int8_t      ptMeditRef,eltMeditRef,metricData,lsData;
   vtkDataSet  *dataset;
 
   mesh->dim = 3;
 
   ier = MMG5_loadVtuMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,
-                               &nsols,&metricData);
+                               &nsols,&metricData,&lsData);
   if ( ier < 1 ) return ier;
 
   /* Check data fields */
-  if ( nsols > metricData ) {
+  if ( nsols > (metricData+lsData) ) {
     fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols);
     return -1;
   }
@@ -119,13 +119,13 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #else
   int         ier,nsols;
-  int8_t      ptMeditRef,eltMeditRef,metricData;
+  int8_t      ptMeditRef,eltMeditRef,metricData,lsData;
   vtkDataSet  *dataset;
 
   mesh->dim = 3;
 
   ier = MMG5_loadVtuMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,
-                               &nsols,&metricData);
+                               &nsols,&metricData,&lsData);
   if ( ier < 1 ) return ier;
 
   mesh->nsols = nsols;
@@ -152,17 +152,17 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #else
   int         ier,nsols;
-  int8_t      ptMeditRef,eltMeditRef,metricData;
+  int8_t      ptMeditRef,eltMeditRef,metricData,lsData;
   vtkDataSet  *dataset;
 
   mesh->dim = 3;
 
   ier = MMG5_loadVtkMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,
-                               &nsols,&metricData);
+                               &nsols,&metricData,&lsData);
   if ( ier < 1 ) return ier;
 
   /* Check data fields */
-  if ( nsols > metricData ) {
+  if ( nsols > (metricData+lsData) ) {
     fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols);
     return -1;
   }
@@ -192,13 +192,13 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #else
   int         ier,nsols;
-  int8_t      ptMeditRef,eltMeditRef,metricData;
+  int8_t      ptMeditRef,eltMeditRef,metricData, lsData;
   vtkDataSet  *dataset;
 
   mesh->dim = 3;
 
   ier = MMG5_loadVtkMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,
-                               &nsols,&metricData);
+                               &nsols,&metricData,&lsData);
   if ( ier < 1 ) return ier;
 
   mesh->nsols = nsols;

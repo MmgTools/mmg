@@ -60,9 +60,9 @@
 #include <vtkCellArray.h>
 #include <typeinfo>
 
-int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
-int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
-int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
+int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
+int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
+int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
 
 int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int);
 
@@ -168,9 +168,8 @@ static void MMG5_internal_VTKbinary(vtkDataSetWriter *w, int binary) {
 ///
 template <class T, class TWriter, class PWriter>
 int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
-                       const char *mfilename,
-                       int metricData,int binary,
-                       int npart, int myid,int master) {
+                       const char *mfilename,int metricData,
+                       int binary,int npart,int myid,int master) {
   int hasPointRef = 0, hasCellRef = 0;
 
   // Transfer points from Mmg to VTK

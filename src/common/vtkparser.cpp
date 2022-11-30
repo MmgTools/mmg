@@ -46,6 +46,8 @@
 #include <vtkDataArray.h>
 
 #include "vtkparser.hpp"
+#include "libmmgtypes.h"
+#include "mmgcommon.h"
 
 /// @tparam TReader one of the VTK reader class.
 /// @param filename name of the input file.
@@ -82,6 +84,7 @@ vtkDataSet *MMG5_load_vtkXMLFile(const char*fileName)
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
 /// @param metricData 1 if file contains a metric data highlighted by the :metric name
+/// @param lsData 1 if file contains a metric data highlighted by the :ls name
 ///
 /// @return 1 if success, -1 otherwise
 ///
@@ -99,7 +102,7 @@ vtkDataSet *MMG5_load_vtkXMLFile(const char*fileName)
 static
 int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
                              int8_t *ptMeditRef, int8_t *eltMeditRef,
-                             int *nsols, int8_t *metricData ) {
+                             int *nsols, int8_t *metricData, int8_t *lsData ) {
 
   static int8_t mmgWarn0 = 0;
   static int8_t mmgWarn1 = 0;
@@ -158,6 +161,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
   int npointData   = 0;
   int npointRef    = 0;
   int nmetricField = 0;
+  int nlsField     = 0;
 
   *ptMeditRef = -1;
   if ( pd ) {
@@ -165,6 +169,9 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
     for (int k = 0; k < npointData; k++) {
       if  ( strstr(pd->GetArrayName(k),":metric" ) ) {
         ++nmetricField;
+      }
+      else if ( strstr(pd->GetArrayName(k),":ls" ) ) {
+        ++nlsField;
       }
       else if ( strstr(pd->GetArrayName(k),"medit:ref" ) ) {
         (*ptMeditRef) = k;
@@ -180,6 +187,12 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
       printf("  ## Error:%s: %d metric fields detected (labelled with a string"
              " containing the 'metric' keyword).\n"
              " Exit Program.\n",__func__,nmetricField);
+      return -1;
+    }
+    if ( nlsField > 1 ) {
+      printf("  ## Error:%s: %d ls fields detected (labelled with a string"
+             " containing the 'ls' keyword).\n"
+             " Exit Program.\n",__func__,nlsField);
       return -1;
     }
   }
@@ -209,6 +222,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
 
   *nsols      = npointData + ncellData - npointRef - ncellRef;
   *metricData = ( nmetricField > 0 );
+  *lsData     = ( nlsField > 0 );
 
   return 1;
 }
@@ -222,6 +236,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
 /// @param metricData 1 if file contains a metric data highlighted by the :metric name
+/// @param lsData 1 if file contains a metric data highlighted by the :ls name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 otherwise;
 ///
@@ -229,7 +244,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
 ///
 int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
                            int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
-                           int8_t *metricData) {
+                           int8_t *metricData, int8_t *lsData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -244,7 +259,7 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 
   // count the number of entities of each type
   int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
-                                     nsols,metricData );
+                                     nsols,metricData,lsData);
 
   if ( ier != 1 ) {
     return -1;
@@ -261,6 +276,7 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
 /// @param metricData 1 if file contains a metric data highlighted by the :metric name
+/// @param lsData 1 if file contains a metric data highlighted by the :ls name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 otherwise;
 ///
@@ -268,7 +284,7 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 ///
 int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
                            int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
-                           int8_t *metricData ) {
+                           int8_t *metricData, int8_t *lsData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -283,7 +299,7 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 
   // count the number of entities of each type
   int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
-                                     nsols,metricData );
+                                     nsols,metricData,lsData);
 
   if ( ier != 1 ) {
     return -1;
@@ -300,6 +316,7 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// (field named medit:ref), -1 if no references
 /// @param nsols number of point data (except the medit:ref ones)
 /// @param metricData 1 if file contains a metric data highlighted by the :metric name
+/// @param lsData 1 if file contains a metric data highlighted by the :ls name
 ///
 /// @return 1 if success, 0 if fail to open/load the file, -1 other errors;
 ///
@@ -307,7 +324,7 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 ///
 int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dataset,
                            int8_t *ptMeditRef,int8_t *eltMeditRef,int *nsols,
-                           int8_t *metricData) {
+                           int8_t *metricData, int8_t *lsData) {
 
   (*nsols) = 0;
   (*ptMeditRef) = (*eltMeditRef) = -1;
@@ -323,7 +340,7 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 
   // count the number of entities of each type
   int ier = MMG5_count_vtkEntities ( (*dataset),mesh,ptMeditRef,eltMeditRef,
-                                     nsols,metricData );
+                                     nsols,metricData,lsData);
 
   if ( ier != 1 ) {
     return -1;
@@ -633,6 +650,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         for (int j = 0; j < npointData; j++) {
           char *ptr = NULL;
           bool metricData = 0;
+          bool lsData = 0;
           char chaine[MMG5_FILESTR_LGTH];
           strcpy(chaine,pd->GetArrayName(j));
 
@@ -642,6 +660,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           else if ( (ptr = strstr(chaine,":metric")) ) {
             *ptr = '\0';
             metricData = 1;
+          }
+          else if ( (ptr = strstr(chaine,":ls")) ) {
+            *ptr = '\0';
+            lsData = 1;
           }
 
           psl = *sol + isol;

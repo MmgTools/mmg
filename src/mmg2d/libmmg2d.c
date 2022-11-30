@@ -546,6 +546,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   }
   else {
     met = umet;
+    met->namein = sol->namein;
   }
 
   /*uncomment for callback*/
