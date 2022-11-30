@@ -1775,7 +1775,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
   }
 
   (*tag) |= MG_BDY;
-  *ilist = MMG5_coquil(mesh,k,imax,list);
+  int8_t dummy;
+  *ilist = MMG5_coquil(mesh,k,imax,list,&dummy);
   if ( !(*ilist) ) {
     /* On of the tetra of the edge shell is required: we cannot split the edge */
     return 0;

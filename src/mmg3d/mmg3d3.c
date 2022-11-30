@@ -137,8 +137,10 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
 
       /* Skip the non-internal edges */
       if ( pxt && (pxt->tag[i] & MG_BDY) )  continue;
+
       /* Skip boundary edges - WARNING: This also skips edges connecting two
        * boundary points. */
+#warning too restrictive test
       if( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
 
       len = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0])
@@ -174,7 +176,8 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
     if ( pxt ) {
       assert( !(pxt->tag[imax] & MG_BDY) ); }
 #endif
-    ilist = MMG5_coquil(mesh,k,imax,list);
+    int8_t isbdy;
+    ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
 
     if ( !ilist ) continue;
     else if ( ilist<0 ) return -1;

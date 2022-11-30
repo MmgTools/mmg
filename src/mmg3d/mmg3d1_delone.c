@@ -205,7 +205,8 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
      * edges with Delauney kernel. */
     /* Note that it is possible that non bdy tetra contains a bdy edge, here
      * only non bdy edge are considered */
-    ilist = MMG5_coquil(mesh,k,imax,list);
+    int8_t isbdy;
+    ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
     if ( !ilist ){
       /* Unable to compute edge shell: treat next element */
       return 0;
@@ -217,6 +218,12 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
       /* Edge is bdy: we want to treat it from a bdy face */
       return 0;
     }
+
+#warning FIXME
+    /* Edge is bdy: skip it (we want to treat it from a bdy tetra) */
+//    if ( isbdy ) {
+//      return 0;
+ //   }
 
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
