@@ -115,10 +115,18 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     }
     else {
       /* Case of an internal face */
+
+      /* Following test skip boundary edges but also, as side effect, internal
+       * edges connecting boundary points.
+       * For now there is no way to skip safely only boundary edges:
+       *   - testing if edge shell is open will fail for bdy edge at interface of 2 domains
+       *   - testing edge tag is not possible because we don't have a bdy face */
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
+
       ilist = MMG5_coquil(mesh,k,imax,list);
       if ( !ilist ) continue;
       else if ( ilist<0 ) return -1;
+
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
