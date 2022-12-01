@@ -738,6 +738,74 @@ static int norver(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer towards the mesh
+ * \param pt pointer towards current triangle
+ * \param k number of current point
+ * \param c newly computed coordinates (giving negative area)
+ * \param n normal of triangle before regularization
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative area
+ *
+ */
+static inline int MMGS_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c, double *n) {
+
+  MMG5_pPoint  ppt;
+  double       to,tp,t,nnew[3],p[3],o[3],result;
+  int          it,maxit,pos,ier;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    ier = MMG5_nortri(mesh, pt, nnew);
+    MMG5_dotprod(3,n,nnew,&result);
+
+    if ( result <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
  * \param mesh pointer toward a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
@@ -783,12 +851,12 @@ int MMGS_regver(MMG5_pMesh mesh) {
       tabl[iad+0] = ppt->c[0];
       tabl[iad+1] = ppt->c[1];
       tabl[iad+2] = ppt->c[2];
+
       if ( !MG_VOK(ppt) )  continue;
       if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
-      if ( !iel ) continue; // Mmg3d
-
+   
       pt = &mesh->tria[iel];
       i  = 0;
       if ( pt->v[1] == k )  i = 1;
@@ -827,8 +895,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
-      if ( !iel ) continue; // Mmg3d
-
+  
       pt = &mesh->tria[iel];
       i = 0;
       if ( pt->v[1] == k )  i = 1;
@@ -869,12 +936,6 @@ int MMGS_regver(MMG5_pMesh mesh) {
 
         ier = MMG5_nortri(mesh, pt, n);
 
-        if ( !ier ) {
-          fprintf(stderr,"\n  ## Error: %s: Unable to compute normal vector.\n",__func__);
-          MMG5_SAFE_FREE(tabl);
-          return 0;
-        }
-
         for (i=0;i<3;i++) {
           tnew.v[i] = pt->v[i];
         }
@@ -888,8 +949,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
         ier = MMG5_nortri(mesh, &tnew, nnew);
         MMG5_dotprod(3,n,nnew,&result);
         if ( result < 0.0 ) {
-          // changement d'orientation, faire la dichotomie
-          noupdate = 1;
+          if (!MMGS_dichotomy(mesh,&tnew,k,c,n)) noupdate = 1;
           continue;
         }
       }
@@ -1076,6 +1136,12 @@ int MMGS_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
+  /* regularize vertices coordinates */
+  if ( mesh->info.xreg && !MMGS_regver(mesh) ){
+    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+    return 0;
+  }
+
   /* define normals */
   if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
@@ -1089,13 +1155,6 @@ int MMGS_analys(MMG5_pMesh mesh) {
     }
   }
 
-  /* regularize vertices coordinates */
-  //if( !mesh->xp ){
-  if ( mesh->info.xreg && !MMGS_regver(mesh) ){
-    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
-    return 0;
-  }
-  //}
   return 1;
 }
 

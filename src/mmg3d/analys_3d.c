@@ -813,6 +813,140 @@ int MMG5_norver(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer towards the mesh
+ * \param pt pointer towards current triangle
+ * \param k number of current point
+ * \param c newly computed coordinates (giving negative area)
+* \param n normal of triangle before regularization
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative area of a triangle
+ *
+ */
+static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c, double *n) {
+
+  MMG5_pPoint  ppt;
+  double       to,tp,t,nnew[3],p[3],o[3],result;
+  int          it,maxit,pos,ier;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    ier = MMG5_nortri(mesh, pt, nnew);
+    MMG5_dotprod(3,n,nnew,&result);
+
+    if ( result <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
+ * \param mesh pointer towards the mesh
+ * \param v list of vertices of current tetrahedron
+ * \param k number of current point
+ * \param c input : newly computed coordinates (giving negative area), output : coordinates after dichotomy
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative volume
+ *
+ */
+static inline int MMG3D_dichotomytetra(MMG5_pMesh mesh, MMG5_int *v, MMG5_int k, double *c) {
+
+  MMG5_pPoint  ppt;
+  double       p[3],o[3],vol,to,tp,t;
+  int          it,maxit,pos,i,j;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    vol = MMG5_orvol(mesh->point,v);
+
+    if ( vol <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
  * \param mesh pointer toward a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
@@ -968,12 +1102,6 @@ int MMG3D_regver(MMG5_pMesh mesh) {
 
         ier = MMG5_nortri(mesh, pt, n);
 
-        if ( !ier ) {
-          fprintf(stderr,"\n  ## Error: %s: Unable to compute normal vector.\n",__func__);
-          MMG5_SAFE_FREE(tabl);
-          return 0;
-        }
-
         for (i=0;i<3;i++) {
           tnew.v[i] = pt->v[i];
         }
@@ -987,8 +1115,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
         ier = MMG5_nortri(mesh, &tnew, nnew);
         MMG5_dotprod(3,n,nnew,&result);
         if ( result < 0.0 ) {
-          // changement d'orientation, faire la dichotomie
-          noupdate = 1;
+          if (!MMG3D_dichotomytria(mesh,&tnew,k,c,n)) noupdate = 1;
           continue;
         }
       }
@@ -1018,7 +1145,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
           result = MMG5_orvol(mesh->point,v);
 
           if ( result <= 0.0 ) {
-            noupdate = 1;
+            if (!MMG3D_dichotomytetra(mesh,v,k,c)) noupdate = 1;
             continue;
           }
         }
@@ -1293,6 +1420,12 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n");
 
+  /* regularize vertices coordinates*/
+  if ( mesh->info.xreg && !MMG3D_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+    return 0;
+  }
+
   /* define (and regularize) normals */
   if ( !MMG5_norver(mesh) ) {
     fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
@@ -1301,12 +1434,6 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   }
   if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
     fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
-    return 0;
-  }
-
-  /* regularize vertices coordinates*/
-  if ( mesh->info.xreg && !MMG3D_regver(mesh) ) {
-    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
     return 0;
   }
 

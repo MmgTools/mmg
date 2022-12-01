@@ -774,9 +774,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c) {
 
   MMG5_pPoint  ppt;
-  double       mid[3],co[3][3],vol,to,tp,t;
+  double       p[2],co[3][3],vol,to,tp,t;
   int          it,maxit,pos,i,j;
-  const double s = 0.5;
 
   it = 0;
   maxit = 5;
@@ -790,16 +789,20 @@ static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, do
   for ( i=0 ; i<3 ; i++ ) {
     for ( j=0 ; j<3 ; j++ ) {
       co[i][j] = mesh->point[pt->v[i]].c[j];
-      }
+    }
   }
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
 
   i = 0;
   if ( pt->v[1] == k ) i = 1;
   if ( pt->v[2] == k ) i = 2;
 
   do {
-    co[i][0] = ppt->c[0] + t*(c[0] - ppt->c[0]);
-    co[i][1] = ppt->c[1] + t*(c[1] - ppt->c[1]);
+    co[i][0] = ppt->c[0] + t*(p[0] - ppt->c[0]);
+    co[i][1] = ppt->c[1] + t*(p[1] - ppt->c[1]);
 
     vol = MMG2D_quickarea(co[0],co[1],co[2]);
 
@@ -1031,6 +1034,12 @@ int MMG2D_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
+  /* Regularize vertix vector field with a Laplacian / anti-laplacian smoothing */
+  if ( mesh->info.xreg && !MMG2D_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in regularizing vertices coordinates. Exit program.\n");
+    return 0;
+  }
+
   /* Define normal vectors at vertices on curves */
   if ( !MMG2D_norver(mesh,MMG5_UNSET) ) {
      fprintf(stderr,"\n  ## Problem in calculating normal vectors. Exit program.\n");
@@ -1042,11 +1051,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
   }
-  /* Regularize vertix vector field with a Laplacian / anti-laplacian smoothing */
-  if ( mesh->info.xreg && !MMG2D_regver(mesh) ) {
-    fprintf(stderr,"\n  ## Problem in regularizing vertices coordinates. Exit program.\n");
-    return 0;
-  }
+
   if ( mesh->nquad ) MMG5_DEL_MEM(mesh,mesh->adjq);
 
   return 1;
