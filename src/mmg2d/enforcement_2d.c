@@ -35,7 +35,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
   MMG5_pPoint     ppt;
-  MMG5_int        list[MMG2D_LONMAX],list2[3];
+  MMG5_int        list[MMG5_TRIA_LMAX],list2[3];
   MMG5_int        k,l,kk,nex,kdep,lon,iel;
   int             iare,ied;
   MMG5_int        ia,ib,ilon,rnd,idep,*adja,ir,adj;
@@ -81,7 +81,8 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     else
       j=2;
 
-    lon = MMG2D_boulet(mesh,kdep,j,list);
+    int8_t dummy;
+    lon = MMG5_boulet(mesh,kdep,j,list,0,&dummy);
 
     if ( lon <= 0 ) {
       if ( !mmgWarn0 ) {
@@ -168,7 +169,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Warning: %s: existing edge.\n",__func__);
         }
       }
-      if( (!mmgWarn5) && (lon>MMG2D_LONMAX) ) {
+      if( (!mmgWarn5) && (lon>MMG5_TRIA_LMAX) ) {
         mmgWarn5 = 1;
         fprintf(stderr,"\n  ## Error: %s: at least 1 edge intersecting too many"
                " triangles (%" MMG5_PRId ")\n",__func__,lon);

@@ -494,32 +494,37 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check for parameter file */
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr ) *ptr = '\0';
   strcat(data,".mmg2d");
+
   in = fopen(data,"rb");
 
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmg2d");
     in = fopen(data,"rb");
-    if ( !in )
+    if ( !in ) {
       return 1;
+    }
   }
-  if ( mesh->info.imprim >= 0 )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+  }
 
   /* Read parameters */
   while ( !feof(in) ) {
     ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) ) break;
-    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    for (i=0; (size_t)i<strlen(data); i++) data[i] = tolower(data[i]);
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
       ret = fscanf(in,"%d",&npar);
       if ( !ret ) {
         fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
-        return (0);
+        return 0;
       }
 
       if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numberOfMat,npar) ) {
@@ -550,7 +555,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
         return 0;
       }
-      else if ( npar > MMG2D_LPARMAX ) {
+      else if ( npar > MMG5_LPARMAX ) {
         fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",npar);
         return 0;
       }
@@ -569,7 +574,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
             return (0);
           }
 
-          for (j=0; j<strlen(data); j++) data[j] = tolower(data[j]);
+          for (j=0; (size_t)j<strlen(data); j++) data[j] = tolower(data[j]);
           if ( !strcmp(data,"triangles") || !strcmp(data,"triangle") ) {
             if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,fp3) ) {
               return 0;

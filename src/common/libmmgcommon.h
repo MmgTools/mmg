@@ -47,6 +47,7 @@
 extern "C" {
 #endif
 
+#define MMG5_VOLFRAC     1.e-5
 
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */

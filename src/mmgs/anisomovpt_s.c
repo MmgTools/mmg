@@ -50,7 +50,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    p0,ppt0;
   MMG5_Bezier    pb;
-  double         r[3][3],lispoi[3*MMGS_LMAX+1],*m0;//,m[6],mo[6];
+  double         r[3][3],lispoi[3*MMG5_TRIA_LMAX+1],*m0;//,m[6],mo[6];
   double         gv[2],area,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
   double         calold,calnew,caltmp;
   MMG5_int       k,iel,kel,nump,nbeg,nend;

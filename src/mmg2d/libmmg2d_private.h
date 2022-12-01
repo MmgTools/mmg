@@ -55,13 +55,10 @@ extern "C" {
 #define MMG2D_SIZE   0.75
 #define MMG2D_ALPHA  0.28867513459
 #define MMG2D_ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
-#define MMG2D_LONMAX 1024
 #define MMG2D_BADKAL    0.2
 #define MMG2D_NULKAL    1.e-6
 #define MMG2D_ANGCORN   -1.e-6
 #define MMG2D_SHORTMAX     0x7fff
-#define MMG2D_LPARMAX     200
-#define MMG2D_VOLFRAC     1.e-5
 
 #define MMG2D_LLONG  2.0
 #define MMG2D_LSHRT  0.3
@@ -234,18 +231,9 @@ int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 
 /* Adds Charles */
 double MMG2D_caltri_iso_3pt(double *a,double *b,double *c);
-double MMG2D_voltri(MMG5_pMesh ,MMG5_int ,MMG5_int ,MMG5_int );
-double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int );
-int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , MMG5_int , int8_t );
-int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
-int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);
-int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
-int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
-int MMG2D_isbr(MMG5_pMesh ,MMG5_int );
-int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);
 int MMG2D_split2_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);
 int MMG2D_split3_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);

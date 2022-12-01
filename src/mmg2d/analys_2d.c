@@ -268,7 +268,7 @@ int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int            list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,nm,nre,nc;
+  MMG5_int            list[MMG5_TRIA_LMAX+2],listref[MMG5_TRIA_LMAX+2],k,nm,nre,nc;
   int                 ns,ng,nr;
   int8_t              i;
 
@@ -316,7 +316,7 @@ int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
 
       if ( !MG_EDG(ppt->tag) ) continue;
 
-      ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG2D_LONMAX);
+      ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG5_TRIA_LMAX);
 
       if ( !ns )  continue;
       if ( (ng+nr) > 2 ) {

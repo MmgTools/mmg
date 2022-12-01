@@ -402,7 +402,7 @@ MMG5_invsl(double A[3][3],double b[3],double r[3]) {
  */
 
 static int
-MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
+MMG3D_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
   MMG5_pTetra   pt,pt1;
   double        v,v0,v1,v2;
   int           ibdy,ilist,cur,l;
@@ -732,7 +732,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
         ip = pt->v[i];
         p0 = &mesh->point[ip];
         if ( p0->flag == 1 ) {
-          if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
+          if ( !MMG3D_ismaniball(mesh,sol,k,i) ) {
             if ( tmp[ip] < 0.0 )
               sol->m[ip] = -100.0*MMG5_EPS;
             else
@@ -1411,7 +1411,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  * Beware : may return 0 when implicit boundary is tangent to outer boundary
  *
  */
-int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
+int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
   int            ilist,cur,nref;
   MMG5_int       base,ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
@@ -1519,7 +1519,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
 }
 
 /** Check whether implicit surface enclosed in volume is orientable */
-int MMG5_chkmani(MMG5_pMesh mesh){
+int MMG3D_chkmani(MMG5_pMesh mesh){
   MMG5_pTetra   pt,pt1;
   MMG5_int      ref;
   MMG5_int      iel,k,*adja;
@@ -1572,7 +1572,7 @@ int MMG5_chkmani(MMG5_pMesh mesh){
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
 
-        if(!MMG5_chkmaniball(mesh,k,ip))
+        if(!MMG3D_chkmaniball(mesh,k,ip))
           return 0;
       }
     }
@@ -1590,10 +1590,10 @@ int MMG5_chkmani(MMG5_pMesh mesh){
  * \return 1 if success, 0 otherwise.
  *
  * Check whether implicit surface enclosed in volume is orientable (perform an
- * additionnal test w.r.t. MMG5_chkmani)
+ * additionnal test w.r.t. MMG3D_chkmani)
  *
  */
-int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG3D_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra    pt,pt1;
   MMG5_int       k,iel;
   MMG5_int       *adja;
@@ -1634,7 +1634,7 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
 
-        if(!MMG5_chkmaniball(mesh,k,ip)){
+        if(!MMG3D_chkmaniball(mesh,k,ip)){
           fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
                   " ball of point %" MMG5_PRId ".\n",__func__,pt->v[ip]);
           return 0;
@@ -1664,7 +1664,7 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  * not in shell of (np,nq).
  *
  */
-int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndepmin,MMG5_int ndepplus,MMG5_int refmin,MMG5_int refplus,int8_t isminp,int8_t isplp) {
+int MMG3D_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndepmin,MMG5_int ndepplus,MMG5_int refmin,MMG5_int refplus,int8_t isminp,int8_t isplp) {
   MMG5_pTetra    pt,pt1;
   int            ilist,cur;
   MMG5_int       stor;

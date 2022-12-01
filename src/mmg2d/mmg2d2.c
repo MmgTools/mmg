@@ -210,7 +210,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_int      k,kk,ns,nus,nu,nud;
   int           iter,maxiter;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
-  MMG5_int      list[MMG2D_LONMAX];
+  MMG5_int      list[MMG5_TRIA_LMAX];
   const int flag=-10;
 
   for(k=1; k<=mesh->np-4; k++) {

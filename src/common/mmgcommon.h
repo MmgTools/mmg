@@ -53,6 +53,19 @@ extern "C" {
 
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/**
+ * Maximum array size when storing list of tria containing a vertex.
+ */
+#define MMG5_TRIA_LMAX  1024
+
+/**
+ * Maximum array size when calling boulep.
+ */
+#define MMG5_LMAX      10240
+
+/** Maximal number of local parameters */
+#define MMG5_LPARMAX   200
+
 /** Check if \a a and \a b have the same sign */
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
@@ -96,8 +109,6 @@ extern "C" {
 #define A32TH     0.03125
 
 #define MMG5_MEMMIN 38 /**< minimal memory needed to store the mesh/sol names */
-
-#define MMG5_LMAX      10240
 
 #define MMG5_PATHSEP  '/'
 
@@ -668,6 +679,7 @@ typedef struct MMG5_iNode_s {
  int           MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
  int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);
  int           MMG5_mmgIntmet33_ani(double*,double*,double*,double);
+ int           MMG5_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart);
  int           MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,MMG5_int,double *,double *);
  size_t        MMG5_memSize(void);
  void          MMG5_memOption_memSet(MMG5_pMesh mesh);
@@ -772,6 +784,12 @@ int MMG5_isLevelSet(MMG5_pMesh,MMG5_int,MMG5_int);
 int MMG5_isSplit(MMG5_pMesh ,MMG5_int ,MMG5_int *,MMG5_int *);
 int MMG5_isNotSplit(MMG5_pMesh ,MMG5_int);
 int MMG5_getStartRef(MMG5_pMesh ,MMG5_int, MMG5_int *);
+int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
+int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
+int MMG5_resetRef(MMG5_pMesh );
+int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart);
+int MMG5_chkmanimesh(MMG5_pMesh mesh);
 
 /* test functions */
 extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );
