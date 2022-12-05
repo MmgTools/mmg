@@ -351,20 +351,20 @@ int main(int argc,char *argv[]) {
     break;
 
   case ( MMG5_FMT_VtkVtp ):
-    ier = MMG2D_loadVtpMesh(mesh,sol,mesh->namein);
+    ier = MMG2D_loadVtpMesh(mesh,sol,met,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMG2D_loadVtuMesh(mesh,sol,mesh->namein);
+    ier = MMG2D_loadVtuMesh(mesh,sol,met,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMG2D_loadVtkMesh(mesh,sol,mesh->namein);
+    ier = MMG2D_loadVtkMesh(mesh,sol,met,mesh->namein);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMG2D_loadMesh(mesh,mesh->namein);
-    if ( ier <  1 ) { break; }
+    if ( ier <  1 ) { break; }  
 
     /* Read displacement in lag mode */
     if ( mesh->info.lag >= 0 ) {
@@ -390,6 +390,7 @@ int main(int argc,char *argv[]) {
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
+
     /* In iso mode: read metric if any */
     if ( mesh->info.iso && met->namein ) {
       if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {

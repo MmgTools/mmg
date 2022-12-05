@@ -1383,7 +1383,7 @@ LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1402,7 +1402,7 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1421,7 +1421,7 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1441,7 +1441,7 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1461,7 +1461,7 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1481,7 +1481,7 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1539,7 +1539,7 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.

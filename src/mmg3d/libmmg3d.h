@@ -2023,9 +2023,10 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param 
+ * \met,mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
  *
@@ -2046,7 +2047,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   END SUBROUTINE\n
  *
  */
-LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2070,7 +2071,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2093,7 +2094,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2135,7 +2136,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.

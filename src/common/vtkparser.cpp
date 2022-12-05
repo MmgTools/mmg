@@ -360,7 +360,7 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 ///
 /// I/O at Vtu VTK file format, part 2: mesh and solution storing
 ///
-int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
+int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkDataSet **dataset,
                            int8_t ptMeditRef,int8_t eltMeditRef,int nsols) {
   vtkSmartPointer<vtkDataArray> ptar = NULL, car = NULL;
   int                           ier;
@@ -667,6 +667,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           }
 
           psl = *sol + isol;
+          if (lsData) met = sol;
           psl->ver = mesh->ver;
           psl->dim = mesh->dim;
           psl->type = 1;

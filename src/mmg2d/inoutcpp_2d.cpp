@@ -38,7 +38,7 @@
 
 #ifdef USE_VTK
 
-static int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
+static int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,
                                      vtkDataSet **dataset, int8_t ptMeditRef,
                                      int8_t eltMeditRef,int nsols ) {
   int ier;
@@ -64,7 +64,7 @@ static int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
     return -1;
   }
 
-  ier = MMG5_loadVtkMesh_part2(mesh,sol,dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG5_loadVtkMesh_part2(mesh,sol,met,dataset,ptMeditRef,eltMeditRef,nsols);
 
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
@@ -80,7 +80,7 @@ static int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
 
 #endif
 
-int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
@@ -104,7 +104,7 @@ int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG2D_loadVtkMesh_part2(mesh,&sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG2D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols);
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
     return  ier;
@@ -123,7 +123,7 @@ int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
@@ -149,13 +149,13 @@ int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG2D_loadVtkMesh_part2(mesh,sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG2D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols);
 
   return ier;
 #endif
 }
 
-int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
@@ -179,7 +179,7 @@ int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG2D_loadVtkMesh_part2(mesh,&sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG2D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols);
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
     return  ier;
@@ -198,7 +198,7 @@ int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
@@ -224,13 +224,13 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG2D_loadVtkMesh_part2(mesh,sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG2D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols);
 
   return ier;
 #endif
 }
 
-int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
@@ -254,7 +254,7 @@ int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG2D_loadVtkMesh_part2(mesh,&sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG2D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols);
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
     return  ier;
@@ -273,7 +273,7 @@ int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -306,7 +306,7 @@ int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG2D_loadVtkMesh_part2(mesh,sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG2D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols);
 
   return ier;
 #endif

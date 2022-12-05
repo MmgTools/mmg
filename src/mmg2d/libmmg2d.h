@@ -1533,7 +1533,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG2D_EXPORT int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1554,7 +1554,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  LIBMMG2D_EXPORT int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1576,7 +1576,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG2D_EXPORT int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1598,7 +1598,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG2D_EXPORT int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1620,7 +1620,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG2D_EXPORT int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1642,7 +1642,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG2D_EXPORT int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1728,7 +1728,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG2D_EXPORT int MMG2D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
