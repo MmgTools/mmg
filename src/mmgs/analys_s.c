@@ -810,16 +810,16 @@ static inline int MMGS_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, dou
  * \param mesh pointer toward a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
- * Regularization procedure for vertices coordinates, dual Laplacian for a surface mesh.
+ * Regularization procedure for vertices coordinates,
+ * dual Laplacian for a surface mesh.
  *
  */
 int MMGS_regver(MMG5_pMesh mesh) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p0;
-  MMG5_pxPoint  pxp;
   MMG5_Tria     tnew;
-  double        *tabl,c[3],cprev[3],n[3],nnew[3],*cptr,*nptr,lm1,lm2,dd,cx,cy,cz,nx,ny,nz,res0,res,result;
-  int           i,ii,it,nit,ilist,noupdate,ier;
+  double        *tabl,c[3],n[3],nnew[3],*cptr,lm1,lm2,cx,cy,cz,res0,res,result;
+  int           i,it,nit,ilist,noupdate,ier;
   MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,iad;
 
   /* assign seed to vertex */
@@ -835,7 +835,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
   /* allocate memory for coordinates */
   MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
 
-  /* Pointer toward the suitable adjacency array for Mmgs and Mmg3d */
+  /* Pointer toward the suitable adjacency array */
   adja = mesh->adja;
 
   it   = 0;
@@ -857,7 +857,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
-   
+
       pt = &mesh->tria[iel];
       i  = 0;
       if ( pt->v[1] == k )  i = 1;
@@ -896,7 +896,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
-  
+
       pt = &mesh->tria[iel];
       i = 0;
       if ( pt->v[1] == k )  i = 1;
@@ -950,7 +950,8 @@ int MMGS_regver(MMG5_pMesh mesh) {
         ier = MMG5_nortri(mesh, &tnew, nnew);
         MMG5_dotprod(3,n,nnew,&result);
         if ( result < 0.0 ) {
-          if (!MMGS_dichotomy(mesh,&tnew,k,c,n)) noupdate = 1;
+          if (!MMGS_dichotomy(mesh,&tnew,k,c,n))
+            noupdate = 1;
           continue;
         }
       }

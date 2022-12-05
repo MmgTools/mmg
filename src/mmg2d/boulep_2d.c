@@ -247,7 +247,7 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
   i = ip;
   do {
 
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    if ( ilist > MMG2D_LMAX-2 )  return -ilist;
     list[ilist] = k;
     ++ilist;
 
@@ -310,7 +310,7 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
 
   do {
 
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
+    if ( ilist > MMG2D_LMAX-2 )  return -ilist;
     list[ilist] = k ;
     ++ilist;
 

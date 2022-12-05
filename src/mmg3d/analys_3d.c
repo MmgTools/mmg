@@ -896,7 +896,7 @@ static inline int MMG3D_dichotomytetra(MMG5_pMesh mesh, MMG5_int *v, MMG5_int k,
 
   MMG5_pPoint  ppt;
   double       p[3],o[3],vol,to,tp,t;
-  int          it,maxit,pos,i,j;
+  int          it,maxit,pos;
 
   it = 0;
   maxit = 5;
@@ -957,11 +957,10 @@ int MMG3D_regver(MMG5_pMesh mesh) {
   MMG5_pTria    pt;
   MMG5_pTetra   ptet;
   MMG5_pPoint   ppt,p0;
-  MMG5_pxPoint  pxp;
   MMG5_Tria     tnew;
-  double        *tabl,c[3],cprev[3],n[3],nnew[3],*cptr,*nptr,lm1,lm2,dd,cx,cy,cz,nx,ny,nz,res0,res,result;
+  double        *tabl,c[3],n[3],nnew[3],*cptr,lm1,lm2,cx,cy,cz,res0,res,result;
   int           i,ii,it,nit,ilist,noupdate,ier;
-  MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,*adjatet,iad,v[4],ntet;
+  MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,iad,v[4];
   int64_t       tetlist[MMG5_LMAX];
 
   /* assign seed to vertex */
@@ -992,15 +991,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
   MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
 
   /* Pointer toward the suitable adjacency array for Mmgs and Mmg3d */
-  if ( mesh->adjt ) {
-    /* Mmg3d */
-    adja = mesh->adjt;
-    adjatet = mesh->adja;
-  }
-  else {
-    /* Mmgs */
-    adja = mesh->adja;
-  }
+  adja = mesh->adjt;
 
   it   = 0;
   nit  = 10;
@@ -1115,7 +1106,8 @@ int MMG3D_regver(MMG5_pMesh mesh) {
         ier = MMG5_nortri(mesh, &tnew, nnew);
         MMG5_dotprod(3,n,nnew,&result);
         if ( result < 0.0 ) {
-          if (!MMG3D_dichotomytria(mesh,&tnew,k,c,n)) noupdate = 1;
+          if (!MMG3D_dichotomytria(mesh,&tnew,k,c,n))
+            noupdate = 1;
           continue;
         }
       }
@@ -1145,7 +1137,8 @@ int MMG3D_regver(MMG5_pMesh mesh) {
           result = MMG5_orvol(mesh->point,v);
 
           if ( result <= 0.0 ) {
-            if (!MMG3D_dichotomytetra(mesh,v,k,c)) noupdate = 1;
+            if (!MMG3D_dichotomytetra(mesh,v,k,c))
+              noupdate = 1;
             continue;
           }
         }

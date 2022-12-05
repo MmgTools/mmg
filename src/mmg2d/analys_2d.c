@@ -833,16 +833,16 @@ static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, do
  *
  * \return 0 if fail, 1 if success
  *
- * Regularize vertices coordinates at boundary non singular edges with a Laplacian /
- * antilaplacian smoothing
+ * Regularize vertices coordinates at boundary non singular edges with
+ * a Laplacian / antilaplacian smoothing
  *
  */
 int MMG2D_regver(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
-  double                *tmp,dd,ps,lm1,lm2,cx,cy,ux,uy,nxt,nyt,res,res0,c[2],co[3][3],vol;
-  MMG5_int              k,kt,iel,ip1,ip2,nn,temp,list[MMG5_LMAX];
-  int                   it,maxit,ip,j,ilist,noupdate;
+  double                *tmp,lm1,lm2,cx,cy,res,res0,c[2],co[3][3],vol;
+  MMG5_int              k,kt,iel,ip1,ip2,nn,list[MMG5_LMAX];
+  int                   it,maxit,j,ilist,noupdate;
   int8_t                i,ier;
 
   it = 0;
@@ -946,7 +946,6 @@ int MMG2D_regver(MMG5_pMesh mesh) {
       /* Anti Laplacian operation */
       c[0] = tmp[2*(k-1)+1] - lm2 * (cx - tmp[2*(k-1)+1]);
       c[1] = tmp[2*(k-1)+2] - lm2 * (cy - tmp[2*(k-1)+2]);
-      c[2] = 0.;
 
       /* Check if updated point creates a triangle with negative area.
          If it does, performs a dichotomy to find optimal point */

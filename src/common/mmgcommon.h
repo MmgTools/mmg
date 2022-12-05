@@ -651,6 +651,7 @@ typedef struct MMG5_iNode_s {
  int           MMG5_boulec(MMG5_pMesh, MMG5_int*, MMG5_int,int ip,double *tt);
  int           MMG5_boulen(MMG5_pMesh, MMG5_int*, MMG5_int,int ip,double *nn);
  int           MMG5_bouler(MMG5_pMesh, MMG5_int*, MMG5_int,int ip,MMG5_int *,MMG5_int *,int *, int*, int);
+ int           MMG5_boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t s,int8_t *opn);
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
