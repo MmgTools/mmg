@@ -264,6 +264,7 @@ int  MMG3D_analys(MMG5_pMesh mesh);
 void MMG3D_set_reqBoundaries(MMG5_pMesh mesh);
 int  MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh);
 int  MMG5_norver(MMG5_pMesh mesh);
+int  MMG3D_regver(MMG5_pMesh mesh);
 int  MMG5_setadj(MMG5_pMesh mesh);
 int  MMG5_setdhd(MMG5_pMesh mesh);
 int  MMG5_singul(MMG5_pMesh mesh);

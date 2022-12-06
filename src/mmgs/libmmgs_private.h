@@ -129,6 +129,7 @@ int  MMGS_zaldy(MMG5_pMesh mesh);
 int  MMGS_assignEdge(MMG5_pMesh mesh);
 int  MMGS_analys_for_norver(MMG5_pMesh mesh);
 int  MMGS_analys(MMG5_pMesh mesh);
+int  MMGS_regver(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_hashTria(MMG5_pMesh );
