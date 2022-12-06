@@ -696,6 +696,17 @@ ADD_TEST(NAME mmg3d_OptLs_plane_rembub2
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub2.o.meshb)
 
+# xreg
+ADD_TEST( NAME mmg3d_CoorRegularizationCube
+  COMMAND ${EXECUT_MMG3D} -v 5 -nr -xreg
+  ${MMG3D_CI_TESTS}/CoorRegularizationCube/cube
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationCube.o.meshb)
+
+ADD_TEST( NAME mmg3d_CoorRegularizationRandomCube
+  COMMAND ${EXECUT_MMG3D} -v 5 -xreg
+  ${MMG3D_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube.o.meshb)
+
 # Preservation of orphan points
 ADD_TEST(NAME mmg3d_OptLs_temp_orphan
   COMMAND ${EXECUT_MMG3D} -v 5 -ls

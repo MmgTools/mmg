@@ -2024,8 +2024,23 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
   return 1;
 }
 
-/** Update tag and refs of tetra edges.
-    If tetra is required, set the faces/edges to required */
+/**
+ * \param mesh
+ * \return 1 if successful, 0 if not.
+ *
+ * Update tag and refs of tetra edges. If tetra is required, set the
+ * faces/edges to required.
+ *
+ * \remark While remeshing:
+ *   - A tetra with a boundary face has a xtetra:
+ *     - a boundary edge has consistent tags as soon as it has a non 0 tag;
+#warning check this case
+ *     - some boundary edges may have a 0 tag
+ *
+ * - a tetra with a boundary edge but no bdy faces may or may not have a xtetra
+ *     and boundary edges may have or may not have tags so we can't guess
+ *     nothing with such xtetra.
+ */
 int MMG5_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_pTetra   pt;
   MMG5_pTria    ptt;

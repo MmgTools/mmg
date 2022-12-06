@@ -54,6 +54,8 @@ void MMG2D_Set_commonFunc(void) {
     MMG5_grad2met_ani = MMG2D_grad2met_ani;
     MMG5_grad2metreq_ani = MMG2D_grad2metreq_ani;
     MMG5_solTruncature_ani = MMG5_2dSolTruncature_ani;
+    MMG5_indPt = MMG2D_indPt;
+    MMG5_indElt = MMG2D_indElt;
 
     return;
 }
@@ -165,6 +167,10 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* reset fem value to user setting (needed for multiple library call) */
   mesh->info.fem = mesh->info.setfem;
+
+  /* reset metRidTyp value to 0 (needed for multiple library call because it is
+   * used to mark if input edge have been stored into triangles) */
+  mesh->info.metRidTyp = 0;
 
   /* Scale input mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -401,6 +407,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* reset fem value to user setting (needed for multiple library call) */
   mesh->info.fem = mesh->info.setfem;
+
+  /* reset metRidTyp value to 0 (needed for multiple library call because it is
+   * used to mark if input edge have been stored into triangles) */
+  mesh->info.metRidTyp = 0;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -640,6 +650,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   /* reset fem value to user setting (needed for multiple library call) */
   mesh->info.fem = mesh->info.setfem;
+
+  /* reset metRidTyp value to 0 (needed for multiple library call because it is
+   * used to mark if input edge have been stored into triangles) */
+  mesh->info.metRidTyp = 0;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,sol) ) {
@@ -901,6 +915,10 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* reset fem value to user setting (needed for multiple library call) */
   mesh->info.fem = mesh->info.setfem;
+
+  /* reset metRidTyp value to 0 (needed for multiple library call because it is
+   * used to mark if input edge have been stored into triangles) */
+  mesh->info.metRidTyp = 0;
 
   /* scaling mesh  */
   if ( !MMG5_scaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);

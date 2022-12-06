@@ -289,7 +289,7 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   double         hmi2,len;
   MMG5_int       nc,k;
   int            ilist;
-  MMG5_int       list[MMG2D_LONMAX+2];
+  MMG5_int       list[MMG5_TRIA_LMAX+2];
   int8_t         i,i1,i2,open;
 
   nc    = 0;
@@ -395,7 +395,7 @@ MMG5_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0;
   int               it,maxit,ilist;
-  MMG5_int          k,base,list[MMG2D_LONMAX+2],nm,nnm;
+  MMG5_int          k,base,list[MMG5_TRIA_LMAX+2],nm,nnm;
   int8_t            i,ier;
 
   nnm   = 0;
@@ -420,7 +420,8 @@ MMG5_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
 
-        ilist = MMG2D_boulet(mesh,k,i,list);
+        int8_t dummy;
+        ilist = MMG5_boulet(mesh,k,i,list,0,&dummy);
 
         if ( MG_EDG(p0->tag) )
           ier = MMG2D_movedgpt(mesh,met,ilist,list,0);

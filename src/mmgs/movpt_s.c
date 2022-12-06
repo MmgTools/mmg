@@ -53,7 +53,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   MMG5_Bezier   b;
-  double        aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
+  double        aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMG5_TRIA_LMAX+3];
   double        ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
   MMG5_int      k,iel,ipp,ibeg,iend;
   int           ier,kel,npt;
@@ -163,7 +163,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   gv[1] =  r[1][0]*GV[0] + r[1][1]*GV[1] + r[1][2]*GV[2];
 
   /* Apply rotation \circ translation to the whole ball */
-  assert ( ilist > 0 && ilist < MMGS_LMAX );
+  assert ( ilist > 0 && ilist < MMG5_TRIA_LMAX );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;

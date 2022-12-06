@@ -245,6 +245,8 @@ void MMG5_paramUsage1(void) {
   fprintf(stdout,"-hmax   val  maximal mesh size\n");
   fprintf(stdout,"-hmin   val  minimal mesh size\n");
   fprintf(stdout,"-hsiz   val  constant mesh size\n");
+  fprintf(stdout,"-rmc   [val] enable the removal of componants whose volume fraction is less than\n"
+          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
 }
 
 /**
@@ -258,6 +260,7 @@ void MMG5_paramUsage2(void) {
   fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nreg        normal regul.\n");
+  fprintf(stdout,"-xreg        vertex regul.\n");
   fprintf(stdout,"-nsd    val  save the subdomain number val (0==all subdomain)\n");
   fprintf(stdout,"-optim       mesh optimization\n");
 
@@ -288,9 +291,6 @@ void MMG5_2d3dUsage(void) {
 
   fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
           " two domains of the same reference.\n");
-
-  fprintf(stdout,"-rmc   [val] enable the removal of componants whose volume fraction is less than\n"
-          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
 }
 
 /**
