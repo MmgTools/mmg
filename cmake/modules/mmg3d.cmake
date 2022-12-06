@@ -206,8 +206,8 @@ IF ( BUILD_TESTING )
       SET ( RUN_AGAIN OFF )
     ENDIF ( )
 
-    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}3d EXECUT_MMG3D )
-    SET ( LISTEXEC_MMG ${EXECUT_MMG3D} )
+    SET ( EXECUT_MMG3D      $<TARGET_FILE:${PROJECT_NAME}3d> )
+    SET ( SHRT_EXECUT_MMG3D ${PROJECT_NAME}3d )
 
     IF ( ONLY_VERY_SHORT_TESTS )
       # Add tests that doesn't require to download meshes

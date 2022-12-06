@@ -24,6 +24,7 @@
 # executable is in EXECUT_MMG3D (filled by mmg3d.cmake) and the mmgs executable
 # is in EXECUTE_MMGS (filled by mmgs.cmake))
 SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
+SET(SHRT_EXECUT_MMG ${SHRT_EXECUT_MMGS} ${SHRT_EXECUT_MMG3D})
 
 # Make some files not openable
 IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb
@@ -43,8 +44,7 @@ IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
 ENDIF()
 
 # Lists of tests that are common to mmgs and mmg3d
-FOREACH(EXEC ${EXECUT_MMG})
-  GET_FILENAME_COMPONENT ( SHRT_EXEC ${EXEC} NAME )
+FOREACH(EXEC SHRT_EXEC IN ZIP_LISTS EXECUT_MMG SHRT_EXECUT_MMG)
 
   ###############################################################################
   #####
@@ -402,4 +402,4 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
 
 
 
-ENDFOREACH(EXEC)
+ENDFOREACH()

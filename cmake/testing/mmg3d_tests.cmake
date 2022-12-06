@@ -20,8 +20,6 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMG3D ${EXECUT_MMG3D} NAME )
-
 ##############################################################################
 #####
 #####         Tests that may be run twice
