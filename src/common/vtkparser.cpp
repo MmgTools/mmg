@@ -666,8 +666,15 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
             lsData = 1;
           }
 
-          psl = *sol + isol;
-          if (lsData) met = sol;
+          if ( (nsols==2) && metricData ) {
+            psl = *met; //+ isol;
+          }
+          else if ( (nsols==1) && lsData ) {
+            psl = *sol;
+          }
+          else {
+            psl = *sol; //+ isol;
+          }
           psl->ver = mesh->ver;
           psl->dim = mesh->dim;
           psl->type = 1;

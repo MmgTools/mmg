@@ -364,7 +364,7 @@ int main(int argc,char *argv[]) {
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMG2D_loadMesh(mesh,mesh->namein);
-    if ( ier <  1 ) { break; }  
+    if ( ier <  1 ) { break; }
 
     /* Read displacement in lag mode */
     if ( mesh->info.lag >= 0 ) {
@@ -461,7 +461,7 @@ int main(int argc,char *argv[]) {
               " AND A SOLUTION IN ADAPTATION MODE.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
-    
+
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 
