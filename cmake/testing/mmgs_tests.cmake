@@ -245,17 +245,6 @@ ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-ls-nsd3.o.meshb)
 
-# test xreg option
-ADD_TEST(NAME mmgs_CoorRegularizationCube
-  COMMAND ${EXECUT_MMGS} -v 5 -xreg
-  ${MMGS_CI_TESTS}/CoorRegularizationCube/cube.mesh
-  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationCube.o.meshb)
-
-ADD_TEST(NAME mmgs_CoorRegularizationRandomCube
-  COMMAND ${EXECUT_MMGS} -v 5 -xreg
-  ${MMGS_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
-  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube.o.meshb)
-
 ###############################################################################
 #####
 #####         Detected Bugs

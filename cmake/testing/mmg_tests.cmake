@@ -365,6 +365,17 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/c1/c1.meshb
     -out ${CTEST_OUTPUT_DIR}/mmg_nreg_${SHRT_EXEC}.o.meshb)
 
+  # xreg
+  ADD_TEST( NAME mmg_CoorRegularizationCube_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nr -xreg
+    ${MMG_CI_TESTS}/CoorRegularizationCube/cube
+    -out ${CTEST_OUTPUT_DIR}/CoorRegularizationCube_${SHRT_EXEC}.o.meshb)
+
+  ADD_TEST( NAME mmg_CoorRegularizationRandomCube_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -xreg
+    ${MMG_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
+    -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube_${SHRT_EXEC}.o.meshb)
+
   ##############################################################################
   #####
   #####         Various test cases
