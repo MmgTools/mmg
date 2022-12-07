@@ -72,6 +72,7 @@ enum MMGS_Param {
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
   MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
+  MMGS_IPARAM_xreg,              /*!< [0/1], Disabled/enabled coordinates regularization */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_numberOfLSBaseReferences, /*!< [n], Number of base references for bubble removal */
   MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in ls mode */

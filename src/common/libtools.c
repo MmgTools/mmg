@@ -261,6 +261,7 @@ void MMG5_paramUsage2(void) {
   fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nreg        normal regul.\n");
+  fprintf(stdout,"-xreg        vertex regul.\n");
   fprintf(stdout,"-nsd    val  save the subdomain number val (0==all subdomain)\n");
   fprintf(stdout,"-optim       mesh optimization\n");
 

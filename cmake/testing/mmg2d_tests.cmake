@@ -661,6 +661,23 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
 
+# ls discretisation + xreg
+ADD_TEST(NAME mmg2d_CoorRegularization_apple
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_apple.o.meshb)
+
+# ls discretisation + xreg + nr
+ADD_TEST(NAME mmg2d_CoorRegularization_appleNR
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg -nr
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_appleNR.o.meshb)
+
+# ls discretisation + xreg + nr + check of negative areas
+ADD_TEST(NAME mmg2d_CoorRegularizationNegativeArea
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg -hmax 0.1
+  ${MMG2D_CI_TESTS}/CoorRegularizationNegativeArea/CoorRegularizationNegativeArea
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationNegativeArea.o.meshb)
 
 ###############################################################################
 #####

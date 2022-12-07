@@ -224,23 +224,33 @@ int MMG2D_boulen(MMG5_pMesh mesh, MMG5_int start,int8_t ip, MMG5_int *pleft, MMG
  * \param ip index of point for wich we compute the ball.
  * \return 1 if success, 0 if fail.
  *
- * Find the two endpoints of the boundary curves joining ip and fill \a ip1 and
- * \a ip2 with their indices.
+ * Find the two endpoints of the boundary curves joining ip, fill \a ip1 and
+ * \a ip2 with their indices and list neighbouring triangles
  *
  */
-int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_int *ip2) {
+int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_int *ip2,MMG5_int *list) {
   MMG5_pTria    pt;
   MMG5_int      *adja,k;
   int8_t        i,i1,i2;
   static int8_t mmgWarn0=0;
+  int           ilist;
 
   *ip1 = 0;
   *ip2 = 0;
+  if ( start < 1 ) return 0;
+  pt = &mesh->tria[start];
+  if ( !MG_EOK(pt) ) return 0;
 
   /* Travel elements in the forward sense */
+  ilist= 0;
   k = start;
   i = ip;
   do {
+
+    if ( ilist > MMG2D_LMAX-2 )  return -ilist;
+    list[ilist] = k;
+    ++ilist;
+
     pt = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
     i1 = MMG5_inxt2[i];
@@ -282,9 +292,10 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
     i  = MMG5_inxt2[i];
+
   }
   while ( k && k != start );
-  if ( k > 0 ) return 1;
+  if ( k > 0 ) return ilist;
 
   /* Travel the ball in the reverse sense when a boundary is hit, starting from the neighbor of k */
   k = start;
@@ -295,9 +306,14 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
   i = adja[i2] % 3;
   i = MMG5_iprv2[i];
 
-  if ( !k ) return 1;
+  if ( !k ) return ilist;
 
   do {
+
+    if ( ilist > MMG2D_LMAX-2 )  return -ilist;
+    list[ilist] = k ;
+    ++ilist;
+
     pt = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
     i1 = MMG5_inxt2[i];
@@ -340,9 +356,10 @@ int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_
     if ( k == 0 )  break;
     i  = adja[i2] % 3;
     i  = MMG5_iprv2[i];
+
   }
   while ( k );
 
-  return 1;
+  return ilist;
 }
 

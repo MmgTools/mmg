@@ -42,13 +42,14 @@ extern MMG5_Info  info;
  * \param ip local point index
  * \param adja pointer toward the adjacency array.
  * \param list pointer toward the list of points connected to \a ip.
+ * \param tlist pointer toward the list of triangles sharing \a ip.
  *
  * \return -ilist if buffer overflow, ilist otherwise.
  *
- * Return all vertices connected to ip (with list[0] = ip).
+ * Return all vertices connected to ip (with list[0] = ip) and all triangles sharing ip.
  *
  **/
-int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *list) {
+int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *list, MMG5_int *tlist) {
   MMG5_pTria    pt;
   int           ilist;
   MMG5_int      *adj,k;
@@ -66,6 +67,7 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *
   i2 = MMG5_iprv2[i];
   do {
     if ( ilist > MMG5_LMAX-2 )  return -ilist;
+    tlist[ilist] = k;
     ilist++;
     list[ilist] = pt->v[i2];
 
@@ -74,6 +76,7 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *
     i2 = adj[i1] % 3;
     i1 = MMG5_iprv2[i2];
     pt = &mesh->tria[k];
+
   }
   while ( k && k != start );
   if ( k > 0 )  return ilist;
@@ -94,6 +97,8 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *
     i1 = adj[i2] % 3;
     i2 = MMG5_iprv2[i1];
     pt = &mesh->tria[k];
+
+    tlist[ilist-1] = k;
   }
   while ( k > 0 );
 

@@ -410,6 +410,12 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           return 0;
         }
         break;
+      case 'x':
+        if ( !strcmp(argv[i],"-xreg") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_xreg,1) )
+            return 0;
+        }
+        break;
       default:
         fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMGS_usage(argv[0]);

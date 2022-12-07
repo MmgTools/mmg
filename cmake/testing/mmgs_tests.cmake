@@ -20,8 +20,6 @@
 ##  use this copy of the Mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
-
 ###############################################################################
 #####
 #####         Continuous Integration
@@ -244,7 +242,6 @@ ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
   COMMAND ${EXECUT_MMGS} -v 5 -ls -nsd 3 ${common_args}
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-ls-nsd3.o.meshb)
-
 
 ###############################################################################
 #####

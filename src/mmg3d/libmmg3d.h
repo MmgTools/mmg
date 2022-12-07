@@ -83,6 +83,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nomove,                    /*!< [1/0], Avoid/allow point relocation */
   MMG3D_IPARAM_nosurf,                    /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_nreg,                      /*!< [0/1], Enable normal regularization */
+  MMG3D_IPARAM_xreg,                      /*!< [0/1], Enable coordinates regularization */
   MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters */
   MMG3D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
   MMG3D_IPARAM_numberOfMat,               /*!< [n], Number of material in ls mode */
