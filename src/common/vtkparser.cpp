@@ -669,9 +669,6 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
           if ( (nsols==2) && metricData ) {
             psl = *met; //+ isol;
           }
-          else if ( (nsols==1) && lsData ) {
-            psl = *sol;
-          }
           else {
             psl = *sol; //+ isol;
           }
@@ -681,6 +678,14 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
           psl->entities = MMG5_Vertex;
 
           if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
+            if ( !mmgWarn1 ) {
+              mmgWarn1 = 1;
+              fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
+                      " at least 1 solution.\n",__func__);
+            }
+          }
+
+          if ( !MMG5_Set_inputSolName(mesh,*met,chaine) ) {
             if ( !mmgWarn1 ) {
               mmgWarn1 = 1;
               fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
