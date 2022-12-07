@@ -310,7 +310,10 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   MMG5_version(mesh,"S");
 
-  if ( !mesh->info.iso ) { mesh->info.iso = 1; }
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf) ) {
+    fprintf(stdout,"\n  ## WARNING: ISO MODE NOT PROVIDED: ENABLING ISOVALUE DISCRETIZATION MODE (-ls) \n");
+    mesh->info.iso = 1;
+  }
 
   if ( !umet ) {
     /* User doesn't provide the metric (library mode only), allocate our own one */
@@ -570,9 +573,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
-  if ( mesh->info.iso ) {
+  if ( mesh->info.iso || mesh->info.isosurf ) {
     fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
-            " (MMGS_IPARAM_iso):\n"
+            " (MMGS_IPARAM_iso or MMGS_IPARAM_isosurf):\n"
             "          YOU MUST CALL THE MMGS_MMGSLS FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
@@ -663,8 +666,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     }
   }
 
-  if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m )
+  if ( mesh->info.imprim > 1 && met->m ) {
     MMGS_prilen(mesh,met,0);
+  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);

@@ -1010,9 +1010,9 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
             "            YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
-            " (MMG3D_IPARAM_iso):\n"
+            " (MMG3D_IPARAM_iso or MMG3D_IARAM_isosurf ):\n"
             "          YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
@@ -1500,10 +1500,10 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   chrono(ON,&(ctim[0]));
 
   /* Check options */
-  if ( mesh->info.iso ) {
+  if ( mesh->info.iso || mesh->info.isosurf ) {
     fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
-            " (MMG3D_IPARAM_iso):\n"
-            "          YOU MUST CALL THE MMG3D_mmg3dmov FUNCTION TO USE THIS OPTION.\n");
+            " (MMG3D_IPARAM_iso || MMG3D_IPARAM_isosurf ):\n"
+            "          YOU MUST CALL THE MMG3D_mmg3dls FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
@@ -1599,7 +1599,9 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) MMG3D_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 4 && met->m ) {
+    MMG3D_prilen(mesh,met,0);
+  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -1710,7 +1712,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 1 && (!mesh->info.iso) && met->m )
+  if ( mesh->info.imprim > 1 && met->m )
     MMG3D_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
