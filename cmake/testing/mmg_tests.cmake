@@ -376,6 +376,16 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
     -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube_${SHRT_EXEC}.o.meshb)
 
+  # -lssurf
+  IF ( ${SHRT_EXEC} MATCHES "3d" )
+    SET ( ADD_ARG "-opnbdy" )
+  ENDIF()
+  ADD_TEST(NAME mmg_OptLsSurf_peninsula_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${ADD_ARG} -lssurf -nr -hgrad 1.5 -hausd 0.02
+    -in ${MMG_CI_TESTS}/OptLsSurf_peninsula/peninsula
+    -sol  ${MMG_CI_TESTS}/OptLsSurf_peninsula/ls.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg_OptLsSurf_peninsula_${SHRT_EXEC}.o.meshb)
+
   ##############################################################################
   #####
   #####         Various test cases

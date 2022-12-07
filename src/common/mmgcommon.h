@@ -786,9 +786,12 @@ int MMG5_isSplit(MMG5_pMesh ,MMG5_int ,MMG5_int *,MMG5_int *);
 int MMG5_isNotSplit(MMG5_pMesh ,MMG5_int);
 int MMG5_getStartRef(MMG5_pMesh ,MMG5_int, MMG5_int *);
 int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
+int MMG5_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol);
 int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
-int MMG5_resetRef(MMG5_pMesh );
+int MMG5_resetRef_ls(MMG5_pMesh );
+int MMG5_resetRef_lssurf(MMG5_pMesh );
 int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG5_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol);
 int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart);
 int MMG5_chkmanimesh(MMG5_pMesh mesh);
 

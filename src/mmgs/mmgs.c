@@ -429,7 +429,7 @@ int main(int argc,char *argv[]) {
     if ( ier <  1 ) { break; }
 
     /* read level-set in iso mode */
-    if ( mesh->info.iso ) {
+    if ( mesh->info.iso || mesh->info.isosurf ) {
       if ( MMGS_loadSol(mesh,ls,ls->namein) < 1 ) {
         fprintf(stderr,"\n  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
@@ -464,7 +464,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* Check input data */
-  if ( mesh->info.iso ) {
+  if ( mesh->info.iso || mesh->info.isosurf ) {
     if ( ls->m==NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
@@ -487,7 +487,7 @@ int main(int argc,char *argv[]) {
     ier = MMGS_defaultOption(mesh,met,ls);
     MMGS_RETURN_AND_FREE(mesh,met,ls,ier);
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     ier = MMGS_mmgsls(mesh,ls,met);
   }
   else {

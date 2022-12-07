@@ -2164,6 +2164,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,MMG5_int val
   case MMG3D_IPARAM_isoref :
     mesh->info.isoref   = val;
     break;
+  case MMG3D_IPARAM_isosurf :
+    mesh->info.isosurf = val;
+    break;
   case MMG3D_IPARAM_lag :
 #ifdef USE_ELAS
     if ( val < 0 || val > 2 )

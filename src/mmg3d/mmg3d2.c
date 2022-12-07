@@ -35,6 +35,7 @@
 
 #include "libmmg3d.h"
 #include "libmmg3d_private.h"
+#include "mmg3dexterns.h"
 
 extern int8_t ddb;
 
@@ -309,15 +310,13 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
  * would be better to analyze wich entities must be keeped and which one must be
  * deleted depending on the split/nosplit infos.
  */
-int MMG3D_resetRef(MMG5_pMesh mesh) {
+int MMG3D_resetRef_ls(MMG5_pMesh mesh) {
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_int        k,ref;
   int8_t          i;
 
   /* Travel edges and reset tags at edges extremities */
-
-
   /* Reset ref and tags at ISO points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -343,6 +342,10 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
 
     if ( !MG_EOK(pt) ) continue;
 
+    /* If no material map is provided, reference is resetted to 0, otherwise,
+     * reference has to exist in the material map because it is not possible to
+     * decide for the user if a ref that is not listed has to be preserved or
+     * resetted to 0 */
     if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
     pt->ref = ref;
   }
@@ -663,7 +666,7 @@ MMG3D_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
  * and prevent nonmanifold patterns from being generated.
  *
  */
-static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0;
   double        *tmp;
@@ -1019,7 +1022,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
  * once values of sol have been snapped/checked
  *
  */
-static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
+int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
@@ -1250,7 +1253,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
  * Set references to tets according to the sign of the level set function.
  *
  */
-static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   double        v;
   int           ier;
@@ -1274,6 +1277,8 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       else
         nz ++;
     }
+    /* Remark: this test is not consistent with the test of the lssurf option
+     * because it autorizes the level-set to be superposed with the surface */
     assert(nz < 4);
     ier = MMG5_isSplit(mesh,ref,&refint,&refext);
 
@@ -2201,9 +2206,26 @@ int MMG3D_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int nde
  *
  */
 int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
+  char str[16]="";
+  
+  /* Set function pointers */
+  if ( mesh->info.isosurf ) {
+    strcat(str,"(BOUNDARY PART)");
+
+    MMG3D_snpval  = MMG3D_snpval_lssurf;
+    MMG3D_resetRef = MMG3D_resetRef_lssurf;
+    MMG3D_cuttet  = MMG3D_cuttet_lssurf;
+    MMG3D_setref   = MMG3D_setref_lssurf;
+  }
+  else {
+    MMG3D_snpval  = MMG3D_snpval_ls;
+    MMG3D_resetRef = MMG3D_resetRef_ls;
+    MMG3D_cuttet  = MMG3D_cuttet_ls;
+    MMG3D_setref   = MMG3D_setref_ls;
+  }
 
   if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+    fprintf(stdout,"  ** ISOSURFACE EXTRACTION %s\n",str);
 
   if ( mesh->nprism || mesh->nquad ) {
     fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"
@@ -2212,19 +2234,13 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Snap values of level set function if need be */
-  if ( !MMG3D_snpval_ls(mesh,sol) ) {
+  if ( !MMG3D_snpval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return 0;
-  }
-
-  /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG3D_resetRef(mesh) ) {
-    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
 
@@ -2249,30 +2265,45 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
-
-  /* Removal of small parasitic components */
-  if ( mesh->info.rmc > 0. && !MMG3D_rmc(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Error in removing small parasitic components."
-            " Exit program.\n");
+  
+  /* Reset the mesh->info.isoref field everywhere it appears */
+  if ( !MMG3D_resetRef(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
 
-  if ( !MMG3D_cuttet_ls(mesh,sol,met) ) {
+  /* Removal of small parasitic components */
+  if ( mesh->info.iso ) {
+    if ( mesh->info.rmc > 0. && !MMG3D_rmc(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Error in removing small parasitic components."
+              " Exit program.\n");
+      return 0;
+    }
+  }
+  else {
+    /* RMC : on verra */
+    if ( mesh->info.rmc > 0 ) {
+      fprintf(stdout,"\n  ## Warning: rmc option not implemented for boundary"
+              " isosurface extraction.\n");
+    }
+  }
+    
+  if ( !MMG3D_cuttet(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
-
+  
   MMG5_DEL_MEM(mesh,mesh->adja);
   MMG5_DEL_MEM(mesh,mesh->adjt);
   MMG5_DEL_MEM(mesh,mesh->tria);
 
   mesh->nt = 0;
 
-  if ( !MMG3D_setref_ls(mesh,sol) ) {
+  if ( !MMG3D_setref(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
-
+  
   /* Clean old bdy analysis */
   for ( MMG5_int k=1; k<=mesh->np; ++k ) {
     if ( mesh->point[k].tag & MG_BDY ) {

@@ -33,6 +33,7 @@
  */
 
 #include "libmmgs_private.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -44,7 +45,7 @@
  * once values of sol have been snapped/checked
  *
  */
-static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
+static int MMGS_cuttri(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
@@ -64,6 +65,11 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+      /* If only surface edges are discretized, skip non boundary entities: as
+       * mmgs doesn't add MG_BDY tags, we check if an edge is bdy from the
+       * MG_REF tag */
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_REF) ) continue;
+
       ip0 = pt->v[MMG5_inxt2[i]];
       ip1 = pt->v[MMG5_iprv2[i]];
       p0  = &mesh->point[ip0];
@@ -92,15 +98,28 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_REF) ) {
+        continue;
+      }
+
       ip0 = pt->v[MMG5_inxt2[i]];
       ip1 = pt->v[MMG5_iprv2[i]];
 
       np = MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
 
+      /* Look either at the triangle ref or at the boundary one */
+      MMG5_int ref;
+      if ( mesh->info.isosurf ) {
+        ref = pt->edg[i];
+      }
+      else {
+        ref = pt->ref;
+      }
+
       /* If user asks to keep input refs, ignore multi-mat mode */
       if ( mesh->info.iso!=2 ) {
-        if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
+        if ( !MMG5_isSplit(mesh,ref,&refint,&refext) ) continue;
       }
 
       v0 = sol->m[ip0];
@@ -220,10 +239,30 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
  *
  */
 int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
+  char str[16]="";
   MMG5_int k;
 
-  if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+  assert ( (mesh->info.iso || mesh->info.isosurf) && "level-set discretization mode not specified" );
+
+  assert ( (!(mesh->info.iso && mesh->info.isosurf)) && "unable to determine level-set discretization mode" );
+
+  /* Set function pointers */
+  if ( mesh->info.isosurf ) {
+    strcat(str,"(BOUNDARY PART)");
+
+    MMG5_snpval   = MMG5_snpval_lssurf;
+    MMG5_resetRef = MMG5_resetRef_lssurf;
+    MMG5_setref   = MMG5_setref_lssurf;
+  }
+  else {
+    MMG5_snpval   = MMG5_snpval_ls;
+    MMG5_resetRef = MMG5_resetRef_ls;
+    MMG5_setref   = MMG5_setref_ls;
+  }
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"  ** ISOSURFACE EXTRACTION %s\n",str);
+  }
 
   /* Work only with the 0 level set */
   for (k=1; k<= sol->np; k++)
@@ -247,15 +286,25 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  if ( !MMG5_snpval_ls(mesh,sol) ) {
+  /* Snap values of the level set function which are very close to 0 to 0 exactly */
+  if ( !MMG5_snpval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
 
-  /* Removal of small parasitic components */
-  if ( mesh->info.rmc > 0. && !MMG5_rmc(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Removal of small parasitic components */
+    if ( mesh->info.rmc > 0. && !MMG5_rmc(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
+      return 0;
+    }
+  }
+  else {
+    /* RMC : on verra */
+    if ( mesh->info.rmc > 0 ) {
+      fprintf(stdout,"\n  ## Warning: rmc option not implemented for boundary"
+              " isosurface extraction.\n");
+    }
   }
 
   MMG5_DEL_MEM(mesh,mesh->adja);
@@ -268,12 +317,12 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     }
   }
 
-  if ( !MMGS_cuttri_ls(mesh,sol,met) ) {
+  if ( !MMGS_cuttri(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
 
-  if ( !MMG5_setref_ls(mesh,sol) ) {
+  if ( !MMG5_setref(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
@@ -284,10 +333,12 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Check that the resulting mesh is manifold */
-  if ( !MMG5_chkmanimesh(mesh) ) {
-    fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Check that the resulting mesh is manifold */
+    if ( !MMG5_chkmanimesh(mesh) ) {
+      fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
+      return 0;
+    }
   }
 
   /* Clean memory */
