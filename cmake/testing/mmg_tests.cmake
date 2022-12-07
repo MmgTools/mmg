@@ -365,6 +365,13 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/c1/c1.meshb
     -out ${CTEST_OUTPUT_DIR}/mmg_nreg_${SHRT_EXEC}.o.meshb)
 
+  # -lssurf
+  ADD_TEST(NAME mmg_OptLsSurf_peninsula_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -opnbdy -lssurf -nr -hgrad 1.5 -hausd 0.02
+    -in ${MMG_CI_TESTS}/OptLsSurf_peninsula/peninsula
+    -sol  ${MMG_CI_TESTS}/OptLsSurf_peninsula/ls.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg_OptLsSurf_peninsula_${SHRT_EXEC}.o.meshb)
+
   ##############################################################################
   #####
   #####         Various test cases
