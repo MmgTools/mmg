@@ -47,6 +47,7 @@
 extern "C" {
 #endif
 
+#define MMG5_VOLFRAC     1.e-5
 
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */
@@ -203,19 +204,6 @@ LIBMMG_CORE_EXPORT void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,doub
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * Truncate the metric computed by the DoSol function by hmax and hmin values
- * (if setted by the user). Set hmin and hmax if they are not setted.
- *
- * \warning works only for a metric computed by the DoSol function because we
- * suppose that we have a diagonal tensor in aniso.
- *
- */
-LIBMMG_CORE_EXPORT void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param ref input tetra reference.
  * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
@@ -226,8 +214,8 @@ LIBMMG_CORE_EXPORT void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol me
  * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
  *
  */
-LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                                          int rin, int rex);
+LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
+                                          MMG5_int rin, MMG5_int rex);
 
 
 /**
@@ -242,7 +230,7 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref
  * references are deleted as spurious volumes by the \a rmc option.
  *
  */
-LIBMMG_CORE_EXPORT int  MMG5_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,int br);
+LIBMMG_CORE_EXPORT int  MMG5_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int br);
 
 /* deallocations */
 LIBMMG_CORE_EXPORT void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
@@ -287,6 +275,17 @@ LIBMMG_CORE_EXPORT extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,in
  *
  */
 LIBMMG_CORE_EXPORT int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
+
+/**
+ * \param tag input entity tag
+ *
+ * \return the list of the flags contained in \a tag
+ *
+ * Print the name associated to the \a typ value in the \a MMG5_type enum.
+ *
+ * \warning for debug purpose, no thread safe.
+ */
+const char* MMG5_Get_tagName(int tag);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -405,6 +404,16 @@ LIBMMG_CORE_EXPORT const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
  */
 LIBMMG_CORE_EXPORT const char* MMG5_Get_typeName(enum MMG5_type typ);
 
+
+/**
+ * \param mesh pointer toward mesh
+ *
+ * \return 1 if successful, 0 otherwise
+ *
+ * Clean non-ridge edges belonging to isosurface.
+ *
+ */
+LIBMMG_CORE_EXPORT int MMG5_Clean_isoEdges(MMG5_pMesh mesh);
 
 #ifdef __cplusplus
 }

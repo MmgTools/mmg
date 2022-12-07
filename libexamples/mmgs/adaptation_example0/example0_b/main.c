@@ -53,12 +53,13 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  int             ier,k;
+  int             ier;
   /* To save final mesh in a file */
   FILE*           inm;
   /* To manually recover the mesh */
-  int             np, nt, na, nc, nr, nreq, typEntity, typSol;
-  int             ref, Tria[3], Edge[2], *corner, *required, *ridge;
+  MMG5_int        k,np, nt, na, nc, nr, nreq,ref,Tria[3], Edge[2];
+  int             typEntity, typSol;
+  int             *corner, *required, *ridge;
   double          Point[3],Sol;
   char            *fileout,*solout;
 
@@ -215,59 +216,60 @@ int main(int argc,char *argv[]) {
   }
 
   nreq = 0; nc = 0;
-  fprintf(inm,"\nVertices\n%d\n",np);
+  fprintf(inm,"\nVertices\n%"MMG5_PRId"\n",np);
   for(k=1; k<=np; k++) {
     /** b) Vertex recovering */
     if ( MMGS_Get_vertex(mmgMesh,&(Point[0]),&(Point[1]),&(Point[2]),
                           &ref,&(corner[k]),&(required[k])) != 1 )
       exit(EXIT_FAILURE);
-    fprintf(inm,"%.15lg %.15lg %.15lg %d \n",Point[0],Point[1],Point[2],ref);
+    fprintf(inm,"%.15lg %.15lg %.15lg %"MMG5_PRId" \n",Point[0],Point[1],Point[2],ref);
     if ( corner[k] )  nc++;
     if ( required[k] )  nreq++;
   }
-  fprintf(inm,"\nCorners\n%d\n",nc);
+  fprintf(inm,"\nCorners\n%"MMG5_PRId"\n",nc);
   for(k=1; k<=np; k++) {
-    if ( corner[k] )  fprintf(inm,"%d \n",k);
+    if ( corner[k] )  fprintf(inm,"%"MMG5_PRId" \n",k);
   }
-  fprintf(inm,"\nRequiredVertices\n%d\n",nreq);
+  fprintf(inm,"\nRequiredVertices\n%"MMG5_PRId"\n",nreq);
   for(k=1; k<=np; k++) {
-    if ( required[k] )  fprintf(inm,"%d \n",k);
+    if ( required[k] )  fprintf(inm,"%"MMG5_PRId" \n",k);
   }
   free(corner);
   corner = NULL;
 
   nreq = 0;
-  fprintf(inm,"\nTriangles\n%d\n",nt);
+  fprintf(inm,"\nTriangles\n%"MMG5_PRId"\n",nt);
   for(k=1; k<=nt; k++) {
     /** d) Triangles recovering */
     if ( MMGS_Get_triangle(mmgMesh,&(Tria[0]),&(Tria[1]),&(Tria[2]),
                             &ref,&(required[k])) != 1 )
       exit(EXIT_FAILURE);
-    fprintf(inm,"%d %d %d %d \n",Tria[0],Tria[1],Tria[2],ref);
+    fprintf(inm,"%"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId" \n",
+            Tria[0],Tria[1],Tria[2],ref);
     if ( required[k] )  nreq++;
   }
-  fprintf(inm,"\nRequiredTriangles\n%d\n",nreq);
+  fprintf(inm,"\nRequiredTriangles\n%"MMG5_PRId"\n",nreq);
   for(k=1; k<=nt; k++) {
-    if ( required[k] )  fprintf(inm,"%d \n",k);
+    if ( required[k] )  fprintf(inm,"%"MMG5_PRId" \n",k);
   }
 
   nreq = 0;nr = 0;
-  fprintf(inm,"\nEdges\n%d\n",na);
+  fprintf(inm,"\nEdges\n%"MMG5_PRId"\n",na);
   for(k=1; k<=na; k++) {
     /** e) Edges recovering */
     if ( MMGS_Get_edge(mmgMesh,&(Edge[0]),&(Edge[1]),&ref,
                         &(ridge[k]),&(required[k])) != 1 )  exit(EXIT_FAILURE);
-    fprintf(inm,"%d %d %d \n",Edge[0],Edge[1],ref);
+    fprintf(inm,"%"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId" \n",Edge[0],Edge[1],ref);
     if ( ridge[k] )  nr++;
     if ( required[k] )  nreq++;
   }
-  fprintf(inm,"\nRequiredEdges\n%d\n",nreq);
+  fprintf(inm,"\nRequiredEdges\n%"MMG5_PRId"\n",nreq);
   for(k=1; k<=na; k++) {
-    if ( required[k] )  fprintf(inm,"%d \n",k);
+    if ( required[k] )  fprintf(inm,"%"MMG5_PRId" \n",k);
   }
-  fprintf(inm,"\nRidges\n%d\n",nr);
+  fprintf(inm,"\nRidges\n%"MMG5_PRId"\n",nr);
   for(k=1; k<=na; k++) {
-    if ( ridge[k] )  fprintf(inm,"%d \n",k);
+    if ( ridge[k] )  fprintf(inm,"%"MMG5_PRId" \n",k);
   }
 
   fprintf(inm,"\nEnd\n");
@@ -294,7 +296,7 @@ int main(int argc,char *argv[]) {
   if ( ( typEntity != MMG5_Vertex )  || ( typSol != MMG5_Scalar ) )
     exit(EXIT_FAILURE);
 
-  fprintf(inm,"\nSolAtVertices\n%d\n",np);
+  fprintf(inm,"\nSolAtVertices\n%"MMG5_PRId"\n",np);
   fprintf(inm,"1 1 \n\n");
   for(k=1; k<=np; k++) {
     /** b) Vertex recovering */

@@ -139,7 +139,7 @@ void  tminit(mytime *t,int maxtim) {
   }
 }
 
-#ifdef MMG_DIFFOUTPUT
+#ifdef MMG_COMPARABLE_OUTPUT
 /**
  * \fn void  printim(double elps,char *stim)
  * \brief Print real time.

@@ -36,9 +36,10 @@
 #include "libmmg3d_private.h"
 
 /** get new point address */
-int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src) {
+MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src) {
+
   MMG5_pPoint  ppt;
-  int     curpt;
+  MMG5_int     curpt;
 
   if ( !mesh->npnil )  return 0;
   curpt = mesh->npnil;
@@ -76,9 +77,9 @@ int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src) {
   return curpt;
 }
 
-void MMG3D_delPt(MMG5_pMesh mesh,int ip) {
+void MMG3D_delPt(MMG5_pMesh mesh,MMG5_int ip) {
   MMG5_pPoint   ppt;
-  MMG5_xPoint  *pxp;
+  MMG5_xPoint   *pxp;
 
   ppt = &mesh->point[ip];
   if ( ppt->xp ) {
@@ -95,8 +96,8 @@ void MMG3D_delPt(MMG5_pMesh mesh,int ip) {
 }
 
 /** get new elt address */
-int MMG3D_newElt(MMG5_pMesh mesh) {
-  int     curiel;
+MMG5_int MMG3D_newElt(MMG5_pMesh mesh) {
+  MMG5_int     curiel;
 
   if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
@@ -118,20 +119,20 @@ int MMG3D_newElt(MMG5_pMesh mesh) {
  * Delete the element \a iel
  *
  */
-int MMG3D_delElt(MMG5_pMesh mesh,int iel) {
+int MMG3D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
   MMG5_pTetra   pt;
-  int      iadr;
+  MMG5_int      iadr;
 
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stderr,"\n  ## INVALID ELEMENT %d.\n",iel);
+    fprintf(stderr,"\n  ## INVALID ELEMENT %" MMG5_PRId ".\n",iel);
     return 0;
   }
   memset(pt,0,sizeof(MMG5_Tetra));
   pt->v[3] = mesh->nenil;
   iadr = 4*(iel-1) + 1;
   if ( mesh->adja )
-    memset(&mesh->adja[iadr],0,4*sizeof(int));
+    memset(&mesh->adja[iadr],0,4*sizeof(MMG5_int));
   mesh->nenil = iel;
   if ( iel == mesh->ne ) {
     while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
@@ -171,7 +172,8 @@ int MMG3D_memOption_memSet(MMG5_pMesh mesh) {
  */
 int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   size_t     usedMem,avMem,reservedMem,npadd;
-  int        ctri,bytes;
+  int        ctri;
+  MMG5_int   bytes;
 
   /* init allocation need MMG5_MEMMIN B */
   reservedMem = MMG5_MEMMIN +
@@ -180,7 +182,7 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
     + (mesh->nt+1)*sizeof(MMG5_Tria) + (mesh->ne+1)*sizeof(MMG5_Tetra)
-    + (3*mesh->nt+1)*sizeof(int)   + (4*mesh->ne+1)*sizeof(int)
+    + (3*mesh->nt+1)*sizeof(MMG5_int)   + (4*mesh->ne+1)*sizeof(MMG5_int)
     + (mesh->np+1)*sizeof(double);
 
   if ( usedMem > mesh->memMax  ) {
@@ -195,13 +197,13 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
    * point+tria+tets+adja+adjt+aniso sol+item */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
     6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
-    4*6*sizeof(int) + ctri*3*sizeof(int) +
+    4*6*sizeof(MMG5_int) + ctri*3*sizeof(MMG5_int) +
     4*sizeof(MMG5_hedge)+6*sizeof(double);
 
 #ifdef USE_SCOTCH
   /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
    * + vertOldTab + sortPartTab - adja */
-  bytes = bytes + 3*6*sizeof(int);
+  bytes = bytes + 3*6*sizeof(MMG5_int);
 #endif
 
   avMem = mesh->memMax-usedMem;
@@ -214,15 +216,45 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
 
+  if ( sizeof(MMG5_int) == sizeof(int32_t) ) {
+    /** Check that we will not overflow int32_max when allocating adja array */
+
+    int coef;
+    if ( mesh->nprism ) {
+      coef = 5;
+    }
+    else {
+      coef = 4;
+    }
+
+    /* maximal number of triangles, taking the
+     * computation of adjacency relationships into account */
+    int32_t int32_nemax = (INT32_MAX-(coef+1))/coef;
+
+    if ( int32_nemax < mesh->nemax ) {
+      if ( int32_nemax <= mesh->ne ) {
+        /* No possible allocation without int32 overflow */
+        fprintf(stderr,"\n  ## Error: %s: with %" MMG5_PRId " tetrahedra Mmg will overflow"
+                " the 32-bit integer.\n",__func__,mesh->ne);
+        fprintf(stderr,"Please, configure Mmg with MMG5_INT=int64_t argument.\n");
+        return 0;
+      }
+      else {
+        /* Correction of maximal number of tetrahedra */
+        mesh->nemax = int32_nemax;
+      }
+    }
+  }
+
   /* check if the memory asked is enough to load the mesh*/
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %zu\n",
             mesh->memMax/MMG5_MILLION);
   }
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MMG3D_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  MMG3D_NTMAX    %d\n",mesh->ntmax);
-    fprintf(stdout,"  MMG3D_NEMAX    %d\n",mesh->nemax);
+    fprintf(stdout,"  MMG3D_NPMAX    %" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MMG3D_NTMAX    %" MMG5_PRId "\n",mesh->ntmax);
+    fprintf(stdout,"  MMG3D_NEMAX    %" MMG5_PRId "\n",mesh->nemax);
   }
 
   return 1;
@@ -254,7 +286,7 @@ int MMG3D_memOption(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
-  int k;
+  MMG5_int k;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
@@ -326,7 +358,7 @@ int MMG3D_zaldy(MMG5_pMesh mesh) {
  */
 void MMG5_freeXTets(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
-  int    k;
+  MMG5_int    k;
 
   for (k=1; k<=mesh->ne; k++) {
     pt     = &mesh->tetra[k];
@@ -345,7 +377,7 @@ void MMG5_freeXTets(MMG5_pMesh mesh) {
  */
 void MMG5_freeXPrisms(MMG5_pMesh mesh) {
   MMG5_pPrism pp;
-  int    k;
+  MMG5_int    k;
 
   for (k=1; k<=mesh->nprism; k++) {
     pp      = &mesh->prism[k];

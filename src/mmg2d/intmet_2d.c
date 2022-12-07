@@ -35,9 +35,9 @@
 
 /* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
    ip = index of the new point */
-int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
+int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria  pt;
-  int         ip1,ip2;
+  MMG5_int    ip1,ip2;
   int8_t      i1,i2;
   
   pt  = &mesh->tria[k];
@@ -206,13 +206,13 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
 
 /* Interpolation of anisotropic metric met along edge i of triangle k, according to parameter s;
  ip = index of the new point */
-int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
+int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria     pt;
   double         *m1,*m2,*mr;
 #ifndef NDEBUG
   double         det;
 #endif
-  int            ip1,ip2;
+  MMG5_int       ip1,ip2;
   int8_t         i1,i2;
   static int8_t  mmgWarn=0;
 
@@ -246,7 +246,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double 
     printf("\nInterpolated metrics:\n");
 
     double lambda[2],vp[2][2];
-    printf("Metric %d (tag %d): %e %e %e\n",ip1,mesh->point[ip1].tag,m1[0],m1[1],m1[2]);
+    printf("Metric %" MMG5_PRId " (tag %d): %e %e %e\n",ip1,mesh->point[ip1].tag,m1[0],m1[1],m1[2]);
 
     MMG5_eigen2(m1,lambda,vp);
     printf ("eigenval: %e %e\n",lambda[0],lambda[1] );
@@ -254,7 +254,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double 
     printf ("eigenvec: %e %e\n",vp[0][0],vp[0][1] );
     printf ("eigenvec: %e %e\n\n",vp[1][0],vp[1][1] );
 
-    printf("Metric %d (tag %d): %e %e %e\n",ip2,mesh->point[ip2].tag,m2[0],m2[1],m2[2]);
+    printf("Metric %" MMG5_PRId " (tag %d): %e %e %e\n",ip2,mesh->point[ip2].tag,m2[0],m2[1],m2[2]);
     MMG5_eigen2(m2,lambda,vp);
     printf ("eigenval: %e %e\n",lambda[0],lambda[1] );
     printf ("size:     %e %e\n",1./sqrt(lambda[0]),1./sqrt(lambda[1]) );

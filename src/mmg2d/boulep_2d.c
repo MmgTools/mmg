@@ -33,10 +33,11 @@ static uint8_t iprev[3] = {2,0,1};
    in:  ifirst    : triangle containing p
    iploc     : index of p in start
    out: list  : list of triangles */
-int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
+int MMG2D_boulep(MMG5_pMesh mesh, MMG5_int ifirst, int iploc, MMG5_int * list) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;
-  int    ip,voy,ilist,iel,*adja,i,iadr;
+  MMG5_int    ip,iel,*adja,iadr;
+  int         voy,ilist,i;
 
   if ( ifirst < 1 ) return 0;
   pt = &mesh->tria[ifirst];
@@ -111,11 +112,11 @@ int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
  * of ip in kk.
  *
  */
-int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, double *nn) {
+int MMG2D_boulen(MMG5_pMesh mesh, MMG5_int start,int8_t ip, MMG5_int *pleft, MMG5_int *pright, double *nn) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
-  int               *adja,k,kk,refs;
+  MMG5_int          *adja,k,kk,refs;
   int8_t            notedg;
   int8_t            i,ii,i1,i2;
 
@@ -138,7 +139,7 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, 
 
   if ( kk == start ) {
     fprintf(stderr,"  ## Error: %s: Unable to find a boundary edge in"
-            " the ball of point %d.\n",__func__,MMG2D_indPt(mesh,mesh->tria[start].v[ip]));
+            " the ball of point %" MMG5_PRId ".\n",__func__,MMG2D_indPt(mesh,mesh->tria[start].v[ip]));
     return 0;
   }
 
@@ -221,69 +222,15 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, 
  * \param mesh pointer toward the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
- * \param list pointer toward the computed ball of \a ip.
- * \return the size of the computed ball or 0 if fail.
- *
- * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
- * crossing ridge.
- *
- */
-int MMG2D_boulet(MMG5_pMesh mesh,int start,int8_t ip,int *list) {
-  int           *adja,k,ilist;
-  int8_t        i,i1,i2;
-
-  ilist = 0;
-
-  /* store neighbors */
-  k = start;
-  i = ip;
-  do {
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
-    list[ilist] = 3*k + i;
-    ++ilist;
-
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-    k  = adja[i1] / 3;
-    i  = adja[i1] % 3;
-    i  = MMG5_inxt2[i];
-  }
-  while ( k && k != start );
-  if ( k > 0 )  return ilist;
-
-  /* check if boundary hit */
-  k = start;
-  i = ip;
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i2 = MMG5_iprv2[i];
-    k  = adja[i2] / 3;
-    if ( k == 0 )  break;
-    i  = adja[i2] % 3;
-    i  = MMG5_iprv2[i];
-
-    if ( ilist > MMG2D_LONMAX-2 )  return -ilist;
-    list[ilist] = 3*k + i;
-    ilist++;
-  }
-  while ( k );
-
-  return ilist;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param start index of triangle to start.
- * \param ip index of point for wich we compute the ball.
  * \return 1 if success, 0 if fail.
  *
  * Find the two endpoints of the boundary curves joining ip and fill \a ip1 and
  * \a ip2 with their indices.
  *
  */
-int MMG2D_bouleendp(MMG5_pMesh mesh,int start,int8_t ip,int *ip1,int *ip2) {
+int MMG2D_bouleendp(MMG5_pMesh mesh,MMG5_int start,int8_t ip,MMG5_int *ip1,MMG5_int *ip2) {
   MMG5_pTria    pt;
-  int           *adja,k;
+  MMG5_int      *adja,k;
   int8_t        i,i1,i2;
   static int8_t mmgWarn0=0;
 

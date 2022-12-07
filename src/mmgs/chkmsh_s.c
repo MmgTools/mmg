@@ -45,11 +45,12 @@
  * Check the mesh validity
  *
  */
-int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
+int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
     MMG5_pPoint         ppt;
     MMG5_pTria          pt1,pt2;
-    int                 adj,adj1,k,kk,l,nk,i,j,ip,lon,len;
-    int                 *adja,*adjb,list[MMGS_LMAX+2];
+    MMG5_int            adj,adj1,k,kk,l,nk,ip;
+    MMG5_int            *adja,*adjb,list[MMG5_TRIA_LMAX+2];
+    int                 i,j,lon,len;
     int8_t              voy,voy1,i1,i2,j1,j2;
     static int8_t       mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
     static int8_t       mmgErr5=0,mmgErr6=0,mmgErr7=0;
@@ -69,12 +70,12 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
               if ( !mmgErr0 ) {
                 mmgErr0 = 1;
                 fprintf(stderr,"  ## Error: %s: 0. at least 1 missing edge"
-                        " tag (%d %d)\n",__func__,MMGS_indElt(mesh,k),
+                        " tag (%" MMG5_PRId " %" MMG5_PRId ")\n",__func__,MMGS_indElt(mesh,k),
                         MMGS_indElt(mesh,adj));
-                fprintf(stderr,"triangle %d: %d %d %d \n",MMGS_indElt(mesh,k),
+                fprintf(stderr,"triangle %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMGS_indElt(mesh,k),
                         MMGS_indPt(mesh,pt1->v[0]),MMGS_indPt(mesh,pt1->v[1]),
                         MMGS_indPt(mesh,pt1->v[2]));
-                fprintf(stderr,"tag (%d): %d %d %d \n",MMGS_indElt(mesh,k),
+                fprintf(stderr,"tag (%" MMG5_PRId "): %d %d %d \n",MMGS_indElt(mesh,k),
                         pt1->tag[0],pt1->tag[1],pt1->tag[2]);
               }
               return 0;
@@ -83,12 +84,12 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
               if ( !mmgErr1 ) {
                 mmgErr1 = 1;
                 fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong adjacency"
-                        " (%d %d)\n",
+                        " (%" MMG5_PRId " %" MMG5_PRId ")\n",
                         __func__,MMGS_indElt(mesh,k),MMGS_indElt(mesh,adj));
-                fprintf(stderr,"triangle %d: %d %d %d \n",MMGS_indElt(mesh,k),
+                fprintf(stderr,"triangle %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMGS_indElt(mesh,k),
                         MMGS_indPt(mesh,pt1->v[0]),MMGS_indPt(mesh,pt1->v[1]),
                         MMGS_indPt(mesh,pt1->v[2]));
-                fprintf(stderr,"adj (%d): %d %d %d \n",MMGS_indElt(mesh,k),
+                fprintf(stderr,"adj (%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMGS_indElt(mesh,k),
                         MMGS_indElt(mesh,adja[0]/3),MMGS_indElt(mesh,adja[1]/3),
                         MMGS_indElt(mesh,adja[2]/3));
               }
@@ -99,12 +100,12 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
               if ( !mmgErr2 ) {
                 mmgErr2 = 1;
                 fprintf(stderr,"\n  ## Error: %s: 4. At least 1 invalid adjacent"
-                        " (%d %d)\n",__func__,MMGS_indElt(mesh,adj),
+                        " (%" MMG5_PRId " %" MMG5_PRId ")\n",__func__,MMGS_indElt(mesh,adj),
                         MMGS_indElt(mesh,k));
-                fprintf(stderr,"vertices of k   %d: %d %d %d\n",
+                fprintf(stderr,"vertices of k   %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
                         MMGS_indElt(mesh,k),MMGS_indPt(mesh,pt1->v[0]),
                         MMGS_indPt(mesh,pt1->v[1]),MMGS_indPt(mesh,pt1->v[2]));
-                fprintf(stderr,"vertices of adj %d: %d %d %d \n",
+                fprintf(stderr,"vertices of adj %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",
                         MMGS_indElt(mesh,adj),MMGS_indPt(mesh,pt2->v[0]),
                         MMGS_indPt(mesh,pt2->v[1]),MMGS_indPt(mesh,pt2->v[2]));
               }
@@ -112,7 +113,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             }
             if ( (pt1->tag[i] != pt2->tag[voy]) || (pt1->edg[i] != pt2->edg[voy] ) ) {
                 fprintf(stderr,"\n  ## Error: %s: 3. at least 1 wrong"
-                        " tag/ref (%d %d)"
+                        " tag/ref (%" MMG5_PRId " %" MMG5_PRId ")"
                         "  %d - %d\n",__func__,MMGS_indElt(mesh,k),
                         MMGS_indElt(mesh,adj),pt1->tag[i],pt2->tag[voy]);
                 return 0;
@@ -124,19 +125,19 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
               if ( !mmgErr3 ) {
                 mmgErr3 = 1;
                 fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong"
-                        " adjacency (%d %d)\n",__func__, MMGS_indElt(mesh,k),
+                        " adjacency (%" MMG5_PRId " %" MMG5_PRId ")\n",__func__, MMGS_indElt(mesh,k),
                          MMGS_indElt(mesh,adj1));
-                fprintf(stderr,"vertices of %d: %d %d %d \n",MMGS_indElt(mesh,k),
+                fprintf(stderr,"vertices of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMGS_indElt(mesh,k),
                         MMGS_indPt(mesh,pt1->v[0]),MMGS_indPt(mesh,pt1->v[1]),
                         MMGS_indPt(mesh,pt1->v[2]));
-                fprintf(stderr,"vertices of adj %d: %d %d %d \n",
+                fprintf(stderr,"vertices of adj %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",
                         MMGS_indElt(mesh,adj),
                         MMGS_indPt(mesh,pt2->v[0]),MMGS_indPt(mesh,pt2->v[1]),
                         MMGS_indPt(mesh,pt2->v[2]));
-                fprintf(stderr,"adj(%d): %d %d %d\n",MMGS_indElt(mesh,k),
+                fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMGS_indElt(mesh,k),
                         MMGS_indElt(mesh,adja[0]/3),MMGS_indElt(mesh,adja[1]/3),
                         MMGS_indElt(mesh,adja[2]/3));
-                fprintf(stderr,"adj(%d): %d %d %d\n",MMGS_indElt(mesh,adj),
+                fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMGS_indElt(mesh,adj),
                         MMGS_indElt(mesh,adjb[0]/3),MMGS_indElt(mesh,adjb[1]/3),
                         MMGS_indElt(mesh,adjb[2]/3));
               }
@@ -149,7 +150,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   if ( !mmgErr4 ) {
                     mmgErr4 = 1;
                     fprintf(stderr,"\n  ## Error: %s: 8. at least 1 wrong"
-                            " orientation (%d %d).\n",__func__,MMGS_indElt(mesh,k),
+                            " orientation (%" MMG5_PRId " %" MMG5_PRId ").\n",__func__,MMGS_indElt(mesh,k),
                             MMGS_indElt(mesh,adj));
                   }
                   return 0;
@@ -178,16 +179,17 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
               if ( !mmgErr5 ) {
                 mmgErr5 = 1;
                 fprintf(stderr,"\n  ## Error: %s: 6. at least 1 unused"
-                        " vertex (%d  %d)\n",__func__,
+                        " vertex (%" MMG5_PRId "  %" MMG5_PRId ")\n",__func__,
                         MMGS_indElt(mesh,k),MMGS_indPt(mesh,ip));
-                fprintf(stderr,"%d %d %d\n",MMGS_indPt(mesh,pt1->v[0]),
+                fprintf(stderr,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMGS_indPt(mesh,pt1->v[0]),
                         MMGS_indPt(mesh,pt1->v[1]),MMGS_indPt(mesh,pt1->v[2]));
               }
               return 0;
             }
             else if ( MS_SIN(ppt->tag) )  continue;
 
-            lon = boulet(mesh,k,i,list);
+            int8_t dummy;
+            lon = MMG5_boulet(mesh,k,i,list,1,&dummy);
             if ( lon < 1 )  continue;
             for (l=0; l<lon; l++) {
                 kk  = list[l] / 3;
@@ -197,7 +199,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   if ( !mmgErr6 ) {
                     mmgErr6 = 1;
                     fprintf(stderr,"\n  ## Error: %s: 5. at least 1 wrong"
-                            " ball (%d, %d).\n",__func__,MMGS_indPt(mesh,ip),
+                            " ball (%" MMG5_PRId ", %" MMG5_PRId ").\n",__func__,MMGS_indPt(mesh,ip),
                             MMGS_indPt(mesh,pt2->v[nk]));
                   }
                   return 0;
@@ -217,7 +219,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
               if ( !mmgErr7 ) {
                 mmgErr7 = 1;
                 fprintf(stderr,"\n  ## Error: %s: 7. at least 1 incorrect"
-                        " ball (%d: %d %d).\n",__func__,MMGS_indPt(mesh,ip),lon,len);
+                        " ball (%" MMG5_PRId ": %d %d).\n",__func__,MMGS_indPt(mesh,ip),lon,len);
                 ppt->tag |= MG_CRN + MG_REQ;
               }
               return 0;
@@ -240,10 +242,10 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
 int chknor(MMG5_pMesh mesh) {
     MMG5_pTria    pt;
     MMG5_pPoint   p0;
-    MMG5_pxPoint    go;
-    double   dd,ps,*n,nt[3];
-    int      k;
-    int8_t   i;
+    MMG5_pxPoint  go;
+    double        dd,ps,*n,nt[3];
+    MMG5_int      k;
+    int8_t        i;
     static int8_t mmgWarn0=0, mmgWarn1=0;
 
     /* First test : check that all normal vectors at points are non 0 */
@@ -262,7 +264,7 @@ int chknor(MMG5_pMesh mesh) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 non unitary normal"
-                    " (point: %d normal n1 = %f %f %f). exit program\n",
+                    " (point: %" MMG5_PRId " normal n1 = %f %f %f). exit program\n",
                     __func__,MMGS_indPt(mesh,k),n[0],n[1],n[2]);
           }
           return 0;
@@ -275,7 +277,7 @@ int chknor(MMG5_pMesh mesh) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 non unitary normal"
-                    " (point: %d normal n2 = %f %f %f). exit program\n",
+                    " (point: %" MMG5_PRId " normal n2 = %f %f %f). exit program\n",
                     __func__,MMGS_indPt(mesh,k),n[0],n[1],n[2]);
           }
           return 0;
@@ -302,7 +304,7 @@ int chknor(MMG5_pMesh mesh) {
                       if ( !mmgWarn1 ) {
                         mmgWarn1 = 1;
                         fprintf(stderr,"\n  ## Error: %s: at least 1"
-                                " inconsistant normal (point %d in triangle %d):"
+                                " inconsistant normal (point %" MMG5_PRId " in triangle %" MMG5_PRId "):"
                                 " ps = %f \n",__func__,MMGS_indPt(mesh,pt->v[i]),
                                 MMGS_indElt(mesh,k),ps);
                       }
@@ -315,7 +317,7 @@ int chknor(MMG5_pMesh mesh) {
                       if ( !mmgWarn1 ) {
                         mmgWarn1 = 1;
                         fprintf(stderr,"\n  ## Error: %s: at least 1"
-                                " inconsistant normal (point %d in triangle %d):"
+                                " inconsistant normal (point %" MMG5_PRId " in triangle %" MMG5_PRId "):"
                                 " ps = %f \n",__func__,MMGS_indPt(mesh,pt->v[i]),
                                 MMGS_indElt(mesh,k),ps);
                       }
@@ -329,7 +331,7 @@ int chknor(MMG5_pMesh mesh) {
                       if ( !mmgWarn1 ) {
                         mmgWarn1 = 1;
                         fprintf(stderr,"\n  ## Error: %s: at least 1"
-                                " inconsistant normal (point %d in triangle %d):"
+                                " inconsistant normal (point %" MMG5_PRId " in triangle %" MMG5_PRId "):"
                                 " ps = %f \n",__func__,MMGS_indPt(mesh,pt->v[i]),
                                 MMGS_indElt(mesh,k),ps);
                       }
@@ -344,7 +346,7 @@ int chknor(MMG5_pMesh mesh) {
                   if ( !mmgWarn1 ) {
                     mmgWarn1 = 1;
                     fprintf(stderr,"\n  ## Error: %s: at least 1"
-                            " inconsistant normal (point %d in triangle %d):"
+                            " inconsistant normal (point %" MMG5_PRId " in triangle %" MMG5_PRId "):"
                             " ps = %f \n",__func__,MMGS_indPt(mesh,pt->v[i]),
                             MMGS_indElt(mesh,k),ps);
                   }

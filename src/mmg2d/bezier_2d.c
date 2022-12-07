@@ -25,7 +25,7 @@
 // extern int8_t ddb;
 
 /* Check if triangle k should be split based on geometric and rough edge length considerations */
-int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
+int MMG2D_chkedg(MMG5_pMesh mesh, MMG5_int k) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   MMG5_pPar         par;
@@ -182,7 +182,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
 
 /* Calculate coordinates o[2] and interpolated normal vector no[2] of a new point
  situated at parametric distance s from i1 = inxt2[i] */
-int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,int8_t i,double s,double *o,double *no) {
+int MMG2D_bezierCurv(MMG5_pMesh mesh,MMG5_int k,int8_t i,double s,double *o,double *no) {
   MMG5_pTria         pt;
   MMG5_pPoint        p1,p2;
   double             b1[2],b2[2],t1[2],t2[2],n1[2],n2[2],bn[2],ux,uy,ll,li,ps;

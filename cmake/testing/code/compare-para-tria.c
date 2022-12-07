@@ -105,9 +105,9 @@ int main(int argc,char *argv[]) {
   }
 
   /** Hash parallel triangle using their reference as key */
-  int k;
-  int maxref = 0;
-  int npar1   = 0;
+  MMG5_int k;
+  MMG5_int maxref = 0;
+  MMG5_int npar1   = 0;
   for ( k=1; k<=mesh1->nt; ++k ) {
     MMG5_pTria pt = &mesh1->tria[k];
     if ( (!MG_EOK(pt)) || !(TRIA_PARBDY(pt->tag)) ) {
@@ -118,7 +118,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* Check data consistency with mesh2 */
-  int npar2   = 0;
+  MMG5_int npar2   = 0;
   for ( k=1; k<=mesh2->nt; ++k ) {
     MMG5_pTria pt = &mesh2->tria[k];
     if ( (!MG_EOK(pt)) || !(TRIA_PARBDY(pt->tag)) ) {
@@ -128,7 +128,8 @@ int main(int argc,char *argv[]) {
     if ( pt->ref > maxref ) {
       fprintf(stderr,"Error: %s: %d:"
               " maximal reference of parallel boundaries mimatch:"
-              " max ref in mesh1 is %d while ref %d founded in mesh2.\n",
+              " max ref in mesh1 is %"MMG5_PRId" while ref %"MMG5_PRId" "
+              "founded in mesh2.\n",
               __func__,__LINE__,maxref,pt->ref);
       exit(EXIT_FAILURE);
     }
@@ -136,7 +137,7 @@ int main(int argc,char *argv[]) {
 
   if ( npar2 != npar1 ) {
     fprintf(stderr,"Error: %s: %d:"
-            " number of parallel boundaries mimatch: %d versus %d.\n",
+            " number of parallel boundaries mimatch: %"MMG5_PRId" versus %"MMG5_PRId".\n",
             __func__,__LINE__,npar1,npar2);
     exit(EXIT_FAILURE);
   }
@@ -164,17 +165,18 @@ int main(int argc,char *argv[]) {
       continue;
     }
 
-    int k1 = hash.geom[pt2->ref].a;
+    MMG5_int k1 = hash.geom[pt2->ref].a;
     if ( !k1 ) {
       fprintf(stderr,"Error: %s: %d:"
-            " face of parallel ref %d not found in hashtable.\n",
+            " face of parallel ref %"MMG5_PRId" not found in hashtable.\n",
               __func__,__LINE__,pt2->ref);
       exit(EXIT_FAILURE);
     }
     MMG5_pTria pt1 = &mesh1->tria[k1];
     if ( (!MG_EOK(pt1)) || !(TRIA_PARBDY(pt1->tag)) ) {
       fprintf(stderr,"Error: %s: %d:"
-            " parallel tria %d in mesh2 (ref %d) is not valid in mesh1 (tria %d).\n",
+            " parallel tria %"MMG5_PRId" in mesh2 (ref %"MMG5_PRId") is not"
+              " valid in mesh1 (tria %"MMG5_PRId").\n",
               __func__,__LINE__,k,pt2->ref,k1);
       exit(EXIT_FAILURE);
     }
@@ -195,10 +197,12 @@ int main(int argc,char *argv[]) {
       fprintf(stderr,"Error: %s: %d:"
               " ref of vertices mismatch.\n",
               __func__,__LINE__);
-      fprintf(stderr," Vertices of triangle %d in mesh1 have refs %d %d %d\n",
+      fprintf(stderr," Vertices of triangle %"MMG5_PRId" in mesh1 have refs"
+              " %"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId"\n",
               k1,mesh1->point[pt1->v[0]].ref,mesh1->point[pt1->v[1]].ref,
               mesh1->point[pt1->v[2]].ref);
-      fprintf(stderr," Vertices of triangle %d in mesh2 have refs %d %d %d\n",
+      fprintf(stderr," Vertices of triangle %"MMG5_PRId" in mesh2 have refs"
+              " %"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId"\n",
               k,mesh2->point[pt2->v[0]].ref,mesh2->point[pt2->v[1]].ref,
               mesh2->point[pt2->v[2]].ref);
       exit(EXIT_FAILURE);
@@ -215,10 +219,12 @@ int main(int argc,char *argv[]) {
         fprintf(stderr,"Error: %s: %d:"
                 " ref of vertices %d and %d mismatch.\n",
                 __func__,__LINE__,i,i2);
-        fprintf(stderr," Vertices of triangle %d in mesh1 have refs %d %d %d\n",
+        fprintf(stderr," Vertices of triangle %"MMG5_PRId" in mesh1 have "
+                "refs %"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId"\n",
                 k1,mesh1->point[pt1->v[0]].ref,mesh1->point[pt1->v[1]].ref,
                 mesh1->point[pt1->v[2]].ref);
-        fprintf(stderr," Vertices of triangle %d in mesh2 have refs %d %d %d\n",
+        fprintf(stderr," Vertices of triangle %"MMG5_PRId" in mesh2 have "
+                "refs %"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId"\n",
                 k,mesh2->point[pt2->v[0]].ref,mesh2->point[pt2->v[1]].ref,
                 mesh2->point[pt2->v[2]].ref);
         exit(EXIT_FAILURE);
@@ -228,7 +234,8 @@ int main(int argc,char *argv[]) {
       for (j=0; j<3; ++j) {
         if ( fabs(ppt1->c[j]-ppt2->c[j]) > 1e-5 ) {
           fprintf(stderr,"Error: %s: %d:"
-                  " Elts %d and %d: coor %d of vertices %d and %d (ref %d)"
+                  " Elts %"MMG5_PRId" and %"MMG5_PRId": coor %d of"
+                  " vertices %d and %d (ref %"MMG5_PRId")"
                   " differs: %15lf versus %15lf.\n",__func__,__LINE__,
                   k1,k,j,i,i2,ppt1->ref,ppt1->c[j],ppt2->c[j]);
           exit(EXIT_FAILURE);

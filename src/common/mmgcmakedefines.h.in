@@ -24,8 +24,19 @@
 #ifndef MMGCMAKEDEFINE_H
 #define MMGCMAKEDEFINE_H
 
+/* inttypes.h is needed to handle prints of MMG5_int using PRId32 and PRId64 macros */
+#include <inttypes.h>
+
 @DEF_POSIX@
 @DEF_GNU@
+
+@DEF_MMG5_INT@ /*!< Integer type for C */
+
+@DEF_MMG5_PRId@ /*!< Printing format for MMG5_int type */
+
+@DEF_MMG_SWPBIN@ /*!< MMG5_swapbin function for MMG5_int */
+
+@DEF_MMG_ABS@ /*!< Abs function for MMG5_int */
 
 #cmakedefine   USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 #cmakedefine01 MMG_DYN_LIB

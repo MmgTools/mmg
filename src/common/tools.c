@@ -35,9 +35,20 @@
 
 #include "mmgcommon.h"
 
-/** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
-inline void MMG5_nsort(int n,double *val,int8_t *perm){
-    int   i,j,aux;
+/**
+ * \param n array size
+ * \param val array of double precision floating points
+ * \param perm permutation array
+ *
+ * naive (increasing) sorting algorithm, for very small tabs ; permutation is
+ * stored in perm
+ *
+ * \remark to use only on very small arrays such as metric tensors (size lower
+ * than int8_max).
+ */
+inline void MMG5_nsort(int8_t n,double *val,int8_t *perm){
+    int8_t   i,j;
+    int8_t   aux;
 
     for (i=0; i<n; i++)  perm[i] = i;
 
@@ -63,6 +74,8 @@ inline void MMG5_nsort(int n,double *val,int8_t *perm){
  * Naively permute a small array. Use shift and stride to eventually permute
  * matrix columns.
  *
+ * \remark to use only on very small arrays such as metric tensors (size lower
+ * than int8_max).
  */
 inline void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm) {
   int8_t i,k;
@@ -112,7 +125,7 @@ int MMG5_devangle(double* n1, double *n2, double crit)
  *
  */
 inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
-                                int ip1,int ip2, int ip3,double *n) {
+                                MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,double *n) {
   MMG5_pPoint   p1,p2,p3;
   double        abx,aby,abz,acx,acy,acz;
 
@@ -145,8 +158,8 @@ inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
  *
  */
 inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
-  double   n[3];
-  int      ip1, ip2, ip3;
+  double    n[3];
+  MMG5_int  ip1, ip2, ip3;
 
   ip1 = pt->v[0];
   ip2 = pt->v[1];
@@ -167,7 +180,7 @@ inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
  * Compute normalized face normal given three points on the surface.
  *
  */
-inline int MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+inline int MMG5_norpts(MMG5_pMesh mesh,MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,double *n) {
   double   dd,det;
 
   MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
@@ -811,19 +824,19 @@ inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
  */
 void MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
   MMG5_pTria ptt;
-  int   k;
-  FILE  *inm;
+  MMG5_int   k;
+  FILE       *inm;
 
   inm = fopen(fileName,"w");
 
-  fprintf(inm,"----------> %d TRIANGLES <----------\n",mesh->nt);
+  fprintf(inm,"----------> %" MMG5_PRId " TRIANGLES <----------\n",mesh->nt);
   for(k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    fprintf(inm,"num %d -> %d %d %d\n",k,ptt->v[0],ptt->v[1],
+    fprintf(inm,"num %" MMG5_PRId " -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",k,ptt->v[0],ptt->v[1],
             ptt->v[2]);
-    fprintf(inm,"ref   -> %d\n",ptt->ref);
+    fprintf(inm,"ref   -> %" MMG5_PRId "\n",ptt->ref);
     fprintf(inm,"tag   -> %d %d %d\n",ptt->tag[0],ptt->tag[1],ptt->tag[2]);
-    fprintf(inm,"edg   -> %d %d %d\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
+    fprintf(inm,"edg   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
     fprintf(inm,"\n");
   }
   fprintf(inm,"---------> END TRIANGLES <--------\n");
@@ -935,7 +948,7 @@ inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
  * Compute oriented volume of a tetrahedron (x6)
  *
  */
-inline double MMG5_orvol(MMG5_pPoint point,int *v) {
+inline double MMG5_orvol(MMG5_pPoint point,MMG5_int *v) {
     MMG5_pPoint  p0,p1,p2,p3;
 
     p0 = &point[v[0]];
@@ -980,7 +993,7 @@ double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
  */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
   MMG5_pPoint ppt;
-  int         k;
+  MMG5_int    k;
 
   for ( k=1; k<=mesh->np; k++ ) {
     ppt = &mesh->point[k];
@@ -1002,11 +1015,12 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
  * Mmgs or Mmg2d).
  *
  */
-void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int)  ) {
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG5_int)  ) {
   MMG5_pTria  pt;
   MMG5_pQuad  pq;
   MMG5_pPoint ppt;
-  int         k,i;
+  int         i;
+  MMG5_int    k;
 
   /* Preserve isolated required points */
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1056,9 +1070,10 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int)  ) {
  *
  */
 void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
-                               int (*delElt)(MMG5_pMesh,int) ) {
+                               int (*delElt)(MMG5_pMesh,MMG5_int) ) {
   MMG5_pTria  pt;
-  int         k,i,*adja,iadr,iadrv,iv;
+  int         i,iv;
+  MMG5_int    k,*adja,iadr,iadrv;
   int         nfac = 3; // number of faces per elt
 
   for ( k=1 ; k <= mesh->nt ; k++) {

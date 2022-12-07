@@ -49,7 +49,8 @@ static void MMG5_endcod(void) {
  */
 static inline
 int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
-  int         npar,k,ier;
+  int         npar,ier;
+  MMG5_int    k;
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
@@ -98,7 +99,7 @@ int MMG2D_writeLocalParamAtEdg( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Edge %e %e %e \n",cur->val,
+    fprintf(out,"%"MMG5_PRId" Edge %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }
@@ -236,13 +237,11 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG2D_Set_commonFunc();
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG2D: IMB-LJLL : %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
 
   /* scaling mesh and hmin/hmax computation*/
-  if ( !MMG2D_scaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* specific meshing + update hmin/hmax */
   if ( mesh->info.optim ) {
@@ -251,7 +250,6 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG2D_solTruncatureForOptim(mesh,met);
   }
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
@@ -286,9 +284,9 @@ int main(int argc,char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
 
   /* Version info */
+#ifndef MMG_COMPARABLE_OUTPUT
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
-#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 #endif
 
@@ -462,7 +460,7 @@ int main(int argc,char *argv[]) {
               " AND A SOLUTION IN ADAPTATION MODE.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
-
+    
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 

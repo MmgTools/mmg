@@ -35,8 +35,10 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
   MMG5_pPoint     ppt;
-  int             k,l,kk,nex,list[MMG2D_LONMAX],kdep,lon,iel,iare,ied;
-  int             ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3];
+  MMG5_int        list[MMG5_TRIA_LMAX],list2[3];
+  MMG5_int        k,l,kk,nex,kdep,lon,iel;
+  int             iare,ied;
+  MMG5_int        ia,ib,ilon,rnd,idep,*adja,ir,adj;
   int8_t          i,i1,i2,j;
 //  int       iadr2,*adja2,ndel,iadr,ped0,ped1;
   static int8_t   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
@@ -79,13 +81,14 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     else
       j=2;
 
-    lon = MMG2D_boulet(mesh,kdep,j,list);
+    int8_t dummy;
+    lon = MMG5_boulet(mesh,kdep,j,list,0,&dummy);
 
     if ( lon <= 0 ) {
       if ( !mmgWarn0 ) {
         mmgWarn0=1;
         fprintf(stderr,"\n  ## Error: %s: at least 1 wrong ball "
-                "(point %d of triangle %d).\n",__func__,
+                "(point %" MMG5_PRId " of triangle %" MMG5_PRId ").\n",__func__,
                 MMG2D_indPt(mesh, mesh->tria[kdep].v[j]),MMG2D_indElt(mesh,kdep));
       }
       return 0;
@@ -113,7 +116,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( l >= lon ) {
       if ( (mesh->info.imprim > 5) && (!mmgWarn1) ) {
         mmgWarn1 = 1;
-        fprintf(stderr,"\n  ## Warning: %s: at least 1 missing edge (%d %d).\n",
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 missing edge (%" MMG5_PRId " %" MMG5_PRId ").\n",
                 __func__,MMG2D_indPt(mesh,ped->a),MMG2D_indPt(mesh,ped->b));
       }
       ped->base = kdep;
@@ -123,7 +126,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   /** Now treat the missing edges */
   if ( nex != mesh->na ) {
     if(mesh->info.imprim > 5)
-      printf(" ** number of missing edges : %d\n",mesh->na-nex);
+      printf(" ** number of missing edges : %" MMG5_PRId "\n",mesh->na-nex);
 
     for (kk=1; kk<=mesh->na; kk++) {
       ped = &mesh->edge[kk];
@@ -133,7 +136,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       kdep = ped->base;
 
       if(mesh->info.ddebug)
-        printf("\n  -- edge enforcement %d %d\n",ia,ib);
+        printf("\n  -- edge enforcement %" MMG5_PRId " %" MMG5_PRId "\n",ia,ib);
 
       /* List of the triangles intersected by the edge */
       if ( !(lon=MMG2D_locateEdge(mesh,ia,ib,&kdep,list)) ) {
@@ -150,7 +153,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         if ( mesh->info.ddebug && (!mmgWarn3) ) {
           mmgWarn3=1;
           fprintf(stderr,"\n ## Error: %s: Unable to force at least"
-                  " 1 edge (%d %d -- %d).\n",__func__,MMG2D_indPt(mesh,ia),
+                  " 1 edge (%" MMG5_PRId " %" MMG5_PRId " -- %" MMG5_PRId ").\n",__func__,MMG2D_indPt(mesh,ia),
                   MMG2D_indPt(mesh,ib),lon);
         }
         return 0;
@@ -166,15 +169,15 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Warning: %s: existing edge.\n",__func__);
         }
       }
-      if( (!mmgWarn5) && (lon>MMG2D_LONMAX) ) {
+      if( (!mmgWarn5) && (lon>MMG5_TRIA_LMAX) ) {
         mmgWarn5 = 1;
         fprintf(stderr,"\n  ## Error: %s: at least 1 edge intersecting too many"
-               " triangles (%d)\n",__func__,lon);
+               " triangles (%" MMG5_PRId ")\n",__func__,lon);
       }
       if ( lon<2 ) {
         if ( mesh->info.ddebug && (!mmgWarn6) ) {
           mmgWarn6 = 1;
-          fprintf(stderr,"\n  ## Warning: %s: few edges... %d\n",__func__,lon);
+          fprintf(stderr,"\n  ## Warning: %s: few edges... %" MMG5_PRId "\n",__func__,lon);
         }
       }
 
@@ -197,7 +200,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 
         assert ( l <= lon );
         idep = list[rnd] % 3;
-        // if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
+        // if(mesh->info.ddebug) printf("i= %" MMG5_PRId " < %" MMG5_PRId " ? on demarre avec %" MMG5_PRId "\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
 
         for (i=0; i<3; i++) {
@@ -226,8 +229,8 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
               ilon--;
               if ( mesh->info.ddebug && (!mmgWarn8) ) {
                 mmgWarn8 = 1;
-                fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle (%d)"
-                        " not intersected ==> %d\n",__func__,
+                fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle (%" MMG5_PRId ")"
+                        " not intersected ==> %" MMG5_PRId "\n",__func__,
                         MMG2D_indElt(mesh,list2[ied]),ilon);
               }
               mesh->tria[list2[ied]].base = mesh->base;
@@ -239,7 +242,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
             }
             else {
               if ( mesh->info.ddebug )
-                printf("  ** tr intersected %d \n",list2[ied]);
+                printf("  ** tr intersected %" MMG5_PRId " \n",list2[ied]);
               mesh->tria[list2[ied]].base = mesh->base+1;
             }
           }
@@ -257,7 +260,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 /*   //check if there are more bdry edges.. and delete tr      */
 /* #warning a optimiser en mettant un pile et un while */
-/*   //printf("tr 1 : %d %d %d\n",mesh->tria[1].v[0],mesh->tria[1].v[1],mesh->tria[1].v[2]);  */
+/*   //printf("tr 1 : %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",mesh->tria[1].v[0],mesh->tria[1].v[1],mesh->tria[1].v[2]);  */
 /*   do { */
 /*     ndel=0; */
 /*     for(k=1 ; k<=mesh->nt ; k++) { */
@@ -280,7 +283,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 /*    break; */
 /*       } */
 /*       if(i==3) continue;  */
-  /*       fprintf(stdout,"WARNING BDRY EDGES MISSING : DO YOU HAVE DUPLICATED VERTEX ? %d %d %d\n", */
+  /*       fprintf(stdout,"WARNING BDRY EDGES MISSING : DO YOU HAVE DUPLICATED VERTEX ? %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n", */
 /*        pt->v[0],pt->v[1],pt->v[2]); */
 /*       for(i=0 ; i<3 ; i++) {         */
 /*  if(!adja[i]) continue; */

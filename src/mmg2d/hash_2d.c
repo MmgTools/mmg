@@ -34,8 +34,8 @@
  */
 int MMG2D_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
-  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
-  int            *hcode,*link,inival,hsize,iadr;
+  MMG5_int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
+  MMG5_int       *hcode,*link,inival,hsize,iadr;
   uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
@@ -43,13 +43,13 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
   if ( !mesh->nt )  return 0;
 
   /* memory alloc */
-  MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nt+1,MMG5_int,return 0);
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG5_int),"adjacency table",
                 printf("  Exit program.\n");
                 return 0;);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG5_int,return 0);
 
   link  = mesh->adja;
   hsize = mesh->nt;
@@ -77,8 +77,7 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
       }
 
       /* compute key */
-      key = KTA*mins + KTB*maxs;
-      key = key % hsize + 1;
+      key = (KTA*(int64_t)mins + KTB*(int64_t)maxs)%hsize+1;
 
       /* insert */
       iadr = 3*(k-1) + i+1;
@@ -152,8 +151,8 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
   MMG5_pTria     pt;
   MMG5_Hash      hash;
-  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
-  int           *hcode,*link,hsize,inival;
+  MMG5_int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
+  MMG5_int       *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
@@ -175,11 +174,11 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING QUAD ADJACENCY\n");
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(int),"quad adjacency table",
+  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(MMG5_int),"quad adjacency table",
                fprintf(stderr,"  Exit program.\n");
                return 0);
-  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,int,return 0);
-  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,MMG5_int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,MMG5_int,return 0);
 
   link  = mesh->adjq;
   hsize = mesh->nquad;
@@ -208,8 +207,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
       }
 
       /* compute key */
-      key = KTA*mins + KTB*maxs;
-      key = key % hsize + 1;
+      key = (KTA*(int64_t)mins + KTB*(int64_t)maxs)%hsize+1;
 
       /* insert */
       iadr++;
@@ -335,25 +333,40 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
-  int             k,ia;
+  MMG5_int        ia;
+  MMG5_int        k;
   int8_t          ier;
   uint8_t         i,i1,i2;
 
-  /* Try to clean triangle structure (in case where mmg2dlib is called after
-   * mmg2dmesh) */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
+  /**
+      The cleaning of required tags inside triangles has been initially added by
+      commit da4b099c. It probably followed the report of a bug arising when
+      several library functions are successively called without cleaning the
+      mesh structure but on december 2022 I am not able to reproduce this bug.
+      Due to tags cleaning, input required edges are lost in ls discretization
+      mode (see issue #171).
+      The metRidtyp field (previsouly not used in 2D) is
+      now used to mark if \a MMG2D_assignEdge function is called for the first
+      time inside the library and if we have to clean triangle tags (in order to
+      fix issue #171 without breaking again the initial fix). */
+  if ( !mesh->info.metRidTyp ) {
+    /* Try to clean triangle structure (in case where mmg2dlib is called after
+     * mmg2dmesh) */
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) )  continue;
 
-    /* If all edges are required, the triangle is maybe required by the user */
-    if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
-      continue;
-    }
+      /* If all edges are required, the triangle is maybe required by the user */
+      if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
+        continue;
+      }
 
-    /* Otherwise there is no reason to have required tags on tria edges */
-    for ( ia = 0; ia < 3; ++ia ) {
-      pt->tag[ia] &= ~MG_REQ;
+      /* Otherwise there is no reason to have required tags on edges */
+      for ( ia = 0; ia < 3; ++ia ) {
+        pt->tag[ia] &= ~MG_REQ;
+      }
     }
+    mesh->info.metRidTyp = 1;
   }
 
   if ( !mesh->na ) return 1;
@@ -369,7 +382,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->na; k++) {
     ier = MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
     if ( !ier ) {
-      fprintf(stderr,"\n  ## Error: %s: unable to hash edge %d %d.\n",__func__,
+      fprintf(stderr,"\n  ## Error: %s: unable to hash edge %" MMG5_PRId " %" MMG5_PRId ".\n",__func__,
               MMG2D_indPt(mesh,mesh->edge[k].a),MMG2D_indPt(mesh,mesh->edge[k].b));
       return 0;
     }
@@ -434,7 +447,7 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      pa;
   MMG5_pPoint     p0;
-  int             k,*adja,natmp,iel;
+  MMG5_int        k,*adja,natmp,iel;
   int8_t          i,i1,i2;
 
   natmp = 0;
@@ -516,8 +529,8 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pQuad         pq,pq1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
-  int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
-  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int           np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
+  MMG5_int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   int8_t             i,i1,i2;
 
   /* Keep only one domain if asked */
@@ -690,7 +703,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
           iel = adja[i] / 4;
 
           if ( iel < 0) {
-            /* Edge at the in erface between a quad and a tria: treated from the tria */
+            /* Edge at the interface between a quad and a tria: treated from the tria */
             continue;
           }
 
@@ -860,13 +873,13 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8" MMG5_PRId "   CORNERS %8" MMG5_PRId "\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES      %8" MMG5_PRId "\n",mesh->nt);
     if ( mesh->nquad ) {
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8" MMG5_PRId "\n",mesh->nquad);
     }
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8" MMG5_PRId "\n",mesh->na);
   }
 
   if ( memWarn ) return 0;

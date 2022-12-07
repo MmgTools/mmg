@@ -34,17 +34,38 @@
  */
 
 #include "libmmgs_private.h"
+#include "mmgsexterns.h"
 #include "mmgexterns.h"
+#include "inlined_functions.h"
 
-/* Check whether edge i of triangle k should be swapped for geometric approximation purposes */
-int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk) {
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param k index of the element in wich we perform the edge swap
+ * \param i index of the edge to swap
+ * \param typchk type of check to perform
+ * \param MMGS_lenEdg pointer toward the suitable fct to compute edge lengths
+ * depending on presence of input metric, metric type (iso/aniso) and \a typchk
+ * value (i.e. stage of adaptation)
+ * \param MMGS_caltri pointer toward the suitable fct to compute tria quality
+ * depending on presence of input metric, metric type (iso/aniso) and \a typchk
+ * value (i.e. stage of adaptation)
+ *
+ * Check whether edge i of triangle k should be swapped for geometric
+ * approximation purposes
+ *
+ */
+int chkswp(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i,int8_t typchk,
+           double (*MMGS_lenEdg)(MMG5_pMesh,MMG5_pSol,MMG5_int ,MMG5_int,int8_t),
+           double (*MMGS_caltri)(MMG5_pMesh,MMG5_pSol,MMG5_pTria)) {
   MMG5_pTria    pt,pt0,pt1;
   MMG5_pPoint   p[3],q;
-  MMG5_pPar      par;
-  double   np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3],hausd;
-  double   cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
-  int     *adja,j,kk,l,ip0,ip1,ip2,iq,isloc;
-  int8_t   ii,i1,i2,jj;
+  MMG5_pPar     par;
+  double        np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3],hausd;
+  double        cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
+  MMG5_int      *adja,j,kk,l,ip0,ip1,ip2,iq;
+  int           isloc;
+  int8_t        ii,i1,i2,jj;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
@@ -94,9 +115,9 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk) {
   }
 
   /* check length */
-  if ( typchk == 2 && met->m ) {
-    loni = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
-    lona = MMG5_lenSurfEdg(mesh,met,ip0,iq,0);
+  if ( MMGS_lenEdg ) {
+    loni = MMGS_lenEdg(mesh,met,ip1,ip2,0);
+    lona = MMGS_lenEdg(mesh,met,ip0,iq,0);
     if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,MMGS_LSHRT);
     if ( lona > 1.0 )  lona = 1.0 / lona;
     if ( lona < loni || !loni )  return 0;
@@ -263,14 +284,14 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk) {
   }
   else {
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = MMG5_caltri_iso(mesh,NULL,pt0);
+    cal1 = MMGS_caltri(mesh,met,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = MMG5_caltri_iso(mesh,NULL,pt0);
+    cal2 = MMGS_caltri(mesh,met,pt0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = MMG5_caltri_iso(mesh,NULL,pt0);
+    cal1 = MMGS_caltri(mesh,met,pt0);
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = MMG5_caltri_iso(mesh,NULL,pt0);
+    cal2 = MMGS_caltri(mesh,met,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
 
@@ -294,10 +315,10 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk) {
  * must be checked outside to prevent the creation of empty elts.
  *
  */
-int swapar(MMG5_pMesh mesh,int k,int i) {
+int swapar(MMG5_pMesh mesh,MMG5_int k,int i) {
   MMG5_pTria    pt,pt1;
-  int     *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
-  int8_t   i1,i2,j,jj,j2,v11,v21;
+  MMG5_int      *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
+  int8_t        i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
   if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return 0;
@@ -368,80 +389,4 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   mesh->adja[3*(adj-1)+1+j]   = 3*k11+v11;
 
   return 1;
-}
-
-
-/* flip edge i of tria k for isotropic mesh*/
-int litswp(MMG5_pMesh mesh,int k,int8_t i,double kali) {
-  MMG5_pTria    pt,pt0,pt1;
-  double        kalf,kalt,ps,n1[3],n2[3];
-  int          *adja,ia,ib,ic,id,kk;
-  int8_t        ii,i1,i2;
-
-  pt0 = &mesh->tria[0];
-  pt  = &mesh->tria[k];
-  if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return 0;
-
-  i1 = MMG5_inxt2[i];
-  i2 = MMG5_iprv2[i];
-  ia = pt->v[i];
-  ib = pt->v[i1];
-  ic = pt->v[i2];
-
-  adja = &mesh->adja[3*(k-1)+1];
-  kk  = adja[i] / 3;
-  ii  = adja[i] % 3;
-  pt1 = &mesh->tria[kk];
-  if ( MS_SIN(pt1->tag[ii]) )  return 0;
-  id = pt1->v[ii];
-
-  /* check non convexity */
-  MMG5_norpts(mesh,ia,ib,id,n1);
-  MMG5_norpts(mesh,ia,id,ic,n2);
-  ps = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-  if ( ps < MMG5_ANGEDG )  return 0;
-
-  /* check quality */
-  pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
-  kalt = MMG5_calelt(mesh,NULL,pt0);
-  kali = MG_MIN(kali,kalt);
-  pt0->v[0] = ia;  pt0->v[1] = id;  pt0->v[2] = ic;
-  kalt = MMG5_calelt(mesh,NULL,pt0);
-  pt0->v[0] = ia;  pt0->v[1] = ib;  pt0->v[2] = id;
-  kalf = MMG5_calelt(mesh,NULL,pt0);
-  kalf = MG_MIN(kalf,kalt);
-  if ( kalf > 1.02 * kali ) {
-    swapar(mesh,k,i);
-    return 1;
-  }
-  return 0;
-}
-
-
-/**
- * attempt to swap any edge below quality value
- * list goes from 0 to ilist-1.
- *
- * \warning not used
- *
- */
-int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t typchk) {
-  int      k,ns,iel;
-  int8_t   i,i1;
-
-  k  = 0;
-  ns = 0;
-  do {
-    iel = list[k] / 3;
-    i   = list[k] % 3;
-    i1  = MMG5_inxt2[i];
-    if ( chkswp(mesh,met,iel,i1,typchk) ) {
-      ns += swapar(mesh,iel,i1);
-      k++;
-    }
-    k++;
-  }
-  while ( k < ilist );
-
-  return ns;
 }

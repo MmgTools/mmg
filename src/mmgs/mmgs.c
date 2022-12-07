@@ -63,9 +63,11 @@ static void MMG5_endcod(void) {
  */
 static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
-  int        ref,i,j,ret,npar;
+  int        i,j,ret,npar,nbr,split;
+  MMG5_int   ref,rin,rex,br;
   char       *ptr,buf[256],data[256];
   FILE       *in;
+  fpos_t     position;
 
   /* check for parameter file */
   strcpy(data,mesh->namein);
@@ -79,9 +81,13 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmgs");
     in = fopen(data,"rb");
-    if ( !in )  return 1;
+    if ( !in ) {
+      return 1;
+    }
   }
-  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+  }
 
   /* read parameters */
   mesh->info.npar = 0;
@@ -89,38 +95,96 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* scan line */
     ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) )  break;
-    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    for (i=0; (size_t)i<strlen(data); i++) data[i] = tolower(data[i]);
 
-    /* check for condition type */
-    if ( !strcmp(data,"parameters") ) {
-      MMG_FSCANF(in,"%d",&npar);
-
-      if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLocalParam,npar) )
+    /* Read user-defined references for the LS mode */
+    if ( !strcmp(data,"lsreferences") ) {
+      ret = fscanf(in,"%d",&npar);
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
         return 0;
+      }
 
-      for (i=0; i<mesh->info.npar; i++) {
-        MMG_FSCANF(in,"%d %255s ",&ref,buf);
-        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
-
-        if ( !ret ) {
-          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
-          return 0;
+      if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfMat,npar) ) {
+        return 0;
+      }
+      for (i=0; i<mesh->info.nmat; i++) {
+        MMG_FSCANF(in,"%" MMG5_PRId "",&ref);
+        fgetpos(in,&position);
+        MMG_FSCANF(in,"%255s",data);
+        split = MMG5_MMAT_NoSplit;
+        rin = rex = ref;
+        if ( strcmp(data,"nosplit") ) {
+          fsetpos(in,&position);
+          split = MMG5_MMAT_Split;
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rin);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rex);
         }
-
-        for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
-
-        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
-          if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
-            return 0;
-          }
-        }
-        else {
-          fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
+        if ( !MMGS_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
           return 0;
         }
       }
     }
+    /* Read user-defined local parameters and store them in the structure info->par */
+    else if ( !strcmp(data,"parameters") ) {
+      MMG_FSCANF(in,"%d",&npar);
+
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
+        return 0;
+      }
+      else if ( npar > MMG5_LPARMAX ) {
+        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",npar);
+        return 0;
+      }
+
+      /* Allocate memory and fill the info->par table (adding one, corresponding to the command line data) */
+      if ( npar ) {
+        if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLocalParam,npar) )
+          return 0;
+
+        for (i=0; i<mesh->info.npar; i++) {
+          MMG_FSCANF(in,"%" MMG5_PRId " %255s ",&ref,buf);
+          ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+
+          if ( !ret ) {
+            fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+            return 0;
+          }
+
+          for (j=0; (size_t)j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
+
+          if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
+            if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
+              return 0;
+            }
+          }
+          else {
+            fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
+            return 0;
+          }
+        }
+      }
+    }
+    /* Read user-defined references where connected components should stay attached in ls mode */
+    else if ( !strcmp(data,"lsbasereferences") ) {
+      MMG_FSCANF(in,"%d",&nbr);
+      if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLSBaseReferences,nbr) )
+        return 0;
+
+      for (i=0; i<mesh->info.nbr; i++) {
+        MMG_FSCANF(in,"%" MMG5_PRId "",&br);
+        if ( !MMGS_Set_lsBaseReference(mesh,met,br) ) {
+          return 0;
+        }
+      }
+    }
+    else {
+      fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+      return 0;
+    }
   }
+
   fclose(in);
   return 1;
 }
@@ -244,8 +308,6 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
 
@@ -258,7 +320,6 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
@@ -295,9 +356,9 @@ int main(int argc,char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
 
   /* Version info */
+#ifndef MMG_COMPARABLE_OUTPUT
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
-#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 #endif
 

@@ -33,28 +33,19 @@
 
 #include "libmmg2d_private.h"
 
-/** Return 1 if reference ref is in the br table, 0 otherwise */
-int MMG2D_isbr(MMG5_pMesh mesh,int ref) {
-  int k;
-
-  for(k=0; k<mesh->info.nbr; k++)
-    if ( ref == mesh->info.br[k] ) return(1);
-
-  return(0);
-}
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param kel index of the element in the unpacked mesh
+ *
  *
  * \return 0 if fail, index of the element in packed numerotation otherwise.
  *
  * find the element index in packed numerotation
  *
  */
-int MMG2D_indElt(MMG5_pMesh mesh, int kel) {
-    MMG5_pTria pt;
-    int        ne, k;
+MMG5_int MMG2D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
+    MMG5_pTria      pt;
+    MMG5_int        ne, k;
 
     ne = 0;
     for (k=1; k<=mesh->nt; k++) {
@@ -76,9 +67,9 @@ int MMG2D_indElt(MMG5_pMesh mesh, int kel) {
  * find the point index in packed numerotation
  *
  */
-int MMG2D_indPt(MMG5_pMesh mesh, int kp) {
+MMG5_int MMG2D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
     MMG5_pPoint ppt;
-    int         np, k;
+    MMG5_int    np, k;
 
     np = 0;
     for (k=1; k<=mesh->np; k++) {

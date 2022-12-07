@@ -57,6 +57,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  MMG5_OFF;
+  /* [n/10]   ,Value for isosurface boundary reference */
   mesh->info.isoref   =  MG_ISO;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
@@ -393,7 +394,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 
 void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   MMG5_pPoint ppt;
-  int         k,iadr;
+  MMG5_int    k,iadr;
 
   if ( met->size == 1 ) {
     for (k=1; k<=mesh->np; k++) {
@@ -557,12 +558,18 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethma
     return 0;
   }
 
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
   return 1;
 }
 
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
-  int8_t         sethmin,sethmax;
-
 
   if ( mesh->info.hmin > mesh->info.hsiz ) {
     fprintf(stderr,"\n  ## Error: %s: Mismatched options: hmin (%e) is greater"
@@ -580,20 +587,21 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
 
   *hsiz = mesh->info.hsiz;
 
-  sethmin = sethmax = 0;
-  if ( mesh->info.hmin > 0. ) {
-    sethmin = 1;
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  if ( mesh->info.sethmin ) {
     *hsiz    =  MG_MAX(mesh->info.hmin,*hsiz);
   }
 
-  if ( mesh->info.hmax > 0. ) {
-    sethmax = 1;
+  if ( mesh->info.sethmax ) {
     *hsiz    = MG_MIN(mesh->info.hmax,*hsiz);
   }
 
   /* Set hmin */
-  if ( !sethmin ) {
-    if ( sethmax ) {
+  if ( !mesh->info.sethmin ) {
+    if ( mesh->info.sethmax ) {
       mesh->info.hmin  = MG_MIN(0.1*(*hsiz),0.1*mesh->info.hmax);
     } else {
       mesh->info.hmin  = 0.1*(*hsiz);
@@ -601,12 +609,20 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
   }
 
   /* Set hmax */
-  if ( !sethmax ) {
-    if ( sethmin ) {
+  if ( !mesh->info.sethmax ) {
+    if ( mesh->info.sethmin ) {
       mesh->info.hmax  = MG_MAX(10.*(*hsiz),10.*mesh->info.hmin);
     } else {
       mesh->info.hmax  = 10.*(*hsiz);
     }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After hsiz computation:   hmin %lf (user setted %d)\n"
+            "                               hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
   }
 
   return 1;
@@ -667,6 +683,68 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
+const char* MMG5_Get_tagName(int tag)
+{
+  static char tags_name[1024];
+
+  if ( !tag )
+  {
+    return "No tag";
+  }
+
+  if ( tag & MG_NUL ) {
+    return "Removed";
+  }
+
+  strcpy(tags_name, "\0");
+
+  if ( tag & MG_REF ) {
+    strcat(tags_name,"Reference ");
+  }
+
+  if ( tag & MG_GEO) {
+    strcat(tags_name,"Ridge ");
+  }
+
+  if ( tag & MG_REQ) {
+    strcat(tags_name,"Required ");
+      }
+
+  if ( tag & MG_NOM) {
+    strcat(tags_name,"Non-manifold ");
+      }
+
+  if ( tag & MG_BDY) {
+    strcat(tags_name,"Boundary ");
+      }
+
+  if ( tag & MG_CRN) {
+    strcat(tags_name,"Corner ");
+    }
+
+  if ( tag & MG_NOSURF) {
+    strcat(tags_name,"Nosurf ");
+  }
+
+  if ( tag & MG_OPNBDY) {
+    strcat(tags_name,"Opnbdy ");
+  }
+
+  if ( tag & MG_OLDPARBDY) {
+    strcat(tags_name,"Old-parbdy ");
+  }
+
+  if ( tag & MG_PARBDYBDY) {
+    strcat(tags_name,"Parbdybdy ");
+  }
+
+  if ( tag & MG_PARBDY) {
+    strcat(tags_name,"Parbdy ");
+    }
+  strcat(tags_name,"tag(s).");
+
+  return tags_name;
+}
 
 /**
  * \param ptr pointer toward the file extension (dot included)
@@ -878,118 +956,4 @@ char *MMG5_Remove_ext (char* path,char *ext) {
   retpath[len] = '\0';
 
   return retpath;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * Truncate the metric computed by the DoSol function by hmax and hmin values
- * (if setted by the user). Set hmin and hmax if they are not setted.
- *
- * \warning works only for a metric computed by the DoSol function because we
- * suppose that we have a diagonal tensor in aniso.
- *
- */
-void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
-  MMG5_pTetra pt;
-  MMG5_pPoint ppt;
-  double      isqhmin, isqhmax;
-  int         i,k,iadr,sethmin,sethmax;
-
-  assert ( mesh->info.optim );
-
-  /* Detect the point used only by prisms */
-  if ( mesh->nprism ) {
-    for (k=1; k<=mesh->np; k++) {
-      mesh->point[k].flag = 1;
-    }
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) ) continue;
-
-      for (i=0; i<4; i++) {
-        mesh->point[pt->v[i]].flag = 0;
-      }
-    }
-  }
-
-  /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function. */
-  sethmin = sethmax = 1;
-  if ( mesh->info.hmin < 0 ) {
-    sethmin = 0;
-    if ( met->size == 1 ) {
-      mesh->info.hmin = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
-      }
-    }
-    else if ( met->size == 6 ){
-      mesh->info.hmin = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        iadr = met->size*k;
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+3]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+5]);
-      }
-      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
-    }
-  }
-
-  if ( mesh->info.hmax < 0 ) {
-    sethmax = 0;
-    if ( met->size == 1 ) {
-      mesh->info.hmax = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
-      }
-    }
-    else if ( met->size == 6 ){
-      mesh->info.hmax = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        iadr = met->size*k;
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+3]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+5]);
-      }
-      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
-    }
-  }
-
-  /* Check the compatibility between the user settings and the automatically
-   * computed values */
-  MMG5_check_hminhmax(mesh,sethmin,sethmax);
-
-  /* vertex size */
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
-    }
-  }
-  else if ( met->size == 6 ) {
-    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
-    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      iadr = 6*k;
-      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
-      met->m[iadr+3] = met->m[iadr];
-      met->m[iadr+5] = met->m[iadr];
-    }
-  }
-
-  return;
 }

@@ -69,7 +69,7 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   ADD_CUSTOM_TARGET(mmg${target_identifier}cmakedefines_header ALL
     DEPENDS
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h )
+    ${COMMON_BINARY_DIR}/mmgcmakedefines.h ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h )
 
   ADD_CUSTOM_TARGET(mmg${target_identifier}version_header ALL
     DEPENDS
@@ -94,6 +94,11 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefines )
 
   COPY_HEADER (
+    ${COMMON_BINARY_DIR} mmgcmakedefinesf.h
+    ${include_dir} mmgcmakedefinesf.h
+    mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefinesf )
+
+  COPY_HEADER (
     ${COMMON_BINARY_DIR} mmgversion.h
     ${include_dir} mmgversion.h
     mmg${target_identifier}version_header copy${target_identifier}_mmgversion )
@@ -108,6 +113,7 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${include_dir} mmg${target_identifier}_export.h
     mmg${target_identifier}_export_header copy_mmg${target_identifier}_export )
 
+  if (PERL_FOUND)
   COPY_HEADER (
     ${COMMON_BINARY_DIR} libmmgtypesf.h
     ${include_dir} libmmgtypesf.h
@@ -120,8 +126,10 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   SET ( tgt_list copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
     copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
-    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgversion
+    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgcmakedefinesf
+    copy${target_identifier}_mmgversion
     copy_mmg${target_identifier}_export )
+  endif (PERL_FOUND)
 
   IF (NOT WIN32 OR MINGW)
     COPY_HEADER (

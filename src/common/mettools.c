@@ -673,7 +673,7 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * métrique à reconstruire si c'est possible(quand on vient de grad2metSurfreq)?
  *
  */
-int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
+int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,
                      double ux,double uy,double uz,double mr[6],
                      double r[3][3] ) {
   MMG5_pPoint  p0;
@@ -684,6 +684,10 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   if ( !(MG_GEO & p0->tag) )  return 0;
   m = &met->m[6*np0];
   t = &p0->n[0];
+
+  /* Check that ridge tangent is not null */
+  assert ( t[0]*t[0] + t[1]*t[1] + t[2]*t[2] > 0. && "Null tangent");
+
   go = &mesh->xpoint[p0->xp];
 
   /* Decide between the two possible configurations */
@@ -702,6 +706,13 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
     dv = m[1];
     dn = m[3];
   }
+
+  /* Check that choosed normal is not null */
+  /* Remark: a null second normal along ridge point in mmg3d may be the
+   * consequence of the computation of the same normal with opposite sign for n1
+   * and n2 at a previously inserted ridge point. This append when the ridge
+   * delimits a closed angle an we choose the wrong point normal in bezierCP. */
+  assert ( n1[0]*n1[0] + n1[1]*n1[1] + n1[2]*n1[2] > 0. && "Null normal");
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
   u[1] = n1[2]*t[0] - n1[0]*t[2];
@@ -737,7 +748,7 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * given by \a nt and store the basis vectors in \a r.
  *
  */
-int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
+int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,double nt[3],
                         double mr[6],double r[3][3] ) {
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
@@ -801,10 +812,10 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
  *
  */
 int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  double  det,imn[4],lambda[2],vp[2][2],dm[2],dn[2],d0,d1,ip[4];
-  double  isqhmin,isqhmax;
+  double        det,imn[4],lambda[2],vp[2][2],dm[2],dn[2],d0,d1,ip[4];
+  double        isqhmin,isqhmax;
   static int8_t mmgWarn0 = 0;
-  int     order;
+  int           order;
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
@@ -1121,11 +1132,11 @@ int MMG5_test_intersecmet33(MMG5_pMesh mesh) {
  *
  * Intersect the surface metric held in np (supported in tangent plane of \a np)
  * with 3*3 physical metric in \a me. For ridge points, this function fill the
- * \f$ p_0->m[3]\f$ and \f$ p_0->m[4]\f$ fields that contains respectively the
+ * \f$ p_0 \rightarrow m[3]\f$ and \f$ p_0 \rightarrow m[4]\f$ fields that contains respectively the
  * specific sizes in the \f$n_1\f$ and \f$n_2\f$ directions.
  *
  */
-int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
+int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np,double me[6],
                        double n[3]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint        go;
@@ -1142,11 +1153,30 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   p0 = &mesh->point[np];
   m  = &met->m[6*np];
 
-  /* Case of a singular point : since MMG5_defmetsin() computes an isotropic
+  /** Case of a singular point : since MMG5_defmetsin() computes an isotropic
    * metric, scale it by the physical metric while keeping it isotropic */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
 
-    /* Compute minimum size in physical metric */
+    /** 1. Compute minimum size in physical metric.
+     * Note that, if we enforce an isotropic metric at singular points, we have
+     *  2 direct choices:
+     *   - use the maximal size to make the physical metric iso. In a first
+     * guess it seems to be a good idea to limit the impact of singular points
+     * over the mesh but in practice it leads to collapse too much. See the
+     * following pictures of adaptation over a constant aniso metric with mmgs
+     * without gradation and with gradation.
+     * \image html mmgs-max-on-sin-nograd.png "Max siz on sin points, no gradation" width=30%
+     * \image html mmgs-max-on-sin-grad.png "Max siz on sin points, with gradation" width=15%
+     *   - use the minimal size to make the physical metric iso. Adaptation
+     * over a constant aniso metric with mmgs without gradation
+     * shows the creation of a small element at each corner.
+     * The computed iso size correspond to the size imposed on the
+     * top surface. With gradation, the gradation removes the anisotropy everywhere
+     * so the metric at corners has no effect).
+     * \image html mmgs-min-on-sin-nograd.png "Max siz on sin points, no gradation" width=30%
+     * \image html mmgs-min-on-sin-grad.png "Max siz on sin points, with gradation" width=15%
+     *
+     */
     order = MMG5_eigenv3d(1,me,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
@@ -1162,16 +1192,16 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       hu = MG_MAX(hu,lambda[i]);
     }
 
-    /* Truncate physical size with respect to mesh constraints */
+    /** 2. Truncate physical size with respect to mesh constraints */
     hu = MG_MIN(isqhmin,hu);
     hu = MG_MAX(isqhmax,hu);
 
-    /* Overwrite diagonal metric if physical metric prescribes smaller sizes */
+    /** 3. Overwrite diagonal metric if physical metric prescribes smaller sizes */
     if( hu > m[0] )
       m[0] = m[3] = m[5] = hu;
 
   }
-  /* Case of a ridge point : take sizes in 3 directions t,n1,u */
+  /** Case of a ridge point : take sizes in 3 directions t,n1,u */
   else if ( p0->tag & MG_GEO ) {
     /* Size prescribed by metric me in direction t */
     t = n;
@@ -1182,7 +1212,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     hu = MG_MAX(isqhmax,hu);
     m[0] = MG_MAX(m[0],hu);
 
-    /* Size prescribed by metric me in direction u1 = n1 ^ t */
+    /** 1. Size prescribed by metric me in direction u1 = n1 ^ t */
     assert ( p0->xp );
     go = &mesh->xpoint[p0->xp];
     n1 = &go->n1[0];
@@ -1206,7 +1236,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       hu = MG_MAX(isqhmax,hu);
       m[1] = MG_MAX(m[1],hu);
     }
-    /* Size prescribed by metric me in direction u2 = n2 ^ t */
+    /** 2. Size prescribed by metric me in direction u2 = n2 ^ t */
     u[0] = n2[1]*t[2] - n2[2]*t[1];
     u[1] = n2[2]*t[0] - n2[0]*t[2];
     u[2] = n2[0]*t[1] - n2[1]*t[0];
@@ -1226,7 +1256,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       m[2] = MG_MAX(m[2],hu);
     }
 
-    /* Size prescribed by metric me in direction n1 */
+    /** 3. Size prescribed by metric me in direction n1 */
     hu = me[0]*n1[0]*n1[0] + me[3]*n1[1]*n1[1] + me[5]*n1[2]*n1[2]
       + 2.0*me[1]*n1[0]*n1[1] + 2.0*me[2]*n1[0]*n1[2] + 2.0*me[4]*n1[1]*n1[2];
 
@@ -1234,7 +1264,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     hu = MG_MAX(isqhmax,hu);
     m[3] = hu;
 
-    /* Size prescribed by metric me in direction n2 */
+    /** 4. Size prescribed by metric me in direction n2 */
     hu = me[0]*n2[0]*n2[0] + me[3]*n2[1]*n2[1] + me[5]*n2[2]*n2[2]
       + 2.0*me[1]*n2[0]*n2[1] + 2.0*me[2]*n2[0]*n2[2] + 2.0*me[4]*n2[1]*n2[2];
 
@@ -1242,11 +1272,11 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     hu = MG_MAX(isqhmax,hu);
     m[4] = hu;
   }
-  /* Case of a ref, or regular point : intersect metrics in tangent plane */
+  /** Case of a ref, or regular point : intersect metrics in tangent plane */
   else {
     MMG5_rotmatrix(n,r);
 
-    /* Expression of both metrics in tangent plane */
+    /** 1. Expression of both metrics in tangent plane */
     MMG5_rmtr(r,m,mrot);
     mtan[0] = mrot[0];
     mtan[1] = mrot[1];
@@ -1258,7 +1288,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     metan[1] = mrot[1];
     metan[2] = mrot[3];
 
-    /* Intersection of metrics in the tangent plane */
+    /** 2. Intersection of metrics in the tangent plane */
     if ( !MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
       if ( !mmgWarn1 ) {
         fprintf(stderr,"\n  ## Warning: %s: impossible metric intersection:"
@@ -1275,7 +1305,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       return 0;
     }
 
-    /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and
+    /** 3. Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and
      * metan are reused */
     mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0];
     mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1];
@@ -1295,7 +1325,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     m[4] = r[0][1] * mtan[2] + r[1][1] * metan[2] + r[2][1]*alpha3;
     m[5] = r[0][2] * mtan[2] + r[1][2] * metan[2] + r[2][2]*alpha3;
 
-    /* Truncate the metric in the third direction (because me was not
+    /** 4. Truncate the metric in the third direction (because me was not
      * truncated) */
     order = MMG5_eigenv3d(1,m,lambda,vp);
     if ( !order ) {

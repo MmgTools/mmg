@@ -76,19 +76,45 @@ SET (CMAKE_RELEASE_VERSION
 ###############################################################################
 # Architecture detection
 IF (NOT WIN32)
-  # Set preprocessor flags to say that we are posix and gnu compatible
+# Set preprocessor flags to say that we are posix and gnu compatible
   SET (DEF_POSIX "#define MMG_POSIX")
   SET (DEF_GNU "#define MMG_GNU")
 ELSEIF(MINGW)
   SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
 
-# Create mmgcmakedefines.h file with the architecture infos and
-# the definition ot the USE_POINTMAP flag.
+############################################################################
+#####
+#####         Integer type
+#####
+############################################################################
+
+# type of integer
+SET (MMG5_INT "int32_t" CACHE STRING "Integer type")
+IF (${MMG5_INT} STREQUAL "int64_t")
+  SET ( DEF_MMG5_INT "#define MMG5_int int64_t")
+  SET ( DEF_MMG5_PRId "#define MMG5_PRId PRId64")
+  SET ( DEF_MMG5F_INT "#define MMG5F_INT SELECTED_INT_KIND(18)")
+  SET ( DEF_MMG_SWPBIN "#define MMG5_SWAPBIN(x) MMG5_swapbin_int(x)")
+  SET ( DEF_MMG_ABS "#define MMG5_abs(x) (int64_t)labs((int64_t)x)")
+ELSE ()
+  SET ( DEF_MMG5_INT "#define MMG5_int int32_t")
+  SET ( DEF_MMG5_PRId "#define MMG5_PRId PRId32")
+  SET ( DEF_MMG5F_INT "#define MMG5F_INT SELECTED_INT_KIND(9)")
+  SET ( DEF_MMG_SWPBIN "#define MMG5_SWAPBIN(x) MMG5_swapbin(x)")
+  SET ( DEF_MMG_ABS "#define MMG5_abs(x) abs(x)")
+ENDIF ()
+
+# Create mmgcmakedefines.h file with the architecture infos and the definition
+# ot the USE_POINTMAP flag. Create also mmgcmakedefinesf.h file for automatic
+# definition of integer size for Fortran API
 ###############################################################################
 SET(MMG_DYN_LIB ${BUILD_SHARED_LIBS} CACHE INTERNAL "" FORCE)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
   ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefines.h @ONLY)
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefinesf.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefinesf.h @ONLY)
 
 # Create mmgversion.h file with the release infos
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
@@ -101,6 +127,7 @@ IF (NOT WIN32 OR MINGW)
     COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
     COMMENT "Getting git commit hash"
+    BYPRODUCTS ${COMMON_BINARY_DIR}/git_log_mmg.h
   )
 ENDIF ()
 
@@ -182,6 +209,10 @@ ELSE ()
   SET(BUILD_MMGS3D OFF)
 ENDIF()
 
+FIND_PACKAGE(Perl)
+IF (NOT PERL_FOUND)
+  message(WARNING "Perl not found -> we do not generate Fortran Headers")
+ENDIF(NOT PERL_FOUND)
 ############################################################################
 #####
 #####         Fortran header: libmmgtypesf.h
@@ -189,11 +220,13 @@ ENDIF()
 ############################################################################
 ADD_EXECUTABLE(genheader ${PROJECT_SOURCE_DIR}/scripts/genheader.c)
 TARGET_LINK_LIBRARIES ( genheader PRIVATE ${LIBRARIES}  )
-GENERATE_FORTRAN_HEADER ( mmg
-  ${COMMON_SOURCE_DIR} libmmgtypes.h
-  ${COMMON_BINARY_DIR}
-  ${COMMON_BINARY_DIR} libmmgtypesf.h
-  )
+IF (PERL_FOUND)
+  GENERATE_FORTRAN_HEADER ( mmg
+    ${COMMON_SOURCE_DIR} libmmgtypes.h
+    ${COMMON_BINARY_DIR}
+    ${COMMON_BINARY_DIR} libmmgtypesf.h
+    )
+ENDIF (PERL_FOUND)
 
 ###############################################################################
 #####
@@ -212,6 +245,7 @@ IF ( NOT (WIN32 OR MINGW) )
   MARK_AS_ADVANCED(FORCE M_LIB)
   SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
+
 
 ############################################################################
 #####

@@ -363,14 +363,20 @@ ADD_TEST(NAME mmg3d_val
   ${MMG3D_CI_TESTS}/Cube/cube
   ${CTEST_OUTPUT_DIR}/mmg3d_cube-val.o.meshb
   )
-
-#ADD_TEST(NAME mmg3d_default
-#  COMMAND ${EXECUT_MMG3D} -v 5 -default
-#  ${MMG3D_CI_TESTS}/Cube/cube
-#  -out ${CTEST_OUTPUT_DIR}/mmg3d_default.o.meshb)
-
-SET_PROPERTY(TEST mmg3d_val #mmg3d_default
+SET_PROPERTY(TEST mmg3d_val
   PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg3d_locParamCrea
+  COMMAND ${EXECUT_MMG3D} -v 5 -default
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.0)
+
+SET_TESTS_PROPERTIES ( mmg3d_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmg3d_locParamCrea )
+ADD_TEST(NAME mmg3d_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.mmg3d)
+SET_TESTS_PROPERTIES ( mmg3d_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmg3d_locParamCrea )
 
 # default hybrid
 ADD_TEST(NAME mmg3d_hybrid_3d
@@ -533,6 +539,12 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
 
+ADD_TEST(NAME mmg3d_OptimAni_Cube
+  COMMAND ${EXECUT_MMG3D} -v 5 -optim -A -hgrad -1
+  ${MMG3D_CI_TESTS}/Cube/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_cube.o.meshb)
+
+
 ##############################################################################
 #####
 #####         Check optimLES
@@ -603,6 +615,21 @@ ADD_TEST(NAME mmg3d_OptLs_plane_m
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-m.o.meshb)
 
+# ridge preservation
+IF ( (NOT SCOTCH_FOUND) OR USE_SCOTCH MATCHES OFF )
+  SET ( DISABLE_RENUM "" )
+ELSE()
+  SET ( DISABLE_RENUM -rn 0 )
+ENDIF()
+
+ADD_TEST(NAME mmg3d_OptLs_NM_ridge
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.5 -noinsert -noswap -nomove -nr ${DISABLE_RENUM}
+  ${MMG3D_CI_TESTS}/OptLs_NM_ridge/cube-it2.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_NM_cube-it2.o.mesh)
+
+SET_TESTS_PROPERTIES ( mmg3d_OptLs_NM_ridge
+  PROPERTIES FIXTURES_SETUP mmg3d_OptLs_NM_ridge )
+
 # non-zero ls
 ADD_TEST(NAME mmg3d_OptLs_plane_nonzero
   COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.1
@@ -645,6 +672,19 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
   -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-normc.o.meshb)
 
 # ls + rmc
 ADD_TEST(NAME mmg3d_OptLs_plane_withbub
@@ -705,26 +745,17 @@ if (BASH)
     )
 endif()
 
-IF ( TEST_LIBMMG3D )
-  ADD_TEST(NAME test_para_tria
-    COMMAND ${EXECUT_MMG3D}
-    -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
-    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
-    -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
-    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
-    )
+ADD_TEST(NAME test_para_tria
+  COMMAND ${EXECUT_MMG3D}
+  -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
+  ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+  -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
+  ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+  )
 
-  SET_TESTS_PROPERTIES ( test_para_tria
-    PROPERTIES FIXTURES_SETUP test_para_tria )
+SET_TESTS_PROPERTIES ( test_para_tria
+  PROPERTIES FIXTURES_SETUP test_para_tria )
 
-  ADD_TEST(NAME test_compare_para_tria
-    COMMAND ${TEST_COMPARE_PARA_TRIA}
-    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
-    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
-    )
-  SET_TESTS_PROPERTIES ( test_compare_para_tria
-    PROPERTIES FIXTURES_REQUIRED test_para_tria )
-ENDIF()
 
 IF ( LONG_TESTS )
   # Test the Ls option

@@ -28,7 +28,8 @@ int main(int argc,char *argv[]) {
   int             i,j,opt;
 
   /* To manually recover the mesh */
-  int             nsol,np,typSol[MMG5_NSOLS_MAX];
+  MMG5_int        np;
+  int             nsol,typSol[MMG5_NSOLS_MAX];
   double          *sols;
 
   /* Filenames */

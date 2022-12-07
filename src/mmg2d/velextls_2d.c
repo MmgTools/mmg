@@ -45,12 +45,12 @@
     invperm stores the permutation [ new pt nb -> old pt nb ] (for unpacking purposes)
     Return: npf = number of vertices in the packed mesh.
 */
-int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
+MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     p0;
   double          u[2];
-  int             k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
-  int             vper[3],*perm,*list,*adja,*invperm;
+  MMG5_int        k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
+  MMG5_int        vper[3],*perm,*list,*adja,*invperm;
   int8_t          i,j,jedg;
 
   nlay       = 20;
@@ -60,11 +60,11 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   nef        = 0;
   u[0]       = u[1] = 0.0;
   ilist      = ilisto = ilistck = 0;
-  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"element list",return NULL);
-  MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return NULL);
+  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_int),"element list",return NULL);
+  MMG5_SAFE_CALLOC(list,mesh->nt+1,MMG5_int,return NULL);
 
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
-  MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG5_int),"point permutation",return NULL);
+  MMG5_SAFE_CALLOC(perm,mesh->np+1,MMG5_int,return NULL);
 
 
   /* Reset flag field at triangles */
@@ -135,11 +135,11 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   }
 
   /* Creation of the inverse permutation table */
-  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(int),"permutation table",
+  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(MMG5_int),"permutation table",
                   MMG5_DEL_MEM ( mesh,list );
                   MMG5_DEL_MEM ( mesh,perm );
                   return NULL );
-  MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
+  MMG5_SAFE_CALLOC ( invperm,(npf+1),MMG5_int,
                       MMG5_DEL_MEM ( mesh,list );
                       MMG5_DEL_MEM ( mesh,perm );
                       return NULL );
@@ -209,7 +209,7 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     for (i=0; i<3; i++)
       vper[i] = perm[pt->v[i]];
 
-    if (!LS_addTri(lsst,k,vper,0) ) {
+    if (!LS_addTri(lsst,(int)k,(int*)vper,0) ) {
       fprintf(stdout,"  ## Problem in fn LS_addTet. Exiting.\n");
       MMG5_DEL_MEM ( mesh,list );
       MMG5_DEL_MEM ( mesh,perm );
@@ -236,7 +236,7 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         vper[0] = perm[pt->v[MMG5_inxt2[i]]];
         vper[1] = perm[pt->v[MMG5_iprv2[i]]];
 
-        if ( !LS_addEdg(lsst,nef,vper,refdirnh) ) {
+        if ( !LS_addEdg(lsst,(int)nef,(int*)vper,refdirnh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
           MMG5_DEL_MEM ( mesh,list );
           MMG5_DEL_MEM ( mesh,perm );
@@ -249,7 +249,7 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         vper[0] = perm[pt->v[MMG5_inxt2[i]]];
         vper[1] = perm[pt->v[MMG5_iprv2[i]]];
 
-        if ( !LS_addEdg(lsst,nef,vper,refdirh) ) {
+        if ( !LS_addEdg(lsst,(int)nef,(int*)vper,refdirh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
           MMG5_DEL_MEM ( mesh,list );
           MMG5_DEL_MEM ( mesh,perm );
@@ -260,7 +260,7 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   }
 
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (ilist+npf+nef > 0) )
-    printf("Number of packed triangles %d, points %d, edges %d\n",ilist,npf,nef);
+    printf("Number of packed triangles %" MMG5_PRId ", points %" MMG5_PRId ", edges %" MMG5_PRId "\n",ilist,npf,nef);
 
   /* Add boundary conditions */
   /*if ( !LS_setBC(lsst,Dirichlet,refdirnh,'v',LS_edg,v) ) {
@@ -315,9 +315,9 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 }
 
 /** Transfer solution from the submesh to the global mesh */
-int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invperm) {
+int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_int *invperm) {
   double      *u;
-  int         k,ip;
+  MMG5_int    k,ip;
   int8_t      i;
 
   u = LS_getSol(lsst);
@@ -339,7 +339,7 @@ int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
 /** Extension of the displacement at the nodes of edges tagged MMG5_DISPREF */
 int MMG2D_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst       *lsst;
-  int        npf,*invperm;
+  MMG5_int   npf,*invperm;
 
   /* Creation of the data structure for storing the submesh */
   lsst = LS_init(mesh->dim,mesh->ver,P1,1);

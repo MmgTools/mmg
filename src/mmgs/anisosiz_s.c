@@ -37,6 +37,7 @@
 #include "libmmgs.h"
 #include "inlined_functions.h"
 #include "mmgsexterns.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -50,14 +51,15 @@
  * size.
  *
  */
-static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0;
   MMG5_pPar          par;
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
-  int                ilist,list[MMGS_LMAX+2],k,i,iel,idp,init_s;
+  MMG5_int           list[MMGS_LMAX+2],k,iel,idp,init_s;
+  int                ilist,i;
   uint8_t            i0,i1,i2;
 
   pt  = &mesh->tria[it];
@@ -70,9 +72,9 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
 
-  ilist = boulet(mesh,it,ip,list);
-  if ( ilist < 1 )
-    return 0;
+  int8_t dummy;
+  ilist = MMG5_boulet(mesh,it,ip,list,1,&dummy);
+  if ( ilist < 1 )  return 0;
 
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
@@ -155,23 +157,28 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  *
  * Compute metric tensor associated to a ridge point : convention is a bit weird
  * here :
- *  - p->m[0] is the specific size in direction \a t,
- *  - p->m[1] is the specific size in direction \f$u_1 = n_1^{}t\f$,
- *  - p->m[2] is the specific size in direction \f$u_2 = n_2^{}t\f$,
- *  - p->m[3] is the specific size in direction \f$n_1\f$
+ *   - p->m[0] is the specific size in direction \a t,
+ *   - p->m[1] is the specific size in direction \f$ u_1 = n_1 \wedge t \f$ ,
+ *   - p->m[2] is the specific size in direction \f$ u_2 = n_2 \wedge t \f$ ,
+ *   - p->m[3] is the specific size in direction \f$ n_1 \f$
+ *     (computed by the \a MMG5_intextmet function),
+ *   - p->m[4] is the specific size in direction \f$n_2\f$ ,
  *    (computed by the \a MMG5_intextmet function),
- *  - p->m[4] is the specific size in direction \f$n_2\f$,
- *   (computed by the \a MMG5_intextmet function),
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
+ * \warning As it is implemented, the interpolation at ridge point from 2
+ * singular points leads to an isotropic metric of size m[0] (even if the metric
+ * at singular points is not enforced to be isotropic).
  */
-static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    p0,p1,p2;
   MMG5_Bezier    b;
   MMG5_pPar      par;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[MMGS_LMAX+2];
-  int            list2[MMGS_LMAX+2],iprid[2],ier,isloc;
+  MMG5_int       k,iel,idp,*list,list1[MMGS_LMAX+2];
+  int            ilist1,ilist2,ilist;
+  MMG5_int       list2[MMGS_LMAX+2],iprid[2],isloc;
+  int            ier;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,trot[2],u[2];
   double         r[3][3],lispoi[3*MMGS_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
@@ -342,12 +349,13 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * geometric approx of the surface.
  *
  */
-static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
   MMG5_Bezier        b;
   MMG5_pPar          par;
-  int                i,ilist,list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
+  MMG5_int           list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
+  int                i,ilist;
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMGS_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3],hausd;
@@ -359,7 +367,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  ilist = boulet(mesh,it,ip,list);
+  int8_t dummy;
+  ilist = MMG5_boulet(mesh,it,ip,list,1,&dummy);
   if ( ilist < 1 )
     return 0;
 
@@ -509,6 +518,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * \param ilist number of tria in the ball of \a p0
  * \param r rotation that send the normal at p0 onto the z vector
  * \param lipoint rotated ball of point \a p0
+ * \param n normal at point \a p0
  *
  * \return 1 if success, 0 otherwise.
  *
@@ -516,15 +526,15 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * and apply this rotation to the ball of \a p0.
  *
  */
-int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int *list,int ilist,
-                          double r[3][3],double *lispoi) {
+int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int *list,int ilist,
+                          double r[3][3],double *lispoi,double n[3]) {
   MMG5_pTria  pt;
   MMG5_pPoint p1;
-  double      *n,ux,uy,uz,area;
-  int         iel,i0,i1,k;
+  double      ux,uy,uz,area;
+  MMG5_int    iel;
+  int         i0,i1,k;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  n  = p0->n;
   assert ( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] > MMG5_EPSD2 );
 
   if ( !MMG5_rotmatrix(n,r) ) {
@@ -580,12 +590,13 @@ int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int *list,int ilist,
  * the geometric approx of the surface.
  *
  */
-static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   MMG5_pTria          pt;
   MMG5_pPoint         p0;
   MMG5_Bezier         b;
   MMG5_pPar           par;
-  int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i;
+  MMG5_int            list[MMGS_LMAX+2],iel,idp,isloc;
+  int                 ilist,k,i;
   double              *m,r[3][3],lispoi[3*MMGS_LMAX+1];
   double              c[3],isqhmin,isqhmax;
   double              tAA[6],tAb[3],hausd;
@@ -596,12 +607,13 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
   m   = &met->m[6*idp];
 
-  ilist = boulet(mesh,it,ip,list);
+  int8_t dummy;
+  ilist = MMG5_boulet(mesh,it,ip,list,1,&dummy);
   if ( ilist < 1 )
     return 0;
 
   /* Rotation of the ball of p0 */
-  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi)  ) {
+  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi,p0->n)  ) {
     return 0;
   }
 
@@ -677,7 +689,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  *
  */
 static inline
-int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
+int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np,double me[6]) {
   MMG5_pPoint         p0;
   double              *n;
   double              dummy_n[3];
@@ -705,12 +717,26 @@ int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
  * Define size at points by intersecting the surfacic metric and the
  * physical metric.
  *
+ * The output metric is:
+ *   - at singular points: isotropic
+ *   - at ridge points: anisotropic in the orthonormal basis defined by the
+ * tangent at the ridge and the normal at each portion of surface.
+ *   - at surface boundary points: anisotropic in an orthonormal basis difined
+ * in the tangent plane and the direction normal to this plane.
+ *
+ * \warning What we are doing on non-manifold points has to be improved: as such
+ *     points are marked as MG_CRN and MG_REQ, we first try to call \ref
+ *     MMG5_defmetsin that likely fails (because \ref MMG5_boulet don't work for
+ *     non-manifod points due to the missing of consistent adjacencies
+ *     relationships), then we call \ref MMG5_defUninitSize and we set hmax on
+ *     non-manifold points. Note that the building of adjacency table depends on
+ *     the initial mesh numbering, thus, in certain cases, MMG5_boulet will succeed...
  */
 int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   double        mm[6];
-  int           k;
+  MMG5_int      k;
   int8_t        ismet;
   int8_t        i;
   static int8_t mmgErr=0;
@@ -748,7 +774,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
+  /** Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
@@ -775,7 +801,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
           if ( !mmgErr ) {
             fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
-                    " at point %d.\n",__func__,
+                    " at point %" MMG5_PRId ".\n",__func__,
                     MMGS_indPt(mesh,pt->v[i]));
             mmgErr = 1;
           }
@@ -788,7 +814,10 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Now the metric storage at ridges is the "mmg" one. */
   mesh->info.metRidTyp = 1;
 
-  /* search for unintialized metric */
+  /** search for unintialized metric */
+  /** Remark: as non manifold points are marked as CRN and REQ, we first try to
+      call defmetsin that fails (because MMG5_boulet don't work for non-manifod
+      points), then we pass here and we set hmax on non-manifold points */
   MMG5_defUninitSize ( mesh,met,ismet );
 
   return 1;
@@ -806,7 +835,8 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint  p1;
   double       *m,mv;
-  int          k,it;
+  MMG5_int     k;
+  int          it;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
