@@ -389,6 +389,23 @@ ADD_TEST(NAME mmgs_LSTriaOri
   ${MMGS_CI_TESTS}/LSTriaOri/fault.mesh
   ${CTEST_OUTPUT_DIR}/mmgs_LSTriaOri.o.meshb)
 
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmgs_OptLsSurf_box
+  COMMAND ${EXECUT_MMGS} -v 5 -lssurf
+  -sol ${MMGS_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMGS_CI_TESTS}/OptLsSurf_box/box-3D.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLsSurf_box.o.meshb
+  )
+
+# lssurf + multimat: discretization of boundaries only
+ADD_TEST(NAME mmgs_OptLsSurf_multiMat_box
+  COMMAND ${EXECUT_MMGS} -v 5 -lssurf
+  -sol ${MMGS_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMGS_CI_TESTS}/OptLsSurf_box/box_multiMat-3D.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLsSurf_multiMat_box.o.meshb
+  )
+
+
 ###############################################################################
 #####
 #####         Check snapping (prevision of non-manifold situations)

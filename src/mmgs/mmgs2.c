@@ -65,6 +65,12 @@ static int MMGS_cuttri(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+
+      /* If only surface edges are discretized, skip non boundary entities: as
+       * mmgs doesn't add MG_BDY tags, we check if an edge is bdy from the
+       * MG_REF tag */
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_REF) ) continue;
+
       ip0 = pt->v[MMG5_inxt2[i]];
       ip1 = pt->v[MMG5_iprv2[i]];
       p0  = &mesh->point[ip0];

@@ -78,7 +78,7 @@ int MMG5_snpval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !pt->v[0] ) continue;
 
     for (i=0; i<3; i++) {
-      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      if ( !(pt->tag[i] & MG_REF) ) continue;
       i0 = MMG5_inxt2[i];
       i1 = MMG5_inxt2[i0];
 
@@ -137,7 +137,7 @@ int MMG5_resetRef_lssurf(MMG5_pMesh mesh) {
     if ( !pt->v[0] ) continue;
 
     for (i=0; i<3; i++) {
-      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      if ( !(pt->tag[i] & MG_REF) ) continue;
 
       if( !MMG5_getStartRef(mesh,pt->edg[i],&ref) ) return 0;
       pt->edg[i] = ref;
@@ -169,7 +169,7 @@ int MMG5_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
-      if ( !(pt->tag[i] & MG_BDY) ) continue;
+      if ( !(pt->tag[i] & MG_REF) ) continue;
       ref = pt->edg[i];
       nmn = npl = nz = 0;
 
