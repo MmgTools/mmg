@@ -96,13 +96,26 @@ int MMG2D_cuttri(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_REF) ) {
+        continue;
+      }
+
       ip0 = pt->v[MMG5_inxt2[i]];
       ip1 = pt->v[MMG5_iprv2[i]];
 
       np = MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
 
-      if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
+      /* Look either at the triangle ref or at the boundary one */
+      MMG5_int ref;
+      if ( mesh->info.isosurf ) {
+        ref = pt->edg[i];
+      }
+      else {
+        ref = pt->ref;
+      }
+
+      if ( !MMG5_isSplit(mesh,ref,&refint,&refext) ) continue;
 
       v0 = sol->m[ip0];
       v1 = sol->m[ip1];
