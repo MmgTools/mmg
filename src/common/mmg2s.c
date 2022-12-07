@@ -129,7 +129,7 @@ int MMG5_snpval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
 int MMG5_resetRef_lssurf(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1;
-  int             k,ref;
+  MMG5_int        k,ref;
   int8_t          i,i0,i1;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -160,8 +160,8 @@ int MMG5_resetRef_lssurf(MMG5_pMesh mesh) {
 int MMG5_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt;
   double         v,v1;
-  int            k,ier,ip1,ref,refint,refext;
-  int8_t         i,i1,j,nmn,npl,nz;
+  MMG5_int       k,ip1,ref,refint,refext;
+  int8_t         ier,i,i1,j,nmn,npl,nz;
 
   /* Travel all surface edges (via triangles) */
   for(k=1; k<=mesh->nt; k++) {

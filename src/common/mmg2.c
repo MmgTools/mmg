@@ -43,7 +43,7 @@
  *
  * Compute key for the material in the hash table.
  */
-static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
+static MMG5_int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
   return (ref - pim->offset);
 }
 
@@ -185,7 +185,7 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,MMG5_int ref,M
 
   /* Material not found in the table */
   if( k == -1 ) {
-    fprintf(stderr,"\n  ## Warning: %s: material %d not found in table.\n",
+    fprintf(stderr,"\n  ## Warning: %s: material %" MMG5_PRId " not found in table.\n",
             __func__,ref);
     fprintf(stderr,"              Please ensure that you provide all mesh"
             " references in the material map\n"
@@ -243,8 +243,9 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
   /* Scan all references in the table limits, some may not exist */
   for( ref = pim->offset; ref < pim->offset + pim->size; ref++ ) {
     if( !MMG5_InvMat_getParent(mesh,pim,ref,&pref) ) continue;
-    printf("%" MMG5_PRId " (%" MMG5_PRId "): %" MMG5_PRId " %d\n",ref,MMG5_InvMat_key(pim,ref),pref,
-        MMG5_InvMat_getAttrib(pim,ref));
+    printf("%" MMG5_PRId " (%" MMG5_PRId "): %" MMG5_PRId " %d\n",ref,
+           MMG5_InvMat_key(pim,ref),pref,
+           MMG5_InvMat_getAttrib(pim,ref));
   }
 }
 

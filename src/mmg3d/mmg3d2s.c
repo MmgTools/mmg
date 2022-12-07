@@ -52,7 +52,7 @@ int MMG3D_resetRef_lssurf(MMG5_pMesh mesh) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p1,p2;
   MMG5_pxTetra   pxt;
-  int            k,ref,ip1,ip2;
+  MMG5_int       k,ref,ip1,ip2;
   int8_t         i,ia,j,j1,j2;
 
   for (k=1; k<=mesh->ne; k++) {
@@ -107,7 +107,7 @@ int MMG3D_resetRef_lssurf(MMG5_pMesh mesh) {
 int MMG3D_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   p0;
   double        *tmp;
-  int           k,ns;
+  MMG5_int      k,ns;
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
@@ -132,7 +132,7 @@ int MMG3D_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+        fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
@@ -163,7 +163,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint   p0,p1;
   MMG5_Hash     hash;
   double        c[3],v0,v1,s;
-  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier,src,refext,refint;
+  MMG5_int      vx[6],nb,k,ip0,ip1,np,ns,ne,ier,src,refext,refint;
   int8_t        ia,iface,j,npneg;
   static int8_t mmgWarn = 0;
 
@@ -402,7 +402,7 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
 
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
@@ -420,8 +420,8 @@ int MMG3D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        v,v1,v2;
-  int           k,ip,ip1,ip2,ref,refint,refext,ier;
-  int8_t        nmns,npls,nz,i,ia,j,j1,j2;
+  MMG5_int      k,ip,ip1,ip2,ref,refint,refext;
+  int8_t        nmns,npls,nz,i,ia,j,j1,j2,ier;
 
   /* Travel all boundary faces (via tetra) */
   for (k=1; k<=mesh->ne; k++) {
