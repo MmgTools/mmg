@@ -634,6 +634,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
     // Read the solution at nodes
     // Init (*sol)[0] for the case where nsols=0
     MMG5_pSol psl = *sol;
+    MMG5_pSol pmt = *met;
     psl->ver = mesh->ver;
     psl->dim = mesh->dim;
     psl->type = 1;
@@ -667,10 +668,11 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
           }
 
           if ( (nsols==2) && metricData ) {
-            psl = *met; //+ isol;
+            psl = *met;
+            isol -= 1;
           }
           else {
-            psl = *sol; //+ isol;
+            psl = *sol + isol;
           }
           psl->ver = mesh->ver;
           psl->dim = mesh->dim;
@@ -685,7 +687,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
             }
           }
 
-          if ( !MMG5_Set_inputSolName(mesh,*met,chaine) ) {
+          if ( !MMG5_Set_inputSolName(mesh,pmt,chaine) ) {
             if ( !mmgWarn1 ) {
               mmgWarn1 = 1;
               fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
