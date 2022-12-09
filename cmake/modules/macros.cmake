@@ -60,58 +60,53 @@ ENDMACRO ( )
 #####         and create the associated target
 #####
 ###############################################################################
+MACRO ( COPY_1_HEADER_AND_CREATE_TARGET
+    source_dir name include_dir target_identifier )
+
+  ADD_CUSTOM_TARGET(mmg${target_identifier}${name}_header ALL
+    DEPENDS
+    ${source_dir}/${name}.h )
+
+  COPY_HEADER (
+    ${source_dir} ${name}.h
+    ${include_dir} ${name}.h
+    mmg${target_identifier}${name}_header copy${target_identifier}_${name} )
+
+
+ENDMACRO()
+
+###############################################################################
+#####
+#####         Copy an automatically generated header file to another place
+#####         and create the associated target
+#####
+###############################################################################
 MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     source_dir binary_dir include_dir target_identifier )
 
-  ADD_CUSTOM_TARGET(mmg${target_identifier}types_header ALL
-    DEPENDS
-    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} libmmgtypes ${include_dir} ${target_identifier})
 
-  ADD_CUSTOM_TARGET(mmg${target_identifier}cmakedefines_header ALL
-    DEPENDS
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_BINARY_DIR} mmgcmakedefines ${include_dir} ${target_identifier})
 
-  ADD_CUSTOM_TARGET(mmg${target_identifier}version_header ALL
-    DEPENDS
-    ${MMGCOMMON_BINARY_DIR}/mmgversion.h )
-
-  ADD_CUSTOM_TARGET(mmg${target_identifier}_header ALL
-    DEPENDS
-    ${source_dir}/libmmg${target_identifier}.h )
-
-  ADD_CUSTOM_TARGET(mmg${target_identifier}_export_header ALL
-    DEPENDS
-    ${source_dir}/mmg${target_identifier}_export.h )
-
-  COPY_HEADER (
-    ${MMGCOMMON_SOURCE_DIR} libmmgtypes.h
-    ${include_dir} libmmgtypes.h
-    mmg${target_identifier}types_header copy${target_identifier}_libmmgtypes )
-
-  COPY_HEADER (
-    ${MMGCOMMON_BINARY_DIR} mmgcmakedefines.h
-    ${include_dir} mmgcmakedefines.h
-    mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefines )
-
+  # Fortran generation
   COPY_HEADER (
     ${MMGCOMMON_BINARY_DIR} mmgcmakedefinesf.h
     ${include_dir} mmgcmakedefinesf.h
-    mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefinesf )
+    mmg${target_identifier}mmgcmakedefines_header copy${target_identifier}_mmgcmakedefinesf )
 
-  COPY_HEADER (
-    ${MMGCOMMON_BINARY_DIR} mmgversion.h
-    ${include_dir} mmgversion.h
-    mmg${target_identifier}version_header copy${target_identifier}_mmgversion )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_BINARY_DIR} mmgversion ${include_dir} ${target_identifier})
 
-  COPY_HEADER (
-    ${source_dir} libmmg${target_identifier}.h
-    ${include_dir} libmmg${target_identifier}.h
-    mmg${target_identifier}_header copy_libmmg${target_identifier} )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${source_dir} libmmg${target_identifier}
+    ${include_dir} ${target_identifier})
 
-  COPY_HEADER (
-    ${source_dir} mmg${target_identifier}_export.h
-    ${include_dir} mmg${target_identifier}_export.h
-    mmg${target_identifier}_export_header copy_mmg${target_identifier}_export )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${source_dir} mmg${target_identifier}_export
+    ${include_dir} ${target_identifier})
+
 
   if (PERL_FOUND)
   COPY_HEADER (
@@ -125,10 +120,10 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f )
 
   SET ( tgt_list copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
-    copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
+    copy${target_identifier}_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
     copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgcmakedefinesf
     copy${target_identifier}_mmgversion
-    copy_mmg${target_identifier}_export )
+    copy${target_identifier}_mmg${target_identifier}_export )
   endif (PERL_FOUND)
 
   IF (NOT WIN32 OR MINGW)
