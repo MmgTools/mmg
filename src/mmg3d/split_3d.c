@@ -4763,7 +4763,7 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
   warn = 0;
   pt = &mesh->tetra[iel];
 
-#warning isbdy is not used for now but should be used instead of test on MG_BDY points
+//#warning isbdy is not used for now but should be used instead of test on MG_BDY points
   int8_t isbdy;
   lon = MMG5_coquil(mesh,iel,iar,list,&isbdy);
   if ( (!lon || lon<0) )
@@ -4792,7 +4792,7 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
     return 0;
   }
 
-#warning I think that this test is too restrictive: we should authorize splitting of internal edges connecting bdy points
+//#warning I think that this test is too restrictive: we should authorize splitting of internal edges connecting bdy points
   /* Skip edge if it connects bdy point (edge can be internal or external) */
   if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
     return 0;
