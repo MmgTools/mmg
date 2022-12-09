@@ -61,6 +61,7 @@ extern "C" {
     MMG2D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
     MMG2D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
     MMG2D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+    MMG2D_IPARAM_isosurf,           /*!< [1/0], Level-set meshing on the surface part */
     MMG2D_IPARAM_opnbdy,            /*!< [1/0], Preserve edges at interface of 2 domains with same reference */
     MMG2D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
     MMG2D_IPARAM_3dMedit,           /*!< [0/1/2], Read/write 2D mesh in 3D (Medit only). out if val=1 in/out if val=2 */
@@ -70,6 +71,7 @@ extern "C" {
     MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
+    MMG2D_IPARAM_xreg,              /*!< [0/1], Enable vertices coordinates regularization */
     MMG2D_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
     MMG2D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */

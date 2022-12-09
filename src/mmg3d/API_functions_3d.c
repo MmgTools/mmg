@@ -2164,6 +2164,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,MMG5_int val
   case MMG3D_IPARAM_isoref :
     mesh->info.isoref   = val;
     break;
+  case MMG3D_IPARAM_isosurf :
+    mesh->info.isosurf = val;
+    break;
   case MMG3D_IPARAM_lag :
 #ifdef USE_ELAS
     if ( val < 0 || val > 2 )
@@ -2205,6 +2208,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,MMG5_int val
     break;
   case MMG3D_IPARAM_nreg :
     mesh->info.nreg     = val;
+    break;
+  case MMG3D_IPARAM_xreg :
+    mesh->info.xreg     = val;
     break;
   case MMG3D_IPARAM_nosizreq :
     mesh->info.nosizreq = val;
@@ -2327,6 +2333,9 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam) {
     break;
   case MMG3D_IPARAM_nreg :
     return mesh->info.nreg;
+    break;
+  case MMG3D_IPARAM_xreg :
+    return mesh->info.xreg;
     break;
   case MMG3D_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;

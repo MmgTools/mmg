@@ -243,6 +243,16 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           }
           else i--;
         }
+        else if ( !strcmp(argv[i],"-lssurf") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_isosurf,1) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_ls,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
+        }
         break;
       case 'm':
         if ( !strcmp(argv[i],"-met") ) {
@@ -333,9 +343,18 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           return 0;
         }
         break;
-#ifdef USE_SCOTCH
       case 'r':
-        if ( !strcmp(argv[i],"-rn") ) {
+        if ( !strcmp(argv[i],"-rmc") ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_rmc,0) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_rmc,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
+        }
+#ifdef USE_SCOTCH
+        else if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
               if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_renum,atoi(argv[i])) )
@@ -353,8 +372,13 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
             return 0;
           }
         }
-        break;
 #endif
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           /* For retrocompatibility, store the metric if no sol structure available */
@@ -384,6 +408,12 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           MMGS_usage(argv[0]);
           return 0;
+        }
+        break;
+      case 'x':
+        if ( !strcmp(argv[i],"-xreg") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_xreg,1) )
+            return 0;
         }
         break;
       default:
@@ -437,14 +467,15 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
   }
 
   /* adp mode: if the metric name has been stored in sol, move it in met */
-  if ( met->namein==NULL && sol && sol->namein && !(mesh->info.iso || mesh->info.lag>=0) ) {
+  if ( met->namein==NULL && sol && sol->namein &&
+       !(mesh->info.iso || mesh->info.isosurf || mesh->info.lag>=0) ) {
     if ( !MMGS_Set_inputSolName(mesh,met,sol->namein) )
       return 0;
     MMG5_DEL_MEM(mesh,sol->namein);
   }
 
   /* default : store solution name in iso mode, metric name otherwise */
-  tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  tmp = ( mesh->info.iso || mesh->info.isosurf || mesh->info.lag >=0 ) ? sol : met;
   assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMGS_Set_inputSolName(mesh,tmp,"") ) { return 0; }
@@ -857,7 +888,7 @@ int MMGS_unitTensor_3D( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,double *
   int8_t      open;
 
   /** Step 1: compute ball of point */
-  ilist = boulet(mesh,k,i,list,&open);
+  ilist = MMG5_boulet(mesh,k,i,list,1,&open);
   if ( ilist < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
             __func__);
@@ -1073,7 +1104,7 @@ int MMGS_unitTensor_2D ( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,
 
   /* Possible improvement: if we have called MMGS_unitTensor_3D previously,
    * boulet is already computed */
-  ilist = boulet(mesh,k,i,list,&opn);
+  ilist = MMG5_boulet(mesh,k,i,list,1,&opn);
   if ( ilist < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to compute ball of point.\n",
             __func__);

@@ -38,6 +38,8 @@ extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh
+ * \param init_cc 1 if we need to reinitialized \a cc field of tria because
+ * setadj has already been called (isosurf mode)
  *
  * \return 1 if success, 0 if fail
  *
@@ -45,7 +47,7 @@ extern int8_t ddb;
  * count number of subdomains or connected components
  *
  */
-int MMG2D_setadj(MMG5_pMesh mesh) {
+int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
   MMG5_int         *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
@@ -57,6 +59,13 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
 
   /** Step 1: Tags setting from triangles analysis */
   MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
+
+  /* Reinitialization of cc field (as we pass in steadj more than once) */
+  if ( init_cc ) {
+    for ( k=1; k<=mesh->nt; ++k ) {
+      mesh->tria[k].cc = 0;
+    }
+  }
 
   /* Initialization of the pile */
   ncc = 1;
@@ -87,7 +96,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
           pt1 = &mesh->tria[kk];
 
           if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
-            /* Remove BDY/REF and GEO edge tags but required tag must be keeped
+            /* Remove BDY/REF and GEO edge tags but required tag must be kept
              * (to preserve required tria info) */
             pt->tag[i] &= ~MG_REF;
             pt->tag[i] &= ~MG_BDY;
@@ -268,7 +277,7 @@ int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int            list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,nm,nre,nc;
+  MMG5_int            list[MMG5_TRIA_LMAX+2],listref[MMG5_TRIA_LMAX+2],k,nm,nre,nc;
   int                 ns,ng,nr;
   int8_t              i;
 
@@ -316,7 +325,7 @@ int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
 
       if ( !MG_EDG(ppt->tag) ) continue;
 
-      ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG2D_LONMAX);
+      ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG5_TRIA_LMAX);
 
       if ( !ns )  continue;
       if ( (ng+nr) > 2 ) {
@@ -507,8 +516,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
-  MMG5_int              k,iel,ip1,ip2,nn;
-  int                   it,maxit;
+  MMG5_int              k,iel,ip1,ip2,nn,list[MMG5_LMAX];
+  int                   it,maxit,ilist;
   int8_t                i,ier;
 
   it = 0;
@@ -547,9 +556,9 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
 
-      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
 
-      if ( !ier ) {
+      if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
         return 0;
@@ -643,8 +652,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
 
-      ier = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2);
-      if ( !ier ) {
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
+      if ( !ilist ) {
         fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
         MMG5_SAFE_FREE(tmp);
         return 0;
@@ -759,6 +768,247 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   return 1;
 }
 
+/**
+ * \param mesh pointer towards the mesh
+ * \param pt pointer towards current triangle
+ * \param k number of current point
+ * \param c newly computed coordinates (giving negative area)
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative area
+ *
+ */
+static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c) {
+
+  MMG5_pPoint  ppt;
+  double       p[2],co[3][3],vol,to,tp,t;
+  int          it,maxit,pos,i,j;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  for ( i=0 ; i<3 ; i++ ) {
+    for ( j=0 ; j<3 ; j++ ) {
+      co[i][j] = mesh->point[pt->v[i]].c[j];
+    }
+  }
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+
+  i = 0;
+  if ( pt->v[1] == k ) i = 1;
+  if ( pt->v[2] == k ) i = 2;
+
+  do {
+    co[i][0] = ppt->c[0] + t*(p[0] - ppt->c[0]);
+    co[i][1] = ppt->c[1] + t*(p[1] - ppt->c[1]);
+
+    vol = MMG2D_quickarea(co[0],co[1],co[2]);
+
+    if ( vol <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = co[i][0];
+      c[1] = co[i][1];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Regularize vertices coordinates at boundary non singular edges with
+ * a Laplacian / antilaplacian smoothing
+ *
+ */
+int MMG2D_regver(MMG5_pMesh mesh) {
+  MMG5_pTria            pt;
+  MMG5_pPoint           ppt,p1,p2;
+  double                *tmp,lm1,lm2,cx,cy,res,res0,c[2],co[3][3],vol;
+  MMG5_int              k,kt,iel,ip1,ip2,nn,list[MMG5_LMAX];
+  int                   it,maxit,j,ilist,noupdate;
+  int8_t                i,ier;
+
+  it = 0;
+  maxit=10;
+  res0 = 0.0;
+  nn = 0;
+  lm1 = 0.4;
+  lm2 = 0.399;
+
+  /* Temporary table for coordinates */
+  MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,return 0);
+
+  /* Allocate a seed to each point */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      ppt->s = k;
+    }
+  }
+
+  do {
+    /* Step 1: Laplacian */
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      tmp[2*(k-1)+1] = ppt->c[0];
+      tmp[2*(k-1)+2] = ppt->c[1];
+
+      if ( !MG_VOK(ppt) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
+      if ( !MG_EDG(ppt->tag) ) continue;
+
+      cx = cy = 0;
+      iel = ppt->s;
+      pt  = &mesh->tria[iel];
+      i = 0;
+      if ( pt->v[1] == k ) i = 1;
+      if ( pt->v[2] == k ) i = 2;
+
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
+
+      if ( !ilist ) {
+        fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
+        MMG5_SAFE_FREE(tmp);
+        return 0;
+      }
+
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      cx += p1->c[0];
+      cy += p1->c[1];
+
+      cx += p2->c[0];
+      cy += p2->c[1];
+      cx *= 0.5;
+      cy *= 0.5;
+
+      /* Laplacian operation */
+      tmp[2*(k-1)+1] = ppt->c[0] + lm1 * (cx - ppt->c[0]);
+      tmp[2*(k-1)+2] = ppt->c[1] + lm1 * (cy - ppt->c[1]);
+    }
+
+    /* Antilaplacian operation */
+    res = 0.0;
+    for (k=1; k<=mesh->np; k++) {
+
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
+      if ( !MG_EDG(ppt->tag) ) continue;
+
+      cx = cy = 0;
+      iel = ppt->s;
+      pt  = &mesh->tria[iel];
+      i = 0;
+      if ( pt->v[1] == k ) i = 1;
+      if ( pt->v[2] == k ) i = 2;
+
+      ilist = MMG2D_bouleendp(mesh,iel,i,&ip1,&ip2,list);
+
+      if ( !ilist ) {
+        fprintf(stderr,"\n  ## Error: %s: Abort.\n",__func__);
+        MMG5_SAFE_FREE(tmp);
+        return 0;
+      }
+
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      cx += tmp[2*(ip1-1)+1];
+      cy += tmp[2*(ip1-1)+2];
+
+      cx += tmp[2*(ip2-1)+1];
+      cy += tmp[2*(ip2-1)+2];
+      cx *= 0.5;
+      cy *= 0.5;
+
+      /* Anti Laplacian operation */
+      c[0] = tmp[2*(k-1)+1] - lm2 * (cx - tmp[2*(k-1)+1]);
+      c[1] = tmp[2*(k-1)+2] - lm2 * (cy - tmp[2*(k-1)+2]);
+
+      /* Check if updated point creates a triangle with negative area.
+         If it does, performs a dichotomy to find optimal point */
+      noupdate = 0;
+      for (kt=0; kt<ilist;kt++) {
+        pt = &mesh->tria[list[kt]];
+        if ( !MG_EOK(pt) ) continue;
+
+        for ( i=0 ; i<3 ; i++ ) {
+          for ( j=0 ; j<3 ; j++ ) {
+            co[i][j] = mesh->point[pt->v[i]].c[j];
+          }
+        }
+
+        i = 0;
+        if ( pt->v[1] == k ) i = 1;
+        if ( pt->v[2] == k ) i = 2;
+
+        for ( j=0 ; j<3 ; j++ ) {
+          co[i][j] = c[j];
+        }
+
+        vol = MMG2D_quickarea(co[0],co[1],co[2]);
+
+        if ( vol <= 0.0 ) {
+          if (!MMG2D_dichotomy(mesh,pt,k,c)) noupdate = 1;
+          continue;
+        }
+      }
+      if ( !noupdate ) {
+        res += (c[0]-ppt->c[0])*(c[0]-ppt->c[0]) + (c[1]-ppt->c[1])*(c[1]-ppt->c[1]);
+        ppt->c[0] = c[0];
+        ppt->c[1] = c[1];
+        nn++;
+      }
+    }
+
+    if ( it == 0 ) res0 = res;
+    if ( res0 > MMG5_EPSD ) res = res / res0;
+
+    if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
+      fprintf(stdout,"     iter %5d  res %.3E",it,res);
+      fflush(stdout);
+    }
+  }
+  while ( ++it < maxit && res > MMG5_EPS );
+
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     %" MMG5_PRId " coordinates regularized: %.3e\n",nn,res);
+
+  MMG5_SAFE_FREE(tmp);
+  return 1;
+}
+
 /** preprocessing stage: mesh analysis */
 int MMG2D_analys(MMG5_pMesh mesh) {
 
@@ -774,6 +1024,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
+
   /* Creation quadrilaterals adjacency relations in the mesh */
   if ( !MMG2D_hashQuad(mesh) ) {
      fprintf(stderr,"\n  ## Quadrilaterals hashing problem. Exit program.\n");
@@ -781,7 +1032,16 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   }
 
   /* Set tags to triangles from geometric configuration */
-  if ( !MMG2D_setadj(mesh) ) {
+  int8_t init_cc  = 0;
+  if ( mesh->info.isosurf ) {
+    init_cc = 1;
+  }
+
+  /** \warning possible time improvment here: in lssurf mode, the second call of
+   * #MMG2D_setadj only adds BDY tag to points that have been inserted by the
+   * level-set splitting (the rest of the job of setadj has alredy be done by
+   * the first call).  */
+  if ( !MMG2D_setadj(mesh,init_cc) ) {
     fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
     return 0;
   }
@@ -789,6 +1049,12 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   /* Identify singularities in the mesh */
   if ( !MMG2D_singul(mesh,MMG5_UNSET) ) {
      fprintf(stderr,"\n  ## Problem in identifying singularities. Exit program.\n");
+    return 0;
+  }
+
+  /* Regularize vertix vector field with a Laplacian / anti-laplacian smoothing */
+  if ( mesh->info.xreg && !MMG2D_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in regularizing vertices coordinates. Exit program.\n");
     return 0;
   }
 
@@ -803,6 +1069,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
   }
+
   if ( mesh->nquad ) MMG5_DEL_MEM(mesh,mesh->adjq);
 
   return 1;

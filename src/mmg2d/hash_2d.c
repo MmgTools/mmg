@@ -338,21 +338,35 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   int8_t          ier;
   uint8_t         i,i1,i2;
 
-  /* Try to clean triangle structure (in case where mmg2dlib is called after
-   * mmg2dmesh) */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
+  /**
+      The cleaning of required tags inside triangles has been initially added by
+      commit da4b099c. It probably followed the report of a bug arising when
+      several library functions are successively called without cleaning the
+      mesh structure but on december 2022 I am not able to reproduce this bug.
+      Due to tags cleaning, input required edges are lost in ls discretization
+      mode (see issue #171).
+      The metRidtyp field (previsouly not used in 2D) is
+      now used to mark if \a MMG2D_assignEdge function is called for the first
+      time inside the library and if we have to clean triangle tags (in order to
+      fix issue #171 without breaking again the initial fix). */
+  if ( !mesh->info.metRidTyp ) {
+    /* Try to clean triangle structure (in case where mmg2dlib is called after
+     * mmg2dmesh) */
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) )  continue;
 
-    /* If all edges are required, the triangle is maybe required by the user */
-    if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
-      continue;
-    }
+      /* If all edges are required, the triangle is maybe required by the user */
+      if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
+        continue;
+      }
 
-    /* Otherwise there is no reason to have required tags on edges */
-    for ( ia = 0; ia < 3; ++ia ) {
-      pt->tag[ia] &= ~MG_REQ;
+      /* Otherwise there is no reason to have required tags on edges */
+      for ( ia = 0; ia < 3; ++ia ) {
+        pt->tag[ia] &= ~MG_REQ;
+      }
     }
+    mesh->info.metRidTyp = 1;
   }
 
   if ( !mesh->na ) return 1;

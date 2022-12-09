@@ -72,6 +72,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_debug,                     /*!< [1/0], Turn on/off debug mode */
   MMG3D_IPARAM_angle,                     /*!< [1/0], Turn on/off angle detection */
   MMG3D_IPARAM_iso,                       /*!< [1/0], Level-set meshing */
+  MMG3D_IPARAM_isosurf,                   /*!< [1/0], Level-set meshing on the surface part */
   MMG3D_IPARAM_nofem,                     /*!< [1/0], Generate a non finite element mesh */
   MMG3D_IPARAM_opnbdy,                    /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
   MMG3D_IPARAM_lag,                       /*!< [-1/0/1/2], Lagrangian option */
@@ -82,6 +83,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nomove,                    /*!< [1/0], Avoid/allow point relocation */
   MMG3D_IPARAM_nosurf,                    /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_nreg,                      /*!< [0/1], Enable normal regularization */
+  MMG3D_IPARAM_xreg,                      /*!< [0/1], Enable coordinates regularization */
   MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters */
   MMG3D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
   MMG3D_IPARAM_numberOfMat,               /*!< [n], Number of material in ls mode */

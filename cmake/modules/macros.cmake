@@ -313,36 +313,6 @@ ENDMACRO ( )
 
 ###############################################################################
 #####
-#####         Add Executable that must be tested by ci
-#####
-###############################################################################
-
-MACRO ( ADD_EXEC_TO_CI_TESTS exec_name list_name )
-
-  IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_debug)
-    SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_O3)
-    SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
-    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_O3d)
-    SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
-    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_Os)
-    SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-  ELSE()
-    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name})
-    SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-  ENDIF()
-
-  SET ( ${list_name} ${EXECUT} )
-
-ENDMACRO ( )
-
-
-###############################################################################
-#####
 #####         Add a library test
 #####
 ###############################################################################

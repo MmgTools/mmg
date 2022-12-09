@@ -1,6 +1,10 @@
 name: Fast check without dependencies
 
-on: [push]
+on:
+  push:
+  # run tests on PR events
+  pull_request:
+    types: [synchronize]
 
 jobs:
   build:
