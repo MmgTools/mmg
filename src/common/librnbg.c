@@ -36,7 +36,7 @@
 
 #ifdef USE_SCOTCH
 
-#include "librnbg.h"
+#include "librnbg_private.h"
 
 /**
  * \param graf pointer toward the input graph structure.
