@@ -29,7 +29,7 @@ ENDMACRO ( )
 
 ###############################################################################
 #####
-#####         Copy an automatically generated header file to another place
+#####         Copy a header file to another place
 #####
 ###############################################################################
 MACRO ( COPY_HEADER
@@ -56,7 +56,7 @@ ENDMACRO ( )
 
 ###############################################################################
 #####
-#####         Copy an automatically generated header file to another place
+#####         Copy a header file to another place
 #####         and create the associated target
 #####
 ###############################################################################
