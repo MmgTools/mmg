@@ -145,16 +145,7 @@ SET( mmg3d_headers
   ${MMG3D_SOURCE_DIR}/mmg3d_export.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h
   ${MMG3D_BINARY_DIR}/libmmg3df.h
-  ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-  ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-  ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
-  ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-  ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
-  ${MMGCOMMON_BINARY_DIR}/mmgversion.h
   )
-IF (NOT WIN32 OR MINGW)
-  LIST(APPEND mmg3d_headers  ${MMGCOMMON_BINARY_DIR}/git_log_mmg.h )
-ENDIF()
 
 # install man pages
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmg3d.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)

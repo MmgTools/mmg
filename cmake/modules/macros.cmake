@@ -63,14 +63,14 @@ ENDMACRO ( )
 MACRO ( COPY_1_HEADER_AND_CREATE_TARGET
     source_dir name include_dir target_identifier )
 
-  ADD_CUSTOM_TARGET(mmg${target_identifier}${name}_header ALL
+  ADD_CUSTOM_TARGET(mmg${target_identifier}_${name}_header ALL
     DEPENDS
     ${source_dir}/${name}.h )
 
   COPY_HEADER (
     ${source_dir} ${name}.h
     ${include_dir} ${name}.h
-    mmg${target_identifier}${name}_header copy${target_identifier}_${name} )
+    mmg${target_identifier}_${name}_header copy${target_identifier}_${name} )
 
 
 ENDMACRO()
@@ -85,21 +85,6 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     source_dir binary_dir include_dir target_identifier )
 
   COPY_1_HEADER_AND_CREATE_TARGET(
-    ${MMGCOMMON_SOURCE_DIR} libmmgtypes ${include_dir} ${target_identifier})
-
-  COPY_1_HEADER_AND_CREATE_TARGET(
-    ${MMGCOMMON_BINARY_DIR} mmgcmakedefines ${include_dir} ${target_identifier})
-
-  # Fortran generation
-  COPY_HEADER (
-    ${MMGCOMMON_BINARY_DIR} mmgcmakedefinesf.h
-    ${include_dir} mmgcmakedefinesf.h
-    mmg${target_identifier}mmgcmakedefines_header copy${target_identifier}_mmgcmakedefinesf )
-
-  COPY_1_HEADER_AND_CREATE_TARGET(
-    ${MMGCOMMON_BINARY_DIR} mmgversion ${include_dir} ${target_identifier})
-
-  COPY_1_HEADER_AND_CREATE_TARGET(
     ${source_dir} libmmg${target_identifier}
     ${include_dir} ${target_identifier})
 
@@ -109,31 +94,19 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
 
   if (PERL_FOUND)
-  COPY_HEADER (
-    ${MMGCOMMON_BINARY_DIR} libmmgtypesf.h
-    ${include_dir} libmmgtypesf.h
-    mmg_fortran_header copy${target_identifier}_libmmgtypesf )
+    COPY_HEADER (
+      ${binary_dir} libmmg${target_identifier}f.h
+      ${include_dir} libmmg${target_identifier}f.h
+      mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f )
 
-  COPY_HEADER (
-    ${binary_dir} libmmg${target_identifier}f.h
-    ${include_dir} libmmg${target_identifier}f.h
-    mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f )
-
-  SET ( tgt_list copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
-    copy${target_identifier}_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
-    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgcmakedefinesf
-    copy${target_identifier}_mmgversion
-    copy${target_identifier}_mmg${target_identifier}_export )
+    SET ( tgt_list copy_libmmg${target_identifier}f copymmgcommon_libmmgtypesf
+      copy${target_identifier}_libmmg${target_identifier} copymmgcommon_libmmgtypes
+      copy${target_identifier}_mmg${target_identifier}_export
+      copymmgcommon_mmgcmakedefines copymmgcommon_mmgcmakedefinesf
+      copymmgcommon_mmgversion
+      copymmgcommon_mmg_export )
   endif (PERL_FOUND)
 
-  IF (NOT WIN32 OR MINGW)
-    COPY_HEADER (
-      ${MMGCOMMON_BINARY_DIR} git_log_mmg.h
-      ${include_dir} git_log_mmg.h
-      GenerateGitHash copy${target_identifier}_mmggithash )
-
-    LIST ( APPEND tgt_list copy${target_identifier}_mmggithash)
-  ENDIF ()
 
   ADD_CUSTOM_TARGET (copy_${target_identifier}_headers ALL
     DEPENDS ${tgt_list} )

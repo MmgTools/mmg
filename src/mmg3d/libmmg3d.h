@@ -49,7 +49,7 @@
 extern "C" {
 #endif
 
-#include "mmg/mmg3d/libmmgtypes.h"
+#include "../common/libmmgtypes.h"
 #include "mmg3d_export.h"
 
 /**

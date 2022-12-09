@@ -118,16 +118,7 @@ SET( mmg2d_headers
   ${MMG2D_SOURCE_DIR}/mmg2d_export.h
   ${MMG2D_SOURCE_DIR}/libmmg2d.h
   ${MMG2D_BINARY_DIR}/libmmg2df.h
-  ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-  ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-  ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
-  ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-  ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
-  ${MMGCOMMON_BINARY_DIR}/mmgversion.h
   )
-IF (NOT WIN32 OR MINGW)
-  LIST(APPEND mmg2d_headers  ${MMGCOMMON_BINARY_DIR}/git_log_mmg.h )
-ENDIF()
 
 # install man pages
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmg2d.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)

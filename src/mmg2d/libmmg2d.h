@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#include "mmg/mmg2d/libmmgtypes.h"
+#include "../common/libmmgtypes.h"
 #include "mmg2d_export.h"
 
 /**

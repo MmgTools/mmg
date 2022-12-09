@@ -110,16 +110,7 @@ SET( mmgs_headers
   ${MMGS_SOURCE_DIR}/mmgs_export.h
   ${MMGS_SOURCE_DIR}/libmmgs.h
   ${MMGS_BINARY_DIR}/libmmgsf.h
-  ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-  ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-  ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
-  ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-  ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
-  ${MMGCOMMON_BINARY_DIR}/mmgversion.h
   )
-IF (NOT WIN32 OR MINGW)
-  LIST(APPEND mmgs_headers  ${MMGCOMMON_BINARY_DIR}/git_log_mmg.h )
-ENDIF()
 
 # install man pages
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmgs.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)

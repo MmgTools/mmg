@@ -90,36 +90,19 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${MMG2D_SOURCE_DIR}/mmg2d_export.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
     ${MMG2D_BINARY_DIR}/libmmg2df.h
-    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-    ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
     )
   SET( mmg3d_headers
     ${MMG3D_SOURCE_DIR}/mmg3d_export.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
     ${MMG3D_BINARY_DIR}/libmmg3df.h
-    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-    ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
     )
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/mmgs_export.h
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_BINARY_DIR}/libmmgsf.h
-    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-    ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
     )
   SET( mmg_headers
-    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
-    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
-    # ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
+     # ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h
     )
@@ -161,9 +144,6 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     copy_2d_headers copy_s_headers copy_3d_headers
     ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h
     ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h
-    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/libmmgtypes.h
-    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/mmgcmakedefines.h
-    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/mmgcmakedefinesf.h
     )
 
 ENDIF()

@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 #include "mmgs_export.h"
-#include "mmg/mmgs/libmmgtypes.h"
+#include "../common/libmmgtypes.h"
 
 /**
  * Maximum array size when storing adjacent points (or ball) of a vertex.
