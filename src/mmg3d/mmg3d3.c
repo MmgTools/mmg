@@ -180,11 +180,6 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
       continue;
     }
 
-    if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
-      puts("I try to split an internal edge connecting bdy points");
-    }
-
-
 #ifndef NDEBUG
     if ( pxt ) {
       assert( !(pxt->tag[imax] & MG_BDY) ); }

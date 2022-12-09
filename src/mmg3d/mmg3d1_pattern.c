@@ -128,10 +128,6 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         return -1;
       }
 
-      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
-        puts("I try to split an internal edge connecting bdy points");
-      }
-
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);

@@ -208,9 +208,6 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     int8_t isbdy;
     ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
 
-    if ( ilist > 0 && (!ilist%2) && isbdy ) {
-      puts("We were treating a bdy edge as a non bdy one");
-    }
 
     if ( !ilist ){
       /* Unable to compute edge shell: treat next element */
