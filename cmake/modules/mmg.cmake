@@ -45,11 +45,11 @@ FILE(
   ${MMG2D_SOURCE_DIR}/*.c
   ${MMG3D_SOURCE_DIR}/*.c
   ${MMGS_SOURCE_DIR}/*.c
-  ${COMMON_SOURCE_DIR}/*.c
+  ${MMGCOMMON_SOURCE_DIR}/*.c
   ${MMG2D_SOURCE_DIR}/*.h
   ${MMG3D_SOURCE_DIR}/*.h
   ${MMGS_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.h
+  ${MMGCOMMON_SOURCE_DIR}/*.h
   )
 LIST(REMOVE_ITEM mmg_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
@@ -59,7 +59,7 @@ LIST(REMOVE_ITEM mmg_library_files
 
 IF ( VTK_FOUND AND NOT USE_VTK MATCHES OFF)
   LIST(APPEND  mmg_library_files
-    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+    ${MMGCOMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
 
 IF ( LIBMMG_STATIC )
@@ -90,35 +90,35 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${MMG2D_SOURCE_DIR}/mmg2d_export.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
     ${MMG2D_BINARY_DIR}/libmmg2df.h
-    ${COMMON_SOURCE_DIR}/mmg_export.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h
+    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
+    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
+    ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
     )
   SET( mmg3d_headers
     ${MMG3D_SOURCE_DIR}/mmg3d_export.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
     ${MMG3D_BINARY_DIR}/libmmg3df.h
-    ${COMMON_SOURCE_DIR}/mmg_export.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h
+    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
+    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
+    ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
     )
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/mmgs_export.h
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_BINARY_DIR}/libmmgsf.h
-    ${COMMON_SOURCE_DIR}/mmg_export.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h
+    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
+    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
+    ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
     )
   SET( mmg_headers
-    ${COMMON_SOURCE_DIR}/mmg_export.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
+    ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
     # ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h

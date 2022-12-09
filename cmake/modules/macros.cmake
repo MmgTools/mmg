@@ -65,15 +65,15 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   ADD_CUSTOM_TARGET(mmg${target_identifier}types_header ALL
     DEPENDS
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h )
+    ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h )
 
   ADD_CUSTOM_TARGET(mmg${target_identifier}cmakedefines_header ALL
     DEPENDS
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h )
+    ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h )
 
   ADD_CUSTOM_TARGET(mmg${target_identifier}version_header ALL
     DEPENDS
-    ${COMMON_BINARY_DIR}/mmgversion.h )
+    ${MMGCOMMON_BINARY_DIR}/mmgversion.h )
 
   ADD_CUSTOM_TARGET(mmg${target_identifier}_header ALL
     DEPENDS
@@ -84,22 +84,22 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${source_dir}/mmg${target_identifier}_export.h )
 
   COPY_HEADER (
-    ${COMMON_SOURCE_DIR} libmmgtypes.h
+    ${MMGCOMMON_SOURCE_DIR} libmmgtypes.h
     ${include_dir} libmmgtypes.h
     mmg${target_identifier}types_header copy${target_identifier}_libmmgtypes )
 
   COPY_HEADER (
-    ${COMMON_BINARY_DIR} mmgcmakedefines.h
+    ${MMGCOMMON_BINARY_DIR} mmgcmakedefines.h
     ${include_dir} mmgcmakedefines.h
     mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefines )
 
   COPY_HEADER (
-    ${COMMON_BINARY_DIR} mmgcmakedefinesf.h
+    ${MMGCOMMON_BINARY_DIR} mmgcmakedefinesf.h
     ${include_dir} mmgcmakedefinesf.h
     mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefinesf )
 
   COPY_HEADER (
-    ${COMMON_BINARY_DIR} mmgversion.h
+    ${MMGCOMMON_BINARY_DIR} mmgversion.h
     ${include_dir} mmgversion.h
     mmg${target_identifier}version_header copy${target_identifier}_mmgversion )
 
@@ -115,7 +115,7 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   if (PERL_FOUND)
   COPY_HEADER (
-    ${COMMON_BINARY_DIR} libmmgtypesf.h
+    ${MMGCOMMON_BINARY_DIR} libmmgtypesf.h
     ${include_dir} libmmgtypesf.h
     mmg_fortran_header copy${target_identifier}_libmmgtypesf )
 
@@ -133,7 +133,7 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
 
   IF (NOT WIN32 OR MINGW)
     COPY_HEADER (
-      ${COMMON_BINARY_DIR} git_log_mmg.h
+      ${MMGCOMMON_BINARY_DIR} git_log_mmg.h
       ${include_dir} git_log_mmg.h
       GenerateGitHash copy${target_identifier}_mmggithash )
 
@@ -171,13 +171,13 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
     INCLUDE_DIRECTORIES ( BEFORE
-      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR})
+      ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR})
   ELSE ( )
     target_include_directories( ${target_name} BEFORE PUBLIC
       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/>
       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-      $<BUILD_INTERFACE:${COMMON_SOURCE_DIR}>
-      $<BUILD_INTERFACE:${COMMON_BINARY_DIR}>
+      $<BUILD_INTERFACE:${MMGCOMMON_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${MMGCOMMON_BINARY_DIR}>
       $<BUILD_INTERFACE:${MMG3D_SOURCE_DIR}>
       $<BUILD_INTERFACE:${MMGS_SOURCE_DIR}>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/mmg/>
@@ -264,7 +264,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
 
  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
    INCLUDE_DIRECTORIES ( BEFORE
-     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
+     ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
    if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
      message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
      INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
@@ -272,7 +272,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
 
  ELSE ( )
    TARGET_INCLUDE_DIRECTORIES ( ${exec_name} BEFORE PUBLIC
-     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
+     ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
    if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
      message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
      target_include_directories( ${exec_name} BEFORE PUBLIC ${SCOTCH_INCLUDE_DIRS} )
