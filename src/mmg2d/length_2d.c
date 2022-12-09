@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
+#include "mmg2dexterns_private.h"
 
 /* Compute isotropic edge length */
 double long_iso(double *ca,double *cb,double *ma,double *mb) {

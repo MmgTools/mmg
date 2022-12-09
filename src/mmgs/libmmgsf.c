@@ -42,7 +42,7 @@
  */
 
 #include "libmmgs.h"
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 /**
  * See \ref MMGS_mmgslib function in \ref mmgs/libmmgs.h file.

@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 /**
  * swap bytes if needed (conversion from big/little endian toward little/big

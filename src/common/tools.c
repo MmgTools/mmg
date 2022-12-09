@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 /**
  * \param n array size

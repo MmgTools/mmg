@@ -35,7 +35,7 @@
 
 #include "libmmg3d.h"
 #include "libmmg3d_private.h"
-#include "mmg3dexterns.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t ddb;
 

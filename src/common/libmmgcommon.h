@@ -39,9 +39,9 @@
 
 #include "libmmgtypes.h"
 
-#include "chrono.h"
+#include "chrono_private.h"
 
-#include "mmg_core_export.h"
+#include "mmg_core_export_private.h"
 
 #ifdef __cplusplus
 extern "C" {

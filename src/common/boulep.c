@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 extern MMG5_Info  info;
 

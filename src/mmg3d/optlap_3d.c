@@ -33,7 +33,7 @@
 
 #include "libmmg3d.h"
 #include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
+#include "mmg3dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

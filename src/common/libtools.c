@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh

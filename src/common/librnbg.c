@@ -31,8 +31,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
-#include "mmgexterns.h"
+#include "libmmgcommon_private.h"
+#include "mmgexterns_private.h"
 
 #ifdef USE_SCOTCH
 

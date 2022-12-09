@@ -33,8 +33,8 @@
  */
 
 #include "libmmg3d_private.h"
-#include "inlined_functions.h"
-#include "mmg3dexterns.h"
+#include "inlined_functions_private.h"
+#include "mmg3dexterns_private.h"
 
 #ifndef _INLINED_FUNCT_3D_H
 #define _INLINED_FUNCT_3D_H

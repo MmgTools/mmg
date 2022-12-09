@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 #ifndef _INLINED_FUNC_H
 #define _INLINED_FUNC_H

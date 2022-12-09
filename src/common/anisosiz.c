@@ -32,9 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
-#include "mmgexterns.h"
-#include "inlined_functions.h"
+#include "libmmgcommon_private.h"
+#include "mmgexterns_private.h"
+#include "inlined_functions_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

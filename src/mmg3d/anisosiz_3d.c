@@ -35,8 +35,8 @@
 
 #include "libmmg3d.h"
 #include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
-#include "mmgexterns.h"
+#include "mmg3dexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param dm matrix eigenvalues (1x3 array).

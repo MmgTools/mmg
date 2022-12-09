@@ -33,9 +33,9 @@
  */
 
 #include "libmmgs_private.h"
-#include "mmgsexterns.h"
-#include "mmgexterns.h"
-#include "inlined_functions.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
+#include "inlined_functions_private.h"
 
 extern int8_t ddb;
 

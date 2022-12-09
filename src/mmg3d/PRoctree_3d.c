@@ -35,8 +35,8 @@
  */
 
 #include "libmmgtypes.h"
-#include "mmgcommon.h"
-#include "PRoctree_3d.h"
+#include "libmmgcommon_private.h"
+#include "PRoctree_3d_private.h"
 #include <stdio.h>
 
 /**

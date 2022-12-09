@@ -21,9 +21,9 @@
 ** =============================================================================
 */
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 #define MMG_EXTERN
 #define MMG_ASSIGN_NULL =NULL
 
-#include  "mmgexterns.h"
+#include  "mmgexterns_private.h"

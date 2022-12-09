@@ -48,7 +48,7 @@
 extern "C" {
 #endif
 
-#include "eigenv.h"
+#include "eigenv_private.h"
 #include "libmmgcommon.h"
 
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"

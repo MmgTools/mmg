@@ -25,7 +25,7 @@
 #define CHRONO_H
 
 #include <time.h>
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 #ifndef MMG_POSIX
 #include <windows.h>
@@ -34,7 +34,7 @@
 #include <sys/resource.h>
 #endif
 
-#include "mmg_core_export.h"
+#include "mmg_core_export_private.h"
 
 #ifdef __cplusplus
 extern "C" {

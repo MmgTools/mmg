@@ -26,7 +26,7 @@
 
 #ifdef USE_VTK
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkXMLReader.h>

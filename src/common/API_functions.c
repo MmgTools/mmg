@@ -40,7 +40,7 @@
  *
  */
 
-#include "mmgcommon.h"
+#include "libmmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
