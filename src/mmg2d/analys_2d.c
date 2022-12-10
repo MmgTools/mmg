@@ -852,7 +852,7 @@ int MMG2D_regver(MMG5_pMesh mesh) {
   double                *tmp,lm1,lm2,cx,cy,res,res0,c[2],co[3][3],vol;
   MMG5_int              k,kt,iel,ip1,ip2,nn,list[MMG5_LMAX];
   int                   it,maxit,j,ilist,noupdate;
-  int8_t                i,ier;
+  int8_t                i;
 
   it = 0;
   maxit=10;

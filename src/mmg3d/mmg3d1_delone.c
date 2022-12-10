@@ -193,13 +193,6 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     return 2;
     /* End of case of a bdy face */
   }
-  else if(pt->xt){
-    /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
-     * do nothing to avoid splitting of a bdy edge from a non bdy face (due
-     * to collapses, a tetra with no bdy faces may have a xtetra and
-     * boundary tags or no tags on boundary edge). */
-    return 0;
-  }
   else {
     /** Case of a tetra without xtetra (no boundary faces): split non-bdy
      * edges with Delauney kernel. */
