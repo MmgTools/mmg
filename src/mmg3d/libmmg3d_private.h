@@ -24,7 +24,7 @@
 #ifndef LIBMMG3D_PRIVATE_H
 #define LIBMMG3D_PRIVATE_H
 
-#include "libmmgcommon.h"
+#include "libmmgcommon_private.h"
 #include "PRoctree_3d_private.h"
 
 #ifdef __cplusplus

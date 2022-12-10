@@ -38,7 +38,7 @@
  *
  */
 
-#include "libmmgcommon_private.h"
+#include "mmgcommon_private.h"
 
 
 /**

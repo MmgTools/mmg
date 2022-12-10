@@ -3,7 +3,7 @@
 
 #include "libmmgtypes.h"
 #include "PRoctree_3d_private.h"
-#include "libmmgcommon_private.h"
+#include "mmgcommon_private.h"
 
 #ifndef MMG_EXTERN
 #define MMG_EXTERN extern

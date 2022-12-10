@@ -43,7 +43,7 @@ FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 if (PERL_FOUND)
   GENERATE_FORTRAN_HEADER ( mmg3d
     ${MMG3D_SOURCE_DIR} libmmg3d.h
-    ${MMG3D_SHRT_INCLUDE}
+    mmg/common
     ${MMG3D_BINARY_DIR} libmmg3df.h
     )
 endif (PERL_FOUND)

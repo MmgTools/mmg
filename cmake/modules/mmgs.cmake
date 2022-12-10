@@ -42,7 +42,7 @@ FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 if (PERL_FOUND)
   GENERATE_FORTRAN_HEADER ( mmgs
     ${MMGS_SOURCE_DIR} libmmgs.h
-    ${MMGS_SHRT_INCLUDE}
+    mmg/common
     ${MMGS_BINARY_DIR} libmmgsf.h
     )
 endif (PERL_FOUND)

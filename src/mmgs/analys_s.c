@@ -34,7 +34,7 @@
  */
 
 #include "libmmgs_private.h"
-#include "libmmgcommon_private.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh

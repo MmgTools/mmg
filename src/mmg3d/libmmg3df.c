@@ -42,7 +42,7 @@
  */
 
 #include "libmmg3d.h"
-#include "libmmgcommon_private.h"
+#include "mmgcommon_private.h"
 
 /**
  * See \ref MMG3D_mmg3dlib function in \ref mmg3d/libmmg3d.h file.

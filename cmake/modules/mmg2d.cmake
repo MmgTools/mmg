@@ -42,7 +42,7 @@ FILE(MAKE_DIRECTORY  ${MMG2D_BINARY_DIR})
 if (PERL_FOUND)
   GENERATE_FORTRAN_HEADER ( mmg2d
     ${MMG2D_SOURCE_DIR} libmmg2d.h
-    ${MMG2D_SHRT_INCLUDE}
+    mmg/common
     ${MMG2D_BINARY_DIR} libmmg2df.h
     )
 endif(PERL_FOUND)

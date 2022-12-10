@@ -28,8 +28,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-#include "mmgcmakedefines.h"
-#include "mmgversion.h"
+#include "mmg/common/mmgcmakedefines.h"
+#include "mmg/common/mmgversion.h"
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H

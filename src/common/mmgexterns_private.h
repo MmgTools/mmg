@@ -24,7 +24,7 @@
 #ifndef MMGEXTERNS_H
 #define MMGEXTERNS_H
 
-#include "libmmgcommon_private.h"
+#include "mmgcommon_private.h"
 
 #ifndef MMG_EXTERN
 #define MMG_EXTERN extern
