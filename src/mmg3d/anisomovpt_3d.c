@@ -34,7 +34,7 @@
  */
 
 #include "libmmg3d.h"
-#include "inlined_functions_3d.h"
+#include "inlined_functions_3d_private.h"
 #include "mmg3dexterns_private.h"
 #include "mmgexterns_private.h"
 

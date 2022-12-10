@@ -22,7 +22,6 @@
 */
 
 /**
- * \file common/libmmgcommon.h
  * \brief API header for the common part of the MMG libraries.
  * \author Algiane Froehly  (Inria/UBordeaux)
  * \version 5

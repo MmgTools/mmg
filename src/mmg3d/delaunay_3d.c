@@ -32,7 +32,7 @@
  * \todo doxygen documentation.
  */
 
-#include "inlined_functions_3d.h"
+#include "inlined_functions_3d_private.h"
 
 #ifndef MMG_PATTERN
 

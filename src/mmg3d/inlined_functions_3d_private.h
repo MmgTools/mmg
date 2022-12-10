@@ -22,7 +22,6 @@
 */
 
 /**
- * \file mmg3d/inlined_functions_3d.h
  * \brief inlined Functions
  * \author Charles Dapogny (UPMC)
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)

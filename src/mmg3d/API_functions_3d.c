@@ -40,7 +40,7 @@
 
 #include "libmmg3d.h"
 #include "libmmg3d_private.h"
-#include "inlined_functions_3d.h"
+#include "inlined_functions_3d_private.h"
 #include "PRoctree_3d_private.h"
 
 int MMG3D_Init_mesh(const int starter,...) {

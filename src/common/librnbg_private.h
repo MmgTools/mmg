@@ -21,7 +21,6 @@
 ** =============================================================================
 */
 /**
- * \file common/librnbg.h
  * \brief header file for the librnbg.c librnbg_s.c librnbg_3d.c files
  * \author Cedric Lachat  (Inria/UBordeaux)
  * \version 5
