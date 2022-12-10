@@ -52,6 +52,20 @@ SET( mmgcommon_headers
   ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
   ${MMGCOMMON_BINARY_DIR}/mmgversion.h
   )
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  LIST ( APPEND mmgcommon_headers
+    ${MMGCOMMON_SOURCE_DIR}/libmmgcommon_private.h
+    ${MMGCOMMON_SOURCE_DIR}/mmgcommon_private.h
+    ${MMGCOMMON_SOURCE_DIR}/mmg_core_export_private.h
+    ${MMGCOMMON_SOURCE_DIR}/inlined_functions_private.h
+    ${MMGCOMMON_SOURCE_DIR}/mmgexterns_private.h
+    ${MMGCOMMON_SOURCE_DIR}/librnbg_private.h
+    ${MMGCOMMON_SOURCE_DIR}/chrono_private.h
+    ${MMGCOMMON_SOURCE_DIR}/eigenv_private.h
+    )
+ENDIF()
+
+
 IF (NOT WIN32 OR MINGW)
   LIST(APPEND mmgcommon_headers  ${MMGCOMMON_BINARY_DIR}/git_log_mmg.h )
 ENDIF()
@@ -100,6 +114,39 @@ IF (NOT WIN32 OR MINGW)
 
   LIST ( APPEND tgt_list copymmgcommon_mmggithash)
 ENDIF ()
+
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} libmmgcommon_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} mmgcommon_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} mmg_core_export_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} inlined_functions_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} mmgexterns_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} librnbg_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} chrono_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMGCOMMON_SOURCE_DIR} eigenv_private ${MMGCOMMON_INCLUDE} "mmgcommon")
+
+  LIST ( APPEND tgt_list copymmgcommon_libmmgcommon_private
+    copymmgcommon_mmgcommon_private copymmgcommon_mmg_core_export_private
+    copymmgcommon_inlined_functions_private copymmgcommon_mmgexterns_private
+    copymmgcommon_librnbg_private copymmgcommon_chrono_private
+    copymmgcommon_eigenv_private )
+
+ENDIF()
 
 ADD_CUSTOM_TARGET (copy_mmgcommon_headers ALL
     DEPENDS ${tgt_list} )

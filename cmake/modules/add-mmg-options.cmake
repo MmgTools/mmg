@@ -116,3 +116,7 @@ CMAKE_DEPENDENT_OPTION (
 CMAKE_DEPENDENT_OPTION(
   MMG_CI "Enable/Disable test execution for mmg library" ON
   "BUILD_TESTING;BUILD_MMG" OFF)
+
+#---------------------- install provate headers for library built on top of Mmg
+OPTION ( MMG_INSTALL_PRIVATE_HEADERS
+  "Install private headers of Mmg (use at your own risk)" OFF )

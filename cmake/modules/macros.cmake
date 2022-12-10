@@ -105,9 +105,21 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     LIST ( APPEND tgt_list copy_libmmg${target_identifier}f )
   endif (PERL_FOUND)
 
+  IF ( MMG_INSTALL_PRIVATE_HEADERS )
+    COPY_1_HEADER_AND_CREATE_TARGET(
+      ${source_dir} libmmg${target_identifier}_private
+      ${include_dir} ${target_identifier})
+    COPY_1_HEADER_AND_CREATE_TARGET(
+      ${source_dir} mmg${target_identifier}externs_private
+      ${include_dir} ${target_identifier})
+
+    LIST ( APPEND tgt_list copy${target_identifier}_libmmg${target_identifier}_private
+      copy${target_identifier}_mmg${target_identifier}externs_private
+      )
+  ENDIF()
 
   ADD_CUSTOM_TARGET (copy_${target_identifier}_headers ALL
-    DEPENDS ${tgt_list} copy_mmgcommon_headers)
+    DEPENDS ${tgt_list} ${tgt_opt_list} copy_mmgcommon_headers)
 
 ENDMACRO ( )
 

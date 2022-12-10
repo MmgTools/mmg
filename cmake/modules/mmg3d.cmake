@@ -147,11 +147,32 @@ SET( mmg3d_headers
   ${MMG3D_BINARY_DIR}/libmmg3df.h
   )
 
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  LIST ( APPEND mmg3d_headers
+    ${MMG3D_SOURCE_DIR}/libmmg3d_private.h
+    ${MMG3D_SOURCE_DIR}/inlined_functions_3d_private.h
+    ${MMG3D_SOURCE_DIR}/mmg3dexterns_private.h
+    ${MMG3D_SOURCE_DIR}/PRoctree_3d_private.h
+    )
+ENDIF()
+
 # install man pages
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmg3d.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # Install header files in /usr/local or equivalent
 INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d COMPONENT headers)
+
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMG3D_SOURCE_DIR} inlined_functions_3d_private ${MMG3D_INCLUDE} 3d)
+
+  COPY_1_HEADER_AND_CREATE_TARGET(
+    ${MMG3D_SOURCE_DIR} PRoctree_3d_private ${MMG3D_INCLUDE} 3d)
+
+  LIST ( APPEND tgt_opt_list copy3d_inlined_functions_3d_private
+    copy3d_PRoctree_3d_private )
+
+ENDIF()
 
 # Copy header files in project directory at build step
 COPY_HEADERS_AND_CREATE_TARGET ( ${MMG3D_SOURCE_DIR} ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )

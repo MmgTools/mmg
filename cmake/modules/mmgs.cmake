@@ -112,6 +112,13 @@ SET( mmgs_headers
   ${MMGS_BINARY_DIR}/libmmgsf.h
   )
 
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  LIST ( APPEND mmgs_headers
+    ${MMGS_SOURCE_DIR}/libmmgs_private.h
+    ${MMGS_SOURCE_DIR}/mmgsexterns_private.h
+    )
+ENDIF()
+
 # install man pages
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmgs.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 

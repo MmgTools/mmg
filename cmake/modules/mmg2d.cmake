@@ -120,6 +120,13 @@ SET( mmg2d_headers
   ${MMG2D_BINARY_DIR}/libmmg2df.h
   )
 
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  LIST ( APPEND mmg2d_headers
+    ${MMG2D_SOURCE_DIR}/libmmg2d_private.h
+    ${MMG2D_SOURCE_DIR}/mmg2dexterns_private.h
+    )
+ENDIF()
+
 # install man pages
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmg2d.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
