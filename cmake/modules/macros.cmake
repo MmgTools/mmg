@@ -92,6 +92,9 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${source_dir} mmg${target_identifier}_export
     ${include_dir} ${target_identifier})
 
+  SET ( tgt_list
+    copy${target_identifier}_libmmg${target_identifier}
+    copy${target_identifier}_mmg${target_identifier}_export )
 
   if (PERL_FOUND)
     COPY_HEADER (
@@ -99,17 +102,12 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
       ${include_dir} libmmg${target_identifier}f.h
       mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f )
 
-    SET ( tgt_list copy_libmmg${target_identifier}f copymmgcommon_libmmgtypesf
-      copy${target_identifier}_libmmg${target_identifier} copymmgcommon_libmmgtypes
-      copy${target_identifier}_mmg${target_identifier}_export
-      copymmgcommon_mmgcmakedefines copymmgcommon_mmgcmakedefinesf
-      copymmgcommon_mmgversion
-      copymmgcommon_mmg_export )
+    LIST ( APPEND tgt_list copy_libmmg${target_identifier}f )
   endif (PERL_FOUND)
 
 
   ADD_CUSTOM_TARGET (copy_${target_identifier}_headers ALL
-    DEPENDS ${tgt_list} )
+    DEPENDS ${tgt_list} copy_mmgcommon_headers)
 
 ENDMACRO ( )
 

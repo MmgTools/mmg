@@ -79,11 +79,17 @@ COPY_HEADER (
 COPY_1_HEADER_AND_CREATE_TARGET(
   ${MMGCOMMON_BINARY_DIR} mmgversion ${MMGCOMMON_INCLUDE} "mmgcommon")
 
+SET ( tgt_list copymmgcommon_libmmgtypes copymmgcommon_mmgcmakedefines
+  copymmgcommon_mmg_export copymmgcommon_mmgcmakedefinesf
+  copymmgcommon_mmgversion )
+
 if (PERL_FOUND)
   COPY_HEADER (
     ${MMGCOMMON_BINARY_DIR} libmmgtypesf.h
     ${MMGCOMMON_INCLUDE} libmmgtypesf.h
     mmg_fortran_header copymmgcommon_libmmgtypesf )
+
+  LIST ( APPEND tgt_list copymmgcommon_libmmgtypesf )
 endif()
 
 IF (NOT WIN32 OR MINGW)
@@ -94,3 +100,6 @@ IF (NOT WIN32 OR MINGW)
 
   LIST ( APPEND tgt_list copymmgcommon_mmggithash)
 ENDIF ()
+
+ADD_CUSTOM_TARGET (copy_mmgcommon_headers ALL
+    DEPENDS ${tgt_list} )
