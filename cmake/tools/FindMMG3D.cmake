@@ -128,7 +128,7 @@ elseif(MMG_BUILDDIR)
   find_path(MMG3D_libmmgtypes.h_DIRS
     NAMES libmmgtypes.h
     HINTS ${MMG_BUILDDIR}
-    PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg3d")
+    PATH_SUFFIXES "include" "include/mmg" "include/common" "include/mmg/mmg3d")
 else()
   if(MMG_DIR)
     set(MMG3D_libmmgtypes.h_DIRS "MMG3D_libmmgtypes.h_DIRS-NOTFOUND")
@@ -136,12 +136,12 @@ else()
       find_path(MMG3D_libmmgtypes.h_DIRS
         NAMES */libmmgtypes.h
         HINTS ${MMG_BUILDDIR}
-        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg3d")
+        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg3d" "include/mmg/common")
     else()
       find_path(MMG3D_libmmgtypes.h_DIRS
         NAMES libmmgtypes.h
         HINTS ${MMG_DIR} ${MMG_BUILDDIR_INTERNAL}
-        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg3d")
+        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg3d" "include/mmg/common")
     endif()
 
   else()
@@ -149,10 +149,10 @@ else()
     find_path(MMG3D_libmmgtypes.h_DIRS
       NAMES libmmgtypes.h
       HINTS ${_inc_env}
-      PATH_SUFFIXES "include/mmg" "include/mmg/mmg3d")
+      PATH_SUFFIXES "include/mmg" "include/mmg/mmg3d" "mmg" "mmg/common" "mmg/mmg3d"  )
   endif()
 endif()
-STRING(REGEX REPLACE "(mmg/mmg3d)" ""
+STRING(REGEX REPLACE "(mmg/mmg3d)|(mmg/common)" ""
   MMG3D_libmmgtypes.h_DIRS ${MMG3D_libmmgtypes.h_DIRS} )
 
 mark_as_advanced(MMG3D_libmmgtypes.h_DIRS)

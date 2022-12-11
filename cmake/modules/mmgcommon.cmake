@@ -62,6 +62,7 @@ IF ( MMG_INSTALL_PRIVATE_HEADERS )
     ${MMGCOMMON_SOURCE_DIR}/librnbg_private.h
     ${MMGCOMMON_SOURCE_DIR}/chrono_private.h
     ${MMGCOMMON_SOURCE_DIR}/eigenv_private.h
+    ${MMGCOMMON_SOURCE_DIR}/vtkparser.hpp
     )
 ENDIF()
 
@@ -110,7 +111,7 @@ IF (NOT WIN32 OR MINGW)
   COPY_HEADER (
     ${MMGCOMMON_BINARY_DIR} git_log_mmg.h
     ${MMGCOMMON_INCLUDE} git_log_mmg.h
-    GenerateGitHash copymmgcommon_mmggithash )
+    GenerateGitHashMmg copymmgcommon_mmggithash )
 
   LIST ( APPEND tgt_list copymmgcommon_mmggithash)
 ENDIF ()
@@ -140,11 +141,21 @@ IF ( MMG_INSTALL_PRIVATE_HEADERS )
   COPY_1_HEADER_AND_CREATE_TARGET(
     ${MMGCOMMON_SOURCE_DIR} eigenv_private ${MMGCOMMON_INCLUDE} "mmgcommon")
 
+  ADD_CUSTOM_TARGET(mmgcommon_vtkparser_header ALL
+    DEPENDS
+    ${MMGCOMMON_SOURCE_DIR}/vtkparser.hpp )
+
+  COPY_HEADER (
+    ${MMGCOMMON_SOURCE_DIR} vtkparser.hpp
+    ${MMGCOMMON_INCLUDE} vtkparser.hpp
+    mmgcommon_vtkparser_header copymmgcommon_vtkparser )
+
+
   LIST ( APPEND tgt_list copymmgcommon_libmmgcommon_private
     copymmgcommon_mmgcommon_private copymmgcommon_mmg_core_export_private
     copymmgcommon_inlined_functions_private copymmgcommon_mmgexterns_private
     copymmgcommon_librnbg_private copymmgcommon_chrono_private
-    copymmgcommon_eigenv_private )
+    copymmgcommon_eigenv_private copymmgcommon_vtkparser)
 
 ENDIF()
 

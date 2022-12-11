@@ -143,7 +143,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ENDIF()
 
   IF (NOT WIN32 OR MINGW)
-    ADD_DEPENDENCIES(${target_name} GenerateGitHash)
+    ADD_DEPENDENCIES(${target_name} GenerateGitHashMmg)
   ENDIF()
   ADD_DEPENDENCIES( ${target_name} ${target_dependencies})
 
@@ -228,7 +228,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   ENDIF ( )
 
   IF (NOT WIN32 OR MINGW)
-    ADD_DEPENDENCIES(${exec_name} GenerateGitHash)
+    ADD_DEPENDENCIES(${exec_name} GenerateGitHashMmg)
   endif()
   ADD_DEPENDENCIES(${exec_name} ${target_dependencies})
 
