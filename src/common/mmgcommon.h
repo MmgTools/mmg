@@ -171,6 +171,7 @@ extern "C" {
 #define MG_EDG(tag) ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_GEO_OR_NOM(tag) (( tag & MG_GEO ) || ( tag & MG_NOM )) /**< Ridge or non-manifold */
 #define MG_EDG_OR_NOM(tag) ( MG_EDG(tag) || (tag & MG_NOM ) ) /**< Edge, ridge or non-manifold */
+#define MG_TRUE_BDY(tag) ( (tag & MG_BDY) && !(tag & MG_PARBDY) ) /**< Non parbdy boundary point (true bdy) */
 
 
 

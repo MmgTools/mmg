@@ -1393,7 +1393,9 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         if ( pxt->tag[i] & MG_REQ ) continue;
       }
       else  pxt = 0;
+
       if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
+        /* Split internal edges connecting bdy points */
         ip = MMG5_hashGet(&hash,ip1,ip2);
       }
       else {

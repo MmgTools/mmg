@@ -444,6 +444,14 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     return 0;
   }
 
+  /* Debug: export variable MMG_SAVE_ANATET1 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET1") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-1."
+           " (MMG_SAVE_ANATET1 env variable is exported).\n");
+    return 1;
+  }
+
   /* renumbering if available */
   if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
@@ -458,7 +466,23 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     return 0;
   }
 
+  /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_DEFSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER DEFSIZ."
+           " (MMG_SAVE_DEFSIZ env variable is exported).\n");
+    return 1;
+  }
+
   MMG5_gradation_info(mesh);
+
+  /* Debug: export variable MMG_SAVE_GRADSIZ to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_GRADSIZ") ) {
+    printf("  ## WARNING: EXIT AFTER GRADSIZ."
+           " (MMG_SAVE_GRADSIZ env variable is exported).\n");
+    return 1;
+  }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( !MMG3D_gradsiz(mesh,met) ) {
@@ -476,6 +500,14 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
   if ( !MMG5_anatet(mesh,met,2,1) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     return 0;
+  }
+
+  /* Debug: export variable MMG_SAVE_ANATET2 to save adapted mesh at the end of
+   * anatet wave */
+  if ( getenv("MMG_SAVE_ANATET2") ) {
+    printf("  ## WARNING: EXIT AFTER ANATET-2."
+           " (MMG_SAVE_ANATET2 env variable is exported).\n");
+    return 1;
   }
 
   /* renumbering if available */
