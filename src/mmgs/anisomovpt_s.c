@@ -52,7 +52,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double         r[3][3],ux,uy,uz,*n,area,lispoi[3*MMGS_LMAX+1],*m0;//,m[6],mo[6];
   double         gv[2],detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
   double         calold,calnew,caltmp;
-  int            k,iel,kel,nump,nbeg,nend;
+  int            k,iel,kel,nump,nbeg,nend,*adja;
   char           i0,i1,i2,ier;
   static int     warn=0;
   step = 0.1;
@@ -68,6 +68,12 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   p0   = &mesh->point[nump];
   m0   = &met->m[6*nump];
   assert( !p0->tag );
+
+  /* Check that we have a closed manifold ball */
+  assert ( !(p0->tag & MG_NOM) );
+  assert ( !(p0->tag & MG_GEO) );
+  assert ( mesh->adja[ 3*(iel-1) + 1 + i1] );
+  assert ( mesh->adja[ 3*(iel-1) + 1 + MMG5_iprv2[i0]] );
 
   iel = list[ilist-1] / 3;
   i0  = list[ilist-1] % 3;

@@ -37,14 +37,24 @@
 #include <math.h>
 
 
-/* compute movement of an internal point whose ball is passed */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the ball of point.
+ * \param ilist number of elements in the ball of point.
+ *
+ * \return 0 if impossible to move the point, 1 otherwise.
+ *
+ * Compute movement of an internal point whose ball is passed.
+ *
+ */
 int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   MMG5_Bezier   b;
   double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+1];
   double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
-  int      ier,iel,ipp,k,kel,npt,ibeg,iend;
+  int      ier,iel,ipp,k,kel,npt,ibeg,iend,*adja;
   char     i0,i1,i2;
 
   step = 0.1;
@@ -58,6 +68,12 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   ibeg = pt->v[i1];
   ipp  = pt->v[i0];
   p0   = &mesh->point[ipp]; /* point to move */
+
+  /* Check that we have a closed manifold ball */
+  assert ( !(p0->tag & MG_NOM) );
+  assert ( !(p0->tag & MG_GEO) );
+  assert ( mesh->adja[ 3*(k-1) + 1 + i1] );
+  assert ( mesh->adja[ 3*(k-1) + 1 + MMG5_iprv2[i0]] );
 
   k  = list[ilist-1] / 3;
   i0 = list[ilist-1] % 3;

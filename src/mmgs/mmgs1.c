@@ -443,9 +443,16 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
       for (i=0; i<3; i++) {
         ppt = &mesh->point[pt->v[i]];
 
-        if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
+        if ( ppt->flag == base || MS_SIN(ppt->tag) ) {
           continue;
-        ilist = MMGS_boulet(mesh,k,i,MMG5_iprv2[i],list,&ishell);
+        }
+        else if ( ppt->tag & MG_NOM ) {
+          ilist = MMGS_boulet(mesh,k,i,MMG5_iprv2[i],list,&ishell);
+          continue;
+        }
+        else {
+          ilist = MMGS_bouletmani(mesh,k,i,list);
+        }
 
         if ( !ilist ) continue;
 
@@ -453,8 +460,9 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
           ier = movridpt(mesh,met,list,ilist);
           if ( ier )  ns++;
         }
-        else
+        else {
           ier = movintpt(mesh,met,list,ilist);
+        }
         if ( ier ) {
           nm++;
           ppt->flag = base;

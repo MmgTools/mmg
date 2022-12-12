@@ -136,6 +136,7 @@ int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  MMGS_bdryUpdate(MMG5_pMesh mesh);
 int  MMGS_boulet(MMG5_pMesh mesh,int start,int ip,int ia,int *list,int *ishell);
+int  MMGS_bouletmani(MMG5_pMesh mesh,int start,int ip,int *list);
 int  MMGS_boulechknm(MMG5_pMesh mesh,int start,int ip,int ia,int *list,int *ishell);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
 int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);

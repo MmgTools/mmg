@@ -149,6 +149,68 @@ int MMGS_boulet(MMG5_pMesh mesh,int start,int ip,int ia,int *list, int *ishell) 
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param start index of triangle to start.
+ * \param ip index of point for wich we compute the ball.
+ * \param list pointer toward the computed ball of \a ip.
+ * \return the size of the computed ball or 0 if fail.
+ *
+ * Find all triangles sharing \a ip with ip a manifold point, \f$list[0] =\f$ \a
+ * start do not stop when crossing ridge.
+ *
+ */
+int MMGS_bouletmani(MMG5_pMesh mesh,int start,int ip,int *list) {
+  MMG5_pTria    pt;
+  MMG5_pPoint   ppt;
+  int           *adja,k,ilist;
+  char          i,i1,i2;
+
+  pt = &mesh->tria[start];
+
+  ppt = &mesh->point[pt->v[ip]];
+  ilist = 0;
+
+  /* store neighbors */
+  k = start;
+  i = ip;
+  do {
+    if ( ilist > MMGS_LMAX-2 )  return 0;
+    list[ilist] = 3*k + i;
+    ++ilist;
+
+    adja = &mesh->adja[3*(k-1)+1];
+    i1 = MMG5_inxt2[i];
+    k  = adja[i1] / 3;
+    i  = adja[i1] % 3;
+    i  = MMG5_inxt2[i];
+  }
+  while ( k && k != start );
+  if ( k > 0 )  return ilist;
+
+  if ( ppt->tag & MG_NOM )
+    return 0;
+
+  /* check if boundary hit */
+  k = start;
+  i = ip;
+  do {
+    adja = &mesh->adja[3*(k-1)+1];
+    i2 = MMG5_iprv2[i];
+    k  = adja[i2] / 3;
+    if ( k == 0 )  break;
+    i  = adja[i2] % 3;
+    i  = MMG5_iprv2[i];
+
+    if ( ilist > MMGS_LMAX-2 )  return 0;
+    list[ilist] = 3*k + i;
+    ilist++;
+  }
+  while ( k );
+
+  return ilist;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param start index of tria to start to compute the ball.
  * \param ip index of point in tria \a start for which we want to compute
  * the ball.
