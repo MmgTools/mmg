@@ -1471,10 +1471,7 @@ int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip,double ux,
 
   }
   else if( ppt->tag & MG_BDY ) {
-
-    pxp = &mesh->xpoint[ppt->xp];
     memcpy(m,mm,6*sizeof(double));
-
   }
   else {
 
@@ -1730,13 +1727,12 @@ void MMG5_grad2metVol_setmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8
   mm = &met->m[6*ip];
 
   if ( MG_RID(ppt->tag) ) {
-    MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
     double mr[6];
     double u[3],r[3][3],*t,*n;
 
     /* Compute ridge orthonormal basis (t, n x t, n) */
     t = ppt->n;
-    pxp = &mesh->xpoint[ppt->xp];
+    MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
     if( ridgedir )
       n = pxp->n2;
     else

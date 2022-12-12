@@ -116,6 +116,10 @@ int main(int argc,char *argv[]) {
       else if ( typSol[i-1] == MMG5_Tensor ) {
         sols = (double*) calloc(np*6, sizeof(double));
       }
+      else {
+        puts("Unexpected solution type.");
+        exit(EXIT_FAILURE);
+      }
 
       if ( MMG3D_Get_ithSols_inSolsAtVertices(mmgSol,i,sols) !=1 ) exit(EXIT_FAILURE);
 
@@ -130,6 +134,10 @@ int main(int argc,char *argv[]) {
         sols = (double*) calloc(3, sizeof(double));
       else if ( typSol[i-1] == MMG5_Tensor ) {
         sols = (double*) calloc(6, sizeof(double));
+      }
+      else {
+        puts("Unexpected solution type.");
+        exit(EXIT_FAILURE);
       }
 
       for ( j=1; j<=np; ++j ) {
