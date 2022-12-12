@@ -42,7 +42,7 @@
 #include "libmmg2d_private.h"
 
 /**
- * See \ref MMG2D_Init_mesh function in common/libmmgcommon.h file.
+ * See \ref MMG2D_Init_mesh function in common/libmmgcommon_private.h file.
  */
 FORTRAN_VARIADIC ( MMG2D_INIT_MESH, mmg2d_init_mesh,
                    (const int starter, ... ),
@@ -77,7 +77,7 @@ FORTRAN_NAME(MMG2D_INIT_PARAMETERS, mmg2d_init_parameters,(MMG5_pMesh *mesh),
   return;
 }
 /**
- * See \ref MMG2D_Set_inputMeshName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG2D_Set_inputMeshName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
              (MMG5_pMesh *mesh, char* meshin, int *strlen0, int* retval),
@@ -94,7 +94,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
 }
 
 /**
- * See \ref MMG2D_Set_inputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG2D_Set_inputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen0, int* retval),
@@ -130,7 +130,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
 }
 
 /**
- * See \ref MMG2D_Set_outputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG2D_Set_outputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen0, int* retval),

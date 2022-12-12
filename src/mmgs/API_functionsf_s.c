@@ -41,7 +41,7 @@
 #include "libmmgs_private.h"
 
 /**
- * See \ref MMGS_Init_mesh function in common/libmmgcommon.h file.
+ * See \ref MMGS_Init_mesh function in common/libmmgcommon_private.h file.
  */
 FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
                    (const int starter, ... ),
@@ -66,7 +66,7 @@ FORTRAN_NAME(MMGS_INIT_PARAMETERS,mmgs_init_parameters,(MMG5_pMesh *mesh),(mesh)
   return;
 }
 /**
- * See \ref MMGS_Set_inputMeshName function in \ref common/libmmgcommon.h file.
+ * See \ref MMGS_Set_inputMeshName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMGS_SET_INPUTMESHNAME, mmgs_set_inputmeshname,
              (MMG5_pMesh *mesh, char* meshin, int *strlen0, int* retval),
@@ -83,7 +83,7 @@ FORTRAN_NAME(MMGS_SET_INPUTMESHNAME, mmgs_set_inputmeshname,
 }
 
 /**
- * See \ref MMGS_Set_inputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMGS_Set_inputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMGS_SET_INPUTSOLNAME, mmgs_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen0, int* retval),
@@ -119,7 +119,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTMESHNAME,mmgs_set_outputmeshname,
 }
 
 /**
- * See \ref MMGS_Set_outputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMGS_Set_outputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen0, int* retval),

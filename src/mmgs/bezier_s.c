@@ -45,7 +45,7 @@ extern int8_t ddb;
  * with the MMG5_bezierCP interface).
  * \return 1.
  *
- * Compute Bezier control points on triangle \a pt (cf. \cite{vlachos2001curved}).
+ * Compute Bezier control points on triangle \a pt (cf. \cite vlachos2001curved).
  *
  * \todo merge with the MMG5_mmg3dBezierCP function and remove the pointer
  * toward this functions.
