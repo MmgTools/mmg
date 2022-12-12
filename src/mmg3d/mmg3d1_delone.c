@@ -94,18 +94,20 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
   int           ilist;
   int8_t        j,i,i1,i2;
 
-  if ( lmax < MMG3D_LOPTL_DEL )  {
-    /* Edge is small enough: nothing to do */
-    return 3;
-  }
-
-  /** Edge is too long: try to split it */
+  /** Get edge infos */
   pt = &mesh->tetra[k];
   pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
   MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
   if ( pxt && (pxt->ftag[i] & MG_BDY) ) {
+
+    /** Check edge length */
+    if ( lmax < MMG3D_LOPTL_DEL )  {
+      /* Edge is small enough: nothing to do */
+      return 3;
+    }
+
     /** Edge belongs to a boundary face: try to split using patterns */
     /* Construction of bezier edge */
     double      to[3],no1[3],no2[3];
@@ -193,29 +195,40 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     return 2;
     /* End of case of a bdy face */
   }
-  else if(pt->xt){
-    /** Tetra has a xtetra but the longest edge do not belong to a bdy face:
-     * do nothing to avoid splitting of a bdy edge from a non bdy face (due
-     * to collapses, a tetra with no bdy faces may have a xtetra and
-     * boundary tags or no tags on boundary edge). */
-    return 0;
-  }
   else {
     /** Case of a tetra without xtetra (no boundary faces): split non-bdy
      * edges with Delauney kernel. */
     /* Note that it is possible that non bdy tetra contains a bdy edge, here
      * only non bdy edge are considered */
-    ilist = MMG5_coquil(mesh,k,imax,list);
+
+    int8_t force_splt = 0;
+    const int8_t fem_mode = 2; // value of info.fem in case of fem mode
+
+    if ( mesh->info.fem == fem_mode ) {
+      /* Force splitting of internal edges connecting bdy points */
+      if ( MG_TRUE_BDY(p0->tag) && MG_TRUE_BDY(p1->tag) ) {
+        force_splt = 1;
+      }
+    }
+
+    if ( (!force_splt) && lmax < MMG3D_LOPTL_DEL )  {
+      /* Edge is small enough: nothing to do */
+      return 3;
+    }
+
+    int8_t isbdy;
+    ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
+
     if ( !ilist ){
       /* Unable to compute edge shell: treat next element */
       return 0;
     }
+    else if ( isbdy ) {
+      /* Edge is bdy: skip it (we want to treat it from a bdy tetra) */
+      return 0;
+    }
     else if ( ilist<0 ) {
       return -1;
-    }
-    else if(ilist%2) {
-      /* Edge is bdy: we want to treat it from a bdy face */
-      return 0;
     }
 
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -252,6 +265,12 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
     else {
       lfilt = MMG3D_LFILTL_DEL;
+    }
+
+    /* No filter for internal edges connecting boundary points: we want to force
+     * splitting */
+    if ( force_splt ) {
+      lfilt = 0;
     }
 
     ier = 1;
@@ -1011,7 +1030,7 @@ int MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
  */
 int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
   MMG3D_pPROctree PROctree = NULL;
-    
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 

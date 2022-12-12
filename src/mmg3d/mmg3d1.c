@@ -1393,7 +1393,9 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         if ( pxt->tag[i] & MG_REQ ) continue;
       }
       else  pxt = 0;
+
       if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
+        /* Split internal edges connecting bdy points */
         ip = MMG5_hashGet(&hash,ip1,ip2);
       }
       else {
@@ -1775,7 +1777,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
   }
 
   (*tag) |= MG_BDY;
-  *ilist = MMG5_coquil(mesh,k,imax,list);
+  int8_t dummy;
+  *ilist = MMG5_coquil(mesh,k,imax,list,&dummy);
   if ( !(*ilist) ) {
     /* On of the tetra of the edge shell is required: we cannot split the edge */
     return 0;
