@@ -32,7 +32,7 @@
  */
 
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
+#include "mmg2dexterns_private.h"
 
 extern uint8_t ddb;
 

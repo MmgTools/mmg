@@ -39,7 +39,7 @@
 
 #include "libmmg2d_private.h"
 #include "libmmg2d.h"
-#include "mmg2dexterns.h"
+#include "mmg2dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

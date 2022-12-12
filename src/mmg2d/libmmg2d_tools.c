@@ -32,8 +32,8 @@
 
 #include "libmmg2d.h"
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
-#include "mmgexterns.h"
+#include "mmg2dexterns_private.h"
+#include "mmgexterns_private.h"
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ani || (met && met->size==3 ) ) {

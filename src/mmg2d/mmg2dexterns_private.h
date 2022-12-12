@@ -2,7 +2,7 @@
 #define MMG2DEXTERNS_H
 
 #include "libmmgtypes.h"
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 #ifndef MMG_EXTERN
 #define MMG_EXTERN extern

@@ -37,7 +37,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "chrono.h"
+#include "chrono_private.h"
 
 /**
  * \fn void  chrono(int cmode,mytime *ptt)

@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 #ifndef _WIN32
-#include "git_log_mmg.h"
+#include "mmg/common/git_log_mmg.h"
 #endif
 
 #ifndef MMGVERSION_H
