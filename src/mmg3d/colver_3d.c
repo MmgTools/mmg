@@ -355,6 +355,134 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
 }
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ * \param filled 1 if an xtetra has been found (so tag and ref are filled)
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled without
+ * founding an xtetra, adj if an xtetra has been found, 0 otherwise
+ *
+ * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling its
+ * shell in one direction (given by the pivot \a piv).  Stop when meeting the
+ * first xtetra with a non 0 tag (it is sufficient if tags and refs are
+ * consistent through the edge shell except for edges with null tags);
+ *
+ */
+static inline
+int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
+                                  int16_t *tag,MMG5_int *ref, MMG5_int piv,MMG5_int adj,
+                                  int8_t *filled) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     *adja;
+  int8_t       i;
+
+  *filled = 0;
+  while ( adj && (adj != start) ) {
+    pt     = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
+
+    /* update edge ref and tag */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      *ref  = pxt->edg[i];
+      if ( pxt->tag[i] & MG_BDY ) {
+        *tag |= pxt->tag[i];
+        *filled = 1;
+        return adj;
+      }
+    }
+
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+
+  return adj;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param ia local index of edge that must be updated
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \return 1 if success, 0 if fail.
+ *
+ * Get tag and ref of the edge \ia of tetra \a start by traveling its shell.
+ * Stop when meeting the first xtetra (it is sufficient if tags and refs are
+ * consistent through the edge shell);
+ *
+ */
+static inline
+int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *tag,MMG5_int *ref) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     piv,na,nb,adj,*adja;
+  int8_t       filled;
+
+  pt   = &mesh->tetra[start];
+
+  assert( start >= 1 &&  MG_EOK(pt) );
+
+  pxt  = NULL;
+  na   = pt->v[MMG5_iare[ia][0]];
+  nb   = pt->v[MMG5_iare[ia][1]];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( pxt->tag[ia] & MG_BDY ) {
+      *tag |= pxt->tag[ia];
+      *ref = pxt->edg[ia];
+      return 1;
+    }
+  }
+
+  /* Travel in one direction */
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[MMG5_ifar[ia][1]];
+
+  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
+
+  /* If an xtetra has been found or if all shell has been travelled, stop, else,
+   * travel it the other sense */
+  if ( adj > 0 ) {
+    assert ( (adj == start) || filled );
+    return 1;
+  }
+  else if ( adj < 0 ) return 0;
+
+  assert(!adj);
+
+  pt = &mesh->tetra[start];
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][1]] / 4;
+  piv = pt->v[MMG5_ifar[ia][0]];
+
+  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
+
+  if ( adj < 0 ) return 0;
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element in which we collapse.
@@ -457,16 +585,21 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 
     if ( iq < 4 ) {
       nbbdy = 0;
-      if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
+      if ( pt->xt )  {
+        pxt = &mesh->xtetra[pt->xt];
+      }
+
       for (i=0; i<4; i++) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
       }
 
-      /* Topological problem triggered when one of the two faces of collapsed edge is the only
-         internal one : closing a part of the domain */
-      if ( nbbdy == 4 )
+      if ( nbbdy == 4 ) {
+        /* Only one element in the domain: we don't want to delete it */
         return 0;
+      }
       else if ( nbbdy == 3 ) {
+        /* Topological problem triggered when one of the two faces of collapsed
+         edge is the only internal one : closing a part of the domain */
 
         /* Identification of edge number in tetra iel */
         if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
@@ -480,6 +613,42 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
       /* Now check that the 2 faces identified by collapse are not boundary */
       if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
         return 0;
+
+      if ( pt->xt )  {
+        for (i=0; i<4; i++) {
+          if ( i==ipp || i==iq ) {
+            continue;
+          }
+
+          /*  Avoid surface crimping: check that the collapse doesn't merge 3
+           *  bdy edge along a non bdy face: we have to check the edge of each
+           *  shell because some MG_BDY tags may be missings due to the creation
+           *  of an xtetra during a previous collapse */
+          if ( !(pxt->ftag[i] & MG_BDY) ) {
+            int16_t tag0,tag1,tag2;
+            int     ref0,ref1,ref2;
+
+            tag0 = tag1 = tag2 = 0;
+            ref0 = ref1 = ref2 = 0;
+
+            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][0],&tag0,&ref0) ) {
+              fprintf(stderr,"\n  ## Error: %s: 0. unable to get edge info.\n",__func__);
+              return 0;
+            }
+            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][1],&tag1,&ref1) ) {
+              fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+              return 0;
+            }
+            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][2],&tag2,&ref2) ) {
+              fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+              return 0;
+            }
+            if ( (tag0 & MG_BDY) && (tag1 & MG_BDY) && (tag2 & MG_BDY ) ) {
+              return 0;
+            }
+          }
+        }
+      }
 
       continue;
     }
@@ -951,134 +1120,6 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t
   piv = pt->v[MMG5_ifar[ia][0]];
 
   adj = MMG3D_update_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj);
-
-  if ( adj < 0 ) return 0;
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh
- * \param start tetra from which we start to travel
- * \param na edge vertex
- * \param nb edge vertex
- * \param tag new edge tag
- * \param ref new edge ref
- * \param piv global index of the pivot to set the sense of travel
- * \param adj index of adjacent tetra for the travel
- * \param filled 1 if an xtetra has been found (so tag and ref are filled)
- *
- * \return -1 if fail, \a start if shell has been completely travelled without
- * founding an xtetra, adj if an xtetra has been found, 0 otherwise
- *
- * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling its
- * shell in one direction (given by the pivot \a piv).  Stop when meeting the
- * first xtetra with a non 0 tag (it is sufficient if tags and refs are
- * consistent through the edge shell except for edges with null tags);
- *
- */
-static inline
-MMG5_int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
-                                  int16_t *tag,MMG5_int *ref, MMG5_int piv,MMG5_int adj,
-                                  int8_t *filled) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_int     *adja;
-  int8_t       i;
-
-  *filled = 0;
-  while ( adj && (adj != start) ) {
-    pt     = &mesh->tetra[adj];
-
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
-
-    /* update edge ref and tag */
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      *ref  = pxt->edg[i];
-      if ( pxt->tag[i] & MG_BDY ) {
-        *tag |= pxt->tag[i];
-        *filled = 1;
-        return adj;
-      }
-    }
-
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
-
-  return adj;
-}
-
-/**
- * \param mesh pointer toward the mesh
- * \param start tetra from which we start to travel
- * \param ia local index of edge that must be updated
- * \param tag new edge tag
- * \param ref new edge ref
- * \return 1 if success, 0 if fail.
- *
- * Get tag and ref of the edge \ia of tetra \a start by traveling its shell.
- * Stop when meeting the first xtetra (it is sufficient if tags and refs are
- * consistent through the edge shell);
- *
- */
-static inline
-int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *tag,MMG5_int *ref) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_int     piv,na,nb,adj,*adja;
-  int8_t       filled;
-
-  pt   = &mesh->tetra[start];
-
-  assert( start >= 1 &&  MG_EOK(pt) );
-
-  pxt  = NULL;
-  na   = pt->v[MMG5_iare[ia][0]];
-  nb   = pt->v[MMG5_iare[ia][1]];
-
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    if ( pxt->tag[ia] & MG_BDY ) {
-      *tag |= pxt->tag[ia];
-      *ref = pxt->edg[ia];
-      return 1;
-    }
-  }
-
-  /* Travel in one direction */
-  adja = &mesh->adja[4*(start-1)+1];
-  adj = adja[MMG5_ifar[ia][0]] / 4;
-  piv = pt->v[MMG5_ifar[ia][1]];
-
-  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
-
-  /* If an xtetra has been found or if all shell has been travelled, stop, else,
-   * travel it the other sense */
-  if ( adj > 0 ) {
-    assert ( (adj == start) || filled );
-    return 1;
-  }
-  else if ( adj < 0 ) return 0;
-
-  assert(!adj);
-
-  pt = &mesh->tetra[start];
-  adja = &mesh->adja[4*(start-1)+1];
-  adj = adja[MMG5_ifar[ia][1]] / 4;
-  piv = pt->v[MMG5_ifar[ia][0]];
-
-  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
 
   if ( adj < 0 ) return 0;
 
