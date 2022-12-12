@@ -33,7 +33,10 @@
  * \todo Doxygen documentation
  */
 
-#include "inlined_functions_3d.h"
+#include "libmmg3d.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -53,14 +56,15 @@
  *
  */
 int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
-                       int *list,int ilist,int improve) {
-  MMG5_pTetra               pt,pt0;
-  MMG5_pPoint               p0,p1,p2,p3,ppt0;
+                       int64_t *list,int ilist,int improve) {
+  MMG5_pTetra          pt,pt0;
+  MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol;
   double               calold,calnew,callist[MMG3D_LMAX+2];
   double               len1,len2;
   int                  iloc;
-  int                  k,iel,i0;
+  int                  k,i0;
+  MMG5_int             iel;
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -179,14 +183,15 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
  *
  */
 int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
-                          int *list,int ilist,int improve) {
-  MMG5_pTetra               pt,pt0;
-  MMG5_pPoint               p0,p1,p2,p3,ppt0;
+                          MMG5_int *list,int ilist,int improve) {
+  MMG5_pTetra          pt,pt0;
+  MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol;
   double               calold,calnew,callist[MMG3D_LMAX+2];
   double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
   double               u10[3],u20[3],u30[3],oldc[3],coe;
-  int                  k,iel,ifac,iter,maxtou;
+  int                  k,ifac,iter,maxtou;
+  MMG5_int             iel;
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -342,12 +347,13 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
  * Rotation of the oriented surfacic ball of \a ip0.
  *
  */
-int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,int *lists,int ilists,int ip0,
+int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,MMG5_int *lists,int ilists,MMG5_int ip0,
                               double r[3][3],double *lispoi) {
   MMG5_pTetra       pt;
   MMG5_pPoint       p0,p1;
   double            ux,uy,uz,det2d;
-  int               k,l,na,nb,ntempa,ntempb;
+  MMG5_int          k,na,nb,ntempa,ntempb;
+  int               l;
   uint8_t           iface,i;
 
   k     = lists[0] / 4;
@@ -473,8 +479,8 @@ int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,int *lists,int ilists,int ip0,
 * coordinates, normal and tangent and check the geometric approximation.
 *
 */
-int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
-                           const int ip0,double n[3],double lambda[3],double o[3],
+int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,MMG5_int *lists,const MMG5_int kel,
+                           const MMG5_int ip0,double n[3],double lambda[3],double o[3],
                            double no[3]) {
   MMG5_pTetra       pt;
   MMG5_pxTetra      pxt;
@@ -493,6 +499,7 @@ int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
   pxt    = &mesh->xtetra[pt->xt];
   p0     = &mesh->point[ip0];
 
+  assert( 0<=iface && iface<4 && "unexpected local face idx");
   MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
@@ -615,8 +622,8 @@ int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv,int *lists,int ilists,
+int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                          int ilistv,MMG5_int *lists,int ilists,
                           int improveSurf,int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pPoint       p0;
@@ -626,7 +633,8 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],o[3],no[3];
   double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
-  int               k,kel,l,ip0,nut,nxp;
+  int               l,nut,nxp;
+  MMG5_int          kel,k,ip0;
   uint8_t           i0,iface,i;
 
   step = 0.1;
@@ -734,6 +742,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     k           = lists[l] / 4;
     iface       = lists[l] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,k,iface,&tt);
     calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
 
@@ -813,209 +822,357 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param lists pointer toward the surfacic ball of the point we want to move (\a ip0).
+ * \param l item of \a lists to process.
+ * \param ip0 global index of point whose ball is passed.
+ * \param ipa global idx of second vertex of previous bdy tria of the list (updated at end of tria processing).
+ * \param ipb global idx of third vertex of previous bdy tria of the list (updated at end of tria processing).
+ * \param edgTag searched tag (\ref MG_NOM, \ref MG_GEO, \ref MG_REF).
+ * \param ip variable to store the global index of ending point (if found).
+ *
+ * \return 0 if tested edge is not tagged \a edgTag, 1 if it is.
+ *
+ * Process boundary triangle stored in the item \a l of the surfacic list \a
+ * lists of point \a ip0. Check if the edge at interface of this tria and the
+ * tria ipa - ipb - ip0 (previous tria of the list) has tag \a edgTag:
+ *   - if yes, store second vertex of this edge (\a ip0 being the first one) in \a ip and return 1;
+ *   - if no, update values of \a ipa and \a ipb and return 0.
+ *
+ * \remark lists[k] = 4* tet idx + idx of bdy face.
+ *
+ */
+static inline
+int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int ip0,
+                                MMG5_int *ipa,MMG5_int *ipb,const int16_t edgTag,MMG5_int *ip) {
+
+  MMG5_pTetra           pt;
+  MMG5_int              iel,iptmpa,iptmpb;
+  int16_t               tag;
+  uint8_t               i,ie,iface,iea,ieb;
+
+  iel   = lists[l] / 4;
+  iface = lists[l] % 4;
+  pt    = &mesh->tetra[iel];
+  iea = ieb = 0;
+
+  assert ( pt->xt && "tetra with boundary face has a xtetra");
+
+  /* For each bdy face that contains ip0, store the index of the 2 edges
+   * passing through \a ip0 in \a iea and \a ieb. */
+  for (i=0; i<3; i++) {
+    ie = MMG5_iarf[iface][i]; //index in tet of edge i on face iface
+    if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
+      if ( !iea )
+        iea = ie;
+      else
+        ieb = ie;
+    }
+  }
+  /* In current face (\a iface), store in \a iptmpa the global index of the
+   * second vertex of edge \a iea (first vertex being \a ip0). */
+  if ( pt->v[MMG5_iare[iea][0]] != ip0 )
+    iptmpa = pt->v[MMG5_iare[iea][0]];
+  else {
+    assert(pt->v[MMG5_iare[iea][1]] != ip0);
+    iptmpa = pt->v[MMG5_iare[iea][1]];
+  }
+  /* In current face (\a iface), store in \a iptmpb the global index of the
+   * second vertex of edge \a ieb (first vertex being \a ip0). */
+  if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
+    iptmpb = pt->v[MMG5_iare[ieb][0]];
+  else {
+    assert(pt->v[MMG5_iare[ieb][1]] != ip0);
+    iptmpb = pt->v[MMG5_iare[ieb][1]];
+  }
+
+  /* Search if the edge ip0-iptmpa is the edge at the interface with previous
+   * triangle. */
+  if ( (iptmpa == *ipa) || (iptmpa == *ipb) ) {
+    tag = mesh->xtetra[pt->xt].tag[iea];
+    if ( edgTag & tag ) {
+      /* The featured edge has been found. End of ball processing. */
+      *ip = iptmpa;
+      return 1;
+    }
+  }
+
+  /* Search if the edge ip0-iptmpb is the edge at the interface with previous
+   * triangle. */
+  if ( (iptmpb == *ipa) || (iptmpb == *ipb) ) {
+    tag = mesh->xtetra[pt->xt].tag[ieb];
+    if ( edgTag & tag ) {
+      /* The featured edge has been found. End of ball processing. */
+      *ip = iptmpb;
+      return 1;
+    }
+  }
+
+  /* Update face vertices for next item processing */
+  *ipa = iptmpa;
+  *ipb = iptmpb;
+
+  return 0;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param edgTag Type of edge on which we move (\ref MG_REF, \ref MG_NOM or \ref MG_GEO).
+ * \param ip0 point that we want to move along curve.
+ * \param ip1 first ending point of curve (in current surfacic ball).
+ * \param ip2 second ending point of curve (in current surfacic ball).
+ *
+ * \return 0 if fail (one of curve extremity is not found), 1 if success.
+ *
+ * Search the two ending points of curve passing through \a ip0 in the surfacic
+ * ball of \a ip0.
+ *
+ * Travel surfacic ball and recover the two ending points of curve (that will be
+ * stored in \a ip1 and \a ip2): ball is travelled from beginning in one
+ * direction until meeting the curve edge, then, starting from the end, in the
+ * other direction until meeting the second curve edge.
+ */
+int MMG3D_curveEndingPts(MMG5_pMesh mesh,MMG5_int *lists,int ilists,
+                         const int16_t edgTag, MMG5_int ip0,MMG5_int *ip1,
+                         MMG5_int *ip2) {
+  MMG5_pTetra           pt;
+  MMG5_int              iel,ipa,ipb;
+  int                   l;
+  uint8_t               i,iface;
+
+  /** a. Travel surface edges in one sense to get the first featured edge.
+   * Triangles of the surface are successively processed and the tag of the edge
+   * between current tria and previous one is tested (so each edge is checked
+   * only once). Ball processing stops at first featured edge crossed. */
+
+  /* Get first edge to initialize the loop: \a ip0 is the global idx of the
+   * point we want to move, store in \a ipa and \a ipb the global indices of the
+   * 2 other vertices of the boundary face from which we start. When processing
+   * next triangle we will find either the edge ip0-ipa, or ip0-ipb, this will
+   * be the first edge that we will check. */
+  iel = lists[0]/4;
+  iface = lists[0]%4;
+  pt = &mesh->tetra[iel];
+  ipa = ipb = 0;
+  for (i=0; i<3; i++) {
+    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
+      if ( !ipa )
+        ipa = pt->v[MMG5_idir[iface][i]];
+      else
+        ipb = pt->v[MMG5_idir[iface][i]];
+    }
+  }
+  assert(ipa && ipb);
+
+  /* Travel surfacic list of \a ip0 and search if the edge at interface of
+   * boundary triangles stored in lists[l] and lists[l-1] belongs to our curve
+   * (\a edgTag edge). */
+  for (l=1; l<ilists; l++) {
+    if ( MMG3D_curveEndingPts_chkEdg(mesh,lists,l,ip0,&ipa,&ipb,edgTag,ip1) ) {
+      break;
+    }
+  }
+
+  /** b. Now travel surface edges in the reverse sense so as to get the second
+   * curve. Again, we test the tag of the edge at interface of current triangle
+   * and previous one and we stop ball pocessing when the second featured edge
+   * has been found. This edge is necessarly different from the one previously
+   * found. */
+
+  /* Get first edge to initialize the loop: \a ip0 is the global idx of the
+   * point we want to move, store in \a ipa and \a ipb the global indices of the
+   * 2 other vertices of the boundary face from which we start. When processing
+   * next triangle we will find either the edge ip0-ipa, or ip0-ipb, this will
+   * be the first edge that we will check. */
+  iel = lists[0]/4;
+  iface = lists[0]%4;
+  pt = &mesh->tetra[iel];
+  ipa = ipb = 0;
+  for (i=0; i<3; i++) {
+    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
+      if ( !ipa )
+        ipa = pt->v[MMG5_idir[iface][i]];
+      else
+        ipb = pt->v[MMG5_idir[iface][i]];
+    }
+  }
+  assert(ipa && ipb);
+
+  /* Travel surfacic list of \a ip0 and search if the edge at interface of
+   * boundary triangles stored in lists[l] and lists[l+1] belongs to our curve
+   * (\a edgTag edge). */
+  for (l=ilists-1; l>0; l--) {
+    if ( MMG3D_curveEndingPts_chkEdg(mesh,lists,l,ip0,&ipa,&ipb,edgTag,ip2) ) {
+      break;
+    }
+  }
+
+  /* Check that we have found two distinct ending points */
+  if ( !(*ip1) ) {
+    return 0;
+  }
+  if ( !(*ip2) ) {
+    return 0;
+  }
+  if ( (*ip1) == (*ip2) ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
- * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
- * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ * \param p0 point that we want to move.
+ * \param ip0 global index of point \a p0.
+ * \param isrid 1 if point is a ridge manifold point
+ * \param o point coordinates at new position
+ * \param no normal at point at new position
+ * \param no2 second normal at point at new pos (for ridge manifold point)
+ * \param to tangent at point at new pos.
  *
- * \return 0 if fail, 1 if success.
+ * \return 0 if we don't want to move, 1 if we want to move point
  *
- * Move boundary reference, ridge or non-manifold point, whose volumic and
- * surfacic balls are passed.
+ * Check volumes of the tetra in the ball of point with new position of point.
+ * Update coordinates, normals, tangents and qualities if point displacement is
+ * accepted.
  *
- * \remark the metric is not interpolated at the new position.
  */
-static inline
-int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                           int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
+int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
+                                      MMG3D_pPROctree PROctree, int64_t *listv,
+                                      int ilistv,int improve,MMG5_pPoint p0,
+                                      MMG5_int ip0,uint8_t isrid,double o[3],
+                                      double no[3],double no2[3],double to[3]) {
+
   MMG5_pTetra           pt,pt0;
-  MMG5_pxTetra          pxt;
-  MMG5_pPoint           p0,p1,p2,ppt0;
-  MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
-  MMG5_pPar             par;
-  double                step,ll1old,ll2old,o[3],no[3],no2[3],to[3];
-  double                calold,calnew,caltmp,callist[MMG3D_LMAX+2],hmax,hausd;
-  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
-  int                   isloc,j;
-  int16_t               tag;
-  uint8_t               i,i0,ie,iface,iea,ieb,isrid;
+  double                calold,calnew,callist[MMG3D_LMAX+2];
+  MMG5_int              iel;
+  int                   l;
+  int8_t                i0;
 
-  step      = 0.1;
-  ip1 = ip2 = 0;
-  pt        = &mesh->tetra[listv[0]/4];
-  ip0       = pt->v[listv[0]%4];
-  p0        = &mesh->point[ip0];
+  /** Check wether all volumes remain positive with new position of the point */
+  calold = calnew = DBL_MAX;
 
-  /* Compute if the edge is a simple ridge to know if we have to compute a
-   * second normal at point */
-  isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
-
-  assert ( edgTag & p0->tag );
-
-  /* Travel surfacic ball and recover the two ending points of curve : two
-   * senses must be used */
-  iel = lists[0]/4;
-  iface = lists[0]%4;
-  pt = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
+  for( l=0 ; l<ilistv ; l++ ){
+    iel = listv[l] / 4;
+    i0  = listv[l] % 4;
+    pt  = &mesh->tetra[iel];
+    pt0 = &mesh->tetra[0];
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[i0] = 0;
+    calold = MG_MIN(calold, pt->qual);
+    callist[l] = MMG5_orcal(mesh,met,0);
+    if (callist[l] < MMG5_NULKAL) {
+      return 0;
     }
+    calnew = MG_MIN(calnew,callist[l]);
   }
-  assert(ipa && ipb);
-
-  for (l=1; l<ilists; l++) {
-    iel = lists[l]/4;
-    iface = lists[l]%4;
-    pt = &mesh->tetra[iel];
-    iea = ieb = 0;
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( edgTag & tag ) {
-        ip1 = iptmpa;
-        break;
-      }
-    }
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
-      else  tag = 0;
-      if ( edgTag & tag ) {
-        ip1 = iptmpb;
-        break;
-      }
-    }
-    ipa = iptmpa;
-    ipb = iptmpb;
+  if ((calold < MMG5_EPSOK && calnew <= calold) ||
+      (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
+    return 0;
+  } else if (improve && calnew < calold) {
+    return 0;
   }
 
-  /* Now travel surfacic list in the reverse sense so as to get the second ridge */
-  iel = lists[0]/4;
-  iface = lists[0]%4;
-  pt = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
-    }
+  /** Update coordinates, normals, for new point */
+  if ( PROctree ) {
+    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
   }
-  assert(ipa && ipb);
 
-  for (l=ilists-1; l>0; l--) {
-    iel         = lists[l] / 4;
-    iface = lists[l] % 4;
-    pt          = &mesh->tetra[iel];
-    iea         = ieb = 0;
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( edgTag & tag ) {
-        ip2 = iptmpa;
-        break;
-      }
-    }
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( (MG_GEO & edgTag) && (!pt->xt) ) {
-        tag = 0;
-      }
-      else {
-        assert(pt->xt);
-        tag = mesh->xtetra[pt->xt].tag[ieb];
-      }
-      if ( edgTag & tag ) {
-        ip2 = iptmpb;
-        break;
-      }
-    }
-    ipa = iptmpa;
-    ipb = iptmpb;
+  p0->c[0] = o[0];
+  p0->c[1] = o[1];
+  p0->c[2] = o[2];
+
+  pxp = &mesh->xpoint[p0->xp];
+  pxp->n1[0] = no[0];
+  pxp->n1[1] = no[1];
+  pxp->n1[2] = no[2];
+
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
+
+  if ( isrid ) {
+    /* Copy the second normal for ridge point */
+    pxp->n2[0] = no2[0];
+    pxp->n2[1] = no2[1];
+    pxp->n2[2] = no2[2];
   }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
 
-  /* At this point, we get the point extremities of the curve passing through
-     ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
-     iface1,iface2, and the associated edges ie1,ie2.*/
+  for( l=0 ; l<ilistv ; l++ ){
+    (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
+  }
+  return 1;
+}
 
-  /* Changes needed for choice of time step : see manuscript notes */
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param p0 point that we want to move.
+ * \param ip0 global index of point \a p0.
+ * \param ip1 First ending point of curve.
+ * \param ip2 Second ending point of curve.
+ * \param ll1old length of edge ip0-ip1.
+ * \param ll2old length of edge ip0-ip2.
+ * \param isrid 1 if point is a ridge manifold point.
+ * \param step step of displacement.
+ * \param o point coordinates at new position
+ * \param no normal at point at new position
+ * \param no2 second normal at point at new pos (for ridge manifold point)
+ * \param to tangent at point at new pos.
+ * \param edgTag \ref MG_NOM, \ref MG_REF or \ref MG_GEO depending on type of curve
+ * along which we move.
+ *
+ * \return 0 if we don't want to move, global index \a ip if we want to move
+ * toward point ip.
+ *
+ * Check volumes of the tetra in the ball of point with new position of point.
+ * Update coordinates, normals, tangents and qualities if point displacement is
+ * accepted.
+ *
+ */
+int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int ip0,
+                                      MMG5_int ip1,MMG5_int ip2,double ll1old,double ll2old,
+                                      uint8_t isrid,const double step,
+                                      double o[3],double no[3],
+                                      double no2[3],double to[3],
+                                      const int16_t edgTag) {
 
-  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
-    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
-    + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
-  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
-    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
-    + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
+  MMG5_int ip;
 
-  if ( ll1old < ll2old ) { //move towards p2
+  /** Choose direction of displacement depending on edge lengths */
+  if ( ll1old < ll2old ) {
+    /* move towards p2 */
     ip = ip2;
   }
-  else {
+  else if ( ll1old > ll2old ) {
+    /* move towards p1 */
     ip = ip1;
   }
+  else {
+    return 0;
+  }
 
-  /* Compute support of the associated edge, and features of the new position */
+  /** Build support of the edge ip-ip0 and features of new position */
   if ( MG_NOM & edgTag ) {
     if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) ) {
       return 0;
     }
   }
   else if ( MG_GEO & edgTag ) {
+    // Remark: Singular points are required so following assertion should be
+    // verified in the entire function. Keep the test here to make easier
+    // debugging/understanding when passing here.
+    assert ( (!MG_SIN(mesh->point[ip0].tag)) &&
+             "BezierRidge don't work if both ip0 and ip are singular" );
     if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no,no2,to)) ) {
       return 0;
     }
@@ -1030,22 +1187,23 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     return 0;
   }
 
-  /* Test : make sure that geometric approximation has not been degraded too much */
-  ppt0 = &mesh->point[0];
+  /** Store computed values for simulations purposes */
+  MMG5_pPoint ppt0 = &mesh->point[0];
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
   ppt0->c[2] = o[2];
   ppt0->tag  = p0->tag;
   ppt0->ref  = p0->ref;
 
-  nxp = mesh->xp + 1;
+
+  MMG5_int nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
                        return 0);
   }
   ppt0->xp = nxp;
-  pxp = &mesh->xpoint[nxp];
+  MMG5_pxPoint pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
   ppt0->n[0] = to[0];
@@ -1063,14 +1221,108 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     pxp->n2[2] = no2[2];
   }
 
-  /* For each surface triangle, build a virtual displaced triangle for check purposes */
+  return ip;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+ * \param edgTag Type of edge on which we move (\ref MG_REF,\ref MG_NOM or \ref MG_GEO).
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary reference, ridge or non-manifold point, whose volumic and
+ * surfacic balls are passed.
+ *
+ * \remark the metric is not interpolated at the new position.
+ *
+ * \todo End of refactoring with aniso function:
+ *   - test effects of interpolation of metric in iso mode (done only in aniso);
+ *   - check what to do with geometric approx and local hausdorff: only tested
+ * in iso mode, normally the surface size map should be integrated to the
+ * sizemap but chckedg call still returns 0 in some of ci tests (maybe because
+ * metric is not used in lenedg computations).
+ */
+static inline
+int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                           int ilistv, MMG5_int *lists, int ilists,int improve,const int16_t edgTag){
+  MMG5_pTetra           pt;
+  MMG5_pxTetra          pxt;
+  MMG5_pPoint           p0,p1,p2;
+  MMG5_Tria             tt;
+  MMG5_pPar             par;
+  double                ll1old,ll2old,o[3],no[3],no2[3],to[3];
+  double                calold,calnew,caltmp,hmax,hausd;
+  MMG5_int              iel,ip0,ip1,ip2,ip;
+  int                   l;
+  int                   isloc,j;
+  uint8_t               i,iface,isrid;
+
+  ip1 = ip2 = 0;
+  pt        = &mesh->tetra[listv[0]/4];
+  ip0       = pt->v[listv[0]%4];
+  p0        = &mesh->point[ip0];
+
+  /** Step 0: Compute if the edge is a simple ridge to know if we have to
+   * compute a second normal at point */
+  isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
+
+  assert ( edgTag & p0->tag );
+
+  /** Step 1: Travel surfacic ball and recover the two ending points of curve
+     (that will be stored in \a ip1 and \a ip2) */
+  int ier = MMG3D_curveEndingPts(mesh,lists,ilists,edgTag,ip0,&ip1,&ip2);
+  if ( !ier ) {
+    return 0;
+  }
+
+  /** Step 2: At this point, we get the point extremities of the curve passing
+     through ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
+     iface1,iface2, and the associated edges ie1,ie2. Computation of
+     displacement along curve and checks */
+
+  /** a. Changes needed for choice of time step : see manuscript notes */
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+
+  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
+    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
+    + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
+  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
+    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
+    + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
+
+  /** b. Check sense of displacement, compute support of the associated edge and
+   * features of the new position */
+  ip = MMG3D_movbdycurvept_newPosForSimu( mesh,p0,ip0,ip1,ip2,ll1old,ll2old,
+                                          isrid,MMG3D_MOVSTEP,o,no,no2,to,edgTag );
+  if ( !ip ) {
+    return 0;
+  }
+
+  /** For each surfacic triangle build a virtual displaced triangle for check
+   * purposes :
+   *      - check the new triangle qualities;
+   *      - check edge lengths with respect to Hausdorff criterion.
+   *
+   * Remark: normal deviation is checked only with aniso metric because
+   * displacment in inso mode remais sufficiently small to not create spurious
+   * ridges while this issue was encountered on some aniso test cases.
+   */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
     iel         = lists[l] / 4;
     iface       = lists[l] % 4;
-    pt          = &mesh->tetra[iel];
-    pxt         = &mesh->xtetra[pt->xt];
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,iface,&tt);
     caltmp = MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
@@ -1081,7 +1333,9 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
       }
     }
     assert(i<3);
-    if ( i==3 ) return 0;
+    if ( i==3 ) {
+      return 0;
+    }
 
     tt.v[i] = 0;
 
@@ -1094,6 +1348,9 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     calnew = MG_MIN(calnew,caltmp);
 
     /* Local parameters for tt and iel */
+    pt          = &mesh->tetra[iel];
+    pxt         = &mesh->xtetra[pt->xt];
+
     hmax  = mesh->info.hmax;
     hausd = mesh->info.hausd;
 
@@ -1140,67 +1397,25 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     }
 
     if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
-      memset(pxp,0,sizeof(MMG5_xPoint));
+      memset(&mesh->xpoint[mesh->point[0].xp],0,sizeof(MMG5_xPoint));
       return 0;
     }
   }
-  if ( calold < MMG5_EPSOK && calnew <= calold )    return 0;
-  else if ( calnew < calold )    return 0;
-  memset(pxp,0,sizeof(MMG5_xPoint));
-
-  /* Test : check whether all volumes remain positive with new position of the point */
-  calold = calnew = DBL_MAX;
-  for( l=0 ; l<ilistv ; l++ ){
-    iel = listv[l] / 4;
-    i0  = listv[l] % 4;
-    pt  = &mesh->tetra[iel];
-    pt0 = &mesh->tetra[0];
-    memcpy(pt0,pt,sizeof(MMG5_Tetra));
-    pt0->v[i0] = 0;
-    calold = MG_MIN(calold, pt->qual);
-    callist[l] = MMG5_orcal(mesh,met,0);
-    if (callist[l] < MMG5_NULKAL) {
-      return 0;
-    }
-    calnew = MG_MIN(calnew,callist[l]);
-  }
-  if ((calold < MMG5_EPSOK && calnew <= calold) ||
-      (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    return 0;
-  } else if (improve && calnew < calold) {
+  if ( calold < MMG5_EPSOK && calnew <= calold ) {
     return 0;
   }
-
-  /* Update coordinates, normals, for new point */
-  if ( PROctree ) {
-    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
+  else if ( calnew < calold ) {
+    return 0;
   }
+  memset(&mesh->xpoint[mesh->point[0].xp],0,sizeof(MMG5_xPoint));
 
-  p0->c[0] = o[0];
-  p0->c[1] = o[1];
-  p0->c[2] = o[2];
+  /** d. Check whether all volumes remain positive with new position of the
+   * point and update coor, normals, tangents and qualities if move is
+   * accepted. */
+  ier =  MMG3D_movbdycurvept_chckAndUpdate(mesh,met,PROctree,listv,ilistv,
+                                           improve,p0,ip0,isrid,o,no,no2,to);
 
-  pxp = &mesh->xpoint[p0->xp];
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
-
-  if ( isrid ) {
-    /* Copy the second normal for ridge point */
-    pxp->n2[0] = no2[0];
-    pxp->n2[1] = no2[1];
-    pxp->n2[2] = no2[2];
-  }
-
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
-
-  for( l=0 ; l<ilistv ; l++ ){
-    (&mesh->tetra[listv[l]/4])->qual = callist[l];
-    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
-  }
-  return 1;
+  return ier;
 }
 
 /**
@@ -1220,8 +1435,8 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                         int ilistv, int *lists, int ilists,int improve){
+int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                         int ilistv, MMG5_int *lists, int ilists,int improve){
 
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_REF);
 }
@@ -1244,8 +1459,8 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                         int ilistv, int *lists, int ilists,int improve){
+int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                         int ilistv, MMG5_int *lists, int ilists,int improve){
 
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_NOM);
 }
@@ -1264,14 +1479,15 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
                          int ilistv, int improve){
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
   double            step,ll1old,ll2old,calold,calnew,callist[MMG3D_LMAX+2];
   double            o[3],no[3],to[3];
-  int               ip0,ip1,ip2,ip,iel,ipa,l;
+  int               l;
+  MMG5_int          ip0,ip1,ip2,ip,iel,ipa;
   int8_t            i,i0,ie;
 
   step = 0.1;
@@ -1280,7 +1496,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   ip0 = pt->v[listv[0]%4];
   p0 = &mesh->point[ip0];
 
-  assert ( p0->tag & MG_NOM && p0->xp && mesh->xpoint[p0->xp].nnor );
+  assert ( (p0->tag & MG_NOM) && p0->xp && mesh->xpoint[p0->xp].nnor );
 
   /* Recover the two ending points of the underlying non manifold curve */
   for (l=0; l<ilistv; l++) {
@@ -1387,17 +1603,32 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv,int *lists,int ilists,int improve) {
+int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int64_t *listv,
+                          int ilistv,MMG5_int *lists,int ilists,int improve) {
 
   return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_GEO);
 }
 
-
-int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k element index
+ * \param ip local index of point
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move internal point according to the normal at the opposite face
+ * Try to increase the volume of the tetra.
+ * Called when processing very bad elts in opttyp.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
+int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   ppa,ppb,p1,p2,p3;
-  int           j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
+  int           j,iter,maxiter,l,lon;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      ipb,iadr,i1,i2,i3,iel;
   double        *mp,coe,qualtet[MMG3D_LMAX+2];
   double        ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
 
@@ -1506,13 +1737,18 @@ int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
  *
  * Move internal point according to the normal at the opposite face
  * Try to increase the volume of the tetra.
+ * Called when processing very bad elts in opttyp.
  *
  * \remark the metric is not interpolated at the new position.
+ *
+ * \todo to factorize with movv_iso (and movv_ani)?
  */
-int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int         j,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
+  int         j,iter,maxiter,l,lon;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    ipb,iel,i1,i2,i3;
   double      coe,crit,qualtet[MMG3D_LMAX+2];
   double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
 
@@ -1619,10 +1855,29 @@ int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   return 1;
 
 }
-int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k element index
+ * \param ip local index of point
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move internal point according to the normal at the opposite face
+ * Try to increase the volume of the tetra.
+ * Called when processing very bad elts in opttyp.
+ *
+ * \remark the metric is not interpolated at the new position.
+ *
+ * \todo to factorize with movnormal_iso (and movv_ani)?
+ */
+int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
+  int         j,iter,maxiter,l,lon;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    ipb,iadr,iel,i1,i2,i3;
   double      hp,coe,crit,qualtet[MMG3D_LMAX+2];;
   double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
 

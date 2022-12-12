@@ -51,7 +51,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  int             ier;
+  int             ier,silent=0;
   /* To save final mesh in a file */
   FILE*           inm;
   char            *fileout_generic,*fileout_medit,*filein;
@@ -59,8 +59,8 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"  -- TEST LOAD AND GET MESH DATA \n");
 
-  if ( argc != 3 ) {
-    printf(" Usage: %s filein fileout\n",argv[0]);
+  if ( argc != 4 ) {
+    printf(" Usage: %s filein fileout silent_mode\n",argv[0]);
     return(EXIT_FAILURE);
   }
 
@@ -87,6 +87,8 @@ int main(int argc,char *argv[]) {
   strcpy(fileout_medit,argv[2]);
   strcat(fileout_medit,".mesh");
 
+  silent = atoi(argv[3]);
+
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh  structure of Mmg */
   /* args of InitMesh:
@@ -111,13 +113,18 @@ int main(int argc,char *argv[]) {
       fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
       return EXIT_FAILURE;
     }
+    else {
+      assert ( ier == -1 );
+      fprintf(stderr,"  ** UNABLE TO READ INPUT FILE.\n");
+      return EXIT_FAILURE;
+    }
   }
 
   /** 3) Get the mesh from Mmg data structure into local data structure */
 
   /** a) get the size of the mesh: np = #vertices, ne = #tetra, npr = #prisms,
    * nt = #triangles, nq = #quadrangls, na = #edges */
-  int  np, ne, nt, na;
+  MMG5_int  np, ne, nt, na;
   if ( MMG3D_Get_meshSize(mmgMesh,&np,&ne,NULL,&nt,NULL,&na) !=1 ) {
     fprintf(stderr,"  ERROR: Unable to get mesh size.\n");
     return EXIT_FAILURE;
@@ -125,12 +132,12 @@ int main(int argc,char *argv[]) {
 
   /** b) get point coordinates and references: i^th point coordinates are stored
    * in points[3*(i-1)]@3. Reference of this point is in ref[i-1] */
-  double *points=NULL; // point coordinates
-  int    *ref=NULL; // point references (==gmsh tags, ==colors)
+  double   *points=NULL; // point coordinates
+  MMG5_int *ref=NULL; // point references (==gmsh tags, ==colors)
 
   points = (double *)malloc(3*np*sizeof(double));
   assert(points);
-  ref    = (int *)malloc(np*sizeof(int));
+  ref    = (MMG5_int *)malloc(np*sizeof(MMG5_int));
   assert(ref);
 
   ier = MMG3D_Get_vertices(mmgMesh,points, ref,NULL,NULL);
@@ -141,11 +148,11 @@ int main(int argc,char *argv[]) {
 
   /** c) get tetra and tetra references:  i^th tetra vertices are stored
    * in tetra[4*(i-1)]@4. Reference of this tetra is in tetref[i-1]*/
-  int    *tetref=NULL, *tetra=NULL;
+  MMG5_int    *tetref=NULL, *tetra=NULL;
 
-  tetra = (int *)malloc(4*ne*sizeof(int));
+  tetra = (MMG5_int *)malloc(4*ne*sizeof(MMG5_int));
   assert(tetra);
-  tetref = (int *)malloc(ne*sizeof(int));
+  tetref = (MMG5_int *)malloc(ne*sizeof(MMG5_int));
   assert(tetref);
 
   ier = MMG3D_Get_tetrahedra(mmgMesh,tetra, tetref,NULL);
@@ -157,7 +164,7 @@ int main(int argc,char *argv[]) {
   /** ... etc... */
 
   /** 4) Mesh saving at Medit format to check it */
-  int k;
+  MMG5_int k;
 
   if( !(inm = fopen(fileout_medit,"w")) ) {
     fprintf(stderr,"  ** UNABLE TO OPEN OUTPUT MESH FILE.\n");
@@ -168,17 +175,19 @@ int main(int argc,char *argv[]) {
   fprintf(inm,"\nDimension 3\n");
 
   /* Mesh vertices */
-  fprintf(inm,"\nVertices\n%d\n",np);
+  fprintf(inm,"\nVertices\n%"MMG5_PRId"\n",np);
   for(k=1; k<=np; k++) {
-    int address = 3*(k-1);
-    fprintf(inm,"%.15lg %.15lg %.15lg %d \n",points[address],points[address+1],points[address+2],ref[k-1]);
+    MMG5_int address = 3*(k-1);
+    fprintf(inm,"%.15lg %.15lg %.15lg %"MMG5_PRId" \n",
+            points[address],points[address+1],points[address+2],ref[k-1]);
   }
 
   /* Mesh tetra */
-  fprintf(inm,"\nTetrahedra\n%d\n",ne);
+  fprintf(inm,"\nTetrahedra\n%"MMG5_PRId"\n",ne);
   for(k=1; k<=ne; k++) {
-    int address = 4*(k-1);
-    fprintf(inm,"%d %d %d %d %d \n",tetra[address],tetra[address+1],
+    MMG5_int address = 4*(k-1);
+    fprintf(inm,"%"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId" %"
+            MMG5_PRId" \n",tetra[address],tetra[address+1],
             tetra[address+2],tetra[address+3],tetref[k-1]);
   }
 
@@ -193,15 +202,18 @@ int main(int argc,char *argv[]) {
 
   /** 5) get and print tetra adjacencies in terminal */
   for ( k=1; k<=ne; ++k ) {
-    int adja[4];
+    MMG5_int adja[4];
     ier = MMG3D_Get_adjaTet(mmgMesh,k,adja);
     if ( !ier ) {
-      fprintf(stderr,"  ERROR: Unable to get adjacents of tetra %d.\n",k);
+      fprintf(stderr,"  ERROR: Unable to get adjacents of tetra %"MMG5_PRId".\n",k);
       return EXIT_FAILURE;
     }
 
-    fprintf(stdout,"Tetra %d is adjacent to tetras %d %d %d %d\n",
-            k,adja[0],adja[1],adja[2],adja[3]);
+    if ( !silent ) {
+      fprintf(stdout,"Tetra %"MMG5_PRId" is adjacent to tetras %"MMG5_PRId" %"
+              MMG5_PRId" %"MMG5_PRId" %"MMG5_PRId"\n",
+              k,adja[0],adja[1],adja[2],adja[3]);
+    }
   }
 
   /** 6) Save output file depending on the detected extension */

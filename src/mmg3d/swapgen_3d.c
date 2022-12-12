@@ -32,7 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "inlined_functions_3d.h"
+#include "libmmg3d.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -52,13 +54,13 @@
  * configuration. The shell of edge is built during the process.
  *
  */
-int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
-                    int *ilist,int *list,double crit,int8_t typchk) {
+MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
+                    int *ilist,int64_t *list,double crit,int8_t typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double         calold,calnew,caltmp;
-  int            na,nb,np,adj,piv,npol,refdom,k,l,iel;
-  int            *adja,pol[MMG3D_LMAX+2];
+  int            npol,k,l;
+  MMG5_int       np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel,refdom;
   int8_t         i,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
@@ -72,7 +74,7 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   /* Store shell of ia in list, and associated pseudo polygon in pol */
   (*ilist) = 0;
   npol = 0;
-  list[(*ilist)] = 6*start+ia;
+  list[(*ilist)] = 6*(int64_t)start+ia;
   (*ilist)++;
   adja = &mesh->adja[4*(start-1)+1];
   adj  = adja[MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
@@ -104,7 +106,7 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     /* identification of edge number in tetra adj */
     if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
 
-    list[(*ilist)] = 6*adj +i;
+    list[(*ilist)] = 6*(int64_t)adj +i;
     (*ilist)++;
     /* overflow */
     if ( (*ilist) > MMG3D_LMAX-3 )  return 0;
@@ -266,14 +268,15 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
+int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nconf,int ilist,int64_t *list,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
-  int       iel,na,nb,np,nball,src,ret,start;
-  double    m[3];
-  int8_t    ia,ip,iq;
-  int       ier;
+  int            nball,ret,start;
+  MMG5_int       src,iel,na,nb,np;
+  double         m[3];
+  int8_t         ia,ip,iq;
+  int            ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -337,7 +340,7 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   }
   assert(ip<4);
 
-  memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+2)*sizeof(MMG5_int));
   nball = MMG5_boulevolp(mesh,start,ip,list);
 
   ier = MMG5_colver(mesh,met,list,nball,iq,typchk);

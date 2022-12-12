@@ -32,25 +32,27 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 extern MMG5_Info  info;
 
 /**
  * \param mesh pointer toward mesh structure.
  * \param start a triangle to which \a ip belongs.
- * \param ip point index
+ * \param ip local point index
  * \param adja pointer toward the adjacency array.
  * \param list pointer toward the list of points connected to \a ip.
+ * \param tlist pointer toward the list of triangles sharing \a ip.
  *
  * \return -ilist if buffer overflow, ilist otherwise.
  *
- * Return all vertices connected to ip (with list[0] = ip).
+ * Return all vertices connected to ip (with list[0] = ip) and all triangles sharing ip.
  *
  **/
-int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
+int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *list, MMG5_int *tlist) {
   MMG5_pTria    pt;
-  int           *adj,k,ilist;
+  int           ilist;
+  MMG5_int      *adj,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -65,6 +67,7 @@ int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
   i2 = MMG5_iprv2[i];
   do {
     if ( ilist > MMG5_LMAX-2 )  return -ilist;
+    tlist[ilist] = k;
     ilist++;
     list[ilist] = pt->v[i2];
 
@@ -73,6 +76,7 @@ int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
     i2 = adj[i1] % 3;
     i1 = MMG5_iprv2[i2];
     pt = &mesh->tria[k];
+
   }
   while ( k && k != start );
   if ( k > 0 )  return ilist;
@@ -93,6 +97,8 @@ int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
     i1 = adj[i2] % 3;
     i2 = MMG5_iprv2[i1];
     pt = &mesh->tria[k];
+
+    tlist[ilist-1] = k;
   }
   while ( k > 0 );
 
@@ -103,22 +109,26 @@ int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
  * \param mesh pointer toward the mesh structure.
  * \param adjt pointer toward the table of triangle adjacency.
  * \param start index of triangle where we start to work.
- * \param ip index of vertex where the normal is computed.
+ * \param ip local index of vertex where the normal is computed.
  * \param nn pointer toward the computed tangent.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute average normal of triangles sharing P without crossing ridge.
  *
  */
-int MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
+int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
-  int           *adja,k;
+  MMG5_int      *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;
   nn[0] = nn[1] = nn[2] = 0.0;
+
+  /* Ensure point is manifold (i.e., all edges passing through point are
+   * manifold */
+  assert ( (!(MG_NOM & mesh->point[pt->v[ip]].tag)) && "Unexpected non-manifold point" );
 
   /* store neighbors */
   k  = start;
@@ -186,11 +196,11 @@ int MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
  * Compute the tangent to the curve at point \a ip.
  *
  */
-int MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
+int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *tt) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
   double        dd;
-  int           *adja,k;
+  MMG5_int      *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -274,10 +284,11 @@ int MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
  * the vertex \a ip.
  *
  */
-int MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
-                 int *list,int *listref,int *ng,int *nr,int lmax) {
+int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,
+                 MMG5_int *list,MMG5_int *listref,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
-  int           *adja,k,ns;
+  MMG5_int      *adja,k;
+  MMG5_int      ns;
   int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];
@@ -334,4 +345,74 @@ int MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
     while ( k && k != start );
   }
   return ns;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of triangle to start.
+ * \param ip index of point for wich we compute the ball.
+ * \param list pointer toward the computed ball of \a ip.
+ * \param s 1 if called from mmgs, 0 if called from mmg2d.
+ * \param opn 0 for a closed ball, 1 for an open ball.
+ * \return the size of the computed ball or 0 if fail.
+ *
+ * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
+ * crossing ridge.
+ *
+ */
+int MMG5_boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t s,int8_t *opn) {
+  MMG5_int      *adja,k;
+  int           ilist;
+  int8_t        i,i1,i2;
+
+  ilist = 0;
+  *opn  = 0;
+
+  /* store neighbors */
+  k = start;
+  i = ip;
+  do {
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return 0;
+    list[ilist] = 3*k + i;
+    ++ilist;
+
+    adja = &mesh->adja[3*(k-1)+1];
+    i1 = MMG5_inxt2[i];
+    k  = adja[i1] / 3;
+    i  = adja[i1] % 3;
+    i  = MMG5_inxt2[i];
+  }
+  while ( k && k != start );
+  if ( k > 0 )  return ilist;
+
+  if ( s ) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
+    pt = &mesh->tria[start];
+    ppt = &mesh->point[pt->v[ip]];
+
+    /* Point along non-manifold edge: we are not able to loop around edge */
+    if ( ppt->tag & MG_NOM )
+      return 0;
+  }
+
+  /* check if boundary hit */
+  k = start;
+  i = ip;
+  *opn = 1;
+  do {
+    adja = &mesh->adja[3*(k-1)+1];
+    i2 = MMG5_iprv2[i];
+    k  = adja[i2] / 3;
+    if ( k == 0 )  break;
+    i  = adja[i2] % 3;
+    i  = MMG5_iprv2[i];
+
+    if ( ilist > MMG5_TRIA_LMAX-2 )  return 0;
+    list[ilist] = 3*k + i;
+    ilist++;
+  }
+  while ( k );
+
+  return ilist;
 }

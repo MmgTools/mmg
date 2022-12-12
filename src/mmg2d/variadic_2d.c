@@ -30,15 +30,16 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg2d/libmmg2d.h header file for the documentation of all
+ * the \ref mmg2d/liblibmmg2d_private.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * variadic functions definitions for MMG2D library.
  *
  */
 
-#include "mmg2d.h"
-#include "mmg2dexterns.h"
+#include "libmmg2d_private.h"
+#include "libmmg2d.h"
+#include "mmg2dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

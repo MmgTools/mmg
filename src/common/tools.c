@@ -23,7 +23,7 @@
 
 /**
  * \file common/tools.c
- * \brief Various tools for the mmg applications.
+ * \brief Various tools for the mmg libraries.
  * \author Charles Dapogny (UPMC)
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
  * \author Pascal Frey (UPMC)
@@ -33,8 +33,61 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
+/**
+ * \param n array size
+ * \param val array of double precision floating points
+ * \param perm permutation array
+ *
+ * naive (increasing) sorting algorithm, for very small tabs ; permutation is
+ * stored in perm
+ *
+ * \remark to use only on very small arrays such as metric tensors (size lower
+ * than int8_max).
+ */
+inline void MMG5_nsort(int8_t n,double *val,int8_t *perm){
+    int8_t   i,j;
+    int8_t   aux;
+
+    for (i=0; i<n; i++)  perm[i] = i;
+
+    for (i=0; i<n; i++) {
+        for (j=i+1; j<n; j++) {
+            if ( val[perm[i]] > val[perm[j]] ) {
+                aux = perm[i];
+                perm[i] = perm[j];
+                perm[j] = aux;
+            }
+        }
+    }
+}
+
+/**
+ * \param n array size
+ * \param shift shift to apply when taking array value
+ * \param stride stride to apply when taking array value
+ * \param val array of double precision floating points
+ * \param oldval array to store input values
+ * \param perm permutation array
+ *
+ * Naively permute a small array. Use shift and stride to eventually permute
+ * matrix columns.
+ *
+ * \remark to use only on very small arrays such as metric tensors (size lower
+ * than int8_max).
+ */
+inline void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm) {
+  int8_t i,k;
+
+  for( i = 0; i < n; i++ )
+    oldval[i] = val[shift+i*stride];
+
+  for( i = 0; i < n; i++ ) {
+    k = perm[i];
+    val[shift+i*stride] = oldval[k];
+  }
+}
 
 /**
  * \param n1 first normal
@@ -72,7 +125,7 @@ int MMG5_devangle(double* n1, double *n2, double crit)
  *
  */
 inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
-                                int ip1,int ip2, int ip3,double *n) {
+                                MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,double *n) {
   MMG5_pPoint   p1,p2,p3;
   double        abx,aby,abz,acx,acy,acz;
 
@@ -105,8 +158,8 @@ inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
  *
  */
 inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
-  double   n[3];
-  int      ip1, ip2, ip3;
+  double    n[3];
+  MMG5_int  ip1, ip2, ip3;
 
   ip1 = pt->v[0];
   ip2 = pt->v[1];
@@ -127,7 +180,7 @@ inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
  * Compute normalized face normal given three points on the surface.
  *
  */
-inline int MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+inline int MMG5_norpts(MMG5_pMesh mesh,MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,double *n) {
   double   dd,det;
 
   MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
@@ -159,30 +212,183 @@ inline int MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 
 }
 
+/**
+ * \param m matrix (stored as double array)
+ *
+ * Transpose a square matrix in 3D, stored as double array.
+ */
+void MMG5_transpose3d(double m[3][3]) {
+  double swp;
+  for( int8_t i = 0; i < 2; i++ ) {
+    for( int8_t j = i+1; j < 3; j++ ) {
+      swp = m[i][j];
+      m[i][j] = m[j][i];
+      m[j][i] = swp;
+    }
+  }
+}
 
 /**
- * \param m symetric matrix
- * \param n symetric matrix
+ * \return 1 if success, 0 if fail.
+ *
+ * Test the transposition of a 3x3 matrix.
+ */
+int MMG5_test_transpose3d() {
+  double a[3][3] = {{1.,2.,3.},
+                    {4.,5.,6.},
+                    {7.,8.,9.}};
+  double b[3][3] = {{1.,4.,7.},
+                    {2.,5.,8.},
+                    {3.,6.,9.}};
+  double maxerr;
+
+  MMG5_transpose3d(a);
+
+  maxerr = MMG5_test_mat_error(9,(double *)a,(double *)b);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error matrix transposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param dim size of the array
+ * \param a first array
+ * \param b second array
+ * \param result scalar product of the two arrays
+ *
+ * Compute scalar product of two double precision arrays.
+ */
+void MMG5_dotprod(int8_t dim,double *a,double *b,double *result) {
+  *result = 0.0;
+  for( int8_t i = 0; i < dim; i++ )
+    *result += a[i]*b[i];
+}
+
+/**
+ * \return 1 if success, 0 if fail.
+ *
+ * Test vector scalar product.
+ */
+int MMG5_test_dotprod() {
+  double a[4] = {1.0, 2.0,   3.0,  4.0};
+  double b[4] = {1.0, 0.5, 1./3., 0.25};
+  double cex = 4.0;
+  double cnum,err;
+
+  MMG5_dotprod(4,a,b,&cnum);
+  err = fabs(cex-cnum);
+  if( err > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error scalar product: in function %s, error %e\n",
+      __func__,err);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param a first array
+ * \param b second array
+ * \param result cross product of the two arrays
+ *
+ * Compute cross product of two double precision arrays in 3D.
+ */
+void MMG5_crossprod3d(double *a,double *b,double *result) {
+  result[0] = a[1]*b[2] - a[2]*b[1];
+  result[1] = a[2]*b[0] - a[0]*b[2];
+  result[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+/**
+ * \return 1 if success, 0 if fail.
+ *
+ * Test vector cross product.
+ */
+int MMG5_test_crossprod3d() {
+  double a[3] = {1., 0., 0.};
+  double b[3] = {1./sqrt(2.),1./sqrt(2.),0.};
+  double cex[3] = {0.,0.,1./sqrt(2.)};
+  double cnum[3],maxerr;
+
+  MMG5_crossprod3d(a,b,cnum);
+
+  maxerr = MMG5_test_mat_error(3,cex,cnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3D cross product: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param m symmetric matrix
+ * \param n symmetric matrix
  * \param mn result
  *
- * Compute product m*n (mn stored in columns: mn[1] = mn[1][0]).
+ * Compute product m*n (mn stored by rows for consistency with MMG5_eigenv3d).
  *
  */
 void MMG5_mn(double m[6], double n[6], double mn[9] ){
 
   mn[0] = m[0]*n[0] + m[1]*n[1] + m[2]*n[2];
-  mn[1] = m[1]*n[0] + m[3]*n[1] + m[4]*n[2];
-  mn[2] = m[2]*n[0] + m[4]*n[1] + m[5]*n[2];
-
-  mn[3] = m[0]*n[1] + m[1]*n[3] + m[2]*n[4];
+  mn[1] = m[0]*n[1] + m[1]*n[3] + m[2]*n[4];
+  mn[2] = m[0]*n[2] + m[1]*n[4] + m[2]*n[5];
+  mn[3] = m[1]*n[0] + m[3]*n[1] + m[4]*n[2];
   mn[4] = m[1]*n[1] + m[3]*n[3] + m[4]*n[4];
-  mn[5] = m[2]*n[1] + m[4]*n[3] + m[5]*n[4];
-
-  mn[6] = m[0]*n[2] + m[1]*n[4] + m[2]*n[5];
-  mn[7] = m[1]*n[2] + m[3]*n[4] + m[4]*n[5];
+  mn[5] = m[1]*n[2] + m[3]*n[4] + m[4]*n[5];
+  mn[6] = m[2]*n[0] + m[4]*n[1] + m[5]*n[2];
+  mn[7] = m[2]*n[1] + m[4]*n[3] + m[5]*n[4];
   mn[8] = m[2]*n[2] + m[4]*n[4] + m[5]*n[5];
 
   return;
+}
+
+/**
+ *
+ * Test product of 3x3 symmetric matrices.
+ *
+ */
+int MMG5_test_mn() {
+  double m[6] = {1.,2.,3.,4.,5.,6.}; /* Test matrix 1 */
+  double n[6] = {2.,3.,4.,5.,6.,7.}; /* Test matrix 2 */
+  double mnex[9] = {20., 31., 37.,
+                    36., 56., 67.,
+                    45., 70., 84.}; /* Exact m*n product */
+  double nmex[9] = {20., 36., 45.,
+                    31., 56., 70.,
+                    37., 67., 84.}; /* Exact n*m product */
+  double prodnum[9],maxerr; /* Numerical approximation */
+
+  /** Compute product m*n */
+  MMG5_mn(m,n,prodnum);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,mnex,prodnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3x3 symmetric matrix product m*n: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute product n*m */
+  MMG5_mn(n,m,prodnum);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,nmex,prodnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3x3 symmetric matrix product n*m: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
 }
 
 
@@ -217,6 +423,34 @@ inline int MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
   mr[3] = r[1][0]*n[0][1] + r[1][1]*n[1][1] + r[1][2]*n[2][1];
   mr[4] = r[1][0]*n[0][2] + r[1][1]*n[1][2] + r[1][2]*n[2][2];
   mr[5] = r[2][0]*n[0][2] + r[2][1]*n[1][2] + r[2][2]*n[2][2];
+
+  return 1;
+}
+
+/**
+ *
+ * Test computation of product R*M*tR when M is symmetric
+ *
+ */
+inline int MMG5_test_rmtr() {
+  double m[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix */
+  double r[3][3] = {{1./sqrt(2.),1./sqrt(2.),         0.},
+                    {         0.,1./sqrt(2.),1./sqrt(2.)},
+                    {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Test transformation */
+  double outex[6] = {1., 0., 0., 10., 0., 100.}; /* Exact result */
+  double outnum[6],maxerr; /* Numerical result */
+
+  /** Compute transformation */
+  if( !MMG5_rmtr(r,m,outnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,outex,outnum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error linear transformation of symmetric matrix: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
 
   return 1;
 }
@@ -266,6 +500,55 @@ inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
     r[2][1] = n[1]*sinalpha/l;
     r[2][2] = cosalpha;
   }
+  return 1;
+}
+
+/**
+ *
+ * Test computation of the rotation matrix that sends vector \a n to the third
+ * vector of canonical basis.
+ *
+ */
+int MMG5_test_rotmatrix() {
+  double n[3] = {1./sqrt(1000101.),1000./sqrt(1000101.),10./sqrt(1000101.)}; /* Test unit vector */
+  double idex[6] = {1.,0.,0.,1.,0.,1.}; /*Exact identity matrix */
+  double ezex [3] = {0.,0.,1.}; /* Exact z-unit vector */
+  double R[3][3],idnum[6],eznum[3],maxerr; /* Numerical quantities */
+
+  /** Rodrigues' rotation formula (transposed to give a map from n to [0,0,1]).
+   *  Input vector must be a unit vector. */
+  if( !MMG5_rotmatrix(n,R) )
+    return 0;
+
+
+  /** Approximate z-unit vector */
+  for( int8_t i = 0; i < 3; i++ ) {
+    eznum[i] = 0.;
+    for( int8_t j = 0; j < 3; j++ )
+      eznum[i] += R[i][j]*n[j];
+  }
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,ezex,eznum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error vector rotation: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Check orthonormality */
+  if( !MMG5_rmtr(R,idex,idnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,idex,idnum);
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error rotation matrix orthonormality: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -453,6 +736,28 @@ int MMG5_invmat33(double m[3][3],double mi[3][3]) {
 }
 
 /**
+ * \param m initial matrix.
+ * \param mi inverted matrix.
+ *
+ * Invert 2x2 non-symmetric matrix stored in 2 dimensions
+ *
+ */
+int MMG5_invmat22(double m[2][2],double mi[2][2]) {
+  double det;
+
+  det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
+  if ( fabs(det) < MMG5_EPS )  return 0;
+  det = 1.0 / det;
+
+  mi[0][0] =  m[1][1]*det;
+  mi[0][1] = -m[0][1]*det;
+  mi[1][0] = -m[1][0]*det;
+  mi[1][1] =  m[0][0]*det;
+
+  return 1;
+}
+
+/**
  * \param a matrix to invert.
  * \param b last member.
  * \param r vector of unknowns.
@@ -519,19 +824,19 @@ inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
  */
 void MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
   MMG5_pTria ptt;
-  int   k;
-  FILE  *inm;
+  MMG5_int   k;
+  FILE       *inm;
 
   inm = fopen(fileName,"w");
 
-  fprintf(inm,"----------> %d TRIANGLES <----------\n",mesh->nt);
+  fprintf(inm,"----------> %" MMG5_PRId " TRIANGLES <----------\n",mesh->nt);
   for(k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    fprintf(inm,"num %d -> %d %d %d\n",k,ptt->v[0],ptt->v[1],
+    fprintf(inm,"num %" MMG5_PRId " -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",k,ptt->v[0],ptt->v[1],
             ptt->v[2]);
-    fprintf(inm,"ref   -> %d\n",ptt->ref);
+    fprintf(inm,"ref   -> %" MMG5_PRId "\n",ptt->ref);
     fprintf(inm,"tag   -> %d %d %d\n",ptt->tag[0],ptt->tag[1],ptt->tag[2]);
-    fprintf(inm,"edg   -> %d %d %d\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
+    fprintf(inm,"edg   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
     fprintf(inm,"\n");
   }
   fprintf(inm,"---------> END TRIANGLES <--------\n");
@@ -610,198 +915,6 @@ void MMG5_memOption_memSet(MMG5_pMesh mesh) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param node pointer toward a MMG5_iNode (cell for linked list)
- * \return 1 if we can alloc the node \a node, 0 otherwise.
- *
- * Node allocation.
- *
- */
-static inline
-int MMG5_Alloc_inode( MMG5_pMesh mesh, MMG5_iNode **node ) {
-
-  MMG5_ADD_MEM(mesh,sizeof(MMG5_iNode),"boundary reference node",
-                return 0;);
-
-  MMG5_SAFE_MALLOC(*node,1,MMG5_iNode,return 0);
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the address of the root of the linked list.
- * \param val value to add to the linked list.
- * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
- *
- * Add a node with value \a val to a sorted linked list with unique entries.
- *
- * \remark as the linked list had unique entries, we don't insert a node if it
- * exists.
- *
- */
-int MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val ) {
-  MMG5_iNode  *newNode, *cur;
-
-  cur = *liLi;
-
-  /* Travel through the linked list and search if the value val exist or, if
-   * not, where to insert it */
-  if ( cur ) {
-    if ( val < (*liLi)->val ) {
-      /* Add a value at the list head */
-      if ( !MMG5_Alloc_inode(mesh,&newNode) ) return -1;
-
-      newNode->val = val;
-      newNode->nxt = (*liLi);
-
-      (*liLi) = newNode;
-
-      return 1;
-
-    }
-    else if (val == (*liLi)->val ) return 0;
-
-    while ( cur->nxt && ( val >= (cur->nxt)->val) )
-      cur = cur->nxt;
-
-    if ( val == cur->val ) return 0;
-
-    if ( !MMG5_Alloc_inode(mesh,&newNode) ) return -1;
-
-    newNode->val = val;
-    newNode->nxt = cur->nxt;
-    cur->nxt = newNode;
-  }
-  else {
-    if ( !MMG5_Alloc_inode(mesh,&newNode) ) return -1;
-
-    newNode->val = val;
-    newNode->nxt = NULL;
-
-    *liLi = newNode;
-  }
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the root of the linked list.
- *
- * Free the memory used by the linked list whose root is \a liLi.
- *
- */
-void MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi ) {
-  MMG5_iNode *cur,*nxt;
-
-  cur = liLi;
-  while (cur) {
-    nxt = cur;
-    cur = cur->nxt;
-
-    MMG5_DEL_MEM(mesh,nxt);
-  }
-}
-
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param node pointer toward a MMG5_dNode (cell for linked list)
- * \return 1 if we can alloc the node \a node, 0 otherwise.
- *
- * Node allocation.
- *
- */
-static inline
-int MMG5_Alloc_dnode( MMG5_pMesh mesh, MMG5_dNode **node ) {
-
-  MMG5_ADD_MEM(mesh,sizeof(MMG5_dNode),"node for hausdorff eval",
-                return 0;);
-
-  MMG5_SAFE_MALLOC(*node,1,MMG5_dNode,return 0);
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the address of the root of the linked list.
- * \param k integer value to add to the linked list.
- * \param val real value to add to the linked list.
- * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
- *
- * Add a node with integer value \a k and real value \a val to a sorted linked
- * list with unique entries.
- *
- * \remark as the linked list had unique entries, we don't insert a node if it
- * exists.
- *
- */
-int MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int k, double val ) {
-  MMG5_dNode  *newNode, *cur;
-
-  cur = *liLi;
-
-  /* Travel through the linked list and search if the value val exist or, if
-   * not, where to insert it */
-  if ( cur ) {
-    if ( val < (*liLi)->val ) {
-      /* Add a value at the list head */
-      if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
-
-      newNode->val = val;
-      newNode->nxt = (*liLi);
-
-      (*liLi) = newNode;
-
-      return 1;
-
-    }
-    else if (val == (*liLi)->val ) return 0;
-
-    while ( cur->nxt && ( val >= (cur->nxt)->val) )
-      cur = cur->nxt;
-
-    if ( val == cur->val ) return 0;
-
-    if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
-
-    newNode->val = val;
-    newNode->nxt = cur->nxt;
-    cur->nxt = newNode;
-  }
-  else {
-    if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
-
-    newNode->val = val;
-    newNode->nxt = NULL;
-
-    *liLi = newNode;
-  }
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the root of the linked list.
- *
- * Free the memory used by the linked list whose root is \a liLi.
- *
- */
-void MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi ) {
-  MMG5_dNode *cur,*nxt;
-
-  cur = liLi;
-  while (cur) {
-    nxt = cur;
-    cur = cur->nxt;
-
-    MMG5_DEL_MEM(mesh,nxt);
-  }
-}
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
 inline double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
@@ -835,7 +948,7 @@ inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
  * Compute oriented volume of a tetrahedron (x6)
  *
  */
-inline double MMG5_orvol(MMG5_pPoint point,int *v) {
+inline double MMG5_orvol(MMG5_pPoint point,MMG5_int *v) {
     MMG5_pPoint  p0,p1,p2,p3;
 
     p0 = &point[v[0]];
@@ -880,7 +993,7 @@ double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
  */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
   MMG5_pPoint ppt;
-  int         k;
+  MMG5_int    k;
 
   for ( k=1; k<=mesh->np; k++ ) {
     ppt = &mesh->point[k];
@@ -902,11 +1015,12 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
  * Mmgs or Mmg2d).
  *
  */
-void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int)  ) {
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG5_int)  ) {
   MMG5_pTria  pt;
   MMG5_pQuad  pq;
   MMG5_pPoint ppt;
-  int         k,i;
+  int         i;
+  MMG5_int    k;
 
   /* Preserve isolated required points */
   for ( k=1; k<=mesh->np; k++ ) {
@@ -956,9 +1070,10 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int)  ) {
  *
  */
 void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
-                               int (*delElt)(MMG5_pMesh,int) ) {
+                               int (*delElt)(MMG5_pMesh,MMG5_int) ) {
   MMG5_pTria  pt;
-  int         k,i,*adja,iadr,iadrv,iv;
+  int         i,iv;
+  MMG5_int    k,*adja,iadr,iadrv;
   int         nfac = 3; // number of faces per elt
 
   for ( k=1 ; k <= mesh->nt ; k++) {
@@ -994,4 +1109,75 @@ void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
   }
 
   return;
+}
+
+/**
+ * \param nelem number of matrix elements.
+ * \param m1 first matrix (single array).
+ * \param m2 second matrix (single array).
+ *
+ * Compute maximum error between two matrices.
+ *
+ */
+inline
+double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] ) {
+  double maxerr;
+  int8_t k;
+
+  /* Compute max error */
+  maxerr = 0;
+  for( k = 0; k < nelem; k++ )
+    maxerr = MG_MAX(maxerr,fabs(m1[k] - m2[k]));
+
+  return maxerr;
+}
+
+/**
+ *
+ * Test inversion of 2x2 non-symmetric matrix stored in 2 dimensions.
+ *
+ */
+int MMG5_test_invmat22() {
+  double A[2][2] = {{4.0,2.0},{1.0,1.0}}; /* Test matrix */
+  double iAex[2][2] = {{0.5,-1.0},{-0.5,2.0}}; /* Analytical inverse */
+  double iAnum[2][2]; /* Numerical inverse */
+
+  /* Compute matrix inverse */
+  if( !MMG5_invmat22(A,iAnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  double maxerr = MMG5_test_mat_error(4,(double *)iAex,(double *)iAnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error matrix inversion: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ *
+ * Test inversion of 3x3 non-symmetric matrix stored in 2 dimensions.
+ *
+ */
+int MMG5_test_invmat33() {
+  double A[3][3] = {{7.0,2.0,1.0},{0.0,3.0,-1.0},{-3.0,4.0,-2.0}}; /* Test matrix */
+  double iAex[3][3] = {{-2.0,8.0,-5.0},{3.0,-11.0,7.0},{9.0,-34.0,21.0}}; /* Analytical inverse */
+  double iAnum[3][3]; /* Numerical inverse */
+
+  /* Compute matrix inverse */
+  if( !MMG5_invmat33(A,iAnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  double maxerr = MMG5_test_mat_error(9,(double *)iAex,(double *)iAnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error matrix inversion: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
 }

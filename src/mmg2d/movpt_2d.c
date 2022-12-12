@@ -31,7 +31,8 @@
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
  **/
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "mmg2dexterns_private.h"
 
 //extern int8_t ddb;
 
@@ -49,11 +50,11 @@
  * isotropic and anisotropic case
  *
  */
-int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, int8_t improve) {
+int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG5_int *list, int8_t improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        p0,p1,p2,ppt;
   double             step,ll1,ll2,o[2],no[2],calold,calnew;
-  int                k,iel,ip0,ip1,ip2,it1,it2;
+  MMG5_int           k,iel,ip0,ip1,ip2,it1,it2;
   int8_t             i,i1,i2;
   static int8_t      mmgWarn0=0,mmgWarn1=0;
 
@@ -209,11 +210,11 @@ int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, int8_t imp
  * Relocate internal vertex whose ball is passed.
  *
  */
-int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,int8_t improve) {
+int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG5_int *list,int8_t improve) {
   MMG5_pTria        pt,pt0;
   MMG5_pPoint       p0,p1,p2,ppt0;
   double            calold,calnew,vol,volbal,b[2];
-  int               k,iel;
+  MMG5_int          k,iel;
   int8_t            i,i1,i2;
 
   ppt0 = &mesh->point[0];

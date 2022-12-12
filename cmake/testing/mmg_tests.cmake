@@ -20,9 +20,31 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-FOREACH(EXEC ${LISTEXEC_MMG})
+# Execut_mmg contains the list of executables to test (for now the mmg3d
+# executable is in EXECUT_MMG3D (filled by mmg3d.cmake) and the mmgs executable
+# is in EXECUTE_MMGS (filled by mmgs.cmake))
+SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
+SET(SHRT_EXECUT_MMG ${SHRT_EXECUT_MMGS} ${SHRT_EXECUT_MMG3D})
 
-  GET_FILENAME_COMPONENT ( SHRT_EXEC ${EXEC} NAME )
+# Make some files not openable
+IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb
+    AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
+  FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
+ENDIF ()
+IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
+  FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
+ENDIF()
+
+IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol
+    AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
+  FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
+ENDIF ()
+IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
+  FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
+ENDIF()
+
+# Lists of tests that are common to mmgs and mmg3d
+FOREACH(EXEC SHRT_EXEC IN ZIP_LISTS EXECUT_MMG SHRT_EXECUT_MMG)
 
   ###############################################################################
   #####
@@ -30,7 +52,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   #####
   ###############################################################################
 
-  # Gmsh without metric: see mmg3d_tests.cmale and mmgs_tests.cmake
+  # Gmsh without metric: see mmg3d_tests.cmake and mmgs_tests.cmake
 
   # Binary gmsh iso metric
   ADD_TEST(NAME mmg_binary_gmsh_iso_${SHRT_EXEC}
@@ -92,7 +114,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     ${MMG_CI_TESTS}/VtkInout/ani.vtu
     ${CTEST_OUTPUT_DIR}/mmg_vtkvtu_ani_${SHRT_EXEC})
 
-  IF ( NOT VTK_FOUND )
+  IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     SET(expr "VTK library not founded")
     SET_PROPERTY(TEST mmg_vtkvtk_${SHRT_EXEC}
       PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -126,8 +148,8 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     )
 
   SET ( args
-    "-v 5 -hgrad 1.15"
-    "-v 5 -hgrad 1.15"
+    "-v 5 -hgrad 1.25"
+    "-v 5 -hgrad 1.25"
     )
 
   ADD_RUN_AGAIN_TESTS ( ${EXEC} "${test_names}" "${args}" "${input_files}" )
@@ -266,6 +288,19 @@ ADD_TEST(NAME mmg_hsizAni_${SHRT_EXEC}
   ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
   -out ${CTEST_OUTPUT_DIR}/mmg_hsizAni_${SHRT_EXEC}.o.meshb)
 
+# optim + Ani + orphan + unused point
+ADD_TEST(NAME mmg_sphere-optimAni_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 ${common_args}
+  ${MMG_CI_TESTS}/SphereVolAni/sphere3 -sol 2 -optim -A -v 5
+  -out ${CTEST_OUTPUT_DIR}/mmg_sphere-optimAni_${SHRT_EXEC}-sphere-optimAni.o.meshb)
+
+# optim + Iso + orphan + unused point
+ADD_TEST(NAME mmg_sphere-optim_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 ${common_args}
+  ${MMG_CI_TESTS}/SphereVolAni/sphere3 -sol 2 -optim -v 5
+  -out ${CTEST_OUTPUT_DIR}/mmg_sphere-optim_${SHRT_EXEC}-sphere-optim.o.meshb)
+
+
 ADD_TEST(NAME mmg_hsizHmax_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmax 0.05 ${common_args}
   ${MMG_CI_TESTS}/Cube/cube
@@ -297,10 +332,14 @@ ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}
     ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
     -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}.o.meshb)
 
-ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
-  COMMAND ${EXEC} -v 5 -hausd 0.002 -A ${common_args}
-  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
-  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}.o.meshb)
+# Too long for github actions on windows (more than 1 hour). Lasts 15mins on winnie
+# (physical windows), 4mins on ubuntu/mac. See gprof-profile.out file of
+# ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/ (lot of time is passed in gradsiz_ani)
+#
+#ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
+#  COMMAND ${EXEC} -v 5 -hausd 0.002 -A ${common_args}
+#  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
+#  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}.o.meshb)
 
 
 # -A
@@ -326,6 +365,27 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/c1/c1.meshb
     -out ${CTEST_OUTPUT_DIR}/mmg_nreg_${SHRT_EXEC}.o.meshb)
 
+  # xreg
+  ADD_TEST( NAME mmg_CoorRegularizationCube_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nr -xreg
+    ${MMG_CI_TESTS}/CoorRegularizationCube/cube
+    -out ${CTEST_OUTPUT_DIR}/CoorRegularizationCube_${SHRT_EXEC}.o.meshb)
+
+  ADD_TEST( NAME mmg_CoorRegularizationRandomCube_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -xreg
+    ${MMG_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
+    -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube_${SHRT_EXEC}.o.meshb)
+
+  # -lssurf
+  IF ( ${SHRT_EXEC} MATCHES "3d" )
+    SET ( ADD_ARG "-opnbdy" )
+  ENDIF()
+  ADD_TEST(NAME mmg_OptLsSurf_peninsula_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${ADD_ARG} -lssurf -nr -hgrad 1.5 -hausd 0.02
+    -in ${MMG_CI_TESTS}/OptLsSurf_peninsula/peninsula
+    -sol  ${MMG_CI_TESTS}/OptLsSurf_peninsula/ls.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg_OptLsSurf_peninsula_${SHRT_EXEC}.o.meshb)
+
   ##############################################################################
   #####
   #####         Various test cases
@@ -344,5 +404,12 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
     -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_${SHRT_EXEC}.o.meshb)
 
+  # test robustness of optim + aniso mode
+  ADD_TEST(NAME mmg_SurfEdges_OptimAni_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hgrad -1 -optim -A -noinsert -noswap -nomove -nosizreq -hgradreq -1
+    ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_OptimAni_${SHRT_EXEC}.o.meshb)
 
-ENDFOREACH(EXEC)
+
+
+ENDFOREACH()

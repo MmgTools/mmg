@@ -30,7 +30,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
+#include "mmg3dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -42,13 +44,15 @@
  * Try to move the vertices of the tetra \a k to improve its quality.
  *
  */
-int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) {
+int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int k) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   /* double        *n; */
-  int           i,j,i0,ier/*,lists[MMG3D_LMAX+2]*/,listv[MMG3D_LMAX+2]/*,ilists*/,ilistv;
-  int           /* improve,*/ internal,nm,/*maxit,*/base,ns;
+  int64_t       listv[MMG3D_LMAX+2];
+  MMG5_int      ier/*,lists[MMG3D_LMAX+2]*/,base;
+  int           i0,i,j/*,ilists*/,ilistv;
+  int           /* improve,*/ internal,nm,/*maxit,*/ns;
 
   // improve = 1;
   internal = 1;
@@ -154,10 +158,11 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree
  * Try to remove point i of tet k, try the three edges of k containing i.
  *
  */
-int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
+int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
   MMG5_pTetra pt;
   double      len;
-  int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
+  int         ied,iedg,iq,i1,ilistcol;
+  int64_t     listcol[MMG3D_LMAX+2];
   int         ier;
   int8_t      iface,ief;
 
@@ -183,6 +188,7 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     }
     i1    = MMG5_idir[iface][MMG5_inxt2[ief]];
 
+    assert( 0<=i1 && i1<4 && "unexpected local index for vertex");
     ilistcol = MMG5_boulevolp(mesh,k,i1,listcol);
 
     ilistcol = MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
@@ -212,9 +218,11 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
  *
  */
 int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
-                       int k,int i) {
+                       MMG5_int k,int i) {
   MMG5_pTetra pt;
-  int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
+  int         il,ilist,ip;
+  int64_t     list[MMG3D_LMAX+2];
+  MMG5_int    iel;
 
   pt = &mesh->tetra[k];
 
@@ -222,6 +230,7 @@ int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
     return 0;
   }
 
+  assert( 0<=i && i<4 && "unexpected local index for vertex");
   ilist = MMG5_boulevolp(mesh,k,i,list);
   if (ilist > 30 ) return 0;
 
@@ -247,11 +256,13 @@ int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
  * Try to optimize the tetra k. This tetra has a face on the boundary.
  *
  */
-int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) {
+int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int k) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int          ib,i,j,ipb,list[MMG3D_LMAX+2];
-  int          iedg,ier,ilist,ied,ia,it1,it2,ret,imove;
+  int          ib,i,j;
+  int64_t      list[MMG3D_LMAX+2];
+  MMG5_int     ipb,it1,it2;
+  int          iedg,ier,ilist,ied,ia,ret,imove;
 
   imove = 0;
 
@@ -311,9 +322,9 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) 
       ia  = MMG5_iarf[i][j];
 
       /* No swap of geometric edge */
-      if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
-           (pxt->tag[ia] & MG_NOM) )
+      if ( MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
         continue;
+      }
 
       ret = MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
       ilist = ret / 2;

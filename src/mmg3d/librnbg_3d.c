@@ -31,11 +31,12 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
 
 #ifdef USE_SCOTCH
 
-#include "librnbg.h"
+#include "librnbg_private.h"
 
 /**
  * \param tetras pointer toward a table containing the tetra structures.
@@ -48,9 +49,9 @@
  *
  */
 static inline
-void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
+void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, MMG5_int* perm, MMG5_int ind1, MMG5_int ind2) {
   MMG5_Tetra pttmp;
-  int        tmp;
+  MMG5_int   tmp;
 
   /* Commentated part: swap for adja table if we don't free it in renumbering *
    * function (faster but need of 4*mesh->nemax*sizeof(int) extra bytes ) */
@@ -111,25 +112,26 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int in
  *
  */
 int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
-                          MMG5_pSol fields,int* permNodGlob) {
-  MMG5_pPoint ppt;
-  MMG5_pTetra ptet;
-  MMG5_pPrism pp;
-  SCOTCH_Num  edgeNbr;
-  SCOTCH_Num  *vertTab, *edgeTab, *permVrtTab;
+                          MMG5_pSol fields,MMG5_int* permNodGlob) {
+  MMG5_pPoint  ppt;
+  MMG5_pTetra  ptet;
+  MMG5_pPrism  pp;
+  SCOTCH_Num   edgeNbr;
+  SCOTCH_Num   *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
-  int    vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
-  int    i, j, k;
-  int    edgeSiz;
-  int    *vertOldTab, *permNodTab, nereal, npreal;
-  int    *adja,iadr;
+  MMG5_int     vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
+  int          i;
+  MMG5_int     j, k;
+  MMG5_int     edgeSiz;
+  MMG5_int     *vertOldTab, *permNodTab, nereal, npreal;
+  MMG5_int     *adja,iadr;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */
   vertNbr = 0;
 
-  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"vertOldTab",return 1);
-  MMG5_SAFE_CALLOC(vertOldTab,mesh->ne+1,int,return 1);
+  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(MMG5_int),"vertOldTab",return 1);
+  MMG5_SAFE_CALLOC(vertOldTab,mesh->ne+1,MMG5_int,return 1);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
 
@@ -189,7 +191,7 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
 
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
-        int oldsize = edgeSiz;
+        MMG5_int oldsize = edgeSiz;
         MMG5_ADD_MEM(mesh,MMG5_GAP*sizeof(SCOTCH_Num),"edgeTab",
                       MMG5_DEL_MEM(mesh,vertOldTab);
                       MMG5_DEL_MEM(mesh,vertTab);
@@ -289,10 +291,10 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
   }
   MMG5_DEL_MEM(mesh,vertOldTab);
 
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG5_int),"permNodTab",
                 if( !MMG3D_hashTetra(mesh,1) ) return 0;
                 return 1);
-  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,return 1);
+  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,MMG5_int,return 1);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
     ptet = &mesh->tetra[tetraIdx];

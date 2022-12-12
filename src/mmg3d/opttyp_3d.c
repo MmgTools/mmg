@@ -30,7 +30,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "inlined_functions_3d.h"
+#include "libmmg3d.h"
+#include "inlined_functions_3d_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -61,17 +62,18 @@
  *    - 7: 0 obtuse face, 4 acute face, 0 big edge, 2 small edge.
  *
  */
-static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
+static int MMG3D_typelt(MMG5_pMesh mesh,MMG5_int iel,int *item) {
   MMG5_pTetra    pt;
   MMG5_pPoint    pa,pb,pc,pd;
-  double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
-  double    bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
-  double    s[4],dd,rapmin,rapmax,surmin,surmax;
-  int       i,k,ia,ib,ic,id,isur,isurmax,isurmin,iarmax,iarmin;
-  int       nobtus,naigu;
-  short     i0,i1,i2;
-  double    EPSVOL = 0.001;
-  double    RAPMAX = 0.25;
+  double         abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
+  double         bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
+  double         s[4],dd,rapmin,rapmax,surmin,surmax;
+  int            i,k,isur,isurmax,isurmin,iarmax,iarmin;
+  MMG5_int       ia,ib,ic,id;
+  int            nobtus,naigu;
+  short          i0,i1,i2;
+  double         EPSVOL = 0.001;
+  double         RAPMAX = 0.25;
 
   pt = &mesh->tetra[iel];
   if ( !pt->v[0] )  return -1;
@@ -323,10 +325,12 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
  * Try to swap edge \a iar of tetra \a k.
  *
  */
-int MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,int k,int iar) {
+int MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int k,int iar) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int           list[MMG3D_LMAX+2],lon,nconf,ier;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      nconf;
+  int           lon,ier;
   double        OCRIT = 1.01;
 
   ier = 0;
@@ -361,7 +365,7 @@ int MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,int k
  */
 static inline
 int MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
-                        int k,int iar) {
+                        MMG5_int k,int iar) {
   int           i,ier;
 
   ier = 0;
@@ -388,11 +392,12 @@ int MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
  *
  */
 int MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
-                     int k,int iar,double OCRIT) {
+                     MMG5_int k,int iar,double OCRIT) {
   MMG5_pTetra   pt;
   double        len;
   double        LLONG2 = 0.1;
-  int           ier,j;
+  int           j;
+  MMG5_int      ier;
 
   ier = 0;
   pt = &mesh->tetra[k];
@@ -433,7 +438,7 @@ int MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
  */
 static inline
 int MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
-                          int k,int iar) {
+                          MMG5_int k,int iar) {
   int           i,ier;
   double        OCRIT=1.01;
 
@@ -464,15 +469,16 @@ int MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctre
  * 0.2) and try to improve them by every means.
  *
  */
-int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int testmark) {
+MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int testmark) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   double         crit;
-  int            k,ityp,cs[10],ds[10],item[2];
-  int            ier,i,nd,ne,npeau;
-  int            it,maxit,ntot,base;
+  int            ityp,item[2];
+  MMG5_int       k,ntot,ne,nd,cs[10],ds[10];
+  int            ier,i,npeau;
+  int            it,maxit;
 //  double         OCRIT = 1.01;
-  int            nbdy,nbdy2 ;
+  MMG5_int       nbdy,nbdy2,base ;
 
   ntot = 0;
   crit = 0.2 / MMG3D_ALPHAD;
@@ -484,8 +490,8 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int tes
     ne = mesh->ne;
     nd = 0;
     nbdy = nbdy2 = 0;
-    memset(cs,0,10*sizeof(int));
-    memset(ds,0,10*sizeof(int));
+    memset(cs,0,10*sizeof(MMG5_int));
+    memset(ds,0,10*sizeof(MMG5_int));
 
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];
@@ -605,10 +611,10 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int tes
       } /* end switch */
     } /* end for k */
 
-    /* printf("bdry : %d %d\n",nbdy,nbdy2); */
+    /* printf("bdry : %" MMG5_PRId " %" MMG5_PRId "\n",nbdy,nbdy2); */
     /*  for (k=0; k<=7; k++) */
     /*    if ( cs[k] ) */
-    /*    printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
+    /*    printf("  optim [%" MMG5_PRId "]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
 
     ntot += nd;
     if(base==-1) base = mesh->mark-1;

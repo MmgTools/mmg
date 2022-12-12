@@ -20,8 +20,6 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMG3D ${EXECUT_MMG3D} NAME )
-
 ##############################################################################
 #####
 #####         Tests that may be run twice
@@ -30,12 +28,15 @@ GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMG3D ${EXECUT_MMG3D} NAME )
 
 SET ( test_names
   # Simple test: must already pass
-  mmg3d_SimpleCube
+  mmg3d_SimpleCube_fast
   # MultiDomain
   mmg3d_MultiDom_Ellipse_fast
   # Non-manifold test case
   mmg3d_NM_Cube_fast
   mmg3d_NM_Complex_fast
+  # test case with non-manifold, ridges, ref edges and a curve surface
+  mmg3d_NM_cone_fast
+  # mmg3d_NM_cone_ani_fast #Fail because at second run a tetra we have a tet with 4 ridge vertices
   )
 
 SET ( input_files
@@ -45,6 +46,8 @@ SET ( input_files
    ### non-manifold
   ${MMG3D_CI_TESTS}/NM_Cube/nm
   ${MMG3D_CI_TESTS}/NM_Complex/nm4
+  ${MMG3D_CI_TESTS}/cone-nm.mesh
+  #${MMG3D_CI_TESTS}/cone-nm.mesh
   )
 
 SET ( args
@@ -54,6 +57,8 @@ SET ( args
   ### non-manifold
   "-v 5 -hmax 0.1"
   "-v 5"
+  "-v 5"
+  #"-v 5 -A"
   )
 
 IF ( LONG_TESTS )
@@ -143,7 +148,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/CubeSkin0.1_Inside0.4/CubeSkin0.1
     ${MMG3D_CI_TESTS}/CubeSkin0.2_Inside0.4/CubeSkin0.2
     ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.125/CubeSkin0.125
-    ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
+    # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
     # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.5/CubeSkin0.5
     ### Linkrods
     ${MMG3D_CI_TESTS}/Various_unref_Linkrods_met0.2/linkrods
@@ -192,7 +197,7 @@ IF ( LONG_TESTS )
     "-v 5"
     "-v 5"
     "-v 5"
-    "-v 5"
+    # "-v 5"
     # "-v 5"
     ### Linkrods
     "-v 5 -hausd 0.1"
@@ -356,14 +361,20 @@ ADD_TEST(NAME mmg3d_val
   ${MMG3D_CI_TESTS}/Cube/cube
   ${CTEST_OUTPUT_DIR}/mmg3d_cube-val.o.meshb
   )
-
-#ADD_TEST(NAME mmg3d_default
-#  COMMAND ${EXECUT_MMG3D} -v 5 -default
-#  ${MMG3D_CI_TESTS}/Cube/cube
-#  -out ${CTEST_OUTPUT_DIR}/mmg3d_default.o.meshb)
-
-SET_PROPERTY(TEST mmg3d_val #mmg3d_default
+SET_PROPERTY(TEST mmg3d_val
   PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg3d_locParamCrea
+  COMMAND ${EXECUT_MMG3D} -v 5 -default
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.0)
+
+SET_TESTS_PROPERTIES ( mmg3d_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmg3d_locParamCrea )
+ADD_TEST(NAME mmg3d_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.mmg3d)
+SET_TESTS_PROPERTIES ( mmg3d_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmg3d_locParamCrea )
 
 # default hybrid
 ADD_TEST(NAME mmg3d_hybrid_3d
@@ -438,6 +449,12 @@ ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula
   -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula.o.meshb)
 
+ADD_TEST(NAME mmg3d_opnbdy_lssurf-nofile_peninsula
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -lssurf 0.6 -nr -hgrad 1.5 -hausd 0.02
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_lssurf_peninsula.o.meshb)
+
 # ls + nsd
 ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula-nsd3
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls -nsd 3
@@ -466,7 +483,7 @@ ADD_TEST(NAME mmg3d_opnbdy_ref_island
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
@@ -520,6 +537,12 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
 
+ADD_TEST(NAME mmg3d_OptimAni_Cube
+  COMMAND ${EXECUT_MMG3D} -v 5 -optim -A -hgrad -1
+  ${MMG3D_CI_TESTS}/Cube/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_cube.o.meshb)
+
+
 ##############################################################################
 #####
 #####         Check optimLES
@@ -538,6 +561,16 @@ ADD_TEST(NAME mmg3d_OptimLES_sphere
 #####
 ###############################################################################
 #####
+
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmg3d_OptLsSurf_box
+  COMMAND ${EXECUT_MMG3D} -v 5 -lssurf
+  -sol ${MMG3D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG3D_CI_TESTS}/OptLsSurf_box/box.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLsSurf_box.o.meshb
+  )
+
+# multi-mat
 ADD_TEST(NAME mmg3d_LSMultiMat
   COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
   ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
@@ -579,6 +612,21 @@ ADD_TEST(NAME mmg3d_OptLs_plane_m
   ${MMG3D_CI_TESTS}/OptLs_plane/plane
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-m.o.meshb)
+
+# ridge preservation
+IF ( (NOT SCOTCH_FOUND) OR USE_SCOTCH MATCHES OFF )
+  SET ( DISABLE_RENUM "" )
+ELSE()
+  SET ( DISABLE_RENUM -rn 0 )
+ENDIF()
+
+ADD_TEST(NAME mmg3d_OptLs_NM_ridge
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.5 -noinsert -noswap -nomove -nr ${DISABLE_RENUM}
+  ${MMG3D_CI_TESTS}/OptLs_NM_ridge/cube-it2.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_NM_cube-it2.o.mesh)
+
+SET_TESTS_PROPERTIES ( mmg3d_OptLs_NM_ridge
+  PROPERTIES FIXTURES_SETUP mmg3d_OptLs_NM_ridge )
 
 # non-zero ls
 ADD_TEST(NAME mmg3d_OptLs_plane_nonzero
@@ -623,6 +671,19 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
   -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  ${MMG3D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG3D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_LSBaseReferences-normc.o.meshb)
+
 # ls + rmc
 ADD_TEST(NAME mmg3d_OptLs_plane_withbub
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
@@ -657,6 +718,43 @@ ADD_TEST(NAME mmg3d_OptLs_temp_orphan
   -hausd 0.5 -nr -hgrad -1 -nsd 3
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_temp_orphan.o.meshb)
 
+# OptLs and isoref option: compare the result of ls discretization with ref 10
+# and results of the same case with ref 5
+#include(FindUnixCommands)
+
+add_test(
+  NAME mmg3d_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.mesh
+  -sol ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_isoref.o.mesh
+  )
+add_test(
+  NAME mmg3d_OptLs_isoref_5
+  COMMAND ${EXECUT_MMG3D} -v 5 -isoref 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh-isoref5.mesh
+  -sol ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmg3d_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmg3d_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmg3d_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
+
+ADD_TEST(NAME test_para_tria
+  COMMAND ${EXECUT_MMG3D}
+  -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
+  ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+  -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
+  ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+  )
+
+SET_TESTS_PROPERTIES ( test_para_tria
+  PROPERTIES FIXTURES_SETUP test_para_tria )
+
+
 IF ( LONG_TESTS )
   # Test the Ls option
   ADD_TEST(NAME mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
@@ -678,7 +776,7 @@ IF ( LONG_TESTS )
   #####
   ###############################################################################
   #####
-  IF ( ELAS_FOUND )
+  IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     ADD_TEST(NAME mmg3d_LagMotion0_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt

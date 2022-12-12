@@ -38,9 +38,9 @@
  *
  */
 
-#include "mmg3d.h"
-
-#include "mmg3dexterns.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
+#include "mmg3dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

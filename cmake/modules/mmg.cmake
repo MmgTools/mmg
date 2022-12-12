@@ -45,7 +45,11 @@ FILE(
   ${MMG2D_SOURCE_DIR}/*.c
   ${MMG3D_SOURCE_DIR}/*.c
   ${MMGS_SOURCE_DIR}/*.c
-  ${COMMON_SOURCE_DIR}/*.c
+  ${MMGCOMMON_SOURCE_DIR}/*.c
+  ${MMG2D_SOURCE_DIR}/*.h
+  ${MMG3D_SOURCE_DIR}/*.h
+  ${MMGS_SOURCE_DIR}/*.h
+  ${MMGCOMMON_SOURCE_DIR}/*.h
   )
 LIST(REMOVE_ITEM mmg_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
@@ -53,9 +57,9 @@ LIST(REMOVE_ITEM mmg_library_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${REMOVE_FILE} )
 
-IF ( VTK_FOUND )
+IF ( VTK_FOUND AND NOT USE_VTK MATCHES OFF)
   LIST(APPEND  mmg_library_files
-    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+    ${MMGCOMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
 
 IF ( LIBMMG_STATIC )
@@ -75,28 +79,30 @@ ENDIF()
 
 IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   # mmg header files needed for library
+  #
+  # Remark: header installation would need to be cleaned, for now, to allow
+  # independent build of each project and because mmgs and mmg2d have been added
+  # to mmg3d without rethinking the install architecture, the header files that
+  # are common between codes are copied in all include directories (mmg/,
+  # mmg/mmg3d/, mmg/mmgs/, mmg/mmg2d/).  they are also copied in build directory
+  # to enable library call without installation.
   SET( mmg2d_headers
+    ${MMG2D_SOURCE_DIR}/mmg2d_export.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
     ${MMG2D_BINARY_DIR}/libmmg2df.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmg3d_headers
+    ${MMG3D_SOURCE_DIR}/mmg3d_export.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
     ${MMG3D_BINARY_DIR}/libmmg3df.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmgs_headers
+    ${MMGS_SOURCE_DIR}/mmgs_export.h
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_BINARY_DIR}/libmmgsf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmg_headers
+     # ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h
     )
@@ -138,19 +144,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     copy_2d_headers copy_s_headers copy_3d_headers
     ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h
     ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h
-    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/libmmgtypes.h
-    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/mmgcmakedefines.h)
+    )
 
-ENDIF()
-
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-
-IF ( TEST_LIBMMG )
-  INCLUDE(cmake/testing/libmmg_tests.cmake)
 ENDIF()
 
 ###############################################################################
@@ -159,37 +154,9 @@ ENDIF()
 #####
 ###############################################################################
 
-IF ( BUILD_TESTING )
-
-  ##-------------------------------------------------------------------##
-  ##--------------------------- Add tests and configure it ------------##
-  ##-------------------------------------------------------------------##
-  # Add runtime that we want to test for mmg
-  IF( MMG_CI )
-    # Add libmmg tests
-    IF ( TEST_LIBMMG )
-      SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a )
-      SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a )
-
-     ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a}
-       ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/init
-       ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/cube
-       "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0.o")
-     ADD_TEST(NAME libmmg_cpp_a        COMMAND ${LIBMMG_CPP_a}
-       ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/init
-       ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/cube
-       "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_cpp.o")
-
-      IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
-        ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a}
-          ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/init
-          ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/cube
-          "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_Fortran.o"
-          )
-      ENDIF()
-    ENDIF ()
-
-  ENDIF( MMG_CI )
-
-ENDIF ( BUILD_TESTING )
+##-------------------------------------------------------------------##
+##-------------- Library examples and APIs      ---------------------##
+##-------------------------------------------------------------------##
+IF ( TEST_LIBMMG )
+  INCLUDE(libmmg_tests)
+ENDIF()

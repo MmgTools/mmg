@@ -20,20 +20,87 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 // extern int8_t ddb;
 
 /* Check if triangle k should be split based on geometric and rough edge length considerations */
-int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
+int MMG2D_chkedg(MMG5_pMesh mesh, MMG5_int k) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
-  double            hausd,hmax,ps,cosn,ux,uy,ll,li,t1[2],t2[2];
-  int8_t            i,i1,i2;
+  MMG5_pPar         par;
+  double            hausd[3],hmax[3],ps,cosn,ux,uy,ll,li,t1[2],t2[2];
+  int               l;
+  int8_t            i,i1,i2,fill;
 
   pt = &mesh->tria[k];
-  hausd = mesh->info.hausd;
-  hmax = mesh->info.hmax;
+  hausd[0] = hausd[1] = hausd[2] = mesh->info.hausd;
+  hmax[0]  = hmax[1]  = hmax[2]  = mesh->info.hmax;
+
+  /* Local parameters for pt and k */
+  int8_t isloc = 0;
+
+  if ( mesh->info.parTyp & MG_Tria ) {
+    for ( l=0; l<mesh->info.npar; ++l ) {
+      par = &mesh->info.par[l];
+
+      if ( par->elt != MMG5_Triangle )  continue;
+      if ( par->ref != pt->ref ) continue;
+
+      hmax[0]  = hmax[1]  = hmax[2]  = par->hmax;
+      hausd[0] = hausd[1] = hausd[2] = par->hausd;
+      isloc = 1;
+      break;
+    }
+  }
+
+  fill = 0;
+  if ( mesh->info.parTyp & MG_Edge ) {
+    if ( isloc ) {
+      for ( l=0; l<mesh->info.npar; ++l ) {
+        par = &mesh->info.par[l];
+
+        if ( par->elt != MMG5_Edg )  continue;
+
+        for (i=0; i<3; i++) {
+          if ( par->ref != pt->edg[i] ) continue;
+
+          hmax[i]  = MG_MIN(hmax[i],par->hmax);
+          hausd[i] = MG_MIN(hausd[i],par->hausd);
+
+          MG_SET(fill,i);
+        }
+
+        /* Stop the loop over local parameters if all edges have been found */
+        if ( fill == 7 ) {
+          break;
+        }
+
+      }
+    }
+    else {
+      for ( l=0; l<mesh->info.npar; ++l ) {
+        par = &mesh->info.par[l];
+
+        if ( par->elt != MMG5_Edg )  continue;
+
+        for (i=0; i<3; i++) {
+          if ( par->ref != pt->edg[i] ) continue;
+
+          hmax[i]  = par->hmax;
+          hausd[i] = par->hausd;
+
+          MG_SET(fill,i);
+        }
+
+        /* Stop the loop over local parameters if all edges have been found */
+        if ( fill == 7 ) {
+          break;
+        }
+      }
+    }
+  }
+
 
   /* Analyze the three edges of k */
   for (i=0; i<3; i++) {
@@ -49,7 +116,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
     ll = ux*ux + uy*uy;
 
     /* Long edges should be split */
-    if ( ll > hmax*hmax ) {
+    if ( ll > hmax[i]*hmax[i] ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -93,7 +160,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
     cosn = ps/ll ;
     cosn *= (1.0-cosn);
     cosn *= ll;
-    if ( cosn > 9.0*hausd*hausd ) {   // Not so sure about that 9.0
+    if ( cosn > 9.0*hausd[i]*hausd[i] ) {   // Not so sure about that 9.0
       MG_SET(pt->flag,i);
       continue;
     }
@@ -103,7 +170,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
     cosn = ps/ll ;
     cosn *= (1.0-cosn);
     cosn *= ll;
-    if ( cosn > 9.0*hausd*hausd ) {
+    if ( cosn > 9.0*hausd[i]*hausd[i] ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -115,7 +182,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
 
 /* Calculate coordinates o[2] and interpolated normal vector no[2] of a new point
  situated at parametric distance s from i1 = inxt2[i] */
-int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,int8_t i,double s,double *o,double *no) {
+int MMG2D_bezierCurv(MMG5_pMesh mesh,MMG5_int k,int8_t i,double s,double *o,double *no) {
   MMG5_pTria         pt;
   MMG5_pPoint        p1,p2;
   double             b1[2],b2[2],t1[2],t2[2],n1[2],n2[2],bn[2],ux,uy,ll,li,ps;

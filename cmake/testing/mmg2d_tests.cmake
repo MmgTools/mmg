@@ -52,14 +52,20 @@ ADD_TEST(NAME mmg2d_val
   COMMAND ${EXECUT_MMG2D} -v val
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_val.o.meshb)
-
-#ADD_TEST(NAME mmg2d_default
-#  COMMAND ${EXECUT_MMG2D} -default
-#  ${MMG2D_CI_TESTS}/Circle/cercle
-#  -out ${CTEST_OUTPUT_DIR}/mmg2d_default.o.meshb)
-
-SET_PROPERTY(TEST mmg2d_val #mmg2d_default
+SET_PROPERTY(TEST mmg2d_val
   PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg2d_locParamCrea
+  COMMAND ${EXECUT_MMG2D} -v 5 -default
+  ${MMG2D_CI_TESTS}/LocParamsCrea/circle2refs.mesh)
+
+SET_TESTS_PROPERTIES ( mmg2d_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmg2d_locParamCrea )
+ADD_TEST(NAME mmg2d_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMG2D_CI_TESTS}/LocParamsCrea/circle2refs.mmg2d)
+SET_TESTS_PROPERTIES ( mmg2d_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmg2d_locParamCrea )
 
 ADD_TEST(NAME mmg2d_hsizOption
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
@@ -138,7 +144,7 @@ ADD_TEST(NAME mmg2d_locParam_ani
   -out ${CTEST_OUTPUT_DIR}/locParams-ani.o.meshb)
 
 ADD_TEST(NAME mmg2d_opnbdy_yes
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001 -d
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes.o.meshb)
 
@@ -148,10 +154,16 @@ ADD_TEST(NAME mmg2d_opnbdy_no
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-no.o.meshb)
 
 ADD_TEST(NAME mmg2d_opnbdy_ls
-  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001 -d
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
   -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-ls.o.meshb)
+
+ADD_TEST(NAME mmg2d_opnbdy_lssurf
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -lssurf 0.6
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
+  -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-lssurf.o.meshb)
 
 ADD_TEST(NAME mmg2d_opnbdy_yes_ani
   COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
@@ -289,7 +301,7 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -386,6 +398,7 @@ ADD_TEST(NAME mmg2d_SquareAniso
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   ${CTEST_OUTPUT_DIR}/mmg2d_SquareAniso-mmg2d_SquareAniso-adap1.o.meshb)
 
+# optim
 ADD_TEST(NAME mmg2d_Circle-optimAni
   COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
@@ -395,6 +408,18 @@ ADD_TEST(NAME mmg2d_Circle-hsizAni
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.01 -A -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
+
+# optim + ani + oprhan + unused point
+ADD_TEST(NAME mmg2d_Disk-optimAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
+  ${MMG2D_CI_TESTS}/Disk/disk-orphan
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optimAni.o.mesh)
+
+# optim + iso + oprhan + unused point
+ADD_TEST(NAME mmg2d_Disk-optim
+  COMMAND ${EXECUT_MMG2D} -v 5 -optim -sol 2
+  ${MMG2D_CI_TESTS}/Disk/disk-orphan
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optim.o.mesh)
 
 ###############################################################################
 #####
@@ -436,13 +461,13 @@ ADD_TEST(NAME mmg2d_NacaGeneration-hsizAni
 
 # non convex test cases
 ADD_TEST(NAME mmg2d_ACDCGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
+  COMMAND ${EXECUT_MMG2D} -v 5 -d
   ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration.o.meshb)
 
 # nsd option: keep only domain of ref 2
 ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
-  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2
+  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2 -d
   ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.meshb)
 
@@ -450,6 +475,11 @@ ADD_TEST(NAME mmg2d_GaronneGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
+
+ADD_TEST(NAME mmg2d_GaronneGeneration2
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GaronneGeneration/garonne.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration2.o.meshb)
 
 ###############################################################################
 #####
@@ -463,6 +493,30 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
   )
+
+ADD_TEST(NAME mmg2d_OptLs_Bridge
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/OptLs_bridge/bridge.sol
+  ${MMG2D_CI_TESTS}/OptLs_bridge/bridge
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_bridge.o.meshb
+  )
+
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmg2d_OptLsSurf_box
+  COMMAND ${EXECUT_MMG2D} -v 5 -lssurf
+  -sol ${MMG2D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG2D_CI_TESTS}/OptLsSurf_box/box.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLsSurf_box.o.meshb
+  )
+
+# lssurf + multimat: discretization of boundaries only
+ADD_TEST(NAME mmg2d_OptLsSurf_multiMat_box
+  COMMAND ${EXECUT_MMG2D} -v 5 -lssurf
+  -sol ${MMG2D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG2D_CI_TESTS}/OptLsSurf_box/box_multiMat.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLsSurf_multiMat_box.o.meshb
+  )
+
 #multi-mat + opnbdy + non-manifold check
 ADD_TEST(NAME mmg2d_LSMultiMat_nm
   COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
@@ -515,6 +569,19 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
 
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmg2d_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMG2D_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_LSBaseReferences-normc.o.meshb)
+
 # ls + rmc: max pile size bug
 ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
@@ -534,6 +601,26 @@ ADD_TEST(NAME mmg2d_OptLs_dom_rembub2
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub2.o.meshb)
 
+add_test(
+  NAME mmg2d_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.mesh
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh
+  )
+add_test(
+  NAME mmg2d_OptLs_isoref_5
+  COMMAND ${EXECUT_MMG2D} -v 5 -isoref 5 -ls
+  ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh-isoref5.mesh
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmg2d_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmg2d_LSMultiMat_optim
@@ -574,6 +661,23 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
 
+# ls discretisation + xreg
+ADD_TEST(NAME mmg2d_CoorRegularization_apple
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_apple.o.meshb)
+
+# ls discretisation + xreg + nr
+ADD_TEST(NAME mmg2d_CoorRegularization_appleNR
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg -nr
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_appleNR.o.meshb)
+
+# ls discretisation + xreg + nr + check of negative areas
+ADD_TEST(NAME mmg2d_CoorRegularizationNegativeArea
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg -hmax 0.1
+  ${MMG2D_CI_TESTS}/CoorRegularizationNegativeArea/CoorRegularizationNegativeArea
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationNegativeArea.o.meshb)
 
 ###############################################################################
 #####
@@ -581,7 +685,7 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
 #####
 ###############################################################################
 #####
-IF ( ELAS_FOUND )
+IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
   ADD_TEST(NAME mmg2d_LagMotion0_circle
     COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
@@ -593,7 +697,7 @@ IF ( ELAS_FOUND )
     -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion1_circle-circle.o.meshb
     )
   ADD_TEST(NAME mmg2d_LagMotion2_circle
-    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2
+    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2 -d
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
     -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-circle.o.meshb
     )
@@ -606,3 +710,44 @@ IF ( ELAS_FOUND )
     )
 
 ENDIF()
+
+###############################################################################
+#####
+#####         Check snapping (prevision of non-manifold situations)
+#####
+###############################################################################
+#####
+SET(nmRegex "unsnap at least 1 point")
+
+ADD_TEST(NAME mmg2d_LSSnapval_manifold1
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmg2d_LSSnapval_manifold2
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_manifold2.o.mesh
+  )
+
+SET_PROPERTY(TEST mmg2d_LSSnapval_manifold1 mmg2d_LSSnapval_manifold2
+  PROPERTY FAIL_REGULAR_EXPRESSION "${nmRegex}")
+
+ADD_TEST(NAME mmg2d_LSSnapval_non-manifold1
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/8elts1-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_non-manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmg2d_LSSnapval_non-manifold2
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/8elts2-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_non-manifold2.o.mesh
+  )
+SET_PROPERTY(TEST mmg2d_LSSnapval_non-manifold1 mmg2d_LSSnapval_non-manifold2
+  PROPERTY PASS_REGULAR_EXPRESSION "${nmRegex}")

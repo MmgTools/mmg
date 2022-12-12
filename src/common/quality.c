@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -45,10 +45,10 @@
  *
  */
 double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
-  double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
-  double  *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
-  int      ia,ib,ic;
-  int8_t   i;
+  double    anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
+  double    *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
+  MMG5_int  ia,ib,ic;
+  int8_t    i;
 
   ia = pt->v[0];
   ib = pt->v[1];
@@ -116,7 +116,8 @@ double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint   p[3];
   double        rap,anisurf,l0,l1,l2,m[6],mm[6],rbasis[3][3];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
-  int           np[3],i,j;
+  int           i,j;
+  MMG5_int      np[3];
   int8_t        i1,i2;
 
   for (i=0; i<3; i++) {
@@ -248,21 +249,21 @@ inline double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * Display histogram of edge length.
  *
  */
-void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
-                              int amin, int bmin, double lmin,
-                              int amax, int bmax, double lmax,
-                              int nullEdge,double *bd, int *hl,int8_t shift)
+void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG5_int ned, double *avlen,
+                              MMG5_int amin, MMG5_int bmin, double lmin,
+                              MMG5_int amax, MMG5_int bmax, double lmax,
+                              int nullEdge,double *bd, MMG5_int *hl,int8_t shift)
 {
   double dned;
 
   dned     = (double)ned;
   (*avlen) = (*avlen) / dned;
 
-  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",ned);
+  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %" MMG5_PRId "\n",ned);
   fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",(*avlen));
-  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
+  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6" MMG5_PRId " %6" MMG5_PRId "\n",
           lmin,amin,bmin);
-  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
+  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6" MMG5_PRId " %6" MMG5_PRId " \n",
           lmax,amax,bmax);
 
   MMG5_displayLengthHisto_internal( ned,amin,bmin,lmin,amax,bmax,
@@ -290,17 +291,17 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
  * Display histogram of edge length without the histo header
  *
  */
-void MMG5_displayLengthHisto_internal( int ned,int amin,
-                                       int bmin, double lmin,int amax, int bmax,
-                                       double lmax,int nullEdge,double *bd,
-                                       int *hl,int8_t shift,int imprim)
+void MMG5_displayLengthHisto_internal( MMG5_int ned,MMG5_int amin,
+                                       MMG5_int bmin, double lmin,MMG5_int amax, MMG5_int bmax,
+                                       double lmax,MMG5_int nullEdge,double *bd,
+                                       MMG5_int *hl,int8_t shift,int imprim)
 {
   int    k;
 
   if ( abs(imprim) < 3 ) return;
 
   if ( hl[2+shift]+hl[3+shift]+hl[4+shift] )
-    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8"MMG5_PRId"   %5.2f %%  \n",
             bd[2+shift],bd[5+shift],hl[2+shift]+hl[3+shift]+hl[4+shift],
             100.*(hl[2+shift]+hl[3+shift]+hl[4+shift])/(double)ned);
 
@@ -309,20 +310,20 @@ void MMG5_displayLengthHisto_internal( int ned,int amin,
   if ( abs(imprim) > 3 ) {
     fprintf(stdout,"\n     HISTOGRAMM:\n");
     if ( hl[0] )
-      fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
+      fprintf(stdout,"     0.00 < L < 0.30  %8"MMG5_PRId"   %5.2f %%  \n",
               hl[0],100.*(hl[0]/(float)ned));
     if ( lmax > 0.2 ) {
       for (k=2; k<9; k++) {
         if ( hl[k-1] > 0 )
-          fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+          fprintf(stdout,"   %6.2f < L <%5.2f  %8"MMG5_PRId"   %5.2f %%  \n",
                   bd[k-1],bd[k],hl[k-1],100.*(hl[k-1]/(float)ned));
       }
       if ( hl[8] )
-        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
+        fprintf(stdout,"     5.   < L         %8"MMG5_PRId"   %5.2f %%  \n",
                 hl[8],100.*(hl[8]/(float)ned));
     }
     if ( nullEdge )
-      fprintf(stdout,"\n     WARNING: unable to compute the length of %d"
+      fprintf(stdout,"\n     WARNING: unable to compute the length of %"MMG5_PRId
               " edges\n",nullEdge);
   }
 }
@@ -339,7 +340,7 @@ void MMG5_displayLengthHisto_internal( int ned,int amin,
  * of the mesh.
  *
  */
-int MMG5_minQualCheck ( int iel, double minqual, double alpha )
+int MMG5_minQualCheck ( MMG5_int iel, double minqual, double alpha )
 {
   double minqualAlpha;
 
@@ -347,12 +348,12 @@ int MMG5_minQualCheck ( int iel, double minqual, double alpha )
 
   if ( minqualAlpha < MMG5_NULKAL ) {
     fprintf(stderr,"\n  ## Error: %s: too bad quality for the worst element: "
-            "(elt %d -> %15e)\n",__func__,iel,minqual);
+            "(elt %" MMG5_PRId " -> %15e)\n",__func__,iel,minqual);
     return 0;
   }
   else if ( minqualAlpha < MMG5_EPSOK ) {
     fprintf(stderr,"\n  ## Warning: %s: very bad quality for the worst element: "
-            "(elt %d -> %15e)\n",__func__,iel,minqual);
+            "(elt %" MMG5_PRId " -> %15e)\n",__func__,iel,minqual);
   }
 
   return 1;

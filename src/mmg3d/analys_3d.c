@@ -33,7 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * \param mesh pointer towarad the mesh structure.
@@ -44,7 +45,7 @@
  */
 void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
-  int            k;
+  MMG5_int       k;
 
   /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
    * but that are not really required (-nosurf option) */
@@ -90,19 +91,30 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * \param mesh pointer towarad the mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
- * topology: set tria adjacency, detect Moebius, flip faces, count connected comp.
+ * topology: set tria adjacency, detect Moebius, flip faces, count connected
+ * comp.
+ *
+ * \remark: as all triangles are mesh boundaries, we do not need to mark their
+ * adges as MG_BDY so the MG_BDY tag may be used inside geometrical triangles
+ * (external non-parallel, or internal parallel) to tag edges on the
+ * intersection with purely parallel (non-geometrical) triangles.
+ * The MG_PARBDYBDY tag is also added, as it does not have a supporting triangle
+ * to inherit this tag from.
+ *
+ * \remark REQ, NOSURF, etc... tags are added only inside xtetra.
+ * \remark In openbdy mode, all non-manifold edges are marked as opnbdy.
  *
  */
 int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nm,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
 
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -144,9 +156,13 @@ int MMG5_setadj(MMG5_pMesh mesh){
         }
 
         /* open boundary */
-        tag = MG_GEO;
+        tag = 0;
         if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
+          /* Mark non-manifold edges and open-boundary ones: note that in open
+           * boundary mode, all non-manifold edges are marked as open (because
+           * at least one of the triangles that shares the edge has no
+           * adjacent). */
           tag += MG_NOM;
           pt->tag[i] |= tag;
           mesh->point[ip1].tag |= tag;
@@ -169,7 +185,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        if ( MMG5_abs(pt1->ref) != MMG5_abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
@@ -186,6 +202,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
         ii1 = MMG5_inxt2[ii];
         ii2 = MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
+          assert ( pt1->base );
           /* Moebius strip */
           if ( pt1->base < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: Triangle orientation problem (1):"
@@ -252,7 +269,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
   }
 
   /* bilan */
-  nr = nre = nreq = nt = 0;
+  nr = nm = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -264,6 +281,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
+        if ( pt->tag[i] & MG_NOM )  nm++;
         if ( pt->tag[i] & MG_REF )  nre++;
         if ( pt->tag[i] & MG_REQ )  nreq++;
       }
@@ -271,15 +289,16 @@ int MMG5_setadj(MMG5_pMesh mesh){
   }
 
   if ( mesh->info.ddebug ) {
-    fprintf(stdout,"  a- ridges: %d found.\n",nr);
-    fprintf(stdout,"  a- requir: %d found.\n",nreq);
-    fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
-    fprintf(stdout,"  a- orient: %d flipped\n",nf);
+    fprintf(stdout,"  a- ridges: %" MMG5_PRId " found.\n",nr);
+    fprintf(stdout,"  a- nm    : %" MMG5_PRId " found.\n",nm);
+    fprintf(stdout,"  a- requir: %" MMG5_PRId " found.\n",nreq);
+    fprintf(stdout,"  a- connex: %" MMG5_PRId " connected component(s)\n",ncc);
+    fprintf(stdout,"  a- orient: %" MMG5_PRId " flipped\n",nf);
   }
   else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
-    fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+    fprintf(stdout,"     Connected component: %" MMG5_PRId ",  genus: %" MMG5_PRId ",   reoriented: %" MMG5_PRId "\n",ncc,gen,nf);
+    fprintf(stdout,"     Edges: %" MMG5_PRId ",  tagged: %" MMG5_PRId ",  ridges: %" MMG5_PRId ", required: %" MMG5_PRId ", refs: %" MMG5_PRId "\n",
             ned,nr+nre+nreq,nr,nreq,nre);
   }
 
@@ -291,9 +310,75 @@ int MMG5_setadj(MMG5_pMesh mesh){
 int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
-  int          *adja,k,kk,ne,nr;
+  MMG5_int      *adja,k,kk,ne,nr,nrrm;
   int8_t        i,ii,i1,i2;
+  static int8_t warn=0;
 
+  /** Step 1: check input ridges provided by the user to remove those ones
+   * between triangles belonging to the same plane. This step has to be done
+   * prior the next one because we want to remove the MG_GEO tag transfered from
+   * ridges that we delete toward vertices by \a MMG5_setadj but we want to
+   * preserve the MG_GEO tags at vertices of ridges that will be added by the
+   * next step. */
+  nrrm = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* triangle normal */
+    MMG5_nortri(mesh,pt,n1);
+    adja = &mesh->adjt[3*(k-1)+1];
+    for (i=0; i<3; i++) {
+      if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+           (pt->tag[i] & MG_BDY) ) continue;
+
+      if ( pt->tag[i] & MG_NOM ) {
+        /* 1. We don't compute ridges along non-manifold edges because: if we
+         * choose to analyze their angle, we have to check the normal deviation
+         * during mesh adaptation (which is not done for now).
+         *
+         * 2. Do not analyze if nm edges are MG_REF ones because we can't
+         * analyze if adjacent tria have same refs due to non-consistency of
+         * adjacency building.
+         */
+        continue;
+      }
+
+      kk  = adja[i] / 3;
+      ii  = adja[i] % 3;
+
+      if ( kk && k < kk ) {
+        pt1 = &mesh->tria[kk];
+        /* check angle w. neighbor. */
+        MMG5_nortri(mesh,pt1,n2);
+        dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
+
+        if ( (pt->tag[i] & MG_GEO) || (pt1->tag[ii] & MG_GEO) ) {
+          /* Edge is provided as ridge by the user: check that it isn't at the
+           * interface of 2 triangles belonging to the same plane */
+          if ( fabs(dhd-1.) < MMG5_EPSOK ) {
+            pt->tag[i]   &= ~MG_GEO;
+            pt1->tag[ii] &= ~MG_GEO;
+            i1 = MMG5_inxt2[i];
+            i2 = MMG5_inxt2[i1];
+            mesh->point[pt->v[i1]].tag &= ~MG_GEO;
+            mesh->point[pt->v[i2]].tag &= ~MG_GEO;
+            nrrm++;
+            if ( !warn ) {
+              fprintf(stdout,"\n  ## Warning: %s: at least one ridge along flat angle.\n"
+                      "              Ridge tag will be removed from edges but vertices can"
+                      " still have tags that interfer with remeshing.\n\n",
+                      __func__);
+              warn = 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /** Step 2: check ref and angle with neighbour to update ref tags and
+   * ridge ones */
   ne = nr = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -306,19 +391,29 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
       if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
            (pt->tag[i] & MG_BDY) ) continue;
 
+      if ( pt->tag[i] & MG_NOM ) {
+        /* 1. We don't compute ridges along non-manifold edges because: if we
+         * choose to analyze their angle, we have to check the normal deviation
+         * during mesh adaptation (which is not done for now).
+         *
+         * 2. Do not analyze if nm edges are MG_REF ones because we can't
+         * analyze if adjacent tria have same refs due to non-consistency of
+         * adjacency building.
+         */
+        continue;
+      }
+
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
-      if ( !kk ) {
-        pt->tag[i] |= MG_GEO;
-        i1 = MMG5_inxt2[i];
-        i2 = MMG5_inxt2[i1];
-        mesh->point[pt->v[i1]].tag |= MG_GEO;
-        mesh->point[pt->v[i2]].tag |= MG_GEO;
-        nr++;
-      }
-      else if ( k < kk ) {
+
+      if ( kk && k < kk ) {
         pt1 = &mesh->tria[kk];
         /* reference curve */
+        /* Remark: along non-manifold edges we store only adjacency relationship
+         * between 2 surface parts (other are considered without adja). As we
+         * don't ensure consistency in the choic of the surface we cannot rely
+         * on the current test to detect ref edges. For this reason, all
+         * non-manifold edges have to be marked as reference. */
         if ( pt1->ref != pt->ref ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
@@ -328,7 +423,8 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
           mesh->point[pt->v[i2]].tag |= MG_REF;
           ne++;
         }
-        /* check angle w. neighbor */
+
+        /* check angle w. neighbor. */
         MMG5_nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
         if ( dhd <= mesh->info.dhd ) {
@@ -340,11 +436,27 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
           mesh->point[pt->v[i2]].tag |= MG_GEO;
           nr++;
         }
+        else if ( (pt->tag[i] & MG_GEO) || (pt1->tag[ii] & MG_GEO) ) {
+          /* The MG_GEO tag of a vertex at interface of a "true" ridge and a
+           * "spurious" ridge deleted at step 1 may have been removed by
+           * error */
+          pt->tag[i]   |= MG_GEO;
+          pt1->tag[ii] |= MG_GEO;
+          i1 = MMG5_inxt2[i];
+          i2 = MMG5_inxt2[i1];
+          mesh->point[pt->v[i1]].tag |= MG_GEO;
+          mesh->point[pt->v[i2]].tag |= MG_GEO;
+        }
       }
     }
   }
-  if ( abs(mesh->info.imprim) > 3 && nr > 0 )
-    fprintf(stdout,"     %d ridges, %d edges updated\n",nr,ne);
+  if ( abs(mesh->info.imprim) > 3 && nr > 0 ) {
+    fprintf(stdout,"     %" MMG5_PRId " ridges, %" MMG5_PRId " edges added\n",nr,ne);
+  }
+  if ( abs(mesh->info.imprim) > 3 && nrrm > 0 ) {
+    fprintf(stdout,"     %" MMG5_PRId " ridges removed\n",nrrm);
+  }
+
 
   return 1;
 }
@@ -360,7 +472,10 @@ int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  int           k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,i0,ier;
+  MMG5_int      k,lists[MMG3D_LMAX+2];
+  int64_t       listv[MMG3D_LMAX+2];
+  int           ilists,ilistv;
+  int           i0,ier;
   int8_t        i,j;
   static int8_t mmgWarn = 0;
 
@@ -430,7 +545,8 @@ int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  int            list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,nre;
+  int            xp,nr,ns;
   int8_t         i;
 
   nre = nc = 0;
@@ -495,20 +611,39 @@ int MMG5_singul(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
-    fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
+    fprintf(stdout,"     %" MMG5_PRId " corners, %" MMG5_PRId " singular points detected\n",nc,nre);
   return 1;
 }
 
-/** compute normals at C1 vertices, for C0: tangents */
+/**
+ * \param mesh pointer toward mesh
+ * \return 1 if successful, 0 if failed
+ *
+ * Compute normals at C1 vertices, for C0: tangents.
+ *
+ * Following list summerizes computed (and not computed) data depending on
+ * point type:
+ *  - Corner point (MG_CRN): nothing (and no xpoint);
+ *  - Reference point (MG_REF): xp, tangent (ppt->n), 1 normal (pxp->n1);
+ *  - Ridge point (MG_GEO): xp, tangent,2 normals (pxp->n1 and n2);
+ *  - Non-manifold point (MG_NOM) are not filled here but in \a nmgeom function
+ *  - Open boundary points (MG_OPNBDY) are non-manifold so they are filled in nmgeom too.
+ *  - Required points are analyzed using their other flags (so they may have an
+ * xpoint and a normal) but their normal is not used during remeshing.
+ *
+ * Normals at regular boundary points can be provided by users but are ignored
+ * along featured edges.
+ *
+ */
 int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   MMG5_xPoint    *pxp;
   double         n[3],dd;
-  int            *adja,k,kk,ng,nn,nt,nf,nnr;
+  MMG5_int       *adja,k,kk,ng,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
-  /* recomputation of normals only if mesh->xpoint has been freed */
+  /** recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: %s: no research of boundary points"
@@ -518,7 +653,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
     return 1;
   }
 
-  /* identify boundary points */
+  /** Step 1: identify boundary points */
   ++mesh->base;
   mesh->xp = 0;
   nnr      = 0;
@@ -534,7 +669,11 @@ int MMG5_norver(MMG5_pMesh mesh) {
         ppt->flag = mesh->base;
         if ( mesh->nc1 ) {
           if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 ) {
-            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
+            /** input normals are ignored along all type of featured edges (ref,
+             * geo, nom) but it is possible to implement their taking into
+             * account along non-ridges reference edges and external
+             * non-manifold ones. */
+            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || MG_EDG_OR_NOM(ppt->tag) ) {
               ++nnr;
               continue;
             }
@@ -545,13 +684,13 @@ int MMG5_norver(MMG5_pMesh mesh) {
     }
   }
 
-  /* memory to store normals for boundary points */
+  /** Step 2: Allocate memory to store normals for boundary points */
   mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
 
   MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
   MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,return 0);
 
-  /* compute normals + tangents */
+  /** Step 3: compute normals + tangents */
   nn = ng = nt = nf = 0;
   mesh->xp = 0;
   ++mesh->base;
@@ -562,9 +701,13 @@ int MMG5_norver(MMG5_pMesh mesh) {
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
 
-      /* C1 point */
+      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )
+      {
+        continue;
+      }
+
+      /** At C1 point */
       if ( !MG_EDG(ppt->tag) ) {
 
         if ( (!mesh->nc1) ||
@@ -590,13 +733,19 @@ int MMG5_norver(MMG5_pMesh mesh) {
 
       }
 
-      /* along ridge-curve */
+      /** along ridge-curve */
       i1  = MMG5_inxt2[i];
-      if ( !MG_EDG(pt->tag[i1]) )  continue;
-      else if ( !MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
+      if ( !MG_EDG(pt->tag[i1]) ) {
+        continue;
+      }
+
+      /* As we skip non-manifold point, the edge should be manifold */
+      assert ( (!(MG_NOM & pt->tag[i1])) && "Unexpected non-manifold edge" );
+      if ( !MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
         ++nf;
         continue;
       }
+
       ++mesh->xp;
       if(mesh->xp > mesh->xpmax){
         MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
@@ -607,7 +756,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
       pxp = &mesh->xpoint[ppt->xp];
       memcpy(pxp->n1,n,3*sizeof(double));
 
-      if ( pt->tag[i1] & MG_GEO && adja[i1] > 0 ) {
+      if ( (pt->tag[i1] & MG_GEO) && adja[i1] > 0 ) {
         kk = adja[i1] / 3;
         ii = adja[i1] % 3;
         ii = MMG5_inxt2[ii];
@@ -617,7 +766,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
         }
         memcpy(pxp->n2,n,3*sizeof(double));
 
-        /* compute tangent as intersection of n1 + n2 */
+        /** Along ridge: compute tangent as intersection of n1 + n2 */
         ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
         ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
         ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
@@ -657,11 +806,374 @@ int MMG5_norver(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 ) {
     if ( nnr )
-      fprintf(stdout,"     %d input normals ignored\n",nnr);
-    fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
+      fprintf(stdout,"     %" MMG5_PRId " input normals ignored\n",nnr);
+    fprintf(stdout,"     %" MMG5_PRId " normals,  %" MMG5_PRId " tangents updated  (%" MMG5_PRId " failed)\n",nn,nt,nf);
   }
   return 1;
 }
+
+/**
+ * \param mesh pointer towards the mesh
+ * \param pt pointer towards current triangle
+ * \param k number of current point
+ * \param c newly computed coordinates (giving negative area)
+* \param n normal of triangle before regularization
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative area of a triangle
+ *
+ */
+static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c, double *n) {
+
+  MMG5_pPoint  ppt;
+  double       to,tp,t,nnew[3],p[3],o[3],result;
+  int          it,maxit,pos,ier;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    ier = MMG5_nortri(mesh, pt, nnew);
+    MMG5_dotprod(3,n,nnew,&result);
+
+    if ( result <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
+ * \param mesh pointer towards the mesh
+ * \param v list of vertices of current tetrahedron
+ * \param k number of current point
+ * \param c input : newly computed coordinates (giving negative area), output : coordinates after dichotomy
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative volume
+ *
+ */
+static inline int MMG3D_dichotomytetra(MMG5_pMesh mesh, MMG5_int *v, MMG5_int k, double *c) {
+
+  MMG5_pPoint  ppt;
+  double       p[3],o[3],vol,to,tp,t;
+  int          it,maxit,pos;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    vol = MMG5_orvol(mesh->point,v);
+
+    if ( vol <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
+ * \param mesh pointer toward a MMG5 mesh structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Regularization procedure for vertices coordinates, dual Laplacian in 3D
+ *
+ */
+int MMG3D_regver(MMG5_pMesh mesh) {
+  MMG5_pTria    pt;
+  MMG5_pTetra   ptet;
+  MMG5_pPoint   ppt,p0;
+  MMG5_Tria     tnew;
+  double        *tabl,c[3],n[3],nnew[3],*cptr,lm1,lm2,cx,cy,cz,res0,res,result;
+  int           i,ii,it,nit,ilist,noupdate,ier;
+  MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,iad,v[4];
+  int64_t       tetlist[MMG5_LMAX];
+
+  /* assign seed to vertex */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      if ( !ppt->s )  ppt->s = k;
+    }
+  }
+
+   for (k=1; k<=mesh->np; k++) {
+     ppt = &mesh->point[k];
+     ppt->flag = 0;
+  }
+
+  for (k=1; k<=mesh->ne; k++) {
+    ptet = &mesh->tetra[k];
+    if ( !MG_EOK(ptet) )  continue;
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ptet->v[i]];
+      if ( !ppt->flag )  ppt->flag = k;
+    }
+  }
+
+  /* allocate memory for coordinates */
+  MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
+
+  /* Pointer toward the suitable adjacency array for Mmgs and Mmg3d */
+  adja = mesh->adjt;
+
+  it   = 0;
+  nit  = 10;
+  res0 = 0.0;
+  lm1  = 0.4;
+  lm2  = 0.399;
+  while ( it++ < nit ) {
+    /* step 1: laplacian */
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+
+      iad = 3*(k-1)+1;
+      tabl[iad+0] = ppt->c[0];
+      tabl[iad+1] = ppt->c[1];
+      tabl[iad+2] = ppt->c[2];
+      if ( !MG_VOK(ppt) )  continue;
+      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+
+      iel = ppt->s;
+      if ( !iel ) continue; // Mmg3d
+
+      pt = &mesh->tria[iel];
+      i  = 0;
+      if ( pt->v[1] == k )  i = 1;
+      else if ( pt->v[2] == k ) i = 2;
+
+      ilist = MMG5_boulep(mesh,iel,i,adja,list,tlist);
+
+      /* average coordinates */
+      cx = cy = cz = 0.0;
+      for (i=1; i<=ilist; i++) {
+        p0  = &mesh->point[list[i]];
+
+        cptr = p0->c;
+        cx += cptr[0];
+        cy += cptr[1];
+        cz += cptr[2];
+      }
+      cx /= ilist;
+      cy /= ilist;
+      cz /= ilist;
+
+      /* Laplacian */
+      cptr = ppt->c;
+      tabl[iad+0] = cptr[0] + lm1 * (cx - cptr[0]);
+      tabl[iad+1] = cptr[1] + lm1 * (cy - cptr[1]);
+      tabl[iad+2] = cptr[2] + lm1 * (cz - cptr[2]);
+    }
+
+    /* step 2: anti-laplacian */
+    res = 0;
+    nn  = 0;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+
+      if ( !MG_VOK(ppt) )  continue;
+      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+
+      iel = ppt->s;
+      if ( !iel ) continue; // Mmg3d
+
+      pt = &mesh->tria[iel];
+      i = 0;
+      if ( pt->v[1] == k )  i = 1;
+      else if ( pt->v[2] == k ) i = 2;
+
+      ilist = MMG5_boulep(mesh,iel,i,adja,list,tlist);
+
+      /* average normal */
+      cx = cy = cz = 0.0;
+      for (i=1; i<=ilist; i++) {
+        iad = 3*(list[i]-1) + 1;
+        cx += tabl[iad+0];
+        cy += tabl[iad+1];
+        cz += tabl[iad+2];
+      }
+      cx /= ilist;
+      cy /= ilist;
+      cz /= ilist;
+
+      /* antiLaplacian */
+      iad = 3*(k-1)+1;
+      c[0] = tabl[iad+0] - lm2 * (cx - tabl[iad+0]);
+      c[1] = tabl[iad+1] - lm2 * (cy - tabl[iad+1]);
+      c[2] = tabl[iad+2] - lm2 * (cz - tabl[iad+2]);
+
+      cptr = ppt->c;
+
+      mesh->point[0].c[0] = c[0];
+      mesh->point[0].c[1] = c[1];
+      mesh->point[0].c[2] = c[2];
+
+      /* check for negative areas */
+      noupdate = 0;
+      for (kt = 0 ; kt<ilist ; kt++) {
+        pt = &mesh->tria[tlist[kt]];
+
+        if ( !MG_EOK(pt) ) continue;
+
+        ier = MMG5_nortri(mesh, pt, n);
+
+        for (i=0;i<3;i++) {
+          tnew.v[i] = pt->v[i];
+        }
+
+        i = 0;
+        if ( pt->v[1] == k ) i = 1;
+        if ( pt->v[2] == k ) i = 2;
+
+        tnew.v[i] = 0;
+
+        ier = MMG5_nortri(mesh, &tnew, nnew);
+        MMG5_dotprod(3,n,nnew,&result);
+        if ( result < 0.0 ) {
+          if (!MMG3D_dichotomytria(mesh,&tnew,k,c,n))
+            noupdate = 1;
+          continue;
+        }
+      }
+
+      /* check for negative volumes */
+      if ( !noupdate ) {
+        iel = ppt->flag;
+        ptet = &mesh->tetra[iel];
+
+        if ( !MG_EOK(ptet) ) continue;
+
+        i = 0;
+        if ( ptet->v[1] == k )  i = 1;
+        else if ( ptet->v[2] == k ) i = 2;
+        else if ( ptet->v[3] == k ) i = 3;
+        ilist = MMG5_boulevolp(mesh, iel, i, tetlist);
+
+        for( kt=0 ; kt<ilist ; kt++ ) {
+          iel = tetlist[kt] / 4;
+          i   = tetlist[kt] % 4;
+          ptet = &mesh->tetra[iel];
+
+          for ( ii=0 ; ii<4 ; ii++ ) {
+            v[ii] = ptet->v[ii];
+          }
+          v[i] = 0;
+          result = MMG5_orvol(mesh->point,v);
+
+          if ( result <= 0.0 ) {
+            if (!MMG3D_dichotomytetra(mesh,v,k,c))
+              noupdate = 1;
+            continue;
+          }
+        }
+      }
+      if ( !noupdate ) {
+        res += (cptr[0]-c[0])*(cptr[0]-c[0]) + (cptr[1]-c[1])*(cptr[1]-c[1]) + (cptr[2]-c[2])*(cptr[2]-c[2]);
+        cptr[0] = c[0];
+        cptr[1] = c[1];
+        cptr[2] = c[2];
+        nn++;
+      }
+    }
+      if ( it == 1 )  res0 = res;
+      if ( res0 > MMG5_EPSD )  res  = res / res0;
+      if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
+        fprintf(stdout,"     iter %5d  res %.3E\r",it,res);
+        fflush(stdout);
+      }
+      if ( it > 1 && res < MMG5_EPS )  break;
+    }
+  /* reset the ppt->s and ppt->flag tags */
+  for (k=1; k<=mesh->np; ++k) {
+    mesh->point[k].s    = 0;
+    mesh->point[k].flag = 0;
+  }
+
+  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
+
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     %" MMG5_PRId " coordinates regularized: %.3e\n",nn,res);
+
+  MMG5_SAFE_FREE(tabl);
+  return 1;
+}
+
 
 /**
  * \param mesh pointer toward the mesh
@@ -671,13 +1183,24 @@ int MMG5_norver(MMG5_pMesh mesh) {
  * Define continuous geometric support at non manifold vertices, using volume
  * information.
  *
+ * Following list summerizes computed data depending on point type:
+ *  - Non-manifold external point along connex mesh part (MG_NOM): xp, tangent, normal n1, nnor=0
+ *  - Non-manifold external point along edge or point connected mesh part (MG_NOM): no xp,no tangent,no normal,nnor=0
+ *  - Non-manifold not required internal point (MG_NOM+MG_REQ): xp, tangent, no normal, nnor=1.
+ *  - Non-manifold required internal point (MG_NOM+MG_REQ): no xp, no tangent, no normal, nnor=1.
+ *  - Non-manifold open-boundary (MG_OPNBDY) edges are treated like others:
+ *    - if we are along a "truly" open boundary, it is an internal nm edge so
+ * we don't have any normal;
+ *    - if the edge is marked as open while being only non-manifold, we may
+ * compute a normal (along an external boundary) or not (along an internal one).
+ *  - We don't compute anything along corner points.
  */
 int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
-  int             k,base;
-  int             *adja;
+  MMG5_int        k;
+  MMG5_int        *adja,base;
   double          n[3],t[3];
   int8_t          i,j,ip,ier;
 
@@ -692,7 +1215,9 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
         ip = MMG5_idir[i][j];
         p0 = &mesh->point[pt->v[ip]];
         if ( p0->flag == base )  continue;
-        else if ( !(p0->tag & MG_NOM) || (p0->tag & MG_PARBDY) )  continue;
+        else if ( (!(p0->tag & MG_NOM)) || (p0->tag & MG_PARBDY) ) {
+          continue;
+        }
 
         p0->flag = base;
         ier = MMG5_boulenm(mesh,k,ip,i,n,t);
@@ -726,11 +1251,21 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
     if( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) ||
-           p0->xp || (p0->tag & MG_PARBDY) ) continue;
+      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) || p0->xp || (p0->tag & MG_PARBDY) ) {
+        /* CRN points are skipped because we skip REQ points.
+         * For connex meshes it is possible
+         * to compute the tangent at required points but it is not if the mesh
+         * contains some edge or point-connections: all points along such a feature line are marked
+         * as required by the previous loop because \ref MMB5_boulnm fails, thus we pass here
+         * even if the line belongs to a surface. Then \ref MMG5_boulenmInt fails too and
+         * we end up without normals and tangents. For sake of simplicity and because normals
+         * and tangents at required points are not used for remahsing, we choose to skip all
+         * internal REQ points. */
+        continue;
+      }
       ier = MMG5_boulenmInt(mesh,k,i,t);
       if ( ier ) {
         ++mesh->xp;
@@ -762,11 +1297,34 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   return 1;
 }
 
-/** preprocessing stage: mesh analysis */
+/**
+ * \param mesh pointer toward mesh
+ * \return 1 if successful, 0 if fail
+ *
+ * preprocessing stage: mesh analysis.
+ *
+ * At the end of this function:
+ *   1. triangles have been deleted and stored in xtetra;
+ *   2. Boundary point have been analyzed and associated to xpoints (if needed).
+ *      If computed tangent is stored in ppt->n and normals in pxp->n1 and pxp->n2.
+ *      Following list summerizes computed (and not computed) data depending on
+ *      point type:
+ *         - Corner point (MG_CRN): no computation (and no xpoint);
+ *         - Required points have different treatment depending if they are along
+ * a 'regular' surf point, along an internal or external non-manifold edge, along
+ * a non connex mesh part(so they may have a xpoint, a tangent and a normal or not)
+ * but their normal is not used during remeshing. See comments in \ref MMG3D_nmgeom
+ *         - Reference point (MG_REF): xpoint, tangent, 1 normal;
+ *         - Ridge point (MG_GEO): xp, tangent,2 normals;
+ *         - Non-manifold point (MG_NOM): xp, tangent, no normal if internal,
+ *           1 normal if external
+ *         - Open boundary points (MG_OPNBDY) are treated as nm points.
+ *
+ */
 int MMG3D_analys(MMG5_pMesh mesh) {
   MMG5_Hash hash;
   int       ier;
-
+  
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** SURFACE ANALYSIS\n");
@@ -830,7 +1388,8 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  /* identify connexity and flip orientation of faces if needed */
+  /* identify connexity, flip orientation of faces if needed and transfer
+   * triangle edge tags toward vertices. */
   if ( !MMG5_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     MMG5_DEL_MEM(mesh,hash.item);
@@ -853,6 +1412,12 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n");
+
+  /* regularize vertices coordinates*/
+  if ( mesh->info.xreg && !MMG3D_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+    return 0;
+  }
 
   /* define (and regularize) normals */
   if ( !MMG5_norver(mesh) ) {
@@ -908,7 +1473,7 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
 #ifdef USE_POINTMAP
   /* Initialize source point with input index */
-  int ip;
+  MMG5_int ip;
   for( ip = 1; ip <= mesh->np; ip++ )
     mesh->point[ip].src = ip;
 #endif

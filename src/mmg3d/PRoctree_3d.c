@@ -34,7 +34,9 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmgtypes.h"
+#include "mmgcommon_private.h"
+#include "PRoctree_3d_private.h"
 #include <stdio.h>
 
 /**
@@ -62,7 +64,7 @@ void MMG3D_initPROctree_s( MMG3D_PROctree_s* q)
  */
 int MMG3D_initPROctree(MMG5_pMesh mesh,MMG3D_pPROctree* q, int nv)
 {
-  int i;
+  MMG5_int i;
 
   MMG5_ADD_MEM(mesh,sizeof(MMG3D_PROctree),"PROctree structure",
                 return 0);
@@ -220,11 +222,11 @@ int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
  * into the PROctree. (ie: one move at a time in the mesh and the PROctree)
  *
  */
-int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, int no, double* newVer, double* oldVer)
+int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, MMG5_int no, double* newVer, double* oldVer)
 {
   int64_t oldCoor, newCoor;
-  double pt[3];
-  int dim;
+  double  pt[3];
+  int     dim;
 
   dim = mesh->dim;
 
@@ -646,7 +648,7 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
  *
  */
 int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
-                         const int no, int nv)
+                         const MMG5_int no, int nv)
 {
   double   pt[3],quadrant;
   int      dim, nbBitsInt,depthMax,i,j,k;
@@ -665,16 +667,16 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
 
       if(q->nbVer == 0)  // first vertex list allocation
       {
-        MMG5_ADD_MEM(mesh,sizeof(int),"PROctree vertice table", return 0);
-        MMG5_SAFE_MALLOC(q->v,1,int,return 0);
+        MMG5_ADD_MEM(mesh,sizeof(MMG5_int),"PROctree vertice table", return 0);
+        MMG5_SAFE_MALLOC(q->v,1,MMG5_int,return 0);
       }
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> reallocation of the vertex list
       {
         sizeRealloc = q->nbVer;
         sizeRealloc<<=1;
-        MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"PROctree realloc",
+        MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(MMG5_int),"PROctree realloc",
                       return 0);
-        MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"PROctree",return 0);
+        MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,MMG5_int,"PROctree",return 0);
       }
 
       q->v[q->nbVer] = no;
@@ -735,24 +737,24 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
     {
       if(q->nbVer == 0) // first allocation
       {
-        MMG5_ADD_MEM(mesh,sizeof(int),"PROctree vertices table",
+        MMG5_ADD_MEM(mesh,sizeof(MMG5_int),"PROctree vertices table",
                       return 0);
-        MMG5_SAFE_MALLOC(q->v,1,int,return 0);
+        MMG5_SAFE_MALLOC(q->v,1,MMG5_int,return 0);
       }
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> normal reallocation
       {
         sizeRealloc = q->nbVer;
         sizeRealloc <<= 1;
-        MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"PROctree realloc",
+        MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(MMG5_int),"PROctree realloc",
                       return 0);
-        MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"PROctree",return 0);
+        MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,MMG5_int,"PROctree",return 0);
       }
     }
     else if (q->nbVer%nv == 0) // special reallocation of the vertex list because it is at maximum depth
     {
-      MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree realloc",
+      MMG5_ADD_MEM(mesh,nv*sizeof(MMG5_int),"PROctree realloc",
                     return 0);
-      MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,int,"PROctree",return 0);
+      MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,MMG5_int,"PROctree",return 0);
     }
 
     q->v[q->nbVer] = no;
@@ -770,10 +772,10 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
  * Add the vertex of index \a no to the PROctree.
  *
  */
-int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no)
+int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const MMG5_int no)
 {
-  double pt[3];
-  int    dim;
+  double    pt[3];
+  int       dim;
 
   dim = mesh->dim;
   assert(no<=mesh->np);
@@ -795,23 +797,23 @@ int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no)
  * the cells if necessary.
  *
  */
-int MMG3D_delPROctreeVertex(MMG5_pMesh mesh, MMG3D_PROctree_s* q, int indNo)
+int MMG3D_delPROctreeVertex(MMG5_pMesh mesh, MMG3D_PROctree_s* q, MMG5_int indNo)
 {
+  MMG5_int* vTemp;
   int i;
-  int* vTemp;
 
   assert(q->v);
   assert(q->nbVer>indNo);
   for(i=0; i<q->nbVer; ++i)
     assert(q->v[i]>0);
-  memmove(&q->v[indNo],&q->v[indNo+1], (q->nbVer-indNo-1)*sizeof(int));
+  memmove(&q->v[indNo],&q->v[indNo+1], (q->nbVer-indNo-1)*sizeof(MMG5_int));
   --(q->nbVer);
   if (!(q->nbVer & (q->nbVer - 1)) && q->nbVer > 0) // is a power of 2
   {
-    MMG5_ADD_MEM(mesh,q->nbVer*sizeof(int),"PROctree index",
+    MMG5_ADD_MEM(mesh,q->nbVer*sizeof(MMG5_int),"PROctree index",
                   return 0);
-    MMG5_SAFE_MALLOC(vTemp,q->nbVer,int,return 0);
-    memcpy(vTemp, q->v,q->nbVer*sizeof(int));
+    MMG5_SAFE_MALLOC(vTemp,q->nbVer,MMG5_int,return 0);
+    memcpy(vTemp, q->v,q->nbVer*sizeof(MMG5_int));
     MMG5_DEL_MEM(mesh,q->v);
 
     q->v = vTemp;
@@ -839,7 +841,7 @@ void MMG3D_mergeBranchesRec(MMG3D_PROctree_s* q0, MMG3D_PROctree_s* q, int dim, 
 
     assert(*index+q->nbVer<=nv);
 
-    memcpy(&(q0->v[*index]), q->v, q->nbVer*sizeof(int));
+    memcpy(&(q0->v[*index]), q->v, q->nbVer*sizeof(MMG5_int));
     (*index)+= q->nbVer;
     for(i = 0; i<(*index); ++i)
       assert(q0->v[i]>0);
@@ -891,7 +893,7 @@ void MMG3D_mergeBranches(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int dim, int nv)
  * quadrant is the [0;1]x[0;1]x[0;1] box.
  *
  */
-int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, const int no, const int nv)
+int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, const MMG5_int no, const int nv)
 {
   double quadrant;
   int i;
@@ -932,9 +934,9 @@ int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, cons
 
     if (nbVerTemp > q->branches[(int)quadrant].nbVer)
     {
-      MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree vertices table",
+      MMG5_ADD_MEM(mesh,nv*sizeof(MMG5_int),"PROctree vertices table",
                     return 0);
-      MMG5_SAFE_MALLOC(q->v,nv,int,return 0);
+      MMG5_SAFE_MALLOC(q->v,nv,MMG5_int,return 0);
       MMG3D_mergeBranches(mesh,q,dim,nv);
     }else
     {
@@ -1095,7 +1097,7 @@ void MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
     nVer |= nVer >> 16;
     nVer++;
     nVer = (nVer < nv) ? nVer : (int)(((q->nbVer-0.1)/nv+1)*nv);
-    (*s2) += nVer*sizeof(int);
+    (*s2) += nVer*sizeof(MMG5_int);
     (*s1) += sizeof(MMG3D_PROctree_s);
   }else
   {
@@ -1129,6 +1131,7 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
  * \param sol pointer toward the solution structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param ip index of point to check.
+ * \param lmax threshold to check minimal distance between points.
  *
  * \return 1 if we can insert \a ip, 0 if we cannot insert the point
  * \return -1 if fail because of memory.
@@ -1137,13 +1140,14 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
  * metric).
  *
  */
-int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,int ip,double lmax) {
-  MMG5_pPoint     ppt,pp1;
+int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,MMG5_int ip,double lmax) {
+  MMG5_pPoint      ppt,pp1;
   MMG3D_PROctree_s **lococ;
-  double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
-  int             ip1,i,j;
-  int             ncells;
-  double          ani[6];
+  double           d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
+  int              i,j;
+  MMG5_int         ip1;
+  int              ncells;
+  double           ani[6];
   //double          dmax;
 
   ani[0] = sol->m[ip];
@@ -1209,6 +1213,7 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
  * \param sol pointer toward the solution structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param ip index of point to check.
+ * \param lmax threshold to check minimal distance between points.
  *
  * \return 1 if we can insert \a ip, 0 otherwise
  * \return -1 if fail due to lack of memory.
@@ -1217,13 +1222,14 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
  * anisotropic metric).
  *
  */
-int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,int ip,double lmax) {
-  MMG5_pPoint     ppt,pp1;
+int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,MMG5_int ip,double lmax) {
+  MMG5_pPoint      ppt,pp1;
   MMG3D_PROctree_s **lococ;
-  double          d2,ux,uy,uz,methalo[6];
-  double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
-  int             iadr,ip1,i,j;
-  int             ncells;
+  double           d2,ux,uy,uz,methalo[6];
+  double           det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
+  int              i,j;
+  MMG5_int         ip1,iadr;
+  int              ncells;
   // double          dmax;
 
   lococ = NULL;

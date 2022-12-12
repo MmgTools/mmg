@@ -31,7 +31,7 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \note Please, refer to the \ref mmg2d/libmmg2d.h file for functions
+ * \note Please, refer to the \ref mmg2d/liblibmmg2d_private.h file for functions
  * documentation.
  *
  * Define the private Fortran API functions for MMG2D library
@@ -42,10 +42,10 @@
  */
 
 #include "libmmg2d.h"
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
- * See \ref MMG2D_mmg2dlib function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_mmg2dlib function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
                                             ,int* retval),(mesh,met
@@ -56,7 +56,7 @@ FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
   return;
 }
 /**
- * See \ref MMG2D_mmg2dmesh function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_mmg2dmesh function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
                                               ,int* retval),(mesh,met
@@ -67,7 +67,7 @@ FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
   return;
 }
 /**
- * See \ref MMG2D_mmg2dls function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_mmg2dls function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
                                           MMG5_pSol *met,int* retval),
@@ -83,7 +83,7 @@ FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
   return;
 }
 /**
- * See \ref MMG2D_mmg2dmov function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_mmg2dmov function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DMOV,mmg2d_mmg2dmov,(MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *disp
                                             ,int* retval),(mesh,met,disp

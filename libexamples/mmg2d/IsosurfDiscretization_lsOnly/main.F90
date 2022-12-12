@@ -33,7 +33,6 @@
 !>
 
 PROGRAM main
-
   IMPLICIT NONE
 
 !> Include here the mmg2d library hader file
@@ -47,6 +46,8 @@ PROGRAM main
   MMG5_DATA_PTR_T    :: mmgLs
   INTEGER            :: ier,argc
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
+  !> to cast integers into MMG5F_INT integers
+  INTEGER,PARAMETER :: immg = MMG5F_INT
 
   WRITE(*,*) "  -- TEST MMG2DLIB"
 
@@ -82,7 +83,11 @@ PROGRAM main
   !!------------------- Level set discretization option ---------------------
   ! Ask for level set discretization: note that it is important to do this step
   ! here because in iso mode, some filters are applied at mesh loading
-  CALL MMG2D_Set_iparameter(mmgMesh,mmgLs,MMG2D_IPARAM_iso, 1,ier)
+  !
+  ! Remark: 1_immg cast 1 into a MMG5F_INT size integer. It is needed because
+  ! fortran doesn't allow to pass integer(4) to integer(8) argument
+  CALL MMG2D_Set_iparameter(mmgMesh,mmgLs,MMG2D_IPARAM_iso, 1_immg,ier)
+
   IF ( ier == 0 )  CALL EXIT(101)
 
   !> 2) Build mesh in MMG5 format
