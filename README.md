@@ -32,13 +32,13 @@
 [master-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=alert_status
 [master-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Amaster
 
-[master-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=vulnerabilities
-[master-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=vulnerabilities
+[master-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=reliability_rating
+[master-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=reliability
 
-[master-coverage]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
+[master-coverage]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=coverage
 [master-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=coverage
 
-[master-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplicated_lines_density
+[master-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=duplicated_lines_density
 [master-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=duplications
 
 
@@ -48,8 +48,8 @@
 [dev-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=alert_status
 [dev-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Adevelop
 
-[dev-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities
-[dev-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities
+[dev-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=reliability_rating
+[dev-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=reliability
 
 [dev-coverage]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
 [dev-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
