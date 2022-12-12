@@ -109,11 +109,14 @@ static int MMG5_InvMat_check(MMG5_pInvMat pim,int key) {
  * lookup table.
  */
 static void MMG5_InvMat_error(MMG5_pInvMat pim,int ref,int k) {
-  fprintf(stderr,"\n   ## Error: Trying to overwrite material reference %d"
+  fprintf(stderr,"\n   ## Warning: Overwrite material reference %d"
     " (from LSReferences line %d) with another entry from LSReferences line %d."
     ,ref,MMG5_InvMat_getIndex(pim,ref)+1,k+1);
-  fprintf(stderr,"\n             Check your LSReferences table: each material"
-    " reference should be unique!\n");
+  fprintf(stderr,"\n               Check your LSReferences table: if possible,"
+          " each material reference should be unique,\n"
+          "                if not possible, you may"
+          " encounter unexpected issues (wrong domain mapping or erroneous"
+          " detection of non-manifold level-set)!\n");
 }
 
 /**
@@ -132,12 +135,10 @@ static int MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
 
   /** Store the dosplit attribute of the parent material */
   key = MMG5_InvMat_key(pim,pm->ref);
-  if( MMG5_InvMat_check(pim,key) ) {
-    pim->lookup[key] = MMG5_InvMat_code(k,pm->dospl);
-  } else {
+  if( !MMG5_InvMat_check(pim,key) ) {
     MMG5_InvMat_error(pim,pm->ref,k);
-    return 0;
   }
+  pim->lookup[key] = MMG5_InvMat_code(k,pm->dospl);
 
   /** Store the child material sign with the parent material index (in the
    *  lookup table).
@@ -148,19 +149,16 @@ static int MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
    *     and this must have already been checked. */
   if( pm->dospl ) {
     key = MMG5_InvMat_key(pim,pm->rin);
-    if( MMG5_InvMat_check(pim,key) ) {
-      pim->lookup[key] = MMG5_InvMat_code(k,MG_MINUS);
-    } else {
+    if( !MMG5_InvMat_check(pim,key) ) {
       MMG5_InvMat_error(pim,pm->rin,k);
-      return 0;
     }
+    pim->lookup[key] = MMG5_InvMat_code(k,MG_MINUS);
+
     key = MMG5_InvMat_key(pim,pm->rex);
-    if( MMG5_InvMat_check(pim,key) ) {
-      pim->lookup[key] = MMG5_InvMat_code(k,MG_PLUS);
-    } else {
+    if( !MMG5_InvMat_check(pim,key) ) {
       MMG5_InvMat_error(pim,pm->rex,k);
-      return 0;
     }
+    pim->lookup[key] = MMG5_InvMat_code(k,MG_PLUS);
   }
 
   return 1;
