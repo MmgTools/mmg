@@ -390,7 +390,8 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
          * projections may fail but I think that it is not a normal behaviour:
          * it means that the surface approximation has degenerated. See issue #167
          */
-        assert ( ps > 0. || ps2 > 0. && "Unexpected case");
+        assert ( ps > 0. || ps2 > 0. &&
+                 "Negative projection of normal at tria onto normal at point: surface degeneracy");
 
         /* As previous assert may fail in some cases, deal with both cases */
         if ( (ps > 0.) || (ps2 >0.) ) {
