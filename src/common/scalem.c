@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -44,7 +45,7 @@
  */
 int MMG5_boundingBox(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
-  int            k,i;
+  MMG5_int       k,i;
   double         dd;
 
   /* compute bounding box */
@@ -107,10 +108,93 @@ void MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if succeed
+ *
+ * Check that hmin (resp. hmax) is not user setted if it is negative.
+ *
+ */
+int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
+
+  if ( mesh->info.hmin < 0 ) {
+    if ( mesh->info.sethmin ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmin).\n",__func__);
+      return 0;
+    }
+  }
+
+  if ( mesh->info.hmax < 0 ) {
+    if ( mesh->info.sethmax ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmax).\n",__func__);
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+/**
+ * \param met pointer toward metric.
+ * \param ip pointer toward global index of point on which metric has to be truncated
+ * \param isqhmin inverse square of hmin (min edge size)
+ * \param isqhmax inverse square of hmax (max edge size)
+ *
+ * \return 0 if fail, 1 if succeed
+ *
+ * Truncation of anisotropic metric at point \a ip by \a hmin and \a hmax.
+ *
+ */
+int MMG5_truncate_met3d(MMG5_pSol met, MMG5_int ip, double isqhmin, double isqhmax) {
+  double        v[3][3],lambda[3],*m;
+  int           i;
+  static int8_t mmgWarn = 0;
+
+  m = &met->m[(MMG5_int)met->size*ip];
+
+  if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+              " 1 metric.\n",__func__);
+      mmgWarn = 1;
+    }
+    return 0;
+  }
+
+  for (i=0; i<3; i++) {
+    if(lambda[i]<=0) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
+                "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                lambda[1],lambda[2]);
+        mmgWarn = 1;
+      }
+      return 0;
+    }
+    lambda[i]=MG_MIN(isqhmin,lambda[i]);
+    lambda[i]=MG_MAX(isqhmax,lambda[i]);
+  }
+
+  m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
+    + v[2][0]*v[2][0]*lambda[2];
+  m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
+    + v[2][0]*v[2][1]*lambda[2];
+  m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
+    + v[2][0]*v[2][2]*lambda[2];
+  m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
+    + v[2][1]*v[2][1]*lambda[2];
+  m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
+    + v[2][1]*v[2][2]*lambda[2];
+  m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
+    + v[2][2]*v[2][2]*lambda[2];
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param dd scaling value.
- * \param sethmin 1 if hmin must not be automatically computed
- * \param sethmax 1 if hmin must not be automatically computed
  *
  * \return 1 if success, 0 if fail.
  *
@@ -119,13 +203,29 @@ void MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax) {
  * metric.
  *
  */
-int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
-                            int8_t sethmin, int8_t sethmax) {
-  int    k;
+int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
+  MMG5_int      k;
+  int           ier;
   static int8_t mmgWarn0 = 0;
 
+  ++mesh->base;
+
+#ifndef NDEBUG
+  for (k=1; k<=mesh->np; k++) {
+    assert ( mesh->point[k].flag < mesh->base );
+  }
+#endif
+
   for (k=1; k<=mesh->np; k++)  {
-    if( !MG_VOK( &mesh->point[k] ) ) continue;
+
+    if( !MG_VOK( &mesh->point[k] ) ) {
+      continue;
+    }
+
+    /* Set point flag to base so MMG5_solTruncature function will use its
+     * data to compute the hmin/hmax values if not provided by the user. */
+    mesh->point[k].flag = mesh->base;
+
     /* Check the metric */
     if ( met->m[k] <= 0 ) {
       if ( !mmgWarn0 ) {
@@ -139,29 +239,310 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
     met->m[k] *= dd;
   }
 
-  /* compute hmin and hmax parameters if not provided by the user */
-  if ( !sethmin ) {
-    mesh->info.hmin = FLT_MAX;
-    for (k=1; k<=mesh->np; k++)  {
-      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+  ier = MMG5_solTruncature_iso(mesh, met);
+
+  return ier;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param dd scaling value.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Scale and truncate by hmin/hmax the scalar metric stored in met.  If
+ * hmin/hmax are not provided by the user, it is automatically computed from the
+ * metric.
+ *
+ */
+int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
+  MMG5_int    k,iadr;
+  int         i,ier;
+
+  dd = 1.0 / (dd*dd);
+
+  ++mesh->base;
+
+  for (k=1; k<=mesh->np; k++)  {
+
+    if( !MG_VOK( &mesh->point[k] ) ) {
+      continue;
+    }
+
+    /* Set point flag to base so MMG5_solTruncature function will use its
+     * data to compute the hmin/hmax values if not provided by the user. */
+    mesh->point[k].flag = mesh->base;
+
+    iadr = k*met->size;
+    for (i=0; i<met->size; i++) {
+      met->m[iadr+i] *= dd;
     }
   }
-  if ( !sethmax ) {
-    mesh->info.hmax = 0.;
+
+  ier = MMG5_solTruncature_ani(mesh, met);
+
+  return ier;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Compute hmin and hmax values from unflagged points (if not setted by the
+ * user), check the values and truncate the metric.
+ *
+ */
+int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  double      hmin,hmax;
+  MMG5_int    k;
+
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  hmin = FLT_MAX;
+  hmax = 0.;
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
-      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      ppt = &mesh->point[k];
+      if ( (!MG_VOK(ppt)) || (ppt->flag < mesh->base) ) continue;
+      hmin = MG_MIN(hmin,met->m[k]);
+      hmax = MG_MAX(hmax,met->m[k]);
     }
+  }
+
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = hmin;
+  }
+
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = hmax;
+  }
+
+  MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( ppt->flag<mesh->base ) {
+      met->m[k] = mesh->info.hmax;
+    }
+    else {
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Compute hmin and hmax values from unflagged points (if not setted by the
+ * user), check the values and truncate the 2D metric.
+ *
+ */
+int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  MMG5_int    k,iadr;
+  double      isqhmin, isqhmax;
+  double      lambda[2],vp[2][2];
+
+ /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  isqhmin = 0.;
+  isqhmax = FLT_MAX;
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( (!MG_VOK(ppt)) || (ppt->flag < mesh->base) ) continue;
+      iadr = met->size*k;
+
+      MMG5_eigensym(met->m+iadr,lambda,vp);
+
+      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+
+      isqhmin = MG_MAX(isqhmin,lambda[0]);
+      isqhmin = MG_MAX(isqhmin,lambda[1]);
+
+      isqhmax = MG_MIN(isqhmax,lambda[0]);
+      isqhmax = MG_MIN(isqhmax,lambda[1]);
+    }
+  }
+
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = 1./sqrt(isqhmin);
+  }
+
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = 1./sqrt(isqhmax);
+  }
+
+  MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
+
+  /* vertex size */
+  isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+  for (k=1; k<=mesh->np; k++) {
+    iadr = 3*k;
+
+    ppt = &mesh->point[k];
+    if ( ppt->flag < mesh->base ) {
+      met->m[iadr] = met->m[iadr+2] = isqhmax;
+      met->m[iadr+1] = 0;
+    }
+    else {
+      MMG5_eigensym(met->m+iadr,lambda,vp);
+
+      lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
+      lambda[1]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[1]));
+
+      met->m[iadr]   = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1];
+      met->m[iadr+1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1];
+      met->m[iadr+2] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1];
+    }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Compute hmin and hmax values from unflagged points (if not setted by the
+ * user), check the values and truncate the 3D metric.
+ *
+ */
+int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  MMG5_int    k,iadr;
+  double      isqhmin, isqhmax, isqhmaxcoe;
+  double      lambda[3],vp[3][3];
+
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  isqhmin = 0.;
+  isqhmax = FLT_MAX;
+  isqhmaxcoe = 1./(MMG5_HMAXCOE*MMG5_HMAXCOE);
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || (ppt->flag < mesh->base) ) {
+        continue;
+      }
+      iadr = met->size*k;
+
+      /* Check metric */
+      if (!MMG5_eigenv3d(1,met->m+iadr,lambda,vp) ) {
+        fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
+                " Impose hmax size at point\n",__func__,__LINE__);
+        met->m[iadr+0] = FLT_MIN;
+        met->m[iadr+1] = 0;
+        met->m[iadr+2] = 0;
+        met->m[iadr+3] = FLT_MIN;
+        met->m[iadr+4] = 0;
+        met->m[iadr+5] = FLT_MIN;
+        continue;
+      }
+      assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
+               && "Negative eigenvalue");
+
+      /* Take only meaningful values into account: i.e. values at used points
+       * and eigenvalues not equal to MMG5_HMAXCOE for Mmgs (value used when
+       * length in normal direction can't be computed.) */
+      int j;
+      for ( j=0; j<3; ++j ) {
+        if ( isfinite(lambda[j]) && fabs(lambda[j]-isqhmaxcoe) > MMG5_EPS ) {
+          isqhmax = MG_MIN(isqhmax,lambda[j]);
+          isqhmin = MG_MAX(isqhmin,lambda[j]);
+        }
+      }
+    }
+  }
+
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = 1./sqrt(isqhmin);
+  }
+
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = 1./sqrt(isqhmax);
   }
 
   /* Check the compatibility between the user settings and the automatically
    * computed values */
-  MMG5_check_hminhmax(mesh,sethmin,sethmax);
+  MMG5_check_hminhmax(mesh,mesh->info.sethmin,mesh->info.sethmax);
 
-  /* Truncature */
-  for (k=1; k<=mesh->np; k++)  {
-    met->m[k]=MG_MAX(mesh->info.hmin,met->m[k]);
-    met->m[k]=MG_MIN(mesh->info.hmax,met->m[k]);
+  /* vertex size */
+  isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+
+    if ( (ppt->flag < mesh->base) || !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
+      /* Fail to diagonalize metric: put hmax */
+      iadr = 6*k;
+      met->m[iadr]   = isqhmax;
+      met->m[iadr+1] = 0.;
+      met->m[iadr+2] = 0.;
+      met->m[iadr+3] = isqhmax;
+      met->m[iadr+4] = 0.;
+      met->m[iadr+5] = isqhmax;
   }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
   return 1;
 }
 
@@ -170,8 +551,6 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
  * \param met pointer toward a metric
  * \param sol pointer toward a solution structure (level-set or displacement).
  * \param dd pointer toward the scaling value (to fill)
- * \param sethmin setted to 1 if hmin must not be computed from the metric.
- * \param sethmax setted to 1 if hmax must not be computed from the metric.
  *
  * \return 1 if success, 0 if fail.
  *
@@ -179,11 +558,10 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
  * Compute a default value for the hmin/hmax parameters if needed.
  *
  */
-int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd,
-                          int8_t* sethmin,int8_t *sethmax ) {
+int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd) {
   MMG5_pPoint    ppt;
   MMG5_pPar      par;
-  int            k,i;
+  MMG5_int       k,i;
   int8_t         hsizOrOptim;
 
   /* sol is a level-set or a displacement so it cannot be an aniso metric */
@@ -192,8 +570,8 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
   /* met is a metric so it cannot be a vector */
   if ( met ) { assert ( met->type != MMG5_Vector ); }
 
-  /* if we are not in iso or lagrangian mode, check that sol isn't allocated */
-  if ( (!mesh->info.iso) && mesh->info.lag < 0 ) {
+  /* if we are not in iso, isosurf or lagrangian mode, check that sol isn't allocated */
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf)  && mesh->info.lag < 0 ) {
     assert ( !(sol && sol->m) );
   }
 
@@ -221,17 +599,17 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
     par->hausd *= (*dd);
   }
 
-  /* Check if hmin/hmax have been provided by the user and scale it if yes */
-  *sethmin = 0;
-  *sethmax = 0;
-
-  if ( mesh->info.hmin > 0. ) {
-    mesh->info.hmin  *= (*dd);
-    *sethmin = 1;
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
   }
-  if ( mesh->info.hmax > 0. ) {
+
+  if ( mesh->info.sethmin ) {
+    mesh->info.hmin  *= (*dd);
+  }
+  if ( mesh->info.sethmax ) {
     mesh->info.hmax  *= (*dd);
-    *sethmax = 1;
   }
 
   hsizOrOptim = ( mesh->info.hsiz > 0. || mesh->info.optim )? 1 : 0;
@@ -241,12 +619,10 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
   if ( (!hsizOrOptim) && (!(met && met->np)) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
-    if ( !MMG5_Set_defaultTruncatureSizes(mesh,*sethmin,*sethmax) ) {
+    if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.sethmin,mesh->info.sethmax) ) {
       fprintf(stderr,"\n  ## Error: %s: Exit program.\n",__func__);
       return 0;
     }
-    *sethmin = 1;
-    *sethmax = 1;
   }
 
   if ( sol && sol->np ) {
@@ -271,13 +647,9 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
  *
  */
 int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
-  double         dd,d1;
-  int            k,i;
-  double         *m;
-  double         lambda[3],v[3][3],isqhmin,isqhmax;
-  int8_t         sethmin,sethmax;
+  double  dd;
 
-  if ( !MMG5_scale_meshAndSol(mesh,met,sol,&dd,&sethmin,&sethmax) ) {
+  if ( !MMG5_scale_meshAndSol(mesh,met,sol,&dd) ) {
     return 0;
   }
 
@@ -285,105 +657,21 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     return 1;
   }
 
-  switch ( met->size ) {
-  case 1:
-    if ( !MMG5_scale_scalarMetric ( mesh, met, dd, sethmin, sethmax ) ) {
+  if ( met->size == 1 ) {
+    /* isotropic metric */
+    if ( !MMG5_scale_scalarMetric ( mesh, met, dd ) ) {
       return 0;
     }
-    break;
-
-  case 6:
-      d1 = 1.0 / (dd*dd);
-      /* Normalization */
-      for (k=1; k<=mesh->np; k++) {
-
-        if( !MG_VOK( &mesh->point[k] ) ) continue;
-
-        for ( i=0; i<met->size; ++i ) {
-          met->m[6*k+i] *= d1;
         }
-      }
-
-      /* compute hmin and hmax parameters if not provided by the user and check
-       * the input metric */
-      if ( !sethmin ) {
-        mesh->info.hmin = FLT_MAX;
-      }
-
-      if ( !sethmax ) {
-        mesh->info.hmax = 0.;
-      }
-
-      for (k=1; k<=mesh->np; k++) {
-        if( !MG_VOK( &mesh->point[k] ) ) continue;
-
-        m    = &met->m[6*k];
-
-        /* Check the input metric */
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
-          fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
-                  " 1 metric (point %d).\n",__func__,k);
+  else if ( met->size == (mesh->dim-1)*3 ) {
+    /* anisotropic metric: met->size=3 in 2D and 6 in 3D */
+    if ( !MMG5_scale_tensorMetric ( mesh, met, dd ) ) {
           return 0;
         }
-        for (i=0; i<3; i++) {
-          if(lambda[i]<=0) {
-            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
-                    "(point %d -> eigenvalues : %e %e %e).\n"
-                    "            metric tensor: %e %e %e %e %e %e.\n",
-                    __func__,k,lambda[0],lambda[1],lambda[2],
-                              m[0],m[1],m[2],m[3],m[4],m[5]);
-            return 0;
           }
-          if ( !sethmin )
-            mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
-          if ( !sethmax )
-            mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
-        }
-      }
-
-      /* Check the compatibility between the user settings and the automatically
-       * computed values */
-      MMG5_check_hminhmax(mesh,sethmin,sethmax);
-
-      /* Truncature */
-      isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-      isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
-      for (k=1; k<=mesh->np; k++) {
-
-        if( !MG_VOK( &mesh->point[k] ) ) continue;
-
-        m    = &met->m[6*k];
-
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
-          fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
-                  " 1 metric (point %d).\n",__func__,k);
-          return 0;
-        }
-        for (i=0; i<3; i++) {
-          if(lambda[i]<=0) {
-            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
-                    "(point %d -> eigenvalues : %e %e %e).\n"
-                    "            metric tensor: %e %e %e %e %e %e.\n",
-                    __func__,k,lambda[0],lambda[1],lambda[2],
-                              m[0],m[1],m[2],m[3],m[4],m[5]);
-            return 0;
-          }
-          lambda[i]=MG_MIN(isqhmin,lambda[i]);
-          lambda[i]=MG_MAX(isqhmax,lambda[i]);
-        }
-        m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1] + v[2][0]*v[2][0]*lambda[2];
-        m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1] + v[2][0]*v[2][1]*lambda[2];
-        m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1] + v[2][0]*v[2][2]*lambda[2];
-        m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1] + v[2][1]*v[2][1]*lambda[2];
-        m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1] + v[2][1]*v[2][2]*lambda[2];
-        m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1] + v[2][2]*v[2][2]*lambda[2];
-      }
-
-      break;
-  default:
+  else {
     fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
-    break;
-  }
+   }
 
   return 1;
 }
@@ -401,7 +689,8 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   double          dd;
-  int             k,i,iadr;
+  int             i;
+  MMG5_int        k,iadr;
   MMG5_pPar       par;
 
   /* de-normalize coordinates */

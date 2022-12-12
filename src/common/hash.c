@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -55,15 +55,16 @@
  * to inherit this tag from.
  *
  */
-int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
+int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1,pt2;
-  MMG5_hedge    *ph;
-  int            *adja,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
+  MMG5_hedge     *ph;
+  MMG5_int       kk;
+  MMG5_int       *adja,hmax,k,ia,ib,jel,lel,dup,nmf;
   int8_t         i,i1,i2,j,l;
-  unsigned int   key;
+  MMG5_int       key;
 
   /* adjust hash table params */
-  hmax =(int)(3.71*mesh->np);
+  hmax =(MMG5_int)(3.71*mesh->np);
   hash->siz  = mesh->np;
   hash->max  = hmax + 1;
   hash->nxt  = hash->siz;
@@ -76,14 +77,17 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
 
   /* hash triangles */
-  mesh->base = 1;
+  ++mesh->base;
   dup = nmf = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
 
     pt->flag = 0;
+    // base field of triangles has to be setted because it is used in setadj (mmgs
+    // and mmg3d) to detect moebius strip and to flip tria orientation
     pt->base = mesh->base;
+
     adja = &adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
 
@@ -98,7 +102,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+      key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
       ph  = &hash->item[key];
 
       /* store edge */
@@ -136,14 +140,14 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
             l   = adjt[3*(jel-1)+1+j]%3;
             pt2 = &mesh->tria[lel];
 
-            if ( chkISO && ( (pt->ref == MG_ISO) || (pt->ref < 0)) ) {
+            if ( chkISO && ( (pt->ref == mesh->info.isoref) || (pt->ref < 0)) ) {
               adjt[3*(lel-1)+1+l] = 0;
               adja[i] = 3*jel+j;
               adjt[3*(jel-1)+1+j] = 3*k + i;
             }
-            pt->tag[i] |= MG_GEO + MG_NOM;
-            pt1->tag[j] |= MG_GEO + MG_NOM;
-            pt2->tag[l] |= MG_GEO + MG_NOM;
+            pt->tag[i] |= MG_NOM;
+            pt1->tag[j] |= MG_NOM;
+            pt2->tag[l] |= MG_NOM;
             nmf++;
             ++ph->s;
           }
@@ -160,7 +164,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           if ( hash->nxt >= hash->max-1 ) {
             if ( mesh->info.ddebug ) {
               fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
-                      " %d\n",__func__,hash->max);
+                      " %" MMG5_PRId "\n",__func__,hash->max);
             }
             MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                "MMG5_edge",
@@ -213,7 +217,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+      key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
       ph  = &hash->item[key];
 
       if ( ph->a == 0 )  continue;
@@ -258,7 +262,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   if ( abs(mesh->info.imprim) > 5 && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
     if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
-    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    if ( dup > 0 )  fprintf(stdout," %" MMG5_PRId " duplicate removed",dup);
     fprintf(stdout,"\n");
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
@@ -279,16 +283,17 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
  *
  *
  **/
-int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
+MMG5_int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,MMG5_int ic,MMG5_int k) {
   MMG5_hedge     *ph;
-  int        key,mins,maxs,sum,j;
+  MMG5_int       key;
+  MMG5_int       mins,maxs,sum,j;
 
   mins = MG_MIN(ia,MG_MIN(ib,ic));
   maxs = MG_MAX(ia,MG_MAX(ib,ic));
 
   /* compute key */
   sum = ia + ib + ic;
-  key = (MMG5_KA*mins + MMG5_KB*maxs) % hash->siz;
+  key = (MMG5_KA*(int64_t)mins + MMG5_KB*(int64_t)maxs) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a ) {
@@ -337,13 +342,14 @@ int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
  * Add edge \f$[a;b]\f$ to the hash table.
  *
  */
-int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int k) {
+int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
   MMG5_hedge  *ph;
-  int          key,ia,ib,j;
+  MMG5_int     key;
+  MMG5_int    ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a == ia && ph->b == ib )
@@ -359,7 +365,7 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int k) {
     if ( hash->nxt >= hash->max-1 ) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
-                " %d\n",__func__,hash->max);
+                " %" MMG5_PRId "\n",__func__,hash->max);
 
       MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                          "MMG5_edge",return 0);
@@ -391,13 +397,14 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int k) {
  * Update the index of the point stored along the edge \f$[a;b]\f$
  *
  */
-int MMG5_hashUpdate(MMG5_Hash *hash, int a,int b,int k) {
+int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
   MMG5_hedge  *ph;
-  int          key,ia,ib;
+  MMG5_int     key;
+  MMG5_int    ia,ib;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   while ( ph->a ) {
@@ -427,13 +434,14 @@ int MMG5_hashUpdate(MMG5_Hash *hash, int a,int b,int k) {
  * tag. If the edge exist, add the new tag to the already stored tags.
  *
  */
-int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int16_t tag) {
+int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int16_t tag) {
   MMG5_hedge  *ph;
-  int          key,ia,ib,j;
+  MMG5_int     key;
+  MMG5_int    ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a ) {
@@ -484,15 +492,16 @@ int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int16_t tag) {
  * Find the index of point stored along  \f$[a;b]\f$.
  *
  */
-int MMG5_hashGet(MMG5_Hash *hash,int a,int b) {
+MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
   MMG5_hedge  *ph;
-  int          key,ia,ib;
+  MMG5_int    key;
+  MMG5_int    ia,ib;
 
   if ( !hash->item ) return 0;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( !ph->a )  return 0;
@@ -514,8 +523,8 @@ int MMG5_hashGet(MMG5_Hash *hash,int a,int b) {
  * Hash edges or faces.
  *
  */
-int MMG5_hashNew(MMG5_pMesh mesh,MMG5_Hash *hash,int hsiz,int hmax) {
-  int   k;
+int MMG5_hashNew(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int hsiz,MMG5_int hmax) {
+  MMG5_int   k;
 
   /* adjust hash table params */
   hash->siz  = hsiz+1;

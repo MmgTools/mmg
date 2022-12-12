@@ -33,9 +33,11 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
+#include "libmmgs.h"
 #include <math.h>
-#include "mmgsexterns.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
 
 #define MAXLEN   1.0e+3
 
@@ -56,7 +58,7 @@
 static inline
 int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
                                   MMG5_pTria pt,int8_t i) {
-  int         ip0,ip1;
+  MMG5_int         ip0,ip1;
 
   ip0 = pt->v[MMG5_inxt2[i]];
   ip1 = pt->v[MMG5_iprv2[i]];
@@ -88,7 +90,8 @@ int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash
 int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pTria pt;
   MMG5_Hash  hash;
-  int        k,i;
+  int        i;
+  MMG5_int   k;
 
   /* Reset the input metric at required edges extremities */
   if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met,ismet ) ) {
@@ -142,7 +145,8 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar   par;
   double      n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
   double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
-  int         k,j,ip1,ip2,isloc;
+  int         j,isloc;
+  MMG5_int    k,ip1,ip2;
   int8_t      ismet;
   int8_t      i,i1,i2;
 

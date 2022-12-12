@@ -31,7 +31,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "inlined_functions_3d.h"
+#include "libmmg3d.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -45,12 +47,15 @@ int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra    pt,pt1;
   MMG5_pPoint    ppt,pptb,ppta;
 
-  int       it,i,k,lon,l,iel,ipt,list[MMG3D_LMAX+2];
-  int       maxiter,ipta,iptb,ipt0,ipt1,ipt2,ipt3,*compt;
-  double    vol,ax,ay,az,bx,by,bz;
-  double    *nv,*pos,res,dd,ox,oy,oz,declic;
-  double LLAMBDA  = 0.33;
-  double LMU      = 0.331;
+  int            it,lon,l;
+  int64_t        list[MMG3D_LMAX+2];
+  MMG5_int       k,i,iel,ipt,ipta,iptb;
+  int            maxiter;
+  MMG5_int       ipt0,ipt1,ipt2,ipt3,*compt;
+  double         vol,ax,ay,az,bx,by,bz;
+  double         *nv,*pos,res,dd,ox,oy,oz,declic;
+  double LLAMBDA = 0.33;
+  double LMU     = 0.331;
 
   maxiter = 3;
   MMG5_ADD_MEM(mesh,(3*mesh->np+1)*sizeof(double),"nv",
@@ -61,7 +66,7 @@ int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
                 return 0);
   MMG5_SAFE_CALLOC(nv, 3*mesh->np+1, double,return 0);
   MMG5_SAFE_CALLOC(pos, 3*mesh->np+1, double,return 0);
-  MMG5_SAFE_CALLOC(compt, mesh->np+1, int,return 0);
+  MMG5_SAFE_CALLOC(compt, mesh->np+1, MMG5_int,return 0);
 
   it  = 1;
   declic = 3./MMG3D_ALPHAD;

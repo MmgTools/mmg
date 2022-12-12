@@ -32,9 +32,10 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
-#include "inlined_functions.h"
-#include "mmg3dexterns.h"
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
+#include "inlined_functions_private.h"
+#include "mmgexterns_private.h"
 
 extern int8_t ddb;
 
@@ -82,11 +83,13 @@ inline double MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
  * \param hausd hausdorff value.
  * \return the isotropic size at the point if success, FLT_MAX if fail.
  *
- * Define isotropic size at regular point nump, whose surfacic ball is provided.
+ * Define isotropic size at regular point nump, whose surfacic ball is provided
+ * and update metric at 'regular' non-manifold points of the surfacic ball of
+ * point.
  *
  */
 static double
-MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
+MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nump,MMG5_int *lists,
                 int ilists, double hmin,double hmax,double hausd) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -96,20 +99,25 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   double        ux,uy,uz,det2d,h,isqhmin,isqhmax,ll,lmin,lmax,hnm,s;
   double        *n,*t,r[3][3],lispoi[3*MMG3D_LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
   double        kappa[2],vp[2][2];
-  int           k,na,nb,ntempa,ntempb,iel,ip0;
+  MMG5_int      k,na,nb,ntempa,ntempb,iel,ip0;
   int8_t        iface,i,j,i0;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
 
   p0 = &mesh->point[nump];
 
-  if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
+  if ( (!p0->xp) || MG_EDG_OR_NOM(p0->tag) || (p0->tag & MG_REQ))  {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Error: %s: at least 1 wrong point"
-              " qualification : xp ? %d.\n",__func__,p0->xp);
+              " qualification : xp ? %" MMG5_PRId ".\n",__func__,p0->xp);
     }
     return FLT_MAX;
   }
+
+  /* Check that we don't pass here for a corner (not directly tested previously
+   * because corners doesn't have xpoints) */
+  assert ( (!(MG_CRN & p0->tag)) && "We should not pass here with corner points" );
+
   isqhmin = 1.0 / (hmin*hmin);
   isqhmax = 1.0 / (hmax*hmax);
 
@@ -246,6 +254,7 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
     iel   = lists[k] / 4;
     iface = lists[k] % 4;
 
+    assert( 0<=iface && iface<4 && "unexpected local face idx");
     MMG5_tet2tri(mesh,iel,iface,&tt);
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
@@ -417,7 +426,8 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   h = MG_MIN(kappa[0],kappa[1]);
 
-  /* Travel surfacic ball one last time and update non manifold point metric */
+  /* Travel surfacic ball one last time and update metric of non manifold
+   * regular points of ball */
   for (k=0; k<ilists; k++) {
     iface = lists[k] % 4;
 
@@ -425,7 +435,17 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       i0  = MMG5_idir[iface][j];
       ip0 = pt->v[i0];
       p1  = &mesh->point[ip0];
-      if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
+
+      if ( MG_SIN(p1->tag) ) {
+        /* Do not treat singular points */
+        continue;
+      }
+
+      if ( !(p1->tag & MG_NOM) ) {
+        /* Do not treat manifold points */
+        continue;
+      }
+
       assert(p1->xp);
       t = &p1->n[0];
       memcpy(c,t,3*sizeof(double));
@@ -459,12 +479,12 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
  * the surface edges passing through \a nump.
  *
  */
-double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
+double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nump,MMG5_int *lists,
                 int ilists, double hmin,double hmax) {
   MMG5_pTetra       pt;
   MMG5_pPoint       p0,p1;
   double            len,ux,uy,uz;
-  int               k,iel,ip1;
+  MMG5_int          k,iel,ip1;
   int8_t            i,iface;
 
   p0 = &mesh->point[nump];
@@ -512,7 +532,7 @@ double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 static inline
 int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
                                   MMG5_pTetra pt,int8_t i) {
-  int         ip0,ip1;
+  MMG5_int         ip0,ip1;
 
   ip0 = pt->v[MMG5_iare[i][0]];
   ip1 = pt->v[MMG5_iare[i][1]];
@@ -545,7 +565,8 @@ int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t is
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_Hash    hash;
-  int          k,i,j,ip0,ip1,iad0,iad1;
+  MMG5_int     k,j,ip0,ip1,iad0,iad1;
+  int          i;
 
   /* Reset the input metric at required edges extremities */
   if ( ismet ) {
@@ -645,7 +666,9 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    p0,p1;
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
-  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+  MMG5_int       lists[MMG3D_LMAX+2],k,ip0,ip1;
+  int64_t        listv[MMG3D_LMAX+2];
+  int            ilists,ilistv,l;
   int            kk,isloc;
   int8_t         ismet;
   int8_t         i,j,ia,ised,i0,i1;
@@ -883,7 +906,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( p0->flag>1 ) continue;
 
-        if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) )
+        if ( MG_SIN_OR_NOM(p0->tag) || MG_EDG(p0->tag) )
           continue;
 
         /** First step: search for local parameters */
@@ -899,7 +922,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /** Second step: set the metric */
         /* Define size coming from the hausdorff approximation at regular
-         * surface point */
+         * surface point and update metric at non-singular non-manifold points
+         * of surfacic ball*/
         hp  = MMG5_defsizreg(mesh,met,ip0,lists,ilists,hmin,hmax,hausd);
 
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
@@ -946,7 +970,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         /** Second step: set metric */
-        ised = MG_EDG(pxt->tag[ia]) || ( pxt->tag[ia] & MG_NOM );
+        ised = MG_EDG_OR_NOM(pxt->tag[ia]);
 
         MMG5_BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
 
@@ -1003,9 +1027,9 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         else
           lm = sqrt(8.0*hausd / kappa);
 
-        if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) && p0->flag != 3 )
+        if ( MG_EDG(p0->tag) && !MG_SIN_OR_NOM(p0->tag) && p0->flag != 3 )
           met->m[ip0] = MG_MAX(hmin,MG_MIN(met->m[ip0],lm));
-        if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) && p1->flag != 3 )
+        if ( MG_EDG(p1->tag) && !MG_SIN_OR_NOM(p1->tag) && p1->flag != 3 )
           met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
       }
     }
@@ -1017,7 +1041,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  *
- * Set the s field of the points that belongs to a required edge to 1, set it to
+ * Set the s field of the points that belongs to a required edge to 4*ne+3, set it to
  * 0 otherwise.
  *
  */
@@ -1025,7 +1049,7 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_pPoint  ppt;
-  int          k;
+  MMG5_int     k;
   int8_t       i;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1060,7 +1084,8 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   double         l,hn,ux,uy,uz;
-  int            ip0,ip1,it,maxit,nu,nup,k;
+  int            it,maxit;
+  MMG5_int       ip0,ip1,k,nu,nup;
   int8_t         i,j,ia,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -1128,7 +1153,7 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation: %7" MMG5_PRId " updated, %d iter.\n",nup,it);
   return 1;
 }
 
@@ -1144,7 +1169,8 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   double         hgrad,ll,h0,h1,hn,ux,uy,uz;
-  int            ip0,ip1,ipslave,ipmaster,it,maxit,nu,nup,k;
+  int            it,maxit;
+  MMG5_int       ip0,ip1,ipslave,ipmaster,k,nu,nup;
   int8_t         i,j,ia,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
@@ -1179,7 +1205,7 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           p0  = &mesh->point[ip0];
           p1  = &mesh->point[ip1];
 
-          if ( abs ( p0->s - p1->s ) < 2 ) {
+          if ( MMG5_abs ( p0->s - p1->s ) < 2 ) {
             /* No size to propagate */
             continue;
           }
@@ -1228,7 +1254,7 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 && nup ) {
-    fprintf(stdout,"     gradation (required): %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation (required): %7" MMG5_PRId " updated, %d iter.\n",nup,it);
   }
 
   return nup;

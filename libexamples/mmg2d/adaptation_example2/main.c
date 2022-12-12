@@ -22,7 +22,8 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   char            *filename, *outname, *outname2;
-  int             k,np,ier;
+  MMG5_int        k,np;
+  int             ier;
 
   fprintf(stdout,"  -- TEST MMG2DLIB \n");
 
@@ -118,6 +119,11 @@ int main(int argc,char *argv[]) {
   MMG2D_Free_solutions(mmgMesh,mmgSol);
 
   ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
+  if ( ier == MMG5_STRONGFAILURE ) {
+    fprintf(stdout,"BAD ENDING OF MMG2DLIB: UNABLE TO SAVE MESH\n");
+    return(ier);
+  } else if ( ier == MMG5_LOWFAILURE )
+    fprintf(stdout,"BAD ENDING OF MMG2DLIB\n");
 
  /*save result*/
   if ( MMG2D_saveMesh(mmgMesh,outname2) != 1 )  exit(EXIT_FAILURE);

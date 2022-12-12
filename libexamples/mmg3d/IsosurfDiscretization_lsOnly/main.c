@@ -103,7 +103,6 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_iparameter(mmgMesh,mmgLs,MMG3D_IPARAM_iso, 1) != 1 )
     exit(EXIT_FAILURE);
 
-
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
      file formatted or manually set your mesh using the MMG3D_Set* functions */

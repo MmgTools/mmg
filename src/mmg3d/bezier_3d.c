@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 
 extern int8_t ddb;
 
@@ -149,10 +149,11 @@ MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
  *
  */
 inline int
-MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t ised, double v[3]) {
+MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],
+                double b1[3],int8_t ised, double v[3]) {
   MMG5_pPoint   p0,p1;
   MMG5_pxPoint  pxp0,pxp1;
-  double   ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
+  double        ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
 
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
@@ -170,6 +171,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
     pxp0 = 0;
 
   if ( !MG_SIN(p1->tag) ) {
+     /* Remark: all nom points have xpoints */
     assert(p1->xp);
     pxp1 = &mesh->xpoint[p1->xp];
   }
@@ -226,7 +228,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
   }
 
   else {
-    if ( !MG_SIN(p0->tag) && !( p0->tag & MG_NOM ) ) {
+    if ( ! MG_SIN_OR_NOM(p0->tag) ) {
       if ( p0->tag & MG_GEO ) {
         n1 = &(pxp0->n1[0]);
         n2 = &(pxp0->n2[0]);
@@ -241,7 +243,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
         memcpy(np0,&(pxp0->n1[0]),3*sizeof(double));
     }
 
-    if ( !MG_SIN(p1->tag) && !( p1->tag & MG_NOM )) {
+    if ( !MG_SIN_OR_NOM(p1->tag) ) {
       if ( p1->tag & MG_GEO ) {
         n1 = &(pxp1->n1[0]);
         n2 = &(pxp1->n2[0]);
@@ -255,8 +257,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
       else
         memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
     }
-    if ( (MG_SIN(p0->tag) || ( p0->tag & MG_NOM )) &&
-         (MG_SIN(p1->tag) || ( p1->tag & MG_NOM )) ) {
+    if ( MG_SIN_OR_NOM(p0->tag) && MG_SIN_OR_NOM(p1->tag) ) {
       t0[0] = ux * il;
       t0[1] = uy * il;
       t0[2] = uz * il;
@@ -265,8 +266,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
       t1[1] = -uy * il;
       t1[2] = -uz * il;
     }
-    else if ( (!MG_SIN(p0->tag) && !( p0->tag & MG_NOM)) &&
-              ( MG_SIN(p1->tag) ||  ( p1->tag & MG_NOM ))) {
+    else if ( (!MG_SIN_OR_NOM(p0->tag)) && MG_SIN_OR_NOM(p1->tag) ) {
       if ( !MMG5_BezierTgt(p0->c,p1->c,np0,np0,t0,t1) ) {
         t0[0] = ux * il;
         t0[1] = uy * il;
@@ -276,8 +276,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
       t1[1] = -uy * il;
       t1[2] = -uz * il;
     }
-    else if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM ) ) &&
-              (!MG_SIN(p1->tag) && !( p1->tag & MG_NOM ))) {
+    else if ( MG_SIN_OR_NOM(p0->tag) && (!MG_SIN_OR_NOM(p1->tag)) ) {
       if ( !MMG5_BezierTgt(p0->c,p1->c,np1,np1,t0,t1) ) {
         t1[0] = - ux * il;
         t1[1] = - uy * il;
@@ -319,16 +318,16 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t
  * \param ori triangle orientation.
  * \return 1.
  *
- * Compute Bezier control points on triangle \a pt (cf. Vlachos)
+ * Compute Bezier control points on triangle \a pt (cf. \cite vlachos2001curved)
  *
- * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
+ * \todo merge with the MMG5_mmgsBezierCP function and remove the pointer
  * toward this functions.
  */
 int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori) {
   MMG5_pPoint    p[3];
-  MMG5_xPoint   *pxp;
-  double        *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
-  int            ia,ib,ic;
+  MMG5_xPoint    *pxp;
+  double         *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
+  MMG5_int       ia,ib,ic;
   int8_t         i,i1,i2,im,isnm;
 
   ia   = pt->v[0];
@@ -354,6 +353,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
       }
     }
     else if( p[i]->tag & MG_NOM){
+      /* Remark: external nom points have 1 normal, internal ones have no normals */
       MMG5_nortri(mesh,pt,pb->n[i]);
       if ( !ori ) {
         pb->n[i][0] *= -1.0;
@@ -376,22 +376,57 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         /* Choose the closest normal to our surface to ensure smoothness */
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
-        if ( fabs(ps) > fabs(ps2) )
-          memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
-        else
-          memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+
+        /** \remark
+         * - prior to commit f57b861966: we were comparing absolute
+         * values of normals projection (guessing that normals can be bad
+         * oriented). In this case, we can choose the wrong normal (normal at
+         * point related to other portion of surface) when the ridge angle is
+         * almost closed (smallest than 90°) because projection of normal at
+         * first triangle and normal at second triangle (or normal at point
+         * related to second surface) tends to -1;
+         *
+         * - the following assert on the positivity of at least one of the
+         * projections may fail but I think that it is not a normal behaviour:
+         * it means that the surface approximation has degenerated. See issue #167
+         */
+        assert ( ps > 0. || ps2 > 0. &&
+                 "Negative projection of normal at tria onto normal at point: surface degeneracy");
+
+        /* As previous assert may fail in some cases, deal with both cases */
+        if ( (ps > 0.) || (ps2 >0.) ) {
+          /* Normal case */
+          if ( ps > ps2 ) {
+            memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+          }
+          else {
+            memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+          }
+        }
+        else {
+          /* I think that tis case is only possible when we face surface
+           * degeneracy: in this case we want to choose the normal whose
+           * projection over the normal at triangle is smallest as possible
+           * (otherwise we will worsen the degeneracy) */
+           if ( ps < ps2 ) {
+            memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+          }
+          else {
+            memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+          }
+        }
         memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
 
-        /* Normal reorientation if needed */
+        /* Normal should have suitable orientation */
         ps  = pb->n[i][0]*nt[0] + pb->n[i][1]*nt[1] + pb->n[i][2]*nt[2];
-        if ( ps < 0.0 ) {
-          pb->n[i][0] *= -1.0;
-          pb->n[i][1] *= -1.0;
-          pb->n[i][2] *= -1.0;
-        }
+        /* This assertion may fail if assertion on ps and ps2 positivity fails:
+         * I think that we don't want to reorient the tangent because we know
+         * that the negativity of projection is not normal */
+        assert ( ps > 0. );
       }
-      else
+      else {
         memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+      }
     }
   }
 
@@ -447,7 +482,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
     uy = p[i2]->c[1] - p[i1]->c[1];
     uz = p[i2]->c[2] - p[i1]->c[2];
 
-    ll = ux*ux + uy*uy + uz*uz;   // A PROTEGER !!!!
+    ll = ux*ux + uy*uy + uz*uz;
     l  = sqrt(ll);
 
     /* choose normals */
@@ -455,13 +490,14 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
     n2 = pb->n[i2];
 
     /* check for boundary curve */
-    if ( MG_EDG(pt->tag[i]) || (pt->tag[i] & MG_NOM)) {
+    if ( MG_EDG_OR_NOM(pt->tag[i]) ) {
       if ( MG_SIN(p[i1]->tag) ) {
         t1[0] = ux / l;
         t1[1] = uy / l;
         t1[2] = uz / l;
       }
       else {
+        /* Nom points have a tangent so its ok to pass here */
         memcpy(t1,&pb->t[i1],3*sizeof(double));
         ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
         if(ps < 0.0){
@@ -476,6 +512,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
         t2[2] = - uz / l;
       }
       else {
+        /* Nom points have a tangent so its ok to pass here */
         memcpy(t2,&pb->t[i2],3*sizeof(double));
         ps = -(t2[0]*ux + t2[1]*uy + t2[2]*uz);
         if(ps < 0.0){
@@ -590,7 +627,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
     /* linear interpolation, not used here
        no[i] = pb->n[0][i]*w + pb->n[1][i]*u + pb->n[2][i]*v; */
   }
-  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] >0 );
+  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] > 0. );
 
   /* tangent */
   if ( w < MMG5_EPSD2 ) {
@@ -605,7 +642,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
       uz *= dd;
     }
 
-    /* corners */
+    /* corners and required points: no tangent */
     if ( MG_SIN(pb->p[1]->tag) ) {
       pb->t[1][0] = ux;
       pb->t[1][1] = uy;
@@ -642,7 +679,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
       uz *= dd;
     }
 
-    /* corners */
+    /* corners and required points: no tangent */
     if ( MG_SIN(pb->p[0]->tag) ) {
       pb->t[0][0] = ux;
       pb->t[0][1] = uy;

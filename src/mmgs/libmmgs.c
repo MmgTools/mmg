@@ -38,8 +38,10 @@
  *
  */
 
-#include "mmgs.h"
-#include "mmgsexterns.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
@@ -62,7 +64,7 @@
 /** Free adja, xtetra and xpoint tables */
 static inline
 void MMGS_Free_topoTables(MMG5_pMesh mesh) {
-  int k;
+  MMG5_int k;
 
   mesh->xp = 0;
   if ( mesh->adja )
@@ -91,8 +93,9 @@ static inline
 int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
-  int           np,nc,nr, k,nt,nbl,imet,imetnew,i,na,jel;
-  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int      iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int      k,nt,np,na,jel,nc,nr,nbl;
+  int           imet,imetnew,i;
   int8_t        i1,i2;
 
   /* Remove non wanted subdomains if needed */
@@ -105,7 +108,7 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
     if ( ppt->tag & MG_CRN )  nc++;
-    ppt->ref = abs(ppt->ref);
+    ppt->ref = MMG5_abs(ppt->ref);
   }
 
   /* compact triangles */
@@ -283,11 +286,11 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+    fprintf(stdout,"     NUMBER OF VERTICES   %8" MMG5_PRId "   CORNERS %8" MMG5_PRId "\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8" MMG5_PRId "\n",mesh->nt);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
+      fprintf(stdout,"     NUMBER OF EDGES      %8" MMG5_PRId "   RIDGES  %8" MMG5_PRId "\n",mesh->na,nr);
   }
   return 1;
 }
@@ -299,30 +302,26 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   int8_t    mettofree = 0;
   char      stim[32];
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
-
   /** In debug mode, check that all structures are allocated */
   assert ( mesh );
   assert ( sol );
   assert ( mesh->point );
   assert ( mesh->tria );
 
-  if ( !mesh->info.iso ) { mesh->info.iso = 1; }
+  MMG5_version(mesh,"S");
+
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf) ) {
+    fprintf(stdout,"\n  ## WARNING: ISO MODE NOT PROVIDED: ENABLING ISOVALUE DISCRETIZATION MODE (-ls) \n");
+    mesh->info.iso = 1;
+  }
 
   if ( !umet ) {
-    /* User doesn't provide the metric, allocate our own one */
+    /* User doesn't provide the metric (library mode only), allocate our own one */
     MMG5_SAFE_CALLOC(met,1,MMG5_Sol,_LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE));
     mettofree = 1;
   }
   else {
+    /* Using appli we always pass here */
     met = umet;
   }
 
@@ -372,6 +371,13 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION IS NOT AVAILABLE IN"
+           " SURFACIC LEVEL_SET DISCRETIZATION MODE.\n");
+    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  }
+
   if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMGSLS: INPUT DATA\n");
   /* load data */
   chrono(ON,&(ctim[1]));
@@ -390,6 +396,12 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  ## WARNING: WRONG METRIC NUMBER. IGNORED\n");
     if ( mettofree ) {  MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
+
+  /* clean old isosurface */
+  if ( !MMGS_Clean_isoSurf(mesh) ) {
+    fprintf(stderr,"\n  ## Unable to clean old isosurface.\n");
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -426,7 +438,21 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
-  if ( !MMGS_mmgs2(mesh,sol,umet) ) {
+
+  /* Specific meshing: compute optim option here because after isovalue
+   * discretization mesh elements have too bad qualities */
+  if ( mesh->info.optim ) {
+    /* Mean metric computation */
+    if ( !MMGS_doSol(mesh,met) ) {
+      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
+      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+  }
+
+  /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
+  if ( !MMGS_mmgs2(mesh,sol,met) ) {
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
@@ -440,16 +466,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
 
-  if ( mesh->info.optim ) {
-    if ( !MMGS_doSol(mesh,met) ) {
-      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
-        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
-      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
-    MMG5_solTruncatureForOptim(mesh,met);
-  }
-
+  /* Specific meshing: compute hsiz on mesh after isovalue discretization */
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMGS_Set_constantSize(mesh,met) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
@@ -471,28 +488,26 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
-  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
-    /* mesh adaptation */
-    chrono(ON,&(ctim[4]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-    }
+  /* mesh adaptation */
+  chrono(ON,&(ctim[4]));
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+  }
 
-    if ( !MMG5_mmgs1(mesh,met,NULL) ) {
-      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-      if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
-      if ( !MMG5_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+  if ( !MMG5_mmgs1(mesh,met,NULL) ) {
+    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+    if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
+    if ( !MMG5_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+  }
 
-    chrono(OFF,&(ctim[4]));
-    printim(ctim[4].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
-    }
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
   }
 
   /* save file */
@@ -539,15 +554,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   assert ( mesh->point );
   assert ( mesh->tria );
 
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
-            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
-    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
-    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
-    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
-#endif
-  }
+  MMG5_version(mesh,"S");
 
   MMGS_Set_commonFunc();
 
@@ -566,9 +573,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
-  if ( mesh->info.iso ) {
-    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLe"
-            " (MMGS_IPARAM_iso):\n"
+  if ( mesh->info.iso || mesh->info.isosurf ) {
+    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
+            " (MMGS_IPARAM_iso or MMGS_IPARAM_isosurf):\n"
             "          YOU MUST CALL THE MMGS_MMGSLS FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
@@ -627,23 +634,15 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
-  /* specific meshing */
-  if ( mesh->info.optim ) {
-    if ( !MMGS_doSol(mesh,met) ) {
-      if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
-    }
-    MMG5_solTruncatureForOptim(mesh,met);
-  }
+  MMGS_setfunc(mesh,met);
 
+  /* specific meshing */
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMGS_Set_constantSize(mesh,met) ) {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
-
-  MMGS_setfunc(mesh,met);
 
   /* mesh analysis */
   if ( !MMGS_analys(mesh) ) {
@@ -652,6 +651,13 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
+  /* specific meshing: optim mode needs normal at vertices */
+  if ( mesh->info.optim ) {
+    if ( !MMGS_doSol(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+  }
 
   if ( mesh->info.imprim > 0 ||  mesh->info.imprim < -1 ) {
     if ( !MMGS_inqua(mesh,met) ) {
@@ -660,35 +666,34 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     }
   }
 
-  if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m )
+  if ( mesh->info.imprim > 1 && met->m ) {
     MMGS_prilen(mesh,met,0);
+  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
-  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
-    /* mesh adaptation */
-    chrono(ON,&(ctim[3]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-    }
+  /* mesh adaptation */
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+  }
 
-    if ( !MMG5_mmgs1(mesh,met,NULL) ) {
-      if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
-      if ( !MMG5_unscaleMesh(mesh,met,NULL) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+  if ( !MMG5_mmgs1(mesh,met,NULL) ) {
+    if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+  }
 
-    chrono(OFF,&(ctim[3]));
-    printim(ctim[3].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    }
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
 
   /* save file */
@@ -716,4 +721,24 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
+
+
+}
+
+/**
+* Set common pointer functions between mmgs and mmg3d to the matching mmgs
+* functions.
+*/
+void MMGS_Set_commonFunc(void) {
+    MMG5_bezierCP = MMG5_mmgsBezierCP;
+    MMG5_chkmsh = MMG5_mmgsChkmsh;
+    MMG5_indPt = MMGS_indPt;
+    MMG5_indElt = MMGS_indElt;
+    MMG5_grad2met_ani = MMG5_grad2metSurf;
+    MMG5_grad2metreq_ani = MMG5_grad2metSurfreq;
+    MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
+
+#ifdef USE_SCOTCH
+    MMG5_renumbering = MMG5_mmgsRenumbering;
+#endif
 }

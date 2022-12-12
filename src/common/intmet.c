@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param m input metric.
@@ -54,7 +55,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
 
   /* Compute inverse of square root of matrix M : is =
    * P*diag(1/sqrt(lambda))*{^t}P */
-  order = MMG5_eigenv(1,m,lambda,vp);
+  order = MMG5_eigenv3d(1,m,lambda,vp);
   if ( !order ) {
     if ( !mmgWarn ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to diagonalize at least"
@@ -100,7 +101,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   isnis[4] = is[1]*mt[2] + is[3]*mt[5] + is[4]*mt[8];
   isnis[5] = is[2]*mt[2] + is[4]*mt[5] + is[5]*mt[8];
 
-  order = MMG5_eigenv(1,isnis,lambda,vp);
+  order = MMG5_eigenv3d(1,isnis,lambda,vp);
   if ( !order ) {
     if ( !mmgWarn ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to diagonalize at least"
@@ -159,7 +160,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
  * at pointing towards direction of n1 at interpolated point.
  *
  */
-int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
+int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1, MMG5_int ip2,double s,
                     double v[3],double mr[6]) {
   MMG5_pxPoint   go1,go2;
   MMG5_pPoint    p1,p2;
@@ -175,6 +176,11 @@ int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
   if ( (MG_SIN(p1->tag) || (p1->tag & MG_NOM)) &&
        (MG_SIN(p2->tag) || (p2->tag & MG_NOM)) ) {
     /* m1 and m2 are isotropic metrics */
+    /* Remark (Algiane): Perspective of improvement can be:
+       - 1. to not force isotropy at singular point
+       - 2. to not force the metric to be along tangent and normal dir at ridge point
+    */
+
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
     dd *= dd;
     if ( dd < MMG5_EPSD ) {
@@ -502,9 +508,10 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
   double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
-  int            ip1,ip2,nstep,l;
+  int            nstep,l;
+  MMG5_int       ip1,ip2;
   int8_t         i1,i2;
-  static int     warn=0;
+  static int     warn=0,warnnorm=0;
 
   /* Number of steps for parallel transport */
   nstep = 4;
@@ -590,8 +597,19 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
     memcpy(m2,&met->m[6*ip2],6*sizeof(double));
 
     /* In this pathological case, n is empty */
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM))
+    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
       memcpy(n,n2,3*sizeof(double));
+      assert( MMG5_EPSD < (n2[0]*n2[0]+n2[1]*n2[1]+n2[2]*n2[2]) && "normal at p2 is 0" );
+    }
+    else if (ddbn < MMG5_EPSD) {
+      /* Other case where n is empty: bezier normal is 0 */
+      if ( !warnnorm ) {
+        fprintf(stderr,"  ## Warning: %s: %d: unexpected case (null normal),"
+                " impossible interpolation.\n",__func__,__LINE__);
+        warnnorm = 1;
+      }
+      return 0;
+    }
   }
   else {
     if ( p2->tag & MG_GEO ) {
@@ -644,6 +662,27 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
       ++warn;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 impossible metric"
               " interpolation.\n", __func__);
+
+      if ( mesh->info.ddebug ) {
+        fprintf(stderr," points: %"MMG5_PRId": %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip1),
+                mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
+                MMG5_Get_tagName(mesh->point[ip1].tag));
+        fprintf(stderr,"         %"MMG5_PRId": %e %e %e (tag %s)\n",MMG5_indPt(mesh,ip2),
+                mesh->point[ip1].c[0],mesh->point[ip1].c[1],mesh->point[ip1].c[2],
+                MMG5_Get_tagName(mesh->point[ip2].tag));
+
+        fprintf(stderr,"\n BEFORE ROTATION:\n");
+        fprintf(stderr,"\n metric %e %e %e %e %e %e\n",
+                m1old[0],m1old[1],m1old[2],m1old[3],m1old[4],m1old[5]);
+        fprintf(stderr,"     %e %e %e %e %e %e\n",
+                m2old[0],m2old[1],m2old[2],m2old[3],m2old[4],m2old[5]);
+
+        fprintf(stderr,"\n AFTER ROTATION (to %e %e %e):\n",n[0],n[1],n[2]);
+        fprintf(stderr,"\n metric %e %e %e %e %e %e\n",
+                m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+        fprintf(stderr,"     %e %e %e %e %e %e\n",
+                m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+      }
     }
     return 0;
   }

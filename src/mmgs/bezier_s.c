@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 extern int8_t ddb;
 
@@ -45,17 +45,17 @@ extern int8_t ddb;
  * with the MMG5_bezierCP interface).
  * \return 1.
  *
- * Compute Bezier control points on triangle \a pt (cf. Vlachos)
+ * Compute Bezier control points on triangle \a pt (cf. \cite vlachos2001curved).
  *
- * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
+ * \todo merge with the MMG5_mmg3dBezierCP function and remove the pointer
  * toward this functions.
  *
  */
 int MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,
-                       int8_t ori) {
+                      int8_t ori) {
   MMG5_pPoint    p[3];
   double         *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
-  int            ia,ib,ic;
+  MMG5_int       ia,ib,ic;
   int8_t         i,i1,i2;
 
   ia   = pt->v[0];

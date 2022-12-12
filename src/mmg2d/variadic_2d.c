@@ -30,15 +30,16 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg2d/libmmg2d.h header file for the documentation of all
+ * the \ref mmg2d/liblibmmg2d_private.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * variadic functions definitions for MMG2D library.
  *
  */
 
-#include "mmg2d.h"
-#include "mmg2dexterns.h"
+#include "libmmg2d_private.h"
+#include "libmmg2d.h"
+#include "mmg2dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -214,16 +215,6 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n",__func__);
-    return 0;
-  }
-
-  if ( !(sol || ls || disp) ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
-            " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet, "
-            " MMG5_ARG_ppLs or MMG5_ARG_ppDisp preprocessor variable)"
-            " that will contain the output mesh metric, level-set or"
-            " displacement.\n",__func__);
     return 0;
   }
 

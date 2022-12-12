@@ -31,11 +31,12 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
+#include "mmgexterns_private.h"
 
 #ifdef USE_SCOTCH
 
-#include "librnbg.h"
+#include "librnbg_private.h"
 
 /**
  * \param graf pointer toward the input graph structure.
@@ -49,14 +50,14 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG5_int vertNbr, MMG5_int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
-  int boxNbr, vertIdx;
-  SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
-  char s[200];
-  SCOTCH_Num *sortPartTb;
+  MMG5_int     boxNbr, vertIdx;
+  SCOTCH_Num   logMaxVal, SupMaxVal, InfMaxVal, maxVal;
+  char         s[200];
+  SCOTCH_Num   *sortPartTb;
   SCOTCH_Strat strat ;
-  SCOTCH_Arch arch;
+  SCOTCH_Arch  arch;
 
   /* Computing the number of boxes */
   boxNbr = vertNbr / boxVertNbr;
@@ -67,13 +68,13 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-  if ( SCOTCH_6 ) {
+  if ( SCOTCH_6 || SCOTCH_7 ) {
     CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archCmplt", 0) ;
   }
   else {
     CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
   }
-  sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
+  sprintf(s, "m{vert=%" MMG5_PRId ",low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
   MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return 1);
@@ -87,7 +88,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
   }
 
 
-  if ( SCOTCH_6 ) {
+  if ( SCOTCH_6 || SCOTCH_7 ) {
     // Looking for the max value in sortPartTb and computing sortPartTb as
     // followed :
     //  - sortPartTb[2i] is the box value
@@ -155,11 +156,12 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
  *
  */
 void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
-                  MMG5_pSol field,int* perm,int ind1, int ind2, int solsiz) {
+                  MMG5_pSol field,MMG5_int* perm,MMG5_int ind1, MMG5_int ind2, int solsiz) {
   MMG5_Point ptttmp;
   MMG5_pSol  psl;
   MMG5_Sol   soltmp;
-  int        tmp,addr2,addr1,i,pslsiz;
+  int        i,pslsiz;
+  MMG5_int   tmp,addr2,addr1;
 
   /* swap the points */
   memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));
@@ -227,7 +229,7 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
  *
  **/
 int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
-                    MMG5_pSol fields, int *permNodGlob)
+                    MMG5_pSol fields, MMG5_int *permNodGlob)
 {
 
 #ifdef USE_SCOTCH
@@ -237,7 +239,7 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) ) {
 
-    if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
+    if ( (SCOTCH_5 && SCOTCH_6 && SCOTCH_7 ) || ( (!SCOTCH_5) && (!SCOTCH_6) && (!SCOTCH_7) ) ) {
       if ( !mmgWarn ) {
         fprintf(stderr,"\n  ## Warning: %s: fail to determine scotch version."
                 " No renumbering.\n",__func__);

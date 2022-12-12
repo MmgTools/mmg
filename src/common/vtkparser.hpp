@@ -26,7 +26,7 @@
 
 #ifdef USE_VTK
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkXMLReader.h>
@@ -60,9 +60,9 @@
 #include <vtkCellArray.h>
 #include <typeinfo>
 
-int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*);
-int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*);
-int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*);
+int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
+int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
+int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*);
 
 int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int);
 
@@ -176,8 +176,8 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   // Transfer points from Mmg to VTK
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
-  int np = 0;
-  for ( int k=1; k<=mesh->np; ++k ) {
+  MMG5_int np = 0;
+  for ( MMG5_int k=1; k<=mesh->np; ++k ) {
     MMG5_pPoint ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) continue;
 
@@ -202,14 +202,14 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   vtkSmartPointer<vtkQuad>       quadra     = vtkSmartPointer<vtkQuad>       ::New();
   vtkSmartPointer<vtkLine>       edge       = vtkSmartPointer<vtkLine>       ::New();
 
-  int nc = mesh->na+mesh->nt+mesh->nquad+mesh->ne+mesh->nprism;
-  int ic = 0;
+  MMG5_int nc = mesh->na+mesh->nt+mesh->nquad+mesh->ne+mesh->nprism;
+  MMG5_int ic = 0;
 
   int* types = NULL;
   MMG5_SAFE_MALLOC ( types, nc, int, return 0 );
 
   // transfer edges from Mmg to VTK
-  for ( int k=1; k<=mesh->na; ++k ) {
+  for ( MMG5_int k=1; k<=mesh->na; ++k ) {
     MMG5_pEdge pa = &mesh->edge[k];
     if ( !pa || !pa->a ) continue;
 
@@ -225,7 +225,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   MMG5_internal_VTKSetLine(dataset, &cellArray);
 
  // Transfer trias from Mmg to VTK
- for ( int k=1; k<=mesh->nt; ++k ) {
+ for ( MMG5_int k=1; k<=mesh->nt; ++k ) {
    MMG5_pTria  ptt = &mesh->tria[k];
    if ( !MG_EOK(ptt) ) continue;
 
@@ -239,7 +239,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
  }
 
  // Transfer quads from Mmg to VTK
- for ( int k=1; k<=mesh->nquad; ++k ) {
+ for ( MMG5_int k=1; k<=mesh->nquad; ++k ) {
    MMG5_pQuad  pq = &mesh->quadra[k];
    if ( !MG_EOK(pq) ) continue;
 
@@ -253,7 +253,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
  }
 
   // Transfer tets from Mmg to VTK
-  for ( int k=1; k<=mesh->ne; ++k ) {
+  for ( MMG5_int k=1; k<=mesh->ne; ++k ) {
     MMG5_pTetra pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
 
@@ -267,7 +267,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   }
 
   // Transfer prisms from Mmg to VTK
-  for ( int k=1; k<=mesh->nprism; ++k ) {
+  for ( MMG5_int k=1; k<=mesh->nprism; ++k ) {
     MMG5_pPrism ppr = &mesh->prism[k];
     if ( !MG_EOK(ppr) ) continue;
 
@@ -293,7 +293,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
     ar->SetNumberOfTuples(mesh->np);
     ar->SetName("medit:ref");
 
-    for ( int k = 0; k < mesh->np; k++ ) {
+    for ( MMG5_int k = 0; k < mesh->np; k++ ) {
       MMG5_pPoint ppt = &mesh->point[k+1];
       if ( !MG_VOK(ppt) ) continue;
 
@@ -309,24 +309,24 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
     ar->SetNumberOfTuples(nc);
     ar->SetName("medit:ref");
 
-    int idx = 0;
-    for ( int k = 1; k <= mesh->na; k++ ) {
+    MMG5_int idx = 0;
+    for ( MMG5_int k = 1; k <= mesh->na; k++ ) {
       if ( !mesh->edge[k].a ) continue;
       ar->SetTuple1(idx++,mesh->edge[k].ref);
     }
-    for ( int k = 1; k <= mesh->nt; k++ ) {
+    for ( MMG5_int k = 1; k <= mesh->nt; k++ ) {
      if ( !MG_EOK(&mesh->tria[k]) ) continue;
       ar->SetTuple1(idx++,mesh->tria[k].ref);
     }
-    for ( int k = 1; k <= mesh->nquad; k++ ) {
+    for ( MMG5_int k = 1; k <= mesh->nquad; k++ ) {
       if ( !MG_EOK(&mesh->quadra[k]) ) continue;
       ar->SetTuple1(idx++,mesh->quadra[k].ref);
     }
-    for ( int k = 1; k <= mesh->ne; k++ ) {
+    for ( MMG5_int k = 1; k <= mesh->ne; k++ ) {
       if ( !MG_EOK(&mesh->tetra[k]) ) continue;
       ar->SetTuple1(idx++,mesh->tetra[k].ref);
     }
-    for ( int k = 1; k <= mesh->nprism; k++ ) {
+    for ( MMG5_int k = 1; k <= mesh->nprism; k++ ) {
       if ( !MG_EOK(&mesh->prism[k]) ) continue;
       ar->SetTuple1(idx++,mesh->prism[k].ref);
     }
@@ -406,11 +406,11 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
 
     if ( psl->size!= (psl->dim*(psl->dim+1))/2 ) {
       /* scalar or vector field: data order and size isn't modified */
-      for ( int k=1; k<=mesh->np; k++) {
+      for ( MMG5_int k=1; k<=mesh->np; k++) {
         MMG5_pPoint ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) ) continue;
 
-        int    iadr  = k*psl->size;
+        MMG5_int    iadr  = k*psl->size;
         for ( int i=0; i<psl->size; ++i ) {
           dfmt[i] = psl->m[iadr+i];
         }
@@ -423,11 +423,11 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
     }
     else {
       /* Tensor field: we need to reconstruct the entire symetric matrix */
-      for ( int k=1; k<=mesh->np; k++) {
+      for ( MMG5_int k=1; k<=mesh->np; k++) {
         MMG5_pPoint ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) ) continue;
 
-        int iadr  = k*psl->size;
+        MMG5_int iadr  = k*psl->size;
         double *d = &psl->m[iadr];
         if ( psl->dim==2 ) {
           dfmt[0] = d[0];

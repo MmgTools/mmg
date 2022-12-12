@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -96,8 +96,15 @@ int MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     }
 
     /* Take metric at control point */
-    if ( !(MG_GEO & pt->tag[i2]) ) {
-      if ( !MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m) )  return 0;
+    if ( !MG_GEO_OR_NOM(pt->tag[i2]) ) {
+      int ier = MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m);
+      if ( !ier ) {
+        if ( mesh->info.ddebug ) {
+          fprintf(stdout,"  ## Warning:%s:%d: unable to move point (interpreg_ani failure).\n",
+                  __func__,__LINE__);
+        }
+        return 0;
+      }
     }
     else {
       if ( !MMG5_nortri(mesh,pt,no) )  return 0;

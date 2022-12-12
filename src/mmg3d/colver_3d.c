@@ -33,18 +33,19 @@
  * \todo doxygen documentation.
  */
 
-#include "inlined_functions_3d.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t  ddb;
 
 /** Check whether collapse ip -> iq could be performed, ip internal ;
  *  'mechanical' tests (positive jacobian) are not performed here */
-int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
-                    int8_t iedg,int *list,int ilist,int8_t typchk) {
+int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
+                    int8_t iedg,int64_t *list,int ilist,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
   double        calold,calnew,caltmp,ll,lon;
-  int           j,iel,nq,nr;
+  MMG5_int      j,iel,nq,nr;
   int8_t        i,jj,ip,iq;
 
   iq  = MMG5_idir[iface][MMG5_iprv2[iedg]];
@@ -75,22 +76,22 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
     /* Update edges tag for pt0 (needed by lenedg). */
 
     /* prevent from recreating internal edge between boundaries */
-    p0 = &mesh->point[nq];
     if ( mesh->info.fem==typchk ) {
-      if ( !(p0->tag & MG_PARBDY) ) {
-        if ( p0->tag & MG_BDY ) {
-          i = ip;
-          for (jj=0; jj<3; jj++) {
-            i = MMG5_inxt3[i];
-            p0 = &mesh->point[pt->v[i]];
-            if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) )  return 0;
-          }
-        }
-      }
-
-      /* Prevent from creating a tetra with 4 bdy vertices */
       p0 = &mesh->point[nq];
       if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) {
+        i = ip;
+        for (jj=0; jj<3; jj++) {
+          i = MMG5_inxt3[i];
+          p0 = &mesh->point[pt->v[i]];
+          if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ){
+            return 0;
+          }
+        }
+
+        /* Prevent from creating a tetra with 4 bdy vertices */
+        // Algiane (2022) this test is useless I think (because we forbid the
+        // creation of internal edges between boundary points)
+#ifndef NDEBUG
         i  = ip;
         nr = 0;
         for (jj=0; jj<3; jj++) {
@@ -98,34 +99,48 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
           p0 = &mesh->point[pt->v[i]];
           if ( (p0->tag & MG_BDY) && !(p0->tag & MG_PARBDY) ) ++nr;
         }
-        if ( nr==3 ) return 0;
+        if ( nr==3 ) {
+          assert ( 0 && "Uncomment this test, it is not useless");
+          return 0;
+        }
+#endif
       }
     }
     else {
       /* In aniso : prevent from creating a tetra with 4 ridges vertices or
-       * internal edges between to ridges (unable to split it after because of
+       * internal edges between two ridges (unable to split it after because of
        * the ridge metric) */
       if ( met->size==6 ) {
         p0 = &mesh->point[nq];
 
-        if ( p0->tag & MG_GEO ) {
+        if ( (p0->tag & MG_GEO) && !MG_SIN_OR_NOM(p0->tag) ) {
           i = ip;
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO )  return 0;
+            if ( p0->tag & MG_GEO && !MG_SIN_OR_NOM(p0->tag) ) {
+              return 0;
+            }
           }
-        }
 
-        if ( p0->tag & MG_GEO ) {
+          // Algiane (2022) this test is useless because we forbid the creation of
+          // internal edges between boundary points but we can keep it in case we
+          // comment the previous test
+#ifndef NDEBUG
           i  = ip;
           nr = 0;
           for (jj=0; jj<3; jj++) {
             i = MMG5_inxt3[i];
             p0 = &mesh->point[pt->v[i]];
-            if ( p0->tag & MG_GEO ) ++nr;
+            if ( p0->tag & MG_GEO && !MG_SIN_OR_NOM(p0->tag) ) {
+              ++nr;
+            }
           }
-          if ( nr==3 ) return 0;
+          if ( nr==3 ) {
+            assert ( 0 && "Uncomment this test, it is not useless");
+            return 0;
+          }
+#endif
         }
       }
     }
@@ -175,10 +190,10 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
  *
  */
 static inline
-int MMG3D_unfold_shell(MMG5_pMesh  mesh,int start,int end, int na, int nb,int piv,
-                       int *iel,int8_t *iopp) {
+MMG5_int MMG3D_unfold_shell(MMG5_pMesh  mesh,MMG5_int start,MMG5_int end, MMG5_int na, MMG5_int nb,MMG5_int piv,
+                       MMG5_int *iel,int8_t *iopp) {
   MMG5_pTetra  pt;
-  int          adj,*adja;
+  MMG5_int     adj,*adja;
   int8_t       i,ipiv,isface;
 
   adj = start;
@@ -233,12 +248,12 @@ int MMG3D_unfold_shell(MMG5_pMesh  mesh,int start,int end, int na, int nb,int pi
  *
  */
 static int
-MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
+MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *lists,
                     int ilists) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
-  int           nump,numq,iel,jel,jel1,nap,nbp,naq,nbq,nro;
+  MMG5_int      nump,numq,iel,jel,jel1,nap,nbp,naq,nbq,nro;
   int8_t        ip,iq,iopp,i,j,j1,jface,jface1;
 
   pt = &mesh->tetra[k];
@@ -277,8 +292,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
   assert ( mesh->tetra[k].xt && "initial tetra is not boundary");
   pxt = &mesh->xtetra[mesh->tetra[k].xt];
 
-  if ( !( (pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]] & MG_GEO) ||
-          (pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
+  if ( !( MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]]) ||
+          MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]])   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
@@ -323,8 +338,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
 
   pxt      = &mesh->xtetra[mesh->tetra[jel1].xt];
 
-  if ( !( (pxt->tag[MMG5_iarf[jface1][MMG5_iprv2[j1]]] & MG_GEO) ||
-          (pxt->tag[MMG5_iarf[jface1][MMG5_inxt2[j1]]] & MG_GEO)   ) ) {
+  if ( !( MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[jface1][MMG5_iprv2[j1]]]) ||
+          MG_GEO_OR_NOM(pxt->tag[MMG5_iarf[jface1][MMG5_inxt2[j1]]])   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
@@ -334,6 +349,134 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
     devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
     if ( devnew < mesh->info.dhd )  return 0;
   }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ * \param filled 1 if an xtetra has been found (so tag and ref are filled)
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled without
+ * founding an xtetra, adj if an xtetra has been found, 0 otherwise
+ *
+ * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling its
+ * shell in one direction (given by the pivot \a piv).  Stop when meeting the
+ * first xtetra with a non 0 tag (it is sufficient if tags and refs are
+ * consistent through the edge shell except for edges with null tags);
+ *
+ */
+static inline
+int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
+                                  int16_t *tag,MMG5_int *ref, MMG5_int piv,MMG5_int adj,
+                                  int8_t *filled) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     *adja;
+  int8_t       i;
+
+  *filled = 0;
+  while ( adj && (adj != start) ) {
+    pt     = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
+
+    /* update edge ref and tag */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      *ref  = pxt->edg[i];
+      if ( pxt->tag[i] & MG_BDY ) {
+        *tag |= pxt->tag[i];
+        *filled = 1;
+        return adj;
+      }
+    }
+
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+
+  return adj;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param ia local index of edge that must be updated
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \return 1 if success, 0 if fail.
+ *
+ * Get tag and ref of the edge \ia of tetra \a start by traveling its shell.
+ * Stop when meeting the first xtetra (it is sufficient if tags and refs are
+ * consistent through the edge shell);
+ *
+ */
+static inline
+int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *tag,MMG5_int *ref) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     piv,na,nb,adj,*adja;
+  int8_t       filled;
+
+  pt   = &mesh->tetra[start];
+
+  assert( start >= 1 &&  MG_EOK(pt) );
+
+  pxt  = NULL;
+  na   = pt->v[MMG5_iare[ia][0]];
+  nb   = pt->v[MMG5_iare[ia][1]];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( pxt->tag[ia] & MG_BDY ) {
+      *tag |= pxt->tag[ia];
+      *ref = pxt->edg[ia];
+      return 1;
+    }
+  }
+
+  /* Travel in one direction */
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[MMG5_ifar[ia][1]];
+
+  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
+
+  /* If an xtetra has been found or if all shell has been travelled, stop, else,
+   * travel it the other sense */
+  if ( adj > 0 ) {
+    assert ( (adj == start) || filled );
+    return 1;
+  }
+  else if ( adj < 0 ) return 0;
+
+  assert(!adj);
+
+  pt = &mesh->tetra[start];
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][1]] / 4;
+  piv = pt->v[MMG5_ifar[ia][0]];
+
+  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
+
+  if ( adj < 0 ) return 0;
 
   return 1;
 }
@@ -369,17 +512,17 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
  *
  * \remark we don't check edge lengths.
  */
-int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
-                    int8_t iedg,int *listv,int ilistv,int *lists,int ilists,
-                    int refmin,int refplus, int8_t typchk,int isnm,int8_t isnmint) {
+int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
+                    int8_t iedg,int64_t *listv,int ilistv,MMG5_int *lists,int ilists,
+                    MMG5_int refmin,MMG5_int refplus, int8_t typchk,int isnm,int8_t isnmint) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
   MMG5_Tria    tt;
   MMG5_pPar    par;
   double       calold,calnew,caltmp,nadja[3],nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
   double       ps,devold,devnew,hmax,hausd;
-  int          ipp,nump,numq,l,iel,kk;
-  int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
+  MMG5_int     nump,numq,ndepmin,ndepplus,l,kk,iel;
+  int          nr,nbbdy,isloc,iedgeOpp,ipp;
   int16_t      tag;
   int8_t       iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 #ifndef NDEBUG
@@ -426,6 +569,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
   for (l=0; l<ilistv; l++) {
     iel = listv[l] / 4;
     ipp = listv[l] % 4;
+    assert(iel && ipp >=0 && ipp < 4 && "unexpected tetra or local vertex idx");
+
     pt  = &mesh->tetra[iel];
 
     if ( !isnmint ) {
@@ -439,16 +584,21 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
 
     if ( iq < 4 ) {
       nbbdy = 0;
-      if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
+      if ( pt->xt )  {
+        pxt = &mesh->xtetra[pt->xt];
+      }
+
       for (i=0; i<4; i++) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
       }
 
-      /* Topological problem triggered when one of the two faces of collapsed edge is the only
-         internal one : closing a part of the domain */
-      if ( nbbdy == 4 )
+      if ( nbbdy == 4 ) {
+        /* Only one element in the domain: we don't want to delete it */
         return 0;
+      }
       else if ( nbbdy == 3 ) {
+        /* Topological problem triggered when one of the two faces of collapsed
+         edge is the only internal one : closing a part of the domain */
 
         /* Identification of edge number in tetra iel */
         if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
@@ -462,6 +612,42 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       /* Now check that the 2 faces identified by collapse are not boundary */
       if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
         return 0;
+
+      if ( pt->xt )  {
+        for (i=0; i<4; i++) {
+          if ( i==ipp || i==iq ) {
+            continue;
+          }
+
+          /*  Avoid surface crimping: check that the collapse doesn't merge 3
+           *  bdy edge along a non bdy face: we have to check the edge of each
+           *  shell because some MG_BDY tags may be missings due to the creation
+           *  of an xtetra during a previous collapse */
+          if ( !(pxt->ftag[i] & MG_BDY) ) {
+            int16_t tag0,tag1,tag2;
+            int     ref0,ref1,ref2;
+
+            tag0 = tag1 = tag2 = 0;
+            ref0 = ref1 = ref2 = 0;
+
+            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][0],&tag0,&ref0) ) {
+              fprintf(stderr,"\n  ## Error: %s: 0. unable to get edge info.\n",__func__);
+              return 0;
+            }
+            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][1],&tag1,&ref1) ) {
+              fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+              return 0;
+            }
+            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][2],&tag2,&ref2) ) {
+              fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+              return 0;
+            }
+            if ( (tag0 & MG_BDY) && (tag1 & MG_BDY) && (tag2 & MG_BDY ) ) {
+              return 0;
+            }
+          }
+        }
+      }
 
       continue;
     }
@@ -478,15 +664,20 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       }
     }
 
-    /* Prevent from creating a tetra with 4 ridges vertices */
-    if ( mesh->point[numq].tag & MG_GEO ) {
-      i  = ipp;
-      nr = 0;
-      for (iq=0; iq<3; iq++) {
-        i = MMG5_inxt3[i];
-        if ( mesh->point[pt->v[i]].tag & MG_GEO ) ++nr;
+    /* Prevent from creating a tetra with 4 ridges metrics in aniso mode */
+    if ( met && met->m && met->size == 6 ) {
+      if ( (mesh->point[numq].tag & MG_GEO) && !MG_SIN_OR_NOM(mesh->point[numq].tag) ) {
+        i  = ipp;
+        nr = 0;
+        for (iq=0; iq<3; iq++) {
+          i = MMG5_inxt3[i];
+          if ( (mesh->point[pt->v[i]].tag & MG_GEO) &&
+               !MG_SIN_OR_NOM(mesh->point[pt->v[i]].tag) ) {
+            ++nr;
+          }
+        }
+        if ( nr==3 ) return 0;
       }
-      if ( nr==3 ) return 0;
     }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -512,6 +703,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
   for (l=1; l<ilists-1; l++) {
     iel  = lists[l] / 4;
     iopp = lists[l] % 4;
+    assert(iel && iopp >=0 && iopp < 4 && "unexpected tetra or local vertex idx");
+
     pt   = &mesh->tetra[iel];
     pxt  = &mesh->xtetra[pt->xt];
     assert(pt->xt);
@@ -538,8 +731,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
 
     iedgeOpp =  MMG5_iarf[iopp][ia];
 
-    if ( ! ( (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ||
-             (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+    if ( ! ( MG_GEO_OR_NOM(mesh->xtetra[pt->xt].tag[iedgeOpp])) ) {
 
       ier = MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nadja);
       if ( ier < 0 )  return -1;
@@ -567,8 +759,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
 
       iedgeOpp =  MMG5_iarf[iopp2][ipp];
 
-      if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
-               (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+      if ( ! ( MG_GEO_OR_NOM(mesh->xtetra[pt1->xt].tag[iedgeOpp] ) ) ) {
         ier = MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
 
         if ( ier < 0 )  return -1;
@@ -585,7 +776,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       ia = MMG5_iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
-      if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
+      if ( !MG_GEO_OR_NOM(mesh->xtetra[pt->xt].tag[ia]) ) {
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
 
@@ -704,8 +895,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
 
   iedgeOpp =  MMG5_iarf[iopp2][ipp];
 
-  if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
-           (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+  if ( ! ( MG_GEO_OR_NOM(mesh->xtetra[pt1->xt].tag[iedgeOpp]) ) ) {
+
     ier = MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
     if ( ier < 0 )  return -1;
     else if ( !ier ) return 0;
@@ -718,7 +909,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
   }
 
   if ( isnm || mesh->info.iso ) {
-    ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
+    ier = MMG3D_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
     if ( !ier )  return 0;
   }
   else {
@@ -746,13 +937,14 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
  *
  */
 static inline
-void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
+void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,MMG5_int np, MMG5_int nq,
                           uint8_t ip, MMG5_pTetra pt1,MMG5_pxTetra pxt1,
                           uint8_t voyp) {
 
-  int     i,j,p0,p1;
-  uint8_t ia,iav;
-  int16_t tag,tag1;
+  int      i,j;
+  MMG5_int p0,p1;
+  uint8_t  ia,iav;
+  int16_t  tag,tag1;
 
   /* update tags for edges */
   for ( j=0; j<3; j++ ) {
@@ -807,11 +999,11 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
  *
  */
 static inline
-int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
-                                     int16_t tag,int ref, int piv,int adj) {
+MMG5_int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
+                                     int16_t tag,MMG5_int ref, MMG5_int piv,MMG5_int adj) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int          *adja;
+  MMG5_int     *adja;
   int16_t      xtag;
   int8_t       i;
 
@@ -872,10 +1064,10 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
  *
  */
 static inline
-int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref) {
+int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t tag,MMG5_int ref) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int          piv,na,nb,adj,*adja;
+  MMG5_int     piv,na,nb,adj,*adja;
   int16_t      xtag;
 
   pt   = &mesh->tetra[start];
@@ -935,134 +1127,6 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,
 
 /**
  * \param mesh pointer toward the mesh
- * \param start tetra from which we start to travel
- * \param na edge vertex
- * \param nb edge vertex
- * \param tag new edge tag
- * \param ref new edge ref
- * \param piv global index of the pivot to set the sense of travel
- * \param adj index of adjacent tetra for the travel
- * \param filled 1 if an xtetra has been found (so tag and ref are filled)
- *
- * \return -1 if fail, \a start if shell has been completely travelled without
- * founding an xtetra, adj if an xtetra has been found, 0 otherwise
- *
- * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling its
- * shell in one direction (given by the pivot \a piv).  Stop when meeting the
- * first xtetra with a non 0 tag (it is sufficient if tags and refs are
- * consistent through the edge shell except for edges with null tags);
- *
- */
-static inline
-int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
-                                  int16_t *tag,int *ref, int piv,int adj,
-                                  int8_t *filled) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  int          *adja;
-  int8_t       i;
-
-  *filled = 0;
-  while ( adj && (adj != start) ) {
-    pt     = &mesh->tetra[adj];
-
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
-
-    /* update edge ref and tag */
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      *ref  = pxt->edg[i];
-      if ( pxt->tag[i] & MG_BDY ) {
-        *tag |= pxt->tag[i];
-        *filled = 1;
-        return adj;
-      }
-    }
-
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
-
-  return adj;
-}
-
-/**
- * \param mesh pointer toward the mesh
- * \param start tetra from which we start to travel
- * \param ia local index of edge that must be updated
- * \param tag new edge tag
- * \param ref new edge ref
- * \return 1 if success, 0 if fail.
- *
- * Get tag and ref of the edge \ia of tetra \a start by traveling its shell.
- * Stop when meeting the first xtetra (it is sufficient if tags and refs are
- * consistent through the edge shell);
- *
- */
-static inline
-int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t *tag,int *ref) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  int          piv,na,nb,adj,*adja;
-  int8_t       filled;
-
-  pt   = &mesh->tetra[start];
-
-  assert( start >= 1 &&  MG_EOK(pt) );
-
-  pxt  = NULL;
-  na   = pt->v[MMG5_iare[ia][0]];
-  nb   = pt->v[MMG5_iare[ia][1]];
-
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    if ( pxt->tag[ia] & MG_BDY ) {
-      *tag |= pxt->tag[ia];
-      *ref = pxt->edg[ia];
-      return 1;
-    }
-  }
-
-  /* Travel in one direction */
-  adja = &mesh->adja[4*(start-1)+1];
-  adj = adja[MMG5_ifar[ia][0]] / 4;
-  piv = pt->v[MMG5_ifar[ia][1]];
-
-  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
-
-  /* If an xtetra has been found or if all shell has been travelled, stop, else,
-   * travel it the other sense */
-  if ( adj > 0 ) {
-    assert ( (adj == start) || filled );
-    return 1;
-  }
-  else if ( adj < 0 ) return 0;
-
-  assert(!adj);
-
-  pt = &mesh->tetra[start];
-  adja = &mesh->adja[4*(start-1)+1];
-  adj = adja[MMG5_ifar[ia][1]] / 4;
-  piv = pt->v[MMG5_ifar[ia][0]];
-
-  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
-
-  if ( adj < 0 ) return 0;
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  * \param list pointer toward the ball of the point
  * \param ilist number of elements in the ball of the point
@@ -1077,11 +1141,11 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t *tag,in
  * (i.e. approximation of the surface, etc... must be performed outside).
  *
  */
-int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,int8_t typchk) {
+MMG5_int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ilist,int8_t indq,int8_t typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
-  int                  iel,jel,pel,qel,k,np,nq,*adja;
+  MMG5_int             iel,jel,pel,qel,k,np,nq,*adja;
   uint8_t              ip,iq,j,voy,voyp,voyq;
 
   /* coledge[i] contains the local indices of edges that will be merged by the
@@ -1204,10 +1268,10 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
       int iped = coled[l+0];
       int iqed = coled[l+1];
 
-      int16_t tagip = 0;
-      int     refip = 0;
-      int16_t tagiq = 0;
-      int     refiq = 0;
+      int16_t  tagip = 0;
+      MMG5_int refip = 0;
+      int16_t  tagiq = 0;
+      MMG5_int refiq = 0;
 
       if ( !MMG3D_get_shellEdgeTag(mesh,iel,iped,&tagip,&refip) ) {
         fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);

@@ -33,14 +33,14 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see the \a
- * common/libmmgcommon.h, \a mmgs/libmmgs.h and \a mmg3d/libmmg3d.h header files
+ * common/libmmgcommon_private.h, \a mmgs/libmmgs.h and \a mmg3d/libmmg3d.h header files
  * for the documentation of all the usefull user's API functions.
  *
  * C API for MMG library.
  *
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -57,6 +57,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  MMG5_OFF;
+  /* [n/10]   ,Value for isosurface boundary reference */
+  mesh->info.isoref   =  MG_ISO;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
   /* [0/1]    ,Turn on/off debug mode */
@@ -392,7 +394,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 
 void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   MMG5_pPoint ppt;
-  int         k,iadr;
+  MMG5_int    k,iadr;
 
   if ( met->size == 1 ) {
     for (k=1; k<=mesh->np; k++) {
@@ -556,12 +558,18 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethma
     return 0;
   }
 
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
   return 1;
 }
 
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
-  int8_t         sethmin,sethmax;
-
 
   if ( mesh->info.hmin > mesh->info.hsiz ) {
     fprintf(stderr,"\n  ## Error: %s: Mismatched options: hmin (%e) is greater"
@@ -579,20 +587,21 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
 
   *hsiz = mesh->info.hsiz;
 
-  sethmin = sethmax = 0;
-  if ( mesh->info.hmin > 0. ) {
-    sethmin = 1;
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  if ( mesh->info.sethmin ) {
     *hsiz    =  MG_MAX(mesh->info.hmin,*hsiz);
   }
 
-  if ( mesh->info.hmax > 0. ) {
-    sethmax = 1;
+  if ( mesh->info.sethmax ) {
     *hsiz    = MG_MIN(mesh->info.hmax,*hsiz);
   }
 
   /* Set hmin */
-  if ( !sethmin ) {
-    if ( sethmax ) {
+  if ( !mesh->info.sethmin ) {
+    if ( mesh->info.sethmax ) {
       mesh->info.hmin  = MG_MIN(0.1*(*hsiz),0.1*mesh->info.hmax);
     } else {
       mesh->info.hmin  = 0.1*(*hsiz);
@@ -600,15 +609,33 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
   }
 
   /* Set hmax */
-  if ( !sethmax ) {
-    if ( sethmin ) {
+  if ( !mesh->info.sethmax ) {
+    if ( mesh->info.sethmin ) {
       mesh->info.hmax  = MG_MAX(10.*(*hsiz),10.*mesh->info.hmin);
     } else {
       mesh->info.hmax  = 10.*(*hsiz);
     }
   }
 
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After hsiz computation:   hmin %lf (user setted %d)\n"
+            "                               hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
   return 1;
+}
+
+/* Useful tools to manage C strings */
+char *MMG5_Get_basename(char *path) {
+  char *s = strrchr(path, '/');
+
+  if (!s)
+    return strdup(path);
+  else
+    return strdup(s + 1);
 }
 
 
@@ -656,72 +683,277 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
-int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
-                      int split,int rin,int rex){
-  MMG5_pMat mat;
-  int k;
+const char* MMG5_Get_tagName(int tag)
+{
+  static char tags_name[1024];
 
-  if ( !mesh->info.nmat ) {
-    fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
-    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
-    fprintf(stderr," values in multi material structure. \n");
-    return 0;
-  }
-  if ( mesh->info.nmati >= mesh->info.nmat ) {
-    fprintf(stderr,"\n  ## Error: %s: unable to set a new material.\n",
-            __func__);
-    fprintf(stderr,"    max number of materials: %d\n",mesh->info.nmat);
-    return 0;
-  }
-  if ( ref < 0 ) {
-    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
-            __func__);
-    return 0;
+  if ( !tag )
+  {
+    return "No tag";
   }
 
-  for (k=0; k<mesh->info.nmati; k++) {
-    mat = &mesh->info.mat[k];
+  if ( tag & MG_NUL ) {
+    return "Removed";
+  }
 
-    if ( mat->ref == ref ) {
-      mat->dospl = split;
-      if ( split ) {
-        mat->rin   = rin;
-        mat->rex   = rex;
+  strcpy(tags_name, "\0");
+
+  if ( tag & MG_REF ) {
+    strcat(tags_name,"Reference ");
+  }
+
+  if ( tag & MG_GEO) {
+    strcat(tags_name,"Ridge ");
+  }
+
+  if ( tag & MG_REQ) {
+    strcat(tags_name,"Required ");
       }
-      else {
-        mat->rin = mat->ref;
-        mat->rex = mat->ref;
+
+  if ( tag & MG_NOM) {
+    strcat(tags_name,"Non-manifold ");
       }
-      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-        fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
-                __func__);
-        fprintf(stderr," for material of ref %d\n",ref);
+
+  if ( tag & MG_BDY) {
+    strcat(tags_name,"Boundary ");
       }
-      return 1;
+
+  if ( tag & MG_CRN) {
+    strcat(tags_name,"Corner ");
+    }
+
+  if ( tag & MG_NOSURF) {
+    strcat(tags_name,"Nosurf ");
+  }
+
+  if ( tag & MG_OPNBDY) {
+    strcat(tags_name,"Opnbdy ");
+  }
+
+  if ( tag & MG_OLDPARBDY) {
+    strcat(tags_name,"Old-parbdy ");
+  }
+
+  if ( tag & MG_PARBDYBDY) {
+    strcat(tags_name,"Parbdybdy ");
+  }
+
+  if ( tag & MG_PARBDY) {
+    strcat(tags_name,"Parbdy ");
+    }
+  strcat(tags_name,"tag(s).");
+
+  return tags_name;
+}
+
+/**
+ * \param ptr pointer toward the file extension (dot included)
+ * \param fmt default file format.
+ *
+ * \return and index associated to the file format detected from the extension.
+ *
+ * Get the wanted file format from the mesh extension. If \a fmt is provided, it
+ * is used as default file format (\a ptr==NULL), otherwise, the default file
+ * format is the medit one.
+ *
+ */
+int MMG5_Get_format( char *ptr, int fmt ) {
+  /* Default is the Medit file format or a format given as input */
+  int defFmt = fmt;
+
+  if ( !ptr ) return defFmt;
+
+  if ( !strncmp ( ptr,".meshb",strlen(".meshb") ) ) {
+    return MMG5_FMT_MeditBinary;
+  }
+  else if ( !strncmp( ptr,".mesh",strlen(".mesh") ) ) {
+    return MMG5_FMT_MeditASCII;
+  }
+  else if ( !strncmp( ptr,".mshb",strlen(".mshb") ) ) {
+    return MMG5_FMT_GmshBinary;
+  }
+  else if ( !strncmp( ptr,".msh",strlen(".msh") ) ) {
+    return MMG5_FMT_GmshASCII;
+  }
+  else if ( !strncmp ( ptr,".pvtu",strlen(".pvtu") ) ) {
+    return MMG5_FMT_VtkPvtu;
+  }
+  else if ( !strncmp ( ptr,".vtu",strlen(".vtu") ) ) {
+    return MMG5_FMT_VtkVtu;
+  }
+  else if ( !strncmp ( ptr,".pvtp",strlen(".pvtu") ) ) {
+    return MMG5_FMT_VtkPvtp;
+  }
+  else if ( !strncmp ( ptr,".vtp",strlen(".vtp") ) ) {
+    return MMG5_FMT_VtkVtp;
+  }
+  else if ( !strncmp ( ptr,".vtk",strlen(".vtk") ) ) {
+    return MMG5_FMT_VtkVtk;
+  }
+  else if ( !strncmp ( ptr,".node",strlen(".node") ) ) {
+    return MMG5_FMT_Tetgen;
+  }
+
+  return defFmt;
+}
+
+/**
+ * \param fmt file format.
+ *
+ * \return The name of the file format in a string.
+ *
+ * Print the name of the file format associated to \a fmt.
+ *
+ */
+const char* MMG5_Get_formatName(enum MMG5_Format fmt)
+{
+  switch (fmt)
+  {
+  case MMG5_FMT_MeditASCII:
+    return "MMG5_FMT_MeditASCII";
+    break;
+  case MMG5_FMT_MeditBinary:
+    return "MMG5_FMT_MeditBinary";
+    break;
+  case MMG5_FMT_VtkVtu:
+    return "MMG5_FMT_VtkVtu";
+    break;
+  case MMG5_FMT_VtkVtp:
+    return "MMG5_FMT_VtkVtp";
+    break;
+  case MMG5_FMT_VtkPvtu:
+    return "MMG5_FMT_VtkPvtu";
+    break;
+  case MMG5_FMT_VtkPvtp:
+    return "MMG5_FMT_VtkPvtp";
+    break;
+  case MMG5_FMT_VtkVtk:
+    return "MMG5_FMT_VtkVtk";
+    break;
+  case MMG5_FMT_GmshASCII:
+    return "MMG5_FMT_GmshASCII";
+    break;
+  case MMG5_FMT_GmshBinary:
+    return "MMG5_FMT_GmshBinary";
+    break;
+  case MMG5_FMT_Tetgen:
+    return "MMG5_FMT_Tetgen";
+    break;
+  default:
+    return "MMG5_Unknown";
+  }
+}
+
+/**
+ * \param filename string containing a filename
+ *
+ * \return pointer toward the filename extension or toward the end of the string
+ * if no extension have been founded
+ *
+ * Get the extension of the filename string. Do not consider '.o' as an extension.
+ *
+ */
+char *MMG5_Get_filenameExt( char *filename ) {
+  const char pathsep='/';
+  char       *dot,*lastpath;
+
+  if ( !filename ) {
+    return NULL;
+  }
+
+  dot = strrchr(filename, '.');
+  lastpath = (pathsep == 0) ? NULL : strrchr (filename, pathsep);
+
+  if ( (!dot) || dot == filename || (lastpath>dot) || (!strcmp(dot,".o")) ) {
+    /* No extension */
+    return filename + strlen(filename);
+  }
+
+  return dot;
+}
+
+/**
+ * \param path string containing a filename and its path
+ *
+ * \return a pointer toward the path allocated here
+ *
+ * Remove filename from a path and return the path in a newly allocated string.
+ *
+ */
+char *MMG5_Get_path(char *path) {
+  char *lastpath,*retpath;
+  int len;
+
+  if ( path == NULL) return NULL;
+
+  lastpath = (MMG5_PATHSEP == 0) ? NULL : strrchr (path, MMG5_PATHSEP);
+
+  if ( !lastpath ) {
+    return NULL;
+  }
+
+
+  len = 0;
+  while ( path+len != lastpath ) {
+    ++len;
+  }
+
+  MMG5_SAFE_MALLOC(retpath,len+1,char,return NULL);
+
+  /* Copy the string without the extension and add \0 */
+  strncpy ( retpath, path, len );
+  retpath[len] = '\0';
+
+  return retpath;
+}
+
+/**
+ * \param path path from which we want to remove the extension.
+ *
+ * \return allocated string or NULL if the allocation fail.
+ *
+ * Allocate a new string and copy \a path without extension in it.
+ *
+ */
+char *MMG5_Remove_ext (char* path,char *ext) {
+  int        len;
+  char       *retpath, *lastext, *lastpath;
+  char       *extloc;
+
+  /* Default extension if not provided */
+  if ( (!ext) || !*ext ) {
+    extloc = ".";
+  }
+  else {
+    extloc = ext;
+  }
+
+  /* Error checks and string allocation. */
+  if ( path == NULL) return NULL;
+
+  /* Find the relevant characters and the length of the string without
+   * extension */
+  lastext = strstr (path, extloc);
+  lastpath = (MMG5_PATHSEP == 0) ? NULL : strrchr (path, MMG5_PATHSEP);
+
+  if ( lastext == NULL || (lastpath != NULL && lastpath > lastext) ) {
+    /* No extension or the extension is left from a separator (i.e. it is not an
+     * extension) */
+    len = strlen(path);
+  }
+  else {
+    /* An extension is found */
+    len = 0;
+    while ( path+len != lastext ) {
+      ++len;
     }
   }
 
-  if ( ( split != MMG5_MMAT_Split ) && ( split != MMG5_MMAT_NoSplit ) ) {
-    fprintf(stderr,"\n ## Error: %s: unexpected value for the 'split' argument."
-            " You must use the MMG5_MMAT_Split or MMG5_MMAT_NpSplit keywords \n",
-            __func__);
-    return 0;
-  }
+  MMG5_SAFE_MALLOC(retpath,len+1,char,return NULL);
 
-  mesh->info.mat[mesh->info.nmati].ref   = ref;
-  mesh->info.mat[mesh->info.nmati].dospl = split;
-  mesh->info.mat[mesh->info.nmati].rin   = rin;
-  mesh->info.mat[mesh->info.nmati].rex   = rex;
+  /* Copy the string without the extension and add \0 */
+  strncpy ( retpath, path, len );
+  retpath[len] = '\0';
 
-  mesh->info.nmati++;
-
-  /* Invert the table if all materials have been set */
-  if( mesh->info.nmati == mesh->info.nmat )
-    if( !MMG5_MultiMat_init(mesh) ) {
-      fprintf(stderr,"\n ## Error: %s: unable to create lookup table for multiple materials.\n",
-              __func__);
-      return 0;
-    }
-
-  return 1;
+  return retpath;
 }

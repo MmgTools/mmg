@@ -31,7 +31,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
+#include "mmg2dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -54,15 +55,18 @@ double MMG2D_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   return cal;
 }
 
-/* Compute quality of the triangle pt when the supplied metric is isotropic;
-   return 0 in the case that the triangle has inverted orientation */
-double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
-  double    abx,aby,acx,acy,bcx,bcy;
-  double    *a,*b,*c,h1,h2,h3,area,hm;
-
-  a  = mesh->point[pt->v[0]].c;
-  b  = mesh->point[pt->v[1]].c;
-  c  = mesh->point[pt->v[2]].c;
+/**
+ * \param a coordinates of first vertex of tria
+ * \param b coordinates of second vertex of tria
+ * \param c coordinates of third vertex of tria
+ *
+ * \return non-normalized quality if success, 0 if triangle is null or inverted.
+ *
+ * Compute quality of a triangle from the datum of its 3 vertices.
+ *
+ */
+double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
+  double        abx,aby,acx,acy,bcx,bcy,area,h1,h2,h3,hm;
 
   abx = b[0] - a[0];
   aby = b[1] - a[1];
@@ -90,13 +94,36 @@ double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   }
 }
 
+/**
+ * \param pointer toward the mesh
+ * \param pointer toward the metric (for compatibility with aniso interface)
+ * \param pt pointer toward the tria
+ *
+ * \return non-normalized quality if success, 0 if triangle is null or inverted.
+ *
+ * Compute quality of the triangle pt when the supplied metric is isotropic;
+ * return 0 in the case that the triangle has inverted orientation.
+ */
+double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
+  double    *a,*b,*c;
+
+  a  = mesh->point[pt->v[0]].c;
+  b  = mesh->point[pt->v[1]].c;
+  c  = mesh->point[pt->v[2]].c;
+
+  return MMG2D_caltri_iso_3pt(a,b,c);
+}
+
+
+
 /* Compute quality of the triangle pt when the supplied metric is anisotropic;
  return 0 in the case that the triangle has inverted orientation */
 double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double     abx,aby,acx,acy,bcx,bcy;
   double     *a,*b,*c,*ma,*mb,*mc;
   double     area,aream,hm,m[6],h1,h2,h3;
-  int        ipa,ipb,ipc,i;
+  MMG5_int   ipa,ipb,ipc;
+  int        i;
 
   ipa = pt->v[0];
   ipb = pt->v[1];
@@ -156,7 +183,8 @@ double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med,good;
-  int           i,k,iel,ok,ir,imax,nex,his[5];
+  int           i,ir,imax,his[5];
+  MMG5_int      k,iel,ok,nex;
   static int8_t mmgWarn0;
 
   /* Compute triangle quality*/
@@ -212,11 +240,11 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
 #ifndef DEBUG
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+  fprintf(stdout,"\n  -- MESH QUALITY   %" MMG5_PRId "\n",mesh->nt - nex);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%" MMG5_PRId ")\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 #else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d\n",
+  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%" MMG5_PRId ")\n => %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel,
           MMG5_indPt(mesh,mesh->tria[iel].v[0]),MMG5_indPt(mesh,mesh->tria[iel].v[1]),
           MMG5_indPt(mesh,mesh->tria[iel].v[2]));

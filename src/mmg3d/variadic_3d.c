@@ -38,9 +38,9 @@
  *
  */
 
-#include "mmg3d.h"
-
-#include "mmg3dexterns.h"
+#include "libmmg3d_private.h"
+#include "libmmg3d.h"
+#include "mmg3dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -217,16 +217,6 @@ int MMG3D_Init_mesh_var( va_list argptr ) {
     fprintf(stderr,"\n  ## Error: %s: MMG3D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n",__func__);
-    return 0;
-  }
-
-  if ( !(sol || ls || disp) ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG3D_Init_mesh:\n"
-            " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet, "
-            " MMG5_ARG_ppLs or MMG5_ARG_ppDisp preprocessor variable)"
-            " that will contain the output mesh metric, level-set or"
-            " displacement.\n",__func__);
     return 0;
   }
 

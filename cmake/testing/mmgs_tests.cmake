@@ -20,8 +20,6 @@
 ##  use this copy of the Mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
-
 ###############################################################################
 #####
 #####         Continuous Integration
@@ -61,6 +59,8 @@ ADD_TEST(NAME mmgs_val
   COMMAND ${EXECUT_MMGS} -val
   ${MMGS_CI_TESTS}/Teapot/teapot
   )
+SET_PROPERTY(TEST mmgs_val
+  PROPERTY WILL_FAIL TRUE)
 
 # nsd
 ADD_TEST(NAME mmgs_nsd24
@@ -68,13 +68,16 @@ ADD_TEST(NAME mmgs_nsd24
   ${MMGS_CI_TESTS}/Teapot/teapot
   -out ${CTEST_OUTPUT_DIR}/mmgs_nsd24.o.meshb)
 
-#ADD_TEST(NAME mmgs_default
-#  COMMAND ${EXECUT_MMGS} -default
-#  ${MMGS_CI_TESTS}/Teapot/teapot
-#  -out ${CTEST_OUTPUT_DIR}/mmgs_memOption.o.meshb)
-
-SET_PROPERTY(TEST mmgs_val #mmgs_default
-  PROPERTY WILL_FAIL TRUE)
+ADD_TEST(NAME mmgs_locParamCrea
+  COMMAND ${EXECUT_MMGS} -v 5 -default
+  ${MMGS_CI_TESTS}/LocParamsCrea/circle2refs.mesh)
+SET_TESTS_PROPERTIES ( mmgs_locParamCrea
+  PROPERTIES FIXTURES_SETUP mmgs_locParamCrea )
+ADD_TEST(NAME mmgs_locParamClean
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+  ${MMGS_CI_TESTS}/LocParamsCrea/circle2refs.mmgs)
+SET_TESTS_PROPERTIES ( mmgs_locParamClean
+  PROPERTIES FIXTURES_REQUIRED mmgs_locParamCrea )
 
 ###############################################################################
 #####
@@ -112,7 +115,7 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
-IF ( NOT VTK_FOUND )
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmgs_vtkvtp
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -193,9 +196,31 @@ ADD_TEST(NAME mmgs_OptLs_teapot2
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot2-teapot.o.meshb)
 
+add_test(
+  NAME mmgs_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMGS} -v 5 -ls ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh.mesh
+  -sol ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_isoref.o.mesh
+  )
+add_test(
+  NAME mmgs_OptLs_isoref_5
+  COMMAND ${EXECUT_MMGS} -v 5 -isoref 5 -ls
+  ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh-isoref5.mesh
+  -sol ${MMGS_CI_TESTS}/OptLs_isoref/surf-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmgs_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmgs_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmgs_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
+
+
 ####### -met option
 ADD_TEST(NAME mmgs_2squares-withMet
-  COMMAND ${EXECUT_MMGS} -v 5
+  COMMAND ${EXECUT_MMGS} -v 5 -d
   ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-met.o.meshb)
 
@@ -217,7 +242,6 @@ ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
   COMMAND ${EXECUT_MMGS} -v 5 -ls -nsd 3 ${common_args}
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-ls-nsd3.o.meshb)
-
 
 ###############################################################################
 #####
@@ -262,6 +286,25 @@ ADD_TEST(NAME mmgs_LSMultiMat
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
 
+ADD_TEST(NAME mmgs_LSMultiMat-rmc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3 -rmc
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
+
+# ls + rmc + LSBaseReference
+ADD_TEST(NAME mmgs_OptLs_LSBaseReferences-rmc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -rmc
+  ${MMGS_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMGS_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_LSBaseReferences-rmc.o.meshb)
+
+ADD_TEST(NAME mmgs_OptLs_LSBaseReferences-normc
+  COMMAND ${EXECUT_MMGS} -v 5 -ls
+  ${MMGS_CI_TESTS}/LSBaseReferences/box
+  -sol ${MMGS_CI_TESTS}/LSBaseReferences/box.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_LSBaseReferences-normc.o.meshb)
+
 # non 0 ls
 ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   COMMAND ${EXECUT_MMGS} -v 5 -ls 0.01 -hausd 0.001
@@ -269,6 +312,22 @@ ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-nonzero.o.meshb)
 
+# optim + aniso option with corners
+ADD_TEST(NAME mmgs_CubeOptimAni
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/CubeOptimAni/cube-ani
+  -out ${CTEST_OUTPUT_DIR}/mmgs_CubeOptimAni-cube.o.meshb)
+
+# optim + aniso option for open surface
+ADD_TEST(NAME mmgs_OpnbdyOptimAni-circle
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/OpnbdyOptimAni/cercle-3D.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-circle.o.meshb)
+
+ADD_TEST(NAME mmgs_OpnbdyOptimAni-adap1
+  COMMAND ${EXECUT_MMGS} -v 5 -optim -A -hgrad -1
+  ${MMGS_CI_TESTS}/OpnbdyOptimAni/adap1-3D.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-adap1.o.meshb)
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmgs_LSMultiMat_optim
@@ -283,6 +342,13 @@ ADD_TEST(NAME mmgs_LSMultiMat_optimAni
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optimAni.o.meshb)
+
+SET(passRegex "## ERROR: MISMATCH OPTIONS: OPTIM OPTION IS NOT AVAILABLE")
+
+SET_PROPERTY(TEST mmgs_LSMultiMat_optim
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+SET_PROPERTY(TEST mmgs_LSMultiMat_optimAni
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 # ls discretisation + hsiz option
 ADD_TEST(NAME mmgs_LSMultiMat_hsiz
@@ -313,3 +379,67 @@ ADD_TEST(NAME mmgs_LSMultiMat_withMetAndLs
   -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMetAndLs.o.meshb)
+
+# ls discretization with wrong orientation of input triangles
+ADD_TEST(NAME mmgs_LSTriaOri
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
+  ${MMGS_CI_TESTS}/LSTriaOri/fault.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_LSTriaOri.o.meshb)
+
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmgs_OptLsSurf_box
+  COMMAND ${EXECUT_MMGS} -v 5 -lssurf
+  -sol ${MMGS_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMGS_CI_TESTS}/OptLsSurf_box/box-3D.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLsSurf_box.o.meshb
+  )
+
+# lssurf + multimat: discretization of boundaries only
+ADD_TEST(NAME mmgs_OptLsSurf_multiMat_box
+  COMMAND ${EXECUT_MMGS} -v 5 -lssurf
+  -sol ${MMGS_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMGS_CI_TESTS}/OptLsSurf_box/box_multiMat-3D.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLsSurf_multiMat_box.o.meshb
+  )
+
+
+###############################################################################
+#####
+#####         Check snapping (prevision of non-manifold situations)
+#####
+###############################################################################
+#####
+SET(nmRegex "unsnap at least 1 point")
+
+ADD_TEST(NAME mmgs_LSSnapval_manifold1
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmgs_LSSnapval_manifold2
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_manifold2.o.mesh
+  )
+
+SET_PROPERTY(TEST mmgs_LSSnapval_manifold1 mmgs_LSSnapval_manifold2
+  PROPERTY FAIL_REGULAR_EXPRESSION "${nmRegex}")
+
+ADD_TEST(NAME mmgs_LSSnapval_non-manifold1
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/8elts1-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_non-manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmgs_LSSnapval_non-manifold2
+  COMMAND ${EXECUT_MMGS} -v 5  -ls
+  -in ${MMGS_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMGS_CI_TESTS}/LSSnapval/8elts2-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_LSSnapval_non-manifold2.o.mesh
+  )
+SET_PROPERTY(TEST mmgs_LSSnapval_non-manifold1 mmgs_LSSnapval_non-manifold2
+  PROPERTY PASS_REGULAR_EXPRESSION "${nmRegex}")
