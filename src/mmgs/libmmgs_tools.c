@@ -1009,7 +1009,6 @@ int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int k, int i,
   MMG5_int iel = k;
   int j        = i;
   do {
-    ptt   = &mesh->tria[iel];
     adja  = &mesh->adja[3*(iel-1)+1];
     i1    = MMG5_iprv2[j];
     kold  = iel;

@@ -941,9 +941,6 @@ int MMG2D_regver(MMG5_pMesh mesh) {
         return 0;
       }
 
-      p1 = &mesh->point[ip1];
-      p2 = &mesh->point[ip2];
-
       cx += tmp[2*(ip1-1)+1];
       cy += tmp[2*(ip1-1)+2];
 

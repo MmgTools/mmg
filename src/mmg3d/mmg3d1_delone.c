@@ -178,7 +178,6 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
 
     /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
     pt = &mesh->tetra[k];
-    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     if ( ier < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);

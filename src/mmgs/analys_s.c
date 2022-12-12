@@ -781,7 +781,7 @@ static inline int MMGS_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, dou
     mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
     mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
 
-    ier = MMG5_nortri(mesh, pt, nnew);
+    MMG5_nortri(mesh, pt, nnew);
     MMG5_dotprod(3,n,nnew,&result);
 
     if ( result <= 0.0 ) {
@@ -935,7 +935,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
 
         if ( !MG_EOK(pt) ) continue;
 
-        ier = MMG5_nortri(mesh, pt, n);
+        MMG5_nortri(mesh, pt, n);
 
         for (i=0;i<3;i++) {
           tnew.v[i] = pt->v[i];
@@ -947,7 +947,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
 
         tnew.v[i] = 0;
 
-        ier = MMG5_nortri(mesh, &tnew, nnew);
+        MMG5_nortri(mesh, &tnew, nnew);
         MMG5_dotprod(3,n,nnew,&result);
         if ( result < 0.0 ) {
           if (!MMGS_dichotomy(mesh,&tnew,k,c,n))

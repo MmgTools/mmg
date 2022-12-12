@@ -1442,7 +1442,6 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
     if ( !mark[k] ) {
       continue;
     }

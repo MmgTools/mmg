@@ -190,7 +190,6 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,MMG5_int base) {
       int i2 = MMG5_iprv2[i];
 
       MMG5_int jel = adja[i] / 3;
-      j            = adja[i] % 3;
 
       if ( base ) {
         if ( !jel ) {

@@ -855,7 +855,7 @@ static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k
     mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
     mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
 
-    ier = MMG5_nortri(mesh, pt, nnew);
+    MMG5_nortri(mesh, pt, nnew);
     MMG5_dotprod(3,n,nnew,&result);
 
     if ( result <= 0.0 ) {
@@ -959,7 +959,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
   MMG5_pPoint   ppt,p0;
   MMG5_Tria     tnew;
   double        *tabl,c[3],n[3],nnew[3],*cptr,lm1,lm2,cx,cy,cz,res0,res,result;
-  int           i,ii,it,nit,ilist,noupdate,ier;
+  int           i,ii,it,nit,ilist,noupdate;
   MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,iad,v[4];
   int64_t       tetlist[MMG5_LMAX];
 
@@ -1091,7 +1091,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
 
         if ( !MG_EOK(pt) ) continue;
 
-        ier = MMG5_nortri(mesh, pt, n);
+        MMG5_nortri(mesh, pt, n);
 
         for (i=0;i<3;i++) {
           tnew.v[i] = pt->v[i];
@@ -1103,7 +1103,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
 
         tnew.v[i] = 0;
 
-        ier = MMG5_nortri(mesh, &tnew, nnew);
+        MMG5_nortri(mesh, &tnew, nnew);
         MMG5_dotprod(3,n,nnew,&result);
         if ( result < 0.0 ) {
           if (!MMG3D_dichotomytria(mesh,&tnew,k,c,n))

@@ -142,7 +142,6 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
     if ( !mark[k] )  {
       continue;
     }
