@@ -28,8 +28,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-#include "mmgcmakedefines.h"
-#include "mmgversion.h"
+#include "mmg/common/mmgcmakedefines.h"
+#include "mmg/common/mmgversion.h"
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
@@ -528,9 +528,11 @@ typedef struct {
   int           nmati,nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
   int8_t        nreg; /*!< normal regularization */
+  int8_t        xreg; /*!< vertices regularization */
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
+  int8_t        isosurf; /*!< level-set discretization mode on the surface */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
@@ -542,7 +544,13 @@ typedef struct {
   int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   uint8_t       ani, optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  uint8_t       metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
+  uint8_t       metRidTyp;
+  /*!< metRidTyp
+   * - in 3D: 0 for a classical storage of the aniso
+   * metric at ridge, 1 for the Mmg storage (modified
+   * by defsiz)
+   * - in 2D: used to detect if we call assignEdge function for the first time inside the library */
+
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
 } MMG5_Info;

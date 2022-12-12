@@ -813,6 +813,369 @@ int MMG5_norver(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer towards the mesh
+ * \param pt pointer towards current triangle
+ * \param k number of current point
+ * \param c newly computed coordinates (giving negative area)
+* \param n normal of triangle before regularization
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative area of a triangle
+ *
+ */
+static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c, double *n) {
+
+  MMG5_pPoint  ppt;
+  double       to,tp,t,nnew[3],p[3],o[3],result;
+  int          it,maxit,pos,ier;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    ier = MMG5_nortri(mesh, pt, nnew);
+    MMG5_dotprod(3,n,nnew,&result);
+
+    if ( result <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
+ * \param mesh pointer towards the mesh
+ * \param v list of vertices of current tetrahedron
+ * \param k number of current point
+ * \param c input : newly computed coordinates (giving negative area), output : coordinates after dichotomy
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * In coordinate regularization, performs a dichotomy between previous point /
+ * and newly computed point in the case of negative volume
+ *
+ */
+static inline int MMG3D_dichotomytetra(MMG5_pMesh mesh, MMG5_int *v, MMG5_int k, double *c) {
+
+  MMG5_pPoint  ppt;
+  double       p[3],o[3],vol,to,tp,t;
+  int          it,maxit,pos;
+
+  it = 0;
+  maxit = 5;
+  to = 0.0;
+  tp = 1.0;
+  t = 0.5;
+  pos = 0;
+
+  ppt = &mesh->point[k];
+
+  /* initial coordinates of point before regularization */
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* initial coordinates of new point */
+  p[0] = c[0];
+  p[1] = c[1];
+  p[2] = c[2];
+
+  do {
+    mesh->point[0].c[0] = o[0] + t*(p[0] - o[0]);
+    mesh->point[0].c[1] = o[1] + t*(p[1] - o[1]);
+    mesh->point[0].c[2] = o[2] + t*(p[2] - o[2]);
+
+    vol = MMG5_orvol(mesh->point,v);
+
+    if ( vol <= 0.0 ) {
+      tp = t;
+    }
+    else {
+      c[0] = mesh->point[0].c[0];
+      c[1] = mesh->point[0].c[1];
+      c[2] = mesh->point[0].c[2];
+      to = t;
+      pos = 1;
+    }
+
+    t = 0.5*(to + tp);
+  }
+  while ( ++it < maxit );
+
+  if ( pos ) {
+    return 1;
+  }
+  else
+    return 0;
+}
+
+/**
+ * \param mesh pointer toward a MMG5 mesh structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Regularization procedure for vertices coordinates, dual Laplacian in 3D
+ *
+ */
+int MMG3D_regver(MMG5_pMesh mesh) {
+  MMG5_pTria    pt;
+  MMG5_pTetra   ptet;
+  MMG5_pPoint   ppt,p0;
+  MMG5_Tria     tnew;
+  double        *tabl,c[3],n[3],nnew[3],*cptr,lm1,lm2,cx,cy,cz,res0,res,result;
+  int           i,ii,it,nit,ilist,noupdate,ier;
+  MMG5_int      k,kt,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,iad,v[4];
+  int64_t       tetlist[MMG5_LMAX];
+
+  /* assign seed to vertex */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      if ( !ppt->s )  ppt->s = k;
+    }
+  }
+
+   for (k=1; k<=mesh->np; k++) {
+     ppt = &mesh->point[k];
+     ppt->flag = 0;
+  }
+
+  for (k=1; k<=mesh->ne; k++) {
+    ptet = &mesh->tetra[k];
+    if ( !MG_EOK(ptet) )  continue;
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ptet->v[i]];
+      if ( !ppt->flag )  ppt->flag = k;
+    }
+  }
+
+  /* allocate memory for coordinates */
+  MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
+
+  /* Pointer toward the suitable adjacency array for Mmgs and Mmg3d */
+  adja = mesh->adjt;
+
+  it   = 0;
+  nit  = 10;
+  res0 = 0.0;
+  lm1  = 0.4;
+  lm2  = 0.399;
+  while ( it++ < nit ) {
+    /* step 1: laplacian */
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+
+      iad = 3*(k-1)+1;
+      tabl[iad+0] = ppt->c[0];
+      tabl[iad+1] = ppt->c[1];
+      tabl[iad+2] = ppt->c[2];
+      if ( !MG_VOK(ppt) )  continue;
+      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+
+      iel = ppt->s;
+      if ( !iel ) continue; // Mmg3d
+
+      pt = &mesh->tria[iel];
+      i  = 0;
+      if ( pt->v[1] == k )  i = 1;
+      else if ( pt->v[2] == k ) i = 2;
+
+      ilist = MMG5_boulep(mesh,iel,i,adja,list,tlist);
+
+      /* average coordinates */
+      cx = cy = cz = 0.0;
+      for (i=1; i<=ilist; i++) {
+        p0  = &mesh->point[list[i]];
+
+        cptr = p0->c;
+        cx += cptr[0];
+        cy += cptr[1];
+        cz += cptr[2];
+      }
+      cx /= ilist;
+      cy /= ilist;
+      cz /= ilist;
+
+      /* Laplacian */
+      cptr = ppt->c;
+      tabl[iad+0] = cptr[0] + lm1 * (cx - cptr[0]);
+      tabl[iad+1] = cptr[1] + lm1 * (cy - cptr[1]);
+      tabl[iad+2] = cptr[2] + lm1 * (cz - cptr[2]);
+    }
+
+    /* step 2: anti-laplacian */
+    res = 0;
+    nn  = 0;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+
+      if ( !MG_VOK(ppt) )  continue;
+      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+
+      iel = ppt->s;
+      if ( !iel ) continue; // Mmg3d
+
+      pt = &mesh->tria[iel];
+      i = 0;
+      if ( pt->v[1] == k )  i = 1;
+      else if ( pt->v[2] == k ) i = 2;
+
+      ilist = MMG5_boulep(mesh,iel,i,adja,list,tlist);
+
+      /* average normal */
+      cx = cy = cz = 0.0;
+      for (i=1; i<=ilist; i++) {
+        iad = 3*(list[i]-1) + 1;
+        cx += tabl[iad+0];
+        cy += tabl[iad+1];
+        cz += tabl[iad+2];
+      }
+      cx /= ilist;
+      cy /= ilist;
+      cz /= ilist;
+
+      /* antiLaplacian */
+      iad = 3*(k-1)+1;
+      c[0] = tabl[iad+0] - lm2 * (cx - tabl[iad+0]);
+      c[1] = tabl[iad+1] - lm2 * (cy - tabl[iad+1]);
+      c[2] = tabl[iad+2] - lm2 * (cz - tabl[iad+2]);
+
+      cptr = ppt->c;
+
+      mesh->point[0].c[0] = c[0];
+      mesh->point[0].c[1] = c[1];
+      mesh->point[0].c[2] = c[2];
+
+      /* check for negative areas */
+      noupdate = 0;
+      for (kt = 0 ; kt<ilist ; kt++) {
+        pt = &mesh->tria[tlist[kt]];
+
+        if ( !MG_EOK(pt) ) continue;
+
+        ier = MMG5_nortri(mesh, pt, n);
+
+        for (i=0;i<3;i++) {
+          tnew.v[i] = pt->v[i];
+        }
+
+        i = 0;
+        if ( pt->v[1] == k ) i = 1;
+        if ( pt->v[2] == k ) i = 2;
+
+        tnew.v[i] = 0;
+
+        ier = MMG5_nortri(mesh, &tnew, nnew);
+        MMG5_dotprod(3,n,nnew,&result);
+        if ( result < 0.0 ) {
+          if (!MMG3D_dichotomytria(mesh,&tnew,k,c,n))
+            noupdate = 1;
+          continue;
+        }
+      }
+
+      /* check for negative volumes */
+      if ( !noupdate ) {
+        iel = ppt->flag;
+        ptet = &mesh->tetra[iel];
+
+        if ( !MG_EOK(ptet) ) continue;
+
+        i = 0;
+        if ( ptet->v[1] == k )  i = 1;
+        else if ( ptet->v[2] == k ) i = 2;
+        else if ( ptet->v[3] == k ) i = 3;
+        ilist = MMG5_boulevolp(mesh, iel, i, tetlist);
+
+        for( kt=0 ; kt<ilist ; kt++ ) {
+          iel = tetlist[kt] / 4;
+          i   = tetlist[kt] % 4;
+          ptet = &mesh->tetra[iel];
+
+          for ( ii=0 ; ii<4 ; ii++ ) {
+            v[ii] = ptet->v[ii];
+          }
+          v[i] = 0;
+          result = MMG5_orvol(mesh->point,v);
+
+          if ( result <= 0.0 ) {
+            if (!MMG3D_dichotomytetra(mesh,v,k,c))
+              noupdate = 1;
+            continue;
+          }
+        }
+      }
+      if ( !noupdate ) {
+        res += (cptr[0]-c[0])*(cptr[0]-c[0]) + (cptr[1]-c[1])*(cptr[1]-c[1]) + (cptr[2]-c[2])*(cptr[2]-c[2]);
+        cptr[0] = c[0];
+        cptr[1] = c[1];
+        cptr[2] = c[2];
+        nn++;
+      }
+    }
+      if ( it == 1 )  res0 = res;
+      if ( res0 > MMG5_EPSD )  res  = res / res0;
+      if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
+        fprintf(stdout,"     iter %5d  res %.3E\r",it,res);
+        fflush(stdout);
+      }
+      if ( it > 1 && res < MMG5_EPS )  break;
+    }
+  /* reset the ppt->s and ppt->flag tags */
+  for (k=1; k<=mesh->np; ++k) {
+    mesh->point[k].s    = 0;
+    mesh->point[k].flag = 0;
+  }
+
+  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
+
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     %" MMG5_PRId " coordinates regularized: %.3e\n",nn,res);
+
+  MMG5_SAFE_FREE(tabl);
+  return 1;
+}
+
+
+/**
  * \param mesh pointer toward the mesh
  *
  * \return 0 if fail, 1 otherwise
@@ -961,7 +1324,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
 int MMG3D_analys(MMG5_pMesh mesh) {
   MMG5_Hash hash;
   int       ier;
-
+  
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** SURFACE ANALYSIS\n");
@@ -1049,6 +1412,12 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n");
+
+  /* regularize vertices coordinates*/
+  if ( mesh->info.xreg && !MMG3D_regver(mesh) ) {
+    fprintf(stderr,"\n  ## Coordinates regularization problem. Exit program.\n");
+    return 0;
+  }
 
   /* define (and regularize) normals */
   if ( !MMG5_norver(mesh) ) {

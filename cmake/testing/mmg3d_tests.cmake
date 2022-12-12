@@ -20,8 +20,6 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMG3D ${EXECUT_MMG3D} NAME )
-
 ##############################################################################
 #####
 #####         Tests that may be run twice
@@ -451,6 +449,12 @@ ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula
   -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula.o.meshb)
 
+ADD_TEST(NAME mmg3d_opnbdy_lssurf-nofile_peninsula
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -lssurf 0.6 -nr -hgrad 1.5 -hausd 0.02
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_lssurf_peninsula.o.meshb)
+
 # ls + nsd
 ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula-nsd3
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls -nsd 3
@@ -557,6 +561,16 @@ ADD_TEST(NAME mmg3d_OptimLES_sphere
 #####
 ###############################################################################
 #####
+
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmg3d_OptLsSurf_box
+  COMMAND ${EXECUT_MMG3D} -v 5 -lssurf
+  -sol ${MMG3D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG3D_CI_TESTS}/OptLsSurf_box/box.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLsSurf_box.o.meshb
+  )
+
+# multi-mat
 ADD_TEST(NAME mmg3d_LSMultiMat
   COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
   ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh

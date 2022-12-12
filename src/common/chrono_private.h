@@ -20,39 +20,66 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+
+#ifndef CHRONO_H
+#define CHRONO_H
+
+#include <time.h>
+#include "mmgcommon_private.h"
+
+#ifndef MMG_POSIX
+#include <windows.h>
+#else
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
+#include "mmg_core_export_private.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef  ON
+#define  RESET  0
+#define  ON     1
+#define  OFF    2
+#endif
+
+#define  BIG      1e6
+#define  BIG1     1e-6
+#define  TIMEMAX  12
+
 /**
- * \file common/librnbg.h
- * \brief header file for the librnbg.c librnbg_s.c librnbg_3d.c files
- * \author Cedric Lachat  (Inria/UBordeaux)
- * \version 5
- * \date 2013
- * \copyright GNU Lesser General Public License.
+ * \struct mytime
+ * \brief Chrono object.
+ *
+ * mytime allow storage of chronograph informations.
+ *
  */
+typedef struct mytime {
+  double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
+#ifdef MMG_POSIX
+  struct  timeval rutim;
+  struct  rusage  ru;
+#else
+  HANDLE        thisProcess;
+  FILETIME      ftIni, ftEnd, ftSys, ftUser;
+  SYSTEMTIME    stSys, stUser;
+  LARGE_INTEGER frequency;
+  LARGE_INTEGER rutim;
+#endif
+  int     call;
+} mytime;
 
-#ifdef USE_SCOTCH
 
-#ifndef __RENUM__
-#define __RENUM__
+/* prototypes */
+LIBMMG_CORE_EXPORT void   chrono(int cmode,mytime *ptt);
+LIBMMG_CORE_EXPORT void   tminit(mytime *t,int maxtim);
+LIBMMG_CORE_EXPORT void   printim(double ,char *);
 
-#include <scotch.h>
+#ifdef __cplusplus
+}
+#endif
 
-#define HASHPRIME 37
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-#define SCOTCH_5 (!strcmp(TOSTRING(SCOTCH_VERSION),"5.0") ||            \
-                  !strcmp(TOSTRING(SCOTCH_VERSION),"5.1") || !strcmp(TOSTRING(SCOTCH_VERSION),"5"))
-
-#define SCOTCH_6 !strcmp(TOSTRING(SCOTCH_VERSION),"6")
-
-#define SCOTCH_7 !strcmp(TOSTRING(SCOTCH_VERSION),"7")
-
-#define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);return e;}
-
-int    _SCOTCHintSort2asc1(SCOTCH_Num * sortPartTb, MMG5_int vertNbr);
-int    MMG5_kPartBoxCompute(SCOTCH_Graph*, MMG5_int, MMG5_int, SCOTCH_Num*,MMG5_pMesh);
-void   MMG5_swapNod(MMG5_pMesh,MMG5_pPoint, double*, MMG5_pSol,MMG5_int*, MMG5_int, MMG5_int, int);
-
-#endif /* __RENUM__ */
 #endif

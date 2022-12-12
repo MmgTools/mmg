@@ -24,7 +24,7 @@
 #ifndef LIBMMGS_PRIVATE_H
 #define LIBMMGS_PRIVATE_H
 
-#include "libmmgcommon.h"
+#include "libmmgcommon_private.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +38,6 @@ extern "C" {
 #define MMGS_LLONG     2.0
 #define MMGS_LSHRT     0.3
 
-#define MMGS_LMAX  1024
 #define MMGS_BADKAL      2.e-2
 #define MMGS_NULKAL      1.e-4
 
@@ -130,14 +129,15 @@ int  MMGS_zaldy(MMG5_pMesh mesh);
 int  MMGS_assignEdge(MMG5_pMesh mesh);
 int  MMGS_analys_for_norver(MMG5_pMesh mesh);
 int  MMGS_analys(MMG5_pMesh mesh);
+int  MMGS_regver(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_hashTria(MMG5_pMesh );
+int  MMGS_setadj(MMG5_pMesh mesh);
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol,MMG5_int* );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  MMGS_bdryUpdate(MMG5_pMesh mesh);
-int  boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t *opn);
 int  boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list);
 int  bouletrid(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,int *il1,MMG5_int *l1,int *il2,MMG5_int *l2,MMG5_int *ip0,MMG5_int *ip1);
 MMG5_int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);

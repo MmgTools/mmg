@@ -39,8 +39,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "eigenv.h"
-#include "mmgcommon.h"
+#include "eigenv_private.h"
+#include "mmgcommon_private.h"
 
 /* seeking at least 1.e-05 accuracy, more if not sufficient */
 #define  MG_EIGENV_EPS27          1.e-27

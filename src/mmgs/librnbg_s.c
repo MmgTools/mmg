@@ -35,7 +35,7 @@
 
 #ifdef USE_SCOTCH
 
-#include "librnbg.h"
+#include "librnbg_private.h"
 
 /**
  * \param trias pointer toward a table containing the tetra structures.

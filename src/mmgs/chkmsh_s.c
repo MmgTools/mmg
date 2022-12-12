@@ -49,7 +49,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
     MMG5_pPoint         ppt;
     MMG5_pTria          pt1,pt2;
     MMG5_int            adj,adj1,k,kk,l,nk,ip;
-    MMG5_int            *adja,*adjb,list[MMGS_LMAX+2];
+    MMG5_int            *adja,*adjb,list[MMG5_TRIA_LMAX+2];
     int                 i,j,lon,len;
     int8_t              voy,voy1,i1,i2,j1,j2;
     static int8_t       mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
@@ -189,7 +189,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
             else if ( MS_SIN(ppt->tag) )  continue;
 
             int8_t dummy;
-            lon = boulet(mesh,k,i,list,&dummy);
+            lon = MMG5_boulet(mesh,k,i,list,1,&dummy);
             if ( lon < 1 )  continue;
             for (l=0; l<lon; l++) {
                 kk  = list[l] / 3;

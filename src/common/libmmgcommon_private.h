@@ -22,7 +22,6 @@
 */
 
 /**
- * \file common/libmmgcommon.h
  * \brief API header for the common part of the MMG libraries.
  * \author Algiane Froehly  (Inria/UBordeaux)
  * \version 5
@@ -39,14 +38,15 @@
 
 #include "libmmgtypes.h"
 
-#include "chrono.h"
+#include "chrono_private.h"
 
-#include "mmg_core_export.h"
+#include "mmg_core_export_private.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define MMG5_VOLFRAC     1.e-5
 
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */

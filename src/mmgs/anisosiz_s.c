@@ -35,9 +35,9 @@
 
 #include "libmmgs_private.h"
 #include "libmmgs.h"
-#include "inlined_functions.h"
-#include "mmgsexterns.h"
-#include "mmgexterns.h"
+#include "inlined_functions_private.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -73,7 +73,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   isqhmax = mesh->info.hmax;
 
   int8_t dummy;
-  ilist = boulet(mesh,it,ip,list,&dummy);
+  ilist = MMG5_boulet(mesh,it,ip,list,1,&dummy);
   if ( ilist < 1 )  return 0;
 
   maxkappa = 0.0;
@@ -368,7 +368,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   p0  = &mesh->point[idp];
 
   int8_t dummy;
-  ilist = boulet(mesh,it,ip,list,&dummy);
+  ilist = MMG5_boulet(mesh,it,ip,list,1,&dummy);
   if ( ilist < 1 )
     return 0;
 
@@ -608,7 +608,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
   m   = &met->m[6*idp];
 
   int8_t dummy;
-  ilist = boulet(mesh,it,ip,list,&dummy);
+  ilist = MMG5_boulet(mesh,it,ip,list,1,&dummy);
   if ( ilist < 1 )
     return 0;
 
@@ -726,11 +726,11 @@ int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np,double me[6]) {
  *
  * \warning What we are doing on non-manifold points has to be improved: as such
  *     points are marked as MG_CRN and MG_REQ, we first try to call \ref
- *     MMG5_defmetsin that likely fails (because \ref boulet don't work for
+ *     MMG5_defmetsin that likely fails (because \ref MMG5_boulet don't work for
  *     non-manifod points due to the missing of consistent adjacencies
  *     relationships), then we call \ref MMG5_defUninitSize and we set hmax on
  *     non-manifold points. Note that the building of adjacency table depends on
- *     the initial mesh numbering, thus, in certain cases, boulet will succeed...
+ *     the initial mesh numbering, thus, in certain cases, MMG5_boulet will succeed...
  */
 int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
@@ -816,7 +816,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /** search for unintialized metric */
   /** Remark: as non manifold points are marked as CRN and REQ, we first try to
-      call defmetsin that fails (because boulet don't work for non-manifod
+      call defmetsin that fails (because MMG5_boulet don't work for non-manifod
       points), then we pass here and we set hmax on non-manifold points */
   MMG5_defUninitSize ( mesh,met,ismet );
 

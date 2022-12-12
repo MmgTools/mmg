@@ -31,7 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
+#include "mmg2dexterns_private.h"
 
 /* Mesh adaptation routine for the first stages of the algorithm: intertwine splitting
  based on patterns, collapses and swaps.
@@ -442,7 +442,7 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   int          ilist;
   MMG5_int     nc;
   uint8_t      i,i1,i2,open;
-  MMG5_int     list[MMG2D_LONMAX+2];
+  MMG5_int     list[MMG5_TRIA_LMAX+2];
 
   nc = 0;
   hmin2 = mesh->info.hmin * mesh->info.hmin;
@@ -700,7 +700,7 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_int          k,nc;
   int               ilist;
   int8_t            i,i1,i2,open;
-  MMG5_int          list[MMG2D_LONMAX+2];
+  MMG5_int          list[MMG5_TRIA_LMAX+2];
   
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -758,7 +758,7 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
   MMG5_int             nnm,nm,ns,k;
   int                  it,ilist;
   int8_t               i,ier;
-  MMG5_int             base,list[MMG2D_LONMAX+2];
+  MMG5_int             base,list[MMG5_TRIA_LMAX+2];
 
   it = nnm = 0;
   base = 0;
@@ -777,7 +777,8 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
 
-        ilist = MMG2D_boulet(mesh,k,i,list);
+        int8_t dummy;
+        ilist = MMG5_boulet(mesh,k,i,list,0,&dummy);
 
         if ( MG_EDG(p0->tag) ) {
           ier = MMG2D_movedgpt(mesh,met,ilist,list,improve);

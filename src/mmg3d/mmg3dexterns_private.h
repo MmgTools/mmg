@@ -2,8 +2,8 @@
 #define MMG3DEXTERNS_H
 
 #include "libmmgtypes.h"
-#include "PRoctree_3d.h"
-#include "mmgcommon.h"
+#include "PRoctree_3d_private.h"
+#include "mmgcommon_private.h"
 
 #ifndef MMG_EXTERN
 #define MMG_EXTERN extern
@@ -26,6 +26,10 @@ FUNCTION_POINTER ( int    (*MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROc
 FUNCTION_POINTER ( int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int64_t*, int, MMG5_int*, int ,int) );
 FUNCTION_POINTER ( int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,int ,int64_t *,int ,double) );
 FUNCTION_POINTER ( int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,MMG5_int,double ) );
+FUNCTION_POINTER ( int    (*MMG3D_resetRef)(MMG5_pMesh) );
+FUNCTION_POINTER ( int    (*MMG3D_setref)(MMG5_pMesh,MMG5_pSol) );
+FUNCTION_POINTER ( int    (*MMG3D_snpval)(MMG5_pMesh,MMG5_pSol) );
+FUNCTION_POINTER ( int    (*MMG3D_cuttet)(MMG5_pMesh,MMG5_pSol,MMG5_pSol) );
 
 #undef MMG_EXTERN
 #undef MMG_ASSIGN_NULL

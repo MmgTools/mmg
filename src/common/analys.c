@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 
 /**
@@ -49,7 +49,7 @@ int MMG5_regnor(MMG5_pMesh mesh) {
   MMG5_pxPoint  pxp;
   double        *tabl,n[3],*nptr,lm1,lm2,dd,nx,ny,nz,res0,res;
   int           i,it,nit,ilist;
-  MMG5_int      k,nn,iel,list[MMG5_LMAX],*adja,iad;
+  MMG5_int      k,nn,iel,list[MMG5_LMAX],tlist[MMG5_LMAX],*adja,iad;
 
   /* assign seed to vertex */
   for (k=1; k<=mesh->nt; k++) {
@@ -94,7 +94,7 @@ int MMG5_regnor(MMG5_pMesh mesh) {
       if ( pt->v[1] == k )  i = 1;
       else if ( pt->v[2] == k ) i = 2;
 
-      ilist = MMG5_boulep(mesh,iel,i,adja,list);
+      ilist = MMG5_boulep(mesh,iel,i,adja,list,tlist);
 
       /* average normal */
       nx = ny = nz = 0.0;
@@ -159,7 +159,7 @@ int MMG5_regnor(MMG5_pMesh mesh) {
       if ( pt->v[1] == k )  i = 1;
       else if ( pt->v[2] == k ) i = 2;
 
-      ilist = MMG5_boulep(mesh,iel,i,adja,list);
+      ilist = MMG5_boulep(mesh,iel,i,adja,list,tlist);
 
       /* average normal */
       nx = ny = nz = 0.0;

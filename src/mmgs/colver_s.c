@@ -34,8 +34,8 @@
  */
 
 #include "libmmgs_private.h"
-#include "mmgexterns.h"
-#include "inlined_functions.h"
+#include "mmgexterns_private.h"
+#include "inlined_functions_private.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -475,7 +475,7 @@ int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew;
   double         n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  MMG5_int       list[MMGS_LMAX+2],jel,ip2,l;
+  MMG5_int       list[MMG5_TRIA_LMAX+2],jel,ip2,l;
   int            ilist;
   int8_t         i1,i2,j,jj,j2,open;
 
@@ -497,7 +497,7 @@ int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
   /* collect all triangles around vertex i1 */
   if ( pt->v[i1] & MG_NOM )  return 0;
 
-  ilist = boulet(mesh,k,i1,list,&open);
+  ilist = MMG5_boulet(mesh,k,i1,list,1,&open);
 
 #ifndef NDEBUG
   /* check for open ball */

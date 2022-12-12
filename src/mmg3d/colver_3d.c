@@ -33,8 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t  ddb;
 
@@ -741,7 +741,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   }
 
   if ( isnm || mesh->info.iso ) {
-    ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
+    ier = MMG3D_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
     if ( !ier )  return 0;
   }
   else {

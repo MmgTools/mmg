@@ -159,6 +159,12 @@ ADD_TEST(NAME mmg2d_opnbdy_ls
   -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-ls.o.meshb)
 
+ADD_TEST(NAME mmg2d_opnbdy_lssurf
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -lssurf 0.6
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
+  -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-lssurf.o.meshb)
+
 ADD_TEST(NAME mmg2d_opnbdy_yes_ani
   COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
@@ -495,6 +501,22 @@ ADD_TEST(NAME mmg2d_OptLs_Bridge
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_bridge.o.meshb
   )
 
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmg2d_OptLsSurf_box
+  COMMAND ${EXECUT_MMG2D} -v 5 -lssurf
+  -sol ${MMG2D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG2D_CI_TESTS}/OptLsSurf_box/box.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLsSurf_box.o.meshb
+  )
+
+# lssurf + multimat: discretization of boundaries only
+ADD_TEST(NAME mmg2d_OptLsSurf_multiMat_box
+  COMMAND ${EXECUT_MMG2D} -v 5 -lssurf
+  -sol ${MMG2D_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMG2D_CI_TESTS}/OptLsSurf_box/box_multiMat.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLsSurf_multiMat_box.o.meshb
+  )
+
 #multi-mat + opnbdy + non-manifold check
 ADD_TEST(NAME mmg2d_LSMultiMat_nm
   COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
@@ -639,6 +661,23 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
 
+# ls discretisation + xreg
+ADD_TEST(NAME mmg2d_CoorRegularization_apple
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_apple.o.meshb)
+
+# ls discretisation + xreg + nr
+ADD_TEST(NAME mmg2d_CoorRegularization_appleNR
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg -nr
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_appleNR.o.meshb)
+
+# ls discretisation + xreg + nr + check of negative areas
+ADD_TEST(NAME mmg2d_CoorRegularizationNegativeArea
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg -hmax 0.1
+  ${MMG2D_CI_TESTS}/CoorRegularizationNegativeArea/CoorRegularizationNegativeArea
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularizationNegativeArea.o.meshb)
 
 ###############################################################################
 #####
@@ -671,3 +710,44 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     )
 
 ENDIF()
+
+###############################################################################
+#####
+#####         Check snapping (prevision of non-manifold situations)
+#####
+###############################################################################
+#####
+SET(nmRegex "unsnap at least 1 point")
+
+ADD_TEST(NAME mmg2d_LSSnapval_manifold1
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmg2d_LSSnapval_manifold2
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/manifold.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_manifold2.o.mesh
+  )
+
+SET_PROPERTY(TEST mmg2d_LSSnapval_manifold1 mmg2d_LSSnapval_manifold2
+  PROPERTY FAIL_REGULAR_EXPRESSION "${nmRegex}")
+
+ADD_TEST(NAME mmg2d_LSSnapval_non-manifold1
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts1.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/8elts1-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_non-manifold1.o.mesh
+  )
+
+ADD_TEST(NAME mmg2d_LSSnapval_non-manifold2
+  COMMAND ${EXECUT_MMG2D} -v 5  -ls
+  -in ${MMG2D_CI_TESTS}/LSSnapval/8elts2.mesh
+  -sol ${MMG2D_CI_TESTS}/LSSnapval/8elts2-nm.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSSnapval_non-manifold2.o.mesh
+  )
+SET_PROPERTY(TEST mmg2d_LSSnapval_non-manifold1 mmg2d_LSSnapval_non-manifold2
+  PROPERTY PASS_REGULAR_EXPRESSION "${nmRegex}")

@@ -33,9 +33,9 @@
  */
 
 #include "libmmgs_private.h"
-#include "mmgsexterns.h"
-#include "mmgexterns.h"
-#include "inlined_functions.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
+#include "inlined_functions_private.h"
 
 extern int8_t ddb;
 
@@ -470,7 +470,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int           it,ier,ilist;
-  MMG5_int      k,base,list[MMGS_LMAX+2],nm,ns,nnm;
+  MMG5_int      k,base,list[MMG5_TRIA_LMAX+2],nm,ns,nnm;
   int8_t        i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -494,7 +494,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
           continue;
 
         int8_t dummy;
-        ilist = boulet(mesh,k,i,list,&dummy);
+        ilist = MMG5_boulet(mesh,k,i,list,1,&dummy);
 
         if ( ilist < 1 ) continue;
 
@@ -1027,7 +1027,7 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  MMG5_int      nc,list[MMGS_LMAX+2],k;
+  MMG5_int      nc,list[MMG5_TRIA_LMAX+2],k;
   int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
 
@@ -1209,7 +1209,7 @@ static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double        len;
-  MMG5_int      nc,k,list[MMGS_LMAX+2];
+  MMG5_int      nc,k,list[MMG5_TRIA_LMAX+2];
   int           ier,ilist;
   int8_t        i,i1,i2;
 

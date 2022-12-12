@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
+#include "mmg2dexterns_private.h"
 
 extern uint8_t ddb;
 
@@ -90,7 +90,8 @@ int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *li
 
   /* collect all triangles around vertex i1
    simplification w.r.to the surface case: no need to use spacial ball boulechknm (impossible situation in 2d) */
-  ilist = MMG2D_boulet(mesh,k,i1,list);
+  int8_t dummy;
+  ilist = MMG5_boulet(mesh,k,i1,list,0,&dummy);
   if ( ilist <= 0 )
     return 0;
 

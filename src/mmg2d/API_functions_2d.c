@@ -93,6 +93,8 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.renum    = MMG5_OFF;
   /* [0/1]   , set off/on normal regularization */
   mesh->info.nreg     = MMG5_OFF;
+  /* [0/1]   , set off/on vertex regularization */
+  mesh->info.xreg     = MMG5_OFF;
   /* default values for doubles */
   /* level set value */
   mesh->info.ls       = MMG5_LS;
@@ -152,6 +154,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int va
   case MMG2D_IPARAM_isoref :
     mesh->info.isoref   = val;
     break;
+  case MMG2D_IPARAM_isosurf :
+    mesh->info.isosurf = val;
+    break;
   case MMG2D_IPARAM_lag :
 #ifdef USE_ELAS
     if ( val < 0 || val > 2 )
@@ -193,6 +198,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int va
     break;
   case MMG2D_IPARAM_nreg :
     mesh->info.nreg     = val;
+    break;
+  case MMG2D_IPARAM_xreg :
+    mesh->info.xreg     = val;
     break;
   case MMG2D_IPARAM_nosizreq :
     mesh->info.nosizreq = val;
@@ -340,7 +348,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_rmc :
     if ( !val ) {
       /* Default value */
-      mesh->info.rmc      = MMG2D_VOLFRAC;
+      mesh->info.rmc      = MMG5_VOLFRAC;
     }
     else {
       /* User customized value */

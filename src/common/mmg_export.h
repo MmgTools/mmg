@@ -24,7 +24,7 @@
 #ifndef MMG_EXPORT_H
 #define MMG_EXPORT_H
 
-#include <mmgcmakedefines.h>
+#include "mmg/common/mmgcmakedefines.h"
 
 #if(MMG_DYN_LIB)
 #  if defined(_WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
