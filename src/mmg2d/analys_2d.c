@@ -783,7 +783,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, double *c) {
 
   MMG5_pPoint  ppt;
-  double       p[2],co[3][3],vol,to,tp,t;
+  double       p[2],co[3][2],vol,to,tp,t;
   int          it,maxit,pos,i,j;
 
   it = 0;
@@ -796,7 +796,7 @@ static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, do
   ppt = &mesh->point[k];
 
   for ( i=0 ; i<3 ; i++ ) {
-    for ( j=0 ; j<3 ; j++ ) {
+    for ( j=0 ; j<2 ; j++ ) {
       co[i][j] = mesh->point[pt->v[i]].c[j];
     }
   }
@@ -849,10 +849,10 @@ static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, do
 int MMG2D_regver(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
-  double                *tmp,lm1,lm2,cx,cy,res,res0,c[2],co[3][3],vol;
+  double                *tmp,lm1,lm2,cx,cy,res,res0,c[2],co[3][2],vol;
   MMG5_int              k,kt,iel,ip1,ip2,nn,list[MMG5_LMAX];
   int                   it,maxit,j,ilist,noupdate;
-  int8_t                i,ier;
+  int8_t                i;
 
   it = 0;
   maxit=10;
@@ -964,7 +964,7 @@ int MMG2D_regver(MMG5_pMesh mesh) {
         if ( !MG_EOK(pt) ) continue;
 
         for ( i=0 ; i<3 ; i++ ) {
-          for ( j=0 ; j<3 ; j++ ) {
+          for ( j=0 ; j<2 ; j++ ) {
             co[i][j] = mesh->point[pt->v[i]].c[j];
           }
         }
@@ -973,7 +973,7 @@ int MMG2D_regver(MMG5_pMesh mesh) {
         if ( pt->v[1] == k ) i = 1;
         if ( pt->v[2] == k ) i = 2;
 
-        for ( j=0 ; j<3 ; j++ ) {
+        for ( j=0 ; j<2 ; j++ ) {
           co[i][j] = c[j];
         }
 
