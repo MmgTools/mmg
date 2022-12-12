@@ -40,8 +40,8 @@
 
 #include "libmmgs.h"
 #include "libmmgs_private.h"
-#include "mmgsexterns.h"
-#include "mmgexterns.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.

@@ -40,9 +40,9 @@
  */
 
 #include "libmmg3d.h"
-#include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
-#include "mmgexterns.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol

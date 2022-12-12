@@ -31,7 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include <vtkparser.hpp>
+#include "vtkparser.hpp"
 
 #include "libmmg2d.h"
 #include "libmmg2d_private.h"

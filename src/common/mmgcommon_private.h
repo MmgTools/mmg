@@ -34,7 +34,7 @@
 #include <float.h>
 #include <math.h>
 #include <complex.h>
-#include "mmgcmakedefines.h"
+#include "mmg/common/mmgcmakedefines.h"
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -48,8 +48,8 @@
 extern "C" {
 #endif
 
-#include "eigenv.h"
-#include "libmmgcommon.h"
+#include "eigenv_private.h"
+#include "libmmgcommon_private.h"
 
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 

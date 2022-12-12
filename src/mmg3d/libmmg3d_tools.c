@@ -31,11 +31,11 @@
  **/
 
 #include "libmmg3d.h"
-#include "mmgcommon.h"
-#include "inlined_functions_3d.h"
+#include "mmgcommon_private.h"
+#include "inlined_functions_3d_private.h"
 #include "mmgversion.h"
-#include "mmg3dexterns.h"
-#include "mmgexterns.h"
+#include "mmg3dexterns_private.h"
+#include "mmgexterns_private.h"
 
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {

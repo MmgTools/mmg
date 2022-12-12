@@ -33,8 +33,8 @@
  *
  */
 
-#include "mmgcommon.h"
-#include "mmgexterns.h"
+#include "mmgcommon_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param pim    multimaterials inverse data table.

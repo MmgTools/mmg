@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

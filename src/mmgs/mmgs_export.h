@@ -24,7 +24,7 @@
 #ifndef MMGS_EXPORT_H
 #define MMGS_EXPORT_H
 
-#include <mmg_export.h>
+#include "mmg/common/mmg_export.h"
 #if  defined(libmmg_so_EXPORTS) || defined(libmmgs_so_EXPORTS)
 #  define LIBMMGS_EXPORT MMG_DECL_EXPORT
 #else

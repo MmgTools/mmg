@@ -33,8 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t  ddb;
 

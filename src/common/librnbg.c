@@ -31,12 +31,12 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
-#include "mmgexterns.h"
+#include "mmgcommon_private.h"
+#include "mmgexterns_private.h"
 
 #ifdef USE_SCOTCH
 
-#include "librnbg.h"
+#include "librnbg_private.h"
 
 /**
  * \param graf pointer toward the input graph structure.
