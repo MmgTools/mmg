@@ -145,14 +145,14 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     DESTINATION ${PROJECT_BINARY_DIR}/include/mmg/
     PATTERN "libmmg*f.h"  EXCLUDE)
 
-  set ( mmg_tgt_list ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h )
+  set ( mmg_file_list ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h )
   IF ( PERL_FOUND )
-    list ( APPEND mmg_tgt_list ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h)
+    list ( APPEND mmg_file_list ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h)
   ENDIF( )
 
   ADD_CUSTOM_TARGET(copy_mmg_headers ALL
     DEPENDS
-    copy_2d_headers copy_s_headers copy_3d_headers mmg_tgt_lit
+    copy_2d_headers copy_s_headers copy_3d_headers ${mmg_file_list}
     )
 
 ENDIF()
