@@ -788,7 +788,6 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
 
     /* Update of adjacency relations */
     iel = list[k] / 6;
-    ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
     jel = MMG5_abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
