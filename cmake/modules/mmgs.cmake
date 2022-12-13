@@ -109,8 +109,11 @@ ENDIF()
 SET( mmgs_headers
   ${MMGS_SOURCE_DIR}/mmgs_export.h
   ${MMGS_SOURCE_DIR}/libmmgs.h
-  ${MMGS_BINARY_DIR}/libmmgsf.h
   )
+
+IF ( PERL_FOUND )
+  LIST ( APPEND mmgs_headers   ${MMGS_BINARY_DIR}/libmmgsf.h )
+ENDIF()
 
 IF ( MMG_INSTALL_PRIVATE_HEADERS )
   LIST ( APPEND mmgs_headers

@@ -89,23 +89,28 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   SET( mmg2d_headers
     ${MMG2D_SOURCE_DIR}/mmg2d_export.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
-    ${MMG2D_BINARY_DIR}/libmmg2df.h
     )
   SET( mmg3d_headers
     ${MMG3D_SOURCE_DIR}/mmg3d_export.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
-    ${MMG3D_BINARY_DIR}/libmmg3df.h
     )
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/mmgs_export.h
     ${MMGS_SOURCE_DIR}/libmmgs.h
-    ${MMGS_BINARY_DIR}/libmmgsf.h
     )
   SET( mmg_headers
      # ${PROJECT_SOURCE_DIR}/src/common/mmg_core_export.h
-    ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
-    ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h
+     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     )
+
+  IF ( PERL_FOUND )
+    LIST ( APPEND mmg3d_headers   ${MMG3D_BINARY_DIR}/libmmg3df.h )
+    LIST ( APPEND mmg2d_headers   ${MMG2D_BINARY_DIR}/libmmg2df.h )
+    LIST ( APPEND mmgs_headers    ${MMGS_BINARY_DIR}/libmmgsf.h )
+    LIST ( APPEND mmg_headers     ${PROJECT_SOURCE_DIR}/libmmgf.h )
+  ENDIF()
+
+
   SET(MMG2D_INCLUDE ${PROJECT_BINARY_DIR}/include/mmg/mmg2d )
   SET(MMGS_INCLUDE ${PROJECT_BINARY_DIR}/include/mmg/mmgs )
   SET(MMG3D_INCLUDE ${PROJECT_BINARY_DIR}/include/mmg/mmg3d )
@@ -122,7 +127,9 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d)
   INSTALL(FILES ${mmg_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg)
 
-  FILE(INSTALL ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${PROJECT_BINARY_DIR}/include/mmg/)
+  IF ( PERL_FOUND )
+    FILE(INSTALL ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${PROJECT_BINARY_DIR}/include/mmg/)
+  ENDIF()
 
   # Install header files in project directory
   FILE(INSTALL  ${mmg2d_headers}
@@ -138,12 +145,14 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     DESTINATION ${PROJECT_BINARY_DIR}/include/mmg/
     PATTERN "libmmg*f.h"  EXCLUDE)
 
+  set ( mmg_tgt_list ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h )
+  IF ( PERL_FOUND )
+    list ( APPEND mmg_tgt_list ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h)
+  ENDIF( )
 
   ADD_CUSTOM_TARGET(copy_mmg_headers ALL
     DEPENDS
-    copy_2d_headers copy_s_headers copy_3d_headers
-    ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h
-    ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h
+    copy_2d_headers copy_s_headers copy_3d_headers mmg_tgt_lit
     )
 
 ENDIF()

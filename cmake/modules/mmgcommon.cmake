@@ -47,11 +47,15 @@ SET(MMGCOMMON_INCLUDE         ${PROJECT_BINARY_DIR}/include/${MMGCOMMON_SHRT_INC
 SET( mmgcommon_headers
   ${MMGCOMMON_SOURCE_DIR}/mmg_export.h
   ${MMGCOMMON_SOURCE_DIR}/libmmgtypes.h
-  ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h
   ${MMGCOMMON_BINARY_DIR}/mmgcmakedefines.h
   ${MMGCOMMON_BINARY_DIR}/mmgcmakedefinesf.h
   ${MMGCOMMON_BINARY_DIR}/mmgversion.h
   )
+
+IF ( PERL_FOUND )
+  LIST ( APPEND mmgcommon_headers  ${MMGCOMMON_BINARY_DIR}/libmmgtypesf.h )
+ENDIF ( )
+
 IF ( MMG_INSTALL_PRIVATE_HEADERS )
   LIST ( APPEND mmgcommon_headers
     ${MMGCOMMON_SOURCE_DIR}/libmmgcommon_private.h
@@ -65,7 +69,6 @@ IF ( MMG_INSTALL_PRIVATE_HEADERS )
     ${MMGCOMMON_SOURCE_DIR}/vtkparser.hpp
     )
 ENDIF()
-
 
 IF (NOT WIN32 OR MINGW)
   LIST(APPEND mmgcommon_headers  ${MMGCOMMON_BINARY_DIR}/git_log_mmg.h )
