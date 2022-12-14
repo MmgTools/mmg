@@ -207,7 +207,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   int* types = NULL;
   MMG5_SAFE_MALLOC ( types, nc, int, return 0 );
 
-  // transfer edges from Mmg to VTK
+  // Transfer edges from Mmg to VTK
   for ( MMG5_int k=1; k<=mesh->na; ++k ) {
     MMG5_pEdge pa = &mesh->edge[k];
     if ( !pa || !pa->a ) continue;

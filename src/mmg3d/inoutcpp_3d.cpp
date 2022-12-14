@@ -229,6 +229,7 @@ int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #endif
 }
+
 int MMG3D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
 #ifndef USE_VTK
@@ -243,7 +244,6 @@ int MMG3D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #endif
 }
-
 
 int MMG3D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 

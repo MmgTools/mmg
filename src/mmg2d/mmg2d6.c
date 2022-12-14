@@ -225,7 +225,6 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-
   /* Effective splitting of the crossed triangles */
   if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
