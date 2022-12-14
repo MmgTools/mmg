@@ -34,7 +34,7 @@
 #include <float.h>
 
 
-#include "libmmgcommon.h"
+#include "libmmgcommon_private.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -233,7 +233,7 @@ int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 double MMG2D_caltri_iso_3pt(double *a,double *b,double *c);
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_hashQuad(MMG5_pMesh mesh);
-int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
+int MMG2D_cuttri(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);
 int MMG2D_split2_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);
 int MMG2D_split3_sim(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);
@@ -243,11 +243,12 @@ int MMG2D_split3(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int vx[3]);
 int MMG2D_splitbar(MMG5_pMesh ,MMG5_int ,MMG5_int );
 int MMG2D_assignEdge(MMG5_pMesh );
 int MMG2D_bdryEdge(MMG5_pMesh );
-int MMG2D_setadj(MMG5_pMesh );
+int MMG2D_setadj(MMG5_pMesh,int8_t );
 int MMG2D_singul(MMG5_pMesh,MMG5_int );
 int MMG2D_analys(MMG5_pMesh );
 int MMG2D_norver(MMG5_pMesh,MMG5_int );
 int MMG2D_regnor(MMG5_pMesh );
+int MMG2D_regver(MMG5_pMesh );
 int MMG2D_boulen(MMG5_pMesh , MMG5_int ,int8_t ,MMG5_int *,MMG5_int *,double *);
 int MMG2D_mmg2d1n(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_anatri(MMG5_pMesh ,MMG5_pSol ,int8_t );
@@ -273,7 +274,8 @@ int MMG2D_chkcol(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int *,int8_t);
 int MMG2D_colver(MMG5_pMesh,int,MMG5_int*);
 int MMG2D_colver3(MMG5_pMesh,MMG5_int*);
 int MMG2D_colver2(MMG5_pMesh,MMG5_int*);
-int MMG2D_bouleendp(MMG5_pMesh,MMG5_int,int8_t,MMG5_int*,MMG5_int*);
+int MMG2D_boulet(MMG5_pMesh,MMG5_int,int8_t,MMG5_int*);
+int MMG2D_bouleendp(MMG5_pMesh,MMG5_int,int8_t,MMG5_int*,MMG5_int*,MMG5_int*);
 int MMG2D_savemesh_db(MMG5_pMesh ,char* ,int8_t );
 int MMG2D_savemet_db(MMG5_pMesh ,MMG5_pSol ,char* ,int8_t );
 int MMG2D_chkswp(MMG5_pMesh , MMG5_pSol ,MMG5_int ,int8_t ,int8_t );

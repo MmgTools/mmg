@@ -37,11 +37,58 @@
  */
 
 #include "libmmg3d.h"
-#include "inlined_functions_3d.h"
-#include "mmgexterns.h"
-#include "mmg3dexterns.h"
+#include "inlined_functions_3d_private.h"
+#include "mmgexterns_private.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t ddb;
+
+/**
+ * \param mesh pointer toward mesh
+ * \param ppt pointer toward point whose geom data have to be updated
+ * \param tag point tag
+ * \param nmref ref that has to be setted at point \a ppt if point is non-manifold
+ * \param edgref ref that has to be setted at point \a ppt if point is manifold (edg ref)
+ * \param no1 normal that has to be setted at point \a ppt (if needed)
+ * \param no2 normal that has to be setted at point \a ppt (if needed)
+ * \param to tangent that has to be setted at point \a ppt (if needed)
+ *
+ * Set geometric info (ref, tag, normals and tangent) at point \a ppt.
+ *
+ */
+void MMG3D_set_geom(MMG5_pMesh mesh, MMG5_pPoint ppt,
+                    int16_t tag,MMG5_int nmref,MMG5_int edgref,
+                    double no1[3],double no2[3],double to[3]) {
+
+  if ( MG_EDG_OR_NOM(tag) ) {
+    ppt->ref = nmref;
+  }
+  else {
+    ppt->ref = edgref;
+  }
+
+  MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
+  if ( tag & MG_NOM ){
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    memcpy(ppt->n,to,3*sizeof(double));
+    return;
+  }
+  else if ( tag & MG_GEO ) {
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    memcpy(pxp->n2,no2,3*sizeof(double));
+    memcpy(ppt->n,to,3*sizeof(double));
+    return;
+  }
+  else if ( tag & MG_REF ) {
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    memcpy(ppt->n,to,3*sizeof(double));
+    return;
+  }
+  else {
+    memcpy(pxp->n1,no1,3*sizeof(double));
+    return;
+  }
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -885,8 +932,15 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           assert(0);
           continue;
         }
-        else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
-
+        else {
+          /* Ignore OLDPARBDY tag of p0 */
+          int16_t tag = p0->tag;
+          tag &= ~MG_OLDPARBDY;
+          if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+            /* Unable to merge edge */
+            continue;
+          }
+        }
 
         /* Ball of point: computed here if needed for the local parameter
          * evaluation, after length check otherwise (because the ball
@@ -1104,6 +1158,127 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param k index of tetra in which we work.
+ * \param imin index in \a k of edge that we consider for collapse.
+ * \param lmin length of edge \a imin.
+ * \param nc pointer toward count of collapses (has to be updated)
+ *
+ * \return -1 for strong failure.
+ *
+ * \return 0 if edge cannot be collapsed and if we want to pass to next loop
+ * step (next element or next tetra edge)
+ *
+ * \return 2 if edge has been collapsed.
+ *
+ * \return 3 if nothing has been done (no error but no collapse either).
+ *
+ * Try to collapse edge \a imin it too small.
+ *
+ */
+int MMG3D_adpcoledg(MMG5_pMesh mesh, MMG5_pSol met,
+                    MMG3D_pPROctree *PROctree,MMG5_int k,
+                    int8_t imin,double lmin,MMG5_int* nc) {
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPoint   p0,p1;
+  int64_t       list[MMG3D_LMAX+2];
+  MMG5_int      lists[MMG3D_LMAX+2],ip1,ip2;
+  int           ilist,ilists;
+  int8_t        j,i,i1,i2;
+
+  if(lmin > MMG3D_LOPTS) {
+    /* Edge is large enough: nothing to do */
+    return 3;
+  }
+
+  if ( lmin == 0 ) {
+    /* Case of an internal tetra with 4 ridges vertices */
+//#warning is it possible to merge this edge ??
+    return 0;
+  }
+
+  pt = &mesh->tetra[k];
+  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+  MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
+
+  /* Ignore OLDPARBDY tag of p0 */
+  int16_t tag0 = p0->tag;
+  tag0 &= ~MG_OLDPARBDY;
+  if ( (tag0 > p1->tag) || (tag0 & MG_REQ) ) {
+    /* Unable to merge edge: pass to next element */
+    return 0;
+  }
+
+  /** Compute edge shell */
+  ilist = 0;
+  if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+    /* Case of a boundary face */
+    int16_t tag = pxt->tag[MMG5_iarf[i][j]];
+    if ( tag & MG_REQ ) {
+      return 0;
+    }
+    tag |= MG_BDY;
+    tag &= ~MG_OLDPARBDY;
+    if ( tag0 > tag ) {
+      return 0;
+    }
+    if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) {
+      return 0;
+    }
+
+    int16_t isnm = (p0->tag & MG_NOM);
+    if (MMG5_boulesurfvolp(mesh,k,i1,i, list,&ilist,lists,&ilists,isnm) < 0 ) {
+      return -1;
+    }
+
+    ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
+  }
+  else {
+    /* Case of an internal face */
+    if ( p0->tag & MG_BDY ) {
+      return 0;
+    }
+
+    ilist = MMG5_boulevolp(mesh,k,i1,list);
+    ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
+  }
+
+  /** Collapse */
+  if ( ilist > 0 ) {
+    /* Checks are ok */
+    int ier = MMG5_colver(mesh,met,list,ilist,i2,2);
+    if ( ilist < 0 ) {
+      /* Colver failure */
+      return 0;
+    }
+    if ( ier < 0 ) {
+      /* Colver failure */
+        return -1;
+    }
+    else if(ier) {
+      /* Collapse is successful */
+      if ( PROctree && (*PROctree) ) {
+        MMG3D_delPROctree(mesh,*PROctree,ier);
+      }
+      MMG3D_delPt(mesh,ier);
+      (*nc)++;
+      return 2;
+    }
+  }
+  else if (ilist < 0 ) {
+    /* Checks on chkcol_bdy have failed (error in edge shell computation) */
+    return -1;
+  }
+
+  return 3;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param hash pointer toward the hash table of edges.
  * \return 0 if failed, 1 if success
  *
@@ -1218,7 +1393,9 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         if ( pxt->tag[i] & MG_REQ ) continue;
       }
       else  pxt = 0;
+
       if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
+        /* Split internal edges connecting bdy points */
         ip = MMG5_hashGet(&hash,ip1,ip2);
       }
       else {
@@ -1421,7 +1598,7 @@ split:
  *
  */
 static inline int
-MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
+MMG3D_update_rid_geom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
   double dd,to[3];
 
   dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
@@ -1463,7 +1640,6 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  * \param i index of (boundary) face in which we work.
  * \param j local index in face i of the ridge.
  * \param pt tetra to split
- * \param pxt associated xtetra
  * \param no1 first normal at new ridge point (to fill)
  * \param no2 second normal at new ridge point (to fill)
  * \param to tangent ar new ridge point (to fill)
@@ -1472,10 +1648,11 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  *
  * Compute normals and tangent at new ridge point.
  *
+ * \remark has to be called from a bdy face with suitable orientation (normal
+ * orientation is not checked along edges with 2 singular extremities)
  */
 int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
-                                      MMG5_pxTetra pxt,double no1[3],
-                                      double no2[3], double to[3] ) {
+                                       double no1[3],double no2[3],double to[3] ) {
   MMG5_Tria ptt;
   double    dd;
   int       ier;
@@ -1485,13 +1662,18 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
   assert ( 0<=j && j<3 && "unexpected local edg odx in face" );
 
   assert( 0<=i && i<4 && "unexpected local face idx");
+
+#ifndef NDEBUG
+  /* Check that face is boundary and has a suitable orientation */
+  assert ( mesh->tetra[k].xt && "Tetra is not boundary" );
+
+  MMG5_pxTetra pxt = &mesh->xtetra[ mesh->tetra[k].xt ];
+  assert ( (pxt->ftag[i] & MG_BDY) && "Face is not boundary" );
+  assert ( MG_GET(pxt->ori,i) && "Wrong face orientation" );
+#endif
+
   MMG5_tet2tri(mesh,k,i,&ptt);
   MMG5_nortri(mesh,&ptt,no1);
-  if ( !MG_GET(pxt->ori,i) ) {
-    no1[0] *= -1.0;
-    no1[1] *= -1.0;
-    no1[2] *= -1.0;
-  }
 
   /* In this case, 'to' orientation depends on the edge processing (so on
    * the triangle from which we come) so we can't use it to compute no2. */
@@ -1520,14 +1702,6 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
   else {
     assert ( ier==1 );
 
-    if ( !MG_GET(pxt->ori,i) ) {
-      /* If k belongs to the domain that is not consistent with the normal
-       * orientation, no2 (as no1) has to be inverted */
-      no2[0] *= -1.0;
-      no2[1] *= -1.0;
-      no2[2] *= -1.0;
-    }
-
     /* Compute 'to' as intersection of no1 and no2 */
     to[0] = no1[1]*no2[2] - no1[2]*no2[1];
     to[1] = no1[2]*no2[0] - no1[0]*no2[2];
@@ -1541,6 +1715,196 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
     }
   }
   return 1;
+}
+
+/**
+ * \param mesh pointer toward mesh
+ * \param k index of input tetra
+ * \param imax index of edge in tetra \a k
+ * \param i index of boundary face of tetra from which we will work
+ * \param j index of edge in face \a i
+ * \param pxt boundary tetra associated to \a k
+ * \param ip1 first vertex of edge \a i
+ * \param ip2 second vertex of edge \a i
+ * \param p0 point \a ip1
+ * \param p1 point \a ip2
+ * \param ref edge ref (to fill)
+ * \param tag edge tag (to fill)
+ * \param o coordinates of new point along bezier edge (to fill)
+ * \param to tangent at new point \a o (to fill if needed)
+ * \param no1 first normal at new point \a o (to fill if needed)
+ * \param no2 second normal at new point (to fill if needed)
+ * \param list pointer toward edge shell (to fill)
+ * \param ilist 2x edge shell size (+1 for a bdy edge)
+ *
+ * \return -1 for strong failure.
+ * \return 0 edge shell contains a required tet or non manifold edge or ridge
+ * reconstruction has failed.
+ * \return 1 ref or regular edge reconstruction has failed.
+ * \return 2 if successful (we can compute new point).
+ *
+ * Build Bezier edge from the boundary face of a boundary tetra and compute
+ * position and feature of new point along this edge.
+ *
+ */
+int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
+                              int8_t imax,int8_t i, int8_t j,
+                              MMG5_pxTetra pxt,
+                              MMG5_int ip1,MMG5_int ip2,
+                              MMG5_pPoint p0, MMG5_pPoint p1,
+                              MMG5_int *ref,int16_t *tag,
+                              double o[3],double to[3],double no1[3],
+                              double no2[3],int64_t *list,int *ilist) {
+  MMG5_Tria    ptt;
+  double      v[3];
+
+  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) {
+    /* Skip edge with extremities on parallel interfaces */
+    return 0;
+  }
+
+  int8_t ori = MG_GET(pxt->ori,i);
+  if ( !ori ) {
+    /* Treat triangles at interface of 2 subdomains from well oriented face */
+    return 0;
+  }
+
+  *ref = pxt->edg[imax];
+  *tag = pxt->tag[imax];
+  if ( (*tag) & MG_REQ ) {
+    /* No need to split required edges */
+    return 0;
+  }
+
+  (*tag) |= MG_BDY;
+  int8_t dummy;
+  *ilist = MMG5_coquil(mesh,k,imax,list,&dummy);
+  if ( !(*ilist) ) {
+    /* On of the tetra of the edge shell is required: we cannot split the edge */
+    return 0;
+  }
+  else if ( (*ilist) < 0 ) {
+    /* Shell computation has failed */
+    return -1;
+  }
+
+  /** a/ computation of bezier edge */
+  if ( (*tag) & MG_NOM ){
+    /* Edge is non-manifold */
+    if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      /* Unable to compute geom infos at nm edge */
+      return 0;
+    }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+    }
+  }
+  else if ( (*tag) & MG_GEO ) {
+    /* Edge is ridge */
+    if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) {
+      /* Unable to compute geom infos at ridge */
+//#warning why a continue here?
+      return 0;
+  }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,no1,no2,to) ) {
+        return -1;
+      }
+    }
+  }
+  else if ( (*tag) & MG_REF ) {
+    /* Edge is ref */
+    if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) {
+      /* Unable to compute geom infos at ref edge */
+      return 1;
+    }
+    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+//#warning creation of sin-sin ref edge to see if it works without normal realloc
+      assert( 0<=i && i<4 && "unexpected local face idx");
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+      }
+    }
+  else {
+    /* Longest edge is regular */
+    if ( !MMG5_norface(mesh,k,i,v) ) {
+      /* Unable to treat long edge: try to collapse short one */
+      return 1;
+  }
+    if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) {
+      /* Unable to compute geom infos at regular edge */
+      return 1;
+    }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      assert( 0<=i && i<4 && "unexpected local face idx");
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+      }
+    }
+  return 2;
+}
+
+/**
+ * \param mesh pointer toward mesh
+ * \param pt pointer toward tetra on which we work
+ * \param ied index in tetra \a pt of edge on which we work
+ * \param i index of a face of \a pt that contains \a ied. If possible we choose
+ * a boundary face with suitable orientation (to fill)
+ * \param j local index of edge \a ied in face \a i (to fill)
+ * \param i1 local index in tetra \a pt of first extremity of edge \a ied (to fill)
+ * \param i2 local index in tetra \a pt of second extremity of edge \a ied (to fill)
+ * \param ip1 global index first extremity of edge \a ied (to fill)
+ * \param ip2 global index in tetra \a pt of second extremity of edge \a ied (to fill)
+ * \param p0 pointer toward first extremity of edge \a ied (to fill)
+ * \param p1 pointer toward second extremity of edge \a ied (to fill)
+ *
+ * Search a face from wich we car reach edge \a ied. If a boundary face with
+ * good orientation exists it is choosed prior to another face, otherwise, if
+ * possible, we choose a boundary face. Fill data needed to work on edge.
+ *
+ */
+void MMG3D_find_bdyface_from_edge(MMG5_pMesh mesh,MMG5_pTetra pt,int8_t ied,
+                                  int8_t *i,int8_t *j,int8_t*i1,int8_t*i2,
+                                  MMG5_int*ip1,MMG5_int*ip2,MMG5_pPoint *p0,MMG5_pPoint *p1) {
+
+  int8_t ifa0 = MMG5_ifar[ied][0];
+  int8_t ifa1 = MMG5_ifar[ied][1];
+
+  /** An edge can be at the interface of a boundary face with good orientation
+   * and of another one with bad orientation: ensure to treat the edge from the
+   * suitable face */
+  /* Default face */
+  MMG5_pxTetra pxt = pt->xt? &mesh->xtetra[pt->xt] : 0;
+
+  (*i) = ifa0;
+  if ( pt->xt ) {
+    int16_t is_ifa0_bdy = (pxt->ftag[ifa0] & MG_BDY);
+    int16_t is_ifa1_bdy = (pxt->ftag[ifa1] & MG_BDY);
+
+    if ( is_ifa0_bdy && is_ifa1_bdy ) {
+      /* Two bdy faces: search if one has a suitable orientation */
+      int8_t  ifa1_ori    = MG_GET(pxt->ori,(*i));
+      (*i) = ifa1_ori ? ifa1 : ifa0;
+    }
+    else if ( is_ifa1_bdy ) {
+      /* only ifa1 is boundary: no need to check for orientation (if it has a
+       * bad ori we will quit the function later) */
+      (*i) = ifa1;
+    }
+    /* For all other cases (only ifa0 is bdy or no bdy face), we use default
+     * face (ifa0) */
+  }
+
+  (*j)   = MMG5_iarfinv[*i][ied];
+  (*i1)  = MMG5_idir[*i][MMG5_inxt2[*j]];
+  (*i2)  = MMG5_idir[*i][MMG5_iprv2[*j]];
+  (*ip1) = pt->v[*i1];
+  (*ip2) = pt->v[*i2];
+  (*p0)  = &mesh->point[*ip1];
+  (*p1)  = &mesh->point[*ip2];
+
 }
 
 /**
@@ -1563,94 +1927,37 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
 int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
                        MMG5_pTetra pt,MMG5_pxTetra pxt,int8_t imax,int8_t typchk,
                        int8_t chkRidTet,int *warn ) {
-  MMG5_Tria    ptt;
   MMG5_pPoint  p0,p1,ppt;
-  MMG5_pxPoint pxp;
-  double       o[3],to[3],no1[3],no2[3],v[3];
+  double       o[3],to[3],no1[3],no2[3];
   int          ilist;
   MMG5_int     src,ip,ip1,ip2,ref;
   int64_t      list[MMG3D_LMAX+2];
   int          ier;
   int16_t      tag;
-  int8_t       j,i,i1,i2,ifa0,ifa1;
+  int8_t       j,i,i1,i2;
 
   assert ( pxt == &mesh->xtetra[pt->xt] );
 
   /* proceed edges according to lengths */
-  ifa0 = MMG5_ifar[imax][0];
-  ifa1 = MMG5_ifar[imax][1];
-  i  = (pxt->ftag[ifa1] & MG_BDY) ? ifa1 : ifa0;
-  j  = MMG5_iarfinv[i][imax];
-  i1 = MMG5_idir[i][MMG5_inxt2[j]];
-  i2 = MMG5_idir[i][MMG5_iprv2[j]];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
-  p0  = &mesh->point[ip1];
-  p1  = &mesh->point[ip2];
+  MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
-  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) return 0;
-
-  ref = pxt->edg[imax];
-  tag = pxt->tag[imax];
-
-  if ( tag & MG_REQ ) { return 0; }
-
-  tag |= MG_BDY;
-
-  ilist = MMG5_coquil(mesh,k,imax,list);
-  if ( !ilist )  return 0;
-  else if ( ilist < 0 ) { return -1; }
-
-  if ( tag & MG_NOM ){
-    if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) ) {
-      return 0;
-    }
-    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-      assert( 0<=i && i<4 && "unexpected local face idx");
-      MMG5_tet2tri(mesh,k,i,&ptt);
-      MMG5_nortri(mesh,&ptt,no1);
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
-    }
-  }
-  else if ( tag & MG_GEO ) {
-    if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) ) { return 0; }
-
-    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-      if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
-        return -1;
-      }
-    }
-  }
-  else if ( tag & MG_REF ) {
-    if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) { return 0; }
-    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-      assert( 0<=i && i<4 && "unexpected local face idx");
-      MMG5_tet2tri(mesh,k,i,&ptt);
-      MMG5_nortri(mesh,&ptt,no1);
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
-    }
-  }
-  else {
-    if ( !MMG5_norface(mesh,k,i,v) ) { return 0; }
-    if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) { return 0; }
-    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-      assert( 0<=i && i<4 && "unexpected local face idx");
-      MMG5_tet2tri(mesh,k,i,&ptt);
-      MMG5_nortri(mesh,&ptt,no1);
-      if ( !MG_GET(pxt->ori,i) ) {
-        no1[0] *= -1.0;
-        no1[1] *= -1.0;
-        no1[2] *= -1.0;
-      }
-    }
+  ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,&ref,&tag,
+                               o,to,no1,no2,list,&ilist);
+  switch ( ier ) {
+  case -1:
+    /* Strong failure (due to lack of memory or wrong edge shell) */
+    return -1;
+  case 0:
+    /* We don't want to split the edge (edge shell contains a required tet or
+     * non manifold edge or ridge reconstruction has failed) */
+    return 0;
+  case 1:
+    /* We don't want to split the edge (ref or regular edge reconstruction has
+     * failed) */
+    return 0;
+  default:
+    /* We can insert new vertex along edge */
+    assert ( ier==2 );
   }
 
 #ifdef USE_POINTMAP
@@ -1687,31 +1994,16 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
    * order to comute edge lengths). Thus we need to store the geometric info of
    * point here. */
   ppt = &mesh->point[ip];
-  if ( MG_EDG_OR_NOM(tag) )
-    ppt->ref = ref;
-  else
-    ppt->ref = pxt->ref[i];
-
-  pxp = &mesh->xpoint[ppt->xp];
-  if ( tag & MG_NOM ){
-    memcpy(pxp->n1,no1,3*sizeof(double));
-    memcpy(ppt->n,to,3*sizeof(double));
-  }
-  else if ( tag & MG_GEO ) {
-    memcpy(pxp->n1,no1,3*sizeof(double));
-    memcpy(pxp->n2,no2,3*sizeof(double));
-    memcpy(ppt->n,to,3*sizeof(double));
-  }
-  else if ( tag & MG_REF ) {
-    memcpy(pxp->n1,no1,3*sizeof(double));
-    memcpy(ppt->n,to,3*sizeof(double));
-  }
-  else {
-    memcpy(pxp->n1,no1,3*sizeof(double));
-  }
+  MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
 
   ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+
+#ifndef NDEBUG
+  if ( mesh->info.ddebug ) {
+    assert ( (ier != -1) && "simbulgept failure" );
+  }
+#endif
+
   if ( ier < 0 || ier == 2 ) {
     MMG3D_delPt(mesh,ip);
     return 0;
@@ -1722,9 +2014,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   if ( ier == 1 ) { ier = MMG5_split1b(mesh,met,list,ilist,ip,1,typchk-1,chkRidTet); }
 
   /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
-  pt = &mesh->tetra[k];
-  pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
     return -1;
@@ -1889,6 +2178,7 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     pt->flag = 0;
     pxt = &mesh->xtetra[pt->xt];
 
+    /* Travel well oriented boundary faces to flag edges that have to be cut */
     for (i=0; i<4; i++){
       if ( pxt->ftag[i] & MG_REQ )     continue;
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;
@@ -1932,7 +2222,10 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
     if ( ier==-1 ) { return -1; }
     else if ( !ier ) { continue; }
-    else if ( ier==2 ) { break; }
+    else if ( ier==2 ) {
+      /* Unable to split due to lack of memory */
+      return ns;
+    }
 
     ++ns;
   }
@@ -2117,7 +2410,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
                 ier = MMG3D_bezierInt(&pb2,&uv[j2][0],o,no,to);
                 assert(ier);
 
-                if ( !MMG3D_storeGeom(ppt,pxp,no) ) continue;
+                if ( !MMG3D_update_rid_geom(ppt,pxp,no) ) continue;
               }
             }
           }
@@ -2134,7 +2427,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
 
-          if ( !MMG3D_storeGeom(ppt,pxp,no) ) continue;
+          if ( !MMG3D_update_rid_geom(ppt,pxp,no) ) continue;
         }
       }
     }
@@ -2173,11 +2466,6 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         /** Edge analysis */
         /* First: skip edge if required */
         if ( pt->xt && (pxt->tag[ia] & MG_REQ) )  continue;
-        else if ( ptt.tag[j] & MG_REQ ) {
-          // Dead code: to remove (Algiane 05/03/20)?
-          assert ( pt->xt && (pxt->tag[ia] & MG_REQ) );
-          continue;
-        }
 
         /* Second: if possible treat manifold ridges from a boundary face (to
          * ensure the computation of n2) */

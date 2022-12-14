@@ -32,9 +32,9 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
-#include "mmgexterns.h"
-#include "inlined_functions.h"
+#include "mmgcommon_private.h"
+#include "mmgexterns_private.h"
+#include "inlined_functions_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -758,7 +758,7 @@ int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, MMG5_int ipref[2],
  \left(\frac{d-1}{d} \right)^2.
  \f]
  *
- * See Theorem 1 of \cite{dapogny2014three}.
+ * See Theorem 1 of \cite dapogny2014three.
  *
  **/
 double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, MMG5_int idp,

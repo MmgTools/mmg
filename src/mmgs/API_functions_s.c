@@ -1338,6 +1338,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
   case MMGS_IPARAM_isoref :
       mesh->info.isoref   = val;
     break;
+  case MMGS_IPARAM_isosurf :
+    mesh->info.isosurf = val;
+    break;
   case MMGS_IPARAM_keepRef :
     if ( mesh->info.nmat ) {
       fprintf(stderr,"\n  ## Warning: %s: multi material mode not compatible with"
@@ -1364,6 +1367,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
     break;
   case MMGS_IPARAM_nreg :
     mesh->info.nreg     = val;
+    break;
+  case MMGS_IPARAM_xreg :
+    mesh->info.xreg     = val;
     break;
   case MMGS_IPARAM_nosizreq :
     mesh->info.nosizreq = val;
@@ -1477,6 +1483,9 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam) {
     break;
   case MMGS_IPARAM_nreg :
     return  mesh->info.nreg;
+    break;
+  case MMGS_IPARAM_xreg :
+    return  mesh->info.xreg;
     break;
   case MMGS_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;

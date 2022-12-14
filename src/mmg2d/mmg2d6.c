@@ -31,7 +31,8 @@
  * \copyright GNU Lesser General Public License.
  */
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
+#include "mmgexterns_private.h"
+#include "mmg2dexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -40,28 +41,33 @@
  *
  * \return 1 if success, 0 otherwise
  *
- * Effective discretization of the 0 level set encoded in sol in the mesh
+ * Effective discretization of the 0 level set encoded in sol in the mesh.
+ * Only the boundary part of the domain is discretized if mesh->info.isosurf is 1.
  *
  */
-int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
+int MMG2D_cuttri(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
   double       v0,v1,s,c[2];
-  MMG5_int     k,ip0,ip1,nb,np,nt,ns,vx[3],refint,refext;
-  int8_t       i,i0,i1,ier;
+  MMG5_int     k,ip0,ip1,nb,np,nt,ns,refint,refext,vx[3];
+  int8_t       i,ier;
 
   /* Reset flag field for points */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
-  /* Evaluate the number of intersected edges by the 0 level set */
+  /* Estimate the number of intersected edges or surface edges by the 0 level set */
   nb = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+
+      /* If only surface edges are discretized, skip non boundary entities */
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_BDY) ) continue;
+
       ip0 = pt->v[MMG5_inxt2[i]];
       ip1 = pt->v[MMG5_iprv2[i]];
       p0  = &mesh->point[ip0];
@@ -81,8 +87,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   }
   if ( !nb ) return 1;
 
-  /* Create the intersection points between the edges in the mesh and the 0
-   * level set */
+  /* Create the intersection points between the edges or surface edges
+   * in the mesh and the 0 level set */
   if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -90,13 +96,26 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
+      if ( mesh->info.isosurf && !(pt->tag[i] & MG_REF) ) {
+        continue;
+      }
+
       ip0 = pt->v[MMG5_inxt2[i]];
       ip1 = pt->v[MMG5_iprv2[i]];
 
       np = MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
 
-      if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
+      /* Look either at the triangle ref or at the boundary one */
+      MMG5_int ref;
+      if ( mesh->info.isosurf ) {
+        ref = pt->edg[i];
+      }
+      else {
+        ref = pt->ref;
+      }
+
+      if ( !MMG5_isSplit(mesh,ref,&refint,&refext) ) continue;
 
       v0 = sol->m[ip0];
       v1 = sol->m[ip1];
@@ -183,10 +202,30 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
 
 /* Main function of the -ls mode */
 int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
+  char str[16]="";
   MMG5_int k;
 
-  if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+  assert ( (mesh->info.iso || mesh->info.isosurf) && "level-set discretization mode not specified" );
+
+  assert ( (!(mesh->info.iso && mesh->info.isosurf)) && "unable to determine level-set discretization mode" );
+
+  /* Set function pointers */
+  if ( mesh->info.isosurf ) {
+    strcat(str,"(BOUNDARY PART)");
+
+    MMG5_snpval   = MMG5_snpval_lssurf;
+    MMG5_resetRef = MMG5_resetRef_lssurf;
+    MMG5_setref   = MMG5_setref_lssurf;
+  }
+  else {
+    MMG5_snpval   = MMG5_snpval_ls;
+    MMG5_resetRef = MMG5_resetRef_ls;
+    MMG5_setref   = MMG5_setref_ls;
+  }
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"  ** ISOSURFACE EXTRACTION %s\n",str);
+  }
 
   if ( mesh->nquad ) {
     fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"
@@ -204,16 +243,40 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
+  /* Processing of bdy infos for isosurface boundary discretization */
+  if ( mesh->info.isosurf ) {
+    /* Creation of tria adjacency relations in the mesh */
+    if ( !MMG2D_hashTria(mesh) ) {
+       fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+      return 0;
+    }
+
+    /* Set tags to triangles from geometric configuration */
+    if ( !MMG2D_setadj(mesh,0) ) {
+      fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
+      return 0;
+    }
+  }
+
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
-  if ( !MMG5_snpval_ls(mesh,sol) ) {
+  if ( !MMG5_snpval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
 
-  /* Removal of small parasitic components */
-  if ( mesh->info.rmc > 0. && !MMG5_rmc(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Removal of small parasitic components */
+    if ( mesh->info.rmc > 0. && !MMG5_rmc(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
+      return 0;
+    }
+  }
+  else {
+    /* RMC : on verra */
+    if ( mesh->info.rmc > 0 ) {
+      fprintf(stdout,"\n  ## Warning: rmc option not implemented for boundary"
+              " isosurface extraction.\n");
+    }
   }
 
   /* No need to keep adjacencies from now on */
@@ -226,13 +289,13 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Effective splitting of the crossed triangles */
-  if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
+  if ( !MMG2D_cuttri(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
     return 0;
   }
 
   /* Set references on the interior / exterior triangles*/
-  if ( !MMG5_setref_ls(mesh,sol) ) {
+  if ( !MMG5_setref(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
@@ -243,10 +306,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Check that the resulting mesh is manifold */
-  if ( !MMG5_chkmanimesh(mesh) ) {
-    fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
-    return 0;
+  if ( mesh->info.iso ) {
+    /* Check that the resulting mesh is manifold */
+    if ( !MMG5_chkmanimesh(mesh) ) {
+      fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
+      return 0;
+    }
   }
 
   /* Clean memory */

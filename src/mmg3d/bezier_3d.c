@@ -318,7 +318,7 @@ MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],
  * \param ori triangle orientation.
  * \return 1.
  *
- * Compute Bezier control points on triangle \a pt (cf. \cite{vlachos2001curved})
+ * Compute Bezier control points on triangle \a pt (cf. \cite vlachos2001curved)
  *
  * \todo merge with the MMG5_mmgsBezierCP function and remove the pointer
  * toward this functions.
@@ -390,7 +390,8 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
          * projections may fail but I think that it is not a normal behaviour:
          * it means that the surface approximation has degenerated. See issue #167
          */
-        assert ( ps > 0. || ps2 > 0. && "Unexpected case");
+        assert ( ps > 0. || ps2 > 0. &&
+                 "Negative projection of normal at tria onto normal at point: surface degeneracy");
 
         /* As previous assert may fail in some cases, deal with both cases */
         if ( (ps > 0.) || (ps2 >0.) ) {

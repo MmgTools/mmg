@@ -20,8 +20,6 @@
 ##  use this copy of the Mmg distribution only if you accept them.
 ## =============================================================================
 
-GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
-
 ###############################################################################
 #####
 #####         Continuous Integration
@@ -245,7 +243,6 @@ ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-ls-nsd3.o.meshb)
 
-
 ###############################################################################
 #####
 #####         Detected Bugs
@@ -388,6 +385,23 @@ ADD_TEST(NAME mmgs_LSTriaOri
   COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
   ${MMGS_CI_TESTS}/LSTriaOri/fault.mesh
   ${CTEST_OUTPUT_DIR}/mmgs_LSTriaOri.o.meshb)
+
+# lssurf: discretization of boundaries only
+ADD_TEST(NAME mmgs_OptLsSurf_box
+  COMMAND ${EXECUT_MMGS} -v 5 -lssurf
+  -sol ${MMGS_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMGS_CI_TESTS}/OptLsSurf_box/box-3D.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLsSurf_box.o.meshb
+  )
+
+# lssurf + multimat: discretization of boundaries only
+ADD_TEST(NAME mmgs_OptLsSurf_multiMat_box
+  COMMAND ${EXECUT_MMGS} -v 5 -lssurf
+  -sol ${MMGS_CI_TESTS}/OptLsSurf_box/box.sol
+  ${MMGS_CI_TESTS}/OptLsSurf_box/box_multiMat-3D.mesh
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLsSurf_multiMat_box.o.meshb
+  )
+
 
 ###############################################################################
 #####

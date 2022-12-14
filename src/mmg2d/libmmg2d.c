@@ -23,8 +23,8 @@
 
 #include "libmmg2d.h"
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
-#include "mmgexterns.h"
+#include "mmg2dexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
@@ -93,9 +93,9 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met) {
             " MMG2D_mmg2dmesh function\n.");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     fprintf(stdout,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
-            " (MMG2D_IPARAM_iso):\n"
+            " (MMG2D_IPARAM_iso or MMG2D_IPARAM_isosurf ):\n"
             "          YOU MUST CALL THE MMG2D_mmg2dls FUNCTION TO USE THIS"
             " OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -334,9 +334,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
-  else if ( mesh->info.iso ) {
+  else if ( mesh->info.iso || mesh->info.isosurf ) {
     fprintf(stdout,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
-            " (MMG2D_IPARAM_iso):\n"
+            " (MMG2D_IPARAM_iso || MMG2D_IPARAM_isosurf ):\n"
             "          YOU MUST CALL THE MMG2D_MMG2DLS FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
@@ -534,7 +534,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   MMG5_version(mesh,"2D");
 
-  if ( !mesh->info.iso ) { mesh->info.iso = 1; }
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf) ) {
+    fprintf(stdout,"\n  ## WARNING: ISO MODE NOT PROVIDED: ENABLING ISOVALUE DISCRETIZATION MODE (-ls) \n");
+    mesh->info.iso = 1;
+  }
 
   if ( !umet ) {
     /* User doesn't provide the metric, allocate our own one */

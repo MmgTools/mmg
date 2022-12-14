@@ -35,9 +35,9 @@
 
 #include "libmmgs.h"
 #include "libmmgs_private.h"
-#include "inlined_functions.h"
-#include "mmgsexterns.h"
-#include "mmgexterns.h"
+#include "inlined_functions_private.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
 
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
@@ -243,6 +243,16 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           }
           else i--;
         }
+        else if ( !strcmp(argv[i],"-lssurf") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_isosurf,1) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_ls,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
+        }
         break;
       case 'm':
         if ( !strcmp(argv[i],"-met") ) {
@@ -400,6 +410,12 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           return 0;
         }
         break;
+      case 'x':
+        if ( !strcmp(argv[i],"-xreg") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_xreg,1) )
+            return 0;
+        }
+        break;
       default:
         fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMGS_usage(argv[0]);
@@ -451,14 +467,15 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
   }
 
   /* adp mode: if the metric name has been stored in sol, move it in met */
-  if ( met->namein==NULL && sol && sol->namein && !(mesh->info.iso || mesh->info.lag>=0) ) {
+  if ( met->namein==NULL && sol && sol->namein &&
+       !(mesh->info.iso || mesh->info.isosurf || mesh->info.lag>=0) ) {
     if ( !MMGS_Set_inputSolName(mesh,met,sol->namein) )
       return 0;
     MMG5_DEL_MEM(mesh,sol->namein);
   }
 
   /* default : store solution name in iso mode, metric name otherwise */
-  tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  tmp = ( mesh->info.iso || mesh->info.isosurf || mesh->info.lag >=0 ) ? sol : met;
   assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMGS_Set_inputSolName(mesh,tmp,"") ) { return 0; }
@@ -992,7 +1009,6 @@ int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int k, int i,
   MMG5_int iel = k;
   int j        = i;
   do {
-    ptt   = &mesh->tria[iel];
     adja  = &mesh->adja[3*(iel-1)+1];
     i1    = MMG5_iprv2[j];
     kold  = iel;

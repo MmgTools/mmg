@@ -29,7 +29,7 @@
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
  *
- * \note Please, refer to the \ref common/libmmgcommon.h, mmgs/libmmgs.h and
+ * \note Please, refer to the \ref common/libmmgcommon_private.h, mmgs/libmmgs.h and
  * mmg3d/libmmg3d.h header files for functions documentation.
  *
  * Define the Fortran API functions for MMG library: adds function
@@ -38,11 +38,11 @@
  *
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 
 /**
- * See \ref MMG5_Init_fileNames function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_Init_fileNames function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_INIT_FILENAMES,mmg5_init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
 
@@ -51,7 +51,7 @@ FORTRAN_NAME(MMG5_INIT_FILENAMES,mmg5_init_filenames,(MMG5_pMesh *mesh,MMG5_pSol
 }
 
 /**
- * See \ref MMG5_Set_inputMeshName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_Set_inputMeshName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_SET_INPUTMESHNAME, mmg5_set_inputmeshname,
              (MMG5_pMesh *mesh, char *meshin, int *strlen, int *retval),
@@ -68,7 +68,7 @@ FORTRAN_NAME(MMG5_SET_INPUTMESHNAME, mmg5_set_inputmeshname,
 }
 
 /**
- * See \ref MMG5_Set_inputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_Set_inputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_SET_INPUTSOLNAME, mmg5_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen, int* retval),
@@ -104,7 +104,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTMESHNAME,mmg5_set_outputmeshname,
 }
 
 /**
- * See \ref MMG5_Set_outputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_Set_outputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen, int* retval),
@@ -121,7 +121,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
 }
 
 /**
- * See \ref MMG5_scaleMesh function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_scaleMesh function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_SCALEMESH,mmg5_scalemesh,
              (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *ls,int* retval),
@@ -133,7 +133,7 @@ FORTRAN_NAME(MMG5_SCALEMESH,mmg5_scalemesh,
 }
 
 /**
- * See \ref MMG5_unscaleMesh function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_unscaleMesh function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_UNSCALEMESH,mmg5_unscalemesh,
              (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *ls,int* retval),
@@ -145,7 +145,7 @@ FORTRAN_NAME(MMG5_UNSCALEMESH,mmg5_unscalemesh,
 }
 
 /**
- * See \a MMG5_unscaleMesh function in \ref common/libmmgcommon.h file.
+ * See \a MMG5_unscaleMesh function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG5_MMGFREE_NAMES,mmg5_mmgfree_names,(MMG5_pMesh *mesh
                                                     ,MMG5_pSol *met

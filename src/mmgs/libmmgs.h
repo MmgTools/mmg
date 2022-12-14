@@ -41,8 +41,8 @@
 extern "C" {
 #endif
 
-#include "mmgs_export.h"
-#include "mmg/mmgs/libmmgtypes.h"
+#include "mmg/mmgs/mmgs_export.h"
+#include "mmg/common/libmmgtypes.h"
 
 /**
  * Maximum array size when storing adjacent points (or ball) of a vertex.
@@ -64,6 +64,7 @@ enum MMGS_Param {
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMGS_IPARAM_isosurf,           /*!< [1/0], Level-set meshing on the surface part */
   MMGS_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
   MMGS_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
@@ -71,6 +72,7 @@ enum MMGS_Param {
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
   MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
+  MMGS_IPARAM_xreg,              /*!< [0/1], Disabled/enabled coordinates regularization */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_numberOfLSBaseReferences, /*!< [n], Number of base references for bubble removal */
   MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in ls mode */

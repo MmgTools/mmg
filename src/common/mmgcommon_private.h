@@ -34,7 +34,7 @@
 #include <float.h>
 #include <math.h>
 #include <complex.h>
-#include "mmgcmakedefines.h"
+#include "mmg/common/mmgcmakedefines.h"
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -48,8 +48,8 @@
 extern "C" {
 #endif
 
-#include "eigenv.h"
-#include "libmmgcommon.h"
+#include "eigenv_private.h"
+#include "libmmgcommon_private.h"
 
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
@@ -171,6 +171,7 @@ extern "C" {
 #define MG_EDG(tag) ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_GEO_OR_NOM(tag) (( tag & MG_GEO ) || ( tag & MG_NOM )) /**< Ridge or non-manifold */
 #define MG_EDG_OR_NOM(tag) ( MG_EDG(tag) || (tag & MG_NOM ) ) /**< Edge, ridge or non-manifold */
+#define MG_TRUE_BDY(tag) ( (tag & MG_BDY) && !(tag & MG_PARBDY) ) /**< Non parbdy boundary point (true bdy) */
 
 
 
@@ -647,11 +648,11 @@ typedef struct MMG5_iNode_s {
  void          MMG5_mn(double m[6], double n[6], double mn[9] );
  extern int    MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
  int           MMG5_boundingBox(MMG5_pMesh mesh);
- int           MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int*,MMG5_int *list);
- int           MMG5_boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t s,int8_t *opn);
+ int           MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int*,MMG5_int *list, MMG5_int *tlist);
  int           MMG5_boulec(MMG5_pMesh, MMG5_int*, MMG5_int,int ip,double *tt);
  int           MMG5_boulen(MMG5_pMesh, MMG5_int*, MMG5_int,int ip,double *nn);
  int           MMG5_bouler(MMG5_pMesh, MMG5_int*, MMG5_int,int ip,MMG5_int *,MMG5_int *,int *, int*, int);
+ int           MMG5_boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list,int8_t s,int8_t *opn);
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
@@ -786,9 +787,12 @@ int MMG5_isSplit(MMG5_pMesh ,MMG5_int ,MMG5_int *,MMG5_int *);
 int MMG5_isNotSplit(MMG5_pMesh ,MMG5_int);
 int MMG5_getStartRef(MMG5_pMesh ,MMG5_int, MMG5_int *);
 int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
+int MMG5_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol);
 int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
-int MMG5_resetRef(MMG5_pMesh );
+int MMG5_resetRef_ls(MMG5_pMesh );
+int MMG5_resetRef_lssurf(MMG5_pMesh );
 int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG5_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol);
 int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart);
 int MMG5_chkmanimesh(MMG5_pMesh mesh);
 
