@@ -1391,6 +1391,8 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
  * \param start index of the starting tetra
  * \param ia index of the edge
  * \param list list of tetra sharing the edge \a ia
+ * \param isbdy 1 if edge is bdy, 0 otherwise (note that at interface of
+ * 2 domains the edge shell of a bdy edge can be closed)
  *
  * \return 2*ilist if shell is closed, 2*ilist +1 otherwise, 0 if one of the tet
  * of the shell is required, -1 if fail.
@@ -1398,7 +1400,7 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
  * Find all tets sharing edge ia of tetra start.
  *
  */
-int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t * list) {
+int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t*list,int8_t *isbdy) {
   MMG5_pTetra   pt;
   MMG5_int      *adja,piv,na,nb,adj;
   int           ilist;
@@ -1418,6 +1420,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t * list) {
   adja = &mesh->adja[4*(start-1)+1];
   adj = adja[MMG5_ifar[ia][0]] / 4; // start travelling by face (ia,0)
   piv = pt->v[MMG5_ifar[ia][1]];
+  *isbdy = (pt->xt && (mesh->xtetra[pt->xt].ftag[MMG5_ifar[ia][0]] & MG_BDY))? 1 : 0;
 
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
@@ -1443,14 +1446,24 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t * list) {
 
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
+    int8_t travel_fac = MMG5_ifar[i][0];
+    if ( pt->v[ travel_fac ] == piv ) {
+      adj = adja[ travel_fac ] / 4;
       piv = pt->v[ MMG5_ifar[i][1] ];
     }
     else {
-      assert(pt->v[ MMG5_ifar[i][1] ] == piv );
-      adj = adja[ MMG5_ifar[i][1] ] /4;
+      travel_fac = MMG5_ifar[i][1];
+      assert(pt->v[ travel_fac ] == piv );
+      adj = adja[ travel_fac ] /4;
       piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+
+    /* If we haven't cross yet a bdy face, test traveled triangle. Avoid the
+     * test otherwise (to not add a useless access to the xtetra strcuture) */
+    if ( !*isbdy ) {
+      if ( pt->xt && (mesh->xtetra[pt->xt].ftag[travel_fac] & MG_BDY) ) {
+        *isbdy = 1;
+      }
     }
   }
 
@@ -1462,6 +1475,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t * list) {
   adj = list[ilist-1] / 6;
   i   = list[ilist-1] % 6;
   ilist = 0;
+  *isbdy = 1;
 
   /* Start back everything from this tetra adj */
   list[ilist] = 6*(int64_t)adj + i;

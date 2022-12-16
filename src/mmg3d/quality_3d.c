@@ -33,8 +33,8 @@
  */
 
 #include "libmmg3d.h"
-#include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t ddb;
 
@@ -811,7 +811,6 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
   int         ia,ipa,ipb,lon,l;
   //int   npbdry;
   int         lenint,loc,nedel,longen;
-  //int      isbdry;
   double      dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double      dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int         ddebug=0,ib,nv;
@@ -861,17 +860,16 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
     nedel = 0;
 
     for (ia=0; ia<6; ia++) {
-      longen = MMG5_coquil(mesh,k,ia,list);
+      int8_t isbdy;
+      longen = MMG5_coquil(mesh,k,ia,list,&isbdy);
       lon = longen/2;
-      //isbdry = 0;//longen%2;
+
       if ( lon<=0 ) {
         MMG5_SAFE_FREE(pdel);
         return 0;
       }
-      /* if ( isbdry )  { */
-      /*    assert(longen%2); */
-      /*    //printf("MMG5_coquil %" MMG5_PRId "\n",longen/2); */
-      /*    continue; */
+      /* if ( isbdy )  { */
+       /*    continue; */
       /* } */
       //assert(!(longen%2));
       for (l=1; l<lon; l++)

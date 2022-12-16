@@ -31,7 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include <vtkparser.hpp>
+#include "vtkparser.hpp"
 #include "libmmgs.h"
 #include "libmmgs_private.h"
 

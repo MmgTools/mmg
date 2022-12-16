@@ -108,14 +108,15 @@ int main(int argc,char *argv[]) {
    * output of Mmg, that is, the second mesh of the current app) */
 
   /* Step 1: Hash edges of mesh2 and store their tags */
-  int k;
+  MMG5_int k;
   MMG5_HGeom hash;
   MMG5_hNew(mesh2,&hash,mesh2->na,3*mesh2->na);
 
   for ( k=1; k<=mesh2->na; ++k ) {
     MMG5_pEdge ped = &mesh2->edge[k];
     if ( !MMG5_hEdge(mesh2,&hash,ped->a,ped->b,ped->ref,ped->tag) ) {
-      fprintf(stderr,"Error: %s: %d: Unable to hash edge %d: %d %d.\n",
+      fprintf(stderr,"Error: %s: %d: Unable to hash edge %" MMG5_PRId
+              ": %" MMG5_PRId " %" MMG5_PRId ".\n",
               __func__,__LINE__,k,ped->a,ped->b);
       exit(EXIT_FAILURE);
     }
@@ -125,18 +126,19 @@ int main(int argc,char *argv[]) {
    * is a ridge too (as level-set splitting may splits boudary edges, we can't
    * ensure that all ridges of input mesh will be present in the output mesh
    * (they may have been splitted) */
-  int ier = 0;
+  MMG5_int ier = 0;
   for ( k=1; k<=mesh1->na; ++k ) {
     MMG5_pEdge ped = &mesh1->edge[k];
     if ( ped->tag & MG_GEO ) {
-      int ref;
-      int16_t tag;
+      MMG5_int ref;
+      int16_t  tag;
       if ( !MMG5_hGet(&hash,ped->a,ped->b,&ref,&tag) ) {
         continue;
       }
       if ( ! (tag & MG_GEO) ) {
         /* ridge of mesh1 exists in mesh2 but is not ridge anymore */
-        fprintf(stderr,"Error: %s: %d: Ridge %d (%d %d) of first mesh is not"
+        fprintf(stderr,"Error: %s: %d: Ridge %" MMG5_PRId
+                " (%" MMG5_PRId " %" MMG5_PRId ") of first mesh is not"
                 " ridge in second mesh.\n",__func__,__LINE__,k,ped->a,ped->b);
         ++ier;
       }
@@ -144,7 +146,8 @@ int main(int argc,char *argv[]) {
   }
 
   if ( ier ) {
-    fprintf(stderr,"Error: %s: %d: At least %d missing ridges.\n",__func__,__LINE__,ier);
+    fprintf(stderr,"Error: %s: %d: At least %" MMG5_PRId " missing ridges.\n",
+            __func__,__LINE__,ier);
     exit(EXIT_FAILURE);
   }
 

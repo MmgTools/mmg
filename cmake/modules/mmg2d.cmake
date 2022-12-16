@@ -42,7 +42,7 @@ FILE(MAKE_DIRECTORY  ${MMG2D_BINARY_DIR})
 if (PERL_FOUND)
   GENERATE_FORTRAN_HEADER ( mmg2d
     ${MMG2D_SOURCE_DIR} libmmg2d.h
-    ${MMG2D_SHRT_INCLUDE}
+    mmg/common
     ${MMG2D_BINARY_DIR} libmmg2df.h
     )
 endif(PERL_FOUND)
@@ -57,27 +57,27 @@ FILE(
   GLOB
   mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/*.c
-  ${COMMON_SOURCE_DIR}/*.c
+  ${MMGCOMMON_SOURCE_DIR}/*.c
   ${MMG2D_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.h
+  ${MMGCOMMON_SOURCE_DIR}/*.h
   ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp
   )
 
 LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  ${COMMON_SOURCE_DIR}/apptools.c
+  ${MMGCOMMON_SOURCE_DIR}/apptools.c
   ${REMOVE_FILE} )
 
 IF ( VTK_FOUND AND NOT USE_VTK MATCHES OFF )
   LIST(APPEND  mmg2d_library_files
-    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+    ${MMGCOMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
 
 FILE(
   GLOB
   mmg2d_main_file
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  ${COMMON_SOURCE_DIR}/apptools.c
+  ${MMGCOMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################
@@ -117,16 +117,17 @@ ENDIF ( )
 SET( mmg2d_headers
   ${MMG2D_SOURCE_DIR}/mmg2d_export.h
   ${MMG2D_SOURCE_DIR}/libmmg2d.h
-  ${MMG2D_BINARY_DIR}/libmmg2df.h
-  ${COMMON_SOURCE_DIR}/mmg_export.h
-  ${COMMON_SOURCE_DIR}/libmmgtypes.h
-  ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  ${COMMON_BINARY_DIR}/mmgcmakedefines.h
-  ${COMMON_BINARY_DIR}/mmgcmakedefinesf.h
-  ${COMMON_BINARY_DIR}/mmgversion.h
   )
-IF (NOT WIN32 OR MINGW)
-  LIST(APPEND mmg2d_headers  ${COMMON_BINARY_DIR}/git_log_mmg.h )
+
+IF ( PERL_FOUND )
+  LIST ( APPEND mmg2d_headers   ${MMG2D_BINARY_DIR}/libmmg2df.h )
+ENDIF()
+
+IF ( MMG_INSTALL_PRIVATE_HEADERS )
+  LIST ( APPEND mmg2d_headers
+    ${MMG2D_SOURCE_DIR}/libmmg2d_private.h
+    ${MMG2D_SOURCE_DIR}/mmg2dexterns_private.h
+    )
 ENDIF()
 
 # install man pages
@@ -184,7 +185,7 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
 
-    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
+    SET ( EXECUT_MMG2D      $<TARGET_FILE:${PROJECT_NAME}2d> )
 
     IF ( ONLY_VERY_SHORT_TESTS )
       # Add tests that doesn't require to download meshes

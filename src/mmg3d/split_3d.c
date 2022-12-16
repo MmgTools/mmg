@@ -34,8 +34,8 @@
  */
 
 #include "libmmg3d.h"
-#include "inlined_functions_3d.h"
-#include "mmg3dexterns.h"
+#include "inlined_functions_3d_private.h"
+#include "mmg3dexterns_private.h"
 
 extern int8_t  ddb;
 
@@ -788,7 +788,6 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
 
     /* Update of adjacency relations */
     iel = list[k] / 6;
-    ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
     jel = MMG5_abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
@@ -4762,9 +4761,13 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
 
   warn = 0;
   pt = &mesh->tetra[iel];
-  lon = MMG5_coquil(mesh,iel,iar,list);
+
+  int8_t isbdy;
+  lon = MMG5_coquil(mesh,iel,iar,list,&isbdy);
   if ( (!lon || lon<0) )
     return 0;
+
+  /* Skip edges along an external boundary (test on open shell) */
   if(lon%2) return 0;
 
   i0 = pt->v[MMG5_iare[iar][0]];
@@ -4787,7 +4790,8 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
     return 0;
   }
 
-  if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
+  /* Skip edge if it connects bdy point (edge can be internal or external) */
+  if ( isbdy ) {
     return 0;
   }
 

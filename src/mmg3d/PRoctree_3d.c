@@ -35,8 +35,8 @@
  */
 
 #include "libmmgtypes.h"
-#include "mmgcommon.h"
-#include "PRoctree_3d.h"
+#include "mmgcommon_private.h"
+#include "PRoctree_3d_private.h"
 #include <stdio.h>
 
 /**
@@ -1131,6 +1131,7 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
  * \param sol pointer toward the solution structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param ip index of point to check.
+ * \param lmax threshold to check minimal distance between points.
  *
  * \return 1 if we can insert \a ip, 0 if we cannot insert the point
  * \return -1 if fail because of memory.
@@ -1212,6 +1213,7 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
  * \param sol pointer toward the solution structure.
  * \param PROctree pointer toward the PROctree structure.
  * \param ip index of point to check.
+ * \param lmax threshold to check minimal distance between points.
  *
  * \return 1 if we can insert \a ip, 0 otherwise
  * \return -1 if fail due to lack of memory.

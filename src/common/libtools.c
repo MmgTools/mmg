@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -226,7 +226,8 @@ void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-met file  load metric file\n");
 
   fprintf(stdout,"\n**  Mode specifications (mesh adaptation by default)\n");
-  fprintf(stdout,"-ls  val     create mesh of isovalue val (0 if no argument provided)\n");
+  fprintf(stdout,"-ls     val create mesh of isovalue val (0 if no argument provided)\n");
+  fprintf(stdout,"-lssurf val split mesh boundaries on isovalue val (0 if no argument provided)\n");
 
 }
 
@@ -260,6 +261,7 @@ void MMG5_paramUsage2(void) {
   fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nreg        normal regul.\n");
+  fprintf(stdout,"-xreg        vertex regul.\n");
   fprintf(stdout,"-nsd    val  save the subdomain number val (0==all subdomain)\n");
   fprintf(stdout,"-optim       mesh optimization\n");
 

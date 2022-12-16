@@ -42,7 +42,7 @@
  */
 
 #include "libmmg2d.h"
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * See \ref MMG2D_mmg2dlib function in \ref mmg2d/liblibmmg2d_private.h file.

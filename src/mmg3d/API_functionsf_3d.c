@@ -42,7 +42,7 @@
 #include "libmmg3d.h"
 
 /**
- * See \ref MMG3D_Init_mesh function in common/libmmgcommon.h file.
+ * See \ref MMG3D_Init_mesh function in common/libmmgcommon_private.h file.
  */
 FORTRAN_VARIADIC ( MMG3D_INIT_MESH, mmg3d_init_mesh,
                    (const int starter, ... ),
@@ -121,7 +121,7 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTMESHNAME,mmg3d_set_outputmeshname,
 }
 
 /**
- * See \ref MMG3D_Set_outputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG3D_Set_outputSolName function in \ref common/libmmgcommon_private.h file.
  */
 FORTRAN_NAME(MMG3D_SET_OUTPUTSOLNAME,mmg3d_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen0, int* retval),

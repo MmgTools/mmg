@@ -39,10 +39,10 @@ INCLUDE(macros)
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/common)
-SET(COMMON_BINARY_DIR ${PROJECT_BINARY_DIR}/src/common)
+SET(MMGCOMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/common)
+SET(MMGCOMMON_BINARY_DIR ${PROJECT_BINARY_DIR}/src/common)
 
-FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
+FILE(MAKE_DIRECTORY ${MMGCOMMON_BINARY_DIR})
 
 # Path toward the continuous integration directory
 SET ( CI_DIR ${PROJECT_SOURCE_DIR}/ci_tests
@@ -62,9 +62,9 @@ include(GNUInstallDirs)
 ###############################################################################
 
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
-SET (CMAKE_RELEASE_VERSION_MINOR "6" )
+SET (CMAKE_RELEASE_VERSION_MINOR "7" )
 SET (CMAKE_RELEASE_VERSION_PATCH "0" )
-SET (CMAKE_RELEASE_DATE "Nov. 05, 2021" )
+SET (CMAKE_RELEASE_DATE "Dec. 13, 2023" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -123,11 +123,11 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
 # Print git hash to source file
 IF (NOT WIN32 OR MINGW)
 
-  ADD_CUSTOM_TARGET(GenerateGitHash
-    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
+  ADD_CUSTOM_TARGET(GenerateGitHashMmg
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${MMGCOMMON_BINARY_DIR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
     COMMENT "Getting git commit hash"
-    BYPRODUCTS ${COMMON_BINARY_DIR}/git_log_mmg.h
+    BYPRODUCTS ${MMGCOMMON_BINARY_DIR}/git_log_mmg.h
   )
 ENDIF ()
 
@@ -222,9 +222,9 @@ ADD_EXECUTABLE(genheader ${PROJECT_SOURCE_DIR}/scripts/genheader.c)
 TARGET_LINK_LIBRARIES ( genheader PRIVATE ${LIBRARIES}  )
 IF (PERL_FOUND)
   GENERATE_FORTRAN_HEADER ( mmg
-    ${COMMON_SOURCE_DIR} libmmgtypes.h
-    ${COMMON_BINARY_DIR}
-    ${COMMON_BINARY_DIR} libmmgtypesf.h
+    ${MMGCOMMON_SOURCE_DIR} libmmgtypes.h
+    ${MMGCOMMON_BINARY_DIR}
+    ${MMGCOMMON_BINARY_DIR} libmmgtypesf.h
     )
 ENDIF (PERL_FOUND)
 
@@ -273,7 +273,7 @@ SET(CMAKE_MACOSX_RPATH 1)
 
 ###############################################################################
 #####
-#####         Add dependent options
+#####         Add Mmg options
 #####
 ###############################################################################
 

@@ -34,8 +34,8 @@
 
 #include "libmmg2d.h"
 #include "libmmg2d_private.h"
-#include "mmg2dexterns.h"
-#include "mmgexterns.h"
+#include "mmg2dexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -142,7 +142,6 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
     if ( !mark[k] )  {
       continue;
     }
@@ -231,7 +230,6 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Compute metric tensor and hmax if not specified */
   for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
     if ( !mark[k] ) {
       continue;
     }

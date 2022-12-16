@@ -33,8 +33,8 @@
  */
 
 #include "libmmgs_private.h"
-#include "mmgsexterns.h"
-#include "mmgexterns.h"
+#include "mmgsexterns_private.h"
+#include "mmgexterns_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

@@ -20,7 +20,7 @@
 // #include "libmmg3d.h"
 // if the header file is in "include/mmg/mmg3d"
 #include "mmg/mmg3d/libmmg3d.h"
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;

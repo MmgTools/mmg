@@ -22,7 +22,6 @@
 */
 
 /**
- * \file common/inlined_functions.h
  * \brief inlined Functions
  * \author Charles Dapogny (UPMC)
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
@@ -32,7 +31,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 #ifndef _INLINED_FUNC_H
 #define _INLINED_FUNC_H

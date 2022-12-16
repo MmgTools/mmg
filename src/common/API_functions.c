@@ -33,14 +33,14 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see the \a
- * common/libmmgcommon.h, \a mmgs/libmmgs.h and \a mmg3d/libmmg3d.h header files
+ * common/libmmgcommon_private.h, \a mmgs/libmmgs.h and \a mmg3d/libmmg3d.h header files
  * for the documentation of all the usefull user's API functions.
  *
  * C API for MMG library.
  *
  */
 
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
