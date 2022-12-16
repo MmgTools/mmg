@@ -604,7 +604,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
-
     if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");

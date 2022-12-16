@@ -99,7 +99,7 @@ int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *fi
 
   /* Check data fields */
   if ( nsols > (metricData+lsData) ) {
-    fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols);
+    fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols-metricData-lsData);
     return -1;
   }
 
@@ -174,7 +174,7 @@ int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *fi
 
   /* Check data fields */
   if ( nsols > (metricData+lsData) ) {
-    fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols);
+    fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols-metricData-lsData);
     return -1;
   }
 
@@ -249,7 +249,7 @@ int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *fi
 
   /* Check data fields */
   if ( nsols > (metricData+lsData) ) {
-    fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols);
+    fprintf(stderr,"Error: %d UNEXPECTED DATA FIELD(S)\n",nsols-metricData-lsData);
     return -1;
   }
 
