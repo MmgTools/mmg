@@ -1045,13 +1045,13 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
   MMG5_warnOrientation(mesh);
 
   if ( met ) {
-  if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    MMG5_DEL_MEM(mesh,met->m);
-    met->np = 0;
-  }
-  else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
+    if ( met->np && (met->np != mesh->np) ) {
+      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+      MMG5_DEL_MEM(mesh,met->m);
+      met->np = 0;
+    }
+    else if ( met->size!=1 && met->size!=6 ) {
+      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
@@ -1074,7 +1074,9 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMG3D_setfunc(mesh,met);
+  if ( met ) {
+    MMG3D_setfunc(mesh,met);
+  }
 
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
@@ -1086,10 +1088,12 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
   if ( !MMG5_scaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
 
-  MMG3D_searchqua(mesh,met,critmin,eltab,metRidTyp);
-  ier = MMG3D_searchlen(mesh,met,lmin,lmax,eltab,metRidTyp);
-  if ( !ier )
-    _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
+  if ( met ) {
+    MMG3D_searchqua(mesh,met,critmin,eltab,metRidTyp);
+    ier = MMG3D_searchlen(mesh,met,lmin,lmax,eltab,metRidTyp);
+    if ( !ier )
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
+  }
 
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 }
