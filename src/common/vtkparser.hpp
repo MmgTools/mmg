@@ -287,7 +287,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
 
   // Transfer references if needed (i.e. the mesh contains non 0 refs)
   if ( hasPointRef ) {
-    auto *ar = vtkFloatArray::New();
+    auto *ar = vtkIntArray::New();
 
     ar->SetNumberOfComponents(1);
     ar->SetNumberOfTuples(mesh->np);
@@ -303,7 +303,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
     dataset->GetPointData()->AddArray(ar);
   }
   if ( hasCellRef ) {
-    auto *ar = vtkFloatArray::New();
+    auto *ar = vtkIntArray::New();
 
     ar->SetNumberOfComponents(1);
     ar->SetNumberOfTuples(nc);

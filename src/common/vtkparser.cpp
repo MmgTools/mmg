@@ -404,6 +404,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
   MMG5_int nbl_a = 0;
   MMG5_int nt    = 0;
   MMG5_int nbl_t = 0;
+  MMG5_int ne    = 0;
 
   // Get pointer toward cells data containing element refs
   vtkIdType numCells = (*dataset)->GetNumberOfCells();
@@ -417,7 +418,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     // Check that we get 1 data only
     assert ( car->GetNumberOfComponents() == 1 );
 
-    MMG5_int ne = car->GetNumberOfTuples();
+    ne = car->GetNumberOfTuples();
     if ( ne != numCells ) {
       printf( "  ## Error: Cell data size (%" MMG5_PRId ") differs from the number of"
               " cells (%lld)\n",ne,numCells);
@@ -796,7 +797,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           if ( numCells != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
                     "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF CELLS DATA IN "
-                    "THE SOLUTION (%" MMG5_PRId ") \n",mesh->ne,psl->np);
+                    "THE SOLUTION (%" MMG5_PRId ") \n",numCells,psl->np);
             return -1;
           }
 
