@@ -796,7 +796,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           psl->np = ar->GetNumberOfTuples();
           if ( numCells != psl->np ) {
             fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
-                    "THE MESH (%" MMG5_PRId ") DIFFERS FROM THE NUMBER OF CELLS DATA IN "
+                    "THE MESH (%lld) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
                     "THE SOLUTION (%" MMG5_PRId ") \n",numCells,psl->np);
             return -1;
           }
