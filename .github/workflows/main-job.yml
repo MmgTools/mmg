@@ -273,6 +273,7 @@ jobs:
           cmake -Smmg -Bbuild \
           ${{ env.C_FLG }} \
           ${{ env.FORT_FLG }} \
+            -DCMAKE_INSTALL_PREFIX=mmg-install \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
@@ -291,6 +292,9 @@ jobs:
       - name: Build Mmg
         run: |
           cmake --build build --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+      - name: Install Mmg
+        run: |
+          cmake --build build --target install --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
