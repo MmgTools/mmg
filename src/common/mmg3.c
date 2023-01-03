@@ -65,6 +65,8 @@ short MMG5_dikmov ( MMG5_pMesh mesh,MMG5_pSol disp,short *lastt,short shortmax,
     return tmax;
 
   /* Else, find the largest displacement by dichotomy */
+  assert ( tmax > tmin && "t will be used uninitialized if we don't enter next loop");
+
   while( tmin != tmax && it < maxit ) {
     t = (tmin+tmax)/2;
 

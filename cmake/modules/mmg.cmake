@@ -107,7 +107,7 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     LIST ( APPEND mmg3d_headers   ${MMG3D_BINARY_DIR}/libmmg3df.h )
     LIST ( APPEND mmg2d_headers   ${MMG2D_BINARY_DIR}/libmmg2df.h )
     LIST ( APPEND mmgs_headers    ${MMGS_BINARY_DIR}/libmmgsf.h )
-    LIST ( APPEND mmg_headers     ${PROJECT_SOURCE_DIR}/libmmgf.h )
+    LIST ( APPEND mmg_headers     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h )
   ENDIF()
 
 
