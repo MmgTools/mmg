@@ -47,7 +47,7 @@
 
 #include "vtkparser.hpp"
 #include "libmmgtypes.h"
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /// @tparam TReader one of the VTK reader class.
 /// @param filename name of the input file.
