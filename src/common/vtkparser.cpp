@@ -47,7 +47,7 @@
 
 #include "vtkparser.hpp"
 #include "libmmgtypes.h"
-#include "mmgcommon.h"
+#include "mmgcommon_private.h"
 
 /// @tparam TReader one of the VTK reader class.
 /// @param filename name of the input file.
@@ -463,6 +463,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
         ++nref;
       }
       break;
+
     case ( VTK_POLY_LINE ):
       int n;
       n = (*dataset)->GetCell(k)->GetNumberOfPoints() - 1;
@@ -489,10 +490,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
           ++nref;
         }
       }
-
       break;
-    case ( VTK_LINE ):
 
+    case ( VTK_LINE ):
       ++mesh->nai;
       ref = car ? car->GetTuple1(k) : 0;
 
