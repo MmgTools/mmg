@@ -200,7 +200,7 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   /* Coordinates of optimal point */
   calold = DBL_MAX;
   totvol = 0.0;
-  assert ( ilist );
+  assert ( ilist>0 );
   for (k=0; k<ilist; k++) {
     iel  = list[k] / 4;
     ifac = list[k] % 4;
