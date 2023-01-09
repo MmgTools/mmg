@@ -391,11 +391,17 @@ int main(int argc,char *argv[]) {
       }
     }
 
-    /* In iso mode: read metric if any */
-    if ( ( mesh->info.iso || mesh->info.isosurf ) && met->namein ) {
-      if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+    /* In iso mode: read metric if any and give a name to the metric*/
+    if ( ( mesh->info.iso || mesh->info.isosurf ) ) {
+      if (met->namein) {
+        if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        }
+      }
+      else {
+        if ( !MMG2D_Set_inputSolName(mesh,met,"") )
+          fprintf(stdout,"  ## ERROR: UNABLE TO GIVE A NAME TO THE METRIC.\n");
       }
     }
     break;
