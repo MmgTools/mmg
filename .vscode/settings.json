@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "libmmgcommon.h": "c",
+        "random": "c"
+    },
+    "C_Cpp.dimInactiveRegions": false,
+    "C_Cpp.errorSquiggles": "enabled"
+}
