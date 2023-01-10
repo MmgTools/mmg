@@ -400,6 +400,7 @@ int main(int argc,char *argv[]) {
         }
       }
       else {
+        /* Give a name to the metric if not provided */
         if ( !MMG2D_Set_inputSolName(mesh,met,"") )
           fprintf(stdout,"  ## ERROR: UNABLE TO GIVE A NAME TO THE METRIC.\n");
       }

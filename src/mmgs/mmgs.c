@@ -440,6 +440,11 @@ int main(int argc,char *argv[]) {
           MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
         }
       }
+      else {
+        /* Give a name to the metric if not provided */
+        if ( !MMGS_Set_inputSolName(mesh,met,"") )
+          fprintf(stdout,"  ## ERROR: UNABLE TO GIVE A NAME TO THE METRIC.\n");
+      }
     }
     else {
       /* read metric if any */

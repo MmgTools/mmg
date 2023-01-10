@@ -9,7 +9,7 @@
         //     "preLaunchTask": "valgrind-debug: custom",
         //     "args": ["2D_cercle.vtk", "-v", "10"],
         //     "stopAtEntry": false,
-        //     "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D/",
+        //     "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/",
         //     "environment": [ ],
         //     "externalConsole": true,
         //     "MIMode": "gdb",
@@ -35,10 +35,10 @@
             //-------------------------------------------------------------------
             //-- Run for BRANCH feature/ls-vtk-input :: 2D TESTS
             //-------------------------------------------------------------------
-            "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg2d_debug",
+            // "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg2d_debug",
 
             //-- VTK INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/",
             // "args": ["2D_cercle.vtk", "-v", "10"],
             // "args": ["2D_cercle_metric.vtk", "-v", "10"],
             // "args": ["2D_cercle_ls.vtk", "-v", "10", "-ls", "0.8"],
@@ -46,14 +46,14 @@
             // "args": ["2D_cercle_metric_ls.vtk", "-v", "10", "-ls", "0.8"],
 
             //-- VTK INPUT - MULTISOL - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/",
             // "args": ["2D_cercle_multisol.vtk", "-v", "10"],
             // "args": ["2D_cercle_metric_multisol.vtk", "-v", "10"],
             // "args": ["2D_cercle_ls_multisol.vtk", "-v", "10","-ls", "0.8"],
             // "args": ["2D_cercle_ls_metric_multisol.vtk", "-v", "10","-ls", "0.8"],
 
             //-- VTU INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/",
             // "args": ["2D_cercle.vtu", "-v", "10"],
             // "args": ["2D_cercle_metric.vtu", "-v", "10"],
             // "args": ["2D_cercle_ls.vtu", "-v", "10", "-ls", "0.8"],
@@ -61,26 +61,26 @@
             // "args": ["2D_cercle_metric_multisol.vtk", "-v", "10"],
 
             //-- OTHER TESTS - MESH INPUT - MESH OUTPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D/mesh/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/mesh/",
             // "args": ["2D_cercle.mesh", "-v", "10"],
             // "args": ["2D_cercle.mesh", "-v", "10", "-met", "2D_cercle_metric.sol", "-o", "2D_cercle_metric.o.mesh"],
             // "args": ["2D_cercle.mesh", "-v", "10", "-ls", "0.8", "-sol", "2D_cercle_ls.sol", "-o", "2D_cercle_ls.o.mesh"],
             // "args": ["2D_cercle.mesh", "-v", "10", "-ls", "0.8", "-sol", "2D_cercle_ls.sol", "-met", "2D_cercle_metric.sol", "-o", "2D_cercle_ls_metric.o.mesh"],
 
             //-- OTHER TESTS - MESH INPUT - VTK OUTPUT - 2 FAILED
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D/mesh/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/mesh/",
             // "args": ["2D_cercle.mesh", "-v", "10", "-o", "2D_cercle.o.vtk"], // - OK
             // "args": ["2D_cercle.mesh", "-v", "10", "-met", "2D_cercle_metric.sol", "-o", "2D_cercle_metric.o.vtk"], // - OK
             // "args": ["2D_cercle.mesh", "-v", "10", "-ls", "0.8", "-sol", "2D_cercle_ls.sol", "-o", "2D_cercle_ls.o.vtk"], // - FAILED no_name
             // "args": ["2D_cercle.mesh", "-v", "10", "-ls", "0.8", "-sol", "2D_cercle_ls.sol", "-met", "2D_cercle_metric.sol", "-o", "2D_cercle_ls_metric.o.vtk"], // - OK
 
             //-- TESTS ANISO - ISO METRIC - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D_Multimat/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D_Multimat/",
             // "args": ["Multimat_metric_iso.vtk", "-v", "10"],
             // "args": ["Multimat_metric_aniso.vtk", "-v", "10"],
 
             //-- MULTI-MAT TESTS - VTK INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D_Multimat/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D_Multimat/",
             // "args": ["Multimat.vtk", "-v", "10"], //- preserved by default
             // "args": ["Multimat_metric_iso.vtk", "-v", "10"], //- preserved by default
             // "args": ["Multimat_metric_aniso.vtk", "-v", "10"], //- preserved by default
@@ -88,7 +88,7 @@
             // "args": ["Multimat_ls_metric.vtk", "-v", "10", "-ls", "0.04", "-o", "Multimat_ls_metric.o.vtk"], //- preserved
 
             //-- MULTI-MAT TESTS - MESH INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_2D_Multimat/mesh/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D_Multimat/mesh/",
             // "args": ["Multimat.mesh", "-v", "10"], //- preserved by default
             // "args": ["Multimat.mesh", "-v", "10", "-met", "Multimat_metric.sol", "-o", "Multimat_metric.o.mesh"], //- preserved by default
             // "args": ["mm_notpreserved/Multimat.mesh", "-v", "10", "-ls", "0.04", "-sol", "mm_notpreserved/Multimat_ls.sol", "-o", "mm_notpreserved/Multimat_ls.o.mesh"], //- NOT preserved
@@ -97,17 +97,16 @@
             // "args": ["mm_preserved/Multimat.mesh", "-v", "10", "-ls", "0.04", "-sol", "mm_preserved/Multimat_ls.sol", "-met", "Multimat_metric.sol", "-o", "mm_preserved/Multimat_ls_metric.o.mesh"], //- NOT preserved
 
             //-- MULTI POINTS REF
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Ref_Pts/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_Ref_Pts/",
             // "args": ["Multimat_ls_metric_PtsRef.vtk", "-v", "10", "-ls", "0.04", "-o", "Multimat_ls_metric_PtsRef.o.vtk"],
             // "args": ["mesh/Multimat_PtsRef.mesh", "-v", "10", "-ls", "0.04", "-sol", "mesh/Multimat_PtsRef_ls.sol", "-met", "mesh/Multimat_PtsRef_metric.sol", "-o", "Multimat_ls_metric_PtsRef.o.mesh"],
 
             //-- MESH INPUT - VTK OUTPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Ref_Pts/",
-            "cwd": "//home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_MeshToVtk/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_MeshToVtk/2D/",
             // "args": ["Multimat.mesh", "-v", "10", "-o", "Multimat.o.vtk"], //- OK
-            "args": ["Multimat.mesh", "-v", "10", "-met", "Multimat_metric.sol", "-o", "Multimat_metric.o.vtk"], //- OK
+            // "args": ["Multimat.mesh", "-v", "10", "-met", "Multimat_metric.sol", "-o", "Multimat_metric.o.vtk"], //- OK
             // "args": ["Multimat.mesh", "-v", "10", "-sol", "Multimat_metric.sol", "-o", "Multimat_metric.o.vtk"], //- OK
-            // "args": ["Multimat.mesh", "-ls", "0.04", "-v", "10", "-sol", "Multimat_ls.sol", "-o", "Multimat_ls.o.vtk"], //- no_name
+            // "args": ["Multimat.mesh", "-ls", "0.04", "-v", "10", "-sol", "Multimat_ls.sol", "-o", "Multimat_ls.o.vtk"], //- OK - Fixed
             // "args": ["Multimat.mesh", "-ls", "0.04", "-v", "10", "-sol", "Multimat_ls.sol", "-met", "Multimat_metric.sol", "-o", "Multimat_ls_metric.o.vtk"], //- OK
 
             //-- API TESTS - VTK INPUT
@@ -119,7 +118,7 @@
             // "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmgs_debug",
 
             //-- VTK INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Surf/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_Surf/",
             // "args": ["Surf.vtk", "-v", "10"],
             // "args": ["Surf_metric.vtk", "-v", "10"],
             // "args": ["Surf_ls.vtk", "-v", "10", "-ls", "0.1"],
@@ -127,14 +126,14 @@
             // "args": ["Surf_metric_ls.vtk", "-v", "10", "-ls", "0.1"],
 
             //-- VTK INPUT - MULTISOL - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Surf/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_Surf/",
             // "args": ["Surf_multisol.vtk", "-v", "10"],
             // "args": ["Surf_metric_multisol.vtk", "-v", "10"],
             // "args": ["Surf_ls_multisol.vtk", "-v", "10","-ls", "0.1"],
             // "args": ["Surf_ls_metric_multisol.vtk", "-v", "10","-ls", "0.1"],
 
             //-- VTU INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Surf/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_Surf/",
             // "args": ["Surf.vtu", "-v", "10"],
             // "args": ["Surf_metric.vtu", "-v", "10"],
             // "args": ["Surf_ls.vtu", "-v", "10", "-ls", "0.1"],
@@ -142,7 +141,7 @@
             // "args": ["Surf_metric_multisol.vtu", "-v", "10"],
 
             //-- MULTI-MAT TESTS - VTK INPUT
-            // "cwd": "//home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Surf_Multimat/",
+            // "cwd": "//home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_Surf_Multimat/",
             // "args": ["Multimat_Surf.vtk", "-v", "10"],
             // "args": ["Multimat_Surf_metric.vtk", "-v", "10"],
             // "args": ["Multimat_Surf_ls.vtk", "-v", "10", "-ls", "0.2"],
@@ -150,11 +149,19 @@
             // "args": ["mesh/Multimat_Surf.mesh", "-ls", "0.2", "-v", "10", "-sol", "mesh/Multimat_Surf_ls.sol", "-met", "mesh/Multimat_Surf_metric.sol", "-o", "mesh/Multimat_Surf_ls.o.mesh"],
 
             //-- OTHER TESTS - MESH INPUT
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_Surf/mesh/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_Surf/mesh/",
             // "args": ["Surf.mesh", "-v", "10"],
             // "args": ["Surf.mesh", "-v", "10", "-met", "Surf_metric.sol", "-o", "Surf_metric.o.mesh"],
             // "args": ["Surf.mesh", "-v", "10", "-ls", "0.1", "-sol", "Surf_ls.sol", "-o", "Surf_ls.o.mesh"],
             // "args": ["Surf.mesh", "-v", "10", "-ls", "0.1", "-sol", "Surf_ls.sol", "-met", "Surf_metric.sol", "-o", "Surf_ls_metric.o.mesh"],
+
+            //-- MESH INPUT - VTK OUTPUT - OK
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_MeshToVtk/Surf/",
+            // "args": ["Multimat_Surf.mesh", "-v", "10", "-o", "Multimat_Surf.o.vtk"], //- OK
+            // "args": ["Multimat_Surf.mesh", "-v", "10", "-met", "Multimat_Surf_metric.sol", "-o", "Multimat_Surf_metric.o.vtk"], //- OK
+            // "args": ["Multimat_Surf.mesh", "-v", "10", "-sol", "Multimat_Surf_metric.sol", "-o", "Multimat_Surf_metric.o.vtk"], //- OK
+            // "args": ["Multimat_Surf.mesh", "-ls", "0.1", "-v", "10", "-sol", "Multimat_Surf_ls.sol", "-o", "Multimat_Surf_ls.o.vtk"], //- OK - Fixed
+            // "args": ["Multimat_Surf.mesh", "-ls", "0.1", "-v", "10", "-sol", "Multimat_Surf_ls.sol", "-met", "Multimat_Surf_metric.sol", "-o", "Multimat_Surf_ls_metric.o.vtk"], //-
 
              //-- API TESTS - VTK INPUT
             // TODOOOOOO
@@ -162,10 +169,10 @@
             //-------------------------------------------------------------------
             // Run for BRANCH feature/ls-vtk-input :: 3D TESTS
             //-------------------------------------------------------------------
-            // "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg3d_debug",
+            "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg3d_debug",
 
             //-- VTK INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_3D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_3D/",
             // "args": ["3D_cube.vtk", "-v", "10"],
             // "args": ["3D_cube_metric.vtk", "-v", "10"],
             // "args": ["3D_cube_ls.vtk", "-v", "10", "-ls", "0.0"],
@@ -173,7 +180,7 @@
             // "args": ["3D_cube_metric_ls.vtk", "-v", "10", "-ls", "0.0"],
 
             //-- VTK INPUT - MULTISOL -OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_3D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_3D/",
             // "args": ["3D_cube_multisol.vtu", "-v", "10"],
             // "args": ["3D_cube_metric_multisol.vtu", "-v", "10"],
             // "args": ["3D_cube_ls_multisol.vtu", "-v", "10","-ls", "0.0"],
@@ -181,7 +188,7 @@
             // "args": ["3D_cube_metric_multisol.vtu", "-v", "10"],
 
             //-- VTU INPUT - OK
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_3D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_3D/",
             // "args": ["3D_cube.vtu", "-v", "10"],
             // "args": ["3D_cube_metric.vtu", "-v", "10"],
             // "args": ["3D_cube_ls.vtu", "-v", "10", "-ls", "0.0"],
@@ -189,7 +196,7 @@
             // "args": ["3D_cube_metric_multisol.vtu", "-v", "10"],
 
             //-- MULTI-MAT TESTS - VTK INPUT
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_3D_Multimat/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_3D_Multimat/",
             // "args": ["Multimat_3D_cube.vtk", "-v", "10"],
             // "args": ["Multimat_3D_cube_metric.vtk", "-v", "10"],
             // "args": ["Multimat_3D_cube_ls.vtk", "-ls", "0.0", "-v", "10"],
@@ -197,12 +204,19 @@
             // "args": ["mesh/Multimat_3D_cube.mesh", "-ls", "0.0", "-v", "10", "-sol", "mesh/Multimat_3D_cube_ls.sol", "-o", "mesh/Multimat_3D_cube_ls.o.vtk"],
 
             //-- OTHER TESTS - MESH INPUT
-            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/vtkInput/LS/Tests_3D/mesh/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_3D/mesh/",
             // "args": ["3D_cube.mesh", "-v", "10", "-noinsert", "-nomove", "-noswap", "-rn", "0", "-o", "3D_cube.test.o.vtk"],
             // "args": ["3D_cube.mesh", "-v", "10"],
             // "args": ["3D_cube.mesh", "-v", "10", "-met", "3D_cube_metric.sol", "-o", "3D_cube_metric.o.mesh"],
             // "args": ["3D_cube.mesh", "-v", "10", "-ls", "0.0", "-sol", "3D_cube_ls.sol", "-o", "3D_cube_ls.o.mesh"],
             // "args": ["3D_cube.mesh", "-v", "10", "-ls", "0.0", "-sol", "3D_cube_ls.sol", "-met", "3D_cube_metric.sol", "-o", "3D_cube_ls.o.mesh"],
+
+            //-- MESH INPUT - VTK OUTPUT - OK
+            "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_MeshToVtk/3D/",
+            // "args": ["Multimat_3D_cube.mesh", "-v", "10", "-o", "Multimat_3D_cube.o.vtk"], //- OK
+            // "args": ["Multimat_3D_cube.mesh", "-v", "10", "-sol", "Multimat_3D_cube_metric.sol", "-o", "Multimat_3D_cube_metric.o.vtk"], //- OK
+            // "args": ["Multimat_3D_cube.mesh", "-ls", "0.0", "-v", "10", "-sol", "Multimat_3D_cube_ls.sol", "-o", "Multimat_3D_cube_ls.o.vtk"], //- OK - Fixed
+            // "args": ["Multimat_3D_cube.mesh", "-ls", "0.0", "-v", "10", "-sol", "Multimat_3D_cube_ls.sol", "-met", "Multimat_3D_cube_metric.sol", "-o", "Multimat_3D_cube_ls_metric.o.vtk"], //-
 
             //-- API TESTS - VTK INPUT
             // TODOOOOOO
