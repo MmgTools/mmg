@@ -35,7 +35,7 @@
             //-------------------------------------------------------------------
             //-- Run for BRANCH feature/ls-vtk-input :: 2D TESTS
             //-------------------------------------------------------------------
-            // "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg2d_debug",
+            "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg2d_debug",
 
             //-- VTK INPUT - OK
             // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_2D/",
@@ -110,7 +110,7 @@
             // "args": ["Multimat.mesh", "-ls", "0.04", "-v", "10", "-sol", "Multimat_ls.sol", "-met", "Multimat_metric.sol", "-o", "Multimat_ls_metric.o.vtk"], //- OK
 
             //-- API TESTS - VTK INPUT
-            // TODOOOOOO
+            "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_API/2D/",
 
             //-------------------------------------------------------------------
             // Run for BRANCH feature/ls-vtk-input :: SURF TESTS
@@ -169,7 +169,7 @@
             //-------------------------------------------------------------------
             // Run for BRANCH feature/ls-vtk-input :: 3D TESTS
             //-------------------------------------------------------------------
-            "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg3d_debug",
+            // "program": "/home/lmottet/Work/Software/mmg/build-ls-vtk-input/bin/mmg3d_debug",
 
             //-- VTK INPUT - OK
             // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_3D/",
@@ -212,7 +212,7 @@
             // "args": ["3D_cube.mesh", "-v", "10", "-ls", "0.0", "-sol", "3D_cube_ls.sol", "-met", "3D_cube_metric.sol", "-o", "3D_cube_ls.o.mesh"],
 
             //-- MESH INPUT - VTK OUTPUT - OK
-            "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_MeshToVtk/3D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_MeshToVtk/3D/",
             // "args": ["Multimat_3D_cube.mesh", "-v", "10", "-o", "Multimat_3D_cube.o.vtk"], //- OK
             // "args": ["Multimat_3D_cube.mesh", "-v", "10", "-sol", "Multimat_3D_cube_metric.sol", "-o", "Multimat_3D_cube_metric.o.vtk"], //- OK
             // "args": ["Multimat_3D_cube.mesh", "-ls", "0.0", "-v", "10", "-sol", "Multimat_3D_cube_ls.sol", "-o", "Multimat_3D_cube_ls.o.vtk"], //- OK - Fixed
