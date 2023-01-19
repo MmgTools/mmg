@@ -110,7 +110,12 @@
             // "args": ["Multimat.mesh", "-ls", "0.04", "-v", "10", "-sol", "Multimat_ls.sol", "-met", "Multimat_metric.sol", "-o", "Multimat_ls_metric.o.vtk"], //- OK
 
             //-- API TESTS - VTK INPUT
-            "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_API/2D/",
+            // "cwd": "/home/lmottet/Work/Dropbox/Microcard/MMG_tests/feature/ls-vtk-input/Tests_API/2D/",
+
+            //-- NSD
+            "cwd": "/home/lmottet/Work/Seafile/Mmg_Training/20230124_CARMENSeminar_Mmg/Exercises/1_BasisCommands/",
+            "args": ["acdc.mesh", "-ar", "10", "-nsd", "6", "-v", "10", "-o", "acdc_6.o.mesh"],
+            // "args": ["acdc.mesh", "-ar", "10",  "-v", "10", "-o", "acdc.o.mesh"],
 
             //-------------------------------------------------------------------
             // Run for BRANCH feature/ls-vtk-input :: SURF TESTS
