@@ -144,8 +144,11 @@ ENDIF()
 SET( mmg3d_headers
   ${MMG3D_SOURCE_DIR}/mmg3d_export.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h
-  ${MMG3D_BINARY_DIR}/libmmg3df.h
   )
+
+IF ( PERL_FOUND )
+  LIST ( APPEND mmg3d_headers   ${MMG3D_BINARY_DIR}/libmmg3df.h )
+ENDIF()
 
 IF ( MMG_INSTALL_PRIVATE_HEADERS )
   LIST ( APPEND mmg3d_headers

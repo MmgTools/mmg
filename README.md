@@ -39,7 +39,7 @@
 [master-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=coverage
 
 [master-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=duplicated_lines_density
-[master-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=duplications
+[master-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=duplicated_lines_density
 
 
 [dev-build]: https://github.com/MmgTools/mmg/actions/workflows/long-tests.yml/badge.svg?branch=develop
@@ -55,7 +55,7 @@
 [dev-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
 
 [dev-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplicated_lines_density
-[dev-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplications
+[dev-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplicated_lines_density
 
 ---
 

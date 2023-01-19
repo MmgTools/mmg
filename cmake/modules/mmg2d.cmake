@@ -117,8 +117,11 @@ ENDIF ( )
 SET( mmg2d_headers
   ${MMG2D_SOURCE_DIR}/mmg2d_export.h
   ${MMG2D_SOURCE_DIR}/libmmg2d.h
-  ${MMG2D_BINARY_DIR}/libmmg2df.h
   )
+
+IF ( PERL_FOUND )
+  LIST ( APPEND mmg2d_headers   ${MMG2D_BINARY_DIR}/libmmg2df.h )
+ENDIF()
 
 IF ( MMG_INSTALL_PRIVATE_HEADERS )
   LIST ( APPEND mmg2d_headers
