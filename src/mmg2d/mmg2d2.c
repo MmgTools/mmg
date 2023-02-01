@@ -462,7 +462,6 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
     for(k=1 ; k<=nt ; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) ) continue;
-      pt->ref--;
       if ( pt->ref == nsd ) continue;
       MMG2D_delElt(mesh,k);
     }
