@@ -4,8 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/include/vtk-9.2/**",
-                "/home/lmottet/Work/Software/mmg/**"
+                "/usr/local/include/vtk-8.2/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
