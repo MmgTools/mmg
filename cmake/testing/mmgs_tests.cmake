@@ -115,6 +115,12 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmgs_vtkvtk_ls
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls_metric.vtk
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_ls)
+
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmgs_vtkvtp

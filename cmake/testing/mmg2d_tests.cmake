@@ -301,6 +301,12 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmg2d_vtkvtk_ls
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls)
+
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
