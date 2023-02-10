@@ -361,7 +361,8 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 /// I/O at Vtu VTK file format, part 2: mesh and solution storing
 ///
 int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkDataSet **dataset,
-                           int8_t ptMeditRef,int8_t eltMeditRef,int nsols) {
+                           int8_t ptMeditRef,int8_t eltMeditRef,int nsols,
+                           int8_t metricData, int8_t lsData) {
   vtkSmartPointer<vtkDataArray> ptar = NULL, car = NULL;
   int                           ier;
   MMG5_int                      nref = 0;
@@ -650,8 +651,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
 
         for (int j = 0; j < npointData; j++) {
           char *ptr = NULL;
-          bool metricData = 0;
-          bool lsData = 0;
+          bool metricField = 0;
           char chaine[MMG5_FILESTR_LGTH];
           strcpy(chaine,pd->GetArrayName(j));
 
@@ -659,15 +659,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
             continue;
           }
           else if ( (ptr = strstr(chaine,":metric")) ) {
-            *ptr = '\0';
-            metricData = 1;
-          }
-          else if ( (ptr = strstr(chaine,":ls")) ) {
-            *ptr = '\0';
-            lsData = 1;
+            metricField = 1;
           }
 
-          if ( (nsols==2) && metricData ) {
+          if ( metricField && (metricData*lsData) ) {
             psl = *met;
             isol -= 1;
           }

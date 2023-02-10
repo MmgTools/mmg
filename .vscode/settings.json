@@ -1,7 +1,11 @@
 {
     "files.associations": {
         "libmmgcommon.h": "c",
-        "random": "c"
+        "random": "c",
+        "cstring": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
     },
     "C_Cpp.dimInactiveRegions": false,
     "C_Cpp.errorSquiggles": "enabled"

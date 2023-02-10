@@ -64,7 +64,7 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,i
 int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
 int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
 
-int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int);
+int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int,int8_t,int8_t);
 
 /// @param d vtk data type in which we want to store the array \a ca
 /// @param ca vtk cell array containing the lines connectivity
@@ -381,18 +381,28 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
 
     if ( psl->namein ) {
       char *tmp = MMG5_Get_basename(psl->namein);
-      char *data;
+      char *data, *data2;
 
       MMG5_SAFE_CALLOC(data,strlen(tmp)+8,char,
+                       MMG5_SAFE_FREE ( types ); return 0);
+      MMG5_SAFE_CALLOC(data2,strlen(tmp)+8,char,
                        MMG5_SAFE_FREE ( types ); return 0);
 
       strcpy(data,tmp);
       free(tmp); tmp = 0;
 
-      if ( metricData ) {
-        strcat ( data , ":metric");
+      if ( metricData && strstr(data,":ls")) {
+        memmove(data2,data,strlen(data)-3);
+        strcat ( data2 , ":metric");
+        ar->SetName(data2);
       }
-      ar->SetName(data);
+      else if (metricData && !strstr(data,":metric")) {
+        strcat ( data , ":metric");
+        ar->SetName(data);
+      }
+      else {
+        ar->SetName(data);
+      }
 
       MMG5_DEL_MEM(mesh,data);
     }

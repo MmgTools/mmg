@@ -41,7 +41,8 @@
 
 static int MMG3D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,
                                      vtkDataSet **dataset, int8_t ptMeditRef,
-                                     int8_t eltMeditRef,int nsols ) {
+                                     int8_t eltMeditRef,int nsols,
+                                     int8_t metricData, int8_t lsData) {
 
   int ier;
 
@@ -58,7 +59,7 @@ static int MMG3D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *m
     return -1;
   }
 
-  ier = MMG5_loadVtkMesh_part2(mesh,sol,met,dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG5_loadVtkMesh_part2(mesh,sol,met,dataset,ptMeditRef,eltMeditRef,nsols,metricData,lsData);
 
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
@@ -95,7 +96,7 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *fi
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG3D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG3D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols,metricData,lsData);
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
     return  ier;
@@ -137,7 +138,7 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,
   MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG3D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG3D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols,metricData,lsData);
 
   return ier;
 #endif
@@ -168,7 +169,7 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *fi
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG3D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG3D_loadVtkMesh_part2(mesh,&sol,&met,&dataset,ptMeditRef,eltMeditRef,nsols,metricData,lsData);
   if ( ier < 1 ) {
     fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
     return  ier;
@@ -210,7 +211,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,
   MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
-  ier = MMG3D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols);
+  ier = MMG3D_loadVtkMesh_part2(mesh,sol,met,&dataset,ptMeditRef,eltMeditRef,nsols,metricData,lsData);
 
   return ier;
 #endif
