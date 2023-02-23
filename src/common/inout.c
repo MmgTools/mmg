@@ -552,9 +552,6 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
         ppt->tag &= ~MG_NUL;
       }
 
-      /* Set the elements references to 0 in iso mode - Why this was done ? */
-      // if ( mesh->info.iso )  ptt->ref = 0;
-
       for(i=0 ; i<3 ; i++)
         ptt->edg[i] = 0;
 
@@ -586,9 +583,6 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
           ppt = &mesh->point[pt->v[i]];
           ppt->tag &= ~MG_NUL;
         }
-
-        /* Set the elements references to 0 in iso mode - Why this was done ? */
-        // if ( mesh->info.iso )  pt->ref = 0;
 
         /* Possibly switch 2 vertices number so that each tet is positively oriented */
         if ( MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
