@@ -315,11 +315,33 @@ ADD_TEST ( NAME mmg3d_cube-tetgen
   ${CTEST_OUTPUT_DIR}/mmg3d_cube-tetgen.o.node
  )
 
-# VTK .vtk with metric and ls
+# VTK .vtk with ls
 ADD_TEST(NAME mmg3d_vtkvtk_ls
-  COMMAND ${EXECUT_MMG3D} -v 5
-  ${MMG3D_CI_TESTS}/VtkInout/cube_ls_metric.vtk
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/VtkInout/cube_ls.vtk
   ${CTEST_OUTPUT_DIR}/mmg3d_vtkvtk_ls)
+
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmg3d_vtkvtk_metric_ls
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/VtkInout/cube_metric_ls.vtk
+  ${CTEST_OUTPUT_DIR}/mmg3d_vtkvtk_metric_ls)
+
+# VTK .vtk with ls and metric
+ADD_TEST(NAME mmg3d_vtkvtk_ls_metric
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/VtkInout/cube_ls_metric.vtk
+  ${CTEST_OUTPUT_DIR}/mmg3d_vtkvtk_ls_metric)
+
+IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
+  SET(expr "VTK library not founded")
+  SET_PROPERTY(TEST mmg3d_vtkvtk_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg3d_vtkvtk_metric_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg3d_vtkvtk_ls_metric
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  ENDIF ( )
 
 ##############################################################################
 #####

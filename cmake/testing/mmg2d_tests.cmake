@@ -301,11 +301,23 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-# VTK .vtk with metric and ls
+# VTK .vtk with ls
 ADD_TEST(NAME mmg2d_vtkvtk_ls
-  COMMAND ${EXECUT_MMG2D} -v 5
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtk
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls)
+
+# VTK .vtk with ls and metric
+ADD_TEST(NAME mmg2d_vtkvtk_ls_metric
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
   ${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtk
-  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls)
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls_metric)
+
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmg2d_vtkvtk_metric_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_metric_ls.vtk
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_metric_ls)
 
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
@@ -326,6 +338,12 @@ IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET_PROPERTY(TEST mmg2d_vtkvtp_ani
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   SET_PROPERTY(TEST mmg2d_vtkvtu_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_ls_metric
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_metric_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
 ENDIF()
 

@@ -115,11 +115,23 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
-# VTK .vtk with metric and ls
+# VTK .vtk with ls
 ADD_TEST(NAME mmgs_vtkvtk_ls
-  COMMAND ${EXECUT_MMGS} -v 5
-  ${MMGS_CI_TESTS}/VtkInout/surf_ls_metric.vtk
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls.vtk
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_ls)
+
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmgs_vtkvtk_metric_ls
+COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+${MMGS_CI_TESTS}/VtkInout/surf_metric_ls.vtk
+${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_metric_ls)
+
+# VTK .vtk with ls and metric
+ADD_TEST(NAME mmgs_vtkvtk_ls_metric
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_metric_ls.vtk
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_metric_ls)
 
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
@@ -129,7 +141,13 @@ IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   SET_PROPERTY(TEST mmgs_vtkvtp_ani
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-ENDIF ( )
+  SET_PROPERTY(TEST mmgs_vtkvtk_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmgs_vtkvtk_metric_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmgs_vtkvtk_ls_metric
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  ENDIF ( )
 
 ###############################################################################
 #####
