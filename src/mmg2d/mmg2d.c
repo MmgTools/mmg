@@ -351,15 +351,15 @@ int main(int argc,char *argv[]) {
     break;
 
   case ( MMG5_FMT_VtkVtp ):
-    ier = MMG2D_loadVtpMesh(mesh,sol,met,mesh->namein);
+    ier = MMG2D_loadVtpMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMG2D_loadVtuMesh(mesh,sol,met,mesh->namein);
+    ier = MMG2D_loadVtuMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMG2D_loadVtkMesh(mesh,sol,met,mesh->namein);
+    ier = MMG2D_loadVtkMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):

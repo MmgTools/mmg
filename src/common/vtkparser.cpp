@@ -352,15 +352,18 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 
 
 /// @param mesh pointer toward a MMG5 mesh
+/// @param sol pointer toward a list of solution structures
 /// @param ptMeditRef 1 if a point data field contains references (field named medit:ref)
 /// @param eltMeditRef 1 if a cell data field contains references (field named medit:ref)
 /// @param nsols number of point data (except the medit:ref ones)
+/// @param metricData 1 if file contains a metric data highlighted by the :metric name
+/// @param lsData 1 if file contains a metric data highlighted by the :ls name
 ///
 /// @return 1 if success, -1 if fail.
 ///
 /// I/O at Vtu VTK file format, part 2: mesh and solution storing
 ///
-int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkDataSet **dataset,
+int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
                            int8_t ptMeditRef,int8_t eltMeditRef,int nsols,
                            int8_t metricData, int8_t lsData) {
   vtkSmartPointer<vtkDataArray> ptar = NULL, car = NULL;
@@ -631,11 +634,11 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
   ier = MMG5_check_readedMesh(mesh,nref);
   if ( ier < 1 ) return ier;
 
-  if ( sol && *sol ) {
+  if ( sol && sol[1] ) {
     // Read the solution at nodes
     // Init (*sol)[0] for the case where nsols=0
-    MMG5_pSol psl = *sol;
-    MMG5_pSol pmt = *met;
+    MMG5_pSol pmt = &sol[0][0];
+    MMG5_pSol psl = &sol[1][0];
     psl->ver = mesh->ver;
     psl->dim = mesh->dim;
     psl->type = 1;
@@ -643,14 +646,12 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
     int isol = 0;
     if ( nsols ) {
       auto *pd = (*dataset)->GetPointData();
-
       auto *cd = (*dataset)->GetCellData();
 
       if ( pd ) {
         int npointData = pd->GetNumberOfArrays();
 
         for (int j = 0; j < npointData; j++) {
-          char *ptr = NULL;
           bool metricField = 0;
           char chaine[MMG5_FILESTR_LGTH];
           strcpy(chaine,pd->GetArrayName(j));
@@ -658,17 +659,18 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
           if  ( strstr(chaine,"medit:ref" ) ) {
             continue;
           }
-          else if ( (ptr = strstr(chaine,":metric")) ) {
+          else if ( strstr(chaine,":metric") ) {
             metricField = 1;
           }
 
           if ( metricField && (metricData*lsData) ) {
-            psl = *met;
-            isol -= 1;
+            psl = sol[0];
           }
           else {
-            psl = *sol + isol;
+            psl = &sol[1][isol];
+            ++isol;
           }
+
           psl->ver = mesh->ver;
           psl->dim = mesh->dim;
           psl->type = 1;
@@ -682,11 +684,13 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
             }
           }
 
-          if ( !MMG5_Set_inputSolName(mesh,pmt,chaine) ) {
-            if ( !mmgWarn1 ) {
-              mmgWarn1 = 1;
-              fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
-                      " at least 1 solution.\n",__func__);
+          if (pmt) {
+            if ( !MMG5_Set_inputSolName(mesh,pmt,chaine) ) {
+              if ( !mmgWarn1 ) {
+                mmgWarn1 = 1;
+                fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
+                        " at least 1 solution.\n",__func__);
+              }
             }
           }
 
@@ -792,7 +796,6 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
             fprintf(stderr,"  ** UNEXPECTED METRIC TYPE (%d). EXIT PROGRAM \n",psl->type);
             return -1;
           }
-          ++isol;
         }
       }
 
@@ -800,7 +803,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
         int ncellData = cd->GetNumberOfArrays();
 
         for (int j = 0; j < ncellData; j++) {
-          char *ptr = NULL;
+          // char *ptr = NULL;
           char chaine[MMG5_FILESTR_LGTH];
           strcpy(chaine,cd->GetArrayName(j));
 
@@ -808,7 +811,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,vtkData
             continue;
           }
 
-          psl = *sol + isol;
+          psl = &sol[1][isol]; //*sol + isol;
           psl->ver = mesh->ver;
           psl->dim = mesh->dim;
           psl->type = 1;

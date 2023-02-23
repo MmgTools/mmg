@@ -64,7 +64,7 @@ int MMG5_loadVtpMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,i
 int MMG5_loadVtuMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
 int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,int*,int8_t*,int8_t*);
 
-int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int,int8_t,int8_t);
+int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int,int8_t,int8_t);
 
 /// @param d vtk data type in which we want to store the array \a ca
 /// @param ca vtk cell array containing the lines connectivity

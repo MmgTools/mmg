@@ -1378,14 +1378,14 @@ LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTPMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1404,7 +1404,7 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1416,14 +1416,14 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,M
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1443,7 +1443,7 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1456,14 +1456,14 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,M
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1483,7 +1483,7 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,MMG5_pSol *met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1534,14 +1534,14 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.

@@ -376,11 +376,11 @@ int main(int argc,char *argv[]) {
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMG3D_loadVtuMesh(mesh,sol,met,mesh->namein);
+    ier = MMG3D_loadVtuMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMG3D_loadVtkMesh(mesh,sol,met,mesh->namein);
+    ier = MMG3D_loadVtkMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):

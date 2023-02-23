@@ -589,7 +589,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
-int MMG2D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met, const char *filename) {
+int MMG2D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const char *filename) {
   int ier=0;
   const char *filenameptr,*solnameptr;
   char *tmp,*soltmp;
@@ -628,11 +628,11 @@ int MMG2D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met, const c
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMG2D_loadVtuMesh(mesh,sol,met,tmp);
+    ier = MMG2D_loadVtuMesh(mesh,met,sol,tmp);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMG2D_loadVtkMesh(mesh,sol,met,tmp);
+    ier = MMG2D_loadVtkMesh(mesh,met,sol,tmp);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
