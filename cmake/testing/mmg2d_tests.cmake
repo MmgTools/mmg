@@ -307,11 +307,35 @@ COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
 ${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtk
 ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls)
 
+# VTK .vtu with ls
+ADD_TEST(NAME mmg2d_vtkvtu_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtu
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ls)
+
+# VTK .vtp with ls
+ADD_TEST(NAME mmg2d_vtkvtp_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtp
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ls)
+
 # VTK .vtk with ls and metric
 ADD_TEST(NAME mmg2d_vtkvtk_ls_metric
   COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
   ${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtk
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls_metric)
+
+# VTK .vtu with ls and metric
+ADD_TEST(NAME mmg2d_vtkvtu_ls_metric
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtu
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ls_metric)
+
+# VTK .vtp with ls and metric
+ADD_TEST(NAME mmg2d_vtkvtp_ls_metric
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+  ${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ls_metric)
 
 # VTK .vtk with metric and ls
 ADD_TEST(NAME mmg2d_vtkvtk_metric_ls
@@ -341,7 +365,15 @@ IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   SET_PROPERTY(TEST mmg2d_vtkvtk_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp_ls
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   SET_PROPERTY(TEST mmg2d_vtkvtk_ls_metric
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu_ls_metric
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp_ls_metric
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   SET_PROPERTY(TEST mmg2d_vtkvtk_metric_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
