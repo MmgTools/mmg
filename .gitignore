@@ -33,3 +33,8 @@ include/*
 *.o
 
 .DS_Store
+
+TAGS
+.scannerwork/*
+sonar-project.properties
+.github/workflows/sonarqube.yml
