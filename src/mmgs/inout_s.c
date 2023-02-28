@@ -756,7 +756,7 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   return ier;
 }
 
-int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
+int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const char *filename) {
   int ier=0;
   const char *filenameptr,*solnameptr;
   char *tmp,*soltmp;
@@ -795,15 +795,15 @@ int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
     break;
 
   case ( MMG5_FMT_VtkVtp ):
-    ier = MMGS_loadVtpMesh(mesh,sol,tmp);
+    ier = MMGS_loadVtpMesh(mesh,met,sol,tmp);
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMGS_loadVtuMesh(mesh,sol,tmp);
+    ier = MMGS_loadVtuMesh(mesh,met,sol,tmp);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMGS_loadVtkMesh(mesh,sol,tmp);
+    ier = MMGS_loadVtkMesh(mesh,met,sol,tmp);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):

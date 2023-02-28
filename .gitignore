@@ -33,6 +33,7 @@ include/*
 *.o
 
 .DS_Store
+.vscode
 
 TAGS
 .scannerwork/*

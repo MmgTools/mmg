@@ -1528,14 +1528,14 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTPMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG2D_EXPORT int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1571,14 +1571,14 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG2D_EXPORT int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1615,14 +1615,14 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG2D_EXPORT int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG2D_EXPORT int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1723,14 +1723,14 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG2D_EXPORT int MMG2D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
