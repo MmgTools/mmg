@@ -37,4 +37,3 @@ include/*
 TAGS
 .scannerwork/*
 sonar-project.properties
-.github/workflows/sonarqube.yml
