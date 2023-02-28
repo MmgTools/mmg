@@ -196,36 +196,21 @@ ${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_metric_ls)
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmgs_vtkvtk
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtu
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtp
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtk_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtu_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-    SET_PROPERTY(TEST mmgs_vtkvtp_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtk_ani
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtu_ani
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-    SET_PROPERTY(TEST mmgs_vtkvtp_ani
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtk_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtu_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtp_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtk_ls_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtu_ls_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtp_ls_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-    SET_PROPERTY(TEST mmgs_vtkvtk_metric_ls
+    mmgs_vtkvtu
+    mmgs_vtkvtp
+    mmgs_vtkvtk_iso
+    mmgs_vtkvtu_iso
+    mmgs_vtkvtp_iso
+    mmgs_vtkvtk_ani
+    mmgs_vtkvtu_ani
+    mmgs_vtkvtp_ani
+    mmgs_vtkvtk_ls
+    mmgs_vtkvtu_ls
+    mmgs_vtkvtp_ls
+    mmgs_vtkvtk_ls_metric
+    mmgs_vtkvtu_ls_metric
+    mmgs_vtkvtp_ls_metric
+    mmgs_vtkvtk_metric_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   ENDIF ( )
 

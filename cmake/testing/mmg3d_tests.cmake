@@ -371,27 +371,12 @@ ADD_TEST(NAME mmg3d_vtkvtk_metric_ls
 
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
-  SET_PROPERTY(TEST mmg3d_vtkvtk
+  SET_PROPERTY(
+    TEST mmg3d_vtkvtk mmg3d_vtkvtu mmg3d_vtkvtk_metric mmg3d_vtkvtu_metric
+    mmg3d_vtkvtk_ls mmg3d_vtkvtu_ls mmg3d_vtkvtk_ls_metric
+    mmg3d_vtkvtu_ls_metric mmg3d_vtkvtk_metric_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtu
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtk_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtu_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtk_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtu_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtk_ls_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtu_ls_metric
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtk_metric_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg3d_vtkvtu_metric_ls
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  ENDIF ( )
+ ENDIF ( )
 
 ##############################################################################
 #####
