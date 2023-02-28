@@ -2643,8 +2643,8 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
     xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
-    xt[2].tag[ie3] = 0;  xt[2].edg[ie2] = 0;
-    xt[2].edg[ie3] = 0;
+    xt[2].tag[ie3] = 0;  xt[2].edg[ie1] = 0;
+    xt[2].edg[ie2] = 0;  xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
