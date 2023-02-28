@@ -1517,7 +1517,8 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -1527,7 +1528,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * read only low-order points, edges, tria and quad.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADVTPMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMG2D_LOADVTPMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1560,7 +1561,8 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -1570,7 +1572,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * read only low-order points, edges, tria and quad.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMG2D_LOADVTUMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1604,7 +1606,8 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -1614,7 +1617,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * read only low-order points, edges, tria and quad.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMG2D_LOADVTKMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1714,6 +1717,8 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -1722,7 +1727,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * Read mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMG2D_LOADGENERICMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n

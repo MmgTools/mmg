@@ -1369,7 +1369,8 @@ LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1377,7 +1378,7 @@ LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * read only low-order points, edges, tria and quad.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADVTPMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMGS_LOADVTPMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1407,7 +1408,8 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,
 LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1415,7 +1417,7 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * read only low-order points, edges, tria and quad.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMGS_LOADVTUMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1447,7 +1449,8 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1455,7 +1458,7 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * read only low-order points, edges, tria and quad.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMGS_LOADVTKMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1527,13 +1530,15 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Read mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMGS_LOADGENERICMESH(mesh,met,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
