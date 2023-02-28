@@ -622,7 +622,40 @@ if (BASH)
     )
 endif()
 
-# ls discretisation + optim option
+# ls discretisation + parameter file
+ADD_TEST(NAME mmg2d_ParsOpName
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  -f ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-refs.mmg2d
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ParsOpName.o.meshb)
+
+SET(parsopName "multi-mat-refs.mmg2d OPENED")
+SET_PROPERTY(TEST mmg2d_ParsOpName
+  PROPERTY PASS_REGULAR_EXPRESSION "${parsopName}")
+
+# ls discretisation + wrong name of parameter file
+ADD_TEST(NAME mmg2d_ParsOpName_wrongFile
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  -f ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-false.mmg2d
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ParsOpName_wrongFile.o.meshb)
+
+SET(parsopNameWrong "multi-mat-refs.mmg2d file NOT FOUND.")
+SET_PROPERTY(TEST mmg2d_ParsOpName_wrongFile
+  PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameWrong}")
+
+# ls discretisation + no name of parameter file
+ADD_TEST(NAME mmg2d_ParsOpName_NoFileName
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -f
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ParsOpName_NoFileName.o.meshb)
+
+SET(parsopNameNo "Missing filname for f")
+SET_PROPERTY(TEST mmg2d_ParsOpName_NoFileName
+  PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
+
+
+  # ls discretisation + optim option
 ADD_TEST(NAME mmg2d_LSMultiMat_optim
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -hausd 0.001
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat

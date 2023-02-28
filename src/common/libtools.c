@@ -224,6 +224,7 @@ void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-out file  output triangulation\n");
   fprintf(stdout,"-sol file  load solution or metric file\n");
   fprintf(stdout,"-met file  load metric file\n");
+  fprintf(stdout,"-f   file  load parameter file\n");
 
   fprintf(stdout,"\n**  Mode specifications (mesh adaptation by default)\n");
   fprintf(stdout,"-ls     val create mesh of isovalue val (0 if no argument provided)\n");

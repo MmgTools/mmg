@@ -132,6 +132,23 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* mes
 LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param fparamin name of the input parameter file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ *  Set the name of output solution file.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG5_SET_OUTPUTSOLNAME(mesh,fparamin,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: fparamin\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  LIBMMG_CORE_EXPORT int MMG5_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin);
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param solout name of the output solution file.
  * \return 0 if failed, 1 otherwise.
@@ -148,7 +165,6 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
  *
  */
   LIBMMG_CORE_EXPORT int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
