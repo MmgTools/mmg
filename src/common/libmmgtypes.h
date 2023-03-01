@@ -666,7 +666,7 @@ typedef struct {
   MMG5_int  npmax; /* Maximum number of points */
   MMG5_int  npi; /* Temporary number of points (internal use only) */
   int       size; /* Number of solutions per entity */
-  int       type; /* Type of the solution (scalar, vectorial of tensorial) */
+  int       type; /* Type of the solution (scalar, vectorial or tensorial) */
   int       entities; /* Type of the solution (scalar, vectorial of tensorial) */
   double    *m; /*!< Solution values */
   double    umin,umax; /*!<Min/max values for the solution */

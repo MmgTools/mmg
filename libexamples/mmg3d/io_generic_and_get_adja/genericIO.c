@@ -105,7 +105,7 @@ int main(int argc,char *argv[]) {
 
 
   /** 2) Mesh loading depending on detected extension */
-  ier = MMG3D_loadGenericMesh(mmgMesh,NULL,filein);
+  ier = MMG3D_loadGenericMesh(mmgMesh,NULL,NULL,filein);
 
   if ( ier<1 ) {
     if ( ier==0 ) {
