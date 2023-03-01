@@ -1141,11 +1141,8 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     return 0;
   }
 
-  int ier = 1;
-
   if ( mesh->info.iso && !MMG3D_chkmani(mesh) ) {
-    fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
-    ier = 0;
+    fprintf(stdout,"\n  ## WARNING : Non orientable implicit surface.\n");
   }
 
   if ( PROctree ) {
@@ -1153,7 +1150,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     MMG3D_freePROctree(mesh,&PROctree);
   }
 
-  return ier;
+  return 1;
 }
 
 #endif
