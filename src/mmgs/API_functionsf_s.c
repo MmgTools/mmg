@@ -136,6 +136,24 @@ FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
 }
 
 /**
+ * See \ref MMGS_Set_inputParamName function in \ref common/libmmgcommon_private.h file.
+ */
+FORTRAN_NAME(MMGS_SET_INPUTPARAMNAME, mmgs_set_inputparamname,
+             (MMG5_pMesh *mesh,char* fparamin, int* strlen0, int* retval),
+             (mesh,fparamin,strlen0,retval)) {
+
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,fparamin,*strlen0);
+  tmp[*strlen0] = '\0';
+  *retval = MMGS_Set_inputParamName(*mesh,tmp);
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
  * See \ref MMGS_Set_solSize function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_SOLSIZE,mmgs_set_solsize,

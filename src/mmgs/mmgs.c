@@ -61,7 +61,7 @@ static void MMG5_endcod(void) {
  * DEFAULT.mmgs.
  *
  */
-static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
+static int MMGS_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
   int        i,j,ret,npar,nbr,split;
   MMG5_int   ref,rin,rex,br;
@@ -70,7 +70,12 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   fpos_t     position;
 
   /* check for parameter file */
-  strcpy(data,mesh->namein);
+  if (mesh->info.fparam) {
+    strcpy(data,mesh->info.fparam);
+  }
+  else {
+    strcpy(data,mesh->namein);
+  }
 
   ptr = MMG5_Get_filenameExt(data);
 
@@ -79,10 +84,16 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
   in = fopen(data,"rb");
   if ( !in ) {
-    sprintf(data,"%s","DEFAULT.mmgs");
-    in = fopen(data,"rb");
-    if ( !in ) {
-      return 1;
+    if ( !mesh->info.fparam ) {
+      sprintf(data,"%s","DEFAULT.mmgs");
+      in = fopen(data,"rb");
+      if ( !in )
+        return 1;
+    }
+    else if (mesh->info.fparam ) {
+      fprintf(stderr,"  ** In %s: %s file NOT FOUND. \n",__func__,data);
+      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD PARAMETER FILE.\n");
+      return 0;
     }
   }
   if ( mesh->info.imprim >= 0 ) {
@@ -477,7 +488,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* Read parameter file */
-  if ( !MMG5_parsop(mesh,met) )
+  if ( !MMGS_parsop(mesh,met) )
     MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);

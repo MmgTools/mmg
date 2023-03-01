@@ -146,7 +146,7 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filname for %c\n",argv[i-1][1]);
+            fprintf(stderr,"Missing filename for %c\n",argv[i-1][1]);
             MMG2D_usage(argv[0]);
             return 0;
           }
@@ -538,7 +538,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 1;
     }
     else if (mesh->info.fparam ) {
-      fprintf(stderr,"  ** In %s : %s  file NOT FOUND. \n",__func__,data);
+      fprintf(stderr,"  ** In %s: %s file NOT FOUND. \n",__func__,data);
       fprintf(stdout,"  ## ERROR: UNABLE TO LOAD PARAMETER FILE.\n");
       return 0;
     }

@@ -640,6 +640,41 @@ ADD_TEST(NAME mmg3d_LSMultiMat
   -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_LSMultiMat.o.meshb)
 
+# ls discretisation + parameter file
+ADD_TEST(NAME mmg3d_ParsOpName
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  -f ${MMG3D_CI_TESTS}/LSMultiMat/step.0-refs.mmg3d
+  -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
+  ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_ParsOpName.o.meshb)
+
+SET(parsopName "step.0-refs.mmg3d OPENED")
+SET_PROPERTY(TEST mmg3d_ParsOpName
+  PROPERTY PASS_REGULAR_EXPRESSION "${parsopName}")
+
+# ls discretisation + wrong name of parameter file
+ADD_TEST(NAME mmg3d_ParsOpName_wrongFile
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  -f ${MMG3D_CI_TESTS}/LSMultiMat/step.0-false.mmg3d
+  -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
+  ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_ParsOpName_wrongFile.o.meshb)
+
+SET(parsopNameWrong "step.0-false.mmg3d file NOT FOUND.")
+SET_PROPERTY(TEST mmg3d_ParsOpName_wrongFile
+  PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameWrong}")
+
+# ls discretisation + no name of parameter file
+ADD_TEST(NAME mmg3d_ParsOpName_NoFileName
+  COMMAND ${EXECUT_MMG3D} -v 5 -f -ls
+  -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
+  ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_ParsOpName_NoFileName.o.meshb)
+
+SET(parsopNameNo "Missing filename for f")
+SET_PROPERTY(TEST mmg3d_ParsOpName_NoFileName
+  PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
+
 #multi-mat + opnbdy + non-manifold check
 ADD_TEST(NAME mmg3d_LSMultiMat_nm
   COMMAND ${EXECUT_MMG3D} -v 5 -ls -0.1 -hausd 0.05 -hgrad 1.8 -nr -opnbdy

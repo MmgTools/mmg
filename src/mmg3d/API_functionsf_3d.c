@@ -138,6 +138,24 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTSOLNAME,mmg3d_set_outputsolname,
 }
 
 /**
+ * See \ref MMG3D_Set_inputParamName function in \ref common/libmmgcommon_private.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_INPUTPARAMNAME, mmg3d_set_inputparamname,
+             (MMG5_pMesh *mesh,char* fparamin, int* strlen0, int* retval),
+             (mesh,fparamin,strlen0,retval)) {
+
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,fparamin,*strlen0);
+  tmp[*strlen0] = '\0';
+  *retval = MMG3D_Set_inputParamName(*mesh,tmp);
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
  * See \ref MMG3D_Set_solSize function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_SOLSIZE,mmg3d_set_solsize,

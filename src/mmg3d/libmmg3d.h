@@ -242,6 +242,24 @@ enum MMG3D_Param {
  */
  LIBMMG3D_EXPORT int  MMG3D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
                                               const char* solout);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param fparamin name of the input parameter file.
+ * \return 1.
+ *
+ * Set the name of input solution file.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_INPUTPARAMNAME(mesh,fparamin,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: fparamin\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin);
+
 
 /* init structure sizes */
 /**

@@ -232,6 +232,19 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           }
         }
         break;
+      case 'f':
+        if ( !strcmp(argv[i],"-f") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMG3D_Set_inputParamName(mesh,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing filename for %c\n",argv[i-1][1]);
+            MMG3D_usage(argv[0]);
+            return 0;
+          }
+        }
+        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
@@ -595,25 +608,39 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   fpos_t     position;
 
   /* check for parameter file */
-  strcpy(data,mesh->namein);
+  if (mesh->info.fparam) {
+    strcpy(data,mesh->info.fparam);
+  }
+  else {
+    strcpy(data,mesh->namein);
+  }
+
   ptr = MMG5_Get_filenameExt(data);
 
   if ( ptr )  *ptr = '\0';
   strcat(data,".mmg3d");
+
   in = fopen(data,"rb");
   if ( !in ) {
-    strcat(data,".mmg3d5");
-    in = fopen(data,"rb");
-    if ( !in ) {
-      sprintf(data,"%s","DEFAULT.mmg3d");
+    if ( !mesh->info.fparam ) {
+      strcat(data,".mmg3d5");
       in = fopen(data,"rb");
       if ( !in ) {
-        sprintf(data,"%s","DEFAULT.mmg3d5");
+        sprintf(data,"%s","DEFAULT.mmg3d");
         in = fopen(data,"rb");
         if ( !in ) {
-          return 1;
+          sprintf(data,"%s","DEFAULT.mmg3d5");
+          in = fopen(data,"rb");
+          if ( !in ) {
+            return 1;
+          }
         }
       }
+    }
+    else if (mesh->info.fparam ) {
+      fprintf(stderr,"  ** In %s: %s file NOT FOUND. \n",__func__,data);
+      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD PARAMETER FILE.\n");
+      return 0;
     }
   }
   if ( mesh->info.imprim >= 0 )

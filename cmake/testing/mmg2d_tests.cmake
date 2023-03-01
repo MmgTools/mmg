@@ -682,20 +682,19 @@ ADD_TEST(NAME mmg2d_ParsOpName_wrongFile
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat.mesh
   ${CTEST_OUTPUT_DIR}/mmg2d_ParsOpName_wrongFile.o.meshb)
 
-SET(parsopNameWrong "multi-mat-refs.mmg2d file NOT FOUND.")
+SET(parsopNameWrong "multi-mat-false.mmg2d file NOT FOUND.")
 SET_PROPERTY(TEST mmg2d_ParsOpName_wrongFile
   PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameWrong}")
 
 # ls discretisation + no name of parameter file
 ADD_TEST(NAME mmg2d_ParsOpName_NoFileName
-  COMMAND ${EXECUT_MMG2D} -v 5 -ls -f
+  COMMAND ${EXECUT_MMG2D} -v 5 -f -ls
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat.mesh
   ${CTEST_OUTPUT_DIR}/mmg2d_ParsOpName_NoFileName.o.meshb)
 
-SET(parsopNameNo "Missing filname for f")
+SET(parsopNameNo "Missing filename for f")
 SET_PROPERTY(TEST mmg2d_ParsOpName_NoFileName
   PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
-
 
   # ls discretisation + optim option
 ADD_TEST(NAME mmg2d_LSMultiMat_optim
