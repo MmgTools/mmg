@@ -301,25 +301,67 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
+# VTK .vtk with ls
+ADD_TEST(NAME mmg2d_vtkvtk_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtk
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls)
+
+# VTK .vtu with ls
+ADD_TEST(NAME mmg2d_vtkvtu_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtu
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ls)
+
+# VTK .vtp with ls
+ADD_TEST(NAME mmg2d_vtkvtp_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls.vtp
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ls)
+
+# VTK .vtk with ls and metric
+ADD_TEST(NAME mmg2d_vtkvtk_ls_metric
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+  ${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ls_metric)
+
+# VTK .vtu with ls and metric
+ADD_TEST(NAME mmg2d_vtkvtu_ls_metric
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtu
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ls_metric)
+
+# VTK .vtp with ls and metric
+ADD_TEST(NAME mmg2d_vtkvtp_ls_metric
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+  ${MMG2D_CI_TESTS}/VtkInout/cercle_ls_metric.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ls_metric)
+
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmg2d_vtkvtk_metric_ls
+COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.8
+${MMG2D_CI_TESTS}/VtkInout/cercle_metric_ls.vtk
+${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_metric_ls)
+
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
-  SET_PROPERTY(TEST mmg2d_vtkvtk
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtp
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtu
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtk_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtp_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtu_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtk_ani
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtp_ani
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmg2d_vtkvtu_ani
+  SET_PROPERTY(TEST
+    mmg2d_vtkvtk
+    mmg2d_vtkvtp
+    mmg2d_vtkvtu
+    mmg2d_vtkvtk_iso
+    mmg2d_vtkvtp_iso
+    mmg2d_vtkvtu_iso
+    mmg2d_vtkvtk_ani
+    mmg2d_vtkvtp_ani
+    mmg2d_vtkvtu_ani
+    mmg2d_vtkvtk_ls
+    mmg2d_vtkvtu_ls
+    mmg2d_vtkvtp_ls
+    mmg2d_vtkvtk_ls_metric
+    mmg2d_vtkvtu_ls_metric
+    mmg2d_vtkvtp_ls_metric
+    mmg2d_vtkvtk_metric_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
 ENDIF()
 

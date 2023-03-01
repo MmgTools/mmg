@@ -60,8 +60,7 @@ void MMG2D_Set_commonFunc(void) {
     return;
 }
 
-int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
-{
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -272,7 +271,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
  *
  */
 static inline
-int MMG2D_restart(MMG5_pMesh mesh){
+int MMG2D_restart(MMG5_pMesh mesh) {
   MMG5_int k;
 
   /** If needed, reallocate the missing structures */
@@ -302,7 +301,6 @@ int MMG2D_restart(MMG5_pMesh mesh){
 
   return 1;
 }
-
 
 int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pSol sol=NULL; // unused
@@ -523,8 +521,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 }
 
-int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
-{
+int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   MMG5_pSol met=NULL;
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -587,11 +584,13 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
-  } else   if ( sol->size != 1 ) {
+  }
+  else if ( sol->size != 1 ) {
     fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE.\n");
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
-  } else if ( sol->np && (sol->np != mesh->np) ) {
+  }
+  else if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
@@ -605,7 +604,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
-
     if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");

@@ -520,7 +520,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
  * \return 1 if success, 0 otherwise
  *
  * Check the tetra orientation, print warning it negative refs have been
- * detected, mark points as used and remove elt refs in iso mode.
+ * detected, mark points as used.
  *
  */
 int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
@@ -551,9 +551,6 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
         ppt = &mesh->point[ ptt->v[i] ];
         ppt->tag &= ~MG_NUL;
       }
-
-      /* Set the elements references to 0 in iso mode */
-      if ( mesh->info.iso )  ptt->ref = 0;
 
       for(i=0 ; i<3 ; i++)
         ptt->edg[i] = 0;
@@ -586,9 +583,6 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
           ppt = &mesh->point[pt->v[i]];
           ppt->tag &= ~MG_NUL;
         }
-
-        /* Set the elements references to 0 in iso mode */
-        if ( mesh->info.iso )  pt->ref = 0;
 
         /* Possibly switch 2 vertices number so that each tet is positively oriented */
         if ( MMG5_orvol(mesh->point,pt->v) < 0.0 ) {

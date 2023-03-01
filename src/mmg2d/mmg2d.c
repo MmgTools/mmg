@@ -351,15 +351,15 @@ int main(int argc,char *argv[]) {
     break;
 
   case ( MMG5_FMT_VtkVtp ):
-    ier = MMG2D_loadVtpMesh(mesh,sol,mesh->namein);
+    ier = MMG2D_loadVtpMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMG2D_loadVtuMesh(mesh,sol,mesh->namein);
+    ier = MMG2D_loadVtuMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMG2D_loadVtkMesh(mesh,sol,mesh->namein);
+    ier = MMG2D_loadVtkMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
@@ -390,11 +390,19 @@ int main(int argc,char *argv[]) {
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
-    /* In iso mode: read metric if any */
-    if ( ( mesh->info.iso || mesh->info.isosurf ) && met->namein ) {
-      if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+
+    /* In iso mode: read metric if any and give a name to the metric*/
+    if ( ( mesh->info.iso || mesh->info.isosurf ) ) {
+      if (met->namein) {
+        if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        }
+      }
+      else {
+        /* Give a name to the metric if not provided */
+        if ( !MMG2D_Set_inputSolName(mesh,met,"") )
+          fprintf(stdout,"  ## ERROR: UNABLE TO GIVE A NAME TO THE METRIC.\n");
       }
     }
     break;
@@ -460,7 +468,7 @@ int main(int argc,char *argv[]) {
               " AND A SOLUTION IN ADAPTATION MODE.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
-    
+
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 

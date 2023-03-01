@@ -53,8 +53,7 @@ int MMG2D_Init_mesh(const int starter,...) {
   return ier;
 }
 
-void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
-  ) {
+void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   MMG5_Init_fileNames(mesh,sol);
   return;

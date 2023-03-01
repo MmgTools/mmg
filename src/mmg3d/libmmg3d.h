@@ -2005,7 +2005,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -2017,17 +2018,18 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * "medit:ref" keyword.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >   SUBROUTINE MMG3D_LOADVTUMESH(mesh,met,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMG3D_EXPORT int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param
+ * \met,mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
  *
@@ -2052,7 +2054,8 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -2064,15 +2067,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * "medit:ref" keyword.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >   SUBROUTINE MMG3D_LOADVTKMESH(mesh,met,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -2121,6 +2124,8 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure or the NULL pointer.
+ * \param sol pointer toward the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
@@ -2129,15 +2134,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * Read mesh data in a file whose format depends on the filename extension.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >   SUBROUTINE MMG3D_LOADGENERICMESH(mesh,met,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ LIBMMG3D_EXPORT int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.

@@ -413,15 +413,15 @@ int main(int argc,char *argv[]) {
     break;
 
   case ( MMG5_FMT_VtkVtp ):
-    ier = MMGS_loadVtpMesh(mesh,sol,mesh->namein);
+    ier = MMGS_loadVtpMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMGS_loadVtuMesh(mesh,sol,mesh->namein);
+    ier = MMGS_loadVtuMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMGS_loadVtkMesh(mesh,sol,mesh->namein);
+    ier = MMGS_loadVtkMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
@@ -439,6 +439,11 @@ int main(int argc,char *argv[]) {
           fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
           MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
         }
+      }
+      else {
+        /* Give a name to the metric if not provided */
+        if ( !MMGS_Set_inputSolName(mesh,met,"") )
+          fprintf(stdout,"  ## ERROR: UNABLE TO GIVE A NAME TO THE METRIC.\n");
       }
     }
     else {

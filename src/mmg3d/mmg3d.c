@@ -376,11 +376,11 @@ int main(int argc,char *argv[]) {
     break;
 
   case ( MMG5_FMT_VtkVtu ):
-    ier = MMG3D_loadVtuMesh(mesh,sol,mesh->namein);
+    ier = MMG3D_loadVtuMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_VtkVtk ):
-    ier = MMG3D_loadVtkMesh(mesh,sol,mesh->namein);
+    ier = MMG3D_loadVtkMesh(mesh,met,sol,mesh->namein);
     break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
@@ -409,11 +409,19 @@ int main(int argc,char *argv[]) {
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
+
     /* In iso mode: read metric if any */
-    if ( mesh->info.iso && met->namein ) {
-      if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+    if ( mesh->info.iso ) {
+      if (met->namein) {
+        if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        }
+      }
+      else {
+        /* Give a name to the metric if not provided */
+        if ( !MMG3D_Set_inputSolName(mesh,met,"") )
+          fprintf(stdout,"  ## ERROR: UNABLE TO GIVE A NAME TO THE METRIC.\n");
       }
     }
     break;

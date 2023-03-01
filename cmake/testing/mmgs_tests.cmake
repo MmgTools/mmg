@@ -97,17 +97,53 @@ ADD_TEST(NAME mmgs_ascii_gmsh_s
   ${MMGS_CI_TESTS}/GmshInout/cube.msh
   ${CTEST_OUTPUT_DIR}/mmgs-cube-gmsh.o.msh)
 
+# VTK .vtk no metric
+ADD_TEST(NAME mmgs_vtkvtk
+COMMAND ${EXECUT_MMGS} -v 5
+${MMGS_CI_TESTS}/VtkInout/c1.vtk
+${CTEST_OUTPUT_DIR}/mmgs_vtkvtk)
+
+# VTK .vtu no metric
+ADD_TEST(NAME mmgs_vtkvtu
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/c1.vtu
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtu)
+
 # VTK .vtp no metric
 ADD_TEST(NAME mmgs_vtkvtp
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/VtkInout/c1.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp)
 
-# VTK .vtp with iso metric
+# VTK .vtk with iso metric
+ADD_TEST(NAME mmgs_vtkvtk_iso
+COMMAND ${EXECUT_MMGS} -v 5
+${MMGS_CI_TESTS}/VtkInout/iso.vtk
+${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_iso)
+
+# VTK .vtu with iso metric
+ADD_TEST(NAME mmgs_vtkvtu_iso
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/iso.vtu
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtu_iso)
+
+  # VTK .vtp with iso metric
 ADD_TEST(NAME mmgs_vtkvtp_iso
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/VtkInout/iso.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_iso)
+
+# VTK .vtk with aniso metric
+ADD_TEST(NAME mmgs_vtkvtk_ani
+COMMAND ${EXECUT_MMGS} -v 5
+${MMGS_CI_TESTS}/VtkInout/ani.vtk
+${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_ani)
+
+# VTK .vtu with aniso metric
+ADD_TEST(NAME mmgs_vtkvtu_ani
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/ani.vtu
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtu_ani)
 
 # VTK .vtp with aniso metric
 ADD_TEST(NAME mmgs_vtkvtp_ani
@@ -115,15 +151,68 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
+# VTK .vtk with ls
+ADD_TEST(NAME mmgs_vtkvtk_ls
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls.vtk
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_ls)
+
+# VTK .vtu with ls
+ADD_TEST(NAME mmgs_vtkvtu_ls
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls.vtu
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtu_ls)
+
+# VTK .vtp with ls
+ADD_TEST(NAME mmgs_vtkvtp_ls
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ls)
+
+# VTK .vtk with ls and metric
+ADD_TEST(NAME mmgs_vtkvtk_ls_metric
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls_metric.vtk
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_ls_metric)
+
+# VTK .vtu with ls and metric
+ADD_TEST(NAME mmgs_vtkvtu_ls_metric
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls_metric.vtu
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtu_ls_metric)
+
+# VTK .vtp with ls and metric
+ADD_TEST(NAME mmgs_vtkvtp_ls_metric
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+  ${MMGS_CI_TESTS}/VtkInout/surf_ls_metric.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ls_metric)
+
+# VTK .vtk with metric and ls
+ADD_TEST(NAME mmgs_vtkvtk_metric_ls
+COMMAND ${EXECUT_MMGS} -v 5 -ls 0.1
+${MMGS_CI_TESTS}/VtkInout/surf_metric_ls.vtk
+${CTEST_OUTPUT_DIR}/mmgs_vtkvtk_metric_ls)
+
 IF ( (NOT VTK_FOUND) OR USE_VTK MATCHES OFF )
   SET(expr "VTK library not founded")
-  SET_PROPERTY(TEST mmgs_vtkvtp
+  SET_PROPERTY(TEST mmgs_vtkvtk
+    mmgs_vtkvtu
+    mmgs_vtkvtp
+    mmgs_vtkvtk_iso
+    mmgs_vtkvtu_iso
+    mmgs_vtkvtp_iso
+    mmgs_vtkvtk_ani
+    mmgs_vtkvtu_ani
+    mmgs_vtkvtp_ani
+    mmgs_vtkvtk_ls
+    mmgs_vtkvtu_ls
+    mmgs_vtkvtp_ls
+    mmgs_vtkvtk_ls_metric
+    mmgs_vtkvtu_ls_metric
+    mmgs_vtkvtp_ls_metric
+    mmgs_vtkvtk_metric_ls
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtp_iso
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-  SET_PROPERTY(TEST mmgs_vtkvtp_ani
-    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-ENDIF ( )
+  ENDIF ( )
 
 ###############################################################################
 #####

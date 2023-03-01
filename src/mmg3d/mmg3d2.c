@@ -2207,20 +2207,20 @@ int MMG3D_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int nde
  */
 int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   char str[16]="";
-  
+
   /* Set function pointers */
   if ( mesh->info.isosurf ) {
     strcat(str,"(BOUNDARY PART)");
 
-    MMG3D_snpval  = MMG3D_snpval_lssurf;
+    MMG3D_snpval   = MMG3D_snpval_lssurf;
     MMG3D_resetRef = MMG3D_resetRef_lssurf;
-    MMG3D_cuttet  = MMG3D_cuttet_lssurf;
+    MMG3D_cuttet   = MMG3D_cuttet_lssurf;
     MMG3D_setref   = MMG3D_setref_lssurf;
   }
   else {
-    MMG3D_snpval  = MMG3D_snpval_ls;
+    MMG3D_snpval   = MMG3D_snpval_ls;
     MMG3D_resetRef = MMG3D_resetRef_ls;
-    MMG3D_cuttet  = MMG3D_cuttet_ls;
+    MMG3D_cuttet   = MMG3D_cuttet_ls;
     MMG3D_setref   = MMG3D_setref_ls;
   }
 
@@ -2265,7 +2265,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
-  
+
   /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG3D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
@@ -2287,12 +2287,12 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
               " isosurface extraction.\n");
     }
   }
-    
+
   if ( !MMG3D_cuttet(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
-  
+
   MMG5_DEL_MEM(mesh,mesh->adja);
   MMG5_DEL_MEM(mesh,mesh->adjt);
   MMG5_DEL_MEM(mesh,mesh->tria);
@@ -2303,7 +2303,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
-  
+
   /* Clean old bdy analysis */
   for ( MMG5_int k=1; k<=mesh->np; ++k ) {
     if ( mesh->point[k].tag & MG_BDY ) {
