@@ -336,8 +336,8 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   if ( mesh->info.iso ) {
     /* Check that the resulting mesh is manifold */
     if ( !MMG5_chkmanimesh(mesh) ) {
-      fprintf(stdout,"\n  ## WARNING : No manifold resulting situation.\n");
-      return 1;
+      fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
+      return 0;
     }
   }
 
