@@ -97,6 +97,8 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
 
   fprintf(stdout,"gradation control for required entities (-hgradreq)  : %lf\n",
           (mesh->info.hgradreq < 0) ? mesh->info.hgradreq : exp(mesh->info.hgradreq) );
+  fprintf(stdout,"coordinate regularization parameter (-xreg) : %lf\n",
+          mesh->info.lxreg);
 }
 
 int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,

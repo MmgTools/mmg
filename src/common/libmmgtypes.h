@@ -516,7 +516,7 @@ typedef MMG5_InvMat * MMG5_pInvMat;
 typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
-  double        min[3],max[3],delta,ls,rmc;
+  double        min[3],max[3],delta,ls,lxreg,rmc;
   MMG5_int      *br; /*!< list of based references to which an implicit surface can be attached */
   MMG5_int      isoref; /*!< isovalue reference in ls mode */
   MMG5_int      nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
