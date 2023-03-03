@@ -534,8 +534,8 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
   }
 
   if ( mesh->info.iso && !MMG3D_chkmani(mesh) ) {
-    fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
-    return 0;
+    fprintf(stdout,"\n  ## Warning: %s: Non orientable implicit surface.\n",__func__);
+    return 1;
   }
 
   return 1;
