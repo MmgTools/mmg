@@ -112,7 +112,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
 }
 
 /**
- * See \ref MMG2D_Set_inputParamName function in \ref common/libmmgcommon_private.h file.
+ * See \ref MMG2D_Set_inputParamName function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTPARAMNAME, mmg2d_set_inputparamname,
              (MMG5_pMesh *mesh,char* fparamin, int* strlen0, int* retval),

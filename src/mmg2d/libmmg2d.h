@@ -224,7 +224,7 @@ extern "C" {
  * \param fparamin name of the input parameter file.
  * \return 1.
  *
- * Set the name of input solution file.
+ * Set the name of input parameter file.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_INPUTPARAMNAME(mesh,fparamin,strlen0,retval)\n

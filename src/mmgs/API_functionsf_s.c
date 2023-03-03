@@ -136,7 +136,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
 }
 
 /**
- * See \ref MMGS_Set_inputParamName function in \ref common/libmmgcommon_private.h file.
+ * See \ref MMGS_Set_inputParamName function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_INPUTPARAMNAME, mmgs_set_inputparamname,
              (MMG5_pMesh *mesh,char* fparamin, int* strlen0, int* retval),

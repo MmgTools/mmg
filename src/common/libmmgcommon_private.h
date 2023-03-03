@@ -135,10 +135,10 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
  * \param fparamin name of the input parameter file.
  * \return 0 if failed, 1 otherwise.
  *
- *  Set the name of output solution file.
+ *  Set the name of input parameter file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG5_SET_OUTPUTSOLNAME(mesh,fparamin,strlen,retval)\n
+ * >   SUBROUTINE MMG5_SET_INPUTPARAMNAME(mesh,fparamin,strlen,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: fparamin\n
  * >     INTEGER, INTENT(IN)            :: strlen\n

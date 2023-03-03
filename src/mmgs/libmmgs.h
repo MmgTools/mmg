@@ -223,7 +223,7 @@ LIBMMGS_EXPORT int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const 
  * \param fparamin name of the input parameter file.
  * \return 1.
  *
- * Set the name of input solution file.
+ * Set the name of input parameter file.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_INPUTPARAMNAME(mesh,fparamin,strlen0,retval)\n

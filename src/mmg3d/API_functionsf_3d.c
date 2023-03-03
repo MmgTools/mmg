@@ -138,7 +138,7 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTSOLNAME,mmg3d_set_outputsolname,
 }
 
 /**
- * See \ref MMG3D_Set_inputParamName function in \ref common/libmmgcommon_private.h file.
+ * See \ref MMG3D_Set_inputParamName function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_INPUTPARAMNAME, mmg3d_set_inputparamname,
              (MMG5_pMesh *mesh,char* fparamin, int* strlen0, int* retval),

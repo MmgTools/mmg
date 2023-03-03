@@ -227,7 +227,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
  * \param fparamin name of the input solution file.
  * \return 1 if success, 0 if fail
  *
- * Set the name of input solution file.
+ * Set the name of input parameter file.
  *
  */
 int MMG5_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin) {
