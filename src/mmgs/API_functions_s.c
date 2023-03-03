@@ -69,6 +69,10 @@ int MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   return MMG5_Set_inputSolName(mesh,sol,solin);
 }
 
+int MMGS_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin) {
+  return MMG5_Set_inputParamName(mesh,fparamin);
+}
+
 int MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
   return MMG5_Set_outputMeshName(mesh,meshout);

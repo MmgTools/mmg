@@ -156,6 +156,19 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
         if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
           return 0;
         break;
+      case 'f':
+        if ( !strcmp(argv[i],"-f") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMGS_Set_inputParamName(mesh,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing filename for %c\n",argv[i-1][1]);
+            MMGS_usage(argv[0]);
+            return 0;
+          }
+        }
+        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
           if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmin,

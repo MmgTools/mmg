@@ -418,6 +418,41 @@ ADD_TEST(NAME mmgs_OpnbdyOptimAni-adap1
   ${MMGS_CI_TESTS}/OpnbdyOptimAni/adap1-3D.mesh
   -out ${CTEST_OUTPUT_DIR}/mmgs_OpnbdyOptimAni-adap1.o.meshb)
 
+# ls discretisation + parameter file
+ADD_TEST(NAME mmgs_ParsOpName
+COMMAND ${EXECUT_MMGS} -v 5 -ls
+-sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+-f ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-refs.mmgs
+${MMGS_CI_TESTS}/LSMultiMat/multi-mat.mesh
+${CTEST_OUTPUT_DIR}/mmgs_ParsOpName.o.meshb)
+
+SET(parsopName "multi-mat-refs.mmgs OPENED")
+SET_PROPERTY(TEST mmgs_ParsOpName
+PROPERTY PASS_REGULAR_EXPRESSION "${parsopName}")
+
+# ls discretisation + wrong name of parameter file
+ADD_TEST(NAME mmgs_ParsOpName_wrongFile
+COMMAND ${EXECUT_MMGS} -v 5 -ls
+-sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+-f ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-false.mmg
+${MMGS_CI_TESTS}/LSMultiMat/multi-mat.mesh
+${CTEST_OUTPUT_DIR}/mmgs_ParsOpName_wrongFile.o.meshb)
+
+SET(parsopNameWrong "multi-mat-false.mmgs file NOT FOUND.")
+SET_PROPERTY(TEST mmgs_ParsOpName_wrongFile
+PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameWrong}")
+
+# ls discretisation + no name of parameter file
+ADD_TEST(NAME mmgs_ParsOpName_NoFileName
+COMMAND ${EXECUT_MMGS} -v 5 -f -ls
+-sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+${MMGS_CI_TESTS}/LSMultiMat/multi-mat.mesh
+${CTEST_OUTPUT_DIR}/mmgs_ParsOpName_NoFileName.o.meshb)
+
+SET(parsopNameNo "Missing filename for f")
+SET_PROPERTY(TEST mmgs_ParsOpName_NoFileName
+PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
+
 # ls discretisation + optim option
 ADD_TEST(NAME mmgs_LSMultiMat_optim
   COMMAND ${EXECUT_MMGS} -v 5 -ls -optim -hausd 0.001
