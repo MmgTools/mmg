@@ -679,6 +679,12 @@ ADD_TEST(NAME mmg2d_CoorRegularizationNegativeArea
   ${MMG2D_CI_TESTS}/CoorRegularizationNegativeArea/CoorRegularizationNegativeArea
   -out ${CTEST_OUTPUT_DIR}/CoorRegularizationNegativeArea.o.meshb)
 
+# ls discretisation + xreg + choice of value for xreg
+ADD_TEST(NAME mmg2d_CoorRegularization_apple_value
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -xreg 0.9
+  ${MMG2D_CI_TESTS}/CoorRegularization_apple/apple
+  -out ${CTEST_OUTPUT_DIR}/CoorRegularization_apple_value.o.meshb)
+
 ###############################################################################
 #####
 #####         Check Lagrangian motion option
