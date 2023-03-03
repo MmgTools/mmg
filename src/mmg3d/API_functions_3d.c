@@ -103,8 +103,6 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* default values for doubles */
   /* level set value */
   mesh->info.ls       = MMG5_LS;
-  /* xreg relaxation parameter value */
-  mesh->info.lxreg    = MMG5_LXREG;
 
 #ifndef MMG_PATTERN
   mesh->info.PROctree = MMG5_PROCTREE;

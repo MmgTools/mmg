@@ -841,8 +841,8 @@ int MMGS_regver(MMG5_pMesh mesh) {
   it   = 0;
   nit  = 10;
   res0 = 0.0;
-  lm1  = 0.4;
-  lm2  = 0.399;
+  lm1  = mesh->info.lxreg;
+  lm2  = lm1;
   while ( it++ < nit ) {
     /* step 1: laplacian */
     for (k=1; k<=mesh->np; k++) {
