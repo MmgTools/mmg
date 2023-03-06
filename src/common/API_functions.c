@@ -224,6 +224,34 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param fparamin name of the input solution file.
+ * \return 1 if success, 0 if fail
+ *
+ * Set the name of input parameter file.
+ *
+ */
+int MMG5_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin) {
+
+  if ( mesh->info.fparam )
+    MMG5_DEL_MEM(mesh,mesh->info.fparam);
+
+  if ( fparamin && strlen(fparamin) ) {
+    MMG5_ADD_MEM(mesh,(strlen(fparamin)+1)*sizeof(char),"input param name",
+                  fprintf(stderr,"  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.fparam,strlen(fparamin)+1,char,return 0);
+    strcpy(mesh->info.fparam,fparamin);
+  }
+  else {
+    fprintf(stderr,"\n  ## Warning: %s: no name given for the parameter file.\n",__func__);
+    fprintf(stderr,"              We should have never end here.\n");
+    return 0;
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param meshout name of the output mesh file.
  * \return 1 if success, 0 if fail.
  *
