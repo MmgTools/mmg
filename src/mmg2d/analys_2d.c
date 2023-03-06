@@ -525,7 +525,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   res0 = 0.0;
   nn = 0;
   lm1 = mesh->info.lxreg;
-  lm2 = lm1;
+  lm2 = 0.99*lm1;
 
   /* Temporary table for normal vectors */
   MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,return 0);
