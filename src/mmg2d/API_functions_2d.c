@@ -99,7 +99,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* level set value */
   mesh->info.ls       = MMG5_LS;
 /* xreg relaxation parameter value */
-  mesh->info.lxreg    = MMG5_LXREG;
+  mesh->info.lxreg    = MMG5_XREG;
 
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
@@ -347,7 +347,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_ls :
     mesh->info.ls       = val;
     break;
-  case MMG2D_DPARAM_lxreg :
+  case MMG2D_DPARAM_xreg :
     if (val < 0.0 || val > 1.0) {
       fprintf(stderr,"\n  ## Error: %s: Coordinate regularization parameter must be comprised between 0 and 1.\n",__func__);
     }

@@ -513,7 +513,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_xreg,1) )
             return 0;
           if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_lxreg,atof(argv[i])) )
+            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_xreg,atof(argv[i])) )
               return 0;
           }
           else i--;

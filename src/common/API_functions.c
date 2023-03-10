@@ -95,7 +95,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   /* control gradation on required entities */
   mesh->info.hgradreq = MMG5_HGRADREQ;
   /* xreg relaxation parameter value */
-  mesh->info.lxreg    = MMG5_LXREG;
+  mesh->info.lxreg    = MMG5_XREG;
 
   /* default values for pointers */
   /* list of user-defined references */
