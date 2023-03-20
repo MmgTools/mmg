@@ -1561,6 +1561,13 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   case MMGS_DPARAM_ls :
     mesh->info.ls         = val;
     break;
+  case MMGS_DPARAM_xreg :
+    if (val < 0.0 || val > 1.0) {
+      fprintf(stderr,"\n  ## Error: %s: Coordinate regularization parameter must be comprised between 0 and 1.\n",__func__);
+    }
+    else
+      mesh->info.lxreg    = val;
+    break;
   case MMGS_DPARAM_rmc :
     if ( !val ) {
       /* Default value */
