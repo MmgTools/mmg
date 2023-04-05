@@ -1418,9 +1418,10 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  */
 int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
+  MMG5_xTetra    pxt;
   int            ilist,cur,nref;
   MMG5_int       base,ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
-  int8_t         i,l,j;
+  int8_t         i,l,j,pmmg_bdy,iedge;
 
   base = ++mesh->base;
   ilist = 0;
@@ -1512,11 +1513,28 @@ int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      fprintf(stderr,"   *** Topological problem\n");
-      fprintf(stderr,"       non manifold surface at point %" MMG5_PRId " %" MMG5_PRId "\n",nump, MMG3D_indPt(mesh,nump));
-      fprintf(stderr,"       non manifold surface at tet %" MMG5_PRId " (ip %d)\n", MMG3D_indElt(mesh,start),ip);
-      fprintf(stderr,"       nref (color %d) %" MMG5_PRId "\n",nref,ref);
-      return 0;
+      pxt = mesh->xtetra[pt->xt];
+      pmmg_bdy=0;
+      /* if an edge is MG_PARBDY: this is not a non-manifold topology */
+      /*    - True  for centralized input in parmmg */
+      /*    - Wrong for distributed input in parmmg: TODO */
+      for (iedge=0; iedge<6; iedge++) {
+        if ( !(pxt.tag[iedge] & MG_PARBDY) ) continue;
+        pmmg_bdy=1;
+      }
+      /* if the starting point is MG_PARBDY: this is not a non-manifold topology */
+      /*    - True  for centralized input in parmmg */
+      /*    - Wrong for distributed input in parmmg: TODO */
+      if ( mesh->point[nump].tag & MG_PARBDY) {
+        pmmg_bdy=1;
+      }
+      if (!pmmg_bdy) {
+        fprintf(stderr,"   *** Topological problem\n");
+        fprintf(stderr,"       non manifold surface at point %" MMG5_PRId " %" MMG5_PRId "\n",nump, MMG3D_indPt(mesh,nump));
+        fprintf(stderr,"       non manifold surface at tet %" MMG5_PRId " (ip %d)\n", MMG3D_indElt(mesh,start),ip);
+        fprintf(stderr,"       nref (color %d) %" MMG5_PRId "\n",nref,ref);
+        return 0;
+      }
     }
   }
 
