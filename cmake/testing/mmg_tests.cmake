@@ -385,6 +385,11 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
     -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube_${SHRT_EXEC}.o.meshb)
 
+  ADD_TEST( NAME mmg_CoorRegularizationRandomCube_value_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -xreg 0.9
+    ${MMG_CI_TESTS}/CoorRegularizationRandomCube/cubeRandom.mesh
+    -out ${CTEST_OUTPUT_DIR}/CoorRegularizationRandomCube_value_${SHRT_EXEC}.o.meshb)
+
   # -lssurf
   IF ( ${SHRT_EXEC} MATCHES "3d" )
     SET ( ADD_ARG "-opnbdy" )

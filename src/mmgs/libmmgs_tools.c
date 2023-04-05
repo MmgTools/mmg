@@ -427,6 +427,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
         if ( !strcmp(argv[i],"-xreg") ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_xreg,1) )
             return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_xreg,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
         }
         break;
       default:

@@ -125,6 +125,7 @@ extern "C" {
 #define MMG5_LAG         -1 /**< default value for lagrangian option */
 #define MMG5_NR          -1 /**< no ridge detection */
 #define MMG5_LS         0.0 /**< default level-set to discretize */
+#define MMG5_XREG       0.4 /**< default relaxation parameter for coordinate regularization */
 #define MMG5_PROCTREE    32 /**< default size of the PROctree */
 #define MMG5_OFF          0 /**< 0 */
 #define MMG5_ON           1 /**< 1 */

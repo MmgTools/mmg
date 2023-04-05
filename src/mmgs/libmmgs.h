@@ -88,6 +88,7 @@ enum MMGS_Param {
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
+  MMGS_DPARAM_xreg,              /*!< [val], Value of relaxation parameter for coordinates regularization (0<val<1) */
   MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
