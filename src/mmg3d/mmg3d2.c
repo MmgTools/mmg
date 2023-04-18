@@ -1420,7 +1420,7 @@ int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
   int            ilist,cur,nref;
   MMG5_int       base,ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
-  int8_t         i,l,j,pmmg_bdy;
+  int8_t         i,l,j;
 
   base = ++mesh->base;
   ilist = 0;
@@ -1512,20 +1512,11 @@ int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      pmmg_bdy=0;
-      /* If the starting point is MG_PARBDY: this is not a non-manifold topology */
-      /*    - True  for centralized input in parmmg */
-      /*    - Wrong for distributed input in parmmg: TODO */
-      if ( mesh->point[nump].tag & MG_PARBDY) {
-        pmmg_bdy=1;
-      }
-      if (!pmmg_bdy) {
-        fprintf(stderr,"   *** Topological problem\n");
-        fprintf(stderr,"       non manifold surface at point %" MMG5_PRId " %" MMG5_PRId "\n",nump, MMG3D_indPt(mesh,nump));
-        fprintf(stderr,"       non manifold surface at tet %" MMG5_PRId " (ip %d)\n", MMG3D_indElt(mesh,start),ip);
-        fprintf(stderr,"       nref (color %d) %" MMG5_PRId "\n",nref,ref);
-        return 0;
-      }
+      fprintf(stderr,"   *** Topological problem\n");
+      fprintf(stderr,"       non manifold surface at point %" MMG5_PRId " %" MMG5_PRId "\n",nump, MMG3D_indPt(mesh,nump));
+      fprintf(stderr,"       non manifold surface at tet %" MMG5_PRId " (ip %d)\n", MMG3D_indElt(mesh,start),ip);
+      fprintf(stderr,"       nref (color %d) %" MMG5_PRId "\n",nref,ref);
+      return 0;
     }
   }
 
@@ -1586,8 +1577,13 @@ int MMG3D_chkmani(MMG5_pMesh mesh){
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
 
-        if(!MMG3D_chkmaniball(mesh,k,ip))
-          return 0;
+        /* If the starting point is MG_PARBDY: this is not a non-manifold topology */
+        /*    - True  for centralized input in parmmg */
+        /*    - Wrong for distributed input in parmmg: TODO */
+        if ( !(mesh->point[pt->v[ip]].tag & MG_PARBDY)) {
+          if(!MMG3D_chkmaniball(mesh,k,ip))
+            return 0;
+        }
       }
     }
   }
@@ -1648,10 +1644,15 @@ int MMG3D_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
 
-        if(!MMG3D_chkmaniball(mesh,k,ip)){
-          fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
-                  " ball of point %" MMG5_PRId ".\n",__func__,pt->v[ip]);
-          return 0;
+        /* If the starting point is MG_PARBDY: this is not a non-manifold topology */
+        /*    - True  for centralized input in parmmg */
+        /*    - Wrong for distributed input in parmmg: TODO */
+        if ( !(mesh->point[pt->v[ip]].tag & MG_PARBDY)) {
+          if(!MMG3D_chkmaniball(mesh,k,ip)){
+            fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
+                    " ball of point %" MMG5_PRId ".\n",__func__,pt->v[ip]);
+            return 0;
+          }
         }
       }
     }
