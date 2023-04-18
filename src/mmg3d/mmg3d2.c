@@ -1420,7 +1420,7 @@ int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
   int            ilist,cur,nref;
   MMG5_int       base,ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
-  int8_t         i,l,j,pmmg_bdy,iedge;
+  int8_t         i,l,j,pmmg_bdy;
 
   base = ++mesh->base;
   ilist = 0;
