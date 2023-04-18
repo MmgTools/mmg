@@ -1577,8 +1577,13 @@ int MMG3D_chkmani(MMG5_pMesh mesh){
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
 
-        if(!MMG3D_chkmaniball(mesh,k,ip))
-          return 0;
+        /* If the starting point is MG_PARBDY: this is not a non-manifold topology */
+        /*    - True  for centralized input in parmmg */
+        /*    - Wrong for distributed input in parmmg: TODO */
+        if ( !(mesh->point[pt->v[ip]].tag & MG_PARBDY)) {
+          if(!MMG3D_chkmaniball(mesh,k,ip))
+            return 0;
+        }
       }
     }
   }
@@ -1639,10 +1644,15 @@ int MMG3D_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
 
-        if(!MMG3D_chkmaniball(mesh,k,ip)){
-          fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
-                  " ball of point %" MMG5_PRId ".\n",__func__,pt->v[ip]);
-          return 0;
+        /* If the starting point is MG_PARBDY: this is not a non-manifold topology */
+        /*    - True  for centralized input in parmmg */
+        /*    - Wrong for distributed input in parmmg: TODO */
+        if ( !(mesh->point[pt->v[ip]].tag & MG_PARBDY)) {
+          if(!MMG3D_chkmaniball(mesh,k,ip)){
+            fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
+                    " ball of point %" MMG5_PRId ".\n",__func__,pt->v[ip]);
+            return 0;
+          }
         }
       }
     }
