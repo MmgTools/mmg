@@ -1418,7 +1418,6 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  */
 int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
-  MMG5_xTetra    pxt;
   int            ilist,cur,nref;
   MMG5_int       base,ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
   int8_t         i,l,j,pmmg_bdy,iedge;
@@ -1513,16 +1512,8 @@ int MMG3D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      pxt = mesh->xtetra[pt->xt];
       pmmg_bdy=0;
-      /* if an edge is MG_PARBDY: this is not a non-manifold topology */
-      /*    - True  for centralized input in parmmg */
-      /*    - Wrong for distributed input in parmmg: TODO */
-      for (iedge=0; iedge<6; iedge++) {
-        if ( !(pxt.tag[iedge] & MG_PARBDY) ) continue;
-        pmmg_bdy=1;
-      }
-      /* if the starting point is MG_PARBDY: this is not a non-manifold topology */
+      /* If the starting point is MG_PARBDY: this is not a non-manifold topology */
       /*    - True  for centralized input in parmmg */
       /*    - Wrong for distributed input in parmmg: TODO */
       if ( mesh->point[nump].tag & MG_PARBDY) {
