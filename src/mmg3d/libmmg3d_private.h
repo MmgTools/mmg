@@ -154,6 +154,14 @@ extern "C" {
 #define MMG3D_VOLFRAC      1.e-5
 #define MMG3D_MOVSTEP 0.1
 
+/** Copies the contents of fromV[fromC] to toV[toC] and updates toC */
+#define MMG_ARGV_APPEND(fromV,toV,fromC,toC,on_failure)   do {  \
+    MMG5_SAFE_MALLOC(toV[ toC ], strlen( fromV[ fromC ] ) + 1, char,    \
+                     on_failure);                                       \
+    memcpy( toV[ toC ], fromV[ fromC ], (strlen( fromV[ fromC ] ) + 1)*sizeof(char) ); \
+    ++(toC);                                                            \
+  }while(0)
+
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
 static const uint8_t MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
 /** \brief previous vertex of tetra: {3,0,1,2,3,0,1} */
@@ -484,6 +492,10 @@ MMG5_int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
                       int improveVol,int maxit,MMG5_int testmark);
 MMG5_int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
 MMG5_int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,MMG5_int);
+
+/* libmmg3d_tools.c */
+void MMG5_argv_cleanup( char **mmgArgv, int mmgArgc );
+int MMG3D_storeknownar(int,char*[],MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*, char*[]);
 
 /* pointers */
 /* init structures */
