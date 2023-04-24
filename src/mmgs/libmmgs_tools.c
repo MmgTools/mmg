@@ -222,16 +222,15 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           assert ( param != MMG5_UNSET );
 
           val = strtof(argv[i+1],&endptr);
-          if ( (!strcmp(argv[i+1],endptr)) || endptr != &(argv[i+1][strlen(argv[i+1])]) ) {
-            /* argument is not a number */
-            fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
-            return 0;
-          }
-          else {
+          if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
             ++i;
             if ( !MMGS_Set_dparameter(mesh,met,param,val) ){
               return 0;
             }
+          } else {
+            /* argument is not a number */
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+            return 0;
           }
         }
 
