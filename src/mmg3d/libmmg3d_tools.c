@@ -229,15 +229,15 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
           }
           else {
             val = strtof(argv[i+1],&endptr);
-            if ( (!strcmp(argv[i+1],endptr)) || endptr != &(argv[i+1][strlen(argv[i+1])]) ) {
-              /* argument is not a number */
-              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
-              return 0;
-            }
-            else {
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
               ++i;
               if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,val))
                 return 0;
+            }
+            else {
+              /* argument is not a number */
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+              return 0;
             }
           }
        }
@@ -363,13 +363,9 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
             if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_lag,atoi(argv[i])) )
               return 0;
           }
-          else if ( i == argc ) {
-            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
-            return 0;
-          }
           else {
-            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
-            i--;
+            fprintf(stderr,"\nMissing or unexpected argument option %s\n",argv[i-1]);
+            MMG3D_usage(argv[0]);
             return 0;
           }
         }

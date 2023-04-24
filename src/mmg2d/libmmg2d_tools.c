@@ -134,15 +134,15 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           }
           else {
             val = strtof(argv[i+1],&endptr);
-            if ( (!strcmp(argv[i+1],endptr)) || endptr != &(argv[i+1][strlen(argv[i+1])]) ) {
-              /* argument is not a number */
-              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
-              return 0;
-            }
-            else {
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
               ++i;
               if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_angleDetection,val))
                 return 0;
+            }
+            else {
+              /* argument is not a number */
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+              return 0;
             }
           }
         }
@@ -250,13 +250,8 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_lag,atoi(argv[i])) )
               return 0;
           }
-          else if ( i == argc ) {
-            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
-            MMG2D_usage(argv[0]);
-            return 0;
-          }
           else {
-            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
+            fprintf(stderr,"\nMissing or unexpected argument option %s\n",argv[i-1]);
             MMG2D_usage(argv[0]);
             return 0;
           }
