@@ -371,22 +371,28 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_iso,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ||
-                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
-              return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,val))
+                return 0;
+            }
           }
-          else i--;
         }
         else if ( !strcmp(argv[i],"-lssurf") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isosurf,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ||
-                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
-              return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,val))
+                return 0;
+            }
           }
-          else i--;
         }
         else {
           /* Arg unknown by Mmg: arg starts with -l but is not known */
@@ -512,11 +518,14 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         if ( !strcmp(argv[i],"-rmc") ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,0) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,atof(argv[i])) )
-              return 0;
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,val))
+                return 0;
+            }
           }
-          else i--;
         }
 #ifdef USE_SCOTCH
         else if ( !strcmp(argv[i],"-rn") ) {
@@ -588,11 +597,14 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         if ( !strcmp(argv[i],"-xreg") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_xreg,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_xreg,atof(argv[i])) )
-              return 0;
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_xreg,val))
+                return 0;
+            }
           }
-          else i--;
         }
         else {
           /* Arg unknown by Mmg: arg starts with -x but is not known */

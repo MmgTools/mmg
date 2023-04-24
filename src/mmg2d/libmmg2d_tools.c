@@ -258,22 +258,28 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_iso,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ||
-                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
-            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) )
-              return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,val))
+                return 0;
+            }
           }
-          else i--;
         }
         else if ( !strcmp(argv[i],"-lssurf") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isosurf,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ||
-                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
-            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) )
-              return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,val))
+                return 0;
+            }
           }
-          else i--;
         }
         break;
       case 'm':  /* memory */
@@ -374,11 +380,14 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         if ( !strcmp(argv[i],"-rmc") ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,0) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,atof(argv[i])) )
-              return 0;
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,val))
+                return 0;
+            }
           }
-          else i--;
         }
         break;
       case 's':
@@ -417,11 +426,14 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         if ( !strcmp(argv[i],"-xreg") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_xreg,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_xreg,atof(argv[i])) )
-              return 0;
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_xreg,val))
+                return 0;
+            }
           }
-          else i--;
         }
         break;
       case '3':
