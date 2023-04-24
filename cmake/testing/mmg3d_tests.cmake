@@ -671,7 +671,7 @@ ADD_TEST(NAME mmg3d_ParsOpName_NoFileName
   ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
   ${CTEST_OUTPUT_DIR}/mmg3d_ParsOpName_NoFileName.o.meshb)
 
-SET(parsopNameNo "Missing filename for f")
+SET(parsopNameNo "Missing filename for -f")
 SET_PROPERTY(TEST mmg3d_ParsOpName_NoFileName
   PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
 

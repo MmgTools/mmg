@@ -212,19 +212,40 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
                        MMG5_pSol sol,int *mmgArgc, char *mmgArgv[]) {
   MMG5_pSol tmp = NULL;
+  double  val;
   int     i;
-  char    namein[MMG5_FILESTR_LGTH];
+  char    namein[MMG5_FILESTR_LGTH],*endptr;
+  int     param;
 
   i = 1;
   while ( i < argc ) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
       case 'a':
-        if ( !strcmp(argv[i],"-ar") && ++i < argc )
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,
-                                    atof(argv[i])) )
+       if ( !strcmp(argv[i],"-ar") ) {
+          if ( i >= argc -1 ) {
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
             return 0;
-        break;
+          }
+          else {
+            val = strtof(argv[i+1],&endptr);
+            if ( (!strcmp(argv[i+1],endptr)) || endptr != &(argv[i+1][strlen(argv[i+1])]) ) {
+              /* argument is not a number */
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+              return 0;
+            }
+            else {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,val))
+                return 0;
+            }
+          }
+       }
+       else {
+         /* Arg unknown by Mmg: arg starts with -a but is not known */
+         MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+       }
+       break;
       case 'A': /* anisotropy */
         if ( !strcmp(argv[i],"-A") ) {
           if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
@@ -257,7 +278,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filename for %c\n",argv[i-1][1]);
+            fprintf(stderr,"\nMissing filename for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -267,41 +288,53 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         }
         break;
       case 'h':
-        if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
-                                     atof(argv[i])) )
-            return 0;
-
-        }
-        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgradreq,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
-                                    atof(argv[i])) )
-            return 0;
+        param = MMG5_UNSET;
+        if ( i >= argc -1 ) {
+          fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+          return 0;
         }
         else {
-          /* Arg unknown by Mmg: arg starts with -h but is not known */
-          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+          if ( !strcmp(argv[i],"-hmin") ) {
+            param = MMG3D_DPARAM_hmin;
+          }
+          else if ( !strcmp(argv[i],"-hmax") ) {
+            param = MMG3D_DPARAM_hmax;
+          }
+          else if ( !strcmp(argv[i],"-hsiz") ) {
+            param = MMG3D_DPARAM_hsiz;
+          }
+          else if ( !strcmp(argv[i],"-hausd") ) {
+            param = MMG3D_DPARAM_hausd;
+          }
+          else if ( !strcmp(argv[i],"-hgradreq") ) {
+            param = MMG3D_DPARAM_hgradreq;
+          }
+          else if ( !strcmp(argv[i],"-hgrad") ) {
+            param = MMG3D_DPARAM_hgrad;
+          }
+          else {
+            /* Arg unknown by Mmg: arg starts with -h but is not known */
+            MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+          }
+
+          if ( param != MMG5_UNSET ) {
+
+            /* Arg can be parsed */
+            val = strtof(argv[i+1],&endptr);
+            if ( (!strcmp(argv[i+1],endptr)) || endptr != &(argv[i+1][strlen(argv[i+1])]) ) {
+              /* argument is not a number */
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+              return 0;
+            }
+            else {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,param,val) ){
+                return 0;
+              }
+            }
+          }
         }
+
         break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
@@ -310,7 +343,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
 
           }else{
-            fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -331,11 +364,11 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
           }
           else if ( i == argc ) {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
           else {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             i--;
             return 0;
           }
@@ -368,8 +401,8 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
       case 'm':
         if ( !strcmp(argv[i],"-met") ) {
           if ( !met ) {
-            fprintf(stderr,"No metric structure allocated for %c%c%c option\n",
-                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            fprintf(stderr,"\nNo metric structure allocated for %s option\n",
+                    argv[i-1]);
             return 0;
           }
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
@@ -377,7 +410,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -388,7 +421,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
           }
           else {
-            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -416,7 +449,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
           }
           else {
-            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -452,8 +485,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
             if ( !MMG3D_Set_outputMeshName(mesh,argv[i]) )
               return 0;
           }else{
-            fprintf(stderr,"Missing filname for %c%c%c\n",
-                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -499,12 +531,12 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
                 return 0;
             }
             else {
-              fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
               return 0;
             }
           }
           else {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -525,7 +557,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -544,11 +576,11 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
             }
             else {
               i--;
-              fprintf(stderr,"Missing argument option %s\n",argv[i]);
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
             }
           }
           else {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -666,7 +698,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   }
 
   if ( mesh->namein == NULL ) {
-    fprintf(stdout,"  -- INPUT MESH NAME ?\n");
+    fprintf(stdout,"\n  -- INPUT MESH NAME ?\n");
     fflush(stdin);
     MMG_FSCANF(stdin,"%127s",namein);
     if ( !MMG3D_Set_inputMeshName(mesh,namein) )

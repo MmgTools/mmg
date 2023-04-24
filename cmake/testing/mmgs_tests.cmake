@@ -449,7 +449,7 @@ COMMAND ${EXECUT_MMGS} -v 5 -f -ls
 ${MMGS_CI_TESTS}/LSMultiMat/multi-mat.mesh
 ${CTEST_OUTPUT_DIR}/mmgs_ParsOpName_NoFileName.o.meshb)
 
-SET(parsopNameNo "Missing filename for f")
+SET(parsopNameNo "Missing filename for -f")
 SET_PROPERTY(TEST mmgs_ParsOpName_NoFileName
 PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
 
