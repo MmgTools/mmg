@@ -146,10 +146,6 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
   while ( i < argc ) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
-      case '?':
-        MMGS_usage(argv[0]);
-        return 0;
-        break;
       case 'a': /* ridge angle */
         if ( !strcmp(argv[i],"-ar") ) {
           if ( i >= argc -1 ) {
