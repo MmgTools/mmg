@@ -1706,7 +1706,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
       for (i=0; i<3; i++) {
-        if ( !mesh->info.iso ) mesh->point[ptt->v[i]].tag |= MG_BDY;
+        mesh->point[ptt->v[i]].tag |= MG_BDY;
       }
     }
     return 1;
