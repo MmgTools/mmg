@@ -2298,6 +2298,13 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     }
   }
 
+#ifdef USE_POINTMAP
+  /* Initialize source point with input index */
+  MMG5_int ip;
+  for( ip = 1; ip <= mesh->np; ip++ )
+    mesh->point[ip].src = ip;
+#endif
+
   if ( !MMG3D_cuttet(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
