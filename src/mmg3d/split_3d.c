@@ -3989,6 +3989,7 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
+  pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
@@ -4265,22 +4266,22 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Modify first tetra */
-  pt0->v[1] = vx[0]; pt0->v[2] = vx[1]; pt0->v[3] = vx[2];
+  pt0->v[0] = pt->v[0]; pt0->v[1] = vx[0]; pt0->v[2] = vx[1]; pt0->v[3] = vx[2];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Modify second tetra */
-  pt0->v[0] = vx[0]; pt0->v[2] = vx[3]; pt0->v[3] = vx[4];
+  pt0->v[0] = vx[0]; pt0->v[1] = pt->v[1]; pt0->v[2] = vx[3]; pt0->v[3] = vx[4];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Modify 3rd tetra */
-  pt0->v[0] = vx[1]; pt0->v[1] = vx[3]; pt0->v[3] = vx[5];
+  pt0->v[0] = vx[1]; pt0->v[1] = vx[3]; pt0->v[2] = pt->v[2]; pt0->v[3] = vx[5];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Modify 4th tetra */
-  pt0->v[0] = vx[2]; pt0->v[1] = vx[4]; pt0->v[2] = vx[5];
+  pt0->v[0] = vx[2]; pt0->v[1] = vx[4]; pt0->v[2] = vx[5]; pt0->v[3] = pt->v[3];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
