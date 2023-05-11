@@ -57,6 +57,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  MMG5_OFF;
+  /* [0/1]    ,Turn on/off levelset meshing */
+  mesh->info.isosurf  =  MMG5_OFF;
   /* [n/10]   ,Value for isosurface boundary reference */
   mesh->info.isoref   =  MG_ISO;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
