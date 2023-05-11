@@ -2579,7 +2579,9 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       ni++;
       if ( ic == 0 && MMG3D_dichoto(mesh,met,k,vx) ) {
         for (ia=0; ia<6; ia++)
-          if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
+          if ( vx[ia] > 0 ) {
+            mesh->point[vx[ia]].flag++;
+          }
       }
       else {
         for (ia=0; ia<6; ++ia ) {
