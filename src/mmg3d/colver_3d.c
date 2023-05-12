@@ -625,7 +625,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
            *  of an xtetra during a previous collapse */
           if ( !(pxt->ftag[i] & MG_BDY) ) {
             int16_t tag0,tag1,tag2;
-            int     ref0,ref1,ref2;
+            MMG5_int ref0,ref1,ref2;
 
             tag0 = tag1 = tag2 = 0;
             ref0 = ref1 = ref2 = 0;
