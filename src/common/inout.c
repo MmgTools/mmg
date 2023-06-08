@@ -2088,7 +2088,11 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
 
   /* Get last dot character to avoid issues with <basename>.mesh.mesh files */
   char *dot = strrchr(data,'.');
-  ptr = strstr(dot,".mesh");
+
+  ptr = NULL;
+  if ( dot) {
+    ptr = strstr(dot,".mesh");
+  }
   if ( ptr )  *ptr = '\0';
 
   ptr = strstr(data,".sol");
