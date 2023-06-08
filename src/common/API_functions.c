@@ -204,16 +204,20 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
       int mesh_len = strlen(mesh->namein)+1;
       MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,return 0);
       strcpy(sol->namein,mesh->namein);
-      ptr = strstr(sol->namein,".mesh");
+
+      /* Get last dot character to avoid issues with <basename>.mesh.mesh files */
+      char *dot = strrchr(sol->namein,'.');
+      ptr = strstr(dot,".mesh");
       if ( ptr ) {
-        /* the sol file is renamed with the meshfile without extension */
+        /* the sol file is renamed concatening the mesh basename and the sol extension */
         *ptr = '\0';
-        MMG5_SAFE_REALLOC(sol->namein,mesh_len,(strlen(sol->namein)+1),char,
+        MMG5_SAFE_REALLOC(sol->namein,mesh_len,(strlen(sol->namein)+5),char,
                            "input sol name",return 0);
       }
-      MMG5_ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
+      MMG5_ADD_MEM(mesh,(strlen(sol->namein)+5)*sizeof(char),"input sol name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
+      strcat(sol->namein,".sol");
     }
     else {
       MMG5_ADD_MEM(mesh,9*sizeof(char),"input sol name",
@@ -393,7 +397,9 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   }
   else {
     if ( mesh->nameout && strlen(mesh->nameout) ) {
-      ptr = strstr(mesh->nameout,".mesh");
+      /* Get last dot character to avoid issues with <basename>.mesh.mesh files */
+      char *dot = strrchr(mesh->nameout,'.');
+      ptr = strstr(dot,".mesh");
       if ( ptr ) {
         MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,return 0);
         oldsize = strlen(mesh->nameout)+1;
@@ -403,7 +409,8 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
         oldsize = strlen(mesh->nameout)+6;
       }
       strcpy(sol->nameout,mesh->nameout);
-      ptr = strstr(sol->nameout,".mesh");
+      dot = strrchr(sol->nameout,'.');
+      ptr = strstr(dot,".mesh");
       if ( ptr )
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
