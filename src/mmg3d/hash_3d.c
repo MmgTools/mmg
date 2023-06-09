@@ -633,13 +633,16 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
   /* Hash table used by boulernm to store the special edges passing through
    * a given point */
-  np = 0;
-  for (k=1; k<=mesh->np; ++k) {
-    ppt = &mesh->point[k];
-    if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
-    ++np;
-  }
+  /* np = 0; */
+  /* for (k=1; k<=mesh->np; ++k) { */
+  /*   ppt = &mesh->point[k]; */
+  /*   if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue; */
+  /*   ++np; */
+  /* } */
 
+  /* Use a very small hash table as it is useless to count and hash pore than 3
+   * feature edges passing through the points */
+  np = 5;
   if ( ! MMG5_hashNew(mesh,&hash,np,(MMG5_int)(3.71*np)) ) return 0;
 
   nc = nre = 0;
