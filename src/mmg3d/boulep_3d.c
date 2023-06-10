@@ -463,6 +463,8 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
   uint8_t        ie;
 
   /* reset the hash table */
+  hash->nxt = hash->siz;
+
   for ( k=0;  k<=hash->max; ++k ) {
     hash->item[k].a = 0;
     hash->item[k].b = 0;
@@ -514,8 +516,10 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
           else if ( ph->a ) {
             while ( ph->nxt && ph->nxt < hash->max ) {
               ph = &hash->item[ph->nxt];
-              if ( ph->a == ia && ph->b == ib )  continue;
+              if ( ph->a == ia && ph->b == ib )  break;
             }
+            if ( ph->a == ia && ph->b == ib  ) continue;
+
             ph->nxt   = hash->nxt;
             ph        = &hash->item[hash->nxt];
 
@@ -551,7 +555,16 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
           else if ( pxt->tag[ie] & MG_REF ) {
             ++(*nr);
           }
+
+          assert ( pxt->tag[ie] & MG_GEO  ||  pxt->tag[ie] & MG_NOM  || pxt->tag[ie] & MG_REF );
           ++ns;
+
+          if ( ns > 2 ) {
+            /* Point will be marked as singular: no need to have the exact count
+             * of feature edges */
+            assert ( *ng + *nr + *nm > 2 );
+            return ns;
+          }
         }
       }
     }
