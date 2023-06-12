@@ -763,9 +763,10 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       nre++;
       nc++;
     }
-    else {
-      assert ( 0 && "unexpected case");
-    }
+    /* "else" case may happens: ng = nrp = nm = 0 inside hybrid meshes (along a
+     * non manifold line along a surface at the interface of hexahedral domains
+     * with different refs). No need to set tags at points as they will not be
+     * modified. */
   }
 
   /* Free the edge hash table */
