@@ -623,91 +623,153 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 static inline
 int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
-  MMG5_pPoint         ppt;
+  MMG5_pPoint         ppt0,ppt1;
   MMG5_Hash           hash;
   int                 i,ier;
-  MMG5_int            k,base,np,nc,nm,nre, ng, nrp;
+  MMG5_int            k,np,nc,nre,*nfeat;
 
-  /* Second: seek the non-required non-manifold points and try to analyse
+  /** Seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
 
-  /* Hash table used by boulernm to store the special edges passing through
-   * a given point */
-  /* np = 0; */
-  /* for (k=1; k<=mesh->np; ++k) { */
-  /*   ppt = &mesh->point[k]; */
-  /*   if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue; */
-  /*   ++np; */
-  /* } */
+  /** Step 1: count the number or feature edges passing through each points */
+  np = 0;
+  for (k=1; k<=mesh->np; ++k) {
+    ppt0 = &mesh->point[k];
+    if ( (ppt0->tag & MG_REQ) || (ppt0->tag & MG_PARBDY) ) {
+      /* Skip required and parallel points */
+      ppt0->tmp = 0;
+    }
+    else if ( !(ppt0->tag & MG_NOM) ) {
+      /* Skip manifold points */
+      ppt0->tmp = 0;
+    }
+    else {
+      ppt0->tmp = ++np;
+    }
+  }
 
-  /* Use a very small hash table as it is useless to count and hash pore than 3
-   * feature edges passing through the points */
-  np = 5;
+  /* Array to store info of incident feature edges at points */
+  MMG5_SAFE_CALLOC(nfeat,3*(np+1),int,return 0);
+
+  /* Hash table to store the list of seen feature edges */
   if ( ! MMG5_hashNew(mesh,&hash,np,(MMG5_int)(3.71*np)) ) return 0;
 
-  nc = nre = 0;
-  base = ++mesh->base;
   for (k=1; k<=mesh->ne; ++k) {
     ptet = &mesh->tetra[k];
+
     if ( !MG_EOK(ptet) ) continue;
+    if ( !ptet->xt ) continue;
 
-    for ( i=0; i<4; ++i ) {
-      ppt = &mesh->point[ptet->v[i]];
+    MMG5_pxTetra pxt = &mesh->xtetra[ptet->xt];
 
-      /* Skip parallel points */
-      if ( ppt->tag & MG_PARBDY ) continue;
+    for ( i=0; i<6; ++i ) {
+      MMG5_int np0 = ptet->v[MMG5_iare[i][0]];
+      MMG5_int np1 = ptet->v[MMG5_iare[i][1]];
 
-      if ( (!MG_VOK(ppt)) || (ppt->flag==base)  ) continue;
-      ppt->flag = base;
+      MMG5_pPoint ppt0 = &mesh->point[np0];
+      MMG5_pPoint ppt1 = &mesh->point[np1];
 
-      if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
-
-      ier = MMG5_boulernm(mesh,&hash, k, i, &ng, &nrp, &nm);
-      if ( ier < 0 ) return 0;
-      else if ( !ier ) continue;
-
-      if ( (ng+nrp+nm) > 2 ) {
-        /* More than 2 feature edges are passing through the point: point is
-         * marked as corner */
-        ppt->tag |= MG_CRN + MG_REQ;
-        ppt->tag &= ~MG_NOSURF;
-        nre++;
-        nc++;
-      }
-      else if ( (ng == 2) || (nrp == 2) || (nm == 2) ) {
-        /* Exactly 2 edges of same type are passing through the point: do
-         * nothing */
+      if ( ! MG_EDG_OR_NOM(pxt->tag[i]) ) {
         continue;
       }
-      else if ( (ng+nrp+nm) == 2 ) {
-        /* 2 edges of different type are passing through the point: point is
-         * marked as required */
-        ppt->tag |= MG_REQ;
-        ppt->tag &= ~MG_NOSURF;
-        nre++;
+
+      /* Here we have a feature edge: seek if we have already seen it. If not,
+       * hash it and increment nfeat: for point ppt, nfeat[3*ppt->tmp] stores
+       * the number of ridges passing through the point, nfeat[3*ppt->tmp+1]
+       * stores the number of reference edges, nfeat[3*ppt->tmp+2] the number of
+       * non-manifold edges.*/
+      assert ( MG_VOK(ppt1) &&  MG_VOK(ppt0) );
+
+      if ( (!ppt1->tmp) && (!ppt0->tmp) ) {
+        continue;
       }
-      else if ( ng == 1 && !nrp ){
-        ppt->tag |= MG_CRN + MG_REQ;
-        ppt->tag &= ~MG_NOSURF;
-        nre++;
-        nc++;
+
+      ier = MMG5_hashEdge(mesh,&hash,np0,np1,0);
+      if ( ier == 1 ) {
+        /* Edge has been already seen */
+        continue;
       }
-      else if ( (ng+nrp+nm) == 1 ){
-        /* Only 1 feature edge is passing through the point: point is
-         * marked as corner */
-        assert ( (ng == 1) || (nrp==1) || (nm==1) );
-        ppt->tag |= MG_CRN + MG_REQ;
-        ppt->tag &= ~MG_NOSURF;
-        nre++;
-        nc++;
+      else if ( !ier ) {
+        return 0;
       }
-      else {
-        assert ( 0 && "unexpected case");
+
+      if ( pxt->tag[i] & MG_GEO ) {
+        ++nfeat[3*ppt0->tmp];
+      }
+      else if ( pxt->tag[i] & MG_NOM ) {
+        ++nfeat[3*ppt0->tmp+1];
+      }
+      else if ( pxt->tag[i] & MG_REF ) {
+        ++nfeat[3*ppt0->tmp+2];
+      }
+
+      if ( pxt->tag[i] & MG_GEO ) {
+        ++nfeat[3*ppt1->tmp];
+      }
+      else if ( pxt->tag[i] & MG_NOM ) {
+        ++nfeat[3*ppt1->tmp+1];
+      }
+      else if ( pxt->tag[i] & MG_REF ) {
+        ++nfeat[3*ppt1->tmp+2];
       }
     }
   }
 
+  /** Step 2: add suitable point tags depending on the counted feature edges */
+  nc = nre = 0;
+  for (k=1; k<=mesh->np; ++k) {
+    ppt0 = &mesh->point[k];
+
+    if ( (!MG_VOK(ppt0)) || (!ppt0->tmp) ) {
+      continue;
+    }
+
+    MMG5_int ng  = nfeat[3*ppt0->tmp];
+    MMG5_int nrp = nfeat[3*ppt0->tmp+1];
+    MMG5_int nm  = nfeat[3*ppt0->tmp+2];
+
+    if ( (ng+nrp+nm) > 2 ) {
+      /* More than 2 feature edges are passing through the point: point is
+       * marked as corner */
+      ppt0->tag |= MG_CRN + MG_REQ;
+      ppt0->tag &= ~MG_NOSURF;
+      nre++;
+      nc++;
+    }
+    else if ( (ng == 2) || (nrp == 2) || (nm == 2) ) {
+      /* Exactly 2 edges of same type are passing through the point: do
+       * nothing */
+      continue;
+    }
+    else if ( (ng+nrp+nm) == 2 ) {
+      /* 2 edges of different type are passing through the point: point is
+       * marked as required */
+      ppt0->tag |= MG_REQ;
+      ppt0->tag &= ~MG_NOSURF;
+      nre++;
+    }
+    else if ( ng == 1 && !nrp ){
+      ppt0->tag |= MG_CRN + MG_REQ;
+      ppt0->tag &= ~MG_NOSURF;
+      nre++;
+      nc++;
+    }
+    else if ( (ng+nrp+nm) == 1 ){
+      /* Only 1 feature edge is passing through the point: point is
+       * marked as corner */
+      assert ( (ng == 1) || (nrp==1) || (nm==1) );
+      ppt0->tag |= MG_CRN + MG_REQ;
+      ppt0->tag &= ~MG_NOSURF;
+      nre++;
+      nc++;
+    }
+    else {
+      assert ( 0 && "unexpected case");
+    }
+  }
+
   /* Free the edge hash table */
+  MMG5_SAFE_FREE(nfeat);
   MMG5_DEL_MEM(mesh,hash.item);
 
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
