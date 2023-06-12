@@ -635,7 +635,10 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   np = 0;
   for (k=1; k<=mesh->np; ++k) {
     ppt0 = &mesh->point[k];
-    if ( (ppt0->tag & MG_REQ) || (ppt0->tag & MG_PARBDY) ) {
+    if ( !MG_VOK(ppt0) ) {
+      ppt0->tmp = 0;
+    }
+    else if ( (ppt0->tag & MG_REQ) || (ppt0->tag & MG_PARBDY) ) {
       /* Skip required and parallel points */
       ppt0->tmp = 0;
     }
@@ -649,7 +652,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   }
 
   /* Array to store info of incident feature edges at points */
-  MMG5_SAFE_CALLOC(nfeat,3*(np+1),int,return 0);
+  MMG5_SAFE_CALLOC(nfeat,3*(np+1),MMG5_int,return 0);
 
   /* Hash table to store the list of seen feature edges */
   if ( ! MMG5_hashNew(mesh,&hash,np,(MMG5_int)(3.71*np)) ) return 0;
@@ -666,8 +669,8 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       MMG5_int np0 = ptet->v[MMG5_iare[i][0]];
       MMG5_int np1 = ptet->v[MMG5_iare[i][1]];
 
-      MMG5_pPoint ppt0 = &mesh->point[np0];
-      MMG5_pPoint ppt1 = &mesh->point[np1];
+      ppt0 = &mesh->point[np0];
+      ppt1 = &mesh->point[np1];
 
       if ( ! MG_EDG_OR_NOM(pxt->tag[i]) ) {
         continue;
