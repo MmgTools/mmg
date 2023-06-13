@@ -337,7 +337,8 @@ MMG5_int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,M
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
  * \param k index of point along the edge.
- * \return 1 if success, 0 if fail.
+ *
+ * \return 2 if a new edge has been added, 1 if edge was already listed, 0 if fail.
  *
  * Add edge \f$[a;b]\f$ to the hash table.
  *
@@ -383,8 +384,9 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_in
   ph->k = k;
   ph->nxt = 0;
 
-  return 1;
+  return 2;
 }
+
 
 /**
  * \param mesh pointer toward the mesh structure.
