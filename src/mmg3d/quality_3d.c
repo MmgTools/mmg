@@ -233,7 +233,7 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 
   *bd_in = bd;
-  memset(hl,0,9*sizeof(int));
+  memset(hl,0,9*sizeof(MMG5_int));
   *ned = 0;
   *avlen = 0.0;
   *lmax = 0.0;
