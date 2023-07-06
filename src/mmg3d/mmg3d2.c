@@ -670,7 +670,7 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0;
   double        *tmp;
-  MMG5_int      k,nc,ns,ip;
+  MMG5_int      k,nc,ns,ip,ncg;
   int8_t        i;
 
   /* create tetra adjacency */
@@ -725,6 +725,7 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
+  ncg = 0;
   do {
     nc = 0;
     /* Check snapping did not lead to a nonmanifold situation */
@@ -737,9 +738,9 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
         if ( p0->flag == 1 ) {
           if ( !MMG3D_ismaniball(mesh,sol,k,i) ) {
             if ( tmp[ip] < 0.0 )
-              sol->m[ip] = -100.0*MMG5_EPS;
+              sol->m[ip] = mesh->info.ls-100.0*MMG5_EPS;
             else
-              sol->m[ip] = 100.0*MMG5_EPS;
+              sol->m[ip] = mesh->info.ls+100.0*MMG5_EPS;
 
             p0->flag = 0;
             nc++;
@@ -747,11 +748,12 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
       }
     }
+    ncg += nc;
   }
   while ( nc );
 
-  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+ncg > 0 )
+    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,ncg);
 
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
