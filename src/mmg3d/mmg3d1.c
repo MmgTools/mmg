@@ -487,9 +487,16 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
     /*   } */
     /* } */
 
-    hma2 = MMG3D_LLONG*MMG3D_LLONG*hmax*hmax;
+
+    /* Split regular boundary edges connecting ridge or non-manifold points */
+    if ( (MG_GEO_OR_NOM(p[i1]->tag) && MG_GEO_OR_NOM(p[i2]->tag)) && !MG_GEO_OR_NOM(pt->tag[i]) ) {
+      MG_SET(pt->flag,i);
+      continue;
+    }
 
     /* check length */
+    hma2 = MMG3D_LLONG*MMG3D_LLONG*hmax*hmax;
+
     ux = p[i2]->c[0] - p[i1]->c[0];
     uy = p[i2]->c[1] - p[i1]->c[1];
     uz = p[i2]->c[2] - p[i1]->c[2];
