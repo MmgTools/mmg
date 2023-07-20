@@ -609,6 +609,12 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
   return 1;
 }
 
+
+static inline
+int MMG5_skip_ParBdy ( int8_t tag ) {
+  return (tag & MG_PARBDY);
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -624,8 +630,7 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
  * points to not break the ParMmg distributed analysis in which this field is
  * used to store the global numbering of nodes.
  */
-static inline
-int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
+int MMG5_setVertexNmTag(MMG5_pMesh mesh,int func(int8_t) ) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt0,ppt1;
   MMG5_Hash           hash;
@@ -644,8 +649,12 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
     if ( !MG_VOK(ppt0) ) {
       tmp[k] = 0;
     }
-    else if ( ppt0->tag & MG_REQ || (ppt0->tag & MG_PARBDY) ) {
-     /* Skip required and parallel points */
+    else if ( ppt0->tag & MG_REQ || func(ppt0->tag) ) {
+      /* Skip required points and points satisfying condition "func". For
+       * "classic" analysis, func test if the point is PARBDY, between ParMmg
+       * iterations, it tests if the point is not an old PARBDY point (we want
+       * to update analysis only on old parbdy points so we skip the other
+       * ones). */
       tmp[k] = 0;
     }
     else if ( !(ppt0->tag & MG_NOM) ) {
@@ -808,7 +817,7 @@ int MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
-  if ( !MMG5_setVertexNmTag(mesh) ) return 0;
+  if ( !MMG5_setVertexNmTag(mesh,MMG5_skip_ParBdy) ) return 0;
 
   return 1;
 }
