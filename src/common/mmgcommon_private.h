@@ -676,8 +676,10 @@ typedef struct MMG5_iNode_s {
  MMG5_int      MMG5_hashFace(MMG5_pMesh,MMG5_Hash*,MMG5_int,MMG5_int,MMG5_int,MMG5_int);
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int k);
+ int           MMG5_hashUpdate_s(MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int k);
  int           MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int a,MMG5_int b,int16_t k);
  MMG5_int      MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b);
+ MMG5_int      MMG5_hashGet_s(MMG5_Hash *hash,MMG5_int a,MMG5_int b);
  int           MMG5_hashNew(MMG5_pMesh mesh, MMG5_Hash *hash,MMG5_int hsiz,MMG5_int hmax);
  int           MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
  int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);

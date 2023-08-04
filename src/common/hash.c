@@ -429,6 +429,42 @@ int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
  * \param hash pointer toward the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
+ * \param k new index of point along the edge.
+ * \return 1 if success, 0 if fail (edge is not found).
+ *
+ * Update the index of the point stored along the edge \f$[a;b]\f$
+ *
+ */
+int MMG5_hashUpdate_s(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
+  MMG5_hedge  *ph;
+  MMG5_int     key;
+  MMG5_int    ia,ib;
+
+  ia  = MG_MIN(a,b);
+  ib  = MG_MAX(a,b);
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
+  ph  = &hash->item[key];
+
+  while ( ph->a ) {
+    if ( ph->a == ia && ph->b == ib ) {
+      ph->s = k;
+      return 1;
+    }
+
+    if ( !ph->nxt ) return 0;
+
+    ph = &hash->item[ph->nxt];
+
+  }
+
+  return 0;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \param a index of the first extremity of the edge.
+ * \param b index of the second extremity of the edge.
  * \param tag edge tag
  * \return the edge tag if success, 0 if fail.
  *
@@ -511,6 +547,36 @@ MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
   while ( ph->nxt ) {
     ph = &hash->item[ph->nxt];
     if ( ph->a == ia && ph->b == ib )  return ph->k;
+  }
+  return 0;
+}
+
+/**
+ * \param hash pointer toward the hash table of edges.
+ * \param a index of the first extremity of the edge.
+ * \param b index of the second extremity of the edge.
+ * \return the index of point stored along \f$[a;b]\f$.
+ *
+ * Find the index of point stored along  \f$[a;b]\f$.
+ *
+ */
+int MMG5_hashGet_s(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
+  MMG5_hedge  *ph;
+  MMG5_int    key;
+  MMG5_int    ia,ib;
+
+  if ( !hash->item ) return 0;
+
+  ia  = MG_MIN(a,b);
+  ib  = MG_MAX(a,b);
+  key = (MMG5_KA*(int64_t)ia + MMG5_KB*(int64_t)ib) % hash->siz;
+  ph  = &hash->item[key];
+
+  if ( !ph->a )  return 0;
+  if ( ph->a == ia && ph->b == ib )  return ph->s;
+  while ( ph->nxt ) {
+    ph = &hash->item[ph->nxt];
+    if ( ph->a == ia && ph->b == ib )  return ph->s;
   }
   return 0;
 }
