@@ -263,6 +263,7 @@ int16_t MMG5_openCoquilTravel(MMG5_pMesh,MMG5_int,MMG5_int,MMG5_int*,MMG5_int*,i
 int  MMG5_settag(MMG5_pMesh,MMG5_int,int,int16_t,int);
 int  MMG5_deltag(MMG5_pMesh,MMG5_int,int,int16_t);
 int  MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash);
+int  MMG5_setVertexNmTag(MMG5_pMesh mesh,int func(int8_t) );
 int  MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,int8_t,int64_t*,int,int8_t);
 int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,int8_t,int64_t*,int,MMG5_int*,int,MMG5_int,MMG5_int,int8_t,int,int8_t);
 int  MMG3D_chkmanicoll(MMG5_pMesh,MMG5_int,int,int,MMG5_int,MMG5_int,MMG5_int,MMG5_int,int8_t,int8_t);

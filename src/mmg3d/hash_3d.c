@@ -609,6 +609,12 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
   return 1;
 }
 
+
+static inline
+int MMG5_skip_ParBdy ( int8_t tag ) {
+  return (tag & MG_PARBDY);
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -619,35 +625,44 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
  * \remark We don't know how to travel through the shell of a non-manifold point
  * by triangle adjacency. Thus the work done here can't be performed in the \ref
  * MMG5_singul function.
+ *
+ * \remark a temporary array \a tmp is used instead of the tmp field of the
+ * points to not break the ParMmg distributed analysis in which this field is
+ * used to store the global numbering of nodes.
  */
-static inline
-int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
+int MMG5_setVertexNmTag(MMG5_pMesh mesh,int func(int8_t) ) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt0,ppt1;
   MMG5_Hash           hash;
   int                 i,ier;
-  MMG5_int            k,np,nc,nre,*nfeat;
+  MMG5_int            k,np,nc,nre,*nfeat,*tmp;
 
   /** Seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
 
   /** Step 1: count the number or feature edges passing through each points */
   np = 0;
+  MMG5_SAFE_MALLOC(tmp,mesh->np+1,MMG5_int,return 0);
+
   for (k=1; k<=mesh->np; ++k) {
     ppt0 = &mesh->point[k];
     if ( !MG_VOK(ppt0) ) {
-      ppt0->tmp = 0;
+      tmp[k] = 0;
     }
-    else if ( (ppt0->tag & MG_REQ) || (ppt0->tag & MG_PARBDY) ) {
-      /* Skip required and parallel points */
-      ppt0->tmp = 0;
+    else if ( ppt0->tag & MG_REQ || func(ppt0->tag) ) {
+      /* Skip required points and points satisfying condition "func". For
+       * "classic" analysis, func test if the point is PARBDY, between ParMmg
+       * iterations, it tests if the point is not an old PARBDY point (we want
+       * to update analysis only on old parbdy points so we skip the other
+       * ones). */
+      tmp[k] = 0;
     }
     else if ( !(ppt0->tag & MG_NOM) ) {
       /* Skip manifold points */
-      ppt0->tmp = 0;
+      tmp[k] = 0;
     }
     else {
-      ppt0->tmp = ++np;
+      tmp[k] = ++np;
     }
   }
 
@@ -677,13 +692,13 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       }
 
       /* Here we have a feature edge: seek if we have already seen it. If not,
-       * hash it and increment nfeat: for point ppt, nfeat[3*ppt->tmp] stores
-       * the number of ridges passing through the point, nfeat[3*ppt->tmp+1]
+       * hash it and increment nfeat: for point ppt, nfeat[3*tmp] stores
+       * the number of ridges passing through the point, nfeat[3*tmp+1]
        * stores the number of reference edges, nfeat[3*ppt->tmp+2] the number of
        * non-manifold edges.*/
       assert ( MG_VOK(ppt1) &&  MG_VOK(ppt0) );
 
-      if ( (!ppt1->tmp) && (!ppt0->tmp) ) {
+      if ( (!tmp[np0]) && (!tmp[np1]) ) {
         continue;
       }
 
@@ -697,23 +712,23 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       }
 
       if ( pxt->tag[i] & MG_GEO ) {
-        ++nfeat[3*ppt0->tmp];
+        ++nfeat[3*tmp[np0]];
       }
       else if ( pxt->tag[i] & MG_NOM ) {
-        ++nfeat[3*ppt0->tmp+1];
+        ++nfeat[3*tmp[np0]+1];
       }
       else if ( pxt->tag[i] & MG_REF ) {
-        ++nfeat[3*ppt0->tmp+2];
+        ++nfeat[3*tmp[np0]+2];
       }
 
       if ( pxt->tag[i] & MG_GEO ) {
-        ++nfeat[3*ppt1->tmp];
+        ++nfeat[3*tmp[np1]];
       }
       else if ( pxt->tag[i] & MG_NOM ) {
-        ++nfeat[3*ppt1->tmp+1];
+        ++nfeat[3*tmp[np1]+1];
       }
       else if ( pxt->tag[i] & MG_REF ) {
-        ++nfeat[3*ppt1->tmp+2];
+        ++nfeat[3*tmp[np1]+2];
       }
     }
   }
@@ -723,13 +738,13 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->np; ++k) {
     ppt0 = &mesh->point[k];
 
-    if ( (!MG_VOK(ppt0)) || (!ppt0->tmp) ) {
+    if ( (!MG_VOK(ppt0)) || (!tmp[k]) ) {
       continue;
     }
 
-    MMG5_int ng  = nfeat[3*ppt0->tmp];
-    MMG5_int nrp = nfeat[3*ppt0->tmp+1];
-    MMG5_int nm  = nfeat[3*ppt0->tmp+2];
+    MMG5_int ng  = nfeat[3*tmp[k]];
+    MMG5_int nrp = nfeat[3*tmp[k]+1];
+    MMG5_int nm  = nfeat[3*tmp[k]+2];
 
     if ( (ng+nrp+nm) > 2 ) {
       /* More than 2 feature edges are passing through the point: point is
@@ -773,6 +788,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   }
 
   /* Free the edge hash table */
+  MMG5_SAFE_FREE(tmp);
   MMG5_SAFE_FREE(nfeat);
   MMG5_DEL_MEM(mesh,hash.item);
 
@@ -801,7 +817,7 @@ int MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
-  if ( !MMG5_setVertexNmTag(mesh) ) return 0;
+  if ( !MMG5_setVertexNmTag(mesh,MMG5_skip_ParBdy) ) return 0;
 
   return 1;
 }
