@@ -429,13 +429,17 @@ int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
  * \param hash pointer toward the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
- * \param k new index of point along the edge.
+ * \param k index of new point along the edge [a,b].
+ * \param s If ls mode in ParMmg:: index of new point in internal edge communicator;
+ *          otherwise, the value stored in variable s.
  * \return 1 if success, 0 if fail (edge is not found).
  *
- * Update the index of the point stored along the edge \f$[a;b]\f$
+ * Update the index of the new point stored along the edge \f$[a;b]\f$
+ * If ls mode in ParMmg:: update the index of the new point in internal edge communicator;
+ * otherwise, update the value stored in variable s.
  *
  */
-int MMG5_hashUpdate_s(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
+int MMG5_hashUpdate_all(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k,MMG5_int s) {
   MMG5_hedge  *ph;
   MMG5_int     key;
   MMG5_int    ia,ib;
@@ -447,7 +451,8 @@ int MMG5_hashUpdate_s(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
 
   while ( ph->a ) {
     if ( ph->a == ia && ph->b == ib ) {
-      ph->s = k;
+      ph->k = k;
+      ph->s = s;
       return 1;
     }
 
@@ -555,12 +560,17 @@ MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
  * \param hash pointer toward the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
- * \return the index of point stored along \f$[a;b]\f$.
+ * \param k index of new point along the edge [a,b].
+ * \param s If ls mode in ParMmg:: index of new point in internal edge communicator;
+ *          otherwise, the value stored in variable s.
+ * \return 1 if success, 0 if fail (edge is not found).
  *
- * Find the index of point stored along  \f$[a;b]\f$.
+ * Find the index of the new point stored along the edge \f$[a;b]\f$
+ * If ls mode in ParMmg:: find the index of the new point in internal edge communicator;
+ * otherwise, find the value stored in variable s.
  *
  */
-int MMG5_hashGet_s(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
+int MMG5_hashGet_all(MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int *k,MMG5_int *s) {
   MMG5_hedge  *ph;
   MMG5_int    key;
   MMG5_int    ia,ib;
@@ -573,10 +583,18 @@ int MMG5_hashGet_s(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
   ph  = &hash->item[key];
 
   if ( !ph->a )  return 0;
-  if ( ph->a == ia && ph->b == ib )  return ph->s;
+  if ( ph->a == ia && ph->b == ib )  {
+    *k = ph->k;
+    *s = ph->s;
+    return 1;
+  }
   while ( ph->nxt ) {
     ph = &hash->item[ph->nxt];
-    if ( ph->a == ia && ph->b == ib )  return ph->s;
+    if ( ph->a == ia && ph->b == ib ) {
+      *k = ph->k;
+      *s = ph->s;
+      return 1;
+    }
   }
   return 0;
 }
