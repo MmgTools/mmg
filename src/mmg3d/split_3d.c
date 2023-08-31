@@ -2683,23 +2683,23 @@ int MMG5_split3cone_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int
     }
   }
 
-  // fprintf(stdout,"            MMG5_split3cone_GlobNum :: myrank %d, tetra %d; Flag %d \n"
-  //                 "                    vGlobNum %d-%d-%d-%d \n"
-  //                 "                    tau %d-%d-%d-%d, taued %d \n"
-  //                 "                    ia:: %d, ia_l:: %d, ib:: %d, ib_l:: %d \n"
-  //                 "                    BEFORE :: \n"
-  //                 "                       pt[0].v %d-%d-%d-%d \n"
-  //                 "                       pt[1].v %d-%d-%d-%d \n"
-  //                 "                       pt[2].v %d-%d-%d-%d \n"
-  //                 "                       pt[3].v %d-%d-%d-%d \n",
-  //                 myrank,k,flg,
-  //                 vGlobNum[0],vGlobNum[1],vGlobNum[2],vGlobNum[3],
-  //                 tau[0],tau[1],tau[2],tau[3],taued[0],
-  //                 ia,ia_l,ib,ib_l,
-  //                 pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
-  //                 pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
-  //                 pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
-  //                 pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3]);
+  fprintf(stdout,"            MMG5_split3cone_GlobNum :: myrank %d, tetra %d; Flag %d \n"
+                  "                    vGlobNum %d-%d-%d-%d \n"
+                  "                    tau %d-%d-%d-%d, taued %d \n"
+                  "                    ia:: %d, ia_l:: %d, ib:: %d, ib_l:: %d \n"
+                  "                    BEFORE :: \n"
+                  "                       pt[0].v %d-%d-%d-%d \n"
+                  "                       pt[1].v %d-%d-%d-%d \n"
+                  "                       pt[2].v %d-%d-%d-%d \n"
+                  "                       pt[3].v %d-%d-%d-%d \n",
+                  myrank,k,flg,
+                  vGlobNum[0],vGlobNum[1],vGlobNum[2],vGlobNum[3],
+                  tau[0],tau[1],tau[2],tau[3],taued[0],
+                  ia,ia_l,ib,ib_l,
+                  pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
+                  pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
+                  pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
+                  pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3]);
 
   pt[0]->v[tau[1]] = vx[taued[0]] ; pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
   xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
@@ -4676,27 +4676,24 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
     return 0;
   }
 
-  // fprintf(stdout,"            MMG5_split4op_GlobNum :: myrank %d, tetra %d; Flag %d \n"
-  //                 "                    vGlobNum %d-%d-%d-%d \n"
-  //                 "                    tau %d-%d-%d-%d, taued %d \n"
-  //                 "                    imin01:: %d, imin01_l:: %d, imin23:: %d, imin23_l:: %d \n"
-  //                 "                    BEFORE :: \n"
-  //                 "                       pt[0].v %d-%d-%d-%d \n"
-  //                 "                       pt[1].v %d-%d-%d-%d \n"
-  //                 "                       pt[2].v %d-%d-%d-%d \n"
-  //                 "                       pt[3].v %d-%d-%d-%d \n"
-  //                 "                       pt[4].v %d-%d-%d-%d \n"
-  //                 "                       pt[5].v %d-%d-%d-%d \n",
-  //                 myrank,k,flg,
-  //                 vGlobNum[0],vGlobNum[1],vGlobNum[2],vGlobNum[3],
-  //                 tau[0],tau[1],tau[2],tau[3],taued[0],
-  //                 imin01,imin01_l,imin23,imin23_l,
-  //                 pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
-  //                 pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
-  //                 pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
-  //                 pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3],
-  //                 pt[4]->v[0],pt[4]->v[1],pt[4]->v[2],pt[4]->v[3],
-  //                 pt[5]->v[0],pt[5]->v[1],pt[5]->v[2],pt[5]->v[3]);
+  if (myrank == 0) {
+  fprintf(stdout,"               MMG5_split4op_GlobNum :: tau %d-%d-%d-%d, taued %d, imin01:: %d, imin01_l:: %d, imin23:: %d, imin23_l:: %d \n"
+                  "                    BEFORE :: \n"
+                  "                       pt[0].v %d-%d-%d-%d \n"
+                  "                       pt[1].v %d-%d-%d-%d \n"
+                  "                       pt[2].v %d-%d-%d-%d \n"
+                  "                       pt[3].v %d-%d-%d-%d \n"
+                  "                       pt[4].v %d-%d-%d-%d \n"
+                  "                       pt[5].v %d-%d-%d-%d \n",
+                  tau[0],tau[1],tau[2],tau[3],taued[0],
+                  imin01,imin01_l,imin23,imin23_l,
+                  pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
+                  pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
+                  pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
+                  pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3],
+                  pt[4]->v[0],pt[4]->v[1],pt[4]->v[2],pt[4]->v[3],
+                  pt[5]->v[0],pt[5]->v[1],pt[5]->v[2],pt[5]->v[3]);
+  }
 
   /* Generic formulation for split of 4 edges, with no 3 edges lying on the same face */
   if ( imin01 == tau[0] ) {
@@ -4814,21 +4811,22 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
     MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
   }
 
-  // fprintf(stdout,"            MMG5_split4op_GlobNum :: myrank %d, tetra %d; Flag %d \n"
-  //                 "                    AFTER :: \n"
-  //                 "                       pt[0].v %d-%d-%d-%d \n"
-  //                 "                       pt[1].v %d-%d-%d-%d \n"
-  //                 "                       pt[2].v %d-%d-%d-%d \n"
-  //                 "                       pt[3].v %d-%d-%d-%d \n"
-  //                 "                       pt[4].v %d-%d-%d-%d \n"
-  //                 "                       pt[5].v %d-%d-%d-%d \n",
-  //                 myrank,k,flg,
-  //                 pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
-  //                 pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
-  //                 pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
-  //                 pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3],
-  //                 pt[4]->v[0],pt[4]->v[1],pt[4]->v[2],pt[4]->v[3],
-  //                 pt[5]->v[0],pt[5]->v[1],pt[5]->v[2],pt[5]->v[3]);
+  if (myrank == 0) {
+    fprintf(stdout,"               MMG5_split4op_GlobNum :: \n"
+                    "                    AFTER :: \n"
+                    "                       pt[0].v %d-%d-%d-%d \n"
+                    "                       pt[1].v %d-%d-%d-%d \n"
+                    "                       pt[2].v %d-%d-%d-%d \n"
+                    "                       pt[3].v %d-%d-%d-%d \n"
+                    "                       pt[4].v %d-%d-%d-%d \n"
+                    "                       pt[5].v %d-%d-%d-%d \n",
+                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
+                    pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
+                    pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
+                    pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3],
+                    pt[4]->v[0],pt[4]->v[1],pt[4]->v[2],pt[4]->v[3],
+                    pt[5]->v[0],pt[5]->v[1],pt[5]->v[2],pt[5]->v[3]);
+  }
 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,ne*sizeof(int8_t));
