@@ -4725,89 +4725,212 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
     MG_SET(xt[2].ori, tau[2]);
   }
   else {
-    pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
-    xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-    xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
-    xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
-    xt[0].ref [ tau[0]] = 0;
-    xt[0].ftag[ tau[0]] = 0;
+    pt[0]->v[tau[2]] = vx[taued[1]];
+    pt[0]->v[tau[3]] = vx[taued[2]];
+
+    xt[0].tag[taued[3]] = 0;
+    xt[0].tag[taued[4]] = 0;
+    xt[0].tag[taued[5]] = 0;
+
+    xt[0].edg[taued[3]] = 0;
+    xt[0].edg[taued[4]] = 0;
+    xt[0].edg[taued[5]] = 0;
+
+    xt[0].ref[tau[0]] = 0;
+
+    xt[0].ftag[tau[0]] = 0;
+
     MG_SET(xt[0].ori, tau[0]);
 
-    pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[2]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
-    xt[1].tag[taued[2]] = 0;  xt[1].tag[taued[4]] = 0;
-    xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[0]] = 0;
-    xt[1].edg[taued[1]] = 0;  xt[1].edg[taued[2]] = 0;
-    xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
-    xt[1].ref [ tau[0]] = 0;  xt[1].ref [ tau[1]] = 0;  xt[1].ref [tau[2]] = 0;
-    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[1]] = 0;  xt[1].ftag[tau[2]] = 0;
-    MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[2]);
+    pt[1]->v[tau[0]] = vx[taued[1]];
+    pt[1]->v[tau[2]] = vx[taued[3]];
+    pt[1]->v[tau[3]] = vx[taued[2]];
 
-    pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[2]] = vx[taued[3]] ; pt[2]->v[tau[3]] = vx[taued[4]];
-    xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[1]] = 0;
-    xt[2].tag[taued[2]] = 0;  xt[2].tag[taued[5]] = 0;
-    xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[1]] = 0;
-    xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[5]] = 0;
-    xt[2].ref [ tau[1]] = 0;  xt[2].ref [ tau[3]] = 0;
-    xt[2].ftag[ tau[1]] = 0;  xt[2].ftag[ tau[3]] = 0;
-    MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[3]);
+    xt[1].tag[taued[0]] = 0;
+    xt[1].tag[taued[1]] = 0;
+    xt[1].tag[taued[2]] = 0;
+    xt[1].tag[taued[4]] = 0;
+    xt[1].tag[taued[5]] = 0;
+
+    xt[1].edg[taued[0]] = 0;
+    xt[1].edg[taued[1]] = 0;
+    xt[1].edg[taued[2]] = 0;
+    xt[1].edg[taued[4]] = 0;
+    xt[1].edg[taued[5]] = 0;
+
+    xt[1].ref[tau[0]] = 0;
+    xt[1].ref[tau[1]] = 0;
+    xt[1].ref[tau[2]] = 0;
+
+    xt[1].ftag[tau[0]] = 0;
+    xt[1].ftag[tau[1]] = 0;
+    xt[1].ftag[tau[2]] = 0;
+
+    MG_SET(xt[1].ori, tau[0]);
+    MG_SET(xt[1].ori, tau[1]);
+    MG_SET(xt[1].ori, tau[2]);
+
+    pt[2]->v[tau[0]] = vx[taued[2]];
+    pt[2]->v[tau[2]] = vx[taued[3]];
+    pt[2]->v[tau[3]] = vx[taued[4]];
+
+    xt[2].tag[taued[0]] = 0;
+    xt[2].tag[taued[1]] = 0;
+    xt[2].tag[taued[2]] = 0;
+    xt[2].tag[taued[5]] = 0;
+
+    xt[2].edg[taued[0]] = 0;
+    xt[2].edg[taued[1]] = 0;
+    xt[2].edg[taued[2]] = 0;
+    xt[2].edg[taued[5]] = 0;
+
+    xt[2].ref[tau[1]] = 0;
+    xt[2].ref[tau[3]] = 0;
+
+    xt[2].ftag[tau[1]] = 0;
+    xt[2].ftag[tau[3]] = 0;
+
+    MG_SET(xt[2].ori, tau[1]);
+    MG_SET(xt[2].ori, tau[3]);
   }
 
   if ( imin23 == tau[2] ) {
-    pt[3]->v[tau[0]] = vx[taued[2]] ; pt[3]->v[tau[1]] = vx[taued[4]];
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
-    xt[3].tag[taued[3]] = 0;  xt[3].edg[taued[0]] = 0;
-    xt[3].edg[taued[1]] = 0;  xt[3].edg[taued[3]] = 0;
-    xt[3].ref [ tau[3]] = 0;
-    xt[3].ftag[ tau[3]] = 0;
+    pt[3]->v[tau[0]] = vx[taued[2]];
+    pt[3]->v[tau[1]] = vx[taued[4]];
+
+    xt[3].tag[taued[0]] = 0;
+    xt[3].tag[taued[1]] = 0;
+    xt[3].tag[taued[3]] = 0;
+
+    xt[3].edg[taued[0]] = 0;
+    xt[3].edg[taued[1]] = 0;
+    xt[3].edg[taued[3]] = 0;
+
+    xt[3].ref[tau[3]] = 0;
+
+    xt[3].ftag[tau[3]] = 0;
+
     MG_SET(xt[3].ori, tau[3]);
 
-    pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[3]] ; pt[4]->v[tau[3]] = vx[taued[4]];
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
-    xt[4].tag[taued[2]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[0]] = 0;
-    xt[4].edg[taued[1]] = 0;  xt[4].edg[taued[2]] = 0;
-    xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
-    xt[4].ref [ tau[1]] = 0;  xt[4].ref [ tau[2]] = 0;  xt[4].ref [tau[3]] = 0;
-    xt[4].ftag[ tau[1]] = 0;  xt[4].ftag[ tau[2]] = 0;  xt[4].ftag[tau[3]] = 0;
-    MG_SET(xt[4].ori, tau[1]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
+    pt[4]->v[tau[0]] = vx[taued[2]];
+    pt[4]->v[tau[1]] = vx[taued[3]];
+    pt[4]->v[tau[3]] = vx[taued[4]];
 
-    pt[5]->v[tau[0]] = vx[taued[1]] ; pt[5]->v[tau[1]] = vx[taued[3]] ; pt[5]->v[tau[3]] = vx[taued[2]];
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[2]] = 0;
-    xt[5].tag[taued[4]] = 0;  xt[5].tag[taued[5]] = 0;
-    xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[2]] = 0;
-    xt[5].edg[taued[4]] = 0;  xt[5].edg[taued[5]] = 0;
-    xt[5].ref [ tau[0]] = 0;  xt[5].ref [ tau[2]] = 0;
-    xt[5].ftag[ tau[0]] = 0;  xt[5].ftag[ tau[2]] = 0;
-    MG_SET(xt[5].ori, tau[0]);  MG_SET(xt[5].ori, tau[2]);
+    xt[4].tag[taued[0]] = 0;
+    xt[4].tag[taued[1]] = 0;
+    xt[4].tag[taued[2]] = 0;
+    xt[4].tag[taued[4]] = 0;
+    xt[4].tag[taued[5]] = 0;
+
+    xt[4].edg[taued[0]] = 0;
+    xt[4].edg[taued[1]] = 0;
+    xt[4].edg[taued[2]] = 0;
+    xt[4].edg[taued[4]] = 0;
+    xt[4].edg[taued[5]] = 0;
+
+    xt[4].ref[tau[1]] = 0;
+    xt[4].ref[tau[2]] = 0;
+    xt[4].ref[tau[3]] = 0;
+
+    xt[4].ftag[tau[1]] = 0;
+    xt[4].ftag[tau[2]] = 0;
+    xt[4].ftag[tau[3]] = 0;
+
+    MG_SET(xt[4].ori, tau[1]);
+    MG_SET(xt[4].ori, tau[2]);
+    MG_SET(xt[4].ori, tau[3]);
+
+    pt[5]->v[tau[0]] = vx[taued[1]];
+    pt[5]->v[tau[1]] = vx[taued[3]];
+    pt[5]->v[tau[3]] = vx[taued[2]];
+
+    xt[5].tag[taued[0]] = 0;
+    xt[5].tag[taued[2]] = 0;
+    xt[5].tag[taued[4]] = 0;
+    xt[5].tag[taued[5]] = 0;
+
+    xt[5].edg[taued[0]] = 0;
+    xt[5].edg[taued[2]] = 0;
+    xt[5].edg[taued[4]] = 0;
+    xt[5].edg[taued[5]] = 0;
+
+    xt[5].ref[tau[0]] = 0;
+    xt[5].ref[tau[2]] = 0;
+
+    xt[5].ftag[tau[0]] = 0;
+    xt[5].ftag[tau[2]] = 0;
+
+    MG_SET(xt[5].ori, tau[0]);
+    MG_SET(xt[5].ori, tau[2]);
   }
   else {
-    pt[3]->v[tau[0]] = vx[taued[1]] ; pt[3]->v[tau[1]] = vx[taued[3]];
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
-    xt[3].tag[taued[4]] = 0;  xt[3].edg[taued[0]] = 0;
-    xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[4]] = 0;
-    xt[3].ref [ tau[2]] = 0;
-    xt[3].ftag[ tau[2]] = 0;
+    pt[3]->v[tau[0]] = vx[taued[1]];
+    pt[3]->v[tau[1]] = vx[taued[3]];
+
+    xt[3].tag[taued[0]] = 0;
+    xt[3].tag[taued[2]] = 0;
+    xt[3].tag[taued[4]] = 0;
+
+    xt[3].edg[taued[0]] = 0;
+    xt[3].edg[taued[2]] = 0;
+    xt[3].edg[taued[4]] = 0;
+
+    xt[3].ref[tau[2]] = 0;
+
+    xt[3].ftag[tau[2]] = 0;
+
     MG_SET(xt[3].ori, tau[2]);
 
-    pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[3]] ; pt[4]->v[tau[2]] = vx[taued[1]];
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
-    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[0]] = 0;
-    xt[4].edg[taued[1]] = 0;  xt[4].edg[taued[3]] = 0;
-    xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
-    xt[4].ref [ tau[0]] = 0;  xt[4].ref [ tau[2]] = 0;  xt[4].ref [tau[3]] = 0;
-    xt[4].ftag[ tau[0]] = 0;  xt[4].ftag[ tau[2]] = 0;  xt[4].ftag[tau[3]] = 0;
-    MG_SET(xt[4].ori, tau[0]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
+    pt[4]->v[tau[0]] = vx[taued[2]];
+    pt[4]->v[tau[1]] = vx[taued[3]];
+    pt[4]->v[tau[2]] = vx[taued[1]];
 
-    pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[1]] = vx[taued[4]] ; pt[5]->v[tau[2]] = vx[taued[3]];
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[1]] = 0;
-    xt[5].tag[taued[3]] = 0;  xt[5].tag[taued[5]] = 0;
-    xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[1]] = 0;
-    xt[5].edg[taued[3]] = 0;  xt[5].edg[taued[5]] = 0;
-    xt[5].ref [ tau[1]] = 0;  xt[5].ref [ tau[3]] = 0;
-    xt[5].ftag[ tau[1]] = 0;  xt[5].ftag[ tau[3]] = 0;
-    MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
+    xt[4].tag[taued[0]] = 0;
+    xt[4].tag[taued[1]] = 0;
+    xt[4].tag[taued[3]] = 0;
+    xt[4].tag[taued[4]] = 0;
+    xt[4].tag[taued[5]] = 0;
+
+    xt[4].edg[taued[0]] = 0;
+    xt[4].edg[taued[1]] = 0;
+    xt[4].edg[taued[3]] = 0;
+    xt[4].edg[taued[4]] = 0;
+    xt[4].edg[taued[5]] = 0;
+
+    xt[4].ref[tau[0]] = 0;
+    xt[4].ref[tau[2]] = 0;
+    xt[4].ref[tau[3]] = 0;
+
+    xt[4].ftag[tau[0]] = 0;
+    xt[4].ftag[tau[2]] = 0;
+    xt[4].ftag[tau[3]] = 0;
+
+    MG_SET(xt[4].ori, tau[0]);
+    MG_SET(xt[4].ori, tau[2]);
+    MG_SET(xt[4].ori, tau[3]);
+
+    pt[5]->v[tau[0]] = vx[taued[2]];
+    pt[5]->v[tau[1]] = vx[taued[4]];
+    pt[5]->v[tau[2]] = vx[taued[3]];
+
+    xt[5].tag[taued[0]] = 0;
+    xt[5].tag[taued[1]] = 0;
+    xt[5].tag[taued[3]] = 0;
+    xt[5].tag[taued[5]] = 0;
+
+    xt[5].edg[taued[0]] = 0;
+    xt[5].edg[taued[1]] = 0;
+    xt[5].edg[taued[3]] = 0;
+    xt[5].edg[taued[5]] = 0;
+
+    xt[5].ref[tau[1]] = 0;
+    xt[5].ref[tau[3]] = 0;
+
+    xt[5].ftag[tau[1]] = 0;
+    xt[5].ftag[tau[3]] = 0;
+
+    MG_SET(xt[5].ori, tau[1]);
+    MG_SET(xt[5].ori, tau[3]);
   }
 
   if (!myrank) {
