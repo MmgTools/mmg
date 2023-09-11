@@ -2960,7 +2960,7 @@ int MMG5_split3cone_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int
  *
  */
 static inline
-void MMG3D_configSplit3op(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split3op_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                            const uint8_t **taued,
                            uint8_t sym[4],uint8_t symed[6],
                            uint8_t *ip0,uint8_t *ip1,
@@ -3130,7 +3130,7 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
-  MMG3D_configSplit3op(pt,vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+  MMG3D_split3op_cfg(pt,vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -3263,7 +3263,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
   newtet[0]=k;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
-  MMG3D_configSplit3op(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+  MMG3D_split3op_cfg(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
   pt[0]->flag  = 0;
 
@@ -3848,7 +3848,7 @@ MMG5_int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k,int8_t metRid
  *
  */
 static inline
-void MMG3D_configSplit4sf(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split4sf_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                           const uint8_t **taued, uint8_t *imin23,uint8_t *imin12) {
 
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -3939,7 +3939,7 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation of vertices : reference configuration : 23 */
-  MMG3D_configSplit4sf(pt,vx,tau,&taued,&imin23,&imin12);
+  MMG3D_split4sf_cfg(pt,vx,tau,&taued,&imin23,&imin12);
 
   /* Generic formulation of split of 4 edges (with 3 on same face) */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -4042,7 +4042,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   newtet[0]=k;
 
   /* Set permutation of vertices : reference configuration : 23 */
-  MMG3D_configSplit4sf(pt[0],vx,tau,&taued,&imin23,&imin12);
+  MMG3D_split4sf_cfg(pt[0],vx,tau,&taued,&imin23,&imin12);
   pt[0]->flag  = 0;
 
   /* create 5 new tetras */
@@ -4216,6 +4216,44 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
   return 1;
+}
+
+/**
+ * \param flag initial tetra
+ * \param v index of tetra nodes
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param imin01 minimal index of vertices ip0 and ip1
+ * \param imin23 minimal index of vertices ip2 and ip3
+ *
+ * Set permutation of vertices for the split of 4 edges when on opposite edges.
+ * Reference configuration 30.
+ *
+ */
+inline
+void MMG3D_split4op_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
+                          const uint8_t **taued, uint8_t *imin01,uint8_t *imin23) {
+
+
+  /* Set permutation of vertices : reference configuration 30 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  (*taued) = &MMG5_permedge[0][0];
+
+  switch(flag){
+  case 45:
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    (*taued) = &MMG5_permedge[5][0];
+    break;
+
+  case 51:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[4][0];
+    break;
+  }
+
+  /* Determine the condition to choose the pattern of split to apply  */
+  *imin01 = (v[tau[0]] < v[tau[1]]) ? tau[0] : tau[1];
+  *imin23 = (v[tau[2]] < v[tau[3]]) ? tau[2] : tau[3];
 }
 
 /**
@@ -4592,14 +4630,14 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
   MMG5_int            newtet[6];
-  int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23,imin01_l,imin23_l;
+  int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
   uint8_t             tau[4];
   const uint8_t       *taued;
   const int           ne=6;
 
   /* Store the initial tetra and flag */
   pt[0] = &mesh->tetra[k];
-  flg   = pt[0]->flag;
+  flg = pt[0]->flag;
 
   /* Reinitialize the flag of the initial tetra */
   pt[0]->flag = 0;
@@ -4607,28 +4645,9 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
   /* Store the id of the initial tetra */
   newtet[0] = k;
 
-  /* Set permutation of vertices : reference configuration 30 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-
-  switch(flg){
-  case 45:
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
-
-  case 51:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  }
-
-  /* Determine the rotation to be done to split following the pattern  */
-  imin01 = (vGlobNum[tau[0]] < vGlobNum[tau[1]]) ? tau[0] : tau[1];
-  imin23 = (vGlobNum[tau[2]] < vGlobNum[tau[3]]) ? tau[2] : tau[3];
-
-  imin01_l = ((pt[0])->v[tau[0]] < (pt[0])->v[tau[1]]) ? tau[0] : tau[1];
-  imin23_l = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
+  /* Set permutation of vertices */
+  // ACHTUNG : NOTE : This is fine when using Glob Num, not if we use pt->v
+  MMG3D_split4op_cfg(flg,vGlobNum,tau,&taued,&imin01,&imin23);
 
   /* Create 5 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
@@ -4636,7 +4655,7 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
   }
 
   if (!myrank) {
-  fprintf(stdout,"                     MMG5_split4op_GlobNum :: tau %d-%d-%d-%d, taued %d, imin01:: %d, imin01_l:: %d, imin23:: %d, imin23_l:: %d \n"
+  fprintf(stdout,"                     MMG5_split4op_GlobNum :: tau %d-%d-%d-%d, taued %d, imin01:: %d, imin23:: %d \n"
                   "                         BEFORE :: \n"
                   "                          pt[0].v %d-%d-%d-%d \n"
                   "                          pt[1].v %d-%d-%d-%d \n"
@@ -4644,8 +4663,7 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
                   "                          pt[3].v %d-%d-%d-%d \n"
                   "                          pt[4].v %d-%d-%d-%d \n"
                   "                          pt[5].v %d-%d-%d-%d \n",
-                  tau[0],tau[1],tau[2],tau[3],taued[0],
-                  imin01,imin01_l,imin23,imin23_l,
+                  tau[0],tau[1],tau[2],tau[3],taued[0],imin01,imin23,
                   pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
                   pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
                   pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
