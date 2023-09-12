@@ -4252,8 +4252,8 @@ void MMG3D_split4op_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
   }
 
   /* Determine the condition to choose the pattern of split to apply  */
-  *imin01 = (v[tau[0]] < v[tau[1]]) ? tau[0] : tau[1];
-  *imin23 = (v[tau[2]] < v[tau[3]]) ? tau[2] : tau[3];
+  (*imin01) = (v[tau[0]] < v[tau[1]]) ? tau[0] : tau[1];
+  (*imin23) = (v[tau[2]] < v[tau[3]]) ? tau[2] : tau[3];
 }
 
 /**
@@ -4632,7 +4632,7 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
   MMG5_int            newtet[6];
   int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
   uint8_t             tau[4];
-  const uint8_t       *taued;
+  const uint8_t       *taued=NULL;
   const int           ne=6;
 
   /* Store the initial tetra and flag */
