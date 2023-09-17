@@ -1393,9 +1393,17 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
                   return 0);
     MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
+    MMG5_int inival;
+    if ( sizeof(MMG5_int) == 8 ) {
+      inival = LONG_MAX;
+    }
+    else {
+      inival = INT_MAX;
+    }
+
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
-      mesh->info.par[k].ref   = INT_MAX;
+      mesh->info.par[k].ref   = inival;
       mesh->info.par[k].hausd = mesh->info.hausd;
       mesh->info.par[k].hmin  = mesh->info.hmin;
       mesh->info.par[k].hmax  = mesh->info.hmax;
