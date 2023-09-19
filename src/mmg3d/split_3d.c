@@ -1513,7 +1513,7 @@ int MMG5_split2sf_GlobNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
 
   imin = MMG3D_split2sf_cfg(flg,vGlobNum,tau,&taued);
 
-  if (!myrank) {
+  if (myrank) {
     fprintf(stdout,"                     MMG5_split2sf_GlobNum :: tau %d-%d-%d-%d, taued %d, imin:: %d \n"
                     "                         Initial :: pt[0].v %d-%d-%d-%d \n",
                     tau[0],tau[1],tau[2],tau[3],taued[0],imin,
@@ -1560,7 +1560,7 @@ int MMG5_split2sf_GlobNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
     MG_SET(xt[2].ori, tau[2]);  MG_SET(xt[2].ori, tau[3]);
   }
 
-  if (!myrank) {
+  if (myrank) {
     fprintf(stdout, "                           pt[0].v %d-%d-%d-%d \n"
                     "                           pt[1].v %d-%d-%d-%d \n"
                     "                           pt[2].v %d-%d-%d-%d \n"
@@ -2667,7 +2667,7 @@ int MMG5_split3cone_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int
   // ACHTUNG : NOTE : This is fine when using Glob Num, not fine if we use pt->v
   MMG3D_split3cone_cfg(flg,vGlobNum,tau,&taued,&ia,&ib);
 
-  if (!myrank) {
+  if (myrank) {
     fprintf(stdout,"                     MMG5_split3cone_GlobNum :: tau %d-%d-%d-%d, taued %d, ia:: %d, ib:: %d \n"
                     "                         Initial :: pt[0].v %d-%d-%d-%d \n",
                     tau[0],tau[1],tau[2],tau[3],taued[0],ia,ib,
@@ -2830,7 +2830,7 @@ int MMG5_split3cone_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int
     }
   }
 
-  if (!myrank) {
+  if (myrank) {
     fprintf(stdout, "                           pt[0].v %d-%d-%d-%d \n"
                     "                           pt[1].v %d-%d-%d-%d \n"
                     "                           pt[2].v %d-%d-%d-%d \n"
@@ -4628,7 +4628,7 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
     return 0;
   }
 
-  if (!myrank) {
+  if (myrank) {
     fprintf(stdout,"                     MMG5_split4op_GlobNum :: tau %d-%d-%d-%d, taued %d, imin01:: %d, imin23:: %d \n"
                     "                         Initial :: pt[0].v %d-%d-%d-%d \n",
                     tau[0],tau[1],tau[2],tau[3],taued[0],imin01,imin23,
@@ -4914,7 +4914,7 @@ int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
     MG_SET(xt[5].ori, tau[3]);
   }
 
-  if (!myrank) {
+  if (myrank) {
     fprintf(stdout, "                           pt[0].v %d-%d-%d-%d \n"
                     "                           pt[1].v %d-%d-%d-%d \n"
                     "                           pt[2].v %d-%d-%d-%d \n"
