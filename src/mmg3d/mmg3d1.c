@@ -136,35 +136,73 @@ void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt) {
  *
  * Find acceptable position for splitting.
  *
+ * \remark Historically Mmg tried to insert points by dichotomy whatever the
+ * type of surface considered but inserting points elsewhere than on the ideal
+ * surface creates a bad approximation of the boundary so we don't want to do it
+ * on surfaces whose definition we are sure of (general case).  The insertion by
+ * dichotomy can however make sense in the case of the discretization of an
+ * iso-value during a shape optimization process, where the definition of the
+ * surface is temporary and will continue to evolve during the iterations. For
+ * backward compatibility for these applications, we continue to test dichotomy
+ * insertion along iso surfaces in -ls mode.
+ *
  */
 int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
   MMG5_pPoint  pa,pb,ps;
   double       o[6][3],p[6][3];
   float        to,tp,t;
   int          ier,it,maxit;
   MMG5_int     ia,ib;
-  int8_t       i;
+  int8_t       i,iso_flag;
+
+  /** Check for insertion by dichotomy only along iso surfaces */
+  if ( !mesh->info.iso ) {
+    return 0;
+  }
 
   ier = 1;
   pt = &mesh->tetra[k];
+  if ( !pt->xt ) {
+    /** No way to know if edge is along iso surface if we don't work from a
+     * tetra with a boundary face */
+    return 0;
+  }
 
-  /* get point on surface and along segment for edge split */
+  pxt = &mesh->xtetra[pt->xt];
+  iso_flag = 0;
+  for (i=0; i<4; i++) {
+    /* Flag edges belonging to iso surf */
+    if ( pxt->ftag[i] & MG_ISO ) {
+      MG_SET(iso_flag,MMG5_iarf[i][0]);
+      MG_SET(iso_flag,MMG5_iarf[i][1]);
+      MG_SET(iso_flag,MMG5_iarf[i][2]);
+    }
+  }
+
+  if ( !iso_flag  ) {
+    /* None of the edges is along iso surface: we don't want to compute the
+     * dichotomy */
+    return 0;
+  }
+
+  /** Get point on surface and along segment for edge split */
   for (i=0; i<6; i++) {
     memset(p[i],0,3*sizeof(double));
     memset(o[i],0,3*sizeof(double));
-    if ( vx[i] > 0 ) {
+    if ( vx[i] > 0 && MG_GET(iso_flag,i) ) {
+      ps = &mesh->point[vx[i]];
+      p[i][0] = ps->c[0];
+      p[i][1] = ps->c[1];
+      p[i][2] = ps->c[2];
       ia = pt->v[MMG5_iare[i][0]];
       ib = pt->v[MMG5_iare[i][1]];
       pa = &mesh->point[ia];
       pb = &mesh->point[ib];
-      ps = &mesh->point[vx[i]];
       o[i][0] = 0.5 * (pa->c[0] + pb->c[0]);
       o[i][1] = 0.5 * (pa->c[1] + pb->c[1]);
       o[i][2] = 0.5 * (pa->c[2] + pb->c[2]);
-      p[i][0] = ps->c[0];
-      p[i][1] = ps->c[1];
-      p[i][2] = ps->c[2];
     }
   }
   maxit = 4;
@@ -172,10 +210,10 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   tp = 1.0;
   to = 0.0;
   do {
-    /* compute new position */
+    /** Compute new position */
     t = 0.5 * (tp + to);
     for (i=0; i<6; i++) {
-      if ( vx[i] > 0 ) {
+      if ( vx[i] > 0 && MG_GET(iso_flag,i) ) {
         ps = &mesh->point[vx[i]];
         ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
         ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
@@ -223,11 +261,11 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
       tp = t;
   }
   while ( ++it < maxit );
-  /* restore coords of last valid pos. */
+  /** Restore coords of last valid pos. */
   if ( !ier ) {
     t = to;
     for (i=0; i<6; i++) {
-      if ( vx[i] > 0 ) {
+      if ( vx[i] > 0 && MG_GET(iso_flag,i) ) {
         ps = &mesh->point[vx[i]];
         ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
         ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
@@ -236,7 +274,7 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
     }
   }
 
-  /* For very ill-shaped elements, we can have no valid position */
+  /** For very ill-shaped elements, we can have no valid position */
   switch (pt->flag) {
   case 1: case 2: case 4: case 8: case 16: case 32:
     ier = MMG3D_split1_sim(mesh,met,k,vx);
@@ -289,18 +327,49 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
  * Find acceptable position for MMG5_split1b, passing the shell of
  * considered edge, starting from o point.
  *
+ * \remark Historically Mmg tried to insert points by dichotomy whatever the
+ * type of surface considered but inserting points elsewhere than on the ideal
+ * surface creates a bad approximation of the boundary so we don't want to do it
+ * on surfaces whose definition we are sure of (general case).  The insertion by
+ * dichotomy can however make sense in the case of the discretization of an
+ * iso-value during a shape optimization process, where the definition of the
+ * surface is temporary and will continue to evolve during the iterations. For
+ * backward compatibility for these applications, we continue to test dichotomy
+ * insertion along iso surfaces in -ls mode.
+ *
  */
 int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int ip) {
   MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1,ppt;
   int          it,maxit;
   MMG5_int     iel,np,nq;
   double       m[3],o[3],tp,to,t;
-  int8_t       ia,ier;
+  int8_t       ia,ier,iso_edge;
+
+  if ( !mesh->info.iso ) {
+    /** Check for insertion by dichotomy only along iso surfaces (so we can
+     * leave in iso mode) */
+    return 0;
+  }
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
   pt  = &mesh->tetra[iel];
+
+  if ( !pt->xt ) {
+    /** No way to know if edge is along iso surface if we don't work from a
+     * tetra with a boundary face */
+    return 0;
+  }
+
+  pxt = &mesh->xtetra[pt->xt];
+  iso_edge = (pxt->ftag[MMG5_ifar[ia][0]] & MG_ISO) || (pxt->ftag[MMG5_ifar[ia][0]] & MG_ISO);
+
+  if ( !iso_edge ) {
+    /* Edge is not along iso surface: we don't want to compute the dichotomy */
+    return 0;
+  }
 
   np = pt->v[MMG5_iare[ia][0]];
   nq = pt->v[MMG5_iare[ia][1]];
@@ -1338,7 +1407,7 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPar     par;
   double        ll,o[3],ux,uy,uz,hma2,mincal;
   int           l,memlack,ier;
-  MMG5_int      src,vx[6],ip,ip1,ip2,k,ne,ns,nap; 
+  MMG5_int      src,vx[6],ip,ip1,ip2,k,ne,ns,nap;
   int8_t        i,j,ia;
 
   /** 1. analysis */
@@ -2339,7 +2408,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
                                 MMG5_INCREASE_MEM_MESSAGE();
                                 MMG3D_delPatternPts(mesh,hash);return -1;
                                 ,o,MG_BDY,src);
-            // Now pb->p contain a wrong memory address.
+            // Now pb->p contains a wrong memory address.
             pb.p[0] = &mesh->point[ptt.v[0]];
             pb.p[1] = &mesh->point[ptt.v[1]];
             pb.p[2] = &mesh->point[ptt.v[2]];

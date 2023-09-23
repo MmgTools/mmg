@@ -83,6 +83,156 @@ void MMG3D_split1_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param pt pointer toward tetra used to simulate splitting (possible future tetra)
+ * \param k index of tetra used to simulate splitting.
+ * \param ifac index of boundary face for which we want to check normal projection.
+ *
+ * \return 1 if split can be performed (no ridge point or positive projection of
+ * at least one of the normals at each ridge point onto the normal at new
+ * triangle). 0 otherwise (for at least one ridge point, the 2 normals have
+ * negative projection onto the normal at new tria).
+ *
+ * Check the positivity of the projection of normals at possible ridge points
+ * onto the normal at new triangle along boundary face \a ifac.
+ *
+ */
+static inline
+int MMG3D_check_ridpt_normal_proj_fac ( MMG5_pMesh mesh, MMG5_pTetra pt,MMG5_int k, int8_t ifac ) {
+
+  /* Note that the tetra may have no xtetra if element is split by adjacency
+   * (even for more than one edge) */
+  if ( !pt->xt ) {
+    return 1;
+  }
+
+  /* Remark: xtetra is not updated regarding to the splitting that is simulated
+   * but it is not an issue as it is used only to check the face tag */
+  MMG5_pxTetra pxt = &mesh->xtetra[pt->xt];
+
+  if ( !(pxt->ftag[ifac] & MG_BDY) ) {
+    /* nothing to check */
+    return 1;
+  }
+
+  MMG5_Tria ptt;
+  MMG5_tet2tri(mesh,k,ifac,&ptt);
+  double nt[3];
+  MMG5_nortri(mesh,&ptt,nt);
+
+  int8_t i;
+  for ( i=0; i<3; ++i ) {
+    MMG5_int     ip = pt->v[MMG5_idir[ifac][i]];
+    MMG5_pPoint ppt = &mesh->point[ip];
+    if ( MG_SIN(ppt->tag) || !MG_EDG( ppt->tag ) ) {
+      continue;
+    }
+
+    /* Non singular ridge point: check for normal projection */
+    assert ( ppt->xp );
+    MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
+    double ps = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
+    if ( ps > 0. ) {
+      /* Normal projection is ok for this point */
+      continue;
+    }
+    ps = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
+    if ( ps <= 0. ) {
+      /* We are here only if ps is <= 0 too so it means that we don't want
+       * to insert the point */
+      return 0;
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param pt pointer toward tetra used to simulate splitting (one of the tetra
+ * that will be created by the splitting).
+ * \param k index of tetra used to simulate splitting.
+ * \param ia index of edge shared by the 2 faces to test.
+ *
+ * \return 1 if split can be performed (no ridge point or positive projection of
+ * at least one of the normals at each ridge point onto the normal at new
+ * triangle). 0 otherwise (for at least one ridge point, the 2 normals have
+ * negative projection onto the normal at new tria).
+ *
+ * Check the positivity of the projection of normals at possible ridge points
+ * onto the normales at the 2 new triangles belonging to new tetra \a pt and
+ * created on both sides of edge \a ia.
+ *
+ */
+static inline
+int MMG3D_check_ridpt_normal_proj_edg ( MMG5_pMesh mesh, MMG5_pTetra pt,MMG5_int k, int8_t ia ) {
+  int8_t ifac;
+
+  if ( !pt->xt ) {
+    return 1;
+  }
+
+  /* If tetra has a boundary face, check the projection of the normals at
+   * ridge points onto new triangle normal (otherwise we will fail later in
+   * mmg3dBezierCP) */
+  ifac = MMG5_ifar[ia][0];
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt,k,ifac) ) {
+    return 0;
+  }
+
+  ifac = MMG5_ifar[ia][1];
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt,k,ifac) ) {
+    return 0;
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param pt pointer toward tetra used to simulate splitting (one of the tetra
+ * that will be created by the splitting).
+ * \param k index of tetra used to simulate splitting.
+ * \param ifac1 index of face to test.
+ * \param ifac2 index of the second face to test.
+ * \param ifac3 index of the third face to test.
+ *
+ * \return 1 if split can be performed (no ridge point or positive projection of
+ * at least one of the normals at each ridge point onto the normal at new
+ * triangle). 0 otherwise (for at least one ridge point, the 2 normals have
+ * negative projection onto the normal at new tria).
+ *
+ * Check the positivity of the projection of normals at possible ridge points
+ * onto the normald at the 3 new triangles belonging to new tetra \a pt and
+ * faces with local index \a ifac1, \a ifac2 \a ifac 3.
+ *
+ */
+static inline
+int MMG3D_check_ridpt_normal_proj_3fac ( MMG5_pMesh mesh,MMG5_pTetra pt,MMG5_int k,
+                                         int8_t ifac1,int8_t ifac2,int8_t ifac3 ) {
+
+
+  if ( !pt->xt ) {
+    return 1;
+  }
+
+  /* If tetra has a boundary face, check the projection of the normals at
+   * ridge points onto new triangle normal (otherwise we will fail later in
+   * mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt,k,ifac1) ) {
+    return 0;
+  }
+
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt,k,ifac2) ) {
+    return 0;
+  }
+
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt,k,ifac3) ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/** mmg3d_debug dense.mesh -sol dense.sol -ls 0 -hausd 0.5 -hmin 1 -hmax 5 -ar 80 -nofem
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
@@ -107,16 +257,29 @@ int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 
   MMG3D_split1_cfg(pt->flag,tau,&taued);
 
-  /* Test volume of the two created tets */
+  /* Test volume and normal deviation with regard to ridge points for the two
+   * created tets */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[1]] = vx[taued[0]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
 
+  /* Check the projection of the normals at ridge points onto the normal at the
+   * new triangle (otherwise we will fail later in mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+    return 0;
+  }
+
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+
+  /* Check the projection of the normals at ridge points onto the normal at the
+   * new triangle (otherwise we will fail later in mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+    return 0;
+  }
 
   return 1;
 }
@@ -1092,6 +1255,10 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
   pt0->v[tau[2]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[1],tau[2]) ) {
+    return 0;
+  }
+
 
   if ( imin == tau[1] ) {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -1100,22 +1267,53 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
 
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[1]-tau[3]-tau[2], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[4]) ) {
+      return 0;
+    }
+
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[3]] = vx[taued[5]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+
+    /* Check the projection of the normals at ridge points onto the normal at the
+     * new triangle (otherwise we will fail later in mmg3dBezierCP) */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[5]) ) {
+      return 0;
+    }
   }
   else {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[1]-tau[3]-tau[2], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[4]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[4]];
     pt0->v[tau[3]] = vx[taued[5]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[1]-tau[3]-tau[2], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[5]) ) {
+      return 0;
+    }
   }
   return 1;
 }
@@ -1198,7 +1396,7 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
   }
   else if ( (!met) || (!met->m) ) {
     /* in ls mode + -A option, orcal calls caltet_ani that fails */
-    for (i=0; i<ne; i++) {    
+    for (i=0; i<ne; i++) {
       pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
     }
   }
@@ -1395,21 +1593,53 @@ int MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
   pt0->v[tau[1]] = vx[taued[0]];  pt0->v[tau[2]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+   * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+   * taued[2] */
+  if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[1]] = vx[taued[0]];  pt0->v[tau[3]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+   * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+   * taued[1] */
+  if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];  pt0->v[tau[2]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+   * tau[1]-tau[3]-tau[2], that are, the two faces on both sides of edge
+   * taued[4] */
+  if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];  pt0->v[tau[3]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+   * tau[1]-tau[3]-tau[2], that are, the two faces on both sides of edge
+   * taued[4] */
+  if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[3]) ) {
+    return 0;
+  }
 
   return 1;
 }
@@ -1603,18 +1833,33 @@ int MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   pt0->v[tau[2]] = vx[taued[1]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangles (otherwise we will fail later in mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[2],tau[1],tau[3]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   pt0->v[tau[2]] = vx[taued[3]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangles (otherwise we will fail later in mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[2],tau[0],tau[3]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[1]];
   pt0->v[tau[1]] = vx[taued[3]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangles (otherwise we will fail later in mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[3],tau[0],tau[1]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
@@ -1622,6 +1867,11 @@ int MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   pt0->v[tau[2]] = vx[taued[1]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (useful only if some of the new points are ridges) */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[3]) ) {
+    return 0;
+  }
 
   return 1;
 }
@@ -1838,8 +2088,6 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
     if ( pt->v[tau[3]] < pt->v[ib] ) {
       ib = tau[3];
     }
-    else {
-    }
   }
 
   /* Check orientation of the 4 newly created tets */
@@ -1849,6 +2097,11 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
   pt0->v[tau[3]] = vx[taued[2]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangles (otherwise we will fail later in mmg3dBezierCP) */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[2],tau[1],tau[3]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   if ( ia == tau[3] ) {
@@ -1857,6 +2110,14 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
     pt0->v[tau[2]] = vx[taued[1]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[2]-tau[3] and
+     * tau[0]-tau[1]-tau[3], that are, the two faces on both sides of edge
+     * taued[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     if ( ib == tau[1] ) {
@@ -1864,11 +2125,27 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
       pt0->v[tau[2]] = vx[taued[1]];
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+       * tau[0]-tau[1]-tau[3], that are, the two faces on both sides of edge
+       * taued[0] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+        return 0;
+      }
 
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[tau[0]] = vx[taued[1]] ;
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[2]-tau[3] and
+       * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+       * taued[1] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+        return 0;
+      }
     }
     else {
       assert(ib == tau[2]);
@@ -1876,11 +2153,27 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
       pt0->v[tau[1]] = vx[taued[0]];
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[2]-tau[3] and
+       * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+       * taued[1] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+        return 0;
+      }
 
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[tau[0]] = vx[taued[0]] ;
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+       * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+       * taued[0] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+        return 0;
+      }
     }
   }
   else if (ia == tau[2] ) {
@@ -1890,6 +2183,15 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
 
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[3]-tau[2] and
+     * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+     * taued[1] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+      return 0;
+    }
+
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     if ( ib == tau[3] ) {
       pt0->v[tau[0]] = vx[taued[2]];
@@ -1897,10 +2199,28 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
 
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[3]-tau[2] and
+       * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+       * taued[1] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+        return 0;
+      }
+
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[tau[0]] = vx[taued[0]];
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+       * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+       * taued[0] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+        return 0;
+      }
     }
     else {
       assert(ib == tau[1]);
@@ -1909,10 +2229,28 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
 
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+       * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+       * taued[0] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+        return 0;
+      }
+
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[tau[0]] = vx[taued[2]];
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+       * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+       * taued[2] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+        return 0;
+      }
     }
   }
   else {
@@ -1924,17 +2262,42 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
 
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+     * taued[1] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+      return 0;
+    }
+
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     if ( ib == tau[2] ) {
       pt0->v[tau[0]] = vx[taued[1]];
       pt0->v[tau[3]] = vx[taued[2]] ;
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+       * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+       * taued[1] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+        return 0;
+      }
 
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[tau[0]] = vx[taued[2]] ;
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+       * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+       * taued[2] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+        return 0;
+      }
 
     }
     else {
@@ -1945,10 +2308,28 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
 
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+       * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+       * taued[2] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+        return 0;
+      }
+
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[tau[0]] = vx[taued[1]];
       vnew = MMG5_orvol(mesh->point,pt0->v);
       if ( vnew < MMG5_EPSOK )  return 0;
+
+      /* Check the projection of the normals at ridge points onto the normal at
+       * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+       * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+       * tau[0]-tau[3]-tau[2], that are, the two faces on both sides of edge
+       * taued[1] */
+      if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+        return 0;
+      }
     }
   }
 
@@ -2460,77 +2841,191 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[ip0] = vx[ie1] ;  pt0->v[ip1] = vx[ie0] ; pt0->v[ip3] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip1-ip2 and
+     * ip0-ip3-ip2, that are, the two faces on both sides of edge
+     * ie1 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie1) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip3] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip1-ip2 and
+     * ip1-ip3-ip2, that are, the two faces on both sides of edge
+     * ie3 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie3) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip3-ip1-ip2 and
+     * ip1-ip3-ip0, that are, the two faces on both sides of edge
+     * ie4 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie4) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ; pt0->v[ip3] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip1-ip2 and
+     * ip0-ip3-ip2, that are, the two faces on both sides of edge
+     * ie1 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie1) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip3-ip2 and
+     * ip0-ip3-ip1, that are, the two faces on both sides of edge
+     * ie2 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie2) ) {
+      return 0;
+    }
   }
 
   else if ( (imin12 == ip1) && (imin03 == ip0) ) {
     pt0->v[ip0] = vx[ie1] ; pt0->v[ip3] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0, ip1 and ip2 */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,ip0,ip1,ip2) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ; pt0->v[ip3] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangle ip3 */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,ip3) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip1 ip2 ip3 and
+     * ip0 ip1 ip3, that are, the two faces on both sides of edge
+     * ie4 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie4) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0 ip2 ip3 and
+     * ip0 ip1 ip3, that are, the two faces on both sides of edge
+     * ie2 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie2) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1]; pt0->v[ip3] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0 ip2 ip3 and
+     * ip0 ip1 ip2, that are, the two faces on both sides of edge
+     * ie1 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie1) ) {
+      return 0;
+    }
   }
   else if ( (imin12 == ip2) && (imin03 == ip3) ) {
     pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip1, ip2 and ip3 */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,ip3,ip1,ip2) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie1] ; pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangle ip1 */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,ip1) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip1 ip2 ip3 and
+     * ip0 ip1 ip3, that are, the two faces on both sides of edge
+     * ie4 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie4) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie1] ; pt0->v[ip1] = vx[ie0]; pt0->v[ip3] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0 ip2 ip3 and
+     * ip0 ip1 ip2, that are, the two faces on both sides of edge
+     * ie1 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie1) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip3] = vx[ie5];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip1-ip2 and
+     * ip1-ip3-ip2, that are, the two faces on both sides of edge
+     * ie3 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie3) ) {
+      return 0;
+    }
+
   }
   else {
     assert((imin12 == ip1) && (imin03 == ip3)) ;
@@ -2538,21 +3033,50 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip1, ip2 and ip3 */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,ip3,ip1,ip2) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie1] ; pt0->v[ip3] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0, ip1 and ip3 */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,ip0,ip1,ip3) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip1-ip2 and
+     * ip0-ip1-ip2, that are, the two faces on both sides of edge
+     * ie0 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie0) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip0] = vx[ie1] ; pt0->v[ip2] = vx[ie5] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles ip0-ip2-ip3 and
+     * ip1-ip3-ip2, that are, the two faces on both sides of edge
+     * ie4 */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,ie4) ) {
+      return 0;
+    }
+
   }
 
   return 1;
@@ -3270,6 +3794,12 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   pt0->v[tau[3]] = vx[taued[2]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[1], tau[2] and tau[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[1],tau[2],tau[3]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[2]];
@@ -3278,6 +3808,12 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   pt0->v[tau[3]] = vx[taued[4]] ;
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle tau[0]-tau[1]-tau[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[2]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   if ( imin12 == tau[1] ) {
@@ -3286,12 +3822,29 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+     * taued[0] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[0]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[1]];
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[1]-tau[2]-tau[3] and
+     * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+     * taued[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[3]) ) {
+      return 0;
+    }
+
   }
   else {
     pt0->v[tau[0]] = vx[taued[1]];
@@ -3299,12 +3852,25 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[tau[3]] = vx[taued[4]] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[1]-tau[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[0]];
     pt0->v[tau[3]] = vx[taued[4]] ;
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0],tau[2] and
+     * tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[2],tau[3]) ) {
+      return 0;
+    }
   }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -3314,12 +3880,26 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[2]-tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[1]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[2]];
     pt0->v[tau[1]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0],tau[1] and
+     * tau[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[1],tau[2]) ) {
+      return 0;
+    }
+
   }
   else {
     pt0->v[tau[0]] = vx[taued[2]];
@@ -3327,12 +3907,29 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[tau[2]] = vx[taued[1]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[2]-tau[3] and
+     * tau[0]-tau[1]-tau[3], that are, the two faces on both sides of edge
+     * taued[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[2]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[1]];
     pt0->v[tau[1]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[2]-tau[3] and
+     * tau[1]-tau[2]-tau[3], that are, the two faces on both sides of edge
+     * taued[5] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[5]) ) {
+      return 0;
+    }
+
   }
 
   return 1;
@@ -3590,35 +4187,77 @@ int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0],tau[2] and
+     * tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[2],tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[4]]; pt0->v[tau[2]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[1]-tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[2]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[3]]; pt0->v[tau[2]] = vx[taued[1]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+     * tau[0]-tau[2]-tau[3], that are, the two faces on both sides of edge
+     * taued[1] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+      return 0;
+    }
   }
   else {
     pt0->v[tau[2]] = vx[taued[1]]; pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[01,tau[2] and
+     * tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[1],tau[2],tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[2]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[1]-tau[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[2]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[1]-tau[2]-tau[3], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[4]) ) {
+      return 0;
+    }
   }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -3626,35 +4265,77 @@ int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
     pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0],tau[1] and
+     * tau[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[1],tau[2]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[1]-tau[2]-tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[0]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[1]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[2] and
+     * tau[0]-tau[2]-tau[3], that are, the two faces on both sides of edge
+     * taued[1] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+      return 0;
+    }
   }
   else {
     pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[1]] = vx[taued[3]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0],tau[1] and
+     * tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[1],tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[3]];
     pt0->v[tau[2]] = vx[taued[1]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[2]-tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[1]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
     pt0->v[tau[2]] = vx[taued[3]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[1]-tau[2]-tau[3], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[4]) ) {
+      return 0;
+    }
   }
 
   return 1;
@@ -3980,59 +4661,127 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   pt0->v[tau[2]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[0],tau[1] and
+   * tau[2] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[1],tau[2]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[1]] = vx[taued[3]];
   pt0->v[tau[3]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles tau[0],tau[1] and
+   * tau[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[1],tau[3]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
   pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle tau[1]-tau[2]-tau[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[0]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[3]];
   pt0->v[tau[2]] = vx[taued[1]]; pt0->v[tau[3]] = vx[taued[5]];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle tau[0]-tau[2]-tau[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[1]) ) {
+    return 0;
+  }
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   if ( imin == tau[0] ) {
     pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0],tau[2] and
+     * tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[0],tau[2],tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[4]]; pt0->v[tau[2]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[1]-tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[2]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[3]]; pt0->v[tau[2]] = vx[taued[1]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[2]-tau[3] and
+     * tau[0]-tau[1]-tau[2], that are, the two faces on both sides of edge
+     * taued[1] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[1]) ) {
+      return 0;
+    }
   }
   else {
     pt0->v[tau[2]] = vx[taued[1]]; pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[1],tau[2] and
+     * tau[3] */
+    if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,tau[1],tau[2],tau[3]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[2]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normals at triangles tau[0]-tau[1]-tau[3] and
+     * tau[1]-tau[2]-tau[3], that are, the two faces on both sides of edge
+     * taued[4] */
+    if ( !MMG3D_check_ridpt_normal_proj_edg(mesh,pt0,0,taued[4]) ) {
+      return 0;
+    }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[2]] = vx[taued[3]];
     pt0->v[tau[3]] = vx[taued[2]];
     vnew = MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < MMG5_EPSOK )  return 0;
+    /* Check the projection of the normals at ridge points onto the normal at
+     * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+     * this tetra we want to check normal at triangle tau[0]-tau[1]-tau[2] */
+    if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,tau[3]) ) {
+      return 0;
+    }
   }
 
   return 1;
@@ -4269,45 +5018,97 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   pt0->v[0] = pt->v[0]; pt0->v[1] = vx[0]; pt0->v[2] = vx[1]; pt0->v[3] = vx[2];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles vx[1],vx[2] and
+   * vx[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,vx[1],vx[2],vx[3]) ) {
+    return 0;
+  }
 
   /* Modify second tetra */
   pt0->v[0] = vx[0]; pt0->v[1] = pt->v[1]; pt0->v[2] = vx[3]; pt0->v[3] = vx[4];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles vx[0],vx[2] and
+   * vx[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,vx[0],vx[2],vx[3]) ) {
+    return 0;
+  }
 
   /* Modify 3rd tetra */
   pt0->v[0] = vx[1]; pt0->v[1] = vx[3]; pt0->v[2] = pt->v[2]; pt0->v[3] = vx[5];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles vx[0],vx[1] and
+   * vx[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,vx[0],vx[1],vx[3]) ) {
+    return 0;
+  }
 
   /* Modify 4th tetra */
   pt0->v[0] = vx[2]; pt0->v[1] = vx[4]; pt0->v[2] = vx[5]; pt0->v[3] = pt->v[3];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normals at triangles vx[0],vx[1] and
+   * vx[2] */
+  if ( !MMG3D_check_ridpt_normal_proj_3fac(mesh,pt0,0,vx[0],vx[1],vx[2]) ) {
+    return 0;
+  }
 
   /* Modify 5th tetra */
   pt0->v[0] = vx[0]; pt0->v[1] = vx[3]; pt0->v[2] = vx[1];
   pt0->v[3] = vx[2];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle vx[0]-vx[1]-vx[2] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,vx[3]) ) {
+    return 0;
+  }
 
   /* Modify 6th tetra */
   pt0->v[0] = vx[2]; pt0->v[1] = vx[0]; pt0->v[2] = vx[3];
   pt0->v[3] = vx[4];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle vx[0]-vx[1]-vx[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,vx[2]) ) {
+    return 0;
+  }
 
   /* Modify 7th tetra */
   pt0->v[0] = vx[2]; pt0->v[1] = vx[3]; pt0->v[2] = vx[1];
   pt0->v[3] = vx[5];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle vx[0]-vx[2]-vx[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,vx[1]) ) {
+    return 0;
+  }
 
   /* Modify last tetra */
   pt0->v[0] = vx[2]; pt0->v[1] = vx[3]; pt0->v[2] = vx[5];
   pt0->v[3] = vx[4];
   vnew = MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < MMG5_EPSOK )  return 0;
+  /* Check the projection of the normals at ridge points onto the normal at
+   * the new triangle (otherwise we will fail later in mmg3dBezierCP): for
+   * this tetra we want to check normal at triangle vx[1]-vx[2]-vx[3] */
+  if ( !MMG3D_check_ridpt_normal_proj_fac(mesh,pt0,0,vx[0]) ) {
+    return 0;
+  }
 
   return 1;
 }
