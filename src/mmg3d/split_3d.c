@@ -257,7 +257,7 @@ nextstep1:
  * Split 1 edge of tetra \a k.
  *
  */
-int MMG5_split1_GlobNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp, MMG5_int myrank) {
+int MMG5_split1_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp, MMG5_int myrank) {
   MMG5_pTetra         pt,pt1;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
@@ -431,6 +431,7 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int
 
   return  ier;
 }
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric.
@@ -1490,7 +1491,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * Split of two edges that belong to a common face : 1 tetra becomes 3
  *
  */
-int MMG5_split2sf_GlobNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp, MMG5_int myrank){
+int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp, MMG5_int myrank){
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
@@ -2642,7 +2643,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
  * Split 3 opposite edges in a tetra
  *
  */
-int MMG5_split3cone_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp, MMG5_int myrank){
+int MMG5_split3cone_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp, MMG5_int myrank){
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
@@ -4599,7 +4600,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * Split 4 edges in a configuration when no 3 edges lie on the same face
  *
  */
-int MMG5_split4op_GlobNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp, MMG5_int myrank) {
+int MMG5_split4op_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp, MMG5_int myrank) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
@@ -5842,6 +5843,7 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
   }
   return 1;
 }
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
