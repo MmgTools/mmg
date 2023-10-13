@@ -257,7 +257,7 @@ nextstep1:
  * Split 1 edge of tetra \a k.
  *
  */
-int MMG5_split1_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp, MMG5_int myrank) {
+int MMG5_split1_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp) {
   MMG5_pTetra         pt,pt1;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
@@ -1491,7 +1491,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * Split of two edges that belong to a common face : 1 tetra becomes 3
  *
  */
-int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp, MMG5_int myrank){
+int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp){
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
@@ -1513,13 +1513,6 @@ int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
   }
 
   imin = MMG3D_split2sf_cfg(flg,vGlobNum,tau,&taued);
-
-  if (myrank) {
-    fprintf(stdout,"                     MMG5_split2sf_GlobNum :: tau %d-%d-%d-%d, taued %d, imin:: %d \n"
-                    "                         Initial :: pt[0].v %d-%d-%d-%d \n",
-                    tau[0],tau[1],tau[2],tau[3],taued[0],imin,
-                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3]);
-  }
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
   pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
@@ -1559,17 +1552,6 @@ int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
     xt[2].ref [ tau[2]] = 0;  xt[2].ref [ tau[3]] = 0;
     xt[2].ftag[ tau[2]] = 0;  xt[2].ftag[ tau[3]] = 0;
     MG_SET(xt[2].ori, tau[2]);  MG_SET(xt[2].ori, tau[3]);
-  }
-
-  if (myrank) {
-    fprintf(stdout, "                           pt[0].v %d-%d-%d-%d \n"
-                    "                           pt[1].v %d-%d-%d-%d \n"
-                    "                           pt[2].v %d-%d-%d-%d \n"
-                    "                           pt[3].v %d-%d-%d-%d \n",
-                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
-                    pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
-                    pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
-                    pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -2643,7 +2625,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
  * Split 3 opposite edges in a tetra
  *
  */
-int MMG5_split3cone_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp, MMG5_int myrank){
+int MMG5_split3cone_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp){
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
@@ -2667,13 +2649,6 @@ int MMG5_split3cone_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int
   /* Set permutation of vertices */
   // ACHTUNG : NOTE : This is fine when using Glob Num, not fine if we use pt->v
   MMG3D_split3cone_cfg(flg,vGlobNum,tau,&taued,&ia,&ib);
-
-  if (myrank) {
-    fprintf(stdout,"                     MMG5_split3cone_GlobNum :: tau %d-%d-%d-%d, taued %d, ia:: %d, ib:: %d \n"
-                    "                         Initial :: pt[0].v %d-%d-%d-%d \n",
-                    tau[0],tau[1],tau[2],tau[3],taued[0],ia,ib,
-                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3]);
-  }
 
   pt[0]->v[tau[1]] = vx[taued[0]] ; pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
   xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
@@ -2829,17 +2804,6 @@ int MMG5_split3cone_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int
       xt[3].ftag[ tau[2]] = 0;
       MG_SET(xt[3].ori, tau[2]);
     }
-  }
-
-  if (myrank) {
-    fprintf(stdout, "                           pt[0].v %d-%d-%d-%d \n"
-                    "                           pt[1].v %d-%d-%d-%d \n"
-                    "                           pt[2].v %d-%d-%d-%d \n"
-                    "                           pt[3].v %d-%d-%d-%d \n",
-                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
-                    pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
-                    pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
-                    pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -4600,7 +4564,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * Split 4 edges in a configuration when no 3 edges lie on the same face
  *
  */
-int MMG5_split4op_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp, MMG5_int myrank) {
+int MMG5_split4op_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
@@ -4627,13 +4591,6 @@ int MMG5_split4op_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
   /* Create 5 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
-  }
-
-  if (myrank) {
-    fprintf(stdout,"                     MMG5_split4op_GlobNum :: tau %d-%d-%d-%d, taued %d, imin01:: %d, imin23:: %d \n"
-                    "                         Initial :: pt[0].v %d-%d-%d-%d \n",
-                    tau[0],tau[1],tau[2],tau[3],taued[0],imin01,imin23,
-                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3]);
   }
 
   /* Generic formulation for split of 4 edges, with no 3 edges lying on the same face */
@@ -4913,21 +4870,6 @@ int MMG5_split4op_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int v
 
     MG_SET(xt[5].ori, tau[1]);
     MG_SET(xt[5].ori, tau[3]);
-  }
-
-  if (myrank) {
-    fprintf(stdout, "                           pt[0].v %d-%d-%d-%d \n"
-                    "                           pt[1].v %d-%d-%d-%d \n"
-                    "                           pt[2].v %d-%d-%d-%d \n"
-                    "                           pt[3].v %d-%d-%d-%d \n"
-                    "                           pt[4].v %d-%d-%d-%d \n"
-                    "                           pt[5].v %d-%d-%d-%d \n",
-                    pt[0]->v[0],pt[0]->v[1],pt[0]->v[2],pt[0]->v[3],
-                    pt[1]->v[0],pt[1]->v[1],pt[1]->v[2],pt[1]->v[3],
-                    pt[2]->v[0],pt[2]->v[1],pt[2]->v[2],pt[2]->v[3],
-                    pt[3]->v[0],pt[3]->v[1],pt[3]->v[2],pt[3]->v[3],
-                    pt[4]->v[0],pt[4]->v[1],pt[4]->v[2],pt[4]->v[3],
-                    pt[5]->v[0],pt[5]->v[1],pt[5]->v[2],pt[5]->v[3]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
