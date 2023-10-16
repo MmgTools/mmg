@@ -570,7 +570,7 @@ MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
  * otherwise, find the value stored in variable s.
  *
  */
-int MMG5_hashGet_all(MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int *k,MMG5_int *s) {
+MMG5_int MMG5_hashGet_all(MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int *k,MMG5_int *s) {
   MMG5_hedge  *ph;
   MMG5_int    key;
   MMG5_int    ia,ib;
