@@ -1830,7 +1830,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
  */
 inline
 void MMG3D_split3cone_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
-                          const uint8_t **taued, uint8_t *ia,uint8_t *ib) {
+                          const uint8_t **taued,uint8_t *ia,uint8_t *ib) {
 
 
   /* Set permutation of vertices : reference configuration 7 */
@@ -2087,7 +2087,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
  * Split 3 opposite edges in a tetra
  *
  */
-int MMG5_split3cone_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp){
+int MMG5_split3cone_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp){
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
@@ -3808,7 +3808,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * Split 4 edges in a configuration when no 3 edges lie on the same face
  *
  */
-int MMG5_split4op_globNum(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6], MMG5_int vGlobNum[4], int8_t metRidTyp) {
+int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
