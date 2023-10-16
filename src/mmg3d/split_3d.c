@@ -1013,9 +1013,9 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
 
 /**
  * \param flag flag to detect the splitting configuration
+ * \param v indices of the tetra nodes
  * \param tau vertices permutation
  * \param taued edges permutation
- * \param pt tetra in which the splitting is performed
  *
  * Compute vertices and edges permutation for the split of 2 edge along the same
  * face. The configuration flag is computed such as the i^th bit of flag is 1 if
@@ -1080,7 +1080,6 @@ uint8_t MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_
 
   return imin;
 }
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1819,7 +1818,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
 /**
  * \param flag initial tetra
- * \param v index of tetra nodes
+ * \param v indices of the tetra nodes
  * \param tau vertices permutation
  * \param taued edges permutation
  * \param ia first  condition to choose the split
@@ -3621,7 +3620,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 
 /**
  * \param flag initial tetra
- * \param v index of tetra nodes
+ * \param v indices of tetra nodes
  * \param tau vertices permutation
  * \param taued edges permutation
  * \param imin01 minimal index of vertices ip0 and ip1
