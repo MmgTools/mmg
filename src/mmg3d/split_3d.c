@@ -1271,8 +1271,8 @@ int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
   MMG5_pxTetra        pxt0;
   int                 i,flg;
   MMG5_int            newtet[3];
-  int8_t              imin,firstxt,isxt[3];
-  uint8_t             tau[4];
+  int8_t              firstxt,isxt[3];
+  uint8_t             tau[4],imin;
   const uint8_t       *taued;
   const int           ne=3;
 
@@ -2093,8 +2093,8 @@ int MMG5_split3cone_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx
   MMG5_pxTetra        pxt0;
   int                 i;
   MMG5_int            newtet[4];
-  int8_t              flg,firstxt,isxt[4],ia,ib;
-  uint8_t             tau[4];
+  int8_t              flg,firstxt,isxt[4];
+  uint8_t             tau[4],ia,ib;
   const uint8_t       *taued;
   const int           ne=4;
 
@@ -3813,8 +3813,8 @@ int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
   MMG5_int            newtet[6];
-  int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
-  uint8_t             tau[4];
+  int8_t              flg,firstxt,isxt[6],i,j;
+  uint8_t             tau[4],imin01,imin23;
   const uint8_t       *taued=NULL;
   const int           ne=6;
 
