@@ -613,38 +613,36 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
       if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
         return 0;
 
-      if ( pt->xt )  {
-        for (i=0; i<4; i++) {
-          if ( i==ipp || i==iq ) {
-            continue;
+      for (i=0; i<4; i++) {
+        if ( i==ipp || i==iq ) {
+          continue;
+        }
+
+        /*  Avoid surface crimping: check that the collapse doesn't merge 3
+         *  bdy edge along a non bdy face: we have to check the edge of each
+         *  shell because some MG_BDY tags may be missings due to the creation
+         *  of an xtetra during a previous collapse */
+        if ( (!pt->xt) || !(pxt->ftag[i] & MG_BDY) ) {
+          int16_t tag0,tag1,tag2;
+          int     ref0,ref1,ref2;
+
+          tag0 = tag1 = tag2 = 0;
+          ref0 = ref1 = ref2 = 0;
+
+          if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][0],&tag0,&ref0) ) {
+            fprintf(stderr,"\n  ## Error: %s: 0. unable to get edge info.\n",__func__);
+            return 0;
           }
-
-          /*  Avoid surface crimping: check that the collapse doesn't merge 3
-           *  bdy edge along a non bdy face: we have to check the edge of each
-           *  shell because some MG_BDY tags may be missings due to the creation
-           *  of an xtetra during a previous collapse */
-          if ( !(pxt->ftag[i] & MG_BDY) ) {
-            int16_t tag0,tag1,tag2;
-            int     ref0,ref1,ref2;
-
-            tag0 = tag1 = tag2 = 0;
-            ref0 = ref1 = ref2 = 0;
-
-            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][0],&tag0,&ref0) ) {
-              fprintf(stderr,"\n  ## Error: %s: 0. unable to get edge info.\n",__func__);
-              return 0;
-            }
-            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][1],&tag1,&ref1) ) {
-              fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
-              return 0;
-            }
-            if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][2],&tag2,&ref2) ) {
-              fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
-              return 0;
-            }
-            if ( (tag0 & MG_BDY) && (tag1 & MG_BDY) && (tag2 & MG_BDY ) ) {
-              return 0;
-            }
+          if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][1],&tag1,&ref1) ) {
+            fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+            return 0;
+          }
+          if ( !MMG3D_get_shellEdgeTag(mesh,iel,MMG5_iarf[i][2],&tag2,&ref2) ) {
+            fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+            return 0;
+          }
+          if ( (tag0 & MG_BDY) && (tag1 & MG_BDY) && (tag2 & MG_BDY ) ) {
+            return 0;
           }
         }
       }
