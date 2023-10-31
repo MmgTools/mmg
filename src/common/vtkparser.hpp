@@ -334,25 +334,39 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   }
 
   // Transfer point solutions into data set
-  MMG5_pSol   psl   = NULL;
-  int         nsols;
+  MMG5_pSol   psl       = NULL;
+  int         fieldData = 0;
+  int         nsols = 0;
 
+  // For functions: MMG<Y>_saveVt<X>Mesh;
+  // PMMG_savePvtuMesh and PMMG_savePvtuMesh_and_allData
   if ( metricData==1 ) {
     if ( sol && *sol && sol[0]->np ) {
       nsols = 1;
     }
-    else {
-      /* In analysis mode (-noinsert -noswap -nomove), metric is not allocated */
-      nsols = 0;
-    }
   }
-  else {
-    nsols = mesh->nsols;
+
+  // If we have other fields to output
+  // For functions: MMG<Y>_saveVt<X>Mesh_and_allData and PMMG_savePvtuMesh_and_allData
+  if (&sol[1][0]) {
+    nsols += mesh->nsols;
+    fieldData = 1;
   }
 
   static int mmgWarn = 0;
   for ( int isol=0; isol<nsols; ++isol) {
-    psl = *sol + isol;
+    //- If metric, it is stored in sol[0]
+    if (metricData && isol==0) {
+      psl = sol[0];
+    }
+    //- If metric and other fields, fields are stored in sol[1]
+    else if (metricData){
+      psl = &sol[1][isol-1];
+    }
+    //- If other fields only, fields are stored in sol[1]
+    else {
+      psl = &sol[1][isol];
+    }
 
     if ( !psl->m ) {
       if ( !mmgWarn ) {
@@ -396,7 +410,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
         strcat ( data2 , ":metric");
         ar->SetName(data2);
       }
-      else if (metricData && !strstr(data,":metric")) {
+      else if (metricData && !strstr(data,":metric") && isol==0) {
         strcat ( data , ":metric");
         ar->SetName(data);
       }

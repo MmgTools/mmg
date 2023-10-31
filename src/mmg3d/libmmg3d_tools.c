@@ -37,6 +37,13 @@
 #include "mmg3dexterns_private.h"
 #include "mmgexterns_private.h"
 
+void MMG5_argv_cleanup( char **mmgArgv, int mmgArgc )
+{
+  int i;
+  for ( i = 0; i < mmgArgc; ++i )
+    MMG5_SAFE_FREE(mmgArgv[i]);
+  MMG5_SAFE_FREE(mmgArgv);
+}
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 
@@ -187,49 +194,81 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
   return 1;
 }
 
-// In ls mode : metric must be provided using -met option (-sol or default is the ls).
-// In adp mode : -sol or -met or default allow to store the metric.
-int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+/**
+ * \param argc number of command line args
+ * \param argv command line args
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param sol pointer toward the solution (level-set or displacement)
+ * \param mmgArgc pointer toward the number of appened unknown args (to fill)
+ * \param mmgArgv pointer toward the appened unknown args (to fill)
+ *
+ * \return 1 if success, 0 if fail (missing value for argument)
+ *
+ * Store the values of command line arguments known by Mmg in suitable data
+ * structure and append unknown args in mmgArgv/mmgArgc.
+ *
+ */
+int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
+                       MMG5_pSol sol,int *mmgArgc, char *mmgArgv[]) {
   MMG5_pSol tmp = NULL;
+  double  val;
   int     i;
-  char    namein[MMG5_FILESTR_LGTH];
+  char    namein[MMG5_FILESTR_LGTH],*endptr;
+  int     param;
 
-  /* First step: search if user want to see the default parameters values. */
-  for ( i=1; i< argc; ++i ) {
-    if ( !strcmp(argv[i],"-val") ) {
-      if ( !MMG3D_defaultValues(mesh) ) return 0;
-      return 0;
-    }
-  }
-
-  /* Second step: read all other arguments. */
   i = 1;
   while ( i < argc ) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
-      case '?':
-        MMG3D_usage(argv[0]);
-        return 0;
-
       case 'a':
-        if ( !strcmp(argv[i],"-ar") && ++i < argc )
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,
-                                    atof(argv[i])) )
+       if ( !strcmp(argv[i],"-ar") ) {
+          if ( i >= argc -1 ) {
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
             return 0;
-        break;
+          }
+          else {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,val))
+                return 0;
+            }
+            else {
+              /* argument is not a number */
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+              return 0;
+            }
+          }
+       }
+       else {
+         /* Arg unknown by Mmg: arg starts with -a but is not known */
+         MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+       }
+       break;
       case 'A': /* anisotropy */
-        if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
-          return 0;
+        if ( !strcmp(argv[i],"-A") ) {
+          if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+            return 0;
+        }
+        else {
+          /* Arg unknown by Mmg: arg starts with -A but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
         break;
       case 'd':
         if ( !strcmp(argv[i],"-default") ) {
           mesh->mark=1;
         }
-        else {
+        else if ( !strcmp(argv[i],"-d") ) {
           /* debug */
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) ) {
             return 0;
           }
+        }
+        else {
+          /* Arg unknown by Mmg: arg starts with -d but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
       case 'f':
@@ -239,48 +278,62 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filename for %c\n",argv[i-1][1]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing filename for %s\n",argv[i-1]);
             return 0;
           }
         }
+        else {
+          /* Arg unknown by Mmg: arg starts with -f but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
         break;
       case 'h':
-        if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
-                                     atof(argv[i])) )
-            return 0;
-
-        }
-        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgradreq,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else {
-          MMG3D_usage(argv[0]);
+        param = MMG5_UNSET;
+        if ( i >= argc -1 ) {
+          fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
           return 0;
         }
+        else {
+          if ( !strcmp(argv[i],"-hmin") ) {
+            param = MMG3D_DPARAM_hmin;
+          }
+          else if ( !strcmp(argv[i],"-hmax") ) {
+            param = MMG3D_DPARAM_hmax;
+          }
+          else if ( !strcmp(argv[i],"-hsiz") ) {
+            param = MMG3D_DPARAM_hsiz;
+          }
+          else if ( !strcmp(argv[i],"-hausd") ) {
+            param = MMG3D_DPARAM_hausd;
+          }
+          else if ( !strcmp(argv[i],"-hgradreq") ) {
+            param = MMG3D_DPARAM_hgradreq;
+          }
+          else if ( !strcmp(argv[i],"-hgrad") ) {
+            param = MMG3D_DPARAM_hgrad;
+          }
+          else {
+            /* Arg unknown by Mmg: arg starts with -h but is not known */
+            MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+          }
+
+          if ( param != MMG5_UNSET ) {
+
+            /* Arg can be parsed */
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,param,val) ){
+                return 0;
+              }
+            } else {
+              /* argument is not a number */
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+              return 0;
+            }
+          }
+        }
+
         break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
@@ -289,8 +342,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
               return 0;
 
           }else{
-            fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -300,8 +352,8 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
         }
         else {
-          MMG3D_usage(argv[0]);
-          return 0;
+          /* Arg unknown by Mmg: arg starts with -i but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
       case 'l':
@@ -310,44 +362,48 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_lag,atoi(argv[i])) )
               return 0;
           }
-          else if ( i == argc ) {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
-            MMG3D_usage(argv[0]);
-            return 0;
-          }
           else {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            fprintf(stderr,"\nMissing or unexpected argument option %s\n",argv[i-1]);
             MMG3D_usage(argv[0]);
-            i--;
             return 0;
           }
         }
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_iso,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ||
-                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
-              return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,val))
+                return 0;
+            }
           }
-          else i--;
         }
         else if ( !strcmp(argv[i],"-lssurf") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isosurf,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ||
-                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
-              return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,val))
+                return 0;
+            }
           }
-          else i--;
+        }
+        else {
+          /* Arg unknown by Mmg: arg starts with -l but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
       case 'm':
         if ( !strcmp(argv[i],"-met") ) {
           if ( !met ) {
-            fprintf(stderr,"No metric structure allocated for %c%c%c option\n",
-                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            fprintf(stderr,"\nNo metric structure allocated for %s option\n",
+                    argv[i-1]);
             return 0;
           }
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
@@ -355,22 +411,24 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
         else if ( !strcmp(argv[i],"-m") ) {
           /* memory */
-        if ( ++i < argc && isdigit(argv[i][0]) ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
+            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
+          }
         }
         else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-          MMG3D_usage(argv[0]);
-          return 0;
-        }
+          /* Arg unknown by Mmg: arg starts with -m but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
       case 'n':
@@ -392,8 +450,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
               return 0;
           }
           else {
-            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -418,6 +475,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
           }
         }
+        else {
+          /* Arg unknown by Mmg: arg starts with -n but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
         break;
       case 'o':
         if ( (!strcmp(argv[i],"-out")) || (!strcmp(argv[i],"-o")) ) {
@@ -425,9 +486,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             if ( !MMG3D_Set_outputMeshName(mesh,argv[i]) )
               return 0;
           }else{
-            fprintf(stderr,"Missing filname for %c%c%c\n",
-                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
@@ -450,16 +509,23 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )
             return 0;
         }
+        else {
+          /* Arg unknown by Mmg: arg starts with -o but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
         break;
       case 'r':
         if ( !strcmp(argv[i],"-rmc") ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,0) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,atof(argv[i])) )
-              return 0;
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,val))
+                return 0;
+            }
           }
-          else i--;
         }
 #ifdef USE_SCOTCH
         else if ( !strcmp(argv[i],"-rn") ) {
@@ -469,23 +535,21 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
                 return 0;
             }
             else {
-              fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
-              MMG3D_usage(argv[0]);
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
               return 0;
             }
           }
           else {
-            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
             return 0;
           }
         }
 #endif
         else {
-          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
-          MMG3D_usage(argv[0]);
-          return 0;
+          /* Arg unknown by Mmg: arg starts with -r but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
+
         break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
@@ -497,70 +561,141 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
               return 0;
           }
           else {
-            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
-            MMG3D_usage(argv[0]);
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             return 0;
           }
         }
+        else {
+          /* Arg unknown by Mmg: arg starts with -s but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
         break;
       case 'v':
-        if ( ++i < argc ) {
-          if ( isdigit(argv[i][0]) ||
-               (argv[i][0]=='-' && isdigit(argv[i][1])) ) {
-            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,atoi(argv[i])) )
-              return 0;
+        if ( !strcmp(argv[i],"-v") ) {
+          if ( ++i < argc ) {
+            if ( isdigit(argv[i][0]) ||
+                 (argv[i][0]=='-' && isdigit(argv[i][1])) ) {
+              if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,atoi(argv[i])) )
+                return 0;
+            }
+            else {
+              i--;
+              fprintf(stderr,"\nMissing argument option %s\n",argv[i]);
+            }
           }
           else {
-            i--;
-            fprintf(stderr,"Missing argument option %s\n",argv[i]);
+            fprintf(stderr,"\nMissing argument option %s\n",argv[i-1]);
+            return 0;
           }
         }
         else {
-          fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
-          MMG3D_usage(argv[0]);
-          return 0;
+          /* Arg unknown by Mmg: arg starts with -v but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
       case 'x':
         if ( !strcmp(argv[i],"-xreg") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_xreg,1) )
             return 0;
-          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_xreg,atof(argv[i])) )
-              return 0;
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_xreg,val))
+                return 0;
+            }
           }
-          else i--;
+        }
+        else {
+          /* Arg unknown by Mmg: arg starts with -x but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
       default:
-        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
-        MMG3D_usage(argv[0]);
-        return 0;
+        /* Arg unknown by Mmg: arg starts with -<.>, <.> being a letter with
+         * which no known argument of Mmg begins */
+        MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
       }
     }
     else {
-      if ( mesh->namein == NULL ) {
-        if ( !MMG3D_Set_inputMeshName(mesh,argv[i]) )
-          return 0;
-        if ( mesh->info.imprim == -99 ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,5) )
-            return 0;
-        }
-      }
-      else if ( mesh->nameout == NULL ) {
-        if ( !MMG3D_Set_outputMeshName(mesh,argv[i]) )
-          return 0;
-      }
-      else {
-        fprintf(stdout,"Argument %s ignored\n",argv[i]);
-        MMG3D_usage(argv[0]);
-        return 0;
-      }
+      /* Arg unknown by Mmg: arg doesn't start by "-" and has not been parsed as
+       * the value expected by another argument */
+      MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
     }
     i++;
   }
 
-  /* check file names */
+  return 1;
+}
+
+
+// In ls mode : metric must be provided using -met option (-sol or default is the ls).
+// In adp mode : -sol or -met or default allow to store the metric.
+int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+  MMG5_pSol tmp = NULL;
+  int     i;
+  char    namein[MMG5_FILESTR_LGTH];
+
+  /* First step: search if user want to see the default parameters values or is
+   * asking for help */
+  for ( i=1; i< argc; ++i ) {
+    if ( !strcmp(argv[i],"-val") ) {
+      if ( !MMG3D_defaultValues(mesh) ) return 0;
+      return 0;
+    }
+    else if ( ( !strcmp( argv[ i ],"-?" ) ) || ( !strcmp( argv[ i ],"-h" ) ) ) {
+      MMG3D_usage(argv[0]);
+      return 0;
+    }
+  }
+
+  /* Second step: read all other arguments known by Mmg and append unknown ones
+   * in mmgArgv. */
+  int        mmgArgc = 0;
+  char**     mmgArgv = NULL;
+  MMG5_SAFE_MALLOC( mmgArgv, argc, char*,return 0);
+  MMG_ARGV_APPEND ( argv, mmgArgv, 0, mmgArgc,return 0);
+
+  int ier = MMG3D_storeknownar( argc,argv,mesh,met,sol,&mmgArgc,mmgArgv);
+
+  /* Third step: treat unknown args */
+  if ( ier ) {
+    i = 1;
+    while ( i < mmgArgc ) {
+      if ( *mmgArgv[i] != '-' ) {
+        /* Arg doesn't start by '-', try to parse it as filname */
+        if ( mesh->namein == NULL ) {
+          if ( !MMG3D_Set_inputMeshName(mesh,mmgArgv[i]) )
+            return 0;
+        }
+        else if ( mesh->nameout == NULL ) {
+          if ( !MMG3D_Set_outputMeshName(mesh,mmgArgv[i]) )
+            return 0;
+        }
+        else {
+          fprintf(stdout,"Argument %s ignored\n",mmgArgv[i]);
+          ier = 0;
+          break;
+        }
+      }
+      else {
+        /* Arg start by '-' and has not been parsed: unexpected */
+        fprintf(stdout,"Argument %s ignored\n",mmgArgv[i]);
+        ier = 0;
+        break;
+      }
+      i++;
+    }
+  }
+  MMG5_argv_cleanup(mmgArgv,mmgArgc);
+
+  /* Fourth step: handle errors */
+  if ( !ier ) {
+    MMG3D_usage(argv[0]);
+    return 0;
+  }
+
+  /* Last step: check file names */
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
@@ -570,7 +705,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   }
 
   if ( mesh->namein == NULL ) {
-    fprintf(stdout,"  -- INPUT MESH NAME ?\n");
+    fprintf(stdout,"\n  -- INPUT MESH NAME ?\n");
     fflush(stdin);
     MMG_FSCANF(stdin,"%127s",namein);
     if ( !MMG3D_Set_inputMeshName(mesh,namein) )

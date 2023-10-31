@@ -262,7 +262,6 @@ IF ( LONG_TESTS )
 
   ADD_TEST(NAME ${test_name}
     COMMAND ${EXECUT_MMG3D}
-    ${input_file}
     ### M6
     ${input_file}
     -v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60
@@ -671,7 +670,7 @@ ADD_TEST(NAME mmg3d_ParsOpName_NoFileName
   ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
   ${CTEST_OUTPUT_DIR}/mmg3d_ParsOpName_NoFileName.o.meshb)
 
-SET(parsopNameNo "Missing filename for f")
+SET(parsopNameNo "Missing filename for -f")
 SET_PROPERTY(TEST mmg3d_ParsOpName_NoFileName
   PROPERTY PASS_REGULAR_EXPRESSION "${parsopNameNo}")
 

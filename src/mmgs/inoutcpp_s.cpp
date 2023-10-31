@@ -329,6 +329,8 @@ int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 int MMGS_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
+  MMG5_pSol  allSol[2];
+
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
@@ -336,8 +338,11 @@ int MMGS_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
 
 #else
 
+  allSol[0] = NULL;
+  allSol[1] = *sol;
+
   return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkXMLUnstructuredGridWriter,
-                          vtkXMLPUnstructuredGridWriter>(mesh,sol,filename,0,1);
+                          vtkXMLPUnstructuredGridWriter>(mesh,allSol,filename,0,1);
 
 #endif
 }
@@ -359,6 +364,8 @@ int MMGS_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
+  MMG5_pSol  allSol[2];
+
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
@@ -366,8 +373,11 @@ int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
 
 #else
 
+  allSol[0] = NULL;
+  allSol[1] = *sol;
+
   return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkDataSetWriter,
-                          vtkPDataSetWriter>(mesh,sol,filename,0,0);
+                          vtkPDataSetWriter>(mesh,allSol,filename,0,0);
 
 #endif
 }
@@ -389,6 +399,8 @@ int MMGS_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 int MMGS_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
+  MMG5_pSol  allSol[2];
+
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
@@ -396,8 +408,11 @@ int MMGS_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
 
 #else
 
+  allSol[0] = NULL;
+  allSol[1] = *sol;
+
   return MMG5_saveVtkMesh<vtkPolyData,vtkXMLPolyDataWriter,
-                          vtkXMLPPolyDataWriter>(mesh,sol,filename,0,1);
+                          vtkXMLPPolyDataWriter>(mesh,allSol,filename,0,1);
 
 #endif
 }

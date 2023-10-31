@@ -55,7 +55,13 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
   hsize = mesh->nt;
 
   /* init */
-  inival = INT_MAX;
+  if ( sizeof(MMG5_int) == 8 ) {
+    inival = LONG_MAX;
+  }
+  else {
+    inival = INT_MAX;
+  }
+
   for (k=0; k<=mesh->nt; k++)
     hcode[k] = -inival;
 
@@ -185,7 +191,14 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
 
   /* init */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
-  inival = INT_MAX;
+
+  if ( sizeof(MMG5_int) == 8 ) {
+    inival = LONG_MAX;
+  }
+  else {
+    inival = INT_MAX;
+  }
+
   iadr   = 0;
   for (k=0; k<=mesh->nquad; k++)
     hcode[k] = -inival;
