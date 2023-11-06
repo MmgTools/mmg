@@ -317,7 +317,6 @@ int  MMG3D_setMeshSize_alloc(MMG5_pMesh);
 void MMG3D_split1_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued);
 int  MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
 int  MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp);
-int  MMG5_split1_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp);
 int  MMG5_split1b(MMG5_pMesh,MMG5_pSol,int64_t*,int,MMG5_int,int,int8_t,int8_t);
 MMG5_int  MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, double crit);
 uint8_t MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_t **taued);

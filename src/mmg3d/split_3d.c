@@ -132,28 +132,6 @@ int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
  *
  */
 int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
-  MMG5_pTetra    pt;
-
-  /* Tetra to be split */
-  pt  = &mesh->tetra[k];
-
-  return MMG5_split1_globNum(mesh,met,k,vx,pt->v,metRidTyp);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param k index of element to split.
- * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \param vGlobNum vertices indices of the tetra k.
- * \param metRidTyp metric storage (classic or special)
- *
- * \return 0 if fail, 1 otherwise
- *
- * Split 1 edge of tetra \a k.
- *
- */
-int MMG5_split1_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp) {
   MMG5_pTetra         pt,pt1;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
@@ -1013,7 +991,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
 
 /**
  * \param flag flag to detect the splitting configuration
- * \param v indices of the tetra nodes
+ * \param v indices of the tetra nodes (global node indices if called from ParMmg in ls mode)
  * \param tau vertices permutation
  * \param taued edges permutation
  *
@@ -1257,7 +1235,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \param vGlobNum vertices indices of the tetra k.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
  * \param metRidTyp metric storage (classic or special)
  *
  * \return 0 if fail, 1 otherwise
@@ -1818,7 +1796,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
 /**
  * \param flag initial tetra
- * \param v indices of the tetra nodes
+ * \param v indices of the tetra nodes (global node indices if called from ParMmg in ls mode)
  * \param tau vertices permutation
  * \param taued edges permutation
  * \param ia first  condition to choose the split
@@ -2079,7 +2057,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \param vGlobNum vertices indices of the tetra k.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
  * \param metRidTyp metric storage (classic or special)
  *
  * \return 0 if fail, 1 otherwise
@@ -3620,7 +3598,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 
 /**
  * \param flag initial tetra
- * \param v indices of tetra nodes
+ * \param v indices of tetra nodes (global node indices if called from ParMmg in ls mode)
  * \param tau vertices permutation
  * \param taued edges permutation
  * \param imin01 minimal index of vertices ip0 and ip1
@@ -3800,7 +3778,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \param vGlobNum vertices indices of the tetra k.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
  * \param metRidTyp metric storage (classic or special)
  *
  * \return 0 if fail, 1 otherwise
