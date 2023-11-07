@@ -397,6 +397,8 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_in
  * \return 1 if success, 0 if fail (edge is not found).
  *
  * Update the index of the point stored along the edge \f$[a;b]\f$
+ * \note In ParMmg, hash_pmmg.c: PMMG_hashUpdate_all updates k and s at the same time;
+ * \note PMMG_hashUpdate_all might be moved here if needed one day in mmg.
  *
  */
 int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
@@ -491,7 +493,9 @@ int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int1
  * \param b index of the second extremity of the edge.
  * \return the index of point stored along \f$[a;b]\f$.
  *
- * Find the index of point stored along  \f$[a;b]\f$.
+ * Find the index of point stored along \f$[a;b]\f$.
+ * \note In ParMmg, hash_pmmg.c: PMMG_hashGet_all gets k and s at the same time;
+ * \note PMMG_hashGet_all might be moved here if needed one day in mmg.
  *
  */
 MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {

@@ -335,7 +335,7 @@ typedef struct {
   MMG5_int ref; /*!< Reference of the triangle */
   MMG5_int base;
   MMG5_int cc; /*!< used to store the tetra + tetra face indices
-                 that allow to access to the tria */
+                 that allow to access to the tria 4*k + i */
   MMG5_int edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
   MMG5_int flag;

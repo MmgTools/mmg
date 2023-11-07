@@ -49,7 +49,7 @@ extern int8_t  ddb;
  * splitted).
  *
  */
-static inline
+inline
 void MMG3D_split1_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued) {
 
   /* default is case 1 */
@@ -127,8 +127,6 @@ int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
- *
- * \return 0 if fail, 1 otherwise
  *
  * Split 1 edge of tetra \a k.
  *
@@ -244,6 +242,7 @@ nextstep1:
   }
   return 1;
 }
+
 /**
  * \param mesh  pointer toward the mesh structure
  * \param start index of the tetra that we want to split
@@ -306,6 +305,7 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int
 
   return  ier;
 }
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric.
@@ -991,17 +991,17 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
 
 /**
  * \param flag flag to detect the splitting configuration
+ * \param v indices of the tetra nodes (global node indices if called from ParMmg in ls mode)
  * \param tau vertices permutation
  * \param taued edges permutation
- * \param pt tetra in which the splitting is performed
  *
  * Compute vertices and edges permutation for the split of 2 edge along the same
  * face. The configuration flag is computed such as the i^th bit of flag is 1 if
  * the i^th edge is splitted).
  *
  */
-static inline
-uint8_t MMG3D_split2sf_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTetra pt) {
+inline
+uint8_t MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_t **taued) {
   uint8_t imin;
 
   /* identity is case 48 */
@@ -1054,11 +1054,10 @@ uint8_t MMG3D_split2sf_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued,MMG5
     break;
   }
 
-  imin = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2] ;
+  imin = (v[tau[1]] < v[tau[2]]) ? tau[1] : tau[2] ;
 
   return imin;
 }
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1083,7 +1082,7 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  imin = MMG3D_split2sf_cfg(pt->flag,tau,&taued,pt);
+  imin = MMG3D_split2sf_cfg(pt->flag,pt->v,tau,&taued);
 
   /* Test orientation of the three tets to be created */
 
@@ -1219,19 +1218,39 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
  *
+ * Split of two edges that belong to a common face : 1 tetra becomes 3
+ *
+ */
+int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp){
+  MMG5_pTetra    pt;
+
+  /* Tetra to be split */
+  pt  = &mesh->tetra[k];
+
+  return MMG5_split2sf_globNum(mesh,met,k,vx,pt->v,metRidTyp);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
+ * \param metRidTyp metric storage (classic or special)
+ *
  * \return 0 if fail, 1 otherwise
  *
  * Split of two edges that belong to a common face : 1 tetra becomes 3
  *
  */
-int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp){
+int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp){
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
   int                 i,flg;
   MMG5_int            newtet[3];
-  int8_t              imin,firstxt,isxt[3];
-  uint8_t             tau[4];
+  int8_t              firstxt,isxt[3];
+  uint8_t             tau[4],imin;
   const uint8_t       *taued;
   const int           ne=3;
 
@@ -1245,7 +1264,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     return 0;
   }
 
-  imin = MMG3D_split2sf_cfg(flg,tau,&taued,pt[0]);
+  imin = MMG3D_split2sf_cfg(flg,vGlobNum,tau,&taued);
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
   pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
@@ -1776,6 +1795,65 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 }
 
 /**
+ * \param flag initial tetra
+ * \param v indices of the tetra nodes (global node indices if called from ParMmg in ls mode)
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param ia first  condition to choose the split
+ * \param ib second condition to choose the split
+ *
+ * Set permutation of vertices for the split of 3 edges in cone configuration.
+ * Reference configuration 7.
+ *
+ */
+inline
+void MMG3D_split3cone_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
+                          const uint8_t **taued,uint8_t *ia,uint8_t *ib) {
+
+
+  /* Set permutation of vertices : reference configuration 7 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  (*taued) = &MMG5_permedge[0][0];
+
+  switch(flag) {
+  case 25:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[4][0];
+    break;
+
+  case 42:
+    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[6][0];
+    break;
+
+  case 52:
+    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
+    (*taued) = &MMG5_permedge[10][0];
+    break;
+  }
+
+  /* Determine the condition to choose the pattern of split to apply  */
+  if ( v[tau[1]] < v[tau[2]] ) {
+    (*ia) = tau[1];
+    (*ib) = tau[2];
+  }
+  else {
+    (*ia) = tau[2];
+    (*ib) = tau[1];
+  }
+
+  if ( v[tau[3]] < v[(*ia)] ) {
+    (*ib) = (*ia);
+    (*ia) = tau[3];
+  }
+  else {
+    if ( v[tau[3]] < v[(*ib)] ) {
+      (*ib) = tau[3];
+    }
+  }
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
@@ -1962,19 +2040,39 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
  *
- * \return 0 if fail, 1 otherwise
- *
  * Split 3 edge in cone configuration
  *
  */
 int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
+  MMG5_pTetra    pt;
+
+  /* Tetra to be split */
+  pt  = &mesh->tetra[k];
+
+  return MMG5_split3cone_globNum(mesh,met,k,vx,pt->v,metRidTyp);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 3 opposite edges in a tetra
+ *
+ */
+int MMG5_split3cone_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp){
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
   MMG5_int            newtet[4];
-  int8_t              flg,firstxt,isxt[4],ia,ib;
-  uint8_t             tau[4];
+  int8_t              flg,firstxt,isxt[4];
+  uint8_t             tau[4],ia,ib;
   const uint8_t       *taued;
   const int           ne=4;
 
@@ -1988,49 +2086,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
     return 0;
   }
 
-  /* Set permutation of vertices : reference configuration is 7 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-
-  switch(flg) {
-  case 25:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-
-  case 42:
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-
-  case 52:
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
-
-  /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
-  /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
-  if ( (pt[0])->v[tau[1]] < (pt[0])->v[tau[2]] ) {
-    ia = tau[1];
-    ib = tau[2];
-  }
-  else {
-    ia = tau[2];
-    ib = tau[1];
-  }
-
-  if ( (pt[0])->v[tau[3]] < (pt[0])->v[ia] ) {
-    ib = ia;
-    ia = tau[3];
-  }
-  else {
-    if ( (pt[0])->v[tau[3]] < (pt[0])->v[ib] ) {
-      ib = tau[3];
-    }
-    else {
-    }
-  }
+  /* Set permutation of vertices */
+  MMG3D_split3cone_cfg(flg,vGlobNum,tau,&taued,&ia,&ib);
 
   pt[0]->v[tau[1]] = vx[taued[0]] ; pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
   xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
@@ -2253,7 +2310,6 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
   /* Quality update */
   MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
-
   return 1;
 }
 
@@ -2282,7 +2338,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
  *
  */
 static inline
-void MMG3D_configSplit3op(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split3op_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                            const uint8_t **taued,
                            uint8_t sym[4],uint8_t symed[6],
                            uint8_t *ip0,uint8_t *ip1,
@@ -2452,7 +2508,7 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
-  MMG3D_configSplit3op(pt,vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+  MMG3D_split3op_cfg(pt,vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -2585,7 +2641,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
   newtet[0]=k;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
-  MMG3D_configSplit3op(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+  MMG3D_split3op_cfg(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
   pt[0]->flag  = 0;
 
@@ -3170,7 +3226,7 @@ MMG5_int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k,int8_t metRid
  *
  */
 static inline
-void MMG3D_configSplit4sf(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split4sf_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                           const uint8_t **taued, uint8_t *imin23,uint8_t *imin12) {
 
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -3261,7 +3317,7 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation of vertices : reference configuration : 23 */
-  MMG3D_configSplit4sf(pt,vx,tau,&taued,&imin23,&imin12);
+  MMG3D_split4sf_cfg(pt,vx,tau,&taued,&imin23,&imin12);
 
   /* Generic formulation of split of 4 edges (with 3 on same face) */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -3364,7 +3420,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   newtet[0]=k;
 
   /* Set permutation of vertices : reference configuration : 23 */
-  MMG3D_configSplit4sf(pt[0],vx,tau,&taued,&imin23,&imin12);
+  MMG3D_split4sf_cfg(pt[0],vx,tau,&taued,&imin23,&imin12);
   pt[0]->flag  = 0;
 
   /* create 5 new tetras */
@@ -3541,6 +3597,44 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 }
 
 /**
+ * \param flag initial tetra
+ * \param v indices of tetra nodes (global node indices if called from ParMmg in ls mode)
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param imin01 minimal index of vertices ip0 and ip1
+ * \param imin23 minimal index of vertices ip2 and ip3
+ *
+ * Set permutation of vertices for the split of 4 edges when on opposite edges.
+ * Reference configuration 30.
+ *
+ */
+inline
+void MMG3D_split4op_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
+                          const uint8_t **taued, uint8_t *imin01,uint8_t *imin23) {
+
+
+  /* Set permutation of vertices : reference configuration 30 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  (*taued) = &MMG5_permedge[0][0];
+
+  switch(flag){
+  case 45:
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    (*taued) = &MMG5_permedge[5][0];
+    break;
+
+  case 51:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[4][0];
+    break;
+  }
+
+  /* Determine the condition to choose the pattern of split to apply  */
+  (*imin01) = (v[tau[0]] < v[tau[1]]) ? tau[0] : tau[1];
+  (*imin23) = (v[tau[2]] < v[tau[3]]) ? tau[2] : tau[3];
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
@@ -3667,46 +3761,55 @@ int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
  *
+ * Split 4 edges in a configuration when no 3 edges lie on the same face
+ *
+ */
+int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
+  MMG5_pTetra    pt;
+
+  /* Tetra to be split */
+  pt  = &mesh->tetra[k];
+
+  return MMG5_split4op_globNum(mesh,met,k,vx,pt->v,metRidTyp);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
+ * \param metRidTyp metric storage (classic or special)
+ *
  * \return 0 if fail, 1 otherwise
  *
  * Split 4 edges in a configuration when no 3 edges lie on the same face
  *
  */
-int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
+int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
   MMG5_int            newtet[6];
-  int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
-  uint8_t             tau[4];
-  const uint8_t       *taued;
+  int8_t              flg,firstxt,isxt[6],i,j;
+  uint8_t             tau[4],imin01,imin23;
+  const uint8_t       *taued=NULL;
   const int           ne=6;
 
-  pt[0]  = &mesh->tetra[k];
+  /* Store the initial tetra and flag */
+  pt[0] = &mesh->tetra[k];
   flg = pt[0]->flag;
-  pt[0]->flag  = 0;
-  newtet[0]=k;
 
-  /* Set permutation of vertices : reference configuration 30 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
+  /* Reinitialize the flag of the initial tetra */
+  pt[0]->flag = 0;
 
-  switch(flg){
-  case 45:
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
+  /* Store the id of the initial tetra */
+  newtet[0] = k;
 
-  case 51:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  }
+  /* Set permutation of vertices */
+  MMG3D_split4op_cfg(flg,vGlobNum,tau,&taued,&imin01,&imin23);
 
-  imin01 = ((pt[0])->v[tau[0]] < (pt[0])->v[tau[1]]) ? tau[0] : tau[1];
-  imin23 = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
-
-  /* create 5 new tetras */
+  /* Create 5 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
@@ -4739,6 +4842,7 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
   }
   return 1;
 }
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
