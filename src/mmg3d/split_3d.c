@@ -4122,7 +4122,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   const uint8_t       *taued=NULL;
   const int           ne=7;
 
-  pt[0]  = &mesh->tetra[k]; 
+  pt[0]  = &mesh->tetra[k];
   newtet[0]=k;
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
