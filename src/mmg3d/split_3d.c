@@ -1202,8 +1202,6 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
       pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
     }
   }
-
-  return;
 }
 
 /**
@@ -2437,8 +2435,6 @@ void MMG3D_split3op_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
   /* Determine the condition to choose split pattern to apply  */
   (*imin03) = (pt->v[(*ip0)] < pt->v[(*ip3)]) ? (*ip0) : (*ip3);
   (*imin12) = (pt->v[(*ip1)] < pt->v[(*ip2)]) ? (*ip1) : (*ip2);
-
-  return;
 }
 
 /**
