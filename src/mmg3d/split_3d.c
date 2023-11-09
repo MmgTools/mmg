@@ -1001,8 +1001,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
  *
  */
 inline
-uint8_t MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_t **taued) {
-  uint8_t imin;
+void MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_t **taued,uint8_t *imin) {
 
   /* identity is case 48 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -1054,9 +1053,7 @@ uint8_t MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_
     break;
   }
 
-  imin = (v[tau[1]] < v[tau[2]]) ? tau[1] : tau[2] ;
-
-  return imin;
+  (*imin) = (v[tau[1]] < v[tau[2]]) ? tau[1] : tau[2] ;
 }
 
 /**
@@ -1082,7 +1079,7 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  imin = MMG3D_split2sf_cfg(pt->flag,pt->v,tau,&taued);
+  MMG3D_split2sf_cfg(pt->flag,pt->v,tau,&taued,&imin);
 
   /* Test orientation of the three tets to be created */
 
@@ -1259,12 +1256,17 @@ int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
   pt[0]->flag = 0;
   newtet[0]=k;
 
+  /* Determine tau, taued and imin the condition for vertices permutation */
+  /* Remark: It is mandatory to call MMG3D_split2sf_cfg before MMG3D_crea_newTetra.
+             Indeed, vGlobNum is set in MMG3D_split2sf as being pt->v. This value might
+             point to a wrong memory address if the tetra array is reallocated
+             in MMG3D_crea_newTetra before the use of vGlobNum */
+  MMG3D_split2sf_cfg(flg,vGlobNum,tau,&taued,&imin);
+
   /* Create 2 new tetra */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
-
-  imin = MMG3D_split2sf_cfg(flg,vGlobNum,tau,&taued);
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
   pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
@@ -1832,7 +1834,8 @@ void MMG3D_split3cone_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
     break;
   }
 
-  /* Determine the condition to choose the pattern of split to apply  */
+  /* Determine the condition to choose split pattern to apply  */
+  /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
   if ( v[tau[1]] < v[tau[2]] ) {
     (*ia) = tau[1];
     (*ib) = tau[2];
@@ -1876,49 +1879,8 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  /* identity is case 7 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-
-  switch(pt->flag) {
-  case 25:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-
-  case 42:
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-
-  case 52:
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
-
-  /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
-  /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
-  if ( pt->v[tau[1]] < pt->v[tau[2]] ) {
-    ia = tau[1];
-    ib = tau[2];
-  }
-  else {
-    ia = tau[2];
-    ib = tau[1];
-  }
-
-  if ( pt->v[tau[3]] < pt->v[ia] ) {
-    ib = ia;
-    ia = tau[3];
-  }
-  else {
-    if ( pt->v[tau[3]] < pt->v[ib] ) {
-      ib = tau[3];
-    }
-    else {
-    }
-  }
+  /* Determine tau, taued, ia and ib the conditions for vertices permutation */
+  MMG3D_split3cone_cfg(pt->flag,pt->v,tau,&taued,&ia,&ib);
 
   /* Check orientation of the 4 newly created tets */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -2081,14 +2043,19 @@ int MMG5_split3cone_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx
   pt[0]->flag  = 0;
   newtet[0]=k;
 
-  /* create 3 new tetras */
+  /* Determine tau, taued, ia and ib the conditions for vertices permutation */
+  /* Remark: It is mandatory to call MMG3D_split3cone_cfg before MMG3D_crea_newTetra.
+             Indeed, vGlobNum is set in MMG3D_split3cone as being pt->v. This value might
+             point to a wrong memory address if the tetra array is reallocated
+             in MMG3D_crea_newTetra before the use of vGlobNum */
+  MMG3D_split3cone_cfg(flg,vGlobNum,tau,&taued,&ia,&ib);
+
+  /* Create 3 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
-  /* Set permutation of vertices */
-  MMG3D_split3cone_cfg(flg,vGlobNum,tau,&taued,&ia,&ib);
-
+  /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
   pt[0]->v[tau[1]] = vx[taued[0]] ; pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
   xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
   xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
@@ -2477,6 +2444,7 @@ void MMG3D_split3op_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
   assert(vx[(*ie3)] <= 0);
   assert(vx[(*ie4)] <= 0);
 
+  /* Determine the condition to choose split pattern to apply  */
   (*imin03) = (pt->v[(*ip0)] < pt->v[(*ip3)]) ? (*ip0) : (*ip3);
   (*imin12) = (pt->v[(*ip1)] < pt->v[(*ip2)]) ? (*ip1) : (*ip2);
 
@@ -3629,7 +3597,7 @@ void MMG3D_split4op_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
     break;
   }
 
-  /* Determine the condition to choose the pattern of split to apply  */
+  /* Determine the condition to choose split pattern to apply  */
   (*imin01) = (v[tau[0]] < v[tau[1]]) ? tau[0] : tau[1];
   (*imin23) = (v[tau[2]] < v[tau[3]]) ? tau[2] : tau[3];
 }
@@ -3793,7 +3761,7 @@ int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
   MMG5_int            newtet[6];
   int8_t              flg,firstxt,isxt[6],i,j;
   uint8_t             tau[4],imin01,imin23;
-  const uint8_t       *taued=NULL;
+  const uint8_t       *taued;
   const int           ne=6;
 
   /* Store the initial tetra and flag */
@@ -3806,7 +3774,11 @@ int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
   /* Store the id of the initial tetra */
   newtet[0] = k;
 
-  /* Set permutation of vertices */
+  /* Determine tau, taued, imin01 and imin23 the conditions for vertices permutation */
+  /* Remark: It is mandatory to call MMG3D_split4op_cfg before MMG3D_crea_newTetra.
+             Indeed, vGlobNum is set in MMG3D_split4op as being pt->v. This value might
+             point to a wrong memory address if the tetra array is reallocated
+             in MMG3D_crea_newTetra before the use of vGlobNum */
   MMG3D_split4op_cfg(flg,vGlobNum,tau,&taued,&imin01,&imin23);
 
   /* Create 5 new tetras */
@@ -4012,7 +3984,7 @@ int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6
  *
  */
 static inline
-void MMG3D_configSplit5(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split5_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                         const uint8_t **taued,uint8_t *imin) {
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
@@ -4075,7 +4047,7 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation of vertices : reference configuration : 62 */
-  MMG3D_configSplit5(pt,vx,tau,&taued,&imin);
+  MMG3D_split5_cfg(pt,vx,tau,&taued,&imin);
 
   /* Generic formulation of split of 5 edges */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -4168,7 +4140,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   newtet[0]=k;
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
-  MMG3D_configSplit5(pt[0],vx,tau,&taued,&imin);
+  MMG3D_split5_cfg(pt[0],vx,tau,&taued,&imin);
   pt[0]->flag  = 0;
 
   /* create 6 new tetras */
