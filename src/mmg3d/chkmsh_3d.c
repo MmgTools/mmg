@@ -196,13 +196,12 @@ int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t ta
  * Test consistency between the tags in the xtetra of all mesh edges marked as
  * boundaries.
  *
- * \warning Not used.
  */
 void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
-  MMG5_Hash      hash;
-  int            i,tag;
+  MMG5_HGeom     hash;
+  int            i;
   MMG5_int       k,nt,ip1,ip2;
 
   /* Rough eval of the number of boundary triangles */
@@ -222,7 +221,7 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
   nt = nt/2 + 1;
 
   /* Travel mesh edges and hash boundary ones */
-  MMG5_hashNew(mesh,&hash,nt,3*nt);
+  MMG5_hNew(mesh,&hash,nt,3*nt);
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -230,20 +229,42 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
     if ( !pt->xt ) continue;
 
     pxt = &mesh->xtetra[pt->xt];
+
     for (i=0; i<6; i++) {
       if ( pxt->tag[i] & MG_BDY ) {
         ip1 = pt->v[MMG5_iare[i][0]];
         ip2 = pt->v[MMG5_iare[i][1]];
-        tag = MMG5_hashEdgeTag ( mesh,&hash,ip1,ip2,pxt->tag[i]);
-        if ( tag != pxt->tag[i] ) {
-          fprintf(stderr,"Error: %s: %d: Non consistency at tet %" MMG5_PRId " (%" MMG5_PRId "), edge %d:%" MMG5_PRId "--%" MMG5_PRId "\n ",
+
+        int16_t tag = 0;
+        MMG5_int dummy = 0;
+        int ier = MMG5_hGet ( &hash,ip1,ip2,&dummy,&tag);
+
+        if ( !ier ) {
+           /* First time we meet the edge: store the its tag from the current
+            * tetra in the hash table */
+          int ier2 = MMG5_hEdge ( mesh,&hash,ip1,ip2,0,pxt->tag[i]);
+          if ( !ier2 ) {
+            /* Realloc error */
+            fprintf(stderr,"Error: %s: %d: Unable to add to hash table the edge "
+                    "%d:%" MMG5_PRId "--%" MMG5_PRId " from tetra %" MMG5_PRId
+                    " (%" MMG5_PRId ").\n ",__func__,__LINE__,i,ip1,ip2,k,
+                    MMG3D_indElt(mesh,k));
+          }
+        }
+        else {
+          /* Edge tag has been stored from another tet: check consistency */
+          if ( tag != pxt->tag[i] ) {
+            fprintf(stderr,"Error: %s: %d: Non consistency at tet %" MMG5_PRId
+                    " (%" MMG5_PRId "), edge %d:%" MMG5_PRId "--%" MMG5_PRId "\n ",
                   __func__,__LINE__,k,MMG3D_indElt(mesh,k),i,ip1,ip2);
-          assert( tag == pxt->tag[i] && "edge tag error" );
+            assert( tag == pxt->tag[i] && "edge tag error" );
+          }
         }
       }
     }
   }
-  MMG5_DEL_MEM(mesh,hash.item);
+
+  MMG5_DEL_MEM(mesh,hash.geom);
 }
 
 
