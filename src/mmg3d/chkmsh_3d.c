@@ -277,7 +277,6 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
  * Test consistency between the tags of the edge \a ip1 - \a ip2 from all the
  * tetra of the edge shell.
  *
- * \warning Not used.
  */
 void MMG3D_chkedgetag(MMG5_pMesh mesh, MMG5_int ip1, MMG5_int ip2, int tag) {
   MMG5_pTetra    pt;
