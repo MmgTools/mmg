@@ -328,6 +328,9 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   /** Step 5 : come back to original problem, compute patch in triangle iel and
    * check that geometric approx has not been degraded too much */
+  // Remark: if we call following function with a pointer for n, we have to set
+  // the pointer again after the function call as it may invalidate it if it
+  // reallocates the xpoint array
   nxp = MMG3D_movbdyregpt_geom(mesh,lists,kel,ip0,n,lambda,o,no);
   if ( nxp < 0 ) {
     return -1;

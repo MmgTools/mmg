@@ -478,6 +478,7 @@ int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,MMG5_int *lists,int ilists,MMG5_in
 * Compute the Bezier patch at element \a lists[kel], compute the new point
 * coordinates, normal and tangent and check the geometric approximation.
 *
+* \warning may invalidate n if it is a pointer toward the xpoint array
 */
 int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,MMG5_int *lists,const MMG5_int kel,
                            const MMG5_int ip0,double n[3],double lambda[3],double o[3],
@@ -629,7 +630,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_pPoint       p0;
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
-  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,det2d;
+  double            n[3],r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,det2d;
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],o[3],no[3];
   double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
@@ -650,7 +651,11 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   p0 = &mesh->point[ip0];
   assert( p0->xp && !MG_EDG(p0->tag) );
 
-  n = &(mesh->xpoint[p0->xp].n1[0]);
+  /* Don't use a pointer for n to avoid issues with the reallocation of the
+   * xpoint array and invalid pointers (see ls-CenIn-DisOut-8 test of ParMmg) */
+  n[0] = mesh->xpoint[p0->xp].n1[0];
+  n[1] = mesh->xpoint[p0->xp].n1[1];
+  n[2] = mesh->xpoint[p0->xp].n1[2];
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !MMG5_rotmatrix(n,r) ) return 0;
@@ -727,6 +732,9 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
   /** Step 5 : come back to original problem, and compute patch in triangle iel */
+  // Remark: if we call following function with a pointer for n, we have to set
+  // the pointer again after the function call as it may invalidate it if it
+  // reallocates the xpoint array
   nxp = MMG3D_movbdyregpt_geom(mesh,lists,kel,ip0,n,lambda,o,no);
   if ( nxp < 0 ) {
     return -1;
