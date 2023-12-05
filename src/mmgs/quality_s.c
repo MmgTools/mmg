@@ -297,6 +297,16 @@ int MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   amin = amax = bmin = bmax = 0;
   nullEdge = 0;
 
+  if ( (!met) || (!met->m) ) {
+    /* the functions that computes the edge length cannot be called without an
+     * allocated metric */
+    return 0;
+  }
+
+  if ( !mesh->nt ) {
+    return 0;
+  }
+
   /* Hash all edges in the mesh */
   if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
 
