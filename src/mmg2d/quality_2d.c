@@ -187,6 +187,10 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_int      k,iel,ok,nex;
   static int8_t mmgWarn0;
 
+  if ( !mesh->nt ) {
+    return 1;
+  }
+
   /* Compute triangle quality*/
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];

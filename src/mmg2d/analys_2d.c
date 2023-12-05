@@ -54,6 +54,10 @@ int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
   int16_t          tag;
   int8_t           i,ii,i1,i2;
 
+  if ( !mesh->nt ) {
+    return 1;
+  }
+
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
