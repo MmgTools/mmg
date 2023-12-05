@@ -91,7 +91,7 @@ void MMG3D_delPt(MMG5_pMesh mesh,MMG5_int ip) {
   ppt->tmp    = mesh->npnil;
   mesh->npnil = ip;
   if ( ip == mesh->np ) {
-    while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+    while ( (!MG_VOK((&mesh->point[mesh->np]))) && mesh->np )  mesh->np--;
   }
 }
 
@@ -135,7 +135,7 @@ int MMG3D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
     memset(&mesh->adja[iadr],0,4*sizeof(MMG5_int));
   mesh->nenil = iel;
   if ( iel == mesh->ne ) {
-    while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
+    while ( (!MG_EOK((&mesh->tetra[mesh->ne]))) && mesh->ne )  mesh->ne--;
   }
   return 1;
 }
