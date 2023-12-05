@@ -64,7 +64,9 @@ void MMG2D_delPt(MMG5_pMesh mesh,MMG5_int ip) {
   ppt->tmp    = mesh->npnil;
 
   mesh->npnil = ip;
-  if ( ip == mesh->np )  mesh->np--;
+  if ( ip == mesh->np ) {
+    while ( (!MG_VOK((&mesh->point[mesh->np]))) && mesh->np )  mesh->np--;
+  }
 }
 
 void MMG5_delEdge(MMG5_pMesh mesh,MMG5_int iel) {
@@ -119,7 +121,9 @@ int MMG2D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
     memset(&mesh->adja[iadr],0,3*sizeof(MMG5_int));
 
   mesh->nenil = iel;
-  if ( iel == mesh->nt )  mesh->nt--;
+  if ( iel == mesh->nt ) {
+    while ( (!MG_EOK((&mesh->tria[mesh->nt]))) && mesh->nt ) mesh->nt--;
+  }
   return 1;
 }
 
