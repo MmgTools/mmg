@@ -29,7 +29,7 @@
  * \param mesh pointer toward the mesh
  * \return 1 if success, 0 if fail
  *
- * Create adjacency relations between the triangles dein the mesh
+ * Create adjacency relations between the triangles in the mesh
  *
  */
 int MMG2D_hashTria(MMG5_pMesh mesh) {
@@ -40,7 +40,7 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
   unsigned int   key;
 
   if ( mesh->adja )  return 1;
-  if ( !mesh->nt )  return 0;
+  if ( !mesh->nt )  return 1;
 
   /* memory alloc */
   MMG5_SAFE_CALLOC(hcode,mesh->nt+1,MMG5_int,return 0);
