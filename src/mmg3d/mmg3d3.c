@@ -136,11 +136,26 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
       p1 = &mesh->point[ip2];
 
       /* Skip the non-internal edges */
+
+      // Fast check but incomplete: regular boundary edges may have no tags (bdy
+      // tags are not added at new edges created during the split of boudary
+      // faces for example).
       if ( pxt && (pxt->tag[i] & MG_BDY) )  continue;
 
+      // Slower test but allowing to be sure to detect boundary edges
+      int16_t  tag = 0;
+      MMG5_int ref = 0;
+      if ( !MMG3D_get_shellEdgeTag(mesh,k,MMG5_iarf[i][0],&tag,&ref) ) {
+        fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"
+                " (tetra %d).\n",__func__,MMG3D_indElt(mesh,k));
+        continue;
+      }
 
-      if( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
+      if ( tag & MG_BDY ) {
+        continue;
+      }
 
+      /* Here we are sure to work on a non-boundary edge */
       len = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0])
         + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])
         + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
@@ -150,11 +165,12 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
         imax = i;
       }
     }
+
     if ( imax==-1 ) {
       if ( !mmgWarn0 ){
         mmgWarn0 = 1;
-        fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %" MMG5_PRId " are required"
-                " or of length null.\n",__func__,k);
+        fprintf(stderr,"\n  ## Warning: %s: No possible edge split in tetra %" MMG5_PRId
+                ".\n",__func__,MMG3D_indElt(mesh,k));
       }
       continue;
     }
