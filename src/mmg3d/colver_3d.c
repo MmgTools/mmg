@@ -428,7 +428,6 @@ int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, 
  * consistent through the edge shell);
  *
  */
-static inline
 int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *tag,MMG5_int *ref) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
