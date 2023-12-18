@@ -1185,18 +1185,16 @@ int MMG3D_settag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int n
 
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        taginit = pxt->tag[i];
-        pxt->tag[i] |= tag;
-        /* Remove the potential nosurf tag if initially the edge is
-         * really required */
-        if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
-             ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
-          pxt->tag[i] &= ~MG_NOSURF;
-        }
-        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
+
+      taginit = pxt->tag[i];
+      pxt->tag[i] |= tag;
+      /* Remove the potential nosurf tag if initially the edge is
+       * really required */
+      if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
+           ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
+        pxt->tag[i] &= ~MG_NOSURF;
       }
+      pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
     }
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -1244,18 +1242,15 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    if ( (pxt->ftag[MMG5_ifar[ia][0]] & MG_BDY) ||
-         (pxt->ftag[MMG5_ifar[ia][1]] & MG_BDY) ) {
-      taginit = pxt->tag[ia];
-      pxt->tag[ia] |= tag;
-      /* Remove the potential nosurf tag if initially the edge is
-       * really required */
-      if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
-           ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
-        pxt->tag[ia] &= ~MG_NOSURF;
-      }
-      pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
+    taginit = pxt->tag[ia];
+    pxt->tag[ia] |= tag;
+    /* Remove the potential nosurf tag if initially the edge is
+     * really required */
+    if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
+         ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
+      pxt->tag[ia] &= ~MG_NOSURF;
     }
+    pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
   }
 
   adj = MMG3D_settag_oneDir(mesh,start,na,nb,tag,edg,piv,adj);
