@@ -145,7 +145,7 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
       // Slower test but allowing to be sure to detect boundary edges
       int16_t  tag = 0;
       MMG5_int ref = 0;
-      if ( !MMG3D_get_shellEdgeTag(mesh,k,MMG5_iarf[i][0],&tag,&ref) ) {
+      if ( !MMG3D_get_shellEdgeTag(mesh,k,i,&tag,&ref) ) {
         fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"
                 " (tetra %d).\n",__func__,MMG3D_indElt(mesh,k));
         continue;
