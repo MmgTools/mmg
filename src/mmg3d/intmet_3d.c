@@ -47,6 +47,12 @@
  * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
  * \a k for a special storage of ridges metric (after defsiz call).
  *
+ * \remark for boundary edges this function has to be called from a boundary
+ * face to ensure that the boundary edge will not be interpreted as an internal
+ * edge by error. It is due to the fact that regular boundary edges are not
+ * always marked as boundary inside a xtetra and tetra with boundary edges but
+ * no boundary faces are not always associated to an xtetra (moreover, for edges
+ * not belonging to a face inside the xtetra, the tag is not always up to date).
  */
 int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,
                       double s) {
@@ -73,16 +79,35 @@ int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int i
     else if ( pxt->tag[i] & MG_BDY ) {
      return MMG5_intregmet(mesh,met,k,i,s,m);
     }
-    else {
-      /* The edge is an internal edge. */
-      return MMG5_intvolmet(mesh,met,k,i,s,m);
+  }
+
+  /* If we pass here, either we don't have an xtetra, or the edge is not marked
+   * as MG_BDY */
+  assert ( (!pt->xt) || !(pxt->tag[i] & MG_BDY) );
+
+#ifndef NDEBUG
+  /* Assert that we are not dealing by error with a boundary edge (we may have
+   * regular edges without MG_BDY tag or edges ) */
+
+  // If we come from anatets/v, mesh->adja is not allocated and we cannot called
+  // the get_shellEdgeTag function: in this case, the MG_BDY tag has been
+  // explicitely added if we arrive from a boundary face and a boundary edge
+  // should not be splitted from a non boundary face
+  if ( mesh->adja ) {
+    int16_t  tag = 0;
+    MMG5_int ref = 0;
+    if ( !MMG3D_get_shellEdgeTag(mesh,k,i,&tag,&ref) ) {
+      fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"
+              " (tetra %d).\n",__func__,MMG3D_indElt(mesh,k));
+      return 0;
     }
+    assert ( (!(tag & MG_BDY)) && "Boundary edge is seen as internal");
   }
-  else {
-    /* The edge is an internal edge. */
-    return MMG5_intvolmet(mesh,met,k,i,s,m);
-  }
-  return 0;
+#endif
+
+  /* The edge is an internal edge. */
+  return MMG5_intvolmet(mesh,met,k,i,s,m);
+
 }
 
 /**

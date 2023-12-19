@@ -343,7 +343,26 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
   ppt0->c[1] = 0.5*(p0->c[1] + p1->c[1]);
   ppt0->c[2] = 0.5*(p0->c[2] + p1->c[2]);
 
+#ifndef NDEBUG
+  /* Security check: ensure that the edge is boundary */
+  int16_t  tag = 0;
+  MMG5_int ref = 0;
+  if ( !MMG3D_get_shellEdgeTag(mesh,list[0]/6,list[0]%6,&tag,&ref) ) {
+    fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"
+            " (tetra %d).\n",__func__,MMG3D_indElt(mesh,list[0]/6));
+    return 0;
+  }
+  assert ( (tag & MG_BDY)  && "Edge should be boundary but is not");
+#endif
+
   if ( met->m ) {
+    pt  = &mesh->tetra[list[0]/6];
+    assert ( pt->xt && "Boundary edge interpolated from non-boundary face");
+
+    /* Mark edge as boundary to ensure suitable detection of bdy edge during
+     * interpolation */
+    mesh->xtetra[pt->xt].tag[list[0]%6] |= MG_BDY;
+
     if ( typchk == 1 && (met->size>1) ) {
       if ( MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
         return 0;
