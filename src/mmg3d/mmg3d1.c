@@ -1936,7 +1936,14 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   int16_t      tag;
   int8_t       j,i,i1,i2;
 
-  assert ( pxt == &mesh->xtetra[pt->xt] );
+  assert ( pxt == &mesh->xtetra[pt->xt] && "suitable xtetra assignation" );
+
+  assert ( ((pxt->ftag[MMG5_ifar[imax][0]] & MG_BDY) || (pxt->ftag[MMG5_ifar[imax][1]] & MG_BDY) )
+           && "Boundary edge has to be splitted from a boundary face" );
+
+  /* Mark the edge as MG_BDY to avoid wrong evaluation as an internal edge by
+   * the interpolation function (see intmet_ani) */
+  pxt->tag[imax] |= MG_BDY;
 
   /* proceed edges according to lengths */
   MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
@@ -2348,6 +2355,10 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           ppt = &mesh->point[ip];
 
           assert ( met );
+
+          // Add MG_BDY tag before interpolation
+          pxt->tag[ia] |= MG_BDY;
+
           if ( met->m ) {
             if ( typchk == 1 && (met->size>1) )
               ier = MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);
@@ -2418,7 +2429,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         }
         else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
           /* Point at the interface of 2 boundary faces belonging to different
-           * tetra : Point has alredy been created from another tetra so we have
+           * tetra : Point has already been created from another tetra so we have
            * to store the tangent and the second normal at edge */
           ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
           assert(ier);
