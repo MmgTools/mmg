@@ -625,16 +625,24 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
 
           ret = MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
           ilist = ret / 2;
-          if ( ret < 0 )  return -1;
+          if ( ret < 0 ){
+            MMG5_show_tet_location(mesh, pt, k);
+            return -1;
+          }
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
           ier = MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
-          if ( ier <  0 )
+          if ( ier <  0 ){
+            MMG5_show_tet_location(mesh, pt, k);
             return -1;
+          }
           else if ( ier ) {
             ier = MMG5_swpbdy(mesh,met,list,ret,it1,PROctree,typchk);
             if ( ier > 0 )  ns++;
-            else if ( ier < 0 )  return -1;
+            else if ( ier < 0 ){
+              MMG5_show_tet_location(mesh, pt, k);
+              return -1;
+            }
             break;
           }
         }
@@ -694,11 +702,17 @@ MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
         }
 
         nconf = MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,typchk);
-        if ( nconf<0 ) return -1;
+        if ( nconf<0 ){
+          MMG5_show_tet_location(mesh, pt, k);
+          return -1;
+        }
         else if ( nconf ) {
           ier = MMG5_swpgen(mesh,met,nconf,ilist,list,PROctree,typchk);
           if ( ier > 0 )  ns++;
-          else if ( ier < 0 ) return -1;
+          else if ( ier < 0 ){
+            MMG5_show_tet_location(mesh, pt, k);
+            return -1;
+          }
           break;
         }
       }
@@ -807,8 +821,10 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 if( !ier )  continue;
                 else if ( ier>0 )
                   ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
-                else
+                else{
+                  MMG5_show_tet_location(mesh, pt, k);
                   return -1;
+                }
               }
             }
             else if ( ppt->tag & MG_GEO ) {
@@ -816,8 +832,10 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
               if ( !ier )  continue;
               else if ( ier>0 )
                 ier = MMG5_movbdyridpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
-              else
+              else{
+                MMG5_show_tet_location(mesh, pt, k);
                 return -1;
+              }
             }
             else if ( ppt->tag & MG_REF ) {
               ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -825,16 +843,19 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 continue;
               else if ( ier>0 )
                 ier = MMG5_movbdyrefpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
-              else
+              else{
+                MMG5_show_tet_location(mesh, pt, k);
                 return -1;
+              }
             }
             else {
               ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )
                 continue;
-              else if ( ier<0 )
+              else if ( ier<0 ){
+                MMG5_show_tet_location(mesh, pt, k);
                 return -1;
-
+              }
               n = &(mesh->xpoint[ppt->xp].n1[0]);
 
               /* If the orientation of the tetra face is
@@ -846,7 +867,10 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
               }
               ier = MMG5_movbdyregpt(mesh,met,PROctree,listv,ilistv,
                                      lists,ilists,improveSurf,improveVolSurf);
-              if (ier < 0 ) return -1;
+              if (ier < 0 ){
+                MMG5_show_tet_location(mesh, pt, k);
+                return -1;
+              }
               else if ( ier )  ns++;
             }
           }
@@ -964,14 +988,18 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
                 if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
+                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 ){
+                  MMG5_show_tet_location(mesh, pt, k);
                   return -1;
+                }
               }
             }
             else {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 ){
+                MMG5_show_tet_location(mesh, pt, k);
                 return -1;
+              }
             }
           }
           else {
@@ -1095,14 +1123,18 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
                 if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
+                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 ){
+                  MMG5_show_tet_location(mesh, pt, k);
                   return -1;
+                }
               }
             }
             else {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 ){
+                MMG5_show_tet_location(mesh, pt, k);
                 return -1;
+              }
             }
           }
           else {
@@ -1134,13 +1166,19 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,iq,typchk);
-          if ( ier < 0 ) return -1;
+          if ( ier < 0 ){
+            MMG5_show_tet_location(mesh, pt, k);
+            return -1;
+          }
           else if ( ier ) {
             MMG3D_delPt(mesh,ier);
             break;
           }
         }
-        else if (ilist < 0 ) return -1;
+        else if (ilist < 0 ){
+          MMG5_show_tet_location(mesh, pt, k);
+          return -1;
+        }
       }
       if ( ier ) {
         p1->flag = base;
@@ -2593,6 +2631,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               fprintf(stderr,"\n  ## Warning: %s: surfacic pattern: unable to find"
                       " a valid split for at least 1 point. Point(s) deletion.\n",
                       __func__ );
+              MMG5_show_tet_location(mesh, pt, k);
               mmgWarn2 = 1;
             }
 
@@ -3161,7 +3200,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
       ier = MMG3D_anatets(mesh,met,typchk);
 
       if ( ier < 0 ) {
-        fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
+        fprintf(stderr,"\n  ## Unable to complete surface mesh in MMG5_anatet. Exit program.\n");
         return 0;
       }
       ns += ier;
@@ -3172,7 +3211,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
         /* analyze internal tetras */
         ier = MMG5_anatetv(mesh,met,typchk);
         if ( ier < 0 ) {
-          fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
+          fprintf(stderr,"\n  ## Unable to complete volume mesh in MMG5_anatet. Exit program.\n");
           return 0;
         }
         ns += ier;
@@ -3188,7 +3227,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
     if ( !mesh->info.noinsert ) {
       nc = MMG5_coltet(mesh,met,typchk);
       if ( nc < 0 ) {
-        fprintf(stderr,"\n  ## Unable to collapse mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to collapse mesh in MMG5_anatet: nc=%d. Exiting.\n", nc);
         return 0;
       }
     }
@@ -3198,14 +3237,14 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
     if ( !mesh->info.noswap ) {
       ier = MMG5_swpmsh(mesh,met,NULL,typchk);
       if ( ier < 0 ) {
-        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh in MMG5_anatet. Exiting.\n");
         return 0;
       }
       nf  += ier;
 
       ier = MMG5_swptet(mesh,met,MMG3D_LSWAPIMPROVE,MMG3D_SWAP06,NULL,typchk,mesh->mark-2);
       if ( ier < 0 ) {
-        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh in MMG5_anatet. Exiting.\n");
         return 0;
       }
       nf += ier;

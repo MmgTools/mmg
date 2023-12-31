@@ -1723,15 +1723,16 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
     pradj = (*adj);
     pri    = i;
 
-    /* travel through new tetra */
+    // travel through new tetra.
+    // ier=face tag if boundary, 0 if not, -1 if error
+    // Will update *adj, *piv, iface.
     ier = MMG5_coquilTravel(mesh,na,nb,adj,piv,&iface,&i);
 
     /* fill the shell */
     list[(*ilist)] = 6*(int64_t)pradj +pri;
     (*ilist)++;
 
-    /* overflow */
-    if ( (*ilist) > MMG3D_LMAX-2 ) {
+    if ( (*ilist) > MMG3D_LMAX-2 ) {     // overflow
       if ( !mmgErr0 ) {
         fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
                 " Coquil of edge %" MMG5_PRId "-%" MMG5_PRId " contains too many elts.\n",
@@ -1743,16 +1744,11 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
       return -1;
     }
 
-    if ( ier<0 ) return -1;
-    else if ( !ier ) continue;
+    if ( ier<0 ) return -1;      // eror
+    else if ( !ier ) continue;   // not a boundary
 
-    if ( !(*it2) ) {
-      *it2 = 4*pradj+iface;
-      (*nbdy)++;
-    }
-    else {
-      (*nbdy)++;
-    }
+    if ( !(*it2) ) *it2 = 4*pradj+iface;
+    (*nbdy)++;
 
   } while ( (*adj) && ((*adj) != start) );
 
@@ -1831,7 +1827,11 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,
  *
  * Find all tets sharing edge \a ia of tetra \a start, and stores boundary faces
  * when met. \f$ it1 \f$ and \f$ it2 = 6*iel + iface\f$, \a iel = index of
- * tetra, \a iface = index of face in tetra.
+ * tetra, \a iface = index of face in tetra. This function can print a warning
+ * or error message when it finds that the edge has more than one boundary
+ * face. This is an error condition if the edge is supposed to be a manifold
+ * edge. Indeed this function is supposed not to be called for non-manifold
+ * edges, i.e. edges where multiple boundaries join.
  *
  * \warning Don't work if \a ia has only one boundary face in its shell.
  */
@@ -1844,6 +1844,10 @@ int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,int64_t *
   static int8_t mmgErr0=0,mmgErr1=0,mmgWarn0=0;
 
   pt = &mesh->tetra[start];
+
+  /* MMG5_coquilface is called only on edges marked as manifold, check this */
+  assert ( pt->xt );
+  assert ( !(mesh->xtetra[pt->xt].tag[ia] & MG_NOM) );
 
   na   = pt->v[ MMG5_iare[ia][0] ];
   nb   = pt->v[ MMG5_iare[ia][1] ];
@@ -1883,7 +1887,8 @@ int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,int64_t *
           printf("  ## Warning: %s: you have %d boundary triangles in the closed shell"
                  " of a manifold edge.\n",__func__,nbdy);
           printf("  Problem may occur during remesh process.\n");
-          mmgWarn0 = 1;
+          MMG5_show_tet_location(mesh, pt, start);
+          if(0) mmgWarn0 = 1;     // disabled, I want to see how many there are!
 
           /* MMG5_coquilface is called only on edges marked as manifold, check this */
           assert ( pt->xt );

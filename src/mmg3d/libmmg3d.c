@@ -972,6 +972,8 @@ int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   return 1;
 }
 
+// Do all the work in a remeshing run (apart from input etc)
+//
 int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
