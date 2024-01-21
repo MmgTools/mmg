@@ -397,6 +397,10 @@ int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, 
         *tag |= pxt->tag[i];
         *filled = 1;
         return adj;
+      } else if ((pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) || (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY)) {
+        *tag |= (pxt->tag[i] | MG_BDY);
+        *filled = 1;
+        return adj;
       }
     }
 
@@ -444,10 +448,15 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *t
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
+    *ref = pxt->edg[ia];
     if ( pxt->tag[ia] & MG_BDY ) {
-      *tag |= pxt->tag[ia];
-      *ref = pxt->edg[ia];
-      return 1;
+        *tag |= pxt->tag[ia];
+        *ref = pxt->edg[ia];
+        return 1;
+    } else if ((pxt->ftag[MMG5_ifar[ia][0]] & MG_BDY) || (pxt->ftag[MMG5_ifar[ia][1]] & MG_BDY)) {
+        *tag |= (pxt->tag[ia] | MG_BDY);
+        *ref = pxt->edg[ia];
+        return 1;
     }
   }
 
