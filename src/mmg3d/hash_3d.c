@@ -1370,18 +1370,31 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
          * mesh->nt=0 at the beginning of the function) */
         ptt->cc = 4*k + i;
 
+        /* If in LS mode, in analysis after ls discretization: xtetra exists. It has been created by MMG5_bdrySet */
         if ( pxt ) {
-          /* useful only when saving mesh or in ls mode */
+          /* Useful only when saving mesh or in ls mode */
           for( j = 0; j < 3; j++ ) {
+            /* Assign tags to tria from xtetra->tag and remove redundant boundary tag */
             if ( pxt->tag[MMG5_iarf[i][j]] ) {
               ptt->tag[j] = pxt->tag[MMG5_iarf[i][j]];
-              /* Remove redundant boundary tag */
+              /* MG_BDY is removed because by definition a triangle is on the boundary */
               ptt->tag[j] &= ~MG_BDY;
+              /* MG_PARBDYBDY is removed because it will be handled properly by MMG5_mmgHashTria  */
+              ptt->tag[j] &= ~MG_PARBDYBDY;
+              /* If the face from which we arrive is not a parallel face, then remove also the parallel tags
+              MG_PARBDY, MG_NOSURF and MG_REQ */
+              if ( !(pxt->ftag[i] & MG_PARBDY)) {
+                ptt->tag[j] &= ~MG_PARBDY;
+                ptt->tag[j] &= ~MG_NOSURF;
+                ptt->tag[j] &= ~MG_REQ;
+              }
             }
+            /* Assign ref to tria from xtetra->edg */
             if ( pxt->edg[MMG5_iarf[i][j]] )
               ptt->edg[j] = pxt->edg[MMG5_iarf[i][j]];
           }
         }
+
         if ( adj ) {
           if ( mesh->info.iso ) {
             /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to mesh->info.isoref ref */
