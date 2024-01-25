@@ -974,8 +974,8 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         if ( mesh->info.npar ) {
           if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
             tag = pxt->tag[MMG5_iarf[i][j]];
-            isnm = (tag & MG_NOM);
-            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
+            isnm = (tag & MG_NOM);             // is non-manifold
+            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor ); // is non-manifold interior
 
             if ( p0->tag > tag ) continue;
 
@@ -987,8 +987,10 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 ){
+                int bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i, list,&ilist,lists,&ilists,
+                                                  &refmin,&refplus,p0->tag & MG_NOM);
+                if(bsret < 0 ){
+                  printf("  ## (1) MMG5_boulesurfvolpNom returned %d\n", bsret);
                   MMG5_show_tet_location(mesh, pt, k);
                   return -1;
                 }
@@ -998,7 +1000,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 ){
                 MMG5_show_tet_location(mesh, pt, k);
-                return -1;
+                return -2;
               }
             }
           }
@@ -1122,10 +1124,15 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 ){
+                int bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i,list,&ilist,lists,&ilists,
+                                                  &refmin,&refplus,p0->tag & MG_NOM);
+                if(bsret < 0 ){
+                  printf("  ## (2) MMG5_boulesurfvolpNom returned %d\n", bsret);
                   MMG5_show_tet_location(mesh, pt, k);
-                  return -1;
+                  // HACK: jump to the next tet. Maybe a "continue" would be
+                  // good enough (to go to the next edge of the face).
+                  // The original code did "return -1".
+                  goto next;    // return -3;
                 }
               }
             }
@@ -1133,7 +1140,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 ){
                 MMG5_show_tet_location(mesh, pt, k);
-                return -1;
+                return -4;
               }
             }
           }
@@ -1168,7 +1175,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           ier = MMG5_colver(mesh,met,list,ilist,iq,typchk);
           if ( ier < 0 ){
             MMG5_show_tet_location(mesh, pt, k);
-            return -1;
+            return -5;
           }
           else if ( ier ) {
             MMG3D_delPt(mesh,ier);
@@ -1177,7 +1184,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         }
         else if (ilist < 0 ){
           MMG5_show_tet_location(mesh, pt, k);
-          return -1;
+          return -6;
         }
       }
       if ( ier ) {
@@ -1187,6 +1194,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         break;
       }
     }
+  next: ;        // jump here if giving up on the current edge
   }
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
     fprintf(stdout,"     %8" MMG5_PRId " vertices removed, %8" MMG5_PRId " non manifold,\n",nc,nnm);

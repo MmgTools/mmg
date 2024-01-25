@@ -840,13 +840,13 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
           if ( *refplus == -1 ) {
             if ( pt->ref != *refmin  ) *refplus = pt->ref;
           }
-          else if ( pt->ref != *refmin && pt->ref != *refplus ) return -1;
+          else if ( pt->ref != *refmin && pt->ref != *refplus ) return -2;
         }
         pt->flag = base;
       }
       
       /* identification of edge number in tetra k */
-      if ( !MMG3D_findEdge(mesh,pt,k,na,nb,0,&mmgErr2,&i) ) return -1;
+      if ( !MMG3D_findEdge(mesh,pt,k,na,nb,0,&mmgErr2,&i) ) return -3;
       
       /* set sense of travel */
       if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
@@ -906,7 +906,7 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
                   " or/and the maximum mesh.\n");
           mmgErr1 = 1;
         }
-        return -1;
+        return -4;
       }
       listv[(*ilistv)] = 4*k1+j;
       (*ilistv)++;
@@ -918,7 +918,7 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
         if ( *refplus == -1 ) {
           if ( pt1->ref != *refmin  ) *refplus = pt1->ref;
         }
-        else if ( pt1->ref != *refmin && pt1->ref != *refplus ) return -1;
+        else if ( pt1->ref != *refmin && pt1->ref != *refplus ) return -5;
       }
     }
     cur++;
