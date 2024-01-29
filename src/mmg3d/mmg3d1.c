@@ -1129,10 +1129,16 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
                 if(bsret < 0 ){
                   printf("  ## (2) MMG5_boulesurfvolpNom returned %d\n", bsret);
                   MMG5_show_tet_location(mesh, pt, k);
-                  // HACK: jump to the next tet. Maybe a "continue" would be
-                  // good enough (to go to the next edge of the face).
-                  // The original code did "return -1".
-                  goto next;    // return -3;
+                  // Mark's modification. The original code in mmg-5.7.1
+                  // returned -1 here. Algiane confirmed that the cases where
+                  // MMG5_boulesurfvolpNom returns anything but -1 or -4 (in my
+                  // version) are harmless; a ball could not be computed but it
+                  // does not mean that the mesh is wrong.
+                  if(bsret==-1 || bsret==-4){
+                    return -3;
+                  }else{
+                    continue;
+                  }
                 }
               }
             }
@@ -1194,7 +1200,6 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         break;
       }
     }
-  next: ;        // jump here if giving up on the current edge
   }
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
     fprintf(stdout,"     %8" MMG5_PRId " vertices removed, %8" MMG5_PRId " non manifold,\n",nc,nnm);
