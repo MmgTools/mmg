@@ -24,6 +24,12 @@
 #ifndef LIBMMG3D_PRIVATE_H
 #define LIBMMG3D_PRIVATE_H
 
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+
+#include <inttypes.h>
+
 #include "libmmgcommon_private.h"
 #include "PRoctree_3d_private.h"
 
