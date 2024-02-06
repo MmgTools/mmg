@@ -1374,7 +1374,13 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
         if ( pxt ) {
           /* Useful only when saving mesh or in ls mode */
           for( j = 0; j < 3; j++ ) {
-            /* Assign tags to tria from xtetra->tag and remove redundant boundary tag */
+            /* Assign tags to tria from xtetra->tag and remove redundant boundary tag:
+               when called from ParMmg in ls mode, it is needed to remove the parallel tags
+               coming from previous surface analysis to ensure the suitable setting of the
+               MG_BDY tag along edges at the intersection between geometrical (true)
+               boundaries and purely parallel interfaces. For that, it is mandatory to
+               remove the MG_PARBDYBDY tag already added along such edges
+               (see the step 2 of the mmgHashTria implementation) */
             if ( pxt->tag[MMG5_iarf[i][j]] ) {
               ptt->tag[j] = pxt->tag[MMG5_iarf[i][j]];
               /* MG_BDY is removed because by definition a triangle is on the boundary */
