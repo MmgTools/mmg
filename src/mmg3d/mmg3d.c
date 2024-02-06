@@ -542,21 +542,3 @@ int main(int argc,char *argv[]) {
 
 
 
-/* --------------------------------------  Mark's hacks ---------------------------------------------  */
-
-// Print the indices and coordinates of the vertices of one tet.  This is to
-// inform the user about the location of a problem when the tet index is not
-// helpful, for example because it does not correpond to the input or output
-// mesh.
-//
-void MMG5_show_tet_location(MMG5_pMesh mesh, MMG5_pTetra pt, int iel)
-{
-  fprintf(stderr, "  ## tet index %d\n", iel);
-  for(int j=0; j<4; j++){
-    double U[3], *S = mesh->point[pt->v[j]].c;        // unscaled and scaled coords
-    for(int i=0; i<3; i++) U[i] = S[i]*mesh->info.delta + mesh->info.min[i];
-    fprintf(stderr, "  ## vertex %d at (%f,%f,%f)\n", pt->v[j], U[0], U[1], U[2]);
-  }
-}
-
-
