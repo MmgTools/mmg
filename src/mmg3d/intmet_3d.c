@@ -101,12 +101,30 @@ int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int i
 int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,
                       double s) {
   MMG5_pTetra   pt;
-  double        *m,*n,*mr;
   MMG5_int      ip1,ip2;
 
   pt = &mesh->tetra[k];
   ip1 = pt->v[MMG5_iare[i][0]];
   ip2 = pt->v[MMG5_iare[i][1]];
+
+  return MMG3D_intmet33_ani_edge(met,ip1,ip2,ip,s);
+}
+
+/**
+ * \param met pointer toward the metric structure.
+ * \param ip1 first global index of edge extremities.
+ * \param ip2 second global index of edge extremities.
+ * \param ip global index of the new point in which we want to compute the metric.
+ * \param s interpolation parameter (between 0 and 1).
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Interpolation of anisotropic sizemap at parameter \a s along edge [ip1,ip2]
+ * for a classic storage of ridges metrics (before defsiz call).
+ *
+ */
+int MMG3D_intmet33_ani_edge(MMG5_pSol met,MMG5_int ip1,MMG5_int ip2,MMG5_int ip,
+                      double s) {
+  double        *m,*n,*mr;
 
   m   = &met->m[6*ip1];
   n   = &met->m[6*ip2];
@@ -124,7 +142,7 @@ int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_in
  * \param s interpolation parameter (between 0 and 1).
  * \return 0 if fail, 1 otherwise.
  *
- * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
+ * Interpolation of isotropic sizemap at parameter \a s along edge \a i of elt
  * \a k.
  *
  */
@@ -132,11 +150,28 @@ int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int i
                       double s) {
   MMG5_pTetra   pt;
   MMG5_int      ip1, ip2;
-  double        *m1,*m2,*mm;
 
   pt = &mesh->tetra[k];
   ip1 = pt->v[MMG5_iare[i][0]];
   ip2 = pt->v[MMG5_iare[i][1]];
+
+  return MMG5_intmet_iso_edge(met,ip1,ip2,ip,s);
+}
+
+/**
+ * \param met pointer toward the metric structure.
+ * \param ip1 first global index of edge extremities.
+ * \param ip2 second global index of edge extremities.
+ * \param ip global index of the new point in which we want to compute the metric.
+ * \param s interpolation parameter (between 0 and 1).
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Interpolation of isotropic sizemap at parameter \a s along edge [ip1,ip2].
+ *
+ */
+int MMG5_intmet_iso_edge(MMG5_pSol met,MMG5_int ip1,MMG5_int ip2,MMG5_int ip,
+                      double s) {
+  double        *m1,*m2,*mm;
 
   m1 = &met->m[met->size*ip1];
   m2 = &met->m[met->size*ip2];
