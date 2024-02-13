@@ -310,6 +310,13 @@ jobs:
           cd build
           ctest --timeout 7200 -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
+      - name: Test Mmg with in64_t integers
+        # Run long tests only on ubuntu with pattern off, scotch on, vtk on and int64_t integers
+        if: matrix.os == 'ubuntu-20.04' && matrix.pattern == 'off' && matrix.scotch == 'on' && matrix.vtk == 'on' && matrix.int == 'int64_t'
+        run: |
+          cd build
+          ctest --timeout 7200 -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+
       - name: Test non native I/Os of Mmg
         if: matrix.vtk == 'on'
         run: |
