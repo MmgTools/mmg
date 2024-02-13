@@ -101,6 +101,13 @@ jobs:
               - os: ubuntu-20.04
                 pattern: off
                 pointmap: off
+                scotch: on
+                vtk: on
+                int: int64_t
+
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: off
                 scotch: off
                 vtk: off
                 int: int64_t
