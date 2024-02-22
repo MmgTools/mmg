@@ -60,6 +60,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;
   iswp = 0;
+  bpos = ia = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
 
   nref = 0;
@@ -171,7 +172,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     }
     MMG_FREAD(&mesh->ver,MMG5_SW,1,inm);
     if(iswp) mesh->ver = MMG5_swapbin(mesh->ver);
-    while(fread(&binch,MMG5_SW,1,inm)!=0 && binch!=54 ) {
+    while(fread(&binch,4,1,inm)!=0 && binch!=54 ) {
       if(iswp) binch=MMG5_swapbin(binch);
       if(binch==54) break;
       if(!bdim && binch==3) {  //Dimension
