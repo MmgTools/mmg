@@ -60,7 +60,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;
   iswp = 0;
-  bpos = ia = 0;
+  bpos = ia = idn = ip = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
 
   nref = 0;

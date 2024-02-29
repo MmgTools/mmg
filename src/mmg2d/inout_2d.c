@@ -45,6 +45,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   ncor = nreq = nreqed = ntreq = nqreq = 0;
   bin = 0;
   iswp = 0;
+  bpos = 0;
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nref = 0;
 

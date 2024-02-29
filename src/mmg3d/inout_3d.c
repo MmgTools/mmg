@@ -136,6 +136,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   ncor = ned = npreq = ntreq = nqreq = nereq = nedreq = nr = ng = 0;
   nppar = nedpar = ntpar = nqpar = nepar = 0;
   iswp = 0;
+  bpos = ia = idn = ip = 0;
   mesh->np = mesh->nt = mesh->ne = 0;
   nref = 0;
 
