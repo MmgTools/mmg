@@ -5,7 +5,8 @@
 Our project use **Doxygen** to automatically generate the developer documentation. If you implement a new function in **Mmg**, please, comment it and give at least its interface description (function's arguments and return values).  
 
 For example a minimal documentation for the function that save the mesh may be this one:
-```c
+<!-- do not mark this as C code or Doxygen will remove the interesting part -->
+```
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename pointer toward the name of file.
@@ -26,7 +27,8 @@ You can refer to the [Doxygen documentation](http://www.stack.nl/~dimitri/doxyge
 Because the library header for Fortran users is automatically generated from the C header, you must add to your documentation the interface of the fortran function. Each line of this interface must begin with the `>` symbol and end with the `\n` one.
 
 For example, if the previous function is an API function, its documentation becames the following:
-```c
+<!-- do not mark this as C code or Doxygen will remove the interesting part -->
+```
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename pointer toward the name of file.
