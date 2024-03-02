@@ -34,8 +34,8 @@
 #include "libmmg2d_private.h"
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  *
  * \return 0 if fail, 1 if success
  *

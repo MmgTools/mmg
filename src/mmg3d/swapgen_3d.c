@@ -37,8 +37,8 @@
 #include "mmg3dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure
+ * \param met pointer to the metric structure.
  * \param start tetrahedra in which the swap should be performed
  * \param ia edge that we want to swap
  * \param ilist pointer to store the size of the shell of the edge
@@ -253,13 +253,13 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param nconf configuration.
  * \param ilist number of tetrahedra in the shell of the edge that we want
  *  to swap.
- * \param list pointer toward the shell of the edge that we want to swap.
- * \param PROctree pointer toward the PROctree structure in Delaunay mode,
+ * \param list pointer to the shell of the edge that we want to swap.
+ * \param PROctree pointer to the PROctree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).

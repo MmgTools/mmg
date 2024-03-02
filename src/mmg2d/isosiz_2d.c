@@ -37,8 +37,8 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param pt tetra to process.
  * \param i index of the edge of the tetra \a pt that we process.
  *
@@ -63,8 +63,8 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
 
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param ismet 1 if user provided metric
  *
  * \return 0 if fail, 1 otherwise
@@ -121,8 +121,8 @@ return 1;
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 0 if fail, 1 otherwise
  *

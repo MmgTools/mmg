@@ -35,9 +35,9 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param pt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param pt pointer to the triangle structure.
  * \return The computed quality.
  *
  * Compute the quality of the surface triangle \a ptt with respect to
@@ -101,9 +101,9 @@ double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param ptt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param ptt pointer to the triangle structure.
  * \return The computed quality.
  *
  * Compute the quality of the surface triangle \a ptt with respect to
@@ -187,9 +187,9 @@ double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param ptt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param ptt pointer to the triangle structure.
  * \return The computed quality.
  *
  * Compute the quality of the surface triangle \a ptt with respect to
@@ -231,9 +231,9 @@ inline double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ned edges number.
- * \param avlen pointer toward the average edges lengths.
+ * \param avlen pointer to the average edges lengths.
  * \param amin index of first extremity of the smallest edge.
  * \param bmin index of second extremity of the smallest edge.
  * \param lmin smallest edge length.
@@ -241,8 +241,8 @@ inline double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * \param bmax index of second extremity of the largest edge.
  * \param lmax largest edge length.
  * \param nullEdge number of edges for which we are unable to compute the length
- * \param bd pointer toward the table of the quality span.
- * \param hl pointer toward the table that store the number of edges for eac
+ * \param bd pointer to the table of the quality span.
+ * \param hl pointer to the table that store the number of edges for eac
  * \param shift value to shift the target lenght interval
  * span of quality
  *
@@ -282,8 +282,8 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG5_int ned, double *avlen,
  * \param bmax index of second extremity of the largest edge.
  * \param lmax largest edge length.
  * \param nullEdge number of edges for which we are unable to compute the length
- * \param bd pointer toward the table of the quality span.
- * \param hl pointer toward the table that store the number of edges for eac
+ * \param bd pointer to the table of the quality span.
+ * \param hl pointer to the table that store the number of edges for eac
  * \param shift value to shift the target lenght interval
  * span of quality
  * \param imprim verbosity level

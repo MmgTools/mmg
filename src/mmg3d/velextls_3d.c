@@ -42,10 +42,10 @@
 #define _LS_MU          8.2e5
 
 /**
- * \param mesh pointer toward the mesh
- * \param disp pointer toward the displacement
- * \param lsst pointer toward the elastic structure (mesh + sol + info)
- * \param npfin pointer toward the final number of points in the packed mesh
+ * \param mesh pointer to the mesh
+ * \param disp pointer to the displacement
+ * \param lsst pointer to the elastic structure (mesh + sol + info)
+ * \param npfin pointer to the final number of points in the packed mesh
  * for the elasticity call
  *
  * \return invperm array of the permutation (vertices) from the submesh (given
@@ -354,10 +354,10 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param disp pointer toward the displacement
- * \param lsst pointer toward the elastic structure (mesh + sol + info)
- * \param npf pointer toward the number of points in the submesh
+ * \param mesh pointer to the mesh
+ * \param disp pointer to the displacement
+ * \param lsst pointer to the elastic structure (mesh + sol + info)
+ * \param npf pointer to the number of points in the submesh
  * \param invperm array of the permutation from the submesh toward
  * the global one
  *
@@ -389,8 +389,8 @@ int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_in
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param disp pointer toward the displacement.
+ * \param mesh pointer to the mesh.
+ * \param disp pointer to the displacement.
  *
  * \return 0 if fail, 1 if success.
  *

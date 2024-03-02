@@ -51,9 +51,9 @@ PROGRAM main
   !! args of InitMesh:
   !! MMG5_ARG_start: we start to give the args of a variadic func
   !! MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
-  !! &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+  !! &mmgMesh: pointer to your MMG5_pMesh (that stores your mesh)
   !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
-  !! &mmgSol: pointer toward your MMG5_pSol (that store your metric)
+  !! &mmgSol: pointer to your MMG5_pSol (that stores your metric)
 
   mmgMesh = 0
   mmgSol  = 0

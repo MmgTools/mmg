@@ -42,8 +42,8 @@
 #define MAXLEN   1.0e+3
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param hash edge hashtable.
  * \param pt tria to process.
  * \param i index of the edge of the tria \a pt that we process.
@@ -76,8 +76,8 @@ int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param ismet 1 if user provided metric
  *
  * \return 0 if fail, 1 otherwise
@@ -130,8 +130,8 @@ int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ism
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if success, 0 if fail
  *

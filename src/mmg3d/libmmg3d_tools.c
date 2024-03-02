@@ -197,11 +197,11 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 /**
  * \param argc number of command line args
  * \param argv command line args
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- * \param sol pointer toward the solution (level-set or displacement)
- * \param mmgArgc pointer toward the number of appened unknown args (to fill)
- * \param mmgArgv pointer toward the appened unknown args (to fill)
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
+ * \param sol pointer to the solution (level-set or displacement)
+ * \param mmgArgc pointer to the number of appened unknown args (to fill)
+ * \param mmgArgv pointer to the appened unknown args (to fill)
  *
  * \return 1 if success, 0 if fail (missing value for argument)
  *
@@ -1420,8 +1420,8 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  * \param ani 1 for aniso metric, 0 for iso one
  *
  * \return 0 if fail, 1 if succeed.
@@ -1470,8 +1470,8 @@ int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -1545,8 +1545,8 @@ int MMG3D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if succeed, 0 if fail
  *

@@ -37,7 +37,7 @@
 
 
 /**
- * \param mesh pointer toward a MMG5 mesh structure.
+ * \param mesh pointer to a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Regularization procedure for derivatives, dual Laplacian

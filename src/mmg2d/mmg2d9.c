@@ -71,8 +71,8 @@ double MMG2D_estavglen(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement structure.
+ * \param mesh pointer to the mesh structure
+ * \param disp pointer to the displacement structure.
  * \param t fraction of displacement to test
  * \param tetIdx to fill with the list of non valid tria if provided.
  *
@@ -176,9 +176,9 @@ int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param disp pointer toward the displacement structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param disp pointer to the displacement structure.
+ * \param met pointer to the metric structure.
  * \param itdeg degraded elements.
  * \param *warn \a warn is set to 1 if not enough memory is available to complete mesh.
  * \return -1 if failed.
@@ -274,8 +274,8 @@ MMG5_int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int itde
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param itdeg degraded elements.
  * \return -1 if failed.
  * \return number of collapsed points.
@@ -339,8 +339,8 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param crit coefficient of quality improvment.
  * \param itdeg degraded elements.
  *
@@ -383,8 +383,8 @@ MMG5_int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param itdeg degraded elements.
  * \return -1 if failed, number of moved points otherwise.
  *

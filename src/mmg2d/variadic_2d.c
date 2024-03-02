@@ -42,10 +42,10 @@
 #include "mmg2dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param ls pointer toward the level-set (in ls-mode).
- * \param disp pointer toward the displacement (in lag mode).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
+ * \param ls pointer to the level-set (in ls-mode).
+ * \param disp pointer to the displacement (in lag mode).
  *
  * \return 1 if success, 0 if fail
  *
@@ -83,10 +83,10 @@ int MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met, MMG5_pSol *ls,
   return 1;
 }
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \param ls pointer toward a sol structure (level-set).
- * \param disp pointer toward a sol structure (displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a sol structure (metric).
+ * \param ls pointer to a sol structure (level-set).
+ * \param disp pointer to a sol structure (displacement).
  *
  * Initialization of mesh and solution structures to their default
  * values (default names, versions, dimensions...).
@@ -152,11 +152,11 @@ void MMG2D_Init_woalloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met,MMG5_pSol *ls,MMG5
  * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow to identify
  * it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG2D_mmg2dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -165,7 +165,7 @@ void MMG2D_Init_woalloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met,MMG5_pSol *ls,MMG5
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG2D_mmg2dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 0 if fail, 1 otherwise
@@ -232,11 +232,11 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
  * structure must follow one of the \a MMG5_ARG preprocessor variable that allow to
  * identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG2D_mmg2dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -245,7 +245,7 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG2D_mmg2dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 0 if fail, 1 if success
@@ -342,9 +342,9 @@ int MMG2D_Free_all_var(va_list argptr)
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
  * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
- * to identify it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh
+ * to identify it.  \a argptr contains at least a pointer to a \a MMG5_pMesh
  * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
- * keyword) and a pointer toward a \a MMG5_pSol structure (that will contain the
+ * keyword) and a pointer to a \a MMG5_pSol structure (that will contain the
  * ouput metric (and the input one, if provided) and identified by the
  * MMG5_ARG_ppMet keyword).
  *
@@ -353,7 +353,7 @@ int MMG2D_Free_all_var(va_list argptr)
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG2D_mmg2dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 1 if success, 0 if fail
@@ -465,9 +465,9 @@ int MMG2D_Free_structures_var(va_list argptr)
 /**
  * \param argptr list of the mmg structures for whose we want to deallocate the
  * name. Each structure must follow one of the \a MMG5_ARG* preprocessor variable
- * that allow to identify it.  \a argptr contains at least a pointer toward a \a
+ * that allow to identify it.  \a argptr contains at least a pointer to a \a
  * MMG5_pMesh structure (that will contain the mesh and identified by the
- * MMG5_ARG_ppMesh keyword) and a pointer toward a \a MMG5_pSol structure (that
+ * MMG5_ARG_ppMesh keyword) and a pointer to a \a MMG5_pSol structure (that
  * will contain the ouput metric (and the input one, if provided) and identified
  * by the MMG5_ARG_ppMet keyword).
  *

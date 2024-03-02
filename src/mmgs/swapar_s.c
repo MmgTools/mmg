@@ -39,15 +39,15 @@
 #include "inlined_functions_private.h"
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param k index of the element in wich we perform the edge swap
  * \param i index of the edge to swap
  * \param typchk type of check to perform
- * \param MMGS_lenEdg pointer toward the suitable fct to compute edge lengths
+ * \param MMGS_lenEdg pointer to the suitable fct to compute edge lengths
  * depending on presence of input metric, metric type (iso/aniso) and \a typchk
  * value (i.e. stage of adaptation)
- * \param MMGS_caltri pointer toward the suitable fct to compute tria quality
+ * \param MMGS_caltri pointer to the suitable fct to compute tria quality
  * depending on presence of input metric, metric type (iso/aniso) and \a typchk
  * value (i.e. stage of adaptation)
  *

@@ -39,10 +39,10 @@
 extern MMG5_Info  info;
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetrahedra.
  * \param ip local index of the point in the tetrahedra \a start.
- * \param list pointer toward the list of the tetra in the volumic ball of
+ * \param list pointer to the list of the tetra in the volumic ball of
  * \a ip.
  * \return 0 if fail and the number of the tetra in the ball otherwise.
  *
@@ -96,14 +96,14 @@ int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, int64_t * list){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param pt pointer toward the working tetra
+ * \param mesh pointer to the mesh structure.
+ * \param pt pointer to the working tetra
  * \param k index of the tetra \a pt.
  * \param na index of the first extermity of the seeking edge.
  * \param nb index of the second extermity of the seeking edge.
  * \param error 1 if we want to print an error message, 0 for a warning.
  * \param mmgWarn static variable to print warning only once (not used if error==1)
- * \param ia pointer toward the edge index (to fill).
+ * \param ia pointer to the edge index (to fill).
  *
  * \return 0 if fail, 1 if success.
  *
@@ -181,7 +181,7 @@ void MMG3D_compute_tangent(MMG5_pMesh mesh,int nump,int ip0,int ip1,double t[3])
 }
 
 /**
- * \param mesh pointer toward the mesh  structure.
+ * \param mesh pointer to the mesh  structure.
  * \param start tetra index.
  * \param ip point index.
  * \param iface face index.
@@ -326,7 +326,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 }
 
 /**
- * \param mesh pointer toward the mesh  structure.
+ * \param mesh pointer to the mesh  structure.
  * \param start tetra index.
  * \param ip point index.
  * \param t computed tangent vector.
@@ -439,13 +439,13 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward an allocated hash table.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to an allocated hash table.
  * \param start index of the starting tetrahedra.
  * \param ip local index of the point in the tetrahedra \a start.
- * \param ng pointer toward the number of ridges.
- * \param nr pointer toward the number of reference edges.
- * \param nm pointer toward the number of non-manifold edges.
+ * \param ng pointer to the number of ridges.
+ * \param nr pointer to the number of reference edges.
+ * \param nm pointer to the number of non-manifold edges.
  * \return ns the number of special edges passing through ip, -1 if fail.
  *
  * Count the numer of ridges and reference edges incident to
@@ -582,14 +582,14 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetra.
  * \param ip index in \a start of the looked point.
  * \param iface index in \a start of the starting face.
- * \param listv pointer toward the computed volumic ball.
- * \param ilistv pointer toward the computed volumic ball size.
- * \param lists pointer toward the computed surfacic ball.
- * \param ilists pointer toward the computed surfacic ball size.
+ * \param listv pointer to the computed volumic ball.
+ * \param ilistv pointer to the computed volumic ball size.
+ * \param lists pointer to the computed surfacic ball.
+ * \param ilists pointer to the computed surfacic ball size.
  * \param isnm 1 if \a ip is non-manifold, 0 otherwise.
  * \return -1 if fail, 1 otherwise.
  *
@@ -744,14 +744,14 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetra.
  * \param ip index in \a start of the looked point.
  * \param iface index in \a start of the starting face.
- * \param listv pointer toward the computed volumic ball.
- * \param ilistv pointer toward the computed volumic ball size.
- * \param lists pointer toward the computed surfacic ball.
- * \param ilists pointer toward the computed surfacic ball size.
+ * \param listv pointer to the computed volumic ball.
+ * \param ilistv pointer to the computed volumic ball size.
+ * \param lists pointer to the computed surfacic ball.
+ * \param ilists pointer to the computed surfacic ball size.
  * \param refmin return the reference of one of the two subdomains in presence
  * \param refplus return the reference of the other subdomain in presence
  * \param isnm is the looked point \a ip non-manifold?
@@ -929,15 +929,15 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetrahedron.
  * \param ip index of the looked ridge point.
  * \param iface index in \a start of the starting face.
- * \param il1 pointer toward the first ball size.
- * \param l1 pointer toward the first computed ball (associated to \a n_1's
+ * \param il1 pointer to the first ball size.
+ * \param l1 pointer to the first computed ball (associated to \a n_1's
  * side).
- * \param il2 pointer toward the second ball size.
- * \param l2 pointer toward the second computed ball (associated to \a n_2's
+ * \param il2 pointer to the second ball size.
+ * \param l2 pointer to the second computed ball (associated to \a n_2's
  * side).
  * \param ip0 index of the first extremity of the ridge.
  * \param ip1 index of the second extremity of the ridge.
@@ -1151,7 +1151,7 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param na edge vertex
  * \param nb edge vertex
@@ -1211,7 +1211,7 @@ int MMG3D_settag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int n
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param start tetra from which we start
  * \param ia local index of the edge in \a start
  * \param tag tag to set
@@ -1274,7 +1274,7 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param na edge vertex
  * \param nb edge vertex
@@ -1326,7 +1326,7 @@ int MMG3D_deltag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int n
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param start index of the starting tetra
  * \param ia index of the edge in tetra \a start that we want to modify
  * \param tag tag to remove
@@ -1382,7 +1382,7 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param start index of the starting tetra
  * \param ia index of the edge
  * \param list list of tetra sharing the edge \a ia
@@ -1537,7 +1537,7 @@ int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,int64_t*list,int8_t *isbdy
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start starting tetra.
  * \param ia local edge index in tetra \a start.
  *
@@ -1598,7 +1598,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param k1 should contain a tetra index.
  * \param k2 should contain a tetra index different from k2.
  *
@@ -1654,21 +1654,21 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetrahedron.
  * \param na global index of the 1st extremity of the edge whose shell is computed
  * \param nb global index of the  2d extremity of the edge whose shell is computed
  * \param iface index of the face from which we come.
  * \param ia index of edge whose shell is computed (in tetra).
- * \param list pointer toward the list of tetra in the shell (to fill).
- * \param ilist pointer toward the number of tetra in the shell (to fill).
- * \param it1 pointer toward the index of the 1st boundary face sharing \a ia
- * \param it2 pointer toward the index of the 2d boundary face sharing \a ia
+ * \param list pointer to the list of tetra in the shell (to fill).
+ * \param ilist pointer to the number of tetra in the shell (to fill).
+ * \param it1 pointer to the index of the 1st boundary face sharing \a ia
+ * \param it2 pointer to the index of the 2d boundary face sharing \a ia
  * (to fill).
- * \param adj pointer toward the adjacent to treat in the shell (to update)
- * \param hasadja pointer toward 0 if we don't have adja through iface,
+ * \param adj pointer to the adjacent to treat in the shell (to update)
+ * \param hasadja pointer to 0 if we don't have adja through iface,
  * 1 otherwise (to fill)
- * \param nbdy pointer toward the number of boundaries found minus 1 (to update)
+ * \param nbdy pointer to the number of boundaries found minus 1 (to update)
  * \param silent if 1, print error message for more than 2 boundary triangles
  * in the shell
  *
@@ -1765,15 +1765,15 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param piv global index of the pivot.
  * \param iface index of the face from which we come.
  * \param i index of edge whose shell is computed (in tetra).
- * \param list pointer toward the list of tetra in the shell (to fill).
- * \param ilist pointer toward the number of tetra in the shell (to fill).
- * \param it1 pointer toward the index of the 1st boundary face sharing \a ia
- * \param pradj pointer toward the first tetra of the shell (to fill).
- * \param adj pointer toward the adjacent to treat in the shell (to update)
+ * \param list pointer to the list of tetra in the shell (to fill).
+ * \param ilist pointer to the number of tetra in the shell (to fill).
+ * \param it1 pointer to the index of the 1st boundary face sharing \a ia
+ * \param pradj pointer to the first tetra of the shell (to fill).
+ * \param adj pointer to the adjacent to treat in the shell (to update)
  *
  * Initialize the travel in the shell of the edge in reverse direction than in
  * the \a coquilFaceFirstLoop function.
@@ -1815,14 +1815,14 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetrahedron.
  * \param iface index of the boundary face from which we come.
  * \param ia index of edge whose shell is computed (in tetra).
- * \param list pointer toward the list of tetra in the shell (to fill).
- * \param it1 pointer toward the index of the first boundary face sharing \a ia
+ * \param list pointer to the list of tetra in the shell (to fill).
+ * \param it1 pointer to the index of the first boundary face sharing \a ia
  * (to fill).
- * \param it2 pointer toward the index of the second boundary face sharing \a ia
+ * \param it2 pointer to the index of the second boundary face sharing \a ia
  * (to fill).
  * \param silent if 1, print error message for more than 2 boundary triangles
  * in the shell
@@ -1935,7 +1935,7 @@ int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,int64_t *
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param na global index of edge extremity.
  * \param nb global index of edge extremity.
  * \param adj starting tetrahedron at the begining and finish tet at the end.
@@ -1987,7 +1987,7 @@ int16_t MMG5_coquilTravel(MMG5_pMesh mesh, MMG5_int na, MMG5_int nb, MMG5_int* a
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param na global index of edge extremity.
  * \param nb global index of edge extremity.
  * \param adj starting tetrahedron at the begining and finish tet at the end.

@@ -37,7 +37,7 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 1 if success, 0 if fail
  *
@@ -244,7 +244,7 @@ int MMGS_setadj(MMG5_pMesh mesh){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -436,7 +436,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -486,7 +486,7 @@ static int setdhd(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -584,7 +584,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -739,8 +739,8 @@ static int norver(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer towards the mesh
- * \param pt pointer towards current triangle
+ * \param mesh pointer tos the mesh
+ * \param pt pointer tos current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
  * \param n normal of triangle before regularization
@@ -807,7 +807,7 @@ static inline int MMGS_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, dou
 }
 
 /**
- * \param mesh pointer toward a MMG5 mesh structure.
+ * \param mesh pointer to a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Regularization procedure for vertices coordinates,
@@ -1032,7 +1032,7 @@ int MMGS_remDup(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *

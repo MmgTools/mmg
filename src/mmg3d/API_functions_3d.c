@@ -204,7 +204,7 @@ int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param np number of vertices.
  * \param ne number of tetrahedra.
  * \param nprism number of prisms.

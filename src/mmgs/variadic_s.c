@@ -42,9 +42,9 @@
 #include "mmgsexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ls pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
+ * \param ls pointer to the sol structure.
  *
  * \return 0 if fail, 1 if success
  *
@@ -74,9 +74,9 @@ int MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met, MMG5_pSol *ls) {
   return 1;
 }
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \param ls pointer toward the level-set (in ls-mode).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a sol structure (metric).
+ * \param ls pointer to the level-set (in ls-mode).
  *
  * Initialization of mesh and solution structures to their default
  * values (default names, versions, dimensions...).
@@ -129,11 +129,11 @@ void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol *met,MMG5_pSol *ls ) {
  * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
  *
  *  To call the \a MMGS_mmgslib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -202,11 +202,11 @@ int MMGS_Init_mesh_var( va_list argptr ) {
  * structure must follow one of the \a MMG5_ARG preprocessor variable that allow to
  * identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
  *
  *  To call the \a MMGS_mmgslib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -300,11 +300,11 @@ int MMGS_Free_all_var(va_list argptr)
  * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
  *
  *  To call the \a MMGS_mmgslib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -401,12 +401,12 @@ int MMGS_Free_structures_var(va_list argptr)
  * name. Each structure must follow one of the \a MMG5_ARG preprocessor variable
  * that allow to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh
  * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
  * keyword).
  *
  *  To call the \a MMGS_mmgslib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *

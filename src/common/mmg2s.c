@@ -34,8 +34,8 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set
  *
  * \return 1 if success, 0 if fail
  *
@@ -121,7 +121,7 @@ int MMG5_snpval_lssurf(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * Reset mesh->info.isoref vertex references to 0.
  *

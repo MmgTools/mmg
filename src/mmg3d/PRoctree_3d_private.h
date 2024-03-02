@@ -33,7 +33,7 @@
  */
 typedef struct MMG3D_PROctree_s
 {
-  struct MMG3D_PROctree_s* branches; /*!< pointer toward the subtrees of the current PROctree */
+  struct MMG3D_PROctree_s* branches; /*!< pointer to the subtrees of the current PROctree */
   MMG5_int* v;      /*!< vertex index */
   int  nbVer;  /*!< number of vertices in the sub tree */
   int  depth; /*!< sub tree depth */

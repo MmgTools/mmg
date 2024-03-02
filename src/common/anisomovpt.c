@@ -36,10 +36,10 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param pt pointer toward the tria on which we integrate.
- * \param p0 pointer toward the point that we want to move.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param pt pointer to the tria on which we integrate.
+ * \param p0 pointer to the point that we want to move.
  * \param pb bezier patch of the triangle.
  * \param r rotation matrix that sends the normal at point \a p0 to e_z.
  * \param gv centre of mass that we want to update using the computed element

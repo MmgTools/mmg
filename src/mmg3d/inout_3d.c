@@ -39,7 +39,7 @@
 /**
  * \param imprim verbosity level (muted for stdout if -1)
  * \param filename file to open
- * \param inm pointer toward the file unit
+ * \param inm pointer to the file unit
  * \param bin 1 if file will be at binary format
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
@@ -1032,7 +1032,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param filename name of file.
  *
  * \return 0 if the file is not found, -1 if we detect mismatch parameters or we
@@ -1247,8 +1247,8 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const c
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param filename pointer toward the name of file.
+ * \param mesh pointer to the mesh structure.
+ * \param filename pointer to the name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Save mesh data.

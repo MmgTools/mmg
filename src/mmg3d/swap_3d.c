@@ -39,10 +39,10 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param list pointer toward the shell of the edge.
- * \param ilist pointer toward the size of the shell of the edge.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param list pointer to the shell of the edge.
+ * \param ilist pointer to the size of the shell of the edge.
  * \param it1 first element of the open shell.
  * \param it2 last element of the open shell.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
@@ -449,13 +449,13 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the solution structure
- * \param list pointer toward the shell of the edge
+ * \param mesh pointer to the mesh structure
+ * \param met pointer to the solution structure
+ * \param list pointer to the shell of the edge
  * \param ret dobble of the number of tetrahedra in the shell
  * \param it1 boundary face carrying the beforehand tested terminal
  * point for collapse
- * \param PROctree pointer toward the PROctree structure in Delaunay mode,
+ * \param PROctree pointer to the PROctree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -583,8 +583,8 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int it1
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param k index of the tetrahedron with multiple boundary faces (to be swapped).
  * \param metRidTyp metric storage (classic or special)
  * \param ifac face of the tetra \a k that give the best results for the swap23

@@ -545,7 +545,7 @@ int MMG3D_openMesh(int imprim,const char *filename,FILE **inm,int *bin,char*,cha
 int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Warn user that some tetrahedra of the mesh have been reoriented.
  *

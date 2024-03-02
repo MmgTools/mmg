@@ -90,9 +90,9 @@ inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param disp pointer toward the displacement structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param disp pointer to the displacement structure.
+ * \param met pointer to the metric structure.
  * \param itdeg degraded elements.
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
  * \return -1 if failed.
@@ -279,10 +279,10 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param crit coefficient of quality improvment.
- * \param PROctree pointer toward the PROctree structure in delaunay mode and
+ * \param PROctree pointer to the PROctree structure in delaunay mode and
  * toward the \a NULL pointer otherwise.
  * \param itdeg degraded elements.
  *
@@ -334,8 +334,8 @@ MMG5_int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param itdeg degraded elements.
  * \return -1 if failed, number of moved points otherwise.
  *
@@ -393,8 +393,8 @@ MMG5_int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param itdeg degraded elements.
  * \return -1 if failed.
  * \return number of collapsed points.
@@ -474,8 +474,8 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement structure.
+ * \param mesh pointer to the mesh structure
+ * \param disp pointer to the displacement structure.
  * \param t fraction of displacement to test
  * \param tetIdx to fill with the list of non valid tetra if provided.
  *
