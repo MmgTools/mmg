@@ -60,7 +60,7 @@
 ---
 
 Mmg provides 3 applications and 4 libraries:
-  * the **mmg2d** application and library: mesh generation from a set of edges, adaptation and optimization of a bidimensionnal triangulation and isovalue discretization;
+  * the **mmg2d** application and library: mesh generation from a set of edges, adaptation and optimization of a bidimensional triangulation, and isovalue discretization;
   * the **mmgs** application and library: adaptation and optimization of a surface triangulation and isovalue discretization;
   * the **mmg3d** application and library: adaptation and optimization of a tetrahedral mesh, isovalue discretization and lagrangian movement;
   * the **mmg** library gathering the **mmg2d**, **mmgs** and **mmg3d** libraries.
@@ -71,9 +71,9 @@ Mmg provides 3 applications and 4 libraries:
 ### Needed tools
 To get and build Mmg, you will need:
   * **Git**: to download the code you will have to use a git manager. You can install a git manager from the link below but there are many other git clients that you can use:
-    * [Official Git client](https://git-scm.com/download) (command line program)
+    * [Official Git client](https://git-scm.com/download) (command-line program)
     * [GitKraken](https://www.gitkraken.com/)
-    * [SourceTree](https://www.sourcetreeapp.com/)  
+    * [SourceTree](https://www.sourcetreeapp.com/)
 
     Note that if you uses Microsoft Visual Studio (Windows OS), you can simply activate the Git Module of the application.
 
@@ -85,12 +85,12 @@ To get and build Mmg, you will need:
     ```
          Add CMake to the system PATH for all users
     ```
-    </span>  
+    </span>
 
 ### Mmg download and compilation
 #### Unix-like OS (Linux, MacOS...)
 
-  1. Get the repository:  
+  1. Get the repository:
 ```
       wget https://github.com/MmgTools/mmg/archive/master.zip
       ```
@@ -103,24 +103,24 @@ To get and build Mmg, you will need:
    * **src/mmg2d/**   for files related to the mmg2d application;
    * **src/mmgs/**   for files related to the mmgs application;
    * **src/mmg3d/**  for files related to the mmg3d application;
-   * **src/common/** for files related to the both.
+   * **src/common/** for files related to all three.
 
-  2. Fast compilation (build both **mmg2d**, **mmgs**, **mmg3d**, the mmg2d static library (**libmmg3d.a**), the mmgs static library (**libmmgs.a**), the mmg3d static library (**libmmg3d.a**) and the mmg static library (**libmmg.a**)):  
+  2. Fast compilation (build **mmg2d**, **mmgs**, **mmg3d**, the mmg2d static library (**libmmg3d.a**), the mmgs static library (**libmmgs.a**), the mmg3d static library (**libmmg3d.a**) and the mmg static library (**libmmg.a**)) all at once:
 ```
-      cd mmg  
-      mkdir build  
-      cd build  
-      cmake ..  
-      make  
+      cd mmg
+      mkdir build
+      cd build
+      cmake ..
+      make
       make install
 ```
 
-  If the `make install` command fail, try to run the `sudo make install` command.
-  If you don't have root access, please refers to the [Installation section](https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) of the [setup guide](https://github.com/MmgTools/Mmg/wiki/Setup-guide#setup-guide).
+  If the `make install` command fails, try to run the `sudo make install` command.
+  If you don't have root access, please refer to the [Installation section](https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) of the [setup guide](https://github.com/MmgTools/Mmg/wiki/Setup-guide#setup-guide).
 
-  The **mmg2d**, **mmgs** and **mmg3d** applications are available under the `mmg2d_O3`, `mmgs_O3` and `mmg3d_O3` commands. 
+  The **mmg2d**, **mmgs** and **mmg3d** applications are available under the `mmg2d_O3`, `mmgs_O3` and `mmg3d_O3` commands.
 
-Note that if you use some specific options and want to set it easily, you can use a shell script to execute the previous commands. An example is provided [here](https://github.com/MmgTools/mmg/wiki/Configure-script-for-CMake-(UNIX-like-OS)).
+Note that if you use some specific options and want to set them easily, you can use a shell script to execute the previous commands. An example is provided [here](https://github.com/MmgTools/mmg/wiki/Configure-script-for-CMake-(UNIX-like-OS)).
 
 #### Windows OS
 The following compilation can be performed in any modern version of *Windows*
@@ -144,20 +144,19 @@ Universal windows platform development
     cmake -G "Visual Studio 15 2017 Win64" ^
     configure
   ```
-  
-  Note that you can use a script to make this step easier (an example of script is provided [here](https://github.com/MmgTools/mmg/wiki/Configure-script-for-CMake-(Windows-OS))).  
-  
+
+  Note that you can use a script to make this step easier (an example of script is provided [here](https://github.com/MmgTools/mmg/wiki/Configure-script-for-CMake-(Windows-OS))).
+
    Once the configuration script has finished without errors a `mmg.sln` file will be generated in the cmake_build directory.
 
-  6. Double click this file and the visual studio project will open. Then choose the project configuration (Release, Debug...).  
-  Please, make sure that the project is set to Win32 or x64 and change it if is not. 
+  6. Double click this file and the visual studio project will open. Then choose the project configuration (Release, Debug...) and make sure that the project is set to Win32 or x64.
   Finally, in order to compile Mmg, right click the `INSTALL` project and select the option `BUILD`.
 
 ##### Compile with MinGW
 
-  1. Get a **C Compiler**: 
+  1. Get a **C Compiler**:
       * **MinGW** can be downloaded [here](http://mingw.org/). We recommand to install the *mingw-developer-tools*, *mingw32-base*, *mingw32-gcc-fortran*, *mingw32-gcc-g++* and *msys-base* packages;
-      * Edit the environment variables and add MinGW in your **PATH** variable. It can be done in the **advanced system settings** panel. (note that you must modify the **PATH** variable, not the **Path** one);
+      * Edit the environment variables and add MinGW in your **PATH** variable. It can be done in the **advanced system settings** panel. (note that you must modify the **PATH** variable, not **Path**);
       * **MinGW** binaries are probably in `C:\MinGW\bin`
       * the MinGW terminal is in `C:\MinGW\msys\1.0\msys`
 
@@ -169,42 +168,44 @@ Universal windows platform development
        mingw32-make
 ```
 
-Again, if you use some specific options and want to make the CMake configuration step easier, you can use a batch script. An example of script is provided [here](https://github.com/MmgTools/mmg/wiki/Configure-script-for-CMake-(Windows-OS)).
+Again, if you use some specific options and want to make the CMake configuration step easier, you can use a batch script. An example script is provided [here](https://github.com/MmgTools/mmg/wiki/Configure-script-for-CMake-(Windows-OS)).
 
 ## Documentation
-### Project's web page
-Project's actualities and software tutorials can be found on the [mmgtools](http://www.mmgtools.org) web page.
+### Project web page
+Actualities of the project and software tutorials can be found on the [mmgtools](http://www.mmgtools.org) web page.
 
-### Mmg's forum
+### Forum
 Share your comments and issues with other members of the Mmg community on the [Mmg forum](https://forum.mmgtools.org/).
 
-### GitHub's Wiki
-More detailed informations about the compilation and configuration of the mmg's applications are available on the project [wiki](https://github.com/MmgTools/mmg/wiki).
+### GitHub Wiki
+More detailed information about the compilation and configuration of Mmg applications is available on the project [wiki](https://github.com/MmgTools/mmg/wiki).
 
-### Man-pages
+### Man pages
 Man pages are available inside the **doc/man** directory:
-  * To see the **mmg2d** man page, just tap `man ./doc/man/mmg2d.1.gz`
-  * To see the **mmgs** man page, just tap `man ./doc/man/mmgs.1.gz`
-  * To see the **mmg3d** man page, just tap `man ./doc/man/mmg3d.1.gz`
+  * To see the **mmg2d** man page, just run `man ./doc/man/mmg2d.1.gz`
+  * To see the **mmgs** man page, run `man ./doc/man/mmgs.1.gz`
+  * To see the **mmg3d** man page, run `man ./doc/man/mmg3d.1.gz`
 
 ### Code documentation
-Run the `make doc` command to build the Doxygen documentation.
-  * To see the **mmg2d** documentation, open up the **mmg/doc/mmg2d/html/index.html** file;
-  * To see the **mmgs** documentation, open up the **mmg/doc/mmgs/html/index.html** file;
-  * To see the **mmg3d** documentation, open up the **mmg/doc/mmg3d/html/index.html** file.
+Run the `make doc` command to build the Doxygen documentation, after running `cmake`
+  with the option `-DBUILD_DOC=yes` if you did not already do so.
+  You may wish to adapt `build/Doxyfile` to your liking.
+  * To see the **mmg2d** documentation, open the file **mmg/doc/mmg2d/html/index.html**,
+  * to see the **mmgs** documentation, open **mmg/doc/mmgs/html/index.html**, and
+  * ro see the **mmg3d** documentation, open **mmg/doc/mmg3d/html/index.html**.
 
 ## Platforms
-The **mmg** applications are validated on OS X and on most of the Linux platforms. 
+The **mmg** applications are tested on OS X and on most of the Linux platforms.
 
 ## Contributing
-Your contributions to the **mmg** project are welcomed. You can help us to improve
+Your contributions to the **mmg** project are welcome. You can help us to improve
 our code by many means:
-  * pull requests: please follow the [wiki's guideline](https://github.com/MmgTools/Mmg/wiki/Developers-wiki#pull-requests);
+  * pull requests: please follow the [guidelines on the wiki](https://github.com/MmgTools/Mmg/wiki/Developers-wiki#pull-requests);
   * feature requests: please use the [Mmg forum](https://forum.mmgtools.org/);
   * bug reports: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new);
 
 ## About the team
-mmg's current developers and maintainers are Charles Dapogny, Cécile Dobrzynski, Pascal Frey and Algiane Froehly.
+Mmg's current developers and maintainers are Charles Dapogny, Cécile Dobrzynski, Pascal Frey and Algiane Froehly.
 
 Contact: contact@mmgtools.org
 

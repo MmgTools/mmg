@@ -389,7 +389,6 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \brief Set vertex coordinates and references in a mesh structure
  *
  * \param mesh pointer to the mesh structure.
- * vertices[(i-1)*3]\@3.
  * \param vertices  array of vertex coordinates in the order \f$[x_1, y_1, z_1, x_2, \ldots, z_N]\f$
  *   where \f$N\f$ is the number of vertices in the mesh.
  * \param refs  array of point references.
