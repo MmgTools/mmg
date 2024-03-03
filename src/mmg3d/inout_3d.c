@@ -1115,6 +1115,15 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return ier;
 }
 
+/* This is an API function. It is documented in the header.
+ *
+ * This function reads a 3D mesh and 0 or 1 data fields in MSH file format (.msh
+ * extension). We read only low-order points, edges, triangles, quadrangles,
+ * tetrahedra and prisms.
+ *
+ * It returns 0 if the file is not found, -1 if it fails for another reason (mem
+ * lack, file format...), 1 if success.
+ */
 int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
   int         ier;
