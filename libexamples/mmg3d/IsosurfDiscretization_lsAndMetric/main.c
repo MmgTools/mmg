@@ -135,7 +135,7 @@ int main(int argc,char *argv[]) {
 
   /** b) give metric values and positions */
   for(k=1 ; k<=np ; k++) {
-    /* the Metric is constant over the mesh and follow the canonical
+    /* the Metric is constant over the mesh and follows the canonical
      * directions: it is given by the tensor (10000,0,100) */
     if ( MMG3D_Set_tensorSol(mmgMet,10,0,0,1,0,1,k) != 1 ) exit(EXIT_FAILURE);
   }
