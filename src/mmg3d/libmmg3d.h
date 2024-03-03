@@ -33,15 +33,13 @@
  * \warning Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
  *
  * \htmlonly
- * <!-- FIXME I want to have some kind of indication that what follows are the examples,
- *      but in the same style as "Functions" and "Detailed Description" etc. These are
- *      different from \section, \subsection, etc. I can't find how to do this other 
- *      than with raw html. -->
  * <h2 class="groupheader">Examples</h2>
  * \endhtmlonly
  *
  * A very simple example code for mesh adaptation with automatic parsing of .mesh files
- * \include libexamples/mmg3d/adaptation_example0/example0_a/main.c
+ * \dontinclude libexamples/mmg3d/adaptation_example0/example0_a/main.c
+ * \skipline BEGIN_EXAMPLE
+ * \until END_EXAMPLE
  *
  * Mesh adaptation example in which get/set functions are used to provide input to
  * the library and to extract the output mesh.
@@ -56,7 +54,7 @@
  * Mesh adaptation example.
  * \include libexamples/mmg3d/adaptation_example1/main.c
  *
- * Mesh adaptation example.
+ * Another mesh adaptation example.
  * \include libexamples/mmg3d/adaptation_example2/main.c
  *
  * Isosurface discretization example (with metric)

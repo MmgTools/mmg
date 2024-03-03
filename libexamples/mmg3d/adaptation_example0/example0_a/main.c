@@ -19,6 +19,7 @@
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
+**
 */
 
 /**
@@ -32,7 +33,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include <assert.h>
+#include <assert.h>   /** BEGIN_EXAMPLE (this line is used by Doxygen) */
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -41,7 +42,7 @@
 #include <math.h>
 #include <float.h>
 
-/** Include the mmg3d library hader file */
+/** Include the mmg3d library header file */
 // if the header file is in the "include" directory
 // #include "libmmg3d.h"
 // if the header file is in "include/mmg/mmg3d"
@@ -151,4 +152,5 @@ int main(int argc,char *argv[]) {
   fileout = NULL;
 
   return(ier);
-}
+}   /** END_EXAMPLE (this line is used by Doxygen) */
+

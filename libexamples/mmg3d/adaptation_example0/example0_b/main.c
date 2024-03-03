@@ -1,4 +1,4 @@
-/* =============================================================================
+/** =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
@@ -19,7 +19,7 @@
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
-*/
+**/
 
 /**
  * Example of use of the mmg3d library (basic use of mesh adaptation)
