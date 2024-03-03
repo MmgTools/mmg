@@ -32,6 +32,32 @@
  * name and the opening brace (it creates errors under windows)
  * \warning Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
  *
+ * These are the API functions for the mmg3d library. These functions allow to
+ * load and save meshes and data defined on meshes; add, extract, or modify mesh
+ * data; and to call the library functions that perform remeshing, level-set
+ * discretization, and Lagrangian motion.
+ *
+ * Meshes are here defined in terms of vertices and three-dimensional objects:
+ * tetrahedra and prisms. Optionally lower-dimensional entities can be present:
+ * triangles, quadrilaterals and edges. All of these \a entities can have a
+ * \a reference: an integer value that can serve as a group identifier. In
+ * addition mesh entities can have \a attributes such as "ridge" or "required".
+ *
+ * Data defined on meshes can be for example functions that are meant for
+ * level-set discretization, metric tensors that will govern edge lengths, and
+ * vector fields governing lagrangian motion. These data can be scalar, vector,
+ * or (symmetric) tensor-valued; and there can be more than one data item
+ * associated with a mesh entity. These data are often referred to as \a
+ * solutions.
+ *
+ * Three of the functions here are referred to as "programs", because they
+ * perform the tasks for which Mmg is meant: remeshing, level-set discretization
+ * and Lagrangian motion. The other functions merely serve to load and save data
+ * and to perform pre- and post-processing. These programs actually behave much
+ * like independent programs: they send diagnostic output to stdout and in rare
+ * cases they may call the exit() function.
+ *
+ * 
  * \htmlonly
  * <h2 class="groupheader">Examples</h2>
  * \endhtmlonly
@@ -166,7 +192,7 @@ enum MMG3D_Param {
  * \remark No fortran interface to allow variadic arguments.
  *
  * \warning detected bugs:
- *   - some points along open-boundaries end up with a normal (while they should not)
+ *   - some points along open boundaries end up with a normal (while they should not)
  *
  */
  LIBMMG3D_EXPORT int MMG3D_Init_mesh(const int starter,...);
@@ -2274,7 +2300,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
  * format...), 1 if success.
  *
- * This function reads a mesh and 0 or 1 data at VTU (VTK) file format (.vtu
+ * This function reads a mesh and 0 or 1 data field in VTU (VTK) file format (.vtu
  * extension). We read only low-order points, edges, tria, quadra, tetra and
  * prisms. Point and cell references must be stored in PointData or CellData
  * whose names contain the "medit:ref" keyword.
@@ -2327,7 +2353,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
  * format...), 1 if success.
  *
- * This function reads a mesh and 0 or 1 data fields at VTK file format (.vtu extension). We read
+ * This function reads a mesh and 0 or 1 data fields in VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
  * references must be stored in PointData or CellData whose names contain the
  * "medit:ref" keyword.
@@ -2379,7 +2405,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
  * format...), 1 if success.
  *
- * Read mesh and a list of data at MSH file format (.msh extension). We read only
+ * Read mesh and a list of data in MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
@@ -2441,7 +2467,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write mesh and 0 or 1 data at MSH file format (.msh extension). Write binary
+ * Write mesh and 0 or 1 data in MSH file format (.msh extension). Write binary
  * file for .mshb extension and ASCII for .msh one.
  *
  * \remark Fortran interface:
@@ -2464,8 +2490,8 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \return 0 if failed, 1 otherwise.
  *
  * Write mesh and a list of data fields (that are considered as solutions and
- * not metrics, thus, we do nothing over the ridge points) at MSH file format
- * (.msh extension).  Save file at ASCII format for .msh extension, at binary
+ * not metrics, thus, we do nothing over the ridge points) in MSH file format
+ * (.msh extension).  Save file in ASCII format for .msh extension, in binary
  * format for .mshb one.
  *
  * \remark Fortran interface:
@@ -3225,7 +3251,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * Get vertices and reference \a ref of the idx^th non-boundary
  * triangle (for DG methods for example). A tria is boundary if it is located at
- * the interface of 2 domains witch different references or if it belongs to one
+ * the interface of 2 domains with different references or if it belongs to one
  * tetra only.
  *
  * \remark Fortran interface:
