@@ -813,8 +813,8 @@ int MMG5_norver(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer tos the mesh
- * \param pt pointer tos current triangle
+ * \param mesh pointer to the mesh
+ * \param pt pointer to current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
 * \param n normal of triangle before regularization
@@ -881,7 +881,7 @@ static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k
 }
 
 /**
- * \param mesh pointer tos the mesh
+ * \param mesh pointer to the mesh
  * \param v list of vertices of current tetrahedron
  * \param k number of current point
  * \param c input : newly computed coordinates (giving negative area), output : coordinates after dichotomy

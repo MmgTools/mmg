@@ -773,8 +773,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer tos the mesh
- * \param pt pointer tos current triangle
+ * \param mesh pointer to the mesh
+ * \param pt pointer to current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
  *
