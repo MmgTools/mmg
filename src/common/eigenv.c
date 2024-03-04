@@ -291,7 +291,7 @@ newton :
 }
 
 /**
- * \param mat pointer toward a 3x3 matrix.
+ * \param mat pointer to a 3x3 matrix.
  * \param lambda eigenvalues.
  * \param v eigenvectors.
  * \param w1 temporary array to perform the matrix cross product.
@@ -373,7 +373,7 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
 /**
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param mat pointer toward the matrix.
+ * \param mat pointer to the matrix.
  * \param lambda eigenvalues.
  * \param v eigenvectors.
  *
@@ -768,7 +768,7 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
 /**
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param mat pointer toward the matrix.
+ * \param mat pointer to the matrix.
  * \param lambda eigenvalues.
  * \param v eigenvectors.
  *
@@ -848,8 +848,8 @@ int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
 
 /**
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
- * \param mm pointer toward the matrix.
- * \param lambda pointer toward the output eigenvalues.
+ * \param mm pointer to the matrix.
+ * \param lambda pointer to the output eigenvalues.
  * \param vp eigenvectors.
  * \return 1.
  *

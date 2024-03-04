@@ -146,8 +146,8 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ip1 global index of ridge extremity.
  * \param ip2 global index of ridge extremity.
  * \param s interpolation parameter (between 0 and 1).
@@ -490,9 +490,9 @@ int MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param pt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param pt pointer to the triangle structure.
  * \param i edge of the triangle pt
  * \param s interpolated parameter (comprise between 0 and 1)
  * \param mr computed interpolated metric

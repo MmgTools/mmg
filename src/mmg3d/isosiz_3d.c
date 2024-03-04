@@ -47,10 +47,10 @@ extern int8_t ddb;
 
 /**
  * \brief Compute edge length from edge's coordinates.
- * \param *ca pointer toward the coordinates of the first edge's extremity.
- * \param *cb pointer toward the coordinates of the second edge's extremity.
- * \param *ma pointer toward the metric associated to the first edge's extremity.
- * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \param *ca pointer to the coordinates of the first edge's extremity.
+ * \param *cb pointer to the coordinates of the second edge's extremity.
+ * \param *ma pointer to the metric associated to the first edge's extremity.
+ * \param *mb pointer to the metric associated to the second edge's extremity.
  * \return edge length.
  *
  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
@@ -73,10 +73,10 @@ inline double MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param nump index of point in which the size must be computed.
- * \param lists pointer toward the surfacic ball of \a nump.
+ * \param lists pointer to the surfacic ball of \a nump.
  * \param ilists size of surfacic ball of \a nump.
  * \param hmin minimal edge size.
  * \param hmax maximal edge size.
@@ -465,10 +465,10 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nump,MMG5_int *lists,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param nump index of point in which the size must be computed.
- * \param lists pointer toward the surfacic ball of \a nump.
+ * \param lists pointer to the surfacic ball of \a nump.
  * \param ilists size of surfacic ball of \a nump.
  * \param hmin minimal edge size.
  * \param hmax maximal edge size.
@@ -516,8 +516,8 @@ double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nump,MMG5_int 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param hash edge hashtable.
  * \param pt tetra to process.
  * \param i index of the edge of the tetra \a pt that we process.
@@ -550,8 +550,8 @@ int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *has
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param ismet 1 if user provided metric
  *
  * \return 0 if fail, 1 otherwise
@@ -650,8 +650,8 @@ int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t is
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Define isotropic size map at all boundary vertices of the mesh, associated
@@ -1039,7 +1039,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Set the s field of the points that belongs to a required edge to 4*ne+3, set it to
  * 0 otherwise.
@@ -1073,8 +1073,8 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Enforce mesh gradation by truncating size map.
@@ -1158,8 +1158,8 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Enforce mesh gradation by truncating size map.

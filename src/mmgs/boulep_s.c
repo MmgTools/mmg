@@ -36,11 +36,11 @@
 #include "libmmgs_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of tetra to start to compute the ball.
  * \param ip index of point in tetra \a start for which we want to compute
  * the ball.
- * \param list pointer toward the computed ball of point.
+ * \param list pointer to the computed ball of point.
  *
  * \return size of list if success, -size if overflow, 0 if cfg is non-manifold.
  *
@@ -180,14 +180,14 @@ int boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of the starting triangle.
  * \param ip index of the looked ridge point.
- * \param il1 pointer toward the first ball size.
- * \param l1 pointer toward the first computed ball (associated to \a n1's
+ * \param il1 pointer to the first ball size.
+ * \param l1 pointer to the first computed ball (associated to \a n1's
  * side).
- * \param il2 pointer toward the second ball size.
- * \param l2 pointer toward the second computed ball (associated to \a n2's
+ * \param il2 pointer to the second ball size.
+ * \param l2 pointer to the second computed ball (associated to \a n2's
  * side).
  * \param global ip0 index of the first extremity of the ridge.
  * \param global ip1 index of the second extremity of the ridge.

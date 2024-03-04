@@ -36,8 +36,8 @@
 #include "mmg2dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param k elt index
  * \param i vertex index in triangle \a k
  *
@@ -70,8 +70,8 @@ int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param k index of the tria in which we work
  * \param i index of the point on which we want to compute the metric
  *
@@ -352,8 +352,8 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 0 if fail, 1 if success
  *
@@ -518,9 +518,9 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- * \param pt pointer toward the processed triangle.
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
+ * \param pt pointer to the processed triangle.
  * \param np1 first edge extremity (global index)
  * \param np2 second edge extremity (global index)
  *
@@ -581,9 +581,9 @@ MMG5_int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG5_int
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- * \param pt pointer toward the processed tria.
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
+ * \param pt pointer to the processed tria.
  * \param npmaster edge extremity that cannot be modified
  * \param npslave edge extremity to modify to respect the gradation.
  *

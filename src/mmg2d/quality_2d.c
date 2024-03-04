@@ -35,8 +35,8 @@
 #include "mmg2dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh
- * \param pt pointer toward the tria
+ * \param mesh pointer to the mesh
+ * \param pt pointer to the tria
  *
  * \return the oriented area of the triangle.
  *
@@ -95,9 +95,9 @@ double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
 }
 
 /**
- * \param pointer toward the mesh
- * \param pointer toward the metric (for compatibility with aniso interface)
- * \param pt pointer toward the tria
+ * \param pointer to the mesh
+ * \param pointer to the metric (for compatibility with aniso interface)
+ * \param pt pointer to the tria
  *
  * \return non-normalized quality if success, 0 if triangle is null or inverted.
  *
@@ -172,8 +172,8 @@ double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *

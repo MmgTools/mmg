@@ -40,7 +40,7 @@
 #include <stdio.h>
 
 /**
- * \param q pointer toward the PROctree cell
+ * \param q pointer to the PROctree cell
  *
  * Initialisation of the PROctree cell.
  *
@@ -54,8 +54,8 @@ void MMG3D_initPROctree_s( MMG3D_PROctree_s* q)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward the global PROctree
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to the global PROctree
  * \param nv maximum number of vertices in each cell before subdivision
  * \return 1 if ok 0 if memory saturated
  *
@@ -103,8 +103,8 @@ int MMG3D_initPROctree(MMG5_pMesh mesh,MMG3D_pPROctree* q, int nv)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward the PROctree cell
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to the PROctree cell
  * \param nv number of vertices in the cell subtree
  *
  * Free the PROctree cell.
@@ -155,8 +155,8 @@ void MMG3D_freePROctree_s(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int nv)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward a pointer toward the global PROctree.
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to a pointer to the global PROctree.
  *
  * Free the global PROctree structure.
  *
@@ -172,7 +172,7 @@ void MMG3D_freePROctree(MMG5_pMesh mesh,MMG3D_pPROctree *q)
 
 
 /**
- * \param q pointer toward the global PROctree.
+ * \param q pointer to the global PROctree.
  * \param ver coordinates of the point.
  * \param dim space dimension (should be 3).
  * \return the integer containing the coordinates
@@ -209,8 +209,8 @@ int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward the global PROctree.
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to the global PROctree.
  * \param no index of the moved point.
  * \param newVer new coordinates for the moved point.
  * \param oldVer old coordinates for the moved point.
@@ -417,14 +417,14 @@ int MMG3D_intersectRect(double *rectin, double *rectinout)
 }
 
 /**
- * \param q pointer toward the PROctree cell.
+ * \param q pointer to the PROctree cell.
  * \param center coordinates of the centre of the current subtree.
  * \param rect rectangle that we want to intersect with the subtree. We define
  * it given: the coordinates of one corner of the rectange and the length of
  * the rectangle in each dimension.
- * \param qlist pointer toward the list of pointer over the sub PROctrees that
+ * \param qlist pointer to the list of pointer over the sub PROctrees that
  *  intersect \a rect.
- * \param dist pointer toward the list of distances between center of
+ * \param dist pointer to the list of distances between center of
  * the PROctree cells in qlist and the last 3 elements are the coordinates
  * of the center of the whole recangle.
  * \param ani metric of the point.
@@ -556,13 +556,13 @@ int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param ani metric to use for the cell ordering from closest to farthest
- * \param q pointer toward the global PROctree structure.
+ * \param q pointer to the global PROctree structure.
  * \param rect rectangle that we want to intersect with the subtree. We define
  * it given: the coordinates of one corner of the rectangle and the length of
  * the rectangle in each dimension.
- * \param qlist pointer toward the list of pointer over the sub PROctrees that
+ * \param qlist pointer to the list of pointer over the sub PROctrees that
  *  intersect \a rect.
  *
  * \return index, the number of subtrees in the list
@@ -635,8 +635,8 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward an PROctree cell.
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to an PROctree cell.
  * \param ver vertex coordinates scaled such that the quadrant is [0;1]x[0;1]x[0;1]
  * \param no vertex index in the mesh.
  * \param nv maximum number of points in an PROctree cell.
@@ -765,8 +765,8 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
 }
 
 /**
- * \param pointer toward the mesh structure
- * \param q pointer toward the global PROctree structure
+ * \param pointer to the mesh structure
+ * \param q pointer to the global PROctree structure
  * \param no index of the point to add to the PROctree
  *
  * Add the vertex of index \a no to the PROctree.
@@ -789,7 +789,7 @@ int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const MMG5_int no)
 }
 
 /**
- * \param q pointer toward a terminal PROctree cell (containing vertex)
+ * \param q pointer to a terminal PROctree cell (containing vertex)
  * \param no index of the point to delete from the PROctree
  * \return 1 if ok 0 if memory saturated
  *
@@ -822,8 +822,8 @@ int MMG3D_delPROctreeVertex(MMG5_pMesh mesh, MMG3D_PROctree_s* q, MMG5_int indNo
 }
 
 /**
- * \param q0 pointer toward an PROctree cell.
- * \param q pointer toward an PROctree cell.
+ * \param q0 pointer to an PROctree cell.
+ * \param q pointer to an PROctree cell.
  * \param dim dimension of the space (=3).
  * \param nv maximum number of points in an PROctree cell.
  * \param index next index in the array to be filled.
@@ -853,8 +853,8 @@ void MMG3D_mergeBranchesRec(MMG3D_PROctree_s* q0, MMG3D_PROctree_s* q, int dim, 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward an PROctree cell.
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to an PROctree cell.
  * \param dim dimension of the space (=3)
  * \param nv maximum number of points in an PROctree cell.
  *
@@ -880,8 +880,8 @@ void MMG3D_mergeBranches(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int dim, int nv)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward an PROctree cell.
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to an PROctree cell.
  * \param ver vertex coordinates scaled such that the quadrant is [0;1]x[0;1]x[0;1]
  * \param no vertex index in the mesh.
  * \param nv maximum number of points in an PROctree cell.
@@ -966,8 +966,8 @@ int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, cons
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param q pointer toward the global PROctree.
+ * \param mesh pointer to the mesh structure.
+ * \param q pointer to the global PROctree.
  * \param no reference of the vertex to be deleted.
  * \return 1 if ok 0 if memory saturated
  *
@@ -993,7 +993,7 @@ int MMG3D_delPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no)
 
 
 /**
- * \param q pointer toward an PROctree cell
+ * \param q pointer to an PROctree cell
  * \param depth depth of the subtree
  * \param nv number of vertices in the subtree
  * \param dim dimension in which we work
@@ -1019,7 +1019,7 @@ void MMG3D_printArbreDepth(MMG3D_PROctree_s* q, int depth, int nv, int dim)
 }
 
 /**
- * \param q pointer toward the global PROctree structure
+ * \param q pointer to the global PROctree structure
  *
  * Print the PROctree.
  *
@@ -1042,7 +1042,7 @@ void MMG3D_printArbre(MMG3D_pPROctree q)
 }
 
 /**
- * \param q pointer toward an PROctree cell
+ * \param q pointer to an PROctree cell
  * \param nv maximum number of vertices in an PROctree leaf
  * \param dim spacial dimension
  *
@@ -1065,7 +1065,7 @@ void MMG3D_printSubArbre(MMG3D_PROctree_s* q, int nv, int dim)
 
 
 /**
- * \param q pointer toward an PROctree cell
+ * \param q pointer to an PROctree cell
  * \param nv maximum number of vertices in an PROctree leaf
  * \param dim dimension in which we work
  * \param s size of the PROctree
@@ -1106,7 +1106,7 @@ void MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
 }
 
 /**
- * \param q pointer toward the global PROctree structure
+ * \param q pointer to the global PROctree structure
  * \param dim dimension in which we work
  *
  * \return the size of the tree or NULL pointer if fail
@@ -1127,9 +1127,9 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param ip index of point to check.
  * \param lmax threshold to check minimal distance between points.
  *
@@ -1209,9 +1209,9 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param ip index of point to check.
  * \param lmax threshold to check minimal distance between points.
  *

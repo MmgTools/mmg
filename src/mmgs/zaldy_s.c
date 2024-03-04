@@ -82,7 +82,7 @@ MMG5_int MMGS_newElt(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param iel index of the element to delete
  *
  * \return 1 if success, 0 if fail
@@ -110,7 +110,7 @@ int MMGS_delElt(MMG5_pMesh mesh,MMG5_int iel) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -195,7 +195,7 @@ int MMGS_memOption_memSet(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -213,7 +213,7 @@ int MMGS_memOption(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -253,7 +253,7 @@ int MMGS_setMeshSize_alloc( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 1 if success, 0 if fail
  *

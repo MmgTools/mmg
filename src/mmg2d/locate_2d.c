@@ -212,7 +212,7 @@ int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,MMG5_int k,MMG5_int ia,MMG5_int ib) {
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \param ip point index
  * \return index of one elt containing k or 0 (if no elt is found)
  *
@@ -312,11 +312,11 @@ MMG5_int MMG2D_findTria(MMG5_pMesh mesh,MMG5_int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param ia index of first extremity of the edge
  * \param ib index of second extremity of the edge
- * \param kdep pointer toward the index of the first element intersecting the edge
- * \param list pointer toward the list of elts intersected by the edge
+ * \param kdep pointer to the index of the first element intersecting the edge
+ * \param list pointer to the list of elts intersected by the edge
  *
  * \return 4 if the edge exist in the mesh, 0 if fail, ??? otherwise
  *

@@ -39,11 +39,11 @@
 #include "librnbg_private.h"
 
 /**
- * \param graf pointer toward the input graph structure.
+ * \param graf pointer to the input graph structure.
  * \param vertNbr the number of vertices.
  * \param boxVertNbr the number of vertices of each box.
  * \param permVrtTab the new numbering.
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if ok, 1 otherwise.
  *
  * Internal function that computes a new numbering of graph vertices using a
@@ -142,11 +142,11 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG5_int vertNbr, MMG5_int boxVertN
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param points pointer toward a table containing the point structures.
- * \param sols pointer toward a table containing the solution structures.
- * \param fields pointer toward an array of solution fields to permute.
- * \param *perm pointer toward the permutation table (to perform in place
+ * \param mesh pointer to the mesh
+ * \param points pointer to a table containing the point structures.
+ * \param sols pointer to a table containing the solution structures.
+ * \param fields pointer to an array of solution fields to permute.
+ * \param *perm pointer to the permutation table (to perform in place
  * permutations).
  * \param ind1 index of the first tetra to swap.
  * \param ind2 index of the second tetra to swap.
@@ -216,9 +216,9 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
 #endif
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- * \param fields pointer toward an array of solution fields (non mandatory)
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
+ * \param fields pointer to an array of solution fields (non mandatory)
  * \param permNodGlob store the global permutation of nodes (if provided).
  *
  * \return 0 if \a MMG5_renumbering fail (non conformal mesh), 1 otherwise

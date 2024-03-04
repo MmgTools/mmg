@@ -37,8 +37,8 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param list ball of point.
  * \param ilist size of the point ball.
  * \return 0 if fail, 1 otherwise.

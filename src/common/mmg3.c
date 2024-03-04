@@ -34,9 +34,9 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement field
- * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
+ * \param mesh pointer to the mesh structure
+ * \param disp pointer to the displacement field
+ * \param lastt 0 if a movement is possible, pointer to the last tested fraction otherwise
  * \param shortmax maximal parameter t (MMG2D_SHORTMAX or MMG3D_SHORTMAX)
  * \param chkmovmesh function that has to be called to check motion validity
  *
@@ -103,8 +103,8 @@ short MMG5_dikmov ( MMG5_pMesh mesh,MMG5_pSol disp,short *lastt,short shortmax,
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement field
+ * \param mesh pointer to the mesh structure
+ * \param disp pointer to the displacement field
  *
  * \return 1 if success, 0 if fail.
  *

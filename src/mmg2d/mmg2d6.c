@@ -35,9 +35,9 @@
 #include "mmg2dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the level-set
- * \param met pointer toward a metric (non-mandatory)
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the level-set
+ * \param met pointer to a metric (non-mandatory)
  *
  * \return 1 if success, 0 otherwise
  *

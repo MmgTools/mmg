@@ -40,7 +40,7 @@
 extern int8_t  ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if success, 0 if fail
  *
@@ -111,7 +111,7 @@ MMG5_int MMG5_hashGetFace(MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,MMG5_int ic) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param pack we pack the mesh at function begining if \f$pack=1\f$.
  * \return 0 if failed, 1 otherwise.
  *
@@ -232,7 +232,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -630,7 +630,7 @@ int MMG5_skip_ParBdy ( int8_t tag ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if success, 0 if fail.
  * Seek the non-required non-manifold points and try to analyse whether they are
@@ -837,7 +837,7 @@ int MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param hash Edges hash table.
  * \return 1 if success, 0 if failed.
  *
@@ -910,7 +910,7 @@ int MMG5_hashPop(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
 
 
 /**
- * \param hash pointer toward the hash table in which edges are stored
+ * \param hash pointer to the hash table in which edges are stored
  * \param a first edge extremity
  * \param b second edge extremity
  * \param ref reference to assign to the edge
@@ -1112,7 +1112,7 @@ int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int hsiz,MMG5_int hmax) {
 }
 
 /**
- * \param mesh pointer toward he mesh structure.
+ * \param mesh pointer to he mesh structure.
  * \return 0 if failed, 1 otherwise
  *
  * Build hashtable for initial mesh edges.
@@ -1533,7 +1533,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
  * - Remove double triangles from tria array.
@@ -1853,7 +1853,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 if success.
  *
  * Set the triangles references to the tetrahedra faces and edges.
@@ -2243,7 +2243,7 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Make orientation of triangles compatible with tetra faces for external tria

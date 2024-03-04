@@ -1,25 +1,25 @@
-/* =============================================================================
-**  This file is part of the mmg software package for the tetrahedral
-**  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
-**
-**  mmg is free software: you can redistribute it and/or modify it
-**  under the terms of the GNU Lesser General Public License as published
-**  by the Free Software Foundation, either version 3 of the License, or
-**  (at your option) any later version.
-**
-**  mmg is distributed in the hope that it will be useful, but WITHOUT
-**  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-**  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
-**  License for more details.
-**
-**  You should have received a copy of the GNU Lesser General Public
-**  License and of the GNU General Public License along with mmg (in
-**  files COPYING.LESSER and COPYING). If not, see
-**  <http://www.gnu.org/licenses/>. Please read their terms carefully and
-**  use this copy of the mmg distribution only if you accept them.
-** =============================================================================
-*/
+/** =============================================================================
+ **  This file is part of the mmg software package for the tetrahedral
+ **  mesh modification.
+ **  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+ **
+ **  mmg is free software: you can redistribute it and/or modify it
+ **  under the terms of the GNU Lesser General Public License as published
+ **  by the Free Software Foundation, either version 3 of the License, or
+ **  (at your option) any later version.
+ **
+ **  mmg is distributed in the hope that it will be useful, but WITHOUT
+ **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ **  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ **  License for more details.
+ **
+ **  You should have received a copy of the GNU Lesser General Public
+ **  License and of the GNU General Public License along with mmg (in
+ **  files COPYING.LESSER and COPYING). If not, see
+ **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
+ **  use this copy of the mmg distribution only if you accept them.
+ ** =============================================================================
+ **/
 
 /**
  * Example of use of the mmg3d library (migrate from the mmg3d4 to the mmg3d
@@ -73,9 +73,9 @@ int main(int argc,char *argv[]) {
   /* args of InitMesh:
    * MMG5_ARG_start: we start to give the args of a variadic func
    * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
-   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+   * &mmgMesh: pointer to your MMG5_pMesh (that stores your mesh)
    * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
-   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
+   * &mmgSol: pointer to your MMG5_pSol (that stores your metric) */
 
   mmgMesh = NULL;
   mmgSol  = NULL;

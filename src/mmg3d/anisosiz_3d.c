@@ -131,9 +131,9 @@ int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param pt pointer toward a tetra.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
+ * \param pt pointer to a tetra.
  * \param m1 computed metric.
  * \return the number of vertices used for the mean computation, 0 if fail.
  *
@@ -175,8 +175,8 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param kel index of the tetra in which we work.
  * \param iface face of the tetra on which we work.
  * \param ip index of the point on which we want to compute the metric
@@ -371,8 +371,8 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param kel index of the tetra in which we work.
  * \param iface face of the tetra on which we work.
  * \param ip index of the point on which we want to compute the metric
@@ -591,8 +591,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param kel index of the triangle in which we work.
  * \param iface face of the tetra on which we work.
  * \param ip index of the point on which we want to compute the metric
@@ -860,8 +860,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param kel index of the triangle in which we work.
  * \param iface working face.
  * \param ip index of the point on which we want to compute the metric
@@ -1087,8 +1087,8 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ismet 1 if user provided metric
  * \return 1 if success, 0 otherwise.
  *
@@ -1251,8 +1251,8 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
  * \return 0 if fail, 1 otherwise.
@@ -1293,8 +1293,8 @@ int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric stucture.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric stucture.
  * \return 0 if fail, 1 otherwise.
  *
  * Define size at points by intersecting the surfacic metric and the
@@ -1418,8 +1418,8 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh.
+ * \param met pointer to the metric structure.
  * \param ip global point index.
  * \param ux edge vector x-component.
  * \param uy edge vector y-component.
@@ -1484,8 +1484,8 @@ int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip,double ux,
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param ppt pointer toward the P point structure.
+ * \param mesh pointer to the mesh.
+ * \param ppt pointer to the P point structure.
  * \param l Euclidean length of the edge PQ.
  * \param m metric tensor on point P.
  * \param mext metric tensor extended on Q.
@@ -1508,8 +1508,8 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param ppt pointer toward the P point structure.
+ * \param mesh pointer to the mesh.
+ * \param ppt pointer to the P point structure.
  * \param m metric tensor on point P.
  * \param mext extended metric tensor from Q to P.
  * \param ridgedir normal direction for metric reconstruction on P (on ridge only).
@@ -1707,8 +1707,8 @@ void MMG3D_gradSimred(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6]
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh.
+ * \param met pointer to the metric structure.
  * \param ip global index of the point.
  * \param m metric tensor on the point (copy).
  * \param ridgedir normal direction for metric reconstruction (on ridge only).
@@ -1761,8 +1761,8 @@ void MMG5_grad2metVol_setmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh.
+ * \param met pointer to the metric structure.
  * \param np1 global index of the first edge extremity.
  * \param np2 global index of the second edge extremity.
  *
@@ -1886,9 +1886,9 @@ int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param met pointer toward the metric structure.
- * \param pt pointer toward a tetra.
+ * \param mesh pointer to the mesh.
+ * \param met pointer to the metric structure.
+ * \param pt pointer to a tetra.
  * \param npmaster edge extremity that cannot be modified
  * \param npslave edge extremity to modify to respect the gradation.
  *
@@ -2051,8 +2051,8 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int np
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 1
  *
  *
@@ -2200,8 +2200,8 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Enforce mesh gradation by truncating size map.

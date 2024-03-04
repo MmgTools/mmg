@@ -128,7 +128,7 @@ int MMG2D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -227,7 +227,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -246,7 +246,7 @@ int MMG2D_memOption(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -297,7 +297,7 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
