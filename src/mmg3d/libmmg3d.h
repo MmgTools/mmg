@@ -1334,7 +1334,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  */
  LIBMMG3D_EXPORT int MMG3D_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
 
-/** functions to set parameters */
+/* functions to set parameters
+ *
+ * NOTE iparam and dparam are int rather than enum MMG3D_Param because
+ * genheader cannot handle enums in function arguments; i.e. the Fortran
+ * API will break.
+ */
+
 /**
  * \brief set an integer parameter of the remesher
  *
@@ -2179,7 +2185,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the value of an integer parameter of the remesher.
  *
  * \param mesh pointer to the mesh structure.
- * \param iparam integer parameter to get (see \a MMG3D_Param structure).
+ * \param iparam integer parameter to get (see the enumeration \a MMG3D_Param for a
+ *               list of parameters that can be set).
  * \return The value of integer parameter.
  *
  * Get the value of integer parameter \a iparam.
