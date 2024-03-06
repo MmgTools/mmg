@@ -1340,11 +1340,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param iparam integer parameter to set (see \a MMG3D_Param structure).
+ * \param iparam integer parameter to set (see the enumeration \a MMG3D_Param for a
+ *               list of parameters that can be set).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
  *
- * Set integer parameter \a iparam at value \a val.
+ * This function sets the integer parameter \a iparam to value \a val.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
@@ -1365,11 +1366,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param dparam double parameter to set (see \a MMG3D_Param structure).
+ * \param dparam double parameter to set (see the enumeration \a MMG3D_Param for a
+ *               list of parameters that can be set).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
- * Set double parameter \a dparam at value \a val.
+ * This function sets the double parameter \a dparam to value \a val.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
