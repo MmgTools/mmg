@@ -1356,7 +1356,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
+ LIBMMG3D_EXPORT int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol,
+                                           enum MMG3D_Param iparam,
                                            MMG5_int val);
 
 /**
@@ -1380,8 +1381,9 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * >   END SUBROUTINE\n
  *
  */
- LIBMMG3D_EXPORT int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam,
-                                           double val);
+  LIBMMG3D_EXPORT int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol,
+                                            enum MMG3D_Param dparam,
+                                            double val);
 /**
  * \brief set a local parameter
  *

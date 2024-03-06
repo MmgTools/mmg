@@ -2110,7 +2110,8 @@ MMG5_int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,MMG5_int
   return ip;
 }
 
-int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,MMG5_int val){
+int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol,
+                         enum MMG3D_Param iparam, MMG5_int val){
   int k;
 
   switch ( iparam ) {
@@ -2366,7 +2367,8 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam) {
   }
 }
 
-int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
+int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol,
+                         enum MMG3D_Param dparam, double val){
 
   switch ( dparam ) {
     /* double parameters */
