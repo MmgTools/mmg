@@ -1432,7 +1432,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \return 0 if failed, 1 otherwise.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
+ * >   SUBROUTINE MMG3D_SET_MULTIMAT(mesh,sol,ref,split,rmin,rplus,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER, INTENT(IN)           :: split\n
  * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rmin,rplus\n
