@@ -2537,8 +2537,8 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
   return 1;
 }
 
-int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,int split,MMG5_int rin,MMG5_int rout) {
-  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,int split,MMG5_int rmin,MMG5_int rplus) {
+  return MMG5_Set_multiMat(mesh,sol,ref,split,rmin,rplus);
 }
 
 int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br){
