@@ -206,8 +206,8 @@ int MMGS_memOption(MMG5_pMesh mesh) {
 
   mesh->memMax = MMG5_memSize();
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,MMGS_NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,MMGS_NTMAX);
+  mesh->npmax = MG_MAX((MMG5_int)(1.5*mesh->np),MMGS_NPMAX);
+  mesh->ntmax = MG_MAX((MMG5_int)(1.5*mesh->nt),MMGS_NTMAX);
 
   return  MMGS_memOption_memSet(mesh);
 }

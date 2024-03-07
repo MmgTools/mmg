@@ -270,9 +270,9 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
  */
 int MMG3D_memOption(MMG5_pMesh mesh) {
 
-  mesh->npmax = MG_MAX((int)(1.5*mesh->np),MMG3D_NPMAX);
-  mesh->nemax = MG_MAX((int)(1.5*mesh->ne),MMG3D_NEMAX);
-  mesh->ntmax = MG_MAX((int)(1.5*mesh->nt),MMG3D_NTMAX);
+  mesh->npmax = MG_MAX((MMG5_int)(1.5*mesh->np),MMG3D_NPMAX);
+  mesh->nemax = MG_MAX((MMG5_int)(1.5*mesh->ne),MMG3D_NEMAX);
+  mesh->ntmax = MG_MAX((MMG5_int)(1.5*mesh->nt),MMG3D_NTMAX);
 
   return  MMG3D_memOption_memSet(mesh);
 }
