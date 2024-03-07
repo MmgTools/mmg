@@ -125,7 +125,7 @@ extern "C" {
  * \enum MMG3D_Param
  * \brief Input parameters for the mmg library.
  *
- * These are the input parameters for the mmg library. Options prefixed by
+ * These are the input parameters for the mmg3d library functions. Options prefixed by
  * \a MMG3D_IPARAM require integer values and options prefixed by
  * \a MMG3D_DPARAM require real values. They can be set with the
  * \ref MMG3D_Set_iparameter and \ref MMG3D_Set_dparameter functions,
@@ -608,7 +608,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
                                           MMG5_int v2, MMG5_int ref,MMG5_int pos);
 
 /**
- * \brief Set the vertices and references of all triangles ni a mesh.
+ * \brief Set the vertices and references of all triangles in a mesh.
  *
  * \param mesh pointer to the mesh structure.
  * \param tria pointer to the array of the tria vertices
@@ -668,8 +668,6 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * refs[i-1] is the ref of the \f$i^{th}\f$ quadra.
  * \return 0 if failed, 1 otherwise.
  *
- * Set vertices and references of the mesh quadrilaterals.
- *
  * \remark Fortran interface: (commentated in
  * order to allow to pass \%val(0) instead of the refs array)
  *
@@ -713,7 +711,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param k vertex index.
  * \return 1.
  *
- * Set the "corner" attribute at point \a pos. This affects how the vertex is
+ * Set the "corner" attribute at vertex \a k. This affects how the vertex is
  * treated during remeshing.
  *
  * \remark Fortran interface:
@@ -733,7 +731,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param k vertex index.
  * \return 1.
  *
- * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ * Remove corner attribute from vertex \a k (from 1 to the number of vertices included).
  *
  * \remark Fortran interface
  *
@@ -1629,6 +1627,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
                                             int* isCorner, int* isRequired,MMG5_int idx);
 
 /**
+ * \brief Get the coordinates and references of all vertices in the mesh.
+ *
  * \param mesh pointer to the mesh structure.
  * \param vertices pointer to the array of the points coordinates.
  * The coordinates of the \f$i^{th}\f$ point are stored in
@@ -1641,8 +1641,6 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param areRequired pointer to the array of flags saying if points
  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
  * \return 1.
- *
- * Get the coordinates and references of the mesh vertices.
  *
  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
  * instead of the refs, areCorners or areRequired arrays)
@@ -2150,7 +2148,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  LIBMMG3D_EXPORT int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 
 /**
- * \brief Get one out of several solutions at a specific vertex.
+ * \brief Get one out of several scalar solutions at a specific vertex.
  *
  * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
@@ -2175,7 +2173,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
   LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 
 /**
- * \brief Get one out of several solutions at all vertices in the mesh.
+ * \brief Get one out of several scalar solutions at all vertices in the mesh.
  *
  * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
@@ -2743,7 +2741,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 /**
- * \brief Deallocate of an array of solution fields
+ * \brief Deallocate an array of solution fields
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to an array of solution structure (that stores solution fields).
