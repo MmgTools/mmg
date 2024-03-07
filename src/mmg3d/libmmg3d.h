@@ -1334,17 +1334,24 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  */
  LIBMMG3D_EXPORT int MMG3D_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
 
-/** functions to set parameters */
+/* functions to set parameters
+ *
+ * NOTE iparam and dparam are int rather than enum MMG3D_Param because
+ * genheader cannot handle enums in function arguments; i.e. the Fortran
+ * API will break.
+ */
+
 /**
  * \brief set an integer parameter of the remesher
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param iparam integer parameter to set (see \a MMG3D_Param structure).
+ * \param iparam integer parameter to set (see the enumeration \a MMG3D_Param for a
+ *               list of parameters that can be set).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
  *
- * Set integer parameter \a iparam at value \a val.
+ * This function sets the integer parameter \a iparam to value \a val.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
@@ -1364,11 +1371,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param dparam double parameter to set (see \a MMG3D_Param structure).
+ * \param dparam double parameter to set (see the enumeration \a MMG3D_Param for a
+ *               list of parameters that can be set).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
- * Set double parameter \a dparam at value \a val.
+ * This function sets the double parameter \a dparam to value \a val.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
@@ -1385,17 +1393,17 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
 /**
  * \brief set a local parameter
  *
- * \param mesh pointer to the mesh structure.
- * \param sol pointer to the sol structure.
- * \param typ type of entity (triangle, edge,...).
- * \param ref reference of the entity.
- * \param hmin minimal edge size.
- * \param hmax maximal edge size.
- * \param hausd value of the Hausdorff number.
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the sol structure
+ * \param typ type of entity (triangle, edge,...)
+ * \param ref reference of the entity
+ * \param hmin minimal edge size
+ * \param hmax maximal edge size
+ * \param hausd Hausdorff distance
  * \return 0 if failed, 1 otherwise.
  *
- * Set local parameters: set the hausdorff value at \a val for all
- * elements of type \a typ and reference \a ref.
+ * Set local parameters: set the Hausdorff distance, minimum edge length, and
+ * maximum edge length for all entities of type \a typ and reference \a ref.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,& \n
@@ -1412,27 +1420,32 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
                                                 MMG5_int ref,double hmin,double hmax,double hausd);
 
 /**
- * \brief Set the reference mapping for the elements of ref \a ref in ls discretization mode.
+ * \brief Set the reference mapping for the elements of reference
+ *  \a ref in level-set discretization mode.
  *
- * \param mesh pointer to the mesh structure.
- * \param sol pointer to the sol structure.
- * \param ref input tetra reference.
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the sol structure
+ * \param ref input tetrahedron reference
  * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
- * \param rin internal reference after ls discretization
- * \param rex external reference after ls discretization
+ * \param rmin reference for the negative side after LS discretization
+ * \param rplus reference for the positive side after LS discretization
  * \return 0 if failed, 1 otherwise.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
+ * >   SUBROUTINE MMG3D_SET_MULTIMAT(mesh,sol,ref,split,rmin,rplus,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER, INTENT(IN)           :: split\n
- * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rin,rex\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rmin,rplus\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
+ * With this function you can determine which references will be given to the
+ * tetrahedra on both sides of the level set, after discretization. Negative and
+ * positive here refer to volumes where the function is smaller or larger,
+ * respectively, than the isovalue of the level set.
  */
  LIBMMG3D_EXPORT int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
-                                         MMG5_int rin, MMG5_int rex);
+                                         MMG5_int rmin, MMG5_int rplus);
 
 /**
  * \brief Set a new level-set base reference.
@@ -2172,7 +2185,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the value of an integer parameter of the remesher.
  *
  * \param mesh pointer to the mesh structure.
- * \param iparam integer parameter to get (see \a MMG3D_Param structure).
+ * \param iparam integer parameter to get (see the enumeration \a MMG3D_Param for a
+ *               list of parameters that can be set).
  * \return The value of integer parameter.
  *
  * Get the value of integer parameter \a iparam.
