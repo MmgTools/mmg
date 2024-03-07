@@ -917,23 +917,28 @@ LIBMMGS_EXPORT int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int 
  * \param sol pointer to the sol structure.
  * \param ref input tetra reference.
  * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
- * \param rin internal reference after ls discretization
- * \param rex external reference after ls discretization
+ * \param rmin reference for the negative side after LS discretization
+ * \param rplus reference for the positive side after LS discretization
  * \return 0 if failed, 1 otherwise.
  *
  * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
+ * >   SUBROUTINE MMGS_SET_MULTIMAT(mesh,sol,ref,split,rmin,rplus,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rin,rex\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rmin,rplus\n
  * >     INTEGER, INTENT(IN)           :: split\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
+ * With this function you can determine which references will be given to the
+ * triangles on both sides of the level set, after discretization. Negative and
+ * positive here refer to areas where the function is smaller or larger,
+ * respectively, than the isovalue of the level set.
+ *
  */
   LIBMMGS_EXPORT int  MMGS_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,
-                                        int split,MMG5_int rin, MMG5_int rex);
+                                        int split,MMG5_int rmin, MMG5_int rplus);
 
 /**
  * \param mesh pointer to the mesh structure.
