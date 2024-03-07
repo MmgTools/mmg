@@ -21,6 +21,25 @@
 ** ===========================================================================
 */
 
+/*
+ * This file defines the C and Fortran headers of the mmg3d API, and
+ * their Doxygen documentation.
+ *
+ * NOTES FOR DEVELOPERS:
+ *
+ * - The Fortran headers are generated from comment lines that start with '* >'.
+ *   They must match the C declarations.
+ *
+ * - We cannot handle enum types in the Fortran version so enums are replaced
+ *   by ints in both versions.
+ *
+ * - To keep the genheader program working, don't break line between an enum
+ *   name and the opening brace (it creates errors under windows)
+ *
+ * - Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
+ *
+ */
+
 /**
  * \file mmg3d/libmmg3d.h
  * \brief API headers for the mmg3d library
@@ -28,9 +47,6 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning To keep the genheader working, don't break line between the enum
- * name and the opening brace (it creates errors under windows)
- * \warning Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
  *
  * These are the API functions for the mmg3d library. These functions allow to
  * load and save meshes and data defined on meshes; add, extract, or modify mesh
@@ -57,7 +73,7 @@
  * like independent programs: they send diagnostic output to stdout and in rare
  * cases they may call the exit() function.
  *
- * 
+ *
  * \htmlonly
  * <h2 class="groupheader">Examples</h2>
  * \endhtmlonly
