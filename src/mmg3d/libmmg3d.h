@@ -123,23 +123,25 @@ extern "C" {
 
 /**
  * \enum MMG3D_Param
- * \brief Input parameters for mmg library.
+ * \brief Input parameters for the mmg library.
  *
- * Input parameters for mmg library. Options prefixed by \a
- * MMG3D_IPARAM asked for integers values ans options prefixed by \a
- * MMG3D_DPARAM asked for real values.
+ * These are the input parameters for the mmg library. Options prefixed by
+ * \a MMG3D_IPARAM require integer values and options prefixed by
+ * \a MMG3D_DPARAM require real values. They can be set with the
+ * \a MMG3D_Set_iparameter and \a MMG3D_Set_dparameter functions,
+ * respectively.
  *
  */
 enum MMG3D_Param {
-  MMG3D_IPARAM_verbose,                   /*!< [-1..10], Tune level of verbosity */
-  MMG3D_IPARAM_mem,                       /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMG3D_IPARAM_verbose,                   /*!< [-1..10], Level of verbosity */
+  MMG3D_IPARAM_mem,                       /*!< [n/-1], Max memory size in MB or keep the default value */
   MMG3D_IPARAM_debug,                     /*!< [1/0], Turn on/off debug mode */
   MMG3D_IPARAM_angle,                     /*!< [1/0], Turn on/off angle detection */
-  MMG3D_IPARAM_iso,                       /*!< [1/0], Level-set meshing */
-  MMG3D_IPARAM_isosurf,                   /*!< [1/0], Level-set meshing on the surface part */
+  MMG3D_IPARAM_iso,                       /*!< [1/0], Enable level-set discretization (volume and surfaces) */
+  MMG3D_IPARAM_isosurf,                   /*!< [1/0], Enable level-set discretization on the surfaces only */
   MMG3D_IPARAM_nofem,                     /*!< [1/0], Do not attempt to make the mesh suitable for finite-element computations */
-  MMG3D_IPARAM_opnbdy,                    /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
-  MMG3D_IPARAM_lag,                       /*!< [-1/0/1/2], Lagrangian option */
+  MMG3D_IPARAM_opnbdy,                    /*!< [1/0], Preserve triangles at interface of 2 domains with the same reference */
+  MMG3D_IPARAM_lag,                       /*!< [-1/0/1/2], Enable Lagrangian motion */
   MMG3D_IPARAM_optim,                     /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMG3D_IPARAM_optimLES,                  /*!< [1/0], Strong mesh optimization for LES computations */
   MMG3D_IPARAM_noinsert,                  /*!< [1/0], Avoid/allow point insertion */
@@ -148,25 +150,25 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nosurf,                    /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_nreg,                      /*!< [0/1], Enable regularization of normals */
   MMG3D_IPARAM_xreg,                      /*!< [0/1], Enable boundary regularization by moving vertices */
-  MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters */
-  MMG3D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
+  MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters (which will be set with \a MMG3D_Set_localParameter) */
+  MMG3D_IPARAM_numberOfLSBaseReferences,  /*!< [n], Number of base references for bubble removal (requires \a MMG3D_DPARAM_rmc) */
   MMG3D_IPARAM_numberOfMat,               /*!< [n], Number of materials in level-set mode */
-  MMG3D_IPARAM_numsubdomain,              /*!< [0/n], Save the subdomain nb (0==all subdomains) */
-  MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMG3D_IPARAM_numsubdomain,              /*!< [0/n], Save only the subdomain (reference) n (0==all subdomains) */
+  MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off renumbering with Scotch */
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  MMG3D_IPARAM_octree,                    /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
+  MMG3D_IPARAM_octree,                    /*!< [n], Max number of points per PROctree cell (DELAUNAY) */
   MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwriting of sizes at required points (advanced usage) */
   MMG3D_IPARAM_isoref,                    /*!< [0/n], Isosurface boundary material reference */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection (degrees) */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal edge length */
   MMG3D_DPARAM_hmax,                      /*!< [val], Maximal edge length */
   MMG3D_DPARAM_hsiz,                      /*!< [val], Constant edge length */
-  MMG3D_DPARAM_hausd,                     /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  MMG3D_DPARAM_hgrad,                     /*!< [val], Control gradation */
-  MMG3D_DPARAM_hgradreq,                  /*!< [val], Control gradation on required entites (advanced usage) */
+  MMG3D_DPARAM_hausd,                     /*!< [val], Global Hausdorff distance (on all boundaries in the mesh) */
+  MMG3D_DPARAM_hgrad,                     /*!< [val], Gradation */
+  MMG3D_DPARAM_hgradreq,                  /*!< [val], Gradation on required entites (advanced usage) */
   MMG3D_DPARAM_ls,                        /*!< [val], Function value where the level set is to be discretized */
-  MMG3D_DPARAM_xreg,                      /*!< [val], Value of relaxation parameter for boundary regularization (0<val<1) */
-  MMG3D_DPARAM_rmc,                       /*!< [-1/val], Remove small connex components in level-set mode */
+  MMG3D_DPARAM_xreg,                      /*!< [val], Relaxation parameter for boundary regularization (0<val<1) */
+  MMG3D_DPARAM_rmc,                       /*!< [-1/val], Remove small disconnected components in level-set mode */
   MMG3D_PARAM_size,                       /*!< [n], Number of parameters */
 };
 
