@@ -21,6 +21,25 @@
 ** ===========================================================================
 */
 
+/*
+ * This file defines the C and Fortran headers of the mmg3d API, and
+ * their Doxygen documentation.
+ *
+ * NOTES FOR DEVELOPERS:
+ *
+ * - The Fortran headers are generated from comment lines that start with '* >'.
+ *   They must match the C declarations.
+ *
+ * - We cannot handle enum types in the Fortran version so enums are replaced
+ *   by ints in both versions.
+ *
+ * - To keep the genheader program working, don't break line between an enum
+ *   name and the opening brace (it creates errors under windows)
+ *
+ * - Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
+ *
+ */
+
 /**
  * \file mmg3d/libmmg3d.h
  * \brief API headers for the mmg3d library
@@ -28,9 +47,6 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning To keep the genheader working, don't break line between the enum
- * name and the opening brace (it creates errors under windows)
- * \warning Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
  *
  * These are the API functions for the mmg3d library. These functions allow to
  * load and save meshes and data defined on meshes; add, extract, or modify mesh
@@ -57,7 +73,7 @@
  * like independent programs: they send diagnostic output to stdout and in rare
  * cases they may call the exit() function.
  *
- * 
+ *
  * \htmlonly
  * <h2 class="groupheader">Examples</h2>
  * \endhtmlonly
@@ -107,23 +123,25 @@ extern "C" {
 
 /**
  * \enum MMG3D_Param
- * \brief Input parameters for mmg library.
+ * \brief Input parameters for the mmg library.
  *
- * Input parameters for mmg library. Options prefixed by \a
- * MMG3D_IPARAM asked for integers values ans options prefixed by \a
- * MMG3D_DPARAM asked for real values.
+ * These are the input parameters for the mmg library. Options prefixed by
+ * \a MMG3D_IPARAM require integer values and options prefixed by
+ * \a MMG3D_DPARAM require real values. They can be set with the
+ * \ref MMG3D_Set_iparameter and \ref MMG3D_Set_dparameter functions,
+ * respectively.
  *
  */
 enum MMG3D_Param {
-  MMG3D_IPARAM_verbose,                   /*!< [-1..10], Tune level of verbosity */
-  MMG3D_IPARAM_mem,                       /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMG3D_IPARAM_verbose,                   /*!< [-1..10], Level of verbosity */
+  MMG3D_IPARAM_mem,                       /*!< [n/-1], Max memory size in MB or keep the default value */
   MMG3D_IPARAM_debug,                     /*!< [1/0], Turn on/off debug mode */
   MMG3D_IPARAM_angle,                     /*!< [1/0], Turn on/off angle detection */
-  MMG3D_IPARAM_iso,                       /*!< [1/0], Level-set meshing */
-  MMG3D_IPARAM_isosurf,                   /*!< [1/0], Level-set meshing on the surface part */
+  MMG3D_IPARAM_iso,                       /*!< [1/0], Enable level-set discretization (volume and surfaces) */
+  MMG3D_IPARAM_isosurf,                   /*!< [1/0], Enable level-set discretization on the surfaces only */
   MMG3D_IPARAM_nofem,                     /*!< [1/0], Do not attempt to make the mesh suitable for finite-element computations */
-  MMG3D_IPARAM_opnbdy,                    /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
-  MMG3D_IPARAM_lag,                       /*!< [-1/0/1/2], Lagrangian option */
+  MMG3D_IPARAM_opnbdy,                    /*!< [1/0], Preserve triangles at interface of 2 domains with the same reference */
+  MMG3D_IPARAM_lag,                       /*!< [-1/0/1/2], Enable Lagrangian motion */
   MMG3D_IPARAM_optim,                     /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMG3D_IPARAM_optimLES,                  /*!< [1/0], Strong mesh optimization for LES computations */
   MMG3D_IPARAM_noinsert,                  /*!< [1/0], Avoid/allow point insertion */
@@ -132,29 +150,29 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nosurf,                    /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_nreg,                      /*!< [0/1], Enable regularization of normals */
   MMG3D_IPARAM_xreg,                      /*!< [0/1], Enable boundary regularization by moving vertices */
-  MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters */
-  MMG3D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
+  MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters (which will be set with \ref MMG3D_Set_localParameter) */
+  MMG3D_IPARAM_numberOfLSBaseReferences,  /*!< [n], Number of base references for bubble removal (requires \ref MMG3D_DPARAM_rmc) */
   MMG3D_IPARAM_numberOfMat,               /*!< [n], Number of materials in level-set mode */
-  MMG3D_IPARAM_numsubdomain,              /*!< [0/n], Save the subdomain nb (0==all subdomains) */
-  MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMG3D_IPARAM_numsubdomain,              /*!< [0/n], Save only the subdomain (reference) n (0==all subdomains) */
+  MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off renumbering with Scotch */
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  MMG3D_IPARAM_octree,                    /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
+  MMG3D_IPARAM_octree,                    /*!< [n], Max number of points per PROctree cell (DELAUNAY) */
   MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwriting of sizes at required points (advanced usage) */
   MMG3D_IPARAM_isoref,                    /*!< [0/n], Isosurface boundary material reference */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection (degrees) */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal edge length */
   MMG3D_DPARAM_hmax,                      /*!< [val], Maximal edge length */
   MMG3D_DPARAM_hsiz,                      /*!< [val], Constant edge length */
-  MMG3D_DPARAM_hausd,                     /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  MMG3D_DPARAM_hgrad,                     /*!< [val], Control gradation */
-  MMG3D_DPARAM_hgradreq,                  /*!< [val], Control gradation on required entites (advanced usage) */
+  MMG3D_DPARAM_hausd,                     /*!< [val], Global Hausdorff distance (on all boundaries in the mesh) */
+  MMG3D_DPARAM_hgrad,                     /*!< [val], Gradation */
+  MMG3D_DPARAM_hgradreq,                  /*!< [val], Gradation on required entites (advanced usage) */
   MMG3D_DPARAM_ls,                        /*!< [val], Function value where the level set is to be discretized */
-  MMG3D_DPARAM_xreg,                      /*!< [val], Value of relaxation parameter for boundary regularization (0<val<1) */
-  MMG3D_DPARAM_rmc,                       /*!< [-1/val], Remove small connex components in level-set mode */
+  MMG3D_DPARAM_xreg,                      /*!< [val], Relaxation parameter for boundary regularization (0<val<1) */
+  MMG3D_DPARAM_rmc,                       /*!< [-1/val], Remove small disconnected components in level-set mode */
   MMG3D_PARAM_size,                       /*!< [n], Number of parameters */
 };
 
-/*--------------------------- functions header ---------------------------*/
+/*--------------------------- function headers ---------------------------*/
 /* Initialization functions */
 /* init structures */
 /**
@@ -166,12 +184,12 @@ enum MMG3D_Param {
  * want to call.
  *
  * For the MMG3D_mmg3dlib function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet
  * MMG5_ARG_ppMet, &your_metric,MMG5_ARG_end).
  *
  * For the MMG3D_mmg3dls function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
@@ -180,8 +198,8 @@ enum MMG3D_Param {
  * MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric \a your_level_set and
- * \a your_displacement are \a MMG5_pSol.
+ * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric \a your_level_set and
+ * \a your_displacement are \ref MMG5_pSol.
  *
  * \return 1 on success, 0 on failure
  *
@@ -467,7 +485,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \return 0 if failed, 1 otherwise.
  *
  * Assign the vertices \a v0, \a v1,\a v2,\a v3 and reference
- * \a ref to the tetrahedron at position \a pos in the mesh structure. 
+ * \a ref to the tetrahedron at position \a pos in the mesh structure.
  * \a pos ranges from 1 to nb_tetra included.
  *
  * \remark Fortran interface:
@@ -487,7 +505,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  *
  * \param mesh pointer to the mesh structure.
  * \param tetra vertices of the tetras of the mesh given.
- * The vertices of the \f$i^{th}\f$ tetrahedron are given by 
+ * The vertices of the \f$i^{th}\f$ tetrahedron are given by
  *   tetra[(i-1)*4] to tetra[(i-1)*4+3] included.
  * \param refs array of the tetrahedra references.
  *   The references of the \f$i^{th}\f$ tetrahedron is given by refs[i-1].
@@ -1346,7 +1364,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param iparam integer parameter to set (see the enumeration \a MMG3D_Param for a
+ * \param iparam integer parameter to set (see \ref MMG3D_Param for a
  *               list of parameters that can be set).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -1371,7 +1389,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param dparam double parameter to set (see the enumeration \a MMG3D_Param for a
+ * \param dparam double parameter to set (see \ref MMG3D_Param for a
  *               list of parameters that can be set).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
@@ -1565,7 +1583,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * ref of the next vertex of a mesh. It is meant to be used in a loop over all
  * vertices. When this function has been called as many times as there are
  * vertices, the internal loop counter will be reset. To obtain data for a
- * specific vertex, the \a MMG3D_GetByIdx_vertex function can be used instead.
+ * specific vertex, the \ref MMG3D_GetByIdx_vertex function can be used instead.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired, &\n
@@ -1822,7 +1840,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  */
   LIBMMG3D_EXPORT int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int* refs,
                                            int* areRequired);
-  
+
 /**
  * \brief Get the vertices and reference of the next quadrilateral of the mesh.
  *
@@ -2185,7 +2203,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the value of an integer parameter of the remesher.
  *
  * \param mesh pointer to the mesh structure.
- * \param iparam integer parameter to get (see the enumeration \a MMG3D_Param for a
+ * \param iparam integer parameter to get (see \ref MMG3D_Param for a
  *               list of parameters that can be set).
  * \return The value of integer parameter.
  *
@@ -2750,12 +2768,12 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * have call.
  *
  * For the MMG3D_mmg3dlib function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
  * MMG5_ARG_ppMet,&your_metric,MMG5_ARG_end).
  *
  * For the MMG3D_mmg3dls function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
@@ -2783,16 +2801,16 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * have call.
  *
  * For the MMG3D_mmg3dlib function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
  *  MMG5_ARG_ppMet,&your_metric,MMG5_ARG_end).
  *
  * For the MMG3D_mmg3dls function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * For the MMG3D_mmg3dmov function, you must call
+ * For the \ref MMG3D_mmg3dmov function, you must call
  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
@@ -2818,16 +2836,16 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * have call.
  *
  * For the MMG3D_mmg3dlib function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
  *  MMG5_ARG_ppMet,&your_metric,MMG5_ARG_end).
  *
  * For the MMG3D_mmg3dls function, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * to call the \ref MMG3D_Init_mesh function with the following arguments :
  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * For the MMG3D_mmg3dmov function, you must call
+ * For the \ref MMG3D_mmg3dmov function, you must call
  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
