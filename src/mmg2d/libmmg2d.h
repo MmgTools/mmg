@@ -144,12 +144,13 @@ extern "C" {
     MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   };
 
-/*----------------------------- functions header -----------------------------*/
+/*----------------------------- function headers -----------------------------*/
 /* Initialization functions */
 /* init structures */
 
 /**
- * \brief Initialize a mesh structure and optionally the associated solution and metric structures.
+ * \brief Initialize a mesh structure and optionally the associated solution and
+ * metric structures.
  *
  * \param starter dummy argument used to initialize the variadic argument list
  * \param ... variadic arguments.
@@ -169,9 +170,7 @@ extern "C" {
  * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
- * MMG structures allocation and initialization.
- *
- * \remark No fortran interface to allow variadic arguments.
+ * \remark No fortran interface, to allow variadic arguments.
  *
  */
   LIBMMG2D_EXPORT int MMG2D_Init_mesh(const int starter,...);
@@ -1720,7 +1719,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1744,7 +1743,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1769,7 +1768,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1793,7 +1792,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1818,7 +1817,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1842,7 +1841,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1866,7 +1865,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (lack of
  * memory, file format...), 1 on success.
@@ -1890,7 +1889,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to a list of solution structures.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (lack of
  * memory, file format...), 1 on success.
@@ -1941,7 +1940,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1962,7 +1961,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solutions array
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason
  * (insufficient memory, file format...), 1 on success.
@@ -2007,7 +2006,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and optionally one data field in MSH file format
@@ -2074,7 +2073,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and a list of data fields in Vtk file format (.vtk extension).
@@ -2095,7 +2094,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and 0 or 1 data fields in vtu Vtk file format (.vtu extension).
@@ -2116,7 +2115,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and a list of data fields in vtu Vtk file format (.vtu extension).
@@ -2137,7 +2136,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and optionally one data field in polydata Vtk
@@ -2201,7 +2200,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \brief Save mesh data in a file whose format depends on the filename extension.
  *
  * \param mesh pointer to the mesh structure.
- * \param filename name of file to write.
+ * \param filename name of the file to write
  * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
@@ -2722,7 +2721,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 
 /**
- * \brief Set common pointer functions between mmgs and mmg2d to the matching mmg2d
+ * \brief Set common function pointers between mmgs and mmg2d to the matching mmg2d
  * functions.
  */
   LIBMMG2D_EXPORT void MMG2D_Set_commonFunc(void);
