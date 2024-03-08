@@ -106,37 +106,37 @@ extern "C" {
  *
  */
 enum MMGS_Param {
-  MMGS_IPARAM_verbose,           /*!< [-1..10], Tune level of verbosity */
-  MMGS_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMGS_IPARAM_verbose,           /*!< [-1..10], Level of verbosity */
+  MMGS_IPARAM_mem,               /*!< [n/-1], Max memory size in MBytes or -1 to keep the default value */
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
-  MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
-  MMGS_IPARAM_isosurf,           /*!< [1/0], Level-set meshing on the surface part */
+  MMGS_IPARAM_iso,               /*!< [1/0], Enable level-set discretization */
+  MMGS_IPARAM_isosurf,           /*!< [1/0], Enable level-set discretization on the surface part */
   MMGS_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
   MMGS_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
-  MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
-  MMGS_IPARAM_xreg,              /*!< [0/1], Disabled/enabled coordinates regularization */
+  MMGS_IPARAM_nreg,              /*!< [0/1], Disable/enable regularization of normals */
+  MMGS_IPARAM_xreg,              /*!< [0/1], Disable/enable regularization by moving vertices */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_numberOfLSBaseReferences, /*!< [n], Number of base references for bubble removal */
-  MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in ls mode */
-  MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
-  MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in level-set mode */
+  MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save only subdomain n (0==all subdomains) */
+  MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off renumbering with Scotch */
   MMGS_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
-  MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
-  MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
-  MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
-  MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
-  MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
-  MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
-  MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
-  MMGS_DPARAM_xreg,              /*!< [val], Value of relaxation parameter for coordinates regularization (0<val<1) */
-  MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
+  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritings of sizes at required points (advanced usage) */
+  MMGS_DPARAM_angleDetection,    /*!< [val], Threshold for angle detection */
+  MMGS_DPARAM_hmin,              /*!< [val], Minimal edge length */
+  MMGS_DPARAM_hmax,              /*!< [val], Maximal edge length */
+  MMGS_DPARAM_hsiz,              /*!< [val], Constant edge length */
+  MMGS_DPARAM_hausd,             /*!< [val], Global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  MMGS_DPARAM_hgrad,             /*!< [val], Gradation */
+  MMGS_DPARAM_hgradreq,          /*!< [val], Gradation on required entites (advanced usage) */
+  MMGS_DPARAM_ls,                /*!< [val], Function value where the level set is to be discretized */
+  MMGS_DPARAM_xreg,              /*!< [val], Relaxation parameter for coordinate regularization (0<val<1) */
+  MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small disconnected components in level-set mode */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
 
@@ -148,17 +148,17 @@ enum MMGS_Param {
  * \param ... variadic arguments.
  *
  * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
- * For the MMGS_mmgsls function, you need
+ * For the \ref MMGS_mmgsls function, you need
  * to call the \a MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
  * \return 1 if success, 0 if fail
  *
@@ -895,7 +895,7 @@ LIBMMGS_EXPORT int MMGS_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
 /**
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param iparam integer parameter to set (see \a MMGS_Param structure).
+ * \param iparam integer parameter to set (see \ref MMGS_Param structure).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
  *
@@ -915,7 +915,7 @@ LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int ipara
 /**
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure (unused).
- * \param dparam double parameter to set (see \a MMGS_Param structure).
+ * \param dparam double parameter to set (see \ref MMGS_Param structure).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1403,7 +1403,7 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
   LIBMMGS_EXPORT int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 /**
  * \param mesh pointer to the mesh structure.
- * \param iparam integer parameter to set (see \a MMGS_Param structure).
+ * \param iparam integer parameter to set (see \ref MMGS_Param structure).
  * \return The value of integer parameter.
  *
  * Get the value of integer parameter \a iparam.
@@ -1901,17 +1901,17 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \param ... variadic arguments.
  *
  * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
  * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
  * \return 0 if fail, 1 if success
  *
@@ -1930,20 +1930,20 @@ LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
  * \param ... variadic arguments.
  *
  * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
  * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
- * Here, \a your_mesh is a pointer to \a MMG5_pMesh and \a your_metric and
- * \a your_level_set a pointer to \a MMG5_pSol.
+ * Here, \a your_mesh is a pointer to \ref MMG5_pMesh and \a your_metric and
+ * \a your_level_set a pointer to \ref MMG5_pSol.
  *
  * \return 0 if fail, 1 if success
  *
@@ -1962,17 +1962,17 @@ LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
  * \param ... variadic arguments.
  *
  * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
  * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
  * \return 0 if fail, 1 if success
  *
