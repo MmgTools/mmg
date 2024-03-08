@@ -125,7 +125,7 @@ extern "C" {
  * \enum MMG3D_Param
  * \brief Input parameters for the mmg library.
  *
- * These are the input parameters for the mmg library. Options prefixed by
+ * These are the input parameters for the mmg3d library functions. Options prefixed by
  * \a MMG3D_IPARAM require integer values and options prefixed by
  * \a MMG3D_DPARAM require real values. They can be set with the
  * \ref MMG3D_Set_iparameter and \ref MMG3D_Set_dparameter functions,
@@ -608,7 +608,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
                                           MMG5_int v2, MMG5_int ref,MMG5_int pos);
 
 /**
- * \brief Set the vertices and references of all triangles ni a mesh.
+ * \brief Set the vertices and references of all triangles in a mesh.
  *
  * \param mesh pointer to the mesh structure.
  * \param tria pointer to the array of the tria vertices
@@ -668,8 +668,6 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * refs[i-1] is the ref of the \f$i^{th}\f$ quadra.
  * \return 0 if failed, 1 otherwise.
  *
- * Set vertices and references of the mesh quadrilaterals.
- *
  * \remark Fortran interface: (commentated in
  * order to allow to pass \%val(0) instead of the refs array)
  *
@@ -713,7 +711,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param k vertex index.
  * \return 1.
  *
- * Set the "corner" attribute at point \a pos. This affects how the vertex is
+ * Set the "corner" attribute at vertex \a k. This affects how the vertex is
  * treated during remeshing.
  *
  * \remark Fortran interface:
@@ -733,7 +731,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param k vertex index.
  * \return 1.
  *
- * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ * Remove corner attribute from vertex \a k (from 1 to the number of vertices included).
  *
  * \remark Fortran interface
  *
@@ -1629,6 +1627,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
                                             int* isCorner, int* isRequired,MMG5_int idx);
 
 /**
+ * \brief Get the coordinates and references of all vertices in the mesh.
+ *
  * \param mesh pointer to the mesh structure.
  * \param vertices pointer to the array of the points coordinates.
  * The coordinates of the \f$i^{th}\f$ point are stored in
@@ -1641,8 +1641,6 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param areRequired pointer to the array of flags saying if points
  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
  * \return 1.
- *
- * Get the coordinates and references of the mesh vertices.
  *
  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
  * instead of the refs, areCorners or areRequired arrays)
@@ -2150,7 +2148,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  LIBMMG3D_EXPORT int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 
 /**
- * \brief Get one out of several solutions at a specific vertex.
+ * \brief Get one out of several scalar solutions at a specific vertex.
  *
  * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
@@ -2175,7 +2173,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
   LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 
 /**
- * \brief Get one out of several solutions at all vertices in the mesh.
+ * \brief Get one out of several scalar solutions at all vertices in the mesh.
  *
  * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
@@ -2280,7 +2278,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param mesh pointer to the mesh structure.
  * \param filename name of the file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * Read mesh data.
@@ -2303,7 +2301,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param sol pointer to the solution structure.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * This function reads a mesh and 0 or 1 data fields in MSH file format (.msh
@@ -2329,7 +2327,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param sol pointer to the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * This function reads a mesh and 0 or 1 data field in VTU (VTK) file format (.vtu
@@ -2355,7 +2353,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param sol pointer to the solution structure.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * This functionreads a mesh and a list of data in VTU file format (.vtu extension). We read
@@ -2382,7 +2380,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \param sol pointer to the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * This function reads a mesh and 0 or 1 data fields in VTK file format (.vtu extension). We read
@@ -2408,7 +2406,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \param sol pointer to the solution structure.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * Read mesh and a list of data in VTK file format (.vtu extension). We read
@@ -2434,7 +2432,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \param sol pointer to a list of solution structures.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * Read mesh and a list of data in MSH file format (.msh extension). We read only
@@ -2452,14 +2450,14 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  LIBMMG3D_EXPORT  int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
- * \brief Read mesh data in a file whose format depends on the filename extension.
+ * \brief Read mesh data in a format determined by the filename extension.
  *
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient memory, file
  * format...), 1 if success.
  *
  * \remark Fortran interface:
@@ -2538,7 +2536,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
- * \brief Save a mesh and possible one solution in VTK format.
+ * \brief Save a mesh and optionally one solution in VTK format.
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
@@ -2559,7 +2557,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
- * \brief Save a mesh and a list of data fields in VTK format.
+ * \brief Save a mesh and multiple data fields in VTK format.
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
@@ -2580,7 +2578,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
- * \brief Save a mesh and possibly on data field in VTU format.
+ * \brief Save a mesh and optionally one data field in VTU format.
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
@@ -2601,7 +2599,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
- * \brief Save a mesh and a list of data fields in VTU format.
+ * \brief Save a mesh and multiple data fields in VTU format.
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
@@ -2666,8 +2664,8 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \param met pointer to the sol structure.
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
- * format...), 1 if success.
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient
+ * memory, file format...), 1 if successful.
  *
  * Load metric field. The solution file must contains only 1 solution: the
  * metric
@@ -2684,14 +2682,14 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
 
 /**
- * \brief Load 1 or more solutions in a solution file in medit file format.
+ * \brief Load one or more solutions in a solution file in medit file format.
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solutions array
  * \param filename name of file.
  *
- * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
- * format...), 1 if success.
+ * \return 0 if file is not found, -1 if fail for another reason (insufficient
+ * memory, file format...), 1 if successful.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_LOADALLSOLS(mesh,sol,filename,strlen0,retval)\n
@@ -2743,7 +2741,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 /**
- * \brief Deallocate of an array of solution fields
+ * \brief Deallocate an array of solution fields
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to an array of solution structure (that stores solution fields).
@@ -2862,7 +2860,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 
 /* library */
 /**
- * \brief Main "program" for the remesh library.
+ * \brief Main "program" for the mesh adaptation library.
  *
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the sol (metric) structure.
@@ -3196,8 +3194,9 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \param met pointer to the sol structure
  * \return 1 if success
  *
- * Compute a constant size map according to mesh->info.hsiz, mesh->info.hmin and
- * mesh->info.hmax. Update these 3 values if not compatible.
+ * This function computes a constant size map according to mesh->info.hsiz,
+ * mesh->info.hmin and mesh->info.hmax. It updates these 3 values if not
+ * compatible.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_CONSTANTSIZE(mesh,met,retval)\n
