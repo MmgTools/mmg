@@ -36,7 +36,13 @@
  * - To keep the genheader program working, don't break line between an enum
  *   name and the opening brace (it creates errors under windows)
  *
- * - Use the MMG2D_ prefix: the MMG5_ prefix will become obsolete.
+ * - Since Mmg version 5,
+ * -- data structures and parameters that are common between mmg3d, mmg2d
+ *    and mmgs use the MMG5_ prefix;
+ * -- API functions should have an MMG3D_, MMG2D_, or MMGS_ prefix,
+ *    depending on the library; and
+ * -- some MMG5_ API functions exists but they are common to the
+ *    three libraries.
  *
  */
 
@@ -57,7 +63,7 @@
  * triangles and quadrangles. Edges can also be represented. All of these \a
  * entities can have a \a reference: an integer value that can serve as a group
  * identifier. In addition mesh entities can have \a attributes such as
- * "required".
+ * "required" or "corner".
  *
  * Data defined on meshes can be for example functions that are meant for
  * level-set discretization, metric tensors that will govern edge lengths, and

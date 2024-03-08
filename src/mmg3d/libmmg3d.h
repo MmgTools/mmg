@@ -36,7 +36,13 @@
  * - To keep the genheader program working, don't break line between an enum
  *   name and the opening brace (it creates errors under windows)
  *
- * - Use the MMG3D_ prefix: the MMG5_ prefix will become obsolete.
+ * - Since Mmg version 5,
+ * -- data structures and parameters that are common between mmg3d, mmg2d
+ *    and mmgs use the MMG5_ prefix;
+ * -- API functions should have an MMG3D_, MMG2D_, or MMGS_ prefix,
+ *    depending on the library; and
+ * -- some MMG5_ API functions exists but they are common to the
+ *    three libraries.
  *
  */
 

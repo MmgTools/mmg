@@ -21,6 +21,31 @@
 ** =============================================================================
 */
 
+/*
+ * This file defines the C and Fortran headers of the mmgs API, and
+ * their Doxygen documentation.
+ *
+ * NOTES FOR DEVELOPERS:
+ *
+ * - The Fortran headers are generated from comment lines that start with '* >'.
+ *   They must match the C declarations.
+ *
+ * - We cannot handle enum types in the Fortran version so enums are replaced
+ *   by ints in both versions.
+ *
+ * - To keep the genheader program working, don't break line between an enum
+ *   name and the opening brace (it creates errors under windows)
+ *
+ * - Since Mmg version 5,
+ * -- data structures and parameters that are common between mmg3d, mmg2d
+ *    and mmgs use the MMG5_ prefix;
+ * -- API functions should have an MMG3D_, MMG2D_, or MMGS_ prefix,
+ *    depending on the library; and
+ * -- some MMG5_ API functions exists but they are common to the
+ *    three libraries.
+ *
+ */
+
 /**
  * \file mmgs/libmmgs.h
  * \brief API headers for the mmgs library
@@ -28,8 +53,30 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning To keep the genheader working, don't break line between the enum
- * name and the opening brace (it creates errors under windows)
+ *
+ * These are the API functions for the mmgs library. These functions allow to
+ * load and save meshes and data defined on meshes; add, extract, or modify mesh
+ * data; and to call the library functions that perform remeshing and level-set
+ * discretization.
+ *
+ * Meshes are here defined in terms of vertices and two-dimensional objects:
+ * triangles and quadrangles, which live in 3D space. Edges can also be
+ * represented. All of these \a entities can have a \a reference: an integer
+ * value that can serve as a group identifier. In addition mesh entities can
+ * have \a attributes such as "required" or "corner".
+ *
+ * Data defined on meshes can be for example functions that are meant for
+ * level-set discretization and metric tensors that will govern edge
+ * lengths. These data can be scalar, vector, or (symmetric) tensor-valued; and
+ * there can be more than one data item associated with a mesh entity. These
+ * data are often referred to as \a solutions.
+ *
+ * Two of the functions here are referred to as "programs", because they perform
+ * the tasks for which mmgs is meant: meshing and level-set discretization.  The
+ * other functions merely serve to load and save data and to perform pre- and
+ * post-processing. These programs actually behave much like independent
+ * programs: they send diagnostic output to stdout and in rare cases they may
+ * call the exit() function.
  *
  */
 
