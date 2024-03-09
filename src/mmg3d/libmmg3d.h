@@ -123,7 +123,7 @@ extern "C" {
 #include "mmg/mmg3d/mmg3d_export.h"
 
 /**
- * Maximum array size when storing adjacent points (or ball) of a vertex.
+ * Maximum array size when storing adjacent vertices (or ball) of a vertex.
  */
 #define MMG3D_LMAX      10240
 
@@ -162,8 +162,8 @@ enum MMG3D_Param {
   MMG3D_IPARAM_numsubdomain,              /*!< [0/n], Save only the subdomain (reference) n (0==all subdomains) */
   MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off renumbering with Scotch */
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  MMG3D_IPARAM_octree,                    /*!< [n], Max number of points per PROctree cell (DELAUNAY) */
-  MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwriting of sizes at required points (advanced usage) */
+  MMG3D_IPARAM_octree,                    /*!< [n], Max number of vertices per PROctree cell (DELAUNAY) */
+  MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwriting of sizes at required vertices (advanced usage) */
   MMG3D_IPARAM_isoref,                    /*!< [0/n], Isosurface boundary material reference */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection (degrees) */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal edge length */
@@ -216,7 +216,7 @@ enum MMG3D_Param {
  * \remark No fortran interface to allow variadic arguments.
  *
  * \warning detected bugs:
- *   - some points along open boundaries end up with a normal (while they should not)
+ *   - some vertices along open boundaries end up with a normal (while they should not)
  *
  */
  LIBMMG3D_EXPORT int MMG3D_Init_mesh(const int starter,...);
@@ -1636,15 +1636,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the coordinates and references of all vertices in the mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param vertices pointer to the array of the points coordinates.
+ * \param vertices pointer to the array of coordinates.
  * The coordinates of the \f$i^{th}\f$ vertex are stored in
  * vertices[(i-1)*3]\@3.
  * \param refs pointer to the array of the vertex references.
  * The ref of the \f$i^th\f$ vertex is stored in refs[i-1].
  * \param areCorners pointer to the array of the flags saying if
- * points are corners.
+ * vertices are corners.
  * areCorners[i-1]=1 if the \f$i^{th}\f$ vertex is corner.
- * \param areRequired pointer to the array of flags saying if points
+ * \param areRequired pointer to the array of flags saying if vertices
  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ vertex is required.
  * \return 1.
  *
@@ -2311,7 +2311,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * format...), 1 if success.
  *
  * This function reads a mesh and 0 or 1 data fields in MSH file format (.msh
- * extension). We read only low-order points, edges, triangles, quadrangles,
+ * extension). We read only low-order vertices, edges, triangles, quadrangles,
  * tetrahedra and prisms.
  *
  * \remark Fortran interface:
@@ -2337,7 +2337,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * format...), 1 if success.
  *
  * This function reads a mesh and 0 or 1 data field in VTU (VTK) file format (.vtu
- * extension). We read only low-order points, edges, tria, quadra, tetra and
+ * extension). We read only low-order vertices, edges, tria, quadra, tetra and
  * prisms. Point and cell references must be stored in PointData or CellData
  * whose names contain the "medit:ref" keyword.
  *
@@ -2363,7 +2363,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * format...), 1 if success.
  *
  * This functionreads a mesh and a list of data in VTU file format (.vtu extension). We read
- * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * only low-order vertices, edges, tria, quadra, tetra and prisms. Point and cell
  * references must be stored in PointData or CellData whose names contains the
  * "medit:ref" keyword.
  *
@@ -2390,7 +2390,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * format...), 1 if success.
  *
  * This function reads a mesh and 0 or 1 data fields in VTK file format (.vtu extension). We read
- * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * only low-order vertices, edges, tria, quadra, tetra and prisms. Point and cell
  * references must be stored in PointData or CellData whose names contain the
  * "medit:ref" keyword.
  *
@@ -2416,7 +2416,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * format...), 1 if success.
  *
  * Read mesh and a list of data in VTK file format (.vtu extension). We read
- * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * only low-order vertices, edges, tria, quadra, tetra and prisms. Point and cell
  * references must be stored in PointData or CellData whose names contains the
  * "medit:ref" keyword.
  *
@@ -2442,7 +2442,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * format...), 1 if success.
  *
  * Read mesh and a list of data in MSH file format (.msh extension). We read only
- * low-order points, edges, tria, quadra, tetra and prisms.
+ * low-order vertices, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -2526,7 +2526,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \return 0 if failed, 1 otherwise.
  *
  * Write mesh and a list of data fields (that are considered as solutions and
- * not metrics, thus, we do nothing over the ridge points) in MSH file format
+ * not metrics, thus, we do nothing over the ridge vertices) in MSH file format
  * (.msh extension).  Save file in ASCII format for .msh extension, in binary
  * format for .mshb one.
  *
@@ -3178,7 +3178,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 
 /**
  * \brief Compute isotropic size map according to the mean of the length of the
- * edges passing through a point.
+ * edges passing through a vertex.
  *
  * \param mesh pointer to the mesh structure
  * \param met pointer to the sol structure

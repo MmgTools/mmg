@@ -92,7 +92,7 @@ extern "C" {
 #include "mmg/common/libmmgtypes.h"
 
 /**
- * Maximum array size when storing adjacent points (or ball) of a vertex.
+ * Maximum array size when storing adjacent vertices (or ball) of a vertex.
  */
 #define MMGS_LMAX      1024
 
@@ -126,7 +126,7 @@ enum MMGS_Param {
   MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save only subdomain n (0==all subdomains) */
   MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off renumbering with Scotch */
   MMGS_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritings of sizes at required points (advanced usage) */
+  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritings of sizes at required vertices (advanced usage) */
   MMGS_DPARAM_angleDetection,    /*!< [val], Threshold for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal edge length */
   MMGS_DPARAM_hmax,              /*!< [val], Maximal edge length */
@@ -1236,15 +1236,15 @@ LIBMMGS_EXPORT int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, dou
  * \brief Get the coordinates, references and attributes of all vertices in the mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param vertices pointer to the array of points coordinates.
+ * \param vertices pointer to the array of coordinates.
  * The coordinates of vertex \a i are stored in
  * vertices[(i-1)*3]\@3.
  * \param refs pointer to the array of vertex references.
  * The ref of vertex \a i is stored in refs[i-1].
  * \param areCorners pointer to the array of flags saying if
- * points are corners.
+ *   vertices are corners.
  * areCorners[i-1]=1 if vertex \a i is corner.
- * \param areRequired pointer to the table of flags saying if points
+ * \param areRequired pointer to the table of flags saying if vertices
  * are required. areRequired[i-1]=1 if vertex \a i is required.
  * \return 1.
  *
@@ -1737,7 +1737,7 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * \param filename name of the file to load.
  * \return 0 on failure, 1 otherwise.
  *
- * Read a mesh and optionally one data field at MSH file format (.msh extension). We read
+ * Read a mesh and optionally one data field in MSH file format (.msh extension). We read
  * only low-order vertices, edges, triangles, quadrangles, tetrahedra and prisms.
  *
  * \remark Fortran interface:
@@ -1759,7 +1759,7 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * \param filename name of the file to load.
  * \return 0 on failure, 1 otherwise.
  *
- * Read a mesh and multiple data at MSH file format (.msh extension). We read only
+ * Read a mesh and multiple data in MSH file format (.msh extension). We read only
  * low-order vertices, edges, triangles, quadrangles, tetrahedra and prisms.
  *
  * \remark Fortran interface:
@@ -1846,7 +1846,7 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * \return 0 on failure, 1 otherwise.
  *
  * This function saves a mesh and multiple data fields (that are considered as
- * solutions and not metrics, thus, we do nothing over the ridge points) in MSH
+ * solutions and not metrics, thus, we do nothing over the ridge vertices) in MSH
  * file format (.msh extension). The file is saved in ASCII format for .msh
  * extension and in binary format for a .mshb extension.
  *
@@ -2304,7 +2304,7 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 /* Tools for the library */
 /**
  * \brief Compute an isotropic size map according to the mean of the length of the
- * edges passing through a point.
+ * edges passing through a vertex.
  *
  * \param mesh pointer to the mesh structure
  * \param met pointer to the sol structure
@@ -2446,7 +2446,7 @@ LIBMMGS_EXPORT int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int list
  * \param start index of a triangle holding \a ip.
  * \param lispoi pointer to an array of size MMGS_LMAX that will contain
  * the indices of adjacent vertices to the vertex \a ip.
- * \return nbpoi the number of adjacent points on success, 0 on failure.
+ * \return nbpoi the number of adjacent vertices on success, 0 on failure.
  *
  * Find the indices of the adjacent vertices of the vertex \a
  * ip of the triangle \a start.
