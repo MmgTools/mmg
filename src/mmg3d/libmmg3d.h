@@ -150,9 +150,9 @@ enum MMG3D_Param {
   MMG3D_IPARAM_lag,                       /*!< [-1/0/1/2], Enable Lagrangian motion */
   MMG3D_IPARAM_optim,                     /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMG3D_IPARAM_optimLES,                  /*!< [1/0], Strong mesh optimization for LES computations */
-  MMG3D_IPARAM_noinsert,                  /*!< [1/0], Avoid/allow point insertion */
+  MMG3D_IPARAM_noinsert,                  /*!< [1/0], Avoid/allow vertex insertion */
   MMG3D_IPARAM_noswap,                    /*!< [1/0], Avoid/allow edge or face flipping */
-  MMG3D_IPARAM_nomove,                    /*!< [1/0], Avoid/allow point relocation */
+  MMG3D_IPARAM_nomove,                    /*!< [1/0], Avoid/allow vertex relocation */
   MMG3D_IPARAM_nosurf,                    /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_nreg,                      /*!< [0/1], Enable regularization of normals */
   MMG3D_IPARAM_xreg,                      /*!< [0/1], Enable boundary regularization by moving vertices */
@@ -430,11 +430,11 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
 /**
  * \brief Set the coordinates of a single vertex.
  * \param mesh pointer to the mesh structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param c2 coordinate of the point along the third dimension.
- * \param ref point reference.
- * \param pos position of the point in the mesh.
+ * \param c0 coordinate of the vertex along the first dimension.
+ * \param c1 coordinate of the vertex along the second dimension.
+ * \param c2 coordinate of the vertex along the third dimension.
+ * \param ref vertex reference.
+ * \param pos position of the vertex in the mesh.
  * \return 1.
  *
  * This function sets the coordinates of a vertex \a c0, \a c1,\a c2 and reference \a ref
@@ -458,8 +458,8 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param mesh pointer to the mesh structure.
  * \param vertices  array of vertex coordinates in the order \f$[x_1, y_1, z_1, x_2, \ldots, z_N]\f$
  *   where \f$N\f$ is the number of vertices in the mesh.
- * \param refs  array of point references.
- *   The reference of point \f$i\f$ is stored in refs[\f$i-1\f$].
+ * \param refs  array of vertex references.
+ *   The reference of vertex \f$i\f$ is stored in refs[\f$i-1\f$].
  * \return 1.
  *
  * This function sets the coordinates and references of all vertices in a mesh
@@ -777,7 +777,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param k vertex index.
  * \return 1.
  *
- * This function removes the required attribute from point \a k.
+ * This function removes the required attribute from vertex \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
@@ -1112,10 +1112,10 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \brief Set the normal orientation at a single vertex.
  *
  * \param mesh pointer to the mesh structure.
- * \param k point index
- * \param n0 x componant of the normal at point \a k.
- * \param n1 y componant of the normal at point \a k.
- * \param n2 z componant of the normal at point \a k.
+ * \param k vertex index
+ * \param n0 x componant of the normal at vertex \a k.
+ * \param n1 y componant of the normal at vertex \a k.
+ * \param n2 z componant of the normal at vertex \a k.
  *
  * \return 1 if success.
  *
@@ -1543,7 +1543,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
                                          MMG5_int* np,int* typSol);
 
 /**
- * \brief Get the number of elements and dimension of a solution defined on vertices.
+ * \brief Get the number of elements, type, and dimensions of several solutions defined on vertices.
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to an array of sol structure.
@@ -1572,15 +1572,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * next vertex of \a mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param c0 pointer to the coordinate of the point along the first
+ * \param c0 pointer to the coordinate of the vertex along the first
  * dimension.
- * \param c1 pointer to the coordinate of the point along the second
+ * \param c1 pointer to the coordinate of the vertex along the second
  * dimension.
- * \param c2 pointer to the coordinate of the point along the third
+ * \param c2 pointer to the coordinate of the vertex along the third
  * dimension.
- * \param ref pointer to the point reference.
- * \param isCorner pointer to the flag saying if point is corner.
- * \param isRequired pointer to the flag saying if point is required.
+ * \param ref pointer to the vertex reference.
+ * \param isCorner pointer to the flag saying if vertex is corner.
+ * \param isRequired pointer to the flag saying if vertex is required.
  * \return 1.
  *
  * This function retrieves the coordinates \a c0, \a c1,\a c2 and reference \a
@@ -1607,13 +1607,13 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the coordinates and reference of a specific vertex in the mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param c0 pointer to the coordinate of the point along the first dimension.
- * \param c1 pointer to the coordinate of the point along the second dimension.
- * \param c2 pointer to the coordinate of the point along the third dimension.
- * \param ref pointer to the point reference.
- * \param isCorner pointer to the flag saying if point is corner.
- * \param isRequired pointer to the flag saying if point is required.
- * \param idx index of point to get.
+ * \param c0 pointer to the coordinate of the vertex along the first dimension.
+ * \param c1 pointer to the coordinate of the vertex along the second dimension.
+ * \param c2 pointer to the coordinate of the vertex along the third dimension.
+ * \param ref pointer to the vertex reference.
+ * \param isCorner pointer to the flag saying if vertex is corner.
+ * \param isRequired pointer to the flag saying if vertex is required.
+ * \param idx index of vertex to get.
  * \return 1.
  *
  * Get coordinates \a c0, \a c1, \a c2 and reference \a ref of
@@ -1637,15 +1637,15 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \param mesh pointer to the mesh structure.
  * \param vertices pointer to the array of the points coordinates.
- * The coordinates of the \f$i^{th}\f$ point are stored in
+ * The coordinates of the \f$i^{th}\f$ vertex are stored in
  * vertices[(i-1)*3]\@3.
- * \param refs pointer to the array of the point references.
- * The ref of the \f$i^th\f$ point is stored in refs[i-1].
+ * \param refs pointer to the array of the vertex references.
+ * The ref of the \f$i^th\f$ vertex is stored in refs[i-1].
  * \param areCorners pointer to the array of the flags saying if
  * points are corners.
- * areCorners[i-1]=1 if the \f$i^{th}\f$ point is corner.
+ * areCorners[i-1]=1 if the \f$i^{th}\f$ vertex is corner.
  * \param areRequired pointer to the array of flags saying if points
- * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
+ * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ vertex is required.
  * \return 1.
  *
  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
@@ -1936,7 +1936,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \param mesh pointer to the mesh structure.
  * \param edges pointer to the array of edges.
- * The vertices of the \f$i^{th}\f$ edge should be given in edge[(i-1)*2] and edge[(i-1)*2+1].
+ * The vertices of the \f$i^{th}\f$ edge should be given in edges[(i-1)*2] and edges[(i-1)*2+1].
  * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1956,7 +1956,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \param mesh pointer to the mesh structure.
  * \param edges pointer to the array of edges.
- * The vertices of the \f$i^{th}\f$ edge are stored in edge[(i-1)*2] and edge[(i-1)*2+1].
+ * The vertices of the \f$i^{th}\f$ edge are stored in edges[(i-1)*2] and edges[(i-1)*2+1].
  * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
  * \param areRidges 1 if the edge is a ridge, 0 otherwise.
  * \param areRequired 1 if the edge is required, 0 otherwise.
@@ -1979,10 +1979,10 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the normal orientation at a single mesh vertex.
  *
  * \param mesh pointer to the mesh structure.
- * \param k point index
- * \param n0 x componant of the normal at point \a k.
- * \param n1 y componant of the normal at point \a k.
- * \param n2 z componant of the normal at point \a k.
+ * \param k vertex index
+ * \param n0 x componant of the normal at vertex \a k.
+ * \param n1 y componant of the normal at vertex \a k.
+ * \param n2 z componant of the normal at vertex \a k.
  *
  * \return 1 if success.
  *
@@ -2061,7 +2061,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  LIBMMG3D_EXPORT int  MMG3D_Get_scalarSols(MMG5_pSol met, double* s);
 
 /**
- * \brief Get the next element of a vector solution structure defined at vertices.
+ * \brief Get the next element of a vector solution structure.
  *
  * \param met pointer to the sol structure.
  * \param vx x value of the vectorial solution.
@@ -2069,10 +2069,10 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param vz z value of the vectorial solution.
  * \return 0 if failed, 1 otherwise.
  *
- * This function retrieves the solution \f$(v_x,v_y,vz)\f$ of the next vertex
- * of \a mesh. It is meant to be called in a loop over all vertices. When it has
- * been called as many times as there are vertices in the mesh, the internal
- * loop counter will be reset.
+ * This function retrieves the next vector-valued element \f$(v_x,v_y,vz)\f$ of
+ * the solution. It is meant to be called in a loop over all elements.  When it
+ * has been called as many times as there are elements in the solution, the
+ * internal loop counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_VECTORSOL(met,vx,vy,vz,retval)\n
@@ -2085,7 +2085,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  LIBMMG3D_EXPORT int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
 
 /**
- * \brief Get all elements of a vector solution structure defined at vertices.
+ * \brief Get all elements of a vector solution structure.
  *
  * \param met pointer to the sol structure.
  * \param sols array of the solutions at mesh vertices. sols[3*(i-1)]\@3 is
@@ -2105,7 +2105,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  LIBMMG3D_EXPORT int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols);
 
 /**
- * \brief Get the next element of a tensor solution structure defined at vertices.
+ * \brief Get the next element of a tensor solution structure.
  *
  * \param met pointer to the sol structure.
  * \param m11 pointer to the position (1,1) in the solution tensor.
@@ -2116,11 +2116,11 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param m33 pointer to the position (3,3) in the solution tensor.
  * \return 0 if failed, 1 otherwise.
  *
- * This function retrieves the tensor-valued solution
- * \f$(m_{11},m_{12},m_{13},m_{22},m_{23},m_{33})\f$ of the next vertex of \a
- * mesh. It is meant to be called in a loop over all vertices. When it has been
- * called as many times as there are vertices in the mesh, the internal loop
- * counter will be reset.
+ * This function retrieves the next element
+ * \f$(m_{11},m_{12},m_{13},m_{22},m_{23},m_{33})\f$ of a tensor-valued solution
+ * field.  It is meant to be called in a loop over all vertices. When it has
+ * been called as many times as there are elements in the solution, the internal
+ * loop counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,retval)\n
@@ -2134,14 +2134,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
                                          double *m22,double *m23, double *m33);
 
 /**
- * \brief Get all elements of a tensor solution structure defined at vertices.
+ * \brief Get all elements of a tensor solution field.
  *
  * \param met pointer to the sol structure.
  * \param sols array of the solutions at mesh vertices.
  * The solution at vertex \a i will be stored in sols[6*(i-1)] to sols[6*(i-1)+5].
  * \return 0 if failed, 1 otherwise.
- *
- * Get tensorial solutions at mesh vertices.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TENSORSOLS(met,sols,retval)\n
@@ -2154,17 +2152,19 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  LIBMMG3D_EXPORT int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 
 /**
- * \brief Get one out of several scalar solutions at a specific vertex.
+ * \brief Get one out of several solutions at a specific vertex.
  *
  * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
- * \param s solution(s) at mesh vertex \a pos.
+ * \param s solution(s) at mesh vertex \a pos. The required size
+ *   of this array depends on the type of solution.
  * \param pos index of the vertex on which we get the solution.
  *
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the ith field of the solution array at vertex \a pos.
  * (pos from 1 to nb_vertices included and \a i from 1 to \a nb_sols).
+ * The type of solution is inferred from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -2179,7 +2179,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
   LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
 
 /**
- * \brief Get one out of several scalar solutions at all vertices in the mesh.
+ * \brief Get one out of several solutions at all vertices in the mesh.
  *
  * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
@@ -2254,12 +2254,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Add a vertex to the mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param c0 x coor of the new point
- * \param c1 y coor of the new point
- * \param c2 z coor of the new point
- * \param ref point reference.
+ * \param c0 x coor of the new vertex
+ * \param c1 y coor of the new vertex
+ * \param c2 z coor of the new vertex
+ * \param ref vertex reference.
  *
- * \return 0 if unable to create the point, the index of the new point
+ * \return 0 if unable to create the vertex, the index of the new vertex
  * otherwise.
  *
  * This function adds a vertex with coordinates \a c0 \a c1 \a c2 and reference

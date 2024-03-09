@@ -2471,7 +2471,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * domains with different references, if it belongs to one triangle only or if
  * it is a singular edge (ridge or required).
  *
- * Append these edges to the list of edge.
+ * Append these edges to the list of edges.
  *
  * \warning reallocate the edge array and append the internal edges. This may
  * modify the behaviour of other functions.
