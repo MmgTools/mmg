@@ -204,7 +204,7 @@ enum MMG3D_Param {
  * MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric \a your_level_set and
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric \a your_level_set and
  * \a your_displacement are \ref MMG5_pSol.
  *
  * \return 1 on success, 0 on failure
@@ -3363,7 +3363,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 /**
  * \brief Compute the real eigenvalues and eigenvectors of a symmetric matrix
  *
- * \param m upper part of a symmetric matric diagonalizable in |R
+ * \param m upper part of a symmetric matrix diagonalizable in |R
  * \param lambda array of the metric eigenvalues
  * \param vp array of the metric eigenvectors
  *
@@ -3371,10 +3371,13 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * Compute the real eigenvalues and eigenvectors of a symmetric matrix m whose
  * upper part is provided (m11, m12, m13, m22, m23, m33 in this order).
+ *
  * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1], v[0,2] )
  * in C and to the eigenvector v(1,:) in fortran
+ *
  * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1], v[1,2] )
  * in C and to the eigenvector v(2,:) in fortran
+ *
  * lambda[2] is the eigenvalue associated to the eigenvector ( v[2][0], v[2,1], v[2,2] )
  * in C and to the eigenvector v(3,:) in fortran
  *
@@ -3391,7 +3394,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 /**
  * \brief Clean data (triangles and edges) linked to isosurface.
  *
- * \param mesh pointer to the mesh sructure
+ * \param mesh pointer to the mesh structure
  *
  * \return 1 if successful, 0 otherwise.
  *

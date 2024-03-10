@@ -167,7 +167,7 @@ extern "C" {
  * MMG2D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
  * \remark No fortran interface, to allow variadic arguments.
@@ -2639,18 +2639,20 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
   LIBMMG2D_EXPORT int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2],int ied[2]);
 
 /**
- * \brief Compute the real eigenvalues and eigenvectors of a symetric matrix
+ * \brief Compute the real eigenvalues and eigenvectors of a symmetric matrix
  *
- * \param m upper part of a symetric matric diagonalizable in |R
+ * \param m upper part of a symMetric matrix diagonalizable in |R
  * \param lambda array of the metric eigenvalues
  * \param vp array of the metric eigenvectors
  *
  * \return the order of the eigenvalues
  *
- * This function computes the real eigenvalues and eigenvectors of a symetric matrix m
+ * This function computes the real eigenvalues and eigenvectors of a symmetric matrix m
  * whose upper part is provided (m11, m12, m22, in this order).
+ *
  * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1] )
  * in C and to the eigenvector v(1,:) in fortran
+ *
  * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1] )
  * in C and to the eigenvector v(2,:) in fortran
  *

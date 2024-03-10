@@ -160,7 +160,7 @@ enum MMGS_Param {
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
  * \return 1 on success, 0 on failure
@@ -710,7 +710,7 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
  * \param mesh pointer to the mesh structure.
  * \param edges pointer to an array of edges.
  *   The vertices of edge i are stored in edges[(i-1)*2] and edges[(i-1)*2+1].
- * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
+ * \param refs edge references. refs[i-1] is the reference of edge \a i.
  * \param areRidges 1 if the edge is a ridge, 0 otherwise.
  * \param areRequired 1 if the edge is required, 0 otherwise.
  * \return 0 on failure, 1 otherwise.
@@ -912,7 +912,7 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  * \return 0 on failure, 1 otherwise.
  *
  * Set values of the solution at field \a i of the solution array and at
- * position \pos (\a pos from 1 to the number of vertices included and i from 1
+ * position \pos (\a pos from 1 to the number of vertices included and \a i from 1
  * to the number of solutions). The type of solution is determined from \a sol.
  *
  * \remark Fortran interface:
@@ -954,15 +954,16 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
 
 /* check init */
 /**
- * \brief Check if the number of given entities match with mesh and sol size and
- * check mesh data.
+ * \brief Check if the numbers of given entities match with mesh and solution
+ * size and check mesh data.
  *
  * \param mesh pointer to the mesh structure.
- * \param met pointer to the sol structure.
+ * \param met pointer to the solution structure.
  * \return 0 on failure, 1 otherwise.
  *
- * This function checks if the number of given entities match with mesh and sol
- * size and checks the mesh data. Use of this function is not mandatory.
+ * This function checks if the numbers of given entities match with the mesh and
+ * solution sizes and checks the mesh data. Use of this function is not
+ * mandatory.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_CHK_MESHDATA(mesh,met,retval)\n
@@ -1514,9 +1515,10 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  *
  * \return 0 on failure, 1 otherwise.
  *
- * Get values of the ith field of the solution array at vertex \a pos.  (\a pos
- * from 1 to the number of vertices included and \a i from 1 to the number of
- * solutions).
+ * This function retreives the value of field \a i of the solution array at
+ * vertex \a pos.  (\a pos from 1 to the number of vertices included and \a i
+ * from 1 to the number of solutions). It works for any type of solution; the
+ * types are inferred from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1541,8 +1543,9 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  *
  * \return 0 on failure, 1 otherwise.
  *
- * Get values of the solution at the ith field of the solution array.
- * (\a i from 1 to \a the number of sols).
+ * This function retrieves the values of field \a i of the solution array \a sol
+ * (\a i from 1 to \a the number of solutions). It works for any type of solution;
+ * the type is inferred from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1562,7 +1565,9 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \param iparam integer parameter to get (see \ref MMGS_Param structure).
  * \return The value of the parameter.
  *
- * This function retrieves the value of integer parameter \a iparam.
+ * This function retrieves the value of integer parameter \a iparam (see \ref
+ * MMGS_Param for a list of parameters). It returns the value of the parameter,
+ * or zero if the value of \a iparam is not recognized.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_IPARAMETER(mesh,iparam,retval)\n
@@ -1581,6 +1586,12 @@ LIBMMGS_EXPORT int MMGS_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
  * \param mesh pointer to the mesh structure.
  * \param filename name of the file to load.
  * \return 0 on failure, 1 otherwise.
+ *
+ * This function reads .mesh (ASCII) and .meshb (binary) files. If the name
+ * contains ".mesh" the file will be read as an ASCII file and if the name
+ * contains .meshb it be read as a binary file. If the file contains neither of
+ * these strings the function will first try to open "[filename].meshb"
+ * and if this fails it will try "[filename].mesh".
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADMESH(mesh,filename,strlen0,retval)\n
@@ -1615,7 +1626,8 @@ LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol,
+                                    const char *filename);
 
 /**
  * \brief Load a mesh and multiple solutions in VTP (VTK) format from file.
@@ -1637,7 +1649,8 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol so
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                const char *filename);
 
 /**
  * \brief Load a mesh and possibly data in VTU (VTK) format from file.
@@ -1648,8 +1661,9 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * \param filename name of the file to load.
  * \return 0 on failure, 1 otherwise.
  *
- * Read a mesh and optionally one data field in VTK vtu file format (.vtu extension). We
- * read only low-order vertices, edges, triangles and quadrangles.
+ * Read a mesh and optionally one data field in VTK vtu file format (.vtu
+ * extension). We read only low-order vertices, edges, triangles and
+ * quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTUMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1660,7 +1674,7 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const char *filename);
 
 /**
  * \brief Load a mesh and multiple solutions in VTU (VTK) format from file.
@@ -1682,7 +1696,8 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                const char *filename);
 
 /**
  * \brief Load a mesh and possibly data in VTK format from file.
@@ -1705,7 +1720,8 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol,
+                                    const char *filename);
 
 /**
  * \brief Load a mesh and multiple solutions in VTK format from file.
@@ -1727,7 +1743,8 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                const char *filename);
 
 /**
  * \brief Load a mesh and possibly a solution in .msh format from file.
@@ -1749,7 +1766,7 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
 
 /**
  * \brief Load a mesh and all data from a file in MSH format.
@@ -1771,7 +1788,7 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
 
 /**
  * \brief Load a mesh and all data from a file. The format will be guessed from the filename extension.
@@ -1791,7 +1808,8 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol,
+                                        const char *filename);
 
 /**
  * \brief Save a mesh in .mesh or .meshb format.
@@ -1834,7 +1852,7 @@ LIBMMGS_EXPORT int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
 
 /**
  * \brief Save a mesh and multiple data fields in MSH format, ascii or binary
@@ -1859,7 +1877,7 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
 
 /**
  * \brief Write mesh and optionally one data field in Vtk file format (.vtk extension).
@@ -1878,7 +1896,7 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveVtkMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
 
 /**
  * \brief Save a mesh and multiple data fields in VTK format.
@@ -1899,7 +1917,7 @@ LIBMMGS_EXPORT int MMGS_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
 
 /**
  * \brief Write mesh and optionally one data field vtu Vtk file format (.vtu extension).
@@ -1918,7 +1936,7 @@ LIBMMGS_EXPORT int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
 
 /**
  * \brief Write a mesh and multiple data fields in vtu Vtk file format (.vtu extension).
@@ -1960,7 +1978,8 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_saveVtpMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
+  LIBMMGS_EXPORT int MMGS_saveVtpMesh(MMG5_pMesh mesh, MMG5_pSol sol,
+                                      const char *filename);
 
 /**
  * \brief Save a mesh and multiple data fields in VTP format.
@@ -2001,7 +2020,8 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
+  LIBMMGS_EXPORT int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol,
+                                          const char *filename);
 
 /**
  * \brief Load a metric field (or other solution) in medit's .sol format.
@@ -2042,7 +2062,8 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_loadAllSols(MMG5_pMesh mesh, MMG5_pSol *sol, const char* filename);
+LIBMMGS_EXPORT int  MMGS_loadAllSols(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                     const char* filename);
 
 /**
  * \brief Write an isotropic or anisotropic metric in medit file format.
@@ -2061,7 +2082,8 @@ LIBMMGS_EXPORT int  MMGS_loadAllSols(MMG5_pMesh mesh, MMG5_pSol *sol, const char
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
+LIBMMGS_EXPORT int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met,
+                                 const char *filename);
 
 /**
  * \brief Save one or more solutions in a solution file in medit file format.
@@ -2080,7 +2102,8 @@ LIBMMGS_EXPORT int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *fil
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveAllSols(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
+LIBMMGS_EXPORT int MMGS_saveAllSols(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                    const char *filename);
 
 /**
  * \brief Deallocate an array of solution fields
@@ -2115,7 +2138,7 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
  * \return 0 on failure, 1 on success
@@ -2144,11 +2167,8 @@ LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
- * are \ref MMG5_pSol.
- *
  * Here, \a your_mesh is a pointer to \ref MMG5_pMesh and \a your_metric and
- * \a your_level_set a pointer to \ref MMG5_pSol.
+ * \a your_level_set are pointers to \ref MMG5_pSol.
  *
  * \return 0 on failure, 1 on success
  *
@@ -2176,7 +2196,7 @@ LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
  * \return 0 on failure, 1 on success
@@ -2371,7 +2391,7 @@ LIBMMGS_EXPORT int MMGS_usage(char *prog);
 LIBMMGS_EXPORT int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
 
 /**
- * \brief Print the default parameters values.
+ * \brief Print the default parameter values.
  *
  * \param mesh pointer to the mesh structure.
  * \return 0 on failure, 1 on success.
@@ -2416,11 +2436,12 @@ LIBMMGS_EXPORT int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 LIBMMGS_EXPORT void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 /**
- * \brief Return adjacent elements of a triangle.
+ * \brief Return adjacent triangles of a triangle.
+ *
  * \param mesh pointer to the mesh structure.
  * \param kel triangle index.
  * \param listri pointer to the array of indices of the three adjacent
- * triangles of the elt \a kel (the index is 0 if there is no adjacent).
+ * triangles of triangle \a kel (the index is 0 if there is no adjacent triangle).
  * \return 1.
  *
  * Find the indices of the 3 adjacent elements of triangle \a
@@ -2439,7 +2460,7 @@ LIBMMGS_EXPORT void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 LIBMMGS_EXPORT int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]);
 
 /**
- * \brief Find adjacent elements of a triangle.
+ * \brief Find adjacent vertices of a triangle.
  *
  * \param mesh pointer to the mesh structure.
  * \param ip vertex index.
@@ -2463,20 +2484,23 @@ LIBMMGS_EXPORT int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int list
 LIBMMGS_EXPORT int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX]);
 
 /**
- * \brief Compute the real eigenvalues and eigenvectors of a symetric matrix
+ * \brief Compute the real eigenvalues and eigenvectors of a symmetric matrix
  *
- * \param m upper part of a symetric matric diagonalizable in |R
- * \param lambda array of the metric eigenvalues
- * \param vp array of the metric eigenvectors
+ * \param m upper part of a symmetric matrix diagonalizable in |R
+ * \param lambda array of eigenvalues
+ * \param vp array of eigenvectors
  *
  * \return the order of the eigenvalues
  *
- * Compute the real eigenvalues and eigenvectors of a symetric matrice m whose
+ * Compute the real eigenvalues and eigenvectors of a symmetric matrix m whose
  * upper part is provided (m11, m12, m13, m22, m23, m33 in this order).
+ *
  * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1], v[0,2] )
  * in C and to the eigenvector v(1,:) in fortran
+ *
  * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1], v[1,2] )
  * in C and to the eigenvector v(2,:) in fortran
+ *
  * lambda[2] is the eigenvalue associated to the eigenvector ( v[2][0], v[2,1], v[2,2] )
  * in C and to the eigenvector v(3,:) in fortran
  *
@@ -2507,7 +2531,7 @@ LIBMMGS_EXPORT void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 /**
  * \brief Clean data (triangles and edges) linked to isosurface.
  *
- * \param mesh pointer to mesh sructure
+ * \param mesh pointer to mesh structure
  *
  * \return 1 if successful, 0 otherwise.
  *
