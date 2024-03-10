@@ -190,9 +190,7 @@ Man pages are available inside the **doc/man** directory:
 Run the `make doc` command to build the Doxygen documentation, after running `cmake`
   with the option `-DBUILD_DOC=yes` if you did not already do so.
   You may wish to adapt `build/Doxyfile` to your liking.
-  * To see the **mmg2d** documentation, open the file **mmg/doc/mmg2d/html/index.html**,
-  * to see the **mmgs** documentation, open **mmg/doc/mmgs/html/index.html**, and
-  * ro see the **mmg3d** documentation, open **mmg/doc/mmg3d/html/index.html**.
+  * To see the **mmg** documentation, open the file **<build>/doc/index.html**.
 
 ## Platforms
 The **mmg** applications are tested on OS X and on most of the Linux platforms.
