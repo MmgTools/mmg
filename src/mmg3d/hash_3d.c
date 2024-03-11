@@ -240,7 +240,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
  *
  * \remark Adjacencies between prisms and tetra are not filled here.
  *
- * \warning check the hashtable efficiency
+ * \warning check the efficiency of the hash table
  */
 int MMG3D_hashPrism(MMG5_pMesh mesh) {
   MMG5_pPrism    pp,pp1;
@@ -1112,10 +1112,10 @@ int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int hsiz,MMG5_int hmax) {
 }
 
 /**
- * \param mesh pointer to he mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 otherwise
  *
- * Build hashtable for initial mesh edges.
+ * Build hash table for initial mesh edges.
  *
  */
 int MMG5_hGeom(MMG5_pMesh mesh) {
@@ -1291,7 +1291,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
 
   if  ( mesh->nprism && (ntmesh!=ntinit) ) {
     /* If a triangle at the interface between a prism and a tetra is not
-     * provided, the hashtable is used to recover from the prism a boundary tria
+     * provided, the hash table is used to recover from the prism a boundary tria
      * created by tetra */
     if ( ! MMG5_hashNew(mesh,&hash,0.51*ntmesh,1.51*ntmesh) ) return 0;
     tofree=1;
