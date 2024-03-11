@@ -47,16 +47,6 @@
  */
 
 /**
- * \defgroup API Application Programming Interface
- *
- * Mmg comes with three application programming interfaces (APIs), one
- * corresponding to each of the command-line programs. In total there are over
- * 360 API functions. You can find their declarations and descriptions in the
- * files listed above.
- *
- * Examples showing how to use these functions can be found under the "Related
- * Pages" tab.
- *
  *
  * \file mmg3d/libmmg3d.h
  * \ingroup API
