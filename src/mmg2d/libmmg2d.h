@@ -36,7 +36,13 @@
  * - To keep the genheader program working, don't break line between an enum
  *   name and the opening brace (it creates errors under windows)
  *
- * - Use the MMG2D_ prefix: the MMG5_ prefix will become obsolete.
+ * - Since Mmg version 5,
+ * -- data structures and parameters that are common between mmg3d, mmg2d
+ *    and mmgs use the MMG5_ prefix;
+ * -- API functions should have an MMG3D_, MMG2D_, or MMGS_ prefix,
+ *    depending on the library; and
+ * -- some MMG5_ API functions exists but they are common to the
+ *    three libraries.
  *
  */
 
@@ -57,7 +63,7 @@
  * triangles and quadrangles. Edges can also be represented. All of these \a
  * entities can have a \a reference: an integer value that can serve as a group
  * identifier. In addition mesh entities can have \a attributes such as
- * "required".
+ * "required" or "corner".
  *
  * Data defined on meshes can be for example functions that are meant for
  * level-set discretization, metric tensors that will govern edge lengths, and
@@ -86,7 +92,7 @@ extern "C" {
 #include "mmg/mmg2d/mmg2d_export.h"
 
 /**
- * Maximum array size when storing adjacent points (or ball) of a vertex.
+ * Maximum array size when storing adjacent vertices (or ball) of a vertex.
  */
 #define MMG2D_LMAX   1024
 
@@ -112,9 +118,9 @@ extern "C" {
     MMG2D_IPARAM_lag,               /*!< [-1/0/1/2], Enable Lagrangian motion */
     MMG2D_IPARAM_3dMedit,           /*!< [0/1/2], Read/write 2D mesh in 3D (Medit only). out if val=1 in/out if val=2 */
     MMG2D_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
-    MMG2D_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
+    MMG2D_IPARAM_noinsert,          /*!< [1/0], Avoid/allow vertex insertion */
     MMG2D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
-    MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
+    MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow vertex relocation */
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_xreg,              /*!< [0/1], Enable regularization by moving vertices */
@@ -123,7 +129,7 @@ extern "C" {
     MMG2D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
     MMG2D_IPARAM_numberOfMat,                /*!< [n], Number of materials in level-set mode */
     MMG2D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-    MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwriting of sizes at required points (advanced usage) */
+    MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwriting of sizes at required vertices (advanced usage) */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Threshold for angle detection */
     MMG2D_DPARAM_hmin,              /*!< [val], Minimal edge length */
     MMG2D_DPARAM_hmax,              /*!< [val], Maximal edge length */
@@ -138,12 +144,13 @@ extern "C" {
     MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   };
 
-/*----------------------------- functions header -----------------------------*/
+/*----------------------------- function headers -----------------------------*/
 /* Initialization functions */
 /* init structures */
 
 /**
- * \brief Initialize a mesh structure and optionally the associated solution and metric structures.
+ * \brief Initialize a mesh structure and optionally the associated solution and
+ * metric structures.
  *
  * \param starter dummy argument used to initialize the variadic argument list
  * \param ... variadic arguments.
@@ -160,12 +167,10 @@ extern "C" {
  * MMG2D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
- * MMG structures allocation and initialization.
- *
- * \remark No fortran interface to allow variadic arguments.
+ * \remark No fortran interface, to allow variadic arguments.
  *
  */
   LIBMMG2D_EXPORT int MMG2D_Init_mesh(const int starter,...);
@@ -498,10 +503,10 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Set the coordinates and reference of a single vertex.
  *
  * \param mesh pointer to the mesh structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param ref point reference.
- * \param pos position of the point in the mesh.
+ * \param c0 coordinate of the vertex along the first dimension.
+ * \param c1 coordinate of the vertex along the second dimension.
+ * \param ref vertex reference.
+ * \param pos position of the vertex in the mesh.
  * \return 1 on success, 0 in case of failure
  *
  * Set vertex of coordinates \a c0, \a c1 and reference \a ref
@@ -1098,11 +1103,11 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the coordinates and reference ref of the next vertex of a mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param c0 pointer to the coordinate of the point along the first dimension.
- * \param c1 pointer to the coordinate of the point along the second dimension.
- * \param ref pointer to the point reference.
- * \param isCorner pointer to the flag saying if point is corner.
- * \param isRequired pointer to the flag saying if point is required.
+ * \param c0 pointer to the coordinate of the vertex along the first dimension.
+ * \param c1 pointer to the coordinate of the vertex along the second dimension.
+ * \param ref pointer to the vertex reference.
+ * \param isCorner pointer to the flag saying if vertex is corner.
+ * \param isRequired pointer to the flag saying if vertex is required.
  * \return 1.
  *
  * This function retrieves the coordinates \a c0 and \a c1, and reference \a
@@ -1128,12 +1133,12 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the coordinates and reference of a specific vertex in the mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param c0 pointer to the coordinate of the point along the first dimension.
- * \param c1 pointer to the coordinate of the point along the second dimension.
- * \param ref pointer to the point reference.
- * \param isCorner pointer to the flag saying if point is corner.
- * \param isRequired pointer to the flag saying if point is required.
- * \param idx index of point to get.
+ * \param c0 pointer to the coordinate of the vertex along the first dimension.
+ * \param c1 pointer to the coordinate of the vertex along the second dimension.
+ * \param ref pointer to the vertex reference.
+ * \param isCorner pointer to the flag saying if vertex is corner.
+ * \param isRequired pointer to the flag saying if vertex is required.
+ * \param idx index of vertex to get.
  * \return 1.
  *
  * Get coordinates \a c0, \a c1 and reference \a ref of
@@ -1157,15 +1162,15 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \param mesh pointer to the mesh structure.
  * \param vertices pointer to the array of vertex coordinates.
- * The coordinates of the \f$i^{th}\f$ point are stored in
+ * The coordinates of the \f$i^{th}\f$ vertex are stored in
  * vertices[(i-1)*2]\@2.
  * \param refs pointer to the array of references.
- * The ref of the \f$i^th\f$ point is stored in refs[i-1].
+ * The ref of the \f$i^th\f$ vertex is stored in refs[i-1].
  * \param areCorners pointer to the array of flags saying if
- * points are corners.
- * areCorners[i-1]=1 if the \f$i^{th}\f$ point is corner.
- * \param areRequired pointer to the array of flags saying if points
- * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
+ * vertices are corners.
+ * areCorners[i-1]=1 if the \f$i^{th}\f$ vertex is corner.
+ * \param areRequired pointer to the array of flags saying if vertices
+ * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ vertex is required.
  * \return 1.
  *
  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
@@ -1714,13 +1719,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
  *
  * Read a mesh and 0 or 1 data fields in VTK vtp file format (.vtp extension). We
- * read only low-order points, edges, triangles and quadrangles.
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTPMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1738,13 +1743,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
  *
  * Read a mesh and a list of data fields in VTK vtp file format (.vtp extension). We
- * read only low-order points, edges, triangles and quadrangles.
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTPMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1763,13 +1768,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
  *
  * Read a mesh and 0 or 1 data fields in VTK vtu file format (.vtu extension). We
- * read only low-order points, edges, triangles and quadrangles.
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTUMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1787,13 +1792,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
  *
  * Read a mesh and a list of data fields in VTK vtu file format (.vtu extension). We
- * read only low-order points, edges, triangles and quadrangles.
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1812,13 +1817,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
  *
  * Read mesh and 0 or 1 data fields in VTK file format (.vtk extension). We
- * read only low-order points, edges, triangles and quadrangles.
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTKMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1836,13 +1841,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
  *
  * This function reads a mesh and a list of data fields in VTK file format (.vtk
- * extension). We read only low-order points, edges, triangles and quadrangles.
+ * extension). We read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1860,13 +1865,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (lack of
  * memory, file format...), 1 on success.
  *
  * This function reads a mesh and 0 or 1 data fields in MSH file format (.msh
- * extension). We read only low-order points, edges, triangles, and quadrangles.
+ * extension). We read only low-order vertices, edges, triangles, and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADMSHMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1884,13 +1889,13 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to a list of solution structures.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (lack of
  * memory, file format...), 1 on success.
  *
  * This function reads a mesh and all data fields from a file in MSH file format
- * (.msh extension). We read only low-order points, edges, triangles,
+ * (.msh extension). We read only low-order vertices, edges, triangles,
  * quadrangles, tetrahedra and prisms.
  *
  * \remark Fortran interface:
@@ -1935,7 +1940,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure or the NULL pointer.
  * \param sol pointer to the level-set structure or the NULL pointer.
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason (insufficient memory, file
  * format...), 1 on success.
@@ -1956,12 +1961,12 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solutions array
- * \param filename name of file.
+ * \param filename name of the file to load.
  *
  * \return 0 if the file is not found, -1 if failing for another reason
  * (insufficient memory, file format...), 1 on success.
  *
- * Load 1 or more solutions in a solution file at medit file format
+ * Load 1 or more solutions in a solution file in medit file format
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADALLSOLS(mesh,sol,filename,strlen0,retval)\n
@@ -2001,7 +2006,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and optionally one data field in MSH file format
@@ -2068,7 +2073,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and a list of data fields in Vtk file format (.vtk extension).
@@ -2089,7 +2094,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and 0 or 1 data fields in vtu Vtk file format (.vtu extension).
@@ -2110,7 +2115,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and a list of data fields in vtu Vtk file format (.vtu extension).
@@ -2131,7 +2136,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the solution structure.
- * \param filename name of file.
+ * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
  * This function writes a mesh and optionally one data field in polydata Vtk
@@ -2195,7 +2200,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \brief Save mesh data in a file whose format depends on the filename extension.
  *
  * \param mesh pointer to the mesh structure.
- * \param filename name of file to write.
+ * \param filename name of the file to write
  * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
@@ -2404,7 +2409,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
  * \brief Compute unit tensor according to the lengths of the
- * edges passing through a point.
+ * edges passing through a vertex.
  *
  * \param mesh pointer to the mesh structure
  * \param met pointer to the sol structure
@@ -2466,7 +2471,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * domains with different references, if it belongs to one triangle only or if
  * it is a singular edge (ridge or required).
  *
- * Append these edges to the list of edge.
+ * Append these edges to the list of edges.
  *
  * \warning reallocate the edge array and append the internal edges. This may
  * modify the behaviour of other functions.
@@ -2540,7 +2545,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param ip vertex index.
  * \param lispoi pointer to an array of size MMG2D_LMAX that will contain
  * the indices of adjacent vertices to the vertex \a ip.
- * \return nbpoi the number of adjacent points if success, 0 on failure.
+ * \return nbpoi the number of adjacent vertices if success, 0 on failure.
  *
  * Find the indices of the adjacent vertices of the vertex \a
  * ip.
@@ -2564,7 +2569,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \param start index of a triangle holding \a ip.
  * \param lispoi pointer to an array of size MMG2D_LMAX that will contain
  * the indices of adjacent vertices to the vertex \a ip.
- * \return nbpoi the number of adjacent points if success, 0 on failure.
+ * \return nbpoi the number of adjacent vertices if success, 0 on failure.
  *
  * Find the indices of the adjacent vertices of the vertex \a
  * ip of the triangle \a start.
@@ -2634,18 +2639,20 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
   LIBMMG2D_EXPORT int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2],int ied[2]);
 
 /**
- * \brief Compute the real eigenvalues and eigenvectors of a symetric matrix
+ * \brief Compute the real eigenvalues and eigenvectors of a symmetric matrix
  *
- * \param m upper part of a symetric matric diagonalizable in |R
+ * \param m upper part of a symMetric matrix diagonalizable in |R
  * \param lambda array of the metric eigenvalues
  * \param vp array of the metric eigenvectors
  *
  * \return the order of the eigenvalues
  *
- * This function computes the real eigenvalues and eigenvectors of a symetric matrix m
+ * This function computes the real eigenvalues and eigenvectors of a symmetric matrix m
  * whose upper part is provided (m11, m12, m22, in this order).
+ *
  * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1] )
  * in C and to the eigenvector v(1,:) in fortran
+ *
  * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1] )
  * in C and to the eigenvector v(2,:) in fortran
  *
@@ -2716,7 +2723,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 
 /**
- * \brief Set common pointer functions between mmgs and mmg2d to the matching mmg2d
+ * \brief Set common function pointers between mmgs and mmg2d to the matching mmg2d
  * functions.
  */
   LIBMMG2D_EXPORT void MMG2D_Set_commonFunc(void);

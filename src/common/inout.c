@@ -531,6 +531,7 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
   MMG5_pTetra pt;
   int         i;
   MMG5_int    k,aux;
+  double      area;
 
   if ( nref ) {
     fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
@@ -555,10 +556,11 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
       for(i=0 ; i<3 ; i++)
         ptt->edg[i] = 0;
 
-      if ( MMG2D_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
-                           mesh->point[ptt->v[2]].c) < 0.0 ) {
-        /* mesh->xt temporary used to count reoriented tetra*/
-        mesh->xt++;
+      area = MMG2D_quickarea(mesh->point[ptt->v[0]].c,
+                             mesh->point[ptt->v[1]].c,
+                             mesh->point[ptt->v[2]].c);
+      if ( area < 0.0 ) {
+        mesh->xt++;  /* mesh->xt temporarily used to count reoriented tetra*/
         aux = ptt->v[2];
         ptt->v[2] = ptt->v[1];
         ptt->v[1] = aux;
