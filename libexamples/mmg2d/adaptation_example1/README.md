@@ -1,4 +1,4 @@
-# Basic use of the **mmg2d** library to perform mesh adaptation
+# Basic use of the mmg2d library to perform mesh adaptation
 
 ## I/ Implementation
 To call the **mmg2d** library, you must:  

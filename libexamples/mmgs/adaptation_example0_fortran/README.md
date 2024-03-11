@@ -1,4 +1,4 @@
-# Basic use of the **mmgs** library for a **Fortran** call
+# Basic use of the mmgs library for a Fortran call
 
 ## I/ Implementation
 To call the **mmgs** library, you must:  

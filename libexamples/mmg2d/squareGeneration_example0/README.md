@@ -1,4 +1,4 @@
-# Basic use of the **mmg2d** library to perform mesh generation
+# Basic use of the mmg2d library to perform mesh generation
 
 ## I/ Implementation
 To call the **mmg2d** library, you must:  
