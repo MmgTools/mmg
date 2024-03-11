@@ -22,7 +22,13 @@
 */
 
 /**
- * Types
+ * \file common/libmmgtypes.h
+ * \ingroup API
+ * \brief Types used throughout the Mmg libraries
+ * \author Algiane Froehly (Inria/UBordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
  */
 #include <stdint.h>
 #include <stdarg.h>

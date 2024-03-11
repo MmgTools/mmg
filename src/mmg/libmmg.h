@@ -52,8 +52,8 @@
  * \file common/libmmg.h
  * \brief Wrapper for include files for the mmg library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Mark Potse (IMB, Université de Bordeaux)
  * \version 5
- * \date 01 2014
  * \copyright GNU Lesser General Public License.
  */
 
