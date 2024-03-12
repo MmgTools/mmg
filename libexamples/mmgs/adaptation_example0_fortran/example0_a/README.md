@@ -1,4 +1,4 @@
-# Basic use of the **mmgs** library for a **Fortran** call (adaptation test case)
+# Basic use of the mmgs library for a Fortran call (adaptation test case)
 
 ## I/ Implementation
 To call the **mmgs** library, you must:  

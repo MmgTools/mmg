@@ -48,7 +48,8 @@
 
 /**
  * \file mmg2d/libmmg2d.h
- * \brief API headers for the mmg2d library
+ * \ingroup API
+ * \brief API headers and documentation for the mmg2d library
  * \author Cecile Dobrzynski and Algiane Froehly (Bx INP/Inria/UBordeaux)
  * \version 5
  * \date 01 2014

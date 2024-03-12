@@ -48,7 +48,8 @@
 
 /**
  * \file mmgs/libmmgs.h
- * \brief API headers for the mmgs library
+ * \ingroup API
+ * \brief API headers and documentation for the mmgs library
  * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014

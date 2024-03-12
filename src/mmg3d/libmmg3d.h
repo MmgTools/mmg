@@ -47,8 +47,10 @@
  */
 
 /**
+ *
  * \file mmg3d/libmmg3d.h
- * \brief API headers for the mmg3d library
+ * \ingroup API
+ * \brief API headers and documentation for the mmg3d library, for volumetric meshes in 3D
  * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014

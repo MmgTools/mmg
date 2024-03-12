@@ -1,4 +1,4 @@
-# Example of basic use of library **libmmgs** for a level-set discretization test case
+# Example of basic use of library libmmgs for a level-set discretization test case
 
 ## I/ Implementation
   We read the mesh and level-set values at the mesh nodes and then, we discretize the implicit function and optimize the mesh.

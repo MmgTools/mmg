@@ -1,4 +1,4 @@
-# Basic use of the **mmgs** library for an adaptation testcase
+# Basic use of the mmgs library for an adaptation testcase
 
 ## I/ Implementation
 To call the **mmgs** library, you must:  

@@ -286,7 +286,7 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
  * toward the \a NULL pointer otherwise.
  * \param itdeg degraded elements.
  *
- * \return -1 if fail, he number of swap otherwise.
+ * \return -1 if fail, the number of swap otherwise.
  *
  * Internal edge flipping in the Lagrangian mode; only affects tetra marked with it
  *
