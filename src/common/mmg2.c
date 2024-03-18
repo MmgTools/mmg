@@ -345,12 +345,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   /* Initialize the max and min reference */
   refmax = 0;
 
-  if ( sizeof(MMG5_int) == 8 ) {
-    refmin = LONG_MAX;
-  }
-  else {
-    refmin = INT_MAX;
-  }
+  refmin = MMG5_INTMAX;
 
   /* Look for the max/min reference provided in material table */
   for( k = 0; k < mesh->info.nmat; k++ ) {
