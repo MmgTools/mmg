@@ -449,9 +449,10 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
- * \param typEntity type of solutions entities (vertices, triangles...).
+ * \param typEntity type of solutions entities (vertices, triangles, ..., 
+ *        see \ref MMG5_entities for possible values).
  * \param np number of solutions.
- * \param typSol type of solution (scalar, vectorial...).
+ * \param typSol type of solution (scalar, vectorial, ..., see \ref MMG5_type for possible values).
  * \return 0 on failure, 1 otherwise.
  *
  * Initialize an array of solution field: set dimension, types and number of
@@ -479,7 +480,7 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param nsols number of solutions per entity
  * \param nentities number of entities
  * \param typSol    Array of size nsol listing the type of the solutions
- *                  (scalar, vectorial...).
+ *                  (scalar, vectorial, ..., see \ref MMG5_type for possible values).
  * \return 0 on failure, 1 otherwise.
  *
  * Initialize an array of solutions field defined at vertices: set dimension,
@@ -1059,9 +1060,11 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
- * \param typEntity pointer to the type of entities to which solutions are applied.
+ * \param typEntity pointer to the type of entities to which solutions are applied
+ *        (see \ref MMG5_entities for possible values).
  * \param np pointer to the number of solutions.
- * \param typSol pointer to the type of the solutions (scalar, vectorial...)
+ * \param typSol pointer to the type of the solutions
+ *               (scalar, vectorial, ..., see \ref MMG5_type for possible values)
  * \return 1.
  *
  * \remark Fortran interface:
@@ -1083,7 +1086,7 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param sol pointer to an array of sol structure.
  * \param nentities pointer to the number of entities.
  * \param typSol array of size MMG5_NSOL_MAX to store type of each solution
- * (scalar, vector..).
+ *        (scalar, vectorial, ..., see \ref MMG5_type for possible values).
  *
  * \return 1.
  *
