@@ -66,13 +66,6 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
   int            refdirh,refdirnh;
   int8_t         i,j,jface;
 
-  /* LibElas is not compatible with int64: Check for int32 overflow */
-  if ( mesh->np > INT_MAX || mesh->ne > INT_MAX ) {
-    fprintf(stderr,"\n  ## Error: %s: impossible to call elasticity library"
-            " with int64 integers.\n",__func__);
-    return NULL;
-  }
-
   nlay = 20;
   refdirh = 0;
   refdirnh = 1;
@@ -400,6 +393,13 @@ int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_in
 int MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst        *lsst;
   MMG5_int    npf,*invperm;
+
+  /* LibElas is not compatible with int64: Check for int32 overflow */
+  if ( mesh->np > INT_MAX || mesh->ne > INT_MAX || sizeof(MMG5_int) == 8 ) {
+    fprintf(stderr,"\n  ## Error: %s: impossible to call elasticity library"
+            " with int64 integers.\n",__func__);
+    return 0;
+  }
 
   /* Creation of the data structure for the submesh */
   lsst    = LS_init(mesh->dim,mesh->ver,P1,1);
