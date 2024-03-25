@@ -172,7 +172,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     }
     MMG_FREAD(&mesh->ver,MMG5_SW,1,inm);
     if(iswp) mesh->ver = MMG5_swapbin(mesh->ver);
-    while(fread(&binch,4,1,inm)!=0 && binch!=54 ) {
+    while(fread(&binch,MMG5_SW,1,inm)!=0 && binch!=54 ) {
       if(iswp) binch=MMG5_swapbin(binch);
       if(binch==54) break;
       if(!bdim && binch==3) {  //Dimension
