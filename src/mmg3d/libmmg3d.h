@@ -355,9 +355,12 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \brief Initialize a solution field.
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
- * \param typEntity type of solutions entities (vertices, triangles...).
+ * \param typEntity type of entities on which the solution is defined (vertices, triangles, ...).
+ *        See \ref MMG5_entities for the defined entity types. Currently only \ref MMG5_Vertex
+ *        is supported.
  * \param np number of solutions.
- * \param typSol type of solution (scalar, vectorial...).
+ * \param typSol type of solution (scalar, vectorial, ...,
+ *        see \ref MMG5_type for possible values).
  * \return 0 if failed, 1 otherwise.
  *
  * Initialize a solution field: set dimension, types and number of data.
@@ -382,7 +385,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param nsols number of solutions per entity
  * \param nentities number of vertices
  * \param typSol Array of size nsols listing the type of the solutions
- *                  (scalar, vectorial...).
+ *                 (scalar, vectorial, ..., see \ref MMG5_type for possible values).
  * \return 0 if failed, 1 otherwise.
  *
  * Initialize a solution field defined at vertices: set dimension,
@@ -1327,7 +1330,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_inputParamName(MMG5_pMesh mesh, const char* fpara
  * \param mesh pointer to the mesh structure.
  *
  * To mark as ended a mesh given without using the API functions (for example,
- * mesh given by mesh->point[i] = 0 ...). This function performs veritications,
+ * mesh given by mesh->point[i] = 0 ...). This function performs verifications,
  * e.g. to make sure that all tetrahedra are consistently oriented.
  *
  * \remark Fortran interface:
@@ -1526,10 +1529,10 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
  * \param typEntity pointer to the type of entities to which solutions
- * are applied.
+ *        are applied (see \ref MMG5_entities for possible values)
  * \param np pointer to the number of solutions.
- * \param typSol pointer to the type of the solutions (scalar, vectorial,
- * ...)
+ * \param typSol pointer to the type of the solutions
+ *        (scalar, vectorial, ..., see \ref MMG5_type for possible values)
  * \return 1.
  *
  * \remark Fortran interface:
@@ -1552,7 +1555,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \param nsols pointer to the number of solutions per entity.
  * \param nentities pointer to the number of solutions.
  * \param typSol array of size MMG5_NSOLS_MAX to store type of each solution
- * (scalar, vector..).
+ *        (scalar, vectorial, ..., see \ref MMG5_type for possible values).
  *
  * \return 1.
  *
@@ -2006,11 +2009,16 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \brief Get the quality measure of a single tetrahedron in the mesh.
  *
  * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
- * \param k index of the tetra for which we want to get the quality.
- * \return the computed quality or 0. if fail.
+ * \param met pointer to the metric structure (may be NULL for an isotropic metric).
+ * \param k index of the tetrahedron for which we want to get the quality (from 1 to
+ *        the number of tetrahedra included)
+ * \return the computed quality or 0 in case of failure.
  *
- * Get quality of tetra \a k.
+ * This function returns the quality measure of tetrahedron \a k. Quality values
+ * range from 0 (degenerate) to 1 (best attainable). The function returns 0
+ * if the tetrahedron is flat or has a negative volume, and also if \a k is out
+ * of range. In the latter case it will also print a diagnostic message to
+ * standard output.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETRAHEDRONQUALITY(mesh,met,k,retval)\n
@@ -2020,7 +2028,7 @@ LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k);
+  LIBMMG3D_EXPORT double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k);
 
 /**
  * \brief Get the next element of a scalar solution structure defined at vertices.

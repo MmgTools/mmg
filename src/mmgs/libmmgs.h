@@ -300,7 +300,8 @@ LIBMMGS_EXPORT int  MMGS_Set_inputParamName(MMG5_pMesh mesh, const char* fparami
  *
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
- * \param typEntity types of solution entities (vertices, triangles...).
+ * \param typEntity types of solution entities (vertices, triangles, ...
+ *        see \ref MMG5_entities for possible values).
  * \param np number of solutions.
  * \param typSol type of solution (scalar, vectorial, ..., see \ref MMG5_type for possible values)
  * \return 0 on failure, 1 otherwise.
@@ -1131,6 +1132,7 @@ LIBMMGS_EXPORT int  MMGS_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* n
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
  * \param typEntity pointer to the type of entities to which solutions are applied.
+ *        (see \ref MMG5_entities for possible values)
  * \param np pointer to the number of elements in the solution.
  * \param typSol pointer to the type of the solution (\ref MMG5_Scalar, \ref MMG5_Vector,
  *    \ref MMG5_Tensor, \ref MMG5_Notype)

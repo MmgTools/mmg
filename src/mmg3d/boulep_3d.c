@@ -39,6 +39,9 @@
 extern MMG5_Info  info;
 
 /**
+ * \brief Given a vertex and a tetrahedron, find all tetrahedra in the ball of
+ * this vertex.
+ *
  * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetrahedra.
  * \param ip local index of the point in the tetrahedra \a start.
@@ -47,8 +50,8 @@ extern MMG5_Info  info;
  * \return 0 if fail and the number of the tetra in the ball otherwise.
  *
  * Fill the volumic ball (i.e. filled with tetrahedra) of point \a ip in tetra
- * \a start. Results are stored under the form \f$4*kel + jel\f$, kel = number
- * of the tetra, jel = local index of p within kel.
+ * \a start. Results are stored in the form \f$4*kel + jel\f$, kel = number
+ * of tetrahedra, jel = local index of p within kel.
  *
  */
 int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, int64_t * list){

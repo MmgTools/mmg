@@ -305,10 +305,10 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
  *
  * Reset mesh->info.isoref vertex and tetra references to 0.
  *
- * \warning to improve: for now, entities linked to the old ls (corners,required
+ * \warning to improve: for now, entities linked to the old ls (corners, required
  * points, normals/tangents, triangles and edges) are deleted in loadMesh. It
- * would be better to analyze wich entities must be keeped and which one must be
- * deleted depending on the split/nosplit infos.
+ * would be better to analyze wich entities must be kept and which ones must be
+ * deleted depending on the split/nosplit info.
  */
 int MMG3D_resetRef_ls(MMG5_pMesh mesh) {
   MMG5_pTetra     pt;
@@ -714,7 +714,7 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
+        fprintf(stderr,"  ## Warning: %s: snapping value at vertex %" MMG5_PRId "; "
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]) < MMG5_EPSD ) ?
