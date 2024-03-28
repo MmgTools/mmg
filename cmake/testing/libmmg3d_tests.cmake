@@ -215,6 +215,11 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt"
     "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"
     )
+  IF (${MMG5_INT} MATCHES int64_t)
+    SET(passElasRegex "## Error: MMG5_velextLS: impossible to call elasticity library with int64 integers")
+    SET_PROPERTY(TEST libmmg3d_example4
+      PROPERTY PASS_REGULAR_EXPRESSION "${passElasRegex}")
+  ENDIF ()
 ENDIF ()
 
 ADD_TEST(NAME libmmg3d_example6_io_0
