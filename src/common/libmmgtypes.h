@@ -386,7 +386,7 @@ typedef MMG5_Quad * MMG5_pQuad;
  *
  * \brief Structure to store tetrahedra of an MMG mesh.
  *
- * \remark Numbering convention
+ * \remark The numbering conventions are illustrated below. Face i lies opposite to vertex i.
  * \verbatim
  *      Vertices                     Edges                       Faces           *
  *           3                          .                           .            *
@@ -410,8 +410,9 @@ typedef struct {
   MMG5_int ref; /*!< Reference of the tetrahedron */
   MMG5_int base;
   MMG5_int mark; /*!< Used for delaunay */
-  MMG5_int xt; /*!< Index of the surface \ref MMG5_xTetra associated to
-                 the tetrahedron*/
+  MMG5_int xt; /*!< Index of the surface \ref MMG5_xTetra associated to the
+                 tetrahedron (only for tetrahedra that are adjacent to
+                 surfaces) */
   MMG5_int flag;
   int16_t  tag;
 } MMG5_Tetra;
