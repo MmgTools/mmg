@@ -36,7 +36,7 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 if fail (computed bounding box too small).
  *
  * Compute the mesh bounding box and fill the \a min, \a max and \a delta fields
@@ -78,7 +78,7 @@ int MMG5_boundingBox(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param sethmin 1 if hmin is setted by the user.
  * \param sethmax 1 if hmax is setted by the user.
  *
@@ -107,7 +107,7 @@ void MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if fail, 1 if succeed
  *
  * Check that hmin (resp. hmax) is not user setted if it is negative.
@@ -135,8 +135,8 @@ int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
 }
 
 /**
- * \param met pointer toward metric.
- * \param ip pointer toward global index of point on which metric has to be truncated
+ * \param met pointer to metric.
+ * \param ip pointer to global index of point on which metric has to be truncated
  * \param isqhmin inverse square of hmin (min edge size)
  * \param isqhmax inverse square of hmax (max edge size)
  *
@@ -192,8 +192,8 @@ int MMG5_truncate_met3d(MMG5_pSol met, MMG5_int ip, double isqhmin, double isqhm
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param dd scaling value.
  *
  * \return 1 if success, 0 if fail.
@@ -246,8 +246,8 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param dd scaling value.
  *
  * \return 1 if success, 0 if fail.
@@ -287,8 +287,8 @@ int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  *
  * \return 0 if fail, 1 if succeed.
  *
@@ -353,8 +353,8 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  *
  * \return 0 if fail, 1 if succeed.
  *
@@ -441,8 +441,8 @@ int MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  *
  * \return 0 if fail, 1 if succeed.
  *
@@ -547,10 +547,10 @@ int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a metric
- * \param sol pointer toward a solution structure (level-set or displacement).
- * \param dd pointer toward the scaling value (to fill)
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a metric
+ * \param sol pointer to a solution structure (level-set or displacement).
+ * \param dd pointer to the scaling value (to fill)
  *
  * \return 1 if success, 0 if fail.
  *
@@ -635,9 +635,9 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
 
 }
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param sol pointer toward a solution structure (level-set or displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param sol pointer to a solution structure (level-set or displacement).
  *
  * \return 1 if success, 0 if fail (computed bounding box too small
  * or one af the anisotropic input metric is not valid).
@@ -677,9 +677,9 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a metric.
- * \param sol pointer toward a solution structure (level-set or displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a metric.
+ * \param sol pointer to a solution structure (level-set or displacement).
  *
  * \return 1.
  *

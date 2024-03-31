@@ -32,6 +32,8 @@
 
 @DEF_MMG5_INT@ /*!< Integer type for C */
 
+@DEF_MMG5_INTMAX@ /*!< INT_MAX or LONG_MAX depending on MMG5_INT size */
+
 @DEF_MMG5_PRId@ /*!< Printing format for MMG5_int type */
 
 @DEF_MMG_SWPBIN@ /*!< MMG5_swapbin function for MMG5_int */

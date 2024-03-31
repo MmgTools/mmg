@@ -114,7 +114,7 @@ int MMG5_devangle(double* n1, double *n2, double crit)
 }
 
 /**
- * \param mesh pointer toward the mesh stucture.
+ * \param mesh pointer to the mesh stucture.
  * \param ip1 first point of face.
  * \param ip2 second point of face.
  * \param ip3 third point of face.
@@ -150,7 +150,7 @@ inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
 }
 
 /**
- * \param mesh pointer toward the mesh stucture.
+ * \param mesh pointer to the mesh stucture.
  * \param pt triangle for which we compute the surface.
  * \return the computed surface
  *
@@ -170,7 +170,7 @@ inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
   return n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 }
 /**
- * \param mesh pointer toward the mesh stucture.
+ * \param mesh pointer to the mesh stucture.
  * \param ip1 first point of face.
  * \param ip2 second point of face.
  * \param ip3 third point of face.
@@ -198,8 +198,8 @@ inline int MMG5_norpts(MMG5_pMesh mesh,MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,d
 }
 
 /**
- * \param mesh pointer toward the mesh stucture.
- * \param pt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh stucture.
+ * \param pt pointer to the triangle structure.
  * \param n pointer to store the computed normal.
  * \return 1
  *
@@ -456,7 +456,7 @@ inline int MMG5_test_rmtr() {
 }
 
 /**
- * \param n pointer toward the vector that we want to send on the third vector
+ * \param n pointer to the vector that we want to send on the third vector
  * of canonical basis.
  * \param r computed rotation matrix.
  *
@@ -553,8 +553,8 @@ int MMG5_test_rotmatrix() {
 }
 
 /**
- * \param m pointer toward a 3x3 symetric matrix
- * \param mi pointer toward the computed 3x3 matrix.
+ * \param m pointer to a 3x3 symetric matrix
+ * \param mi pointer to the computed 3x3 matrix.
  *
  * Invert \a m (3x3 symetric matrix) and store the result on \a mi
  *
@@ -816,8 +816,8 @@ inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param fileName pointer toward the file name.
+ * \param mesh pointer to the mesh structure.
+ * \param fileName pointer to the file name.
  *
  * Debug function (not use in clean code): write mesh->tria structure in file.
  *
@@ -882,7 +882,7 @@ size_t MMG5_memSize (void) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * Set the memMax value to its "true" value if memory asked by
  * user. Here the MMG5_MEMPERCENT coef is already applied on memMax.
@@ -941,7 +941,7 @@ inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
 
 /**
  * \param point Pointer toward the points array
- * \param v pointer toward the point indices
+ * \param v pointer to the point indices
  *
  * \return the oriented volume of tetra
  *
@@ -986,7 +986,7 @@ double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Mark all mesh vertices as unused.
  *
@@ -1008,7 +1008,7 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param delPt function to call to delete point.
  *
  * Mark the mesh vertices that belong to triangles or quadrangles as used (for
@@ -1062,7 +1062,7 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG5_int)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param nsd subdomain index.
  * \param delElt function to call to delete elt.
  *

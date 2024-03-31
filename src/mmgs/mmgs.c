@@ -52,8 +52,8 @@ static void MMG5_endcod(void) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \return 1.
  *
  * Read local parameters file. This file must have the same name as
@@ -201,7 +201,7 @@ static int MMGS_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
  * Write a DEFAULT.mmg3d file containing the default values of parameters that
@@ -253,9 +253,9 @@ int MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \param sol pointer toward a sol structure (metric).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a sol structure (metric).
+ * \param sol pointer to a sol structure (metric).
  *
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we

@@ -261,7 +261,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if fail (lack of memory), 1 otherwise.
  *
  * Clean the mesh structure when we just call the MMG2D_Free_Triangles and

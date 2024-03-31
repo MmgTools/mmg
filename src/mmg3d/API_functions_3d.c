@@ -204,7 +204,7 @@ int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param np number of vertices.
  * \param ne number of tetrahedra.
  * \param nprism number of prisms.
@@ -2235,12 +2235,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,MMG5_int val
     MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
     MMG5_int inival;
-    if ( sizeof(MMG5_int) == 8 ) {
-      inival = LONG_MAX;
-    }
-    else {
-      inival = INT_MAX;
-    }
+    inival = MMG5_INTMAX;
 
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
@@ -2535,8 +2530,8 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
   return 1;
 }
 
-int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,int split,MMG5_int rin,MMG5_int rout) {
-  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,int split,MMG5_int rmin,MMG5_int rplus) {
+  return MMG5_Set_multiMat(mesh,sol,ref,split,rmin,rplus);
 }
 
 int MMG3D_Set_lsBaseReference(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int br){

@@ -174,14 +174,14 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param end tetra at which we stop the travel
  * \param na edge vertex
  * \param nb edge vertex
  * \param piv global index of the pivot to set the sense of travel
- * \param iel pointer toward the last element of the shell
- * \param iopp pointer toward the ending boundary face of the shell
+ * \param iel pointer to the last element of the shell
+ * \param iopp pointer to the ending boundary face of the shell
  *
  * \return -1 if fail, \a piv otherwise.
  *
@@ -230,7 +230,7 @@ MMG5_int MMG3D_unfold_shell(MMG5_pMesh  mesh,MMG5_int start,MMG5_int end, MMG5_i
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param k index of the starting tetra.
  * \param iface local index of the starting face in the tetra \a k.
  * \param ideg local index of the starting edge in the face \a iface.
@@ -354,7 +354,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param na edge vertex
  * \param nb edge vertex
@@ -420,7 +420,7 @@ int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, 
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param ia local index of edge that must be updated
  * \param tag new edge tag
@@ -490,14 +490,14 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *t
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element in which we collapse.
  * \param iface face through wich we perform the collapse
  * \param iedg edge to collapse (in local face num)
- * \param listv pointer toward the list of the tetra in the ball of \a p0.
+ * \param listv pointer to the list of the tetra in the ball of \a p0.
  * \param ilistv number of tetra in the ball of \a p0.
- * \param lists pointer toward the surfacic ball of \a p0.
+ * \param lists pointer to the surfacic ball of \a p0.
  * \param ilists number of tetra in the surfacic ball of \a p0.
  * \param refmin reference of one of the two subdomains in presence
  * \param refplus reference of the other subdomain in presence
@@ -989,7 +989,7 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,MMG5_int np, MMG5_int 
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param na edge vertex
  * \param nb edge vertex
@@ -1059,7 +1059,7 @@ MMG5_int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param ia local index of edge that must be updated
  * \param tag new edge tag
@@ -1132,9 +1132,9 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- * \param list pointer toward the ball of the point
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
+ * \param list pointer to the ball of the point
  * \param ilist number of elements in the ball of the point
  * \param indq local index of the point on which we collapse
  * \param typchk type of check performed depending on the remeshing step

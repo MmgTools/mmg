@@ -37,8 +37,8 @@
 extern uint8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param k triangle index
  * \param i local index of the edge to split
  *
@@ -230,7 +230,7 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
 }
 
 /**
- * \parma mesh pointer toward the mesh
+ * \parma mesh pointer to the mesh
  * \param k index of the tria to split
  * \param i local index of the edge to split
  * \param ip global index of the new point
@@ -332,8 +332,8 @@ int MMG2D_split1b(MMG5_pMesh mesh,MMG5_int k,int8_t i,MMG5_int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  * \param k triangle index
  * \param vx list of new point indices for each edge
  *
@@ -377,8 +377,8 @@ int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int k, MMG5_int vx[3])
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  * \param k triangle index
  * \param vx list of new point indices for each edge
  *
@@ -443,8 +443,8 @@ int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int k, MMG5_int vx[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  * \param k triangle index
  * \param vx list of new point indices for each edge
  *
@@ -492,8 +492,8 @@ int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int k, MMG5_int vx[3])
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  * \param k triangle index
  * \param vx list of new point indices for each edge
  *
@@ -579,8 +579,8 @@ int MMG2D_split2(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int k, MMG5_int vx[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  * \param k triangle index
  * \param vx list of new point indices for each edge
  *
@@ -617,8 +617,8 @@ int MMG2D_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int k, MMG5_int vx[3])
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the metric
  * \param k triangle index
  * \param vx list of new point indices for each edge
  *
@@ -709,7 +709,7 @@ int MMG2D_split3(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int k, MMG5_int vx[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param k index of the tria to split
  * \param ip global index of the new point
  *

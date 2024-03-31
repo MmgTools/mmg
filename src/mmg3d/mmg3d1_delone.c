@@ -47,16 +47,16 @@ int8_t  ddb;
 #define MMG3D_LFILTL_DEL    0.2
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k index of tetra in which we work.
  * \param imax index in \a k of edge that we consider for split.
  * \param lmax length of edge \a imax.
  * \param lmaxtet length of largest edge of tetra \a k.
  * \param 1 if we want to check tetra with 4 ridge metrics.
  * \param ifilt pointer to store the number of vertices filtered by the PROctree.
- * \param ns pointer toward count of splits (has to be updated)
+ * \param ns pointer to count of splits (has to be updated)
  * \param warn pointer to store a flag that warn the user in case of
  * reallocation error.
  * \param countMemFailure number of memory errors (to update)
@@ -318,9 +318,9 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k index of tetra in which we work.
  * \param imin index in \a k of edge that we consider for split.
  * \param lmin length of edge \a imax.
@@ -329,8 +329,8 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
  * \param lmaxtet length of largest edge of tetra \a k.
  * \param 1 if we want to check tetra with 4 ridge metrics.
  * \param ifilt pointer to store the number of vertices filtered by the PROctree.
- * \param ns pointer toward count of splits (has to be updated)
- * \param nc pointer toward count of collapses (has to be updated)
+ * \param ns pointer to count of splits (has to be updated)
+ * \param nc pointer to count of collapses (has to be updated)
  * \param warn pointer to store a flag that warn the user in case of
  * reallocation error.
  *
@@ -403,9 +403,9 @@ int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param ne number of elements.
  * \param ifilt pointer to store the number of vertices filtered by the PROctree.
  * \param ns pointer to store the number of vertices insertions.
@@ -550,9 +550,9 @@ int MMG5_adpsplcol(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Mesh optimization during insertion phase.
@@ -623,9 +623,9 @@ int MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param warn set to 1 if we can't insert point due to lack of memory.
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
@@ -740,9 +740,9 @@ int MMG5_adpdel(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* wa
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Mesh optimization for LES computation (improve the element skewness).
@@ -834,9 +834,9 @@ int MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   return 1;
 }
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Mesh optimization using egde swapping and point relocation.
@@ -941,9 +941,9 @@ int MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param permNodGlob if provided, strore the global permutation of nodes
  * \return 0 if failed, 1 otherwise.
  *
@@ -1017,8 +1017,8 @@ int MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param permNodGlob if provided, strore the global permutation of nodes
  * \return 0 if failed, 1 if success.
  *

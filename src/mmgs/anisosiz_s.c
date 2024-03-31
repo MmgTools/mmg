@@ -40,8 +40,8 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param it index of the triangle in which we work.
  * \param ip index of the point on which we want to compute the metric in \a it.
  * \return 1 if success, 0 otherwise.
@@ -149,8 +149,8 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param it index of the triangle in which we work.
  * \param ip index of the point on which we want to compute the metric in \a it.
  * \return 1 if success, 0 otherwise.
@@ -339,8 +339,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param it index of the triangle in which we work.
  * \param ip index of the point on which we want to compute the metric in \a it.
  * \return 1 if success, 0 otherwise.
@@ -512,7 +512,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param p0 starting point
  * \param list ball of \a p0
  * \param ilist number of tria in the ball of \a p0
@@ -580,8 +580,8 @@ int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int *list,int ilis
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param it index of the triangle in which we work.
  * \param ip index of the point on which we want to compute the metric in \a it.
  * \return 1 if success, 0 otherwise.
@@ -676,8 +676,8 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int it,int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
  * \return 0 if fail, 1 otherwise.
@@ -710,8 +710,8 @@ int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np,double me[6]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric stucture.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric stucture.
  * \return 0 if fail, 1 otherwise.
  *
  * Define size at points by intersecting the surfacic metric and the
@@ -824,8 +824,8 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 1
  *
  *

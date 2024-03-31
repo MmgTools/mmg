@@ -36,7 +36,7 @@
 #include "inlined_functions_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param dim matrix size.
  * \param m matrix array.
  * \param lambda eigenvalues array.
@@ -82,7 +82,7 @@ void MMG5_eigenvmat_buildsym(MMG5_pMesh mesh,int8_t dim,double m[],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param m matrix array.
  * \param dim matrix size.
  * \param lambda eigenvalues array.
@@ -130,7 +130,7 @@ void MMG5_eigenvmat_buildnonsym(MMG5_pMesh mesh,int8_t dim,double m[],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param m matrix array.
  * \param lambda eigenvalues array.
  * \param v double array of eigenvectors.
@@ -150,7 +150,7 @@ int MMG5_eigenvmatsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param m matrix array.
  * \param lambda eigenvalues array.
  * \param v double array of eigenvectors.
@@ -170,7 +170,7 @@ int MMG5_eigenvmatsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param m matrix array.
  * \param lambda eigenvalues array.
  * \param v double array of eigenvectors.
@@ -195,7 +195,7 @@ int MMG5_eigenvmatnonsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[]
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param m matrix array.
  * \param lambda eigenvalues array.
  * \param v double array of eigenvectors.
@@ -220,7 +220,7 @@ int MMG5_eigenvmatnonsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[]
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param dim matrix size.
  * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
  * \param m input matrix array.
@@ -285,7 +285,7 @@ void MMG5_sort_eigenv( int8_t dim,double *lambda,double *vp,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param mex test matrix array.
  * \param lambdaex exact eigenvalues array.
  * \param vpex double array of exact eigenvectors.
@@ -362,7 +362,7 @@ int MMG5_test_eigenvmatsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param mex test matrix array.
  * \param lambdaex exact eigenvalues array.
  * \param vpex double array of exact right eigenvectors.
@@ -440,7 +440,7 @@ int MMG5_test_eigenvmatnonsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param mex test matrix array.
  * \param lambdaex exact eigenvalues array.
  * \param vpex double array of exact eigenvectors.
@@ -520,7 +520,7 @@ int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param mex test matrix array.
  * \param lambdaex exact eigenvalues array.
  * \param vpex double array of exact right eigenvectors.
@@ -584,7 +584,7 @@ int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param t tangent at the ridge point.
  * \param n normal at the ridge point.
  * \param dtan metric size along the tangent direction.
@@ -622,10 +622,10 @@ MMG5_buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param m pointer toward the first metric to intersect.
- * \param n pointer toward the second metric to intersect.
- * \param mr pointer toward the computed intersected metric.
+ * \param mesh pointer to the mesh structure.
+ * \param m pointer to the first metric to intersect.
+ * \param n pointer to the second metric to intersect.
+ * \param mr pointer to the computed intersected metric.
  * \return 1.
  *
  * Compute the intersected (2 x 2) metric between metrics \a m and \a n,
@@ -653,8 +653,8 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param np0 index of edge's extremity.
  * \param ux distance \f$[p0;p1]\f$ along x axis.
  * \param uy distance \f$[p0;p1]\f$ along y axis.
@@ -734,8 +734,8 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param np0 index of edge's extremity.
  * \param nt normal direction at the ridge point.
  * \param mr computed metric tensor.
@@ -801,9 +801,9 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,double nt[3],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param m pointer toward a \f$(2x2)\f$ metric.
- * \param n pointer toward a \f$(2x2)\f$ metric.
+ * \param mesh pointer to the mesh structure.
+ * \param m pointer to a \f$(2x2)\f$ metric.
+ * \param n pointer to a \f$(2x2)\f$ metric.
  * \param mr computed \f$(2x2)\f$ metric.
  * \return 0 if fail, 1 otherwise.
  *
@@ -911,9 +911,9 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param m pointer toward a \f$(3x3)\f$ metric.
- * \param n pointer toward a \f$(3x3)\f$ metric.
+ * \param mesh pointer to the mesh structure.
+ * \param m pointer to a \f$(3x3)\f$ metric.
+ * \param n pointer to a \f$(3x3)\f$ metric.
  * \param mr computed \f$(3x3)\f$ metric.
  * \return 0 if fail, 1 otherwise.
  *
@@ -953,7 +953,7 @@ int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Test the intersection of (2 x 2) metrics.
@@ -1038,7 +1038,7 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Test the intersection of (3 x 3) metrics.
@@ -1123,8 +1123,8 @@ int MMG5_test_intersecmet33(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
  * \param n normal or tangent at point np.

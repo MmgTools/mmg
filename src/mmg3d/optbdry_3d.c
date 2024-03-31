@@ -35,8 +35,8 @@
 #include "mmg3dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k   index of a tetra
  *
  * \return 1 if we move one of the vertices, 0 otherwise.
@@ -148,8 +148,8 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k   index of a tetra
  * \param i   index of point to delete in tetra \a k.
  *
@@ -206,9 +206,9 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k   index of a tetra
  * \param i   index of point to delete in tetra \a k.
  *
@@ -246,9 +246,9 @@ int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k   index of a tetra
  *
  * \return 1 if success, 0 if fail.

@@ -38,9 +38,9 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param pt pointer toward the triangle structure.
- * \param pb pointer toward the computed Bezier structure.
+ * \param mesh pointer to the mesh structure.
+ * \param pt pointer to the triangle structure.
+ * \param pb pointer to the computed Bezier structure.
  * \param ori triangle orientation (unused but here for compatibility
  * with the MMG5_bezierCP interface).
  * \return 1.
@@ -194,7 +194,7 @@ int MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,
 }
 
 /**
- * \param pb pointer toward the Bezier structure.
+ * \param pb pointer to the Bezier structure.
  * \param uv coordinates of the point in the parametric space.
  * \param o computed coordinates of the point in the real space.
  * \param no computed normal.

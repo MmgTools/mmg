@@ -35,9 +35,9 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param adjt pointer toward the adjacency table of the surfacic mesh.
- * \param hash pointer toward the edge hash table.
+ * \param mesh pointer to the mesh structure.
+ * \param adjt pointer to the adjacency table of the surfacic mesh.
+ * \param hash pointer to the edge hash table.
  * \param chkISO flag to say if we check ISO references
  * (so if we come from mmg3d).
  * \return 1 if success, 0 otherwise.
@@ -271,8 +271,8 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param hash pointer toward the hash table to fill.
+ * \param mesh pointer to the mesh.
+ * \param hash pointer to the hash table to fill.
  * \param ia first vertex of face to hash.
  * \param ib second vertex of face to hash.
  * \param ic third vertex of face to hash.
@@ -332,8 +332,8 @@ MMG5_int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,M
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward the hash table of edges.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
  * \param k index of point along the edge.
@@ -389,8 +389,8 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_in
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward the hash table of edges.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
  * \param k new index of point along the edge.
@@ -427,8 +427,8 @@ int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward the hash table of edges.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
  * \param tag edge tag
@@ -488,7 +488,7 @@ int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int1
 }
 
 /**
- * \param hash pointer toward the hash table of edges.
+ * \param hash pointer to the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.
  * \return the index of point stored along \f$[a;b]\f$.
@@ -520,8 +520,8 @@ MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward the hash table of edges.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to the hash table of edges.
  * \param hsiz initial size of hash table.
  * \param hmax maximal size of hash table.
  * \return 1 if success, 0 if fail.

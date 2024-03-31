@@ -1,4 +1,4 @@
-# Basic use of the **mmg** library for an adaptation testcase for Fortran users
+# Basic use of the mmg library for an adaptation testcase for Fortran users
 
 ## I/ Implementation
 To call the **mmg** library, you must:  

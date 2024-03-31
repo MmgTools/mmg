@@ -348,10 +348,10 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k element index.
- * \param vx pointer toward table of edges to split.
+ * \param vx pointer to table of edges to split.
  * \return 1.
  *
  * Find acceptable position for splitting.
@@ -628,8 +628,8 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * \return -1 if failed or number of new points.
  *
@@ -809,8 +809,8 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \return 1 if success, 0 if strongly fail.
  *
  * Mesh adaptation -- new version of mmg2d1.c

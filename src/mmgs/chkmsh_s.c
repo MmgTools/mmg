@@ -37,7 +37,7 @@
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param severe level of performed check
  * \param base unused argument.
  * \return 0 if fail, 1 if success.
@@ -231,7 +231,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 1 if success, 0 if fail.
  *

@@ -25,7 +25,7 @@
 #include "libmmg2d_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param severe level of performed check
  * \param base 1 if we want to test opnbdy edge tags (consistent only after analysis)
  * \return 0 if fail, 1 if success.

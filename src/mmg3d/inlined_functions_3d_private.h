@@ -41,10 +41,10 @@
 
 /**
  * \brief Compute edge length from edge's coordinates.
- * \param ca pointer toward the coordinates of the first edge's extremity.
- * \param cb pointer toward the coordinates of the second edge's extremity.
- * \param sa pointer toward the metric associated to the first edge's extremity.
- * \param sb pointer toward the metric associated to the second edge's extremity.
+ * \param ca pointer to the coordinates of the first edge's extremity.
+ * \param cb pointer to the coordinates of the second edge's extremity.
+ * \param sa pointer to the metric associated to the first edge's extremity.
+ * \param sb pointer to the metric associated to the second edge's extremity.
  * \return edge length.
  *
  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
@@ -80,10 +80,10 @@ inline double MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
+ * \param pt pointer to the tetra from which we come.
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
@@ -111,10 +111,10 @@ inline double MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
+ * \param pt pointer to the tetra from which we come.
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
@@ -144,10 +144,10 @@ inline double MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
+ * \param pt pointer to the tetra from which we come.
  * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
@@ -187,10 +187,10 @@ inline double MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
+ * \param pt pointer to the tetra from which we come.
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
@@ -217,10 +217,10 @@ inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
+ * \param pt pointer to the tetra from which we come.
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso
@@ -251,8 +251,8 @@ inline double MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
  * \param iel index of element.
  * \return The oriented quality of element \a iel or 0.0 if \a iel is inverted.
  *
@@ -270,9 +270,9 @@ inline double MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param pt pointer toward a tetrahedra.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param pt pointer to a tetrahedra.
  * \return The isotropic quality of the tet in LES measure, 0 if fail
  *
  * Compute the quality of the tet pt with respect to the LES quality measure.
@@ -315,10 +315,10 @@ inline double MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) 
 }
 
 /**
- * \param a pointer toward the coor of the first tetra vertex.
- * \param b pointer toward the coor of the second tetra vertex.
- * \param c pointer toward the coor of the third tetra vertex.
- * \param d pointer toward the coor of the fourth tetra vertex.
+ * \param a pointer to the coor of the first tetra vertex.
+ * \param b pointer to the coor of the second tetra vertex.
+ * \param c pointer to the coor of the third tetra vertex.
+ * \param d pointer to the coor of the fourth tetra vertex.
  * \return The isotropic quality of the tet.
  *
  * Compute the quality of a tetra given by 4 points a,b,c,d with respect to the
@@ -375,9 +375,9 @@ inline double MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param pt pointer toward a tetrahedra.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param pt pointer to a tetrahedra.
  * \return The isotropic quality of the tet.
  *
  * Compute the quality of the tet pt with respect to the isotropic metric \a
@@ -404,9 +404,9 @@ inline double MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param pt pointer toward a tetrahedra.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param pt pointer to a tetrahedra.
  * \return The anisotropic quality of the tet or 0.0 if fail.
  *
  * Compute the quality of the tet pt with respect to the anisotropic metric \a

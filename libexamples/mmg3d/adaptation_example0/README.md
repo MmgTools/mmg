@@ -1,4 +1,4 @@
-# Basic use of the **mmg3d** library
+# Basic use of the mmg3d library
 
 ## I/ Implementation
 To call the **mmg3d** library, you must:  

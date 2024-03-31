@@ -81,9 +81,9 @@ void MMGS_Free_topoTables(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure (unused).
- * \param sol pointer toward a solution structure.
- * \param met pointer toward the solution (metric) structure.
+ * \param mesh pointer to the mesh structure (unused).
+ * \param sol pointer to a solution structure.
+ * \param met pointer to the solution (metric) structure.
  *
  * Pack the sparse mesh and create edges before getting
  * out of library

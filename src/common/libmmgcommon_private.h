@@ -51,8 +51,8 @@ extern "C" {
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  *
  * Initialize file names to their default values.
  *
@@ -65,7 +65,7 @@ extern "C" {
 LIBMMG_CORE_EXPORT void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Initialization of the input parameters (stored in the Info structure).
  *
@@ -79,7 +79,7 @@ LIBMMG_CORE_EXPORT void  (MMG5_Init_parameters)(MMG5_pMesh mesh);
 
 /* init file names */
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param meshin input mesh name.
  * \return 1.
  *
@@ -96,7 +96,7 @@ LIBMMG_CORE_EXPORT void  (MMG5_Init_parameters)(MMG5_pMesh mesh);
  */
 LIBMMG_CORE_EXPORT int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param meshout name of the output mesh file.
  * \return 1.
  *
@@ -113,8 +113,8 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* mesh
  */
 LIBMMG_CORE_EXPORT int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param solin name of the input solution file.
  * \return 1.
  *
@@ -131,7 +131,7 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* mes
  */
 LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param fparamin name of the input parameter file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -148,8 +148,8 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
  */
   LIBMMG_CORE_EXPORT int MMG5_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin);
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param solout name of the output solution file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -166,9 +166,9 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
  */
   LIBMMG_CORE_EXPORT int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param ls pointer toward a solution structure (level-set or displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param ls pointer to a solution structure (level-set or displacement).
  *
  * \return 1 if success, 0 if fail (computed bounding box too small
  * or one af the anisotropic input metric is not valid).
@@ -187,9 +187,9 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
   LIBMMG_CORE_EXPORT int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a metric.
- * \param sol pointer toward a solution structure (level-set or displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a metric.
+ * \param sol pointer to a solution structure (level-set or displacement).
  *
  * \return 1.
  *
@@ -206,8 +206,8 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
   LIBMMG_CORE_EXPORT int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param hsiz wanted edge size
  *
  * fill the metric field with the size \a hsiz
@@ -218,8 +218,8 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, con
 LIBMMG_CORE_EXPORT void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param ref input tetra reference.
  * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
  * \param rin internal reference after ls discretization
@@ -234,8 +234,8 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_in
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param br new level-set base reference.
  * \return 0 if failed, 1 otherwise.
  *
@@ -251,8 +251,8 @@ LIBMMG_CORE_EXPORT int  MMG5_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,
 LIBMMG_CORE_EXPORT void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  *
  * File name deallocations before return.
  *
@@ -265,7 +265,7 @@ LIBMMG_CORE_EXPORT void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 LIBMMG_CORE_EXPORT void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param sethmin 1 if hmin is already setted (>0.)
  * \param sethmax 1 if hmax is already setted (>0.)
  *
@@ -279,8 +279,8 @@ LIBMMG_CORE_EXPORT void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
 LIBMMG_CORE_EXPORT extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric.
  * \param hsiz computed constant size to impose.
  *
  * \return 1 if success, 0 if fail
@@ -303,8 +303,8 @@ LIBMMG_CORE_EXPORT int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,d
 const char* MMG5_Get_tagName(int tag);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an array of solution structure (that stores solution fields).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to an array of solution structure (that stores solution fields).
  * \return 1
  *
  * Deallocation of an array of solution fields
@@ -313,7 +313,7 @@ const char* MMG5_Get_tagName(int tag);
 LIBMMG_CORE_EXPORT int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param filename name of file.
  *
  * \return 1 if success, 0 if fail.
@@ -323,7 +323,7 @@ LIBMMG_CORE_EXPORT int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 LIBMMG_CORE_EXPORT int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param filename name of file.
  * \param ext file extension (.poly or .edge)
  *
@@ -337,7 +337,7 @@ LIBMMG_CORE_EXPORT int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const 
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the allocated string that contains the file basename.
+ * \return a pointer to the allocated string that contains the file basename.
  *
  * Extract basename from a path (allocate a string to store it).
  *
@@ -345,7 +345,7 @@ LIBMMG_CORE_EXPORT int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const 
 LIBMMG_CORE_EXPORT char *MMG5_Get_basename(char *path);
 
 /**
- * \param ptr pointer toward the file extension (dot included)
+ * \param ptr pointer to the file extension (dot included)
  * \param fmt default file format.
  *
  * \return and index associated to the file format detected from the extension.
@@ -360,7 +360,7 @@ LIBMMG_CORE_EXPORT int MMG5_Get_format( char *ptr, int fmt );
 /**
  * \param filename string containing a filename
  *
- * \return pointer toward the filename extension or toward the end of the string
+ * \return pointer to the filename extension or toward the end of the string
  * if no extension have been founded
  *
  * Get the extension of the filename string. Do not consider '.o' as an extension.
@@ -371,7 +371,7 @@ LIBMMG_CORE_EXPORT char *MMG5_Get_filenameExt( char *filename );
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the path allocated here
+ * \return a pointer to the path allocated here
  *
  * Remove filename from a path and return the path in a newly allocated string.
  *
@@ -421,7 +421,7 @@ LIBMMG_CORE_EXPORT const char* MMG5_Get_typeName(enum MMG5_type typ);
 
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  *
  * \return 1 if successful, 0 otherwise
  *

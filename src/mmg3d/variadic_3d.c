@@ -43,10 +43,10 @@
 #include "mmg3dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \param ls pointer toward the level-set (in ls-mode).
- * \param disp pointer toward a sol structure (displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a sol structure (metric).
+ * \param ls pointer to the level-set (in ls-mode).
+ * \param disp pointer to a sol structure (displacement).
  *
  * \return 1 if success, 0 if fail.
  *
@@ -84,10 +84,10 @@ int MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met, MMG5_pSol *ls, MMG5_pSol 
   return 1;
 }
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \param ls pointer toward the level-set (in ls-mode).
- * \param disp pointer toward a sol structure (displacement).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to a sol structure (metric).
+ * \param ls pointer to the level-set (in ls-mode).
+ * \param disp pointer to a sol structure (displacement).
  *
  * Initialization of mesh and solution structures to their default
  * values (default names, versions, dimensions...).
@@ -153,11 +153,11 @@ void MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol *met,MMG5_pSol *ls, MMG5
  * structure must follow one of the MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG3D_mmg3dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -166,7 +166,7 @@ void MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol *met,MMG5_pSol *ls, MMG5
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG3D_mmg3dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 1 if success, 0 if fail
@@ -234,11 +234,11 @@ int MMG3D_Init_mesh_var( va_list argptr ) {
  * structure must follow one of the MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG3D_mmg3dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -247,7 +247,7 @@ int MMG3D_Init_mesh_var( va_list argptr ) {
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG3D_mmg3dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 0 if fail, 1 if success
@@ -349,9 +349,9 @@ int MMG3D_Free_all_var(va_list argptr)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a solution / level-set.
- * \param sol pointer toward a displacement.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to a solution / level-set.
+ * \param sol pointer to a displacement.
  *
  * Free mesh arrays.
  *
@@ -421,11 +421,11 @@ void MMG3D_Free_arrays(MMG5_pMesh *mesh,MMG5_pSol *sol,MMG5_pSol *ls,
  * structure must follow one of the MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG3D_mmg3dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -434,7 +434,7 @@ void MMG3D_Free_arrays(MMG5_pMesh *mesh,MMG5_pSol *sol,MMG5_pSol *ls,
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG3D_mmg3dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 0 if fail, 1 if success
@@ -519,11 +519,11 @@ int MMG3D_Free_structures_var(va_list argptr)
  * name. Each structure must follow one of the \a MMG5_ARG* preprocessor
  * variable that allow to identify it.
  *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG3D_mmg3dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -532,7 +532,7 @@ int MMG3D_Free_structures_var(va_list argptr)
  * identified by the MMG5_ARG_ppLs keyword).
  *
  *  To call the \a MMG3D_mmg3dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
  * \return 0 if fail, 1 if success
