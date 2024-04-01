@@ -749,7 +749,7 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 /**
  * \param mesh pointer to the mesh structure.
  * \param start index of the starting tetrahedron.
- * \param ip index in \a start of the looked point.
+ * \param ip index in \a start of the desired vertex.
  * \param iface index in \a start of the starting face.
  * \param listv pointer to the computed volumic ball.
  * \param ilistv pointer to the computed volumic ball size.
@@ -757,7 +757,7 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  * \param ilists pointer to the computed surfacic ball size.
  * \param refmin return the reference of one of the two subdomains in presence
  * \param refplus return the reference of the other subdomain in presence
- * \param isnm is the looked point \a ip non-manifold?
+ * \param isnm is the vertex non-manifold?
  * \return 1 if succesful, a negative value if the ball cannot be computed:
  * -1 if a surface ball had too many elements,
  * -2 if there are more than two references around,
@@ -767,24 +767,24 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  * is not possible, while -2 and -3 just mean the job could not be done.
  *
  * Compute the volumic ball of a SURFACE point \a p, as well as its surfacic
- * ball, starting from tetra \a start, with point \a ip, and face \a if in tetra
+ * ball, starting from tetra \a start, with point \a ip, and face \a if in the
  * volumic ball.
  * \a listv[k] = 4*number of tet + index of point surfacic ball.
  * \a lists[k] = 4*number of tet + index of face.
  *
  * \warning Doesn't work for a non-manifold point if \a start has an adjacent
- * through \a iface (for example : a non-manifold subdomain). Thus, if \a ip is
+ * through \a iface (for example: a non-manifold subdomain). Thus, if \a ip is
  * non-manifold, must be called only if \a start has no adjacent through iface.
  *
  */
-int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
-                          int64_t *listv,int *ilistv,MMG5_int *lists,int *ilists,
-                          MMG5_int *refmin,MMG5_int *refplus,int isnm)
+int MMG5_boulesurfvolpNom(MMG5_pMesh mesh, MMG5_int start, int ip, int iface,
+                          int64_t *listv, int *ilistv, MMG5_int *lists, int *ilists,
+                          MMG5_int *refmin, MMG5_int *refplus, int isnm)
 {
-  MMG5_pTetra   pt,pt1;
+  MMG5_pTetra   pt, pt1;
   MMG5_pxTetra  pxt;
-  MMG5_int      k,k1,nump,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux,base;
-  int8_t        iopp,ipiv,i,j,l,isface;
+  MMG5_int      k, k1, nump, *adja, piv, na, nb, adj, cur, nvstart, fstart, aux, base;
+  int8_t        iopp, ipiv, i, j, l, isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
 
   if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
