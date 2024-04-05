@@ -22,7 +22,13 @@
 */
 
 /**
- * Types
+ * \file common/libmmgtypes.h
+ * \ingroup API
+ * \brief Types used throughout the Mmg libraries
+ * \author Algiane Froehly (Inria/UBordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
  */
 #include <stdint.h>
 #include <stdarg.h>
@@ -217,7 +223,7 @@ enum MMG5_type {
 
 /**
  * \enum MMG5_entities
- * \brief Type of mesh entities.
+ * \brief Identifies the types of mesh entities.
  */
 enum MMG5_entities {
   MMG5_Noentity, /*!< Undefined type (unusable) */
@@ -247,11 +253,11 @@ enum MMG5_Format {
 
 /**
  * \struct MMG5_Par
- * number) associated to a specific reference.
+ * \brief Local parameters for a specific entity and reference
  *
- * Store the local values (minimal and maximal sizes and Hausdorff number)
- * associated to the given reference of an element of type \a elt (point,
- * edge... ).
+ * This struct can store the local values (minimal and maximal edge lengths and
+ * Hausdorff distance) associated to the given reference of an element of type
+ * \a elt (point, edge... ).
  *
  */
 typedef struct {
@@ -264,11 +270,11 @@ typedef struct {
 
 /**
  * \struct MMG5_Point
- * \brief Structure to store points of a MMG mesh.
+ * \brief Structure to store vertices of an MMG mesh.
  * \todo What to do with n[3], try to remove s.
  */
 typedef struct {
-  double   c[3]; /*!< Coordinates of point */
+  double   c[3]; /*!< Coordinates */
   double   n[3]; /*!< Unitary normal (regular points) or unitary tangent (ridge
                   * and ref points) for mmgs and unitary tangent (if needed) for
                   * mmg3d */
@@ -289,7 +295,7 @@ typedef MMG5_Point * MMG5_pPoint;
 
 /**
  * \struct MMG5_xPoint
- * \brief Structure to store surface points of a MMG mesh.
+ * \brief Structure to store surface vertices of an MMG mesh.
  */
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
@@ -300,7 +306,7 @@ typedef MMG5_xPoint * MMG5_pxPoint;
 
 /**
  * \struct MMG5_Edge
- * \brief Structure to store edges of a MMG mesh.
+ * \brief Structure to store edges of am MMG mesh.
  */
 typedef struct {
   MMG5_int a,b; /*!< Extremities of the edge */
@@ -314,7 +320,7 @@ typedef MMG5_Edge * MMG5_pEdge;
 /**
  * \struct MMG5_Tria
  *
- * Structure to store triangles of a MMG mesh.
+ * \brief Structure to store triangles of a MMG mesh.
  *
  * \remark Numbering convention
  * \verbatim
@@ -348,7 +354,7 @@ typedef MMG5_Tria * MMG5_pTria;
 /**
  * \struct MMG5_Quad
  *
- * Structure to store quadrangles of a MMG mesh.
+ * \brief Structure to store quadrangles of an MMG mesh.
  *
  * \remark Numbering convention
  * \verbatim
@@ -378,9 +384,9 @@ typedef MMG5_Quad * MMG5_pQuad;
 /**
  * \struct MMG5_Tetra
  *
- * Structure to store tetrahedra of a MMG mesh.
+ * \brief Structure to store tetrahedra of an MMG mesh.
  *
- * \remark Numbering convention
+ * \remark The numbering conventions are illustrated below. Face i lies opposite to vertex i.
  * \verbatim
  *      Vertices                     Edges                       Faces           *
  *           3                          .                           .            *
@@ -404,8 +410,9 @@ typedef struct {
   MMG5_int ref; /*!< Reference of the tetrahedron */
   MMG5_int base;
   MMG5_int mark; /*!< Used for delaunay */
-  MMG5_int xt; /*!< Index of the surface \ref MMG5_xTetra associated to
-                 the tetrahedron*/
+  MMG5_int xt; /*!< Index of the surface \ref MMG5_xTetra associated to the
+                 tetrahedron (only for tetrahedra that are adjacent to
+                 surfaces) */
   MMG5_int flag;
   int16_t  tag;
 } MMG5_Tetra;
@@ -413,7 +420,7 @@ typedef MMG5_Tetra * MMG5_pTetra;
 
 /**
  * \struct MMG5_xTetra
- * \brief Structure to store the surface tetrahedra of a MMG mesh.
+ * \brief Structure to store additional information for the surface tetrahedra of an MMG mesh.
  */
 typedef struct {
   MMG5_int ref[4]; /*!< ref[i] is the reference of the opposite triangle to the
@@ -433,7 +440,7 @@ typedef MMG5_xTetra * MMG5_pxTetra;
 /**
  * \struct MMG5_Prism
  *
- * Structure to store prsim of a MMG mesh.
+ * \brief Structure to store prsim of a MMG mesh.
  *
  * \warning prisms are not modified
  *
@@ -511,7 +518,7 @@ typedef MMG5_InvMat * MMG5_pInvMat;
 
 /**
  * \struct MMG5_Info
- * \brief Store input parameters of the run.
+ * \brief Structure to store input parameters of the job.
  */
 typedef struct {
   MMG5_pPar     par;
@@ -558,7 +565,7 @@ typedef struct {
 
 /**
  * \struct MMG5_hgeom
- * \brief Cell of the hash table of geom edges.
+ * \brief Cell of the hash table of geometric edges.
  */
 typedef struct {
   MMG5_int     a; /*!< First extremity of edge */
@@ -659,6 +666,7 @@ typedef MMG5_Mesh  * MMG5_pMesh;
 /**
  * \struct MMG5_sol
  * \brief MMG Solution structure (for solution or metric).
+ *
  */
 typedef struct {
   int       ver; /* Version of the solution file */

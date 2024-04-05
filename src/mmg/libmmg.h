@@ -21,15 +21,40 @@
 ** =============================================================================
 */
 
+/*
+ * WARNING: To keep the genheader program working, don't break line between an enum
+ * name and the opening brace (it creates errors under windows)
+ */
+
+/* The following comment block defines the Doxygen group with label API, which
+ * includes
+ *   mmg3d/libmmg3d.h
+ *   mmg2d/libmmg2.h
+ *   mmgs/libmmg2d.h
+ * and others
+ * with the aim to generate a central index into the API documentation.
+ */
+
+/**
+ * \defgroup API Application Programming Interface
+ *
+ * Mmg comes with three application programming interfaces (APIs), one
+ * corresponding to each of the command-line programs. In total there are over
+ * 360 API functions. You can find their declarations and descriptions in the
+ * files listed above.
+ *
+ * Examples showing how to use these functions can be found under the "Related
+ * Pages" tab.
+ *
+ */
+
 /**
  * \file common/libmmg.h
  * \brief Wrapper for include files for the mmg library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Mark Potse (IMB, Université de Bordeaux)
  * \version 5
- * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning To keep the genheader working, don't break line between the enum
- * name and the opening brace (it creates errors under windows)
  */
 
 #ifndef MMGLIB_H

@@ -1,4 +1,4 @@
-# Basic use of the **mmg2d** library
+# Basic use of the mmg2d library
 
 ## Adaptation example 3
 No mesh or sol file necessary, only compilation of main.c.

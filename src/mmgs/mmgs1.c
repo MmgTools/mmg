@@ -40,10 +40,10 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k element index.
- * \param vx pointer toward table of edges to split.
+ * \param vx pointer to table of edges to split.
  * \return 1.
  *
  * Find acceptable position for splitting.
@@ -143,8 +143,8 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param iel index of the starting triangle.
  * \param ia local index of the edge to split in \a k.
  * \param ip index of the point that we try to create.
@@ -391,7 +391,7 @@ int chkedg(MMG5_pMesh mesh,MMG5_int iel) {
 }
 
 /**
- * \param met pointer toward met structure
+ * \param met pointer to met structure
  * \param typchk type of check to perform: 1 for first stage (adaptation to
  * capture roughly the surface mesh), 2 for second stage of adaptation
  * (rough capture of input metric).
@@ -431,7 +431,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_int      k,ns,nns;
   int8_t        i;
 
-  /* Local function pointer toward the suitable functions to use for edge length
+  /* Local function pointer to the suitable functions to use for edge length
    * and quality computation depending on the adaptation phase */
   double (*MMGS_lenEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t ) = NULL;
   double (*MMGS_caltri)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_pTria pt ) = MMG5_caltri_iso;
@@ -526,8 +526,8 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward the hash table of edges.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to the hash table of edges.
  * \return 0 if failed, 1 if success
  *
  * Delete the points inserted by pattern if the pattern step fail.
@@ -567,8 +567,8 @@ int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param typchk type of check performed depending on the remeshing step
  *
  * \return -1 if fail, the number of split otherwise
@@ -941,8 +941,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param i index of edge to split.
  * \return -1 if lack of memory, 0 if the edge should not be split and 1
@@ -1013,8 +1013,8 @@ MMG5_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
 }
 
 /**
- * \param mesh pointer toward mesh structure
- * \param met pointer toward met structure
+ * \param mesh pointer to mesh structure
+ * \param met pointer to met structure
  * \param typchk type of check to perform: 1 for first stage (adaptation to
  * capture roughly the surface mesh), 2 for second stage of adaptation
  * (rough capture of input metric).
@@ -1031,7 +1031,7 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
 
-  /* Local function pointer toward the suitable functions to use for edge length
+  /* Local function pointer to the suitable functions to use for edge length
    * and quality computation depending on the adaptation phase */
   double (*MMGS_lenEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t ) = NULL;
   double (*MMGS_caltri)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_pTria pt ) = MMG5_caltri_iso;
@@ -1121,8 +1121,8 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * \return -1 if failed or number of new points.
  *
@@ -1197,8 +1197,8 @@ static MMG5_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return -1 if failed.
  * \return number of deleted points.
  *
@@ -1451,8 +1451,8 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param permNodGlob if provided, strore the global permutation of nodes.
  * \return 0 if failed, 1 if success.
  *

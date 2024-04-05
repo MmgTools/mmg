@@ -49,7 +49,7 @@ int delref(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start index of the tetra from which we start
  * \param ref reference to set
  * \param putreq 1 if boundary edges must be set to required
@@ -152,7 +152,7 @@ MMG5_int MMGS_indPt(MMG5_pMesh mesh, MMG5_int kp) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param nsd index of subdomain to keep.
  *
  * Keep only subdomain of index \a nsd and remove other subdomains.

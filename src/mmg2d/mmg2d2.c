@@ -34,7 +34,7 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 if fail.
  *
  * Remove the bounding box triangles.
@@ -155,7 +155,7 @@ MMG5_int MMG2D_findtrianglestate(MMG5_pMesh mesh,MMG5_int k,MMG5_int ip1,MMG5_in
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \param k point index
  * \return index of one elt containing k or 0 (if no elt is found)
  *
@@ -196,8 +196,8 @@ MMG5_int MMG2D_findTria_exhaust(MMG5_pMesh mesh,MMG5_int k) {
 
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the solution structure
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the solution structure
  * \return  0 if fail.
  *
  * Insertion of the list of points inside the mesh
@@ -310,7 +310,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if fail, 1 if success.
  *
@@ -497,8 +497,8 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \return 0 if fail, 1 if success.
  *
  * Mesh triangulation.

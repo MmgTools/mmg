@@ -37,9 +37,9 @@
 //extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric structure.
- * \param list pointer toward the ball of the point.
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric structure.
+ * \param list pointer to the ball of the point.
  * \param ilist size of the ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 0.9 of the old minimum element quality.
@@ -198,9 +198,9 @@ int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG5_int *list, int8_
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric structure.
- * \param list pointer toward the ball of the point.
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric structure.
+ * \param list pointer to the ball of the point.
  * \param ilist size of the ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 0.9 of the old minimum element quality.

@@ -134,7 +134,7 @@ MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ip0 index of the first point of the curve.
  * \param ip1 index of the second point of the curve.
  * \param b0 the first computed extrapolated control point.
@@ -312,9 +312,9 @@ MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param pt pointer toward the triangle structure.
- * \param pb pointer toward the computed Bezier structure.
+ * \param mesh pointer to the mesh structure.
+ * \param pt pointer to the triangle structure.
+ * \param pb pointer to the computed Bezier structure.
  * \param ori triangle orientation.
  * \return 1.
  *
@@ -595,7 +595,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori)
 }
 
 /**
- * \param pb pointer toward the Bezier structure.
+ * \param pb pointer to the Bezier structure.
  * \param uv coordinates of the point in the parametric space.
  * \param o computed coordinates of the point in the real space.
  * \param no computed normal.

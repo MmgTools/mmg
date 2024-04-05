@@ -39,9 +39,9 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param list pointer toward the ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param list pointer to the ball of the point.
  * \param ilist size of the ball.
  *
  * \return 0 if we can't move the point, 1 if we can.
@@ -358,7 +358,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param it triangle to which belongs the edge along which we move
  * \param isrid 1 if the edge is a ridge
  * \param ip0 edge point that we want to move
@@ -423,7 +423,7 @@ int MMGS_paramDisp(MMG5_pMesh mesh,MMG5_int it,int8_t isrid,MMG5_int ip0,MMG5_in
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param p0 point to move.
  * \param p neighbouring point toward which we try to move.
  * \param llold init length of edge p0-p
@@ -535,7 +535,7 @@ int MMGS_update_normalAndTangent(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param p0 point to move.
  * \param p neighbouring point toward which we try to move.
  * \param llold init length of edge p0-p

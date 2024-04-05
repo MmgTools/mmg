@@ -34,7 +34,7 @@
 #include "libmmg2d_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param kel index of the element in the unpacked mesh
  *
  *
@@ -59,7 +59,7 @@ MMG5_int MMG2D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param kp index of the point in the unpacked mesh
  *
  * \return 0 if fail, index of the point in packed numerotation otherwise.
@@ -83,7 +83,7 @@ MMG5_int MMG2D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param nsd index of subdomain to keep.
  *
  * Keep only subdomain of index \a nsd and remove other subdomains.

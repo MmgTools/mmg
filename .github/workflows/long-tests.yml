@@ -5,7 +5,7 @@ on:
   push:
   # run tests on PR events
   pull_request:
-    types: [synchronize]
+    types: [opened, synchronize]
 
   # run tests manually on a given branch (default is master)
   workflow_dispatch:

@@ -39,10 +39,10 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param list pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param list pointer to the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -170,12 +170,12 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, i
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -481,12 +481,12 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -686,12 +686,12 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -710,12 +710,12 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -736,12 +736,12 @@ int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * \return 0 if fail, 1 if success.

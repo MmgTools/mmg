@@ -30,9 +30,9 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param ptt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param ptt pointer to the triangle structure.
  * \return The computed area.
  *
  * Compute the area of the surface triangle \a ptt with respect to
@@ -64,8 +64,8 @@ double MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param funcname name of the calling function
  *
  * \return 1 if success, 0 if fail.
@@ -88,7 +88,7 @@ int MMG5_defsiz_startingMessage (MMG5_pMesh mesh,MMG5_pSol met,const char * func
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Print gradation values (depending on the verbosity).
  *
@@ -114,8 +114,8 @@ void MMG5_gradation_info ( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ip0 index of the first edge extremity
  * \param ip1 index of the second edge extremity
  *
@@ -153,8 +153,8 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip0,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * \return 1 if success, 0 if fail.
  *
@@ -191,8 +191,8 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ismet 1 if user provided metric
  *
  * \return 1 if success, 0 if fail.
@@ -234,7 +234,7 @@ int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t isme
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Set the s field of the points that belongs to a required edge to 1, set it to
  * 0 otherwise.
@@ -266,8 +266,8 @@ void MMG5_mark_pointsOnReqEdge_fromTria (  MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -360,8 +360,8 @@ int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return the number of updated metrics.
  *

@@ -1394,12 +1394,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
     MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
     MMG5_int inival;
-    if ( sizeof(MMG5_int) == 8 ) {
-      inival = LONG_MAX;
-    }
-    else {
-      inival = INT_MAX;
-    }
+    inival = MMG5_INTMAX;
 
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;

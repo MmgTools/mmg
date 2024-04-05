@@ -39,8 +39,8 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
  * \param metRidTyp metric storage (classic or special)
  * \return 1 if success, 0 if fail.
  *
@@ -95,9 +95,9 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param pt pointer toward a tetrahedra.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the meric structure.
+ * \param pt pointer to a tetrahedra.
  * \return The anisotropic quality of the tet or 0.0 if fail.
  *
  * Compute the quality of the tet pt with respect to the anisotropic metric \a
@@ -198,8 +198,8 @@ inline double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param avlen average length (to fill).
  * \param lmin minimal length (to fill).
  * \param lmax max length (to fill).
@@ -339,8 +339,8 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
  * 1 for special storage.
  * \return 0 if fail, 1 otherwise.
@@ -367,16 +367,16 @@ int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param ne pointer toward the number of used tetra (to fill).
- * \param max pointer toward the maximal quality (normalized) to fill.
- * \param avg pointer toward the average quality (normalized) to fill.
- * \param min pointer toward the minimal quality (normalized) to fill.
- * \param iel pointer toward the index of the worst tetra (to fill).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param ne pointer to the number of used tetra (to fill).
+ * \param max pointer to the maximal quality (normalized) to fill.
+ * \param avg pointer to the average quality (normalized) to fill.
+ * \param min pointer to the minimal quality (normalized) to fill.
+ * \param iel pointer to the index of the worst tetra (to fill).
  * \param good number of good elements (to fill).
  * \param med number of elements with a quality greather than 0.5 (to fill).
- * \param his pointer toward the mesh histogram (to fill).
+ * \param his pointer to the mesh histogram (to fill).
  * \param imprim verbosity level
  *
  * Compute the needed quality information in order to print the quality histogram
@@ -456,7 +456,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,
  * \param iel index of the worst tetra.
  * \param good number of good elements.
  * \param med number of elements with a quality greather than 0.5
- * \param his pointer toward the mesh histogram.
+ * \param his pointer to the mesh histogram.
  * \param nrid number of tetra with 4 ridge points if we want to warn the user.
  * \param optimLES 1 if we work in optimLES mode, 0 otherwise
  * \param imprim verbosity level
@@ -491,7 +491,7 @@ int MMG3D_displayQualHisto(MMG5_int ne,double max,double avg,double min,MMG5_int
  * \param iel index of the worst tetra.
  * \param good number of good elements.
  * \param med number of elements with a quality greather than 0.5
- * \param his pointer toward the mesh histogram.
+ * \param his pointer to the mesh histogram.
  * \param nrid number of tetra with 4 ridge points if we want to warn the user.
  * \param optimLES 1 if we work in optimLES mode, 0 otherwise
  * \param imprim verbosity level
@@ -550,16 +550,16 @@ int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param ne pointer toward the number of used tetra (to fill).
- * \param max pointer toward the maximal quality (normalized) to fill.
- * \param avg pointer toward the average quality (normalized) to fill.
- * \param min pointer toward the minimal quality (normalized) to fill.
- * \param iel pointer toward the index of the worst tetra (to fill).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param ne pointer to the number of used tetra (to fill).
+ * \param max pointer to the maximal quality (normalized) to fill.
+ * \param avg pointer to the average quality (normalized) to fill.
+ * \param min pointer to the minimal quality (normalized) to fill.
+ * \param iel pointer to the index of the worst tetra (to fill).
  * \param good number of good elements (to fill).
  * \param med number of elements with a quality greather than 0.5 (to fill).
- * \param his pointer toward the mesh histogram (to fill).
+ * \param his pointer to the mesh histogram (to fill).
  * \param imprim verbosity level
  *
  * Compute the needed quality information in order to print the quality histogram
@@ -631,8 +631,8 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,d
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for classic storage of metric at ridges.
@@ -669,16 +669,16 @@ int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param ne pointer toward the number of used tetra (to fill).
- * \param max pointer toward the maximal quality (normalized) to fill.
- * \param avg pointer toward the average quality (normalized) to fill.
- * \param min pointer toward the minimal quality (normalized) to fill.
- * \param iel pointer toward the index of the worst tetra (to fill).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param ne pointer to the number of used tetra (to fill).
+ * \param max pointer to the maximal quality (normalized) to fill.
+ * \param avg pointer to the average quality (normalized) to fill.
+ * \param min pointer to the minimal quality (normalized) to fill.
+ * \param iel pointer to the index of the worst tetra (to fill).
  * \param good number of good elements (to fill).
  * \param med number of elements with a quality greather than 0.5 (to fill).
- * \param his pointer toward the mesh histogram (to fill).
+ * \param his pointer to the mesh histogram (to fill).
  * \param nrid number of tetra with 4 ridge points if we want to warn the user
  *             to fill.
  * \param imprim verbosity level
@@ -763,8 +763,8 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
@@ -803,8 +803,8 @@ int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param sol, pointer toward the sol structure.
+ * \param mesh pointer to the mesh.
+ * \param sol, pointer to the sol structure.
  * \param weightelt put weight on elts.
  * \param npcible estimation of the final number of nodes/
  *

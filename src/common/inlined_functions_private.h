@@ -37,7 +37,7 @@
 #define _INLINED_FUNC_H
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param m0 metric at point np0.
@@ -181,8 +181,8 @@ double MMG5_lenEdg(MMG5_pMesh mesh,MMG5_int np0,MMG5_int np1,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
@@ -250,8 +250,8 @@ double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,MMG5_int n
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
@@ -274,8 +274,8 @@ double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ip1 index of edge's extremity.
  * \param ip2 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise (dummy arg for

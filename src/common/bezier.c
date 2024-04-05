@@ -36,7 +36,7 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param i0 index of the first extremity of the edge.
  * \param i1 index of the second extremity of the edge.
  * \param b0 first computed bezier coefficient.

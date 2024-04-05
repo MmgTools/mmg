@@ -24,6 +24,12 @@
 #ifndef LIBMMG3D_PRIVATE_H
 #define LIBMMG3D_PRIVATE_H
 
+#ifndef __STDC_FORMAT_MACROS
+#define __STDC_FORMAT_MACROS
+#endif
+
+#include <inttypes.h>
+
 #include "libmmgcommon_private.h"
 #include "PRoctree_3d_private.h"
 
@@ -515,8 +521,10 @@ extern double MMG5_lenedgCoor_iso(double*, double*, double*, double*);
 int    MMG3D_doSol_iso(MMG5_pMesh,MMG5_pSol);
 int    MMG3D_doSol_ani(MMG5_pMesh,MMG5_pSol);
 int    MMG5_intmet_iso(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int, double);
+int    MMG5_intmet_iso_edge(MMG5_pSol,MMG5_int,MMG5_int,MMG5_int, double);
 int    MMG5_intmet_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int, double);
 int    MMG3D_intmet33_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int, double);
+int    MMG3D_intmet33_ani_edge(MMG5_pSol,MMG5_int,MMG5_int,MMG5_int, double);
 int    MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double *);
 int    MMG5_interp4bar33_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double *);
 int    MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double *);
@@ -537,7 +545,7 @@ int MMG3D_openMesh(int imprim,const char *filename,FILE **inm,int *bin,char*,cha
 int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Warn user that some tetrahedra of the mesh have been reoriented.
  *

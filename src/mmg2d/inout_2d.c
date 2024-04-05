@@ -45,6 +45,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   ncor = nreq = nreqed = ntreq = nqreq = 0;
   bin = 0;
   iswp = 0;
+  bpos = 0;
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nref = 0;
 
@@ -182,7 +183,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->np,MMG5_SW,1,inm);
-        if(iswp) mesh->np=MMG5_SWAPBIN(mesh->np);
+        if(iswp) mesh->np=MMG5_swapbin(mesh->np);
         posnp = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -191,7 +192,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->nt,MMG5_SW,1,inm);
-        if(iswp) mesh->nt=MMG5_SWAPBIN(mesh->nt);
+        if(iswp) mesh->nt=MMG5_swapbin(mesh->nt);
         posnt = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -201,7 +202,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&ntreq,MMG5_SW,1,inm);
-        if(iswp) ntreq=MMG5_SWAPBIN(ntreq);
+        if(iswp) ntreq=MMG5_swapbin(ntreq);
         posntreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -210,7 +211,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->nquad,MMG5_SW,1,inm);
-        if(iswp) mesh->nquad=MMG5_SWAPBIN(mesh->nquad);
+        if(iswp) mesh->nquad=MMG5_swapbin(mesh->nquad);
         posnq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -219,7 +220,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&nqreq,MMG5_SW,1,inm);
-        if(iswp) nqreq=MMG5_SWAPBIN(nqreq);
+        if(iswp) nqreq=MMG5_swapbin(nqreq);
         posnqreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -228,7 +229,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&ncor,MMG5_SW,1,inm);
-        if(iswp) ncor=MMG5_SWAPBIN(ncor);
+        if(iswp) ncor=MMG5_swapbin(ncor);
         posncor = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -237,7 +238,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&mesh->na,MMG5_SW,1,inm);
-        if(iswp) mesh->na=MMG5_SWAPBIN(mesh->na);
+        if(iswp) mesh->na=MMG5_swapbin(mesh->na);
         posned = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -246,7 +247,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&nreqed,MMG5_SW,1,inm);
-        if(iswp) nreqed=MMG5_SWAPBIN(nreqed);
+        if(iswp) nreqed=MMG5_swapbin(nreqed);
         posreqed = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -255,7 +256,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&nreq,MMG5_SW,1,inm);
-        if(iswp) nreq=MMG5_SWAPBIN(nreq);
+        if(iswp) nreq=MMG5_swapbin(nreq);
         posreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -320,7 +321,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           ppt->c[i] = (double) fc;
         }
         MMG_FREAD(&ppt->ref,MMG5_SW,1,inm);
-        if(iswp) ppt->ref=MMG5_SWAPBIN(ppt->ref);
+        if(iswp) ppt->ref=MMG5_swapbin(ppt->ref);
       }
     } else {
       if (!bin) {
@@ -336,7 +337,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           if(iswp) ppt->c[i]=MMG5_swapd(ppt->c[i]);
         }
         MMG_FREAD(&ppt->ref,MMG5_SW,1,inm);
-        if(iswp) ppt->ref=MMG5_SWAPBIN(ppt->ref);
+        if(iswp) ppt->ref=MMG5_swapbin(ppt->ref);
       }
     }
     if ( ppt->ref < 0 ) {
@@ -356,11 +357,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
     else {
       MMG_FREAD(&ped->a,MMG5_SW,1,inm);
-      if(iswp) ped->a=MMG5_SWAPBIN(ped->a);
+      if(iswp) ped->a=MMG5_swapbin(ped->a);
       MMG_FREAD(&ped->b,MMG5_SW,1,inm);
-      if(iswp) ped->b=MMG5_SWAPBIN(ped->b);
+      if(iswp) ped->b=MMG5_swapbin(ped->b);
       MMG_FREAD(&ped->ref,MMG5_SW,1,inm);
-      if(iswp) ped->ref=MMG5_SWAPBIN(ped->ref);
+      if(iswp) ped->ref=MMG5_swapbin(ped->ref);
     }
     if ( ped->ref < 0 ) {
       ped->ref = -ped->ref;
@@ -382,10 +383,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else {
         for (i=0 ; i<3 ; i++) {
           MMG_FREAD(&pt->v[i],MMG5_SW,1,inm);
-          if(iswp) pt->v[i]=MMG5_SWAPBIN(pt->v[i]);
+          if(iswp) pt->v[i]=MMG5_swapbin(pt->v[i]);
         }
         MMG_FREAD(&pt->ref,MMG5_SW,1,inm);
-        if(iswp) pt->ref=MMG5_SWAPBIN(pt->ref);
+        if(iswp) pt->ref=MMG5_swapbin(pt->ref);
       }
       for (i=0; i<3; i++) {
         ppt = &mesh->point[ pt->v[i] ];
@@ -425,7 +426,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
         else {
           MMG_FREAD(&i,MMG5_SW,1,inm);
-          if(iswp) i=MMG5_SWAPBIN(i);
+          if(iswp) i=MMG5_swapbin(i);
         }
         if ( i>mesh->nt ) {
           fprintf(stderr,"\n  ## Warning: %s: required triangle number %8" MMG5_PRId ""
@@ -460,10 +461,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else {
         for (i=0 ; i<4 ; i++) {
           MMG_FREAD(&pq1->v[i],MMG5_SW,1,inm);
-          if(iswp) pq1->v[i]=MMG5_SWAPBIN(pq1->v[i]);
+          if(iswp) pq1->v[i]=MMG5_swapbin(pq1->v[i]);
         }
         MMG_FREAD(&pq1->ref,MMG5_SW,1,inm);
-        if(iswp) pq1->ref=MMG5_SWAPBIN(pq1->ref);
+        if(iswp) pq1->ref=MMG5_swapbin(pq1->ref);
       }
       for (i=0; i<4; i++) {
         ppt = &mesh->point[ pq1->v[i] ];
@@ -485,7 +486,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
         else {
           MMG_FREAD(&i,MMG5_SW,1,inm);
-          if(iswp) i=MMG5_SWAPBIN(i);
+          if(iswp) i=MMG5_swapbin(i);
         }
         if ( i>mesh->nquad ) {
           fprintf(stderr,"\n  ## Warning: %s: required quadrilaterals number"
@@ -511,7 +512,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       else {
         MMG_FREAD(&ref,MMG5_SW,1,inm);
-        if(iswp) ref=MMG5_SWAPBIN(ref);
+        if(iswp) ref=MMG5_swapbin(ref);
       }
       ppt = &mesh->point[ref];
       ppt->tag |= MG_CRN;
@@ -528,7 +529,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       else {
         MMG_FREAD(&ref,MMG5_SW,1,inm);
-        if(iswp) ref=MMG5_SWAPBIN(ref);
+        if(iswp) ref=MMG5_swapbin(ref);
       }
       ppt = &mesh->point[ref];
       ppt->tag |= MG_REQ;
@@ -546,7 +547,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       else {
         MMG_FREAD(&ref,MMG5_SW,1,inm);
-        if(iswp) ref=MMG5_SWAPBIN(ref);
+        if(iswp) ref=MMG5_swapbin(ref);
       }
       ped = &mesh->edge[ref];
       ped->tag |= MG_REQ;
@@ -664,7 +665,7 @@ int MMG2D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const c
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Check mesh data for a Msh mesh : mark the vertices as used if no triangles in
@@ -827,8 +828,8 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 }
 
 /**
- * \param sol pointer toward an allocatable sol structure.
- * \param inm pointer toward the solution file
+ * \param sol pointer to an allocatable sol structure.
+ * \param inm pointer to the solution file
  * \param bin 1 if binary file
  * \param iswp Endianess
  * \param index of the readed solution
@@ -858,8 +859,8 @@ int MMG2D_readFloatSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG5_int pos) {
 }
 
 /**
- * \param sol pointer toward an allocatable sol structure.
- * \param inm pointer toward the solution file
+ * \param sol pointer to an allocatable sol structure.
+ * \param inm pointer to the solution file
  * \param bin 1 if binary file
  * \param iswp Endianess
  * \param index of the readed solution
@@ -889,8 +890,8 @@ int MMG2D_readDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG5_int pos) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param filename name of file.
  * \return -1 data invalid or we fail, 0 no file, 1 ok.
  *
@@ -980,8 +981,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an allocatable sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to an allocatable sol structure.
  * \param filename name of file.
  * \return -1 data invalid or we fail, 0 no file, 1 ok.
  *
@@ -1537,8 +1538,8 @@ int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 }
 
 /**
- * \param sol pointer toward an allocatable sol structure.
- * \param inm pointer toward the solution file
+ * \param sol pointer to an allocatable sol structure.
+ * \param inm pointer to the solution file
  * \param bin 1 if binary file
  * \param index of the writted solution
  * \param gmsh write in 3D (for gmsh) if 1
@@ -1601,8 +1602,8 @@ void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,MMG5_int pos,int gmsh)
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1662,8 +1663,8 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solutions array.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solutions array.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *

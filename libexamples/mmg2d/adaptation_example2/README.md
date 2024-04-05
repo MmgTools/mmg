@@ -1,4 +1,4 @@
-# Basic use of the **mmg2d** library to perform mesh adaptation with 2 calls of the library and deletion of the metric between the call.
+# Basic use of the mmg2d library to perform mesh adaptation with 2 calls of the library and deletion of the metric between the call.
 
 ## I/ Implementation
 This example:  

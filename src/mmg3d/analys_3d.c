@@ -462,7 +462,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1.
  *
  * check subdomains connected by a vertex and mark these vertex as CRN and REQ.
@@ -616,7 +616,7 @@ int MMG5_singul(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \return 1 if successful, 0 if failed
  *
  * Compute normals at C1 vertices, for C0: tangents.
@@ -813,8 +813,8 @@ int MMG5_norver(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer towards the mesh
- * \param pt pointer towards current triangle
+ * \param mesh pointer to the mesh
+ * \param pt pointer to current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
 * \param n normal of triangle before regularization
@@ -881,7 +881,7 @@ static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k
 }
 
 /**
- * \param mesh pointer towards the mesh
+ * \param mesh pointer to the mesh
  * \param v list of vertices of current tetrahedron
  * \param k number of current point
  * \param c input : newly computed coordinates (giving negative area), output : coordinates after dichotomy
@@ -947,7 +947,7 @@ static inline int MMG3D_dichotomytetra(MMG5_pMesh mesh, MMG5_int *v, MMG5_int k,
 }
 
 /**
- * \param mesh pointer toward a MMG5 mesh structure.
+ * \param mesh pointer to a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Regularization procedure for vertices coordinates, dual Laplacian in 3D
@@ -1176,7 +1176,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -1298,7 +1298,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \return 1 if successful, 0 if fail
  *
  * preprocessing stage: mesh analysis.

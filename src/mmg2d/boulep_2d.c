@@ -92,7 +92,7 @@ int MMG2D_boulep(MMG5_pMesh mesh, MMG5_int ifirst, int iploc, MMG5_int * list) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start index of the first tria
  * \param ip local index of the point on which we work in tria \a start
  * \param pleft index of the left point of ip along the geom edge
@@ -219,7 +219,7 @@ int MMG2D_boulen(MMG5_pMesh mesh, MMG5_int start,int8_t ip, MMG5_int *pleft, MMG
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
  * \return 1 if success, 0 if fail.

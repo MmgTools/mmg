@@ -39,7 +39,7 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh.
+ * \param mesh pointer to the mesh.
  *
  * Reset mesh->info.isoref vertex and tetra references to 0.
  *
@@ -96,8 +96,8 @@ int MMG3D_resetRef_lssurf(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set function.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set function.
  * \return 1 if success, 0 if fail.
  *
  * Snap values of the level set function very close to 0 to exactly 0,
@@ -147,9 +147,9 @@ int MMG3D_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
- * \param met pointer toward a metric (non-mandatory).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
+ * \param met pointer to a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the trace of the implicit function
@@ -409,8 +409,8 @@ int MMG3D_cuttet_lssurf(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
  * \return 1.
  *
  * Set references to surface triangles according to the sign of the level set function.

@@ -37,9 +37,9 @@
 #include "inlined_functions_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param m pointer toward the metric at triangle vertices.
- * \param ptt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param m pointer to the metric at triangle vertices.
+ * \param ptt pointer to the triangle structure.
  * \return The double of the triangle area.
  *
  * Compute the double of the area of the surface triangle \a ptt with respect to
@@ -112,9 +112,9 @@ double MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param ptt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param ptt pointer to the triangle structure.
  * \return The double of the triangle area.
  *
  * Compute the double of the area of the surface triangle \a ptt with respect to
@@ -157,8 +157,8 @@ double MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param ptt pointer toward the triangle structure.
+ * \param mesh pointer to the mesh structure.
+ * \param ptt pointer to the triangle structure.
  * \param ma metric at triangle vertex.
  * \param mb metric at triangle vertex.
  * \param mc metric at triangle vertex.
@@ -217,8 +217,8 @@ double MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ismet 1 if user provided metric.
  *
  * Search for points with unintialized metric and define anisotropic size at
@@ -272,8 +272,8 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
 
 /**
  * \param k index of the tetrahedra from which we come.
- * \param p0 pointer toward the point on which we want to def the metric.
- * \param i0 pointer toward the local index of the point in tria.
+ * \param p0 pointer to the point on which we want to def the metric.
+ * \param i0 pointer to the local index of the point in tria.
  * \param b control polygon of triangle.
  * \param r rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
@@ -418,12 +418,12 @@ void MMG5_fillDefmetregSys( MMG5_int k, MMG5_pPoint p0, int i0, MMG5_Bezier b,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param r pointer toward the rotation matrix.
+ * \param mesh pointer to the mesh structure.
+ * \param r pointer to the rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
  * \param tAA matrix of the system to solve.
  * \param tAb second member.
- * \param m pointer toward the metric.
+ * \param m pointer to the metric.
  * \param isqhmax maximum size for edge.
  * \param isqhmin minimum size for edge.
  * \param hausd hausdorff value at point.
@@ -518,14 +518,14 @@ int MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param p0 pointer toward the point on which we want to define the metric.
+ * \param mesh pointer to the mesh structure.
+ * \param p0 pointer to the point on which we want to define the metric.
  * \param ipref table containing the indices of the edge extremities.
- * \param r pointer toward the rotation matrix.
+ * \param r pointer to the rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
  * \param tAA matrix of the system to solve.
  * \param tAb second member.
- * \param m pointer toward the metric.
+ * \param m pointer to the metric.
  * \param isqhmax maximum size for edge.
  * \param isqhmin minimum size for edge.
  * \param hausd hausdorff value at point (unused).
@@ -712,10 +712,10 @@ int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, MMG5_int ipref[2],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param p0 pointer toward the point at which we define the metric.
+ * \param mesh pointer to the mesh structure.
+ * \param p0 pointer to the point at which we define the metric.
  * \param idp global index of the point at which we define the metric.
- * \param iprid pointer toward the two extremities of the ridge.
+ * \param iprid pointer to the two extremities of the ridge.
  * \param isqhmin minimum edge size.
  * \param isqhmax maximum edge size.
  * \return the computed ridge size in the tangent direction.
@@ -815,10 +815,10 @@ double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, MMG5_int idp,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param i0 local index in the face of the point on which we want to compute
  * the metric
- * \param bcu pointer toward the barycentric coordinates of vector \a u in the
+ * \param bcu pointer to the barycentric coordinates of vector \a u in the
  * looked face.
  * \param b bezier control polygon for the looked face.
  * \param isqhmin minimum edge size.
@@ -953,9 +953,9 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param met pointer toward the metric structure.
- * \param pt pointer toward a triangle.
+ * \param mesh pointer to the mesh.
+ * \param met pointer to the metric structure.
+ * \param pt pointer to a triangle.
  * \param np1 global index of the first extremity of the edge.
  * \param np2 global index of the second extremity of the edge.
  * \return -1 if no gradation is needed, else index of graded point.
@@ -1311,7 +1311,7 @@ MMG5_int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_i
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param m first matrix
  * \param n second matrix
  * \param dm eigenvalues of m in the coreduction basis (to fill)
@@ -1401,7 +1401,7 @@ int MMG5_simred2d(MMG5_pMesh mesh,double *m,double *n,double dm[2],
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param m first matrix
  * \param n second matrix
  * \param dm eigenvalues of m in the coreduction basis (to fill)
@@ -1569,7 +1569,7 @@ void MMG5_sort_simred( int8_t dim,double *dm,double *dn,double *vp,
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param mex first symmetric test matrix
  * \param nex second symmetric test matrix
  * \param dm diagonalization of the first matrix on the reduction basis
@@ -1647,7 +1647,7 @@ int MMG5_test_simred2d(MMG5_pMesh mesh,double *mex,double *nex,double *dmex,doub
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param mex first symmetric test matrix
  * \param nex second symmetric test matrix
  * \param dm diagonalization of the first matrix on the reduction basis
@@ -1931,9 +1931,9 @@ int MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]) {
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param met pointer toward the metric structure.
- * \param pt pointer toward the processed triangle.
+ * \param mesh pointer to the mesh.
+ * \param met pointer to the metric structure.
+ * \param pt pointer to the processed triangle.
  * \param npmaster edge extremity that cannot be modified
  * \param npslave edge extremity to modify to respect the gradation.
  *
@@ -2191,8 +2191,8 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_int
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * \return 1 if success, 0 if fail.
  *
@@ -2246,8 +2246,8 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param it number of performed iteration (to fill)
  *
  * \return nup, the number of points updated.
@@ -2311,8 +2311,8 @@ MMG5_int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 1
  *
  *
@@ -2368,8 +2368,8 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         /* Impose the gradation to npslave from npmaster: coming from mmgs,
-         * MMG5_grad2metreq_ani is a pointer toward MMG5_grad2metSurfreq,
-         * comming from mmg2d, it is a pointer toward MMG2D_grad2metreq_ani */
+         * MMG5_grad2metreq_ani is a pointer to MMG5_grad2metSurfreq,
+         * comming from mmg2d, it is a pointer to MMG2D_grad2metreq_ani */
         ier = MMG5_grad2metreq_ani(mesh,met,pt,npmaster,npslave);
 
         if ( ier ) {

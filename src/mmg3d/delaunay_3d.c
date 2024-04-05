@@ -126,10 +126,10 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int iel,int i,MMG5_
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
  * \param ip index of the point to insert.
- * \param list pointer toward the list of the tetra in the cavity (computed by
+ * \param list pointer to the list of the tetra in the cavity (computed by
  * \ref MMG5_cavity).
  * \param ilist number of tetra inside the cavity.
  * \return 1 if sucess, 0 or -1 if fail.
@@ -336,8 +336,8 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,int64_t *list,int ilis
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the met structure
+ * \param mesh pointer to the mesh structure
+ * \param met pointer to the met structure
  * \param ip index of the point to insert
  * \param list poiner toward the cavity of the point
  * \param ilist number of elts in the cavity
@@ -462,8 +462,8 @@ static int MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int64_t* lis
 
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the met structure
+ * \param mesh pointer to the mesh structure
+ * \param met pointer to the met structure
  * \param ip index of the point to insert
  * \param list poiner toward the cavity of the point
  * \param ilist number of elts in the cavity
@@ -565,11 +565,11 @@ MMG5_correction_iso(MMG5_pMesh mesh,int ip,int64_t *list,int ilist,int nedep,dou
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param iel tetra index.
  * \param ip point local index in \a iel.
- * \param list pointer toward the list of tetra in the shell of edge where
+ * \param list pointer to the list of tetra in the shell of edge where
  * ip will be inserted.
  * \param lon number of tetra in the list.
  * \return ilist number of tetra inside the cavity or -ilist if one of the tet
@@ -725,11 +725,11 @@ int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel,int ip,int64_t* l
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param iel tetra index.
  * \param ip point local index in \a iel.
- * \param list pointer toward the list of tetra in the shell of edge where
+ * \param list pointer to the list of tetra in the shell of edge where
  * ip will be inserted.
  * \param lon number of tetra in the list.
  * \return ilist number of tetra inside the cavity or -ilist if one of the tet

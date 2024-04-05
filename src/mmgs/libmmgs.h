@@ -21,15 +21,63 @@
 ** =============================================================================
 */
 
+/*
+ * This file defines the C and Fortran headers of the mmgs API, and
+ * their Doxygen documentation.
+ *
+ * NOTES FOR DEVELOPERS:
+ *
+ * - The Fortran headers are generated from comment lines that start with '* >'.
+ *   They must match the C declarations.
+ *
+ * - We cannot handle enum types in the Fortran version so enums are replaced
+ *   by ints in both versions.
+ *
+ * - To keep the genheader program working, don't break line between an enum
+ *   name and the opening brace (it creates errors under windows)
+ *
+ * - Since Mmg version 5,
+ * -- data structures and parameters that are common between mmg3d, mmg2d
+ *    and mmgs use the MMG5_ prefix;
+ * -- API functions should have an MMG3D_, MMG2D_, or MMGS_ prefix,
+ *    depending on the library; and
+ * -- some MMG5_ API functions exists but they are common to the
+ *    three libraries.
+ *
+ */
+
 /**
  * \file mmgs/libmmgs.h
- * \brief API headers for the mmgs library
+ * \ingroup API
+ * \brief API headers and documentation for the mmgs library
  * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning To keep the genheader working, don't break line between the enum
- * name and the opening brace (it creates errors under windows)
+ *
+ * These are the API functions for the mmgs library. These functions allow to
+ * load and save meshes and data defined on meshes; add, extract, or modify mesh
+ * data; and to call the library functions that perform remeshing and level-set
+ * discretization.
+ *
+ * Meshes are here defined in terms of vertices and two-dimensional objects:
+ * triangles and quadrangles, which live in 3D space. Edges can also be
+ * represented. All of these \a entities can have a \a reference: an integer
+ * value that can serve as a group identifier. In addition mesh entities can
+ * have \a attributes such as "required" or "corner".
+ *
+ * Data defined on meshes can be for example functions that are meant for
+ * level-set discretization and metric tensors that will govern edge
+ * lengths. These data can be scalar, vector, or (symmetric) tensor-valued; and
+ * there can be more than one data item associated with a mesh entity. These
+ * data are often referred to as \a solutions.
+ *
+ * Two of the functions here are referred to as "programs", because they perform
+ * the tasks for which mmgs is meant: meshing and level-set discretization.  The
+ * other functions merely serve to load and save data and to perform pre- and
+ * post-processing. These programs actually behave much like independent
+ * programs: they send diagnostic output to stdout and in rare cases they may
+ * call the exit() function.
  *
  */
 
@@ -45,7 +93,7 @@ extern "C" {
 #include "mmg/common/libmmgtypes.h"
 
 /**
- * Maximum array size when storing adjacent points (or ball) of a vertex.
+ * Maximum array size when storing adjacent vertices (or ball) of a vertex.
  */
 #define MMGS_LMAX      1024
 
@@ -59,74 +107,75 @@ extern "C" {
  *
  */
 enum MMGS_Param {
-  MMGS_IPARAM_verbose,           /*!< [-1..10], Tune level of verbosity */
-  MMGS_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMGS_IPARAM_verbose,           /*!< [-1..10], Level of verbosity */
+  MMGS_IPARAM_mem,               /*!< [n/-1], Max memory size in MBytes or -1 to keep the default value */
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
-  MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
-  MMGS_IPARAM_isosurf,           /*!< [1/0], Level-set meshing on the surface part */
+  MMGS_IPARAM_iso,               /*!< [1/0], Enable level-set discretization */
+  MMGS_IPARAM_isosurf,           /*!< [1/0], Enable level-set discretization on the surface part */
   MMGS_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
   MMGS_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
-  MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
+  MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow vertex insertion */
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
-  MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
-  MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
-  MMGS_IPARAM_xreg,              /*!< [0/1], Disabled/enabled coordinates regularization */
+  MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow vertex relocation */
+  MMGS_IPARAM_nreg,              /*!< [0/1], Disable/enable regularization of normals */
+  MMGS_IPARAM_xreg,              /*!< [0/1], Disable/enable regularization by moving vertices */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_numberOfLSBaseReferences, /*!< [n], Number of base references for bubble removal */
-  MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in ls mode */
-  MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
-  MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMGS_IPARAM_numberOfMat,              /*!< [n], Number of material in level-set mode */
+  MMGS_IPARAM_numsubdomain,      /*!< [0/n], Save only subdomain n (0==all subdomains) */
+  MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off renumbering with Scotch */
   MMGS_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
-  MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
-  MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
-  MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
-  MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
-  MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-  MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
-  MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
-  MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
-  MMGS_DPARAM_xreg,              /*!< [val], Value of relaxation parameter for coordinates regularization (0<val<1) */
-  MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
+  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritings of sizes at required vertices (advanced usage) */
+  MMGS_DPARAM_angleDetection,    /*!< [val], Threshold for angle detection */
+  MMGS_DPARAM_hmin,              /*!< [val], Minimal edge length */
+  MMGS_DPARAM_hmax,              /*!< [val], Maximal edge length */
+  MMGS_DPARAM_hsiz,              /*!< [val], Constant edge length */
+  MMGS_DPARAM_hausd,             /*!< [val], Global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  MMGS_DPARAM_hgrad,             /*!< [val], Gradation */
+  MMGS_DPARAM_hgradreq,          /*!< [val], Gradation on required entites (advanced usage) */
+  MMGS_DPARAM_ls,                /*!< [val], Function value where the level set is to be discretized */
+  MMGS_DPARAM_xreg,              /*!< [val], Relaxation parameter for coordinate regularization (0<val<1) */
+  MMGS_DPARAM_rmc,               /*!< [-1/val], Remove small disconnected components in level-set mode */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
 
-/*----------------------------- functions header -----------------------------*/
+/*----------------------------- function headers -----------------------------*/
 /* Initialization functions */
 /* init structures */
 /**
+ * \brief Initialize a mesh structure and optionally the associated solution and
+ * metric structures.
+ *
  * \param starter dummy argument used to initialize the variadic argument list
  * \param ... variadic arguments.
  *
  * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
- * For the MMGS_mmgsls function, you need
+ * For the \ref MMGS_mmgsls function, you need
  * to call the \a MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
- * \return 1 if success, 0 if fail
+ * \return 1 on success, 0 on failure
  *
- * MMG structures allocation and initialization.
- *
- * \remark No fortran interface to allow variadic arguments.
+ * \remark No fortran interface, to allow variadic arguments.
  *
  */
 LIBMMGS_EXPORT int MMGS_Init_mesh(const int starter,...);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \brief Initialize file names to their default values.
  *
- * Initialize file names to their default values.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_INIT_FILENAMES(mesh,sol)\n
@@ -135,8 +184,11 @@ LIBMMGS_EXPORT int MMGS_Init_mesh(const int starter,...);
  *
  */
 LIBMMGS_EXPORT void  MMGS_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Initialize the input parameters.
+ *
+ * \param mesh pointer to the mesh structure.
  *
  * Initialization of the input parameters (stored in the Info structure).
  *
@@ -150,11 +202,11 @@ LIBMMGS_EXPORT void  MMGS_Init_parameters(MMG5_pMesh mesh);
 
 /* init file names */
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Set the name of the input mesh.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param meshin input mesh name.
  * \return 1.
- *
- * Set the name of input mesh.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_INPUTMESHNAME(mesh,meshin,strlen0,retval)\n
@@ -166,12 +218,13 @@ LIBMMGS_EXPORT void  MMGS_Init_parameters(MMG5_pMesh mesh);
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Set the name of the output mesh file.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param meshout name of the output mesh file.
  * \return 1.
- *
- * Set the name of output mesh file.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_OUTPUTMESHNAME(mesh,meshout,strlen0,retval)\n
@@ -183,13 +236,14 @@ LIBMMGS_EXPORT int  MMGS_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \brief Set the name of the input solution file.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param solin name of the input solution file.
  * \return 1.
- *
- * Set the name of input solution file.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_INPUTSOLNAME(mesh,sol,solin,strlen0,retval)\n
@@ -201,13 +255,14 @@ LIBMMGS_EXPORT int  MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param solout name of the output solution file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Set the name of the output solution file.
  *
- *  Set the name of output solution file.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
+ * \param solout name of the output solution file.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen0,retval)\n
@@ -219,12 +274,13 @@ LIBMMGS_EXPORT int  MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const c
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Set the name of the input parameter file.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param fparamin name of the input parameter file.
  * \return 1.
- *
- * Set the name of input parameter file.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_INPUTPARAMNAME(mesh,fparamin,strlen0,retval)\n
@@ -239,15 +295,17 @@ LIBMMGS_EXPORT int  MMGS_Set_inputParamName(MMG5_pMesh mesh, const char* fparami
 
 /* init structure sizes */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typEntity type of solutions entities (vertices, triangles...).
- * \param np number of solutions.
- * \param typSol type of solution (scalar, vectorial...).
- * \return 0 if failed, 1 otherwise.
+ * \brief Initialize an array of solution fields: set dimension, types and
+ * number of fields.
  *
- * Initialize an array of solutions field: set dimension, types and number of
- * data.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
+ * \param typEntity types of solution entities (vertices, triangles, ...
+ *        see \ref MMG5_entities for possible values).
+ * \param np number of solutions.
+ * \param typSol type of solution (scalar, vectorial, ..., see \ref MMG5_type for possible values)
+ * \return 0 on failure, 1 otherwise.
+ *
  * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
@@ -260,17 +318,19 @@ LIBMMGS_EXPORT int  MMGS_Set_inputParamName(MMG5_pMesh mesh, const char* fparami
  *
  */
  LIBMMGS_EXPORT int  MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, MMG5_int np, int typSol);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an allocatable sol structure.
+ * \brief Initialize an array of solution fields defined at vertices: set
+ * dimension, types and number of fields.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to an allocatable sol structure.
  * \param nsols number of solutions per entity
  * \param nentities number of entities
  * \param typSol    Array of size nsol listing the type of the solutions
- *                  (scalar, vectorial...).
- * \return 0 if failed, 1 otherwise.
+ *                  (scalar, vectorial, ..., see \ref MMG5_type for possible values)
+ * \return 0 on failure, 1 otherwise.
  *
- * Initialize an array of solutions field defined at vertices: set dimension,
- * types and number of data.
  * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
@@ -285,16 +345,19 @@ LIBMMGS_EXPORT int  MMGS_Set_inputParamName(MMG5_pMesh mesh, const char* fparami
  */
 LIBMMGS_EXPORT int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                                MMG5_int nentities, int *typSol);
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Set the number of vertices, triangles and edges of the
+ * mesh and allocate the associated tables.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param np number of vertices.
  * \param nt number of triangles.
  * \param na number of edges.
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set the number of vertices, triangles and edges of the
- * mesh and allocate the associated tables. If call twice, reset the
- * whole mesh to realloc it at the new size
+ * If called again, this function resets the
+ * whole mesh to reallocate it at the new size
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_MESHSIZE(mesh,np,nt,na,retval)\n
@@ -306,18 +369,21 @@ LIBMMGS_EXPORT int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,i
  */
 LIBMMGS_EXPORT int  MMGS_Set_meshSize(MMG5_pMesh mesh, MMG5_int np, MMG5_int nt, MMG5_int na);
 
-/* init structure datas */
+/* init structure data */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param c2 coordinate of the point along the third dimension.
- * \param ref point reference.
- * \param pos position of the point in the mesh.
+ * \brief Set the coordinates of a single vertex.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param c0 coordinate of the vertex along the first dimension.
+ * \param c1 coordinate of the vertex along the second dimension.
+ * \param c2 coordinate of the vertex along the third dimension.
+ * \param ref vertex reference.
+ * \param pos position of the vertex in the mesh.
  * \return 1.
  *
- * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure (\a pos from 1 to nb_vertices included).
+ * \brief Set vertex coordinates \a c0, \a c1,\a c2 and reference \a ref at
+ * position \a pos in the mesh structure (\a pos from 1 to the number of
+ * vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
@@ -329,17 +395,17 @@ LIBMMGS_EXPORT int  MMGS_Set_meshSize(MMG5_pMesh mesh, MMG5_int np, MMG5_int nt,
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-                     double c2, MMG5_int ref,MMG5_int pos);
+                     double c2, MMG5_int ref, MMG5_int pos);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param vertices table of the points coor.
- * The coordinates of the \f$i^{th}\f$ point are stored in
- * vertices[(i-1)*3]\@3.
- * \param refs table of points references.
- * The ref of the \f$i^th\f$ point is stored in refs[i-1].
- * \return 1.
+ * \brief Set the coordinates and references of all vertices in a mesh
  *
- * Set vertices coordinates and references in mesh structure
+ * \param mesh pointer to the mesh structure.
+ * \param vertices array of vertex coordinates in the order
+ * \f$[x_1, y_1, z_1, x_2, \ldots, z_N]\f$ where \f$N\f$ is the number of vertices.
+ * \param refs array of references.
+ * The reference of vertex \f$i\f$ is stored in refs[\f$i-1\f$].
+ * \return 1.
  *
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs array)
@@ -352,17 +418,21 @@ LIBMMGS_EXPORT int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  *
  */
  LIBMMGS_EXPORT int  MMGS_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG5_int *refs);
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Set the coordinates and reference of a single triangle.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param v0 first vertex of triangle.
  * \param v1 second vertex of triangle.
  * \param v2 third vertex of triangle.
  * \param ref triangle reference.
  * \param pos triangle position in the mesh.
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.(\a pos from 1 to nb_tria included).
+ * This function sets a triangle with vertices \a v0, \a v1, \a v2 and reference
+ * \a ref at position \a pos in the mesh structure (\a pos from 1 to the number
+ * of triangles included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
@@ -374,15 +444,16 @@ LIBMMGS_EXPORT int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  */
 LIBMMGS_EXPORT int  MMGS_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
                                       MMG5_int v2, MMG5_int ref,MMG5_int pos);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param tria pointer toward the table of the tria vertices
- * Vertices of the \f$i^{th}\f$ tria are stored in tria[(i-1)*3]\@3.
- * \param refs pointer toward the table of the triangle references.
- * refs[i-1] is the ref of the \f$i^{th}\f$ tria.
- * \return 0 if failed, 1 otherwise.
+ * \brief Set the vertices and references of all triangles in the mesh.
  *
- * Set vertices and references of the mesh triangles.
+ * \param mesh pointer to the mesh structure.
+ * \param tria pointer to an array of vertex numbers
+ * Vertices of the \f$i^{th}\f$ triangles are stored in tria[(i-1)*3]\@3.
+ * \param refs pointer to an array of triangle references.
+ * refs[i-1] is the reference of the \f$i^{th}\f$ triangle.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs array)
@@ -394,16 +465,19 @@ LIBMMGS_EXPORT int  MMGS_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
  *
  */
   LIBMMGS_EXPORT int  MMGS_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs);
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Set the vertices and reference of one edge in the mesh.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param v0 first extremity of the edge.
  * \param v1 second extremity of the edge.
  * \param ref edge reference.
  * \param pos edge position in the mesh.
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set edges of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure (\a pos from 1 to nb_edges included).
+ * Assigns vertices \a v0, \a v1 and reference \a ref to the edge at position \a
+ * pos in the mesh structure (\a pos from 1 to the number of edges included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
@@ -414,12 +488,16 @@ LIBMMGS_EXPORT int  MMGS_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int ref,MMG5_int pos);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
+ * \brief Assign the "corner" attribute to a vertex.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param k vertex number.
  * \return 1.
  *
- * Set corner at point \a pos (\a pos from 1 to nb_vertices included).
+ * This function sets the corner attribute at vertex \a pos (\a pos from 1 to
+ * the number of vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CORNER(mesh,k,retval)\n
@@ -430,12 +508,16 @@ LIBMMGS_EXPORT int  MMGS_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_corner(MMG5_pMesh mesh, MMG5_int k);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
+ * \brief Remove the "corner" attribute from a vertex.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param k vertex number.
  * \return 1.
  *
- * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ * This function removes the corner attribute from vertex \a pos (from 1 to the
+ * number of vertices included).
  *
  * \remark Fortran interface
  *
@@ -447,12 +529,16 @@ LIBMMGS_EXPORT int  MMGS_Set_corner(MMG5_pMesh mesh, MMG5_int k);
  *
  */
 LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
+ * \brief Assign the "required" attribute to a vertex.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param k vertex number.
  * \return 1.
  *
- * Set point \a k as required.
+ * This function sets the required attribute at vertex \a k.
+ * Vertices with this attribute will not be modified by the remesher.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_REQUIREDVERTEX(mesh,k,retval)\n
@@ -463,12 +549,15 @@ LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
  *
  */
  LIBMMGS_EXPORT int  MMGS_Set_requiredVertex(MMG5_pMesh mesh, MMG5_int k);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
+ * \brief Remove the "required" attribute from a vertex.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param k vertex number.
  * \return 1.
  *
- * Remove required attribute from point \a k.
+ * This function removes the required attribute from vertex \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
@@ -481,11 +570,13 @@ LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
   LIBMMGS_EXPORT int  MMGS_Unset_requiredVertex(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Assign the "required" attribute to a triangle.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
- * Set triangle \a k as required.
+ * This function sets the required attribute at triangle \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
@@ -498,11 +589,13 @@ LIBMMGS_EXPORT int  MMGS_Unset_corner(MMG5_pMesh mesh, MMG5_int k);
 LIBMMGS_EXPORT int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Remove the "required" attribute from a vertex.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
- * Remove required attribute from triangle \a k.
+ * This function removes the required attribute from triangle \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
@@ -515,11 +608,14 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
  LIBMMGS_EXPORT int  MMGS_Unset_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Assign the "ridge" attribute to an edge.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param k edge index.
  * \return 1.
  *
- * Set ridge at edge \a k.
+ * This function gives the ridge attribute to edge \a k. This influences how
+ * this edge is treated by the remesher.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_RIDGE(mesh,k,retval)\n
@@ -532,11 +628,13 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, MMG5_int k);
 LIBMMGS_EXPORT int  MMGS_Set_ridge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Remove the "ridge" attribute from an edge.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param k edge index.
  * \return 1.
  *
- * Remove ridge attribute at edge \a k.
+ * This function removes the ridge attribute from edge \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_RIDGE(mesh,k,retval)\n
@@ -549,11 +647,14 @@ LIBMMGS_EXPORT int  MMGS_Set_ridge(MMG5_pMesh mesh, MMG5_int k);
 LIBMMGS_EXPORT int  MMGS_Unset_ridge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Assign the "required" attribute to an edge.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param k edge index.
  * \return 1.
  *
- * Set edge \a k as required.
+ * This function makes edge \a k a required edge. Required edges will not be
+ * modified by the remesher.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_REQUIREDEDGE(mesh,k,retval)\n
@@ -566,11 +667,13 @@ LIBMMGS_EXPORT int  MMGS_Unset_ridge(MMG5_pMesh mesh, MMG5_int k);
 LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \brief Remove the "required" attribute from an edge.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param k edge index.
  * \return 1.
  *
- * Remove required attribute from edge \a k.
+ * This function removes the "required" attribute from edge \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_UNSET_REQUIREDEDGE(mesh,k,retval)\n
@@ -583,13 +686,15 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
   LIBMMGS_EXPORT int  MMGS_Unset_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param edges pointer toward the array of edges.
- * Vertices of the \f$i^{th}\f$ edge are stored in edge[(i-1)*2]\@2.
- * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
- * \return 0 if failed, 1 otherwise.
+ * \brief Set the vertices and references of all edges in a mesh.
  *
- * Set vertices and references of the mesh edges.
+ * \param mesh pointer to the mesh structure.
+ * \param edges pointer to an array of edges.
+ *              The vertices of edge i should be given in
+ *              edges[(i-1)*2] and edges[(i-1)*2+1].
+ * \param refs pointer to an array of references.
+ *             refs[i-1] is the reference of edge i.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGES(mesh,edges,refs,retval)\n
@@ -600,16 +705,17 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
  *
  */
  LIBMMGS_EXPORT int MMGS_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, MMG5_int* refs);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param edges pointer toward the array of edges.
- * Vertices of the \f$i^{th}\f$ edge are stored in edge[(i-1)*2]\@2.
- * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
+ * \brief Get vertices, references and attributes of all edges in the mesh.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param edges pointer to an array of edges.
+ *   The vertices of edge i are stored in edges[(i-1)*2] and edges[(i-1)*2+1].
+ * \param refs edge references. refs[i-1] is the reference of edge \a i.
  * \param areRidges 1 if the edge is a ridge, 0 otherwise.
  * \param areRequired 1 if the edge is required, 0 otherwise.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vertices and references of the mesh edges.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
@@ -624,15 +730,17 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
                                    int *areRidges,int *areRequired);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param k point index
- * \param n0 x componant of the normal at point \a k.
- * \param n1 y componant of the normal at point \a k.
- * \param n2 z componant of the normal at point \a k.
+ * \brief Set the normal orientation at a single vertex.
  *
- * \return 1 if success.
+ * \param mesh pointer to the mesh structure.
+ * \param k vertex index
+ * \param n0 x componant of the normal at vertex \a k.
+ * \param n1 y componant of the normal at vertex \a k.
+ * \param n2 z componant of the normal at vertex \a k.
  *
- * Set normals (n0,n1,n2) at point \a k.
+ * \return 1 on success.
+ *
+ * Set normal (n0,n1,n2) at vertex \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
@@ -646,12 +754,12 @@ LIBMMGS_EXPORT int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, MMG5_int k);
 LIBMMGS_EXPORT int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double n0, double n1, double n2) ;
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param k index of the triangle for which we want to get the quality.
- * \return the computed quality or 0. if fail.
+ * \brief Get the quality measure of a triangle.
  *
- * Get quality of tria \a k.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param k index of the triangle for which we want to get the quality.
+ * \return the computed quality or 0 on failure.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TRIANGLEQUALITY(mesh,met,k,retval)\n
@@ -661,16 +769,18 @@ LIBMMGS_EXPORT int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double 
  * >   END SUBROUTINE\n
  *
  */
-  double MMGS_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k);
+  double MMGS_Get_triangleQuality(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k);
 
 /**
- * \param met pointer toward the sol structure.
+ * \brief Set a single element of a scalar solution structure.
+ *
+ * \param met pointer to the sol structure.
  * \param s solution scalar value.
  * \param pos position of the solution in the mesh.
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set scalar value \a s at position \a pos in solution structure
- * (\a pos from 1 to nb_vertices included).
+ * This function sets the scalar value \a s at position \a pos in the solution
+ * structure (\a pos from 1 to the number of vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SCALARSOL(met,s,pos,retval)\n
@@ -681,14 +791,15 @@ LIBMMGS_EXPORT int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double 
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_Set_scalarSol(MMG5_pSol met, double s,MMG5_int pos);
+LIBMMGS_EXPORT int  MMGS_Set_scalarSol(MMG5_pSol met, double s, MMG5_int pos);
+
 /**
- * \param met pointer toward the sol structure.
- * \param s table of the scalar solutions values.
- * s[i-1] is the solution at vertex i.
- * \return 0 if failed, 1 otherwise.
+ * \brief Set the values of all elements of a scalar solution structure.
  *
- * Set scalar solutions at mesh vertices.
+ * \param met pointer to the sol structure.
+ * \param s array of scalar solutions values.
+ *  s[i-1] is the solution at vertex i.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SCALARSOLS(met,s,retval)\n
@@ -699,17 +810,20 @@ LIBMMGS_EXPORT int  MMGS_Set_scalarSol(MMG5_pSol met, double s,MMG5_int pos);
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_scalarSols(MMG5_pSol met, double *s);
+
 /**
- * \param met pointer toward the sol structure.
+ * \brief Set a single element of a vector solution structure.
+ *
+ * \param met pointer to the sol structure.
  * \param vx x value of the vectorial solution.
  * \param vy y value of the vectorial solution.
  * \param vz z value of the vectorial solution.
  * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
- * structure.
- * (\a pos from 1 to nb_vertices included).
+ * This function sets the vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos
+ * in the solution structure (\a pos from 1 to the number of vertices
+ * included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
@@ -721,13 +835,17 @@ LIBMMGS_EXPORT int  MMGS_Set_scalarSols(MMG5_pSol met, double *s);
  *
  */
 LIBMMGS_EXPORT int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, MMG5_int pos);
+
 /**
- * \param met pointer toward the sol structure.
- * \param sols table of the vectorial solutions
- * sols[3*(i-1)]\@3 is the solution at vertex i
- * \return 0 if failed, 1 otherwise.
+ * \brief Set all elements of a vector solution structure.
  *
- * Set vectorial solutions at mesh vertices
+ * \param met pointer to the sol structure.
+ * \param sols array of vectorial solutions
+ * sols[3*(i-1)]\@3 is the solution at vertex i
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function sets a vector-valued solution at each element of solution
+ * structure.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VECTORSOLS(met,sols,retval)\n
@@ -738,8 +856,11 @@ LIBMMGS_EXPORT int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double
  *
  */
 LIBMMGS_EXPORT int MMGS_Set_vectorSols(MMG5_pSol met, double *sols);
+
 /**
- * \param met pointer toward the sol structure.
+ * \brief Set a single element of a tensor solution structure.
+ *
+ * \param met pointer to the sol structure.
  * \param m11 value of the tensorial solution at position (1,1) in the tensor.
  * \param m12 value of the tensorial solution at position (1,2) in the tensor.
  * \param m13 value of the tensorial solution at position (1,3) in the tensor.
@@ -747,11 +868,10 @@ LIBMMGS_EXPORT int MMGS_Set_vectorSols(MMG5_pSol met, double *sols);
  * \param m23 value of the tensorial solution at position (2,3) in the tensor.
  * \param m33 value of the tensorial solution at position (3,3) in the tensor.
  * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set tensorial values at position \a pos in solution
- * structure.
- * (\a pos from 1 to nb_vertices included).
+ * This function sets a tensor value at position \a pos in solution
+ * structure (\a pos from 1 to the number of vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
@@ -764,13 +884,14 @@ LIBMMGS_EXPORT int MMGS_Set_vectorSols(MMG5_pSol met, double *sols);
  */
 LIBMMGS_EXPORT int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                                       double m22,double m23, double m33, MMG5_int pos);
+
 /**
- * \param met pointer toward the sol structure.
- * \param sols table of the tensorial solutions.
- * sols[6*(i-1)]\@6 is the solution at vertex i
- * \return 0 if failed, 1 otherwise.
+ * \brief Set all elements of a tensor solution structure.
  *
- * Set tensorial values by array.
+ * \param met pointer to the sol structure.
+ * \param sols array of tensorial solutions.
+ * sols[6*(i-1)]\@6 is the solution at vertex i
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TENSORSOLS(met,sols,retval)\n
@@ -781,16 +902,20 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, doub
  *
  */
 LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
+
 /**
- * \param sol pointer toward the array of solutions
+ * \brief Set a single element of one out of multiple solution fields that are defined on vertices.
+ *
+ * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to set.
  * \param s solution(s) at mesh vertex \a pos.
  * \param pos index of the vertex on which we set the solution.
  *
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array and at
- * position \pos (\a pos from 1 to nb_vertices included and i from 1 to nb_sols).
+ * Set values of the solution at field \a i of the solution array and at
+ * position \pos (\a pos from 1 to the number of vertices included and \a i from 1
+ * to the number of solutions). The type of solution is determined from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -802,18 +927,21 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int  MMGS_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
+  LIBMMGS_EXPORT int  MMGS_Set_ithSol_inSolsAtVertices(MMG5_pSol sol, int i, double* s, MMG5_int pos);
+
 /**
- * \param sol pointer toward the array of solutions
+ * \brief Set all elements of one out of multiple solution fields that are defined on vertices.
+ *
+ * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to set.
- * \param s table of the solutions at mesh vertices. The solution at vertex \a k
+ * \param s array of solutions at mesh vertices. The solution at vertex \a k
  * is given by s[k-1] for a scalar sol, s[3*(k-1)]\@3 for a vectorial solution
  * and s[6*(k-1)]\@6 for a tensor solution.
  *
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array (\a i from
- * 1 to nb_sols).
+ * Set values of the solution at field \a i of the solution array (\a i from
+ * 1 to the number of solutions). The type of solution is determined from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -828,12 +956,16 @@ LIBMMGS_EXPORT int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
 
 /* check init */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \return 0 if failed, 1 otherwise.
+ * \brief Check if the numbers of given entities match with mesh and solution
+ * size and check mesh data.
  *
- * Check if the number of given entities match with mesh and sol size
- * (not mandatory) and check mesh datas.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function checks if the numbers of given entities match with the mesh and
+ * solution sizes and checks the mesh data. Use of this function is not
+ * mandatory.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_CHK_MESHDATA(mesh,met,retval)\n
@@ -846,13 +978,16 @@ LIBMMGS_EXPORT int MMGS_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
 
 /** functions to set parameters */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure (unused).
- * \param iparam integer parameter to set (see \a MMGS_Param structure).
- * \param val value for the parameter.
- * \return 0 if failed, 1 otherwise.
+ * \brief set an integer parameter of the remesher
  *
- * Set integer parameter \a iparam at value \a val.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure (unused).
+ * \param iparam integer parameter to set (see \ref MMGS_Param for a
+ *   list of parameters that can be set).
+ * \param val value for the parameter.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function sets integer parameter \a iparam to value \a val.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_IPARAMETER(mesh,sol,iparam,val,retval)\n
@@ -865,14 +1000,18 @@ LIBMMGS_EXPORT int MMGS_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, MMG5_int val);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure (unused).
- * \param dparam double parameter to set (see \a MMGS_Param structure).
- * \param val value of the parameter.
- * \return 0 if failed, 1 otherwise.
+ * \brief set a real-valued parameter of the remesher
  *
- * Set double parameter \a dparam at value \a val.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure (unused).
+ * \param dparam double parameter to set (see \ref MMGS_Param for a
+ *    list of parameters that can be set).
+ * \param val value of the parameter.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function sets the double parameter \a dparam to value \a val.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_DPARAMETER(mesh,sol,dparam,val,retval)\n
@@ -885,18 +1024,21 @@ LIBMMGS_EXPORT int  MMGS_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int ipara
  *
  */
 LIBMMGS_EXPORT int  MMGS_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \brief set a local parameter
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param typ type of entity (triangle, edge,...).
  * \param ref reference of the entity.
- * \param hmin minimal edge size.
- * \param hmax maximal edge size.
- * \param hausd value of the Hausdorff number.
- * \return 0 if failed, 1 otherwise.
+ * \param hmin minimal edge length.
+ * \param hmax maximal edge length.
+ * \param Hausdorff distance.
+ * \return 0 on failure, 1 otherwise.
  *
- * Set local parameters: set the hausdorff value at \a hausd, the minmal edge
- * size value at \a hmin and the maximal edge size value at \a hmax for all
+ * Set local parameters: set the hausdorff distance at \a hausd, the minmal edge
+ * length at \a hmin and the maximal edge length at \a hmax for all
  * elements of type \a typ and reference \a ref.
  *
  * \remark Fortran interface:
@@ -913,36 +1055,44 @@ LIBMMGS_EXPORT int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int 
                                             double hmin, double hmax, double hausd);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param ref input tetra reference.
- * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
- * \param rin internal reference after ls discretization
- * \param rex external reference after ls discretization
- * \return 0 if failed, 1 otherwise.
+ * \brief Set the reference mapping for the elements of reference
+ *  \a ref in level-set discretization mode.
  *
- * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
+ * \param ref input triangle reference.
+ * \param split MMG5_MMAT_NoSplit if the entity must not be split, MMG5_MMAT_Split otherwise
+ * \param rmin reference for the negative side after LS discretization
+ * \param rplus reference for the positive side after LS discretization
+ * \return 0 on failure, 1 otherwise.
+ *
+ * With this function you can determine which references will be given to the
+ * triangles on both sides of the level set, after discretization. Negative and
+ * positive here refer to areas where the function is smaller or larger,
+ * respectively, than the isovalue of the level set.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
+ * >   SUBROUTINE MMGS_SET_MULTIMAT(mesh,sol,ref,split,rmin,rplus,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rin,rex\n
+ * >     INTEGER(MMG5F_INT), INTENT(IN):: ref,rmin,rplus\n
  * >     INTEGER, INTENT(IN)           :: split\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   LIBMMGS_EXPORT int  MMGS_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,
-                                        int split,MMG5_int rin, MMG5_int rex);
+                                        int split,MMG5_int rmin, MMG5_int rplus);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param br new level-set base reference.
- * \return 0 if failed, 1 otherwise.
+ * \brief Set a new level-set base reference.
  *
- * Set a new level-set base reference of ref \a br in ls discretization
- * mode. Based references are boundary conditions to which implicit domain can
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
+ * \param br new level-set base reference.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Set a new level-set base reference of ref \a br in level-set discretization
+ * mode. Base references are boundary conditions to which an implicit domain can
  * be attached. All implicit volumes that are not attached to listed base
  * references are deleted as spurious volumes by the \a rmc option.
  *
@@ -956,15 +1106,15 @@ LIBMMGS_EXPORT int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int 
  */
 LIBMMGS_EXPORT int  MMGS_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int br);
 
-/** recover datas */
+/** recover data */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param np pointer toward the number of vertices.
- * \param nt pointer toward the number of triangles.
- * \param na pointer toward the number of edges.
- * \return 1.
+ * \brief Get the number of vertices, triangles, and edges of the mesh.
  *
- * Get the number of vertices, triangles and edges of the mesh.
+ * \param mesh pointer to the mesh structure.
+ * \param np pointer to the number of vertices.
+ * \param nt pointer to the number of triangles.
+ * \param na pointer to the number of edges.
+ * \return 1.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_MESHSIZE(mesh,np,nt,na,retval)\n
@@ -975,15 +1125,18 @@ LIBMMGS_EXPORT int  MMGS_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5
  *
  */
 LIBMMGS_EXPORT int  MMGS_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* nt, MMG5_int* na);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typEntity pointer toward the type of entities to which solutions are applied.
- * \param np pointer toward the number of solutions.
- * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
- * \return 1.
+ * \brief Get the number of elements, dimension, and type of a solution.
  *
- * Get the solution number, dimension and type.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
+ * \param typEntity pointer to the type of entities to which solutions are applied.
+ *        (see \ref MMG5_entities for possible values)
+ * \param np pointer to the number of elements in the solution.
+ * \param typSol pointer to the type of the solution (\ref MMG5_Scalar, \ref MMG5_Vector,
+ *    \ref MMG5_Tensor, \ref MMG5_Notype)
+ * \return 1.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
@@ -996,17 +1149,18 @@ LIBMMGS_EXPORT int  MMGS_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* n
  */
 LIBMMGS_EXPORT int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, MMG5_int* np,
                                      int* typSol);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an array of sol structure.
+ * \brief Get the number of elements, type, and dimensions of several solutions defined on vertices.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to an array of sol structures.
  * \param nsols number of solutions per entity
- * \param nentities pointer toward the number of entities.
+ * \param nentities pointer to the number of entities.
  * \param typSol array of size MMG5_NSOL_MAX to store type of each solution
- * (scalar, vector..).
+ * (scalar, vectorial, ..., see \ref MMG5_type for possible values).
  *
  * \return 1.
- *
- * Get the solution number, dimension and type.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
@@ -1022,17 +1176,23 @@ LIBMMGS_EXPORT int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEnt
                                                   MMG5_int* nentities,int* typSol);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param c0 pointer toward the coordinate of the point along the first dimension.
- * \param c1 pointer toward the coordinate of the point along the second dimension.
- * \param c2 pointer toward the coordinate of the point along the third dimension.
- * \param ref pointer to the point reference.
- * \param isCorner pointer toward the flag saying if point is corner.
- * \param isRequired pointer toward the flag saying if point is required.
+ * \brief Get the coordinates \a c0, \a c1,\a c2 and reference \a ref of the
+ * next vertex of \a mesh.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param c0 pointer to the coordinate of the vertex along the first dimension.
+ * \param c1 pointer to the coordinate of the vertex along the second dimension.
+ * \param c2 pointer to the coordinate of the vertex along the third dimension.
+ * \param ref pointer to the vertex reference.
+ * \param isCorner pointer to the flag saying if the vertex is corner.
+ * \param isRequired pointer to the flag saying if the vertex is required.
  * \return 1.
  *
- * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
- * vertex of mesh.
+ * This function retrieves the coordinates \a c0, \a c1,\a c2, reference \a ref,
+ * and attributes of the next vertex of a mesh. It is meant to be used in a loop
+ * over all vertices. When this function has been called as many times as there
+ * are vertices, the internal loop counter will be reset. To obtain data for a
+ * specific vertex, the \ref MMGS_GetByIdx_vertex function can be used instead.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,retval)\n
@@ -1046,19 +1206,22 @@ LIBMMGS_EXPORT int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEnt
  */
 LIBMMGS_EXPORT int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, MMG5_int* ref,
                                     int* isCorner, int* isRequired);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param c0 pointer toward the coordinate of the point along the first dimension.
- * \param c1 pointer toward the coordinate of the point along the second dimension.
- * \param c2 pointer toward the coordinate of the point along the third dimension.
- * \param ref pointer to the point reference.
- * \param isCorner pointer toward the flag saying if point is corner.
- * \param isRequired pointer toward the flag saying if point is required.
- * \param idx index of point to get.
+ * \brief Get the coordinates and reference of a specific vertex in the mesh.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param c0 pointer to the coordinate of the vertex along the first dimension.
+ * \param c1 pointer to the coordinate of the vertex along the second dimension.
+ * \param c2 pointer to the coordinate of the vertex along the third dimension.
+ * \param ref pointer to the vertex reference.
+ * \param isCorner pointer to the flag saying if the vertex is corner.
+ * \param isRequired pointer to the flag saying if the vertex is required.
+ * \param idx index of vertex to get.
  * \return 1.
  *
- * Get coordinates \a c0, \a c1, \a c2 and reference \a ref of
- * vertex \a idx of mesh.
+ * This function retrieves the coordinates \a c0, \a c1, \a c2 and reference \a ref of
+ * vertex \a idx of mesh, as well as its "corner" and "required" attributes.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GETBYIDX_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,idx,retval)\n
@@ -1074,20 +1237,20 @@ LIBMMGS_EXPORT int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, dou
                                           int* isCorner, int* isRequired,MMG5_int idx);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param vertices pointer toward the table of the points coordinates.
- * The coordinates of the \f$i^{th}\f$ point are stored in
- * vertices[(i-1)*3]\@3.
- * \param refs pointer to the table of the point references.
- * The ref of the \f$i^th\f$ point is stored in refs[i-1].
- * \param areCorners pointer toward the table of the flags saying if
- * points are corners.
- * areCorners[i-1]=1 if the \f$i^{th}\f$ point is corner.
- * \param areRequired pointer toward the table of flags saying if points
- * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
- * \return 1.
+ * \brief Get the coordinates, references and attributes of all vertices in the mesh.
  *
- * Get the coordinates and references of the mesh vertices.
+ * \param mesh pointer to the mesh structure.
+ * \param vertices pointer to the array of coordinates.
+ * The coordinates of vertex \a i are stored in
+ * vertices[(i-1)*3]\@3.
+ * \param refs pointer to the array of vertex references.
+ * The ref of vertex \a i is stored in refs[i-1].
+ * \param areCorners pointer to the array of flags saying if
+ *   vertices are corners.
+ * areCorners[i-1]=1 if vertex \a i is corner.
+ * \param areRequired pointer to the table of flags saying if vertices
+ * are required. areRequired[i-1]=1 if vertex \a i is required.
+ * \return 1.
  *
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs,areCorners and areRequired arrays)
@@ -1103,17 +1266,23 @@ LIBMMGS_EXPORT int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, dou
  */
 LIBMMGS_EXPORT int  MMGS_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_int* refs,
                                       int* areCorners, int* areRequired);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param v0 pointer toward the first vertex of triangle.
- * \param v1 pointer toward the second vertex of triangle.
- * \param v2 pointer toward the third vertex of triangle.
- * \param ref pointer toward the triangle reference.
- * \param isRequired pointer toward the flag saying if triangle is required.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get the vertices, reference, and required attribute of the next
+ * triangle in the mesh.
  *
- * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
- * triangle of mesh.
+ * \param mesh pointer to the mesh structure.
+ * \param v0 pointer to the first vertex of the triangle.
+ * \param v1 pointer to the second vertex of the triangle.
+ * \param v2 pointer to the third vertex of the triangle.
+ * \param ref pointer to the triangle reference.
+ * \param isRequired pointer to the flag saying if the triangle is required.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function retrieves the vertices \a v0, \a v1, \a v2, reference \a ref,
+ * and required attribute \a isRequired of the next triangle of \a mesh. It is
+ * meant to be called in a loop over all triangles. When it has been called as
+ * many times as there are triangles, the internal loop counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TRIANGLE(mesh,v0,v1,v2,ref,isRequired,retval)\n
@@ -1124,20 +1293,22 @@ LIBMMGS_EXPORT int  MMGS_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_in
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref,
-                                      int* isRequired);
+LIBMMGS_EXPORT int  MMGS_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,
+                                       MMG5_int* ref, int* isRequired);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param tria pointer toward the table of the triangles vertices
- * Vertices of the \f$i^{th}\f$ tria are stored in tria[(i-1)*3]\@3.
- * \param refs pointer toward the table of the triangles references.
- * refs[i-1] is the ref of the \f$i^{th}\f$ tria.
- * \param areRequired pointer toward table of the flags saying if triangles
- * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ tria
- * is required.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get the vertices, references, and required attributes of all triangles
+ * in the mesh.
  *
- * Get vertices and references of the mesh triangles.
+ * \param mesh pointer to the mesh structure.
+ * \param tria pointer to an array of vertices
+ * Vertices of triangle \a i are stored in tria[(i-1)*3]\@3.
+ * \param refs pointer to the array of triangles references.
+ * refs[i-1] is the ref of triangle \a i.
+ * \param areRequired pointer to an array of flags saying if triangles
+ * are required. areRequired[i-1]=1 if triangle \a i
+ * is required.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface: (commentated in order to allow to pass
  * \%val(0) instead of the refs and areRequired arrays)
@@ -1153,15 +1324,20 @@ LIBMMGS_EXPORT int  MMGS_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v
 LIBMMGS_EXPORT int  MMGS_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int* refs,
                                        int* areRequired);
 /**
- * \param mesh pointer toward the mesh structure.
- * \param e0 pointer toward the first extremity of the edge.
- * \param e1 pointer toward the second  extremity of the edge.
- * \param ref pointer toward the edge reference.
- * \param isRidge pointer toward the flag saying if the edge is ridge.
- * \param isRequired pointer toward the flag saying if the edge is required.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get the vertices, reference, and attributes of the next edge in the mesh.
  *
- * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
+ * \param mesh pointer to the mesh structure.
+ * \param e0 pointer to the index of the first vertex of the edge.
+ * \param e1 pointer to the index of the second  vertex of the edge.
+ * \param ref pointer to the edge reference.
+ * \param isRidge pointer to the flag saying if the edge is ridge.
+ * \param isRequired pointer to the flag saying if the edge is required.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function retrieves the extremities \a e0, \a e1, reference \a ref, and
+ * attributes of the next edge of \a mesh. It is meant to be called in a loop
+ * over all edges. When it has been called as many times as there are edges in
+ * the mesh, the internal edge counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_EDGE(mesh,e0,e1,ref,isRidge,isRequired,retval)\n
@@ -1177,15 +1353,17 @@ LIBMMGS_EXPORT int  MMGS_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, M
                                   int* isRidge, int* isRequired);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param k point index
- * \param n0 x componant of the normal at point \a k.
- * \param n1 y componant of the normal at point \a k.
- * \param n2 z componant of the normal at point \a k.
+ * \brief Get the normal orientation at an edge.
  *
- * \return 1 if success.
+ * \param mesh pointer to the mesh structure.
+ * \param k vertex number
+ * \param n0 x componant of the normal at vertex \a k.
+ * \param n1 y componant of the normal at vertex \a k.
+ * \param n2 z componant of the normal at vertex \a k.
  *
- * Get normals (n0,n1,n2) at point \a k.
+ * \return 1 on success.
+ *
+ * This function retrieves the normal (n0,n1,n2) at vertex \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
@@ -1199,11 +1377,16 @@ LIBMMGS_EXPORT int  MMGS_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, M
 LIBMMGS_EXPORT int  MMGS_Get_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double *n0, double *n1, double *n2) ;
 
 /**
- * \param met pointer toward the sol structure.
- * \param s pointer toward the scalar solution value.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get the next element of a scalar solution structure.
  *
- * Get solution \a s of next vertex of mesh.
+ * \param met pointer to the sol structure.
+ * \param s pointer to the scalar solution value.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function retrieves the next element \a s of the solution field \a
+ * met. It is meant to be called in a loop over all elements. When it has been
+ * called as many times as there are elements in the solution, the internal loop
+ * counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_SCALARSOL(met,s,retval)\n
@@ -1214,13 +1397,14 @@ LIBMMGS_EXPORT int  MMGS_Get_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double 
  *
  */
 LIBMMGS_EXPORT int  MMGS_Get_scalarSol(MMG5_pSol met, double* s);
+
 /**
- * \param met pointer toward the sol structure.
- * \param s table of the scalar solutions at mesh vertices. s[i-1] is
- * the solution at vertex i.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get all elements of a scalar solution structure.
  *
- * Get solutions at mesh vertices.
+ * \param met pointer to the solution structure.
+ * \param s array of scalar solutions at mesh vertices. s[i-1] is
+ * the solution at vertex i.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_SCALARSOLS(met,s,retval)\n
@@ -1231,14 +1415,20 @@ LIBMMGS_EXPORT int  MMGS_Get_scalarSol(MMG5_pSol met, double* s);
  *
  */
 LIBMMGS_EXPORT int  MMGS_Get_scalarSols(MMG5_pSol met, double* s);
+
 /**
- * \param met pointer toward the sol structure.
+ * \brief Get the next element of a vector solution structure.
+ *
+ * \param met pointer to the sol structure.
  * \param vx x value of the vectorial solution.
  * \param vy y value of the vectorial solution.
  * \param vz z value of the vectorial solution.
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
+ * This function retrieves the next vector-valued element \f$(v_x,v_y,vz)\f$ of
+ * a solution field. It is meant to be called in a loop over all elements.  When
+ * it has been called as many times as there are elements in the solution, the
+ * internal loop counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_VECTORSOL(met,vx,vy,vz,retval)\n
@@ -1249,13 +1439,16 @@ LIBMMGS_EXPORT int  MMGS_Get_scalarSols(MMG5_pSol met, double* s);
  *
  */
 LIBMMGS_EXPORT int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
+
 /**
- * \param met pointer toward the sol structure.
- * \param sols table of the solutions at mesh vertices. sols[3*(i-1)]\@3 is
- * the solution at vertex i.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get all elements of a vector solution structure.
  *
- * Get vectorial solutions at mesh vertices
+ * \param met pointer to the sol structure.
+ * \param sols array of solutions at mesh vertices. sols[3*(i-1)]\@3 is
+ * the solution at vertex i.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function retrieves all elements of a vector-valued solution field.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_VECTORSOLS(met,sols,retval)\n
@@ -1266,17 +1459,24 @@ LIBMMGS_EXPORT int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, dou
  *
  */
 LIBMMGS_EXPORT int MMGS_Get_vectorSols(MMG5_pSol met, double* sols);
+
 /**
- * \param met pointer toward the sol structure.
- * \param m11 pointer toward the position (1,1) in the solution tensor.
- * \param m12 pointer toward the position (1,2) in the solution tensor.
- * \param m13 pointer toward the position (1,3) in the solution tensor.
- * \param m22 pointer toward the position (2,2) in the solution tensor.
- * \param m23 pointer toward the position (2,3) in the solution tensor.
- * \param m33 pointer toward the position (3,3) in the solution tensor.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get the next element of a tensor solution structure.
  *
- * Get tensorial solution of next vertex of mesh.
+ * \param met pointer to the sol structure.
+ * \param m11 pointer to the position (1,1) in the solution tensor.
+ * \param m12 pointer to the position (1,2) in the solution tensor.
+ * \param m13 pointer to the position (1,3) in the solution tensor.
+ * \param m22 pointer to the position (2,2) in the solution tensor.
+ * \param m23 pointer to the position (2,3) in the solution tensor.
+ * \param m33 pointer to the position (3,3) in the solution tensor.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function retrieves the next element
+ * \f$(m_{11},m_{12},m_{13},m_{22},m_{23},m_{33})\f$ of a tensor-valued solution
+ * field.  It is meant to be called in a loop over all vertices. When it has
+ * been called as many times as there are elements in the solution, the internal
+ * loop counter will be reset.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,retval)\n
@@ -1286,15 +1486,16 @@ LIBMMGS_EXPORT int MMGS_Get_vectorSols(MMG5_pSol met, double* sols);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
-                                      double *m22,double *m23, double *m33);
+LIBMMGS_EXPORT int MMGS_Get_tensorSol(MMG5_pSol met, double *m11, double *m12, double *m13,
+                                                     double *m22, double *m23, double *m33);
+
 /**
- * \param met pointer toward the sol structure.
- * \param sols table of the solutions at mesh vertices.
- * sols[6*(i-1)]\@6 is the solution at vertex i.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get all elements of a tensor solution field.
  *
- * Get tensorial solutions at mesh vertices.
+ * \param met pointer to the sol structure.
+ * \param sols array of solution values.
+ *   sols[6*(i-1)]\@6 is the solution at vertex i.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_TENSORSOLS(met,sols,retval)\n
@@ -1305,16 +1506,22 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, do
  *
  */
 LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
+
 /**
- * \param sol pointer toward the array of solutions
- * \param i position of the solution field that we want to set.
- * \param s solution(s) at mesh vertex \a pos.
+ * \brief Get one out of several solutions at a specific vertex.
+ *
+ * \param sol pointer to the array of solutions
+ * \param i position of the solution field that we want to get.
+ * \param s solution(s) at mesh vertex \a pos. The required size
+ *   of this array depends on the type of solution.
  * \param pos index of the vertex on which we get the solution.
  *
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Get values of the ith field of the solution array at vertex \a pos.
- * (\a pos from 1 to nb_vertices included and \a i from 1 to nb_sols).
+ * This function retreives the value of field \a i of the solution array at
+ * vertex \a pos.  (\a pos from 1 to the number of vertices included and \a i
+ * from 1 to the number of solutions). It works for any type of solution; the
+ * types are inferred from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1326,18 +1533,22 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * >   END SUBROUTINE\n
  *
  */
- LIBMMGS_EXPORT int  MMGS_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
+ LIBMMGS_EXPORT int  MMGS_Get_ithSol_inSolsAtVertices(MMG5_pSol sol, int i, double* s, MMG5_int pos);
+
 /**
- * \param sol pointer toward the array of solutions
+ * \brief Get one out of several solutions at all vertices in the mesh.
+ *
+ * \param sol pointer to the array of solutions
  * \param i position of the solution field that we want to get.
- * \param s table of the solutions at mesh vertices. The solution at vertex \a k
+ * \param s array of solutions at mesh vertices. The solution at vertex \a k
  * is given by s[k-1] for a scalar sol, s[3*(k-1)]\@3 for a vectorial solution
  * and s[6*(k-1)]\@6 for a tensor solution.
  *
- * \return 0 if failed, 1 otherwise.
+ * \return 0 on failure, 1 otherwise.
  *
- * Get values of the solution at the ith field of the solution array.
- * (\a i from 1 to \a nb_sols).
+ * This function retrieves the values of field \a i of the solution array \a sol
+ * (\a i from 1 to \a the number of solutions). It works for any type of solution;
+ * the type is inferred from \a sol.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1348,13 +1559,18 @@ LIBMMGS_EXPORT int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  LIBMMGS_EXPORT int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol, int i, double* s);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param iparam integer parameter to set (see \a MMGS_Param structure).
- * \return The value of integer parameter.
+ * \brief Get the value of an integer parameter of the remesher.
  *
- * Get the value of integer parameter \a iparam.
+ * \param mesh pointer to the mesh structure.
+ * \param iparam integer parameter to get (see \ref MMGS_Param structure).
+ * \return The value of the parameter.
+ *
+ * This function retrieves the value of integer parameter \a iparam (see \ref
+ * MMGS_Param for a list of parameters). It returns the value of the parameter,
+ * or zero if the value of \a iparam is not recognized.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_IPARAMETER(mesh,iparam,retval)\n
@@ -1368,11 +1584,17 @@ LIBMMGS_EXPORT int MMGS_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
 
 /* input/output functions */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh (in .mesh/.mesb format) from file.
  *
- * Read mesh data.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function reads .mesh (ASCII) and .meshb (binary) files. If the name
+ * contains ".mesh" the file will be read as an ASCII file and if the name
+ * contains .meshb it be read as a binary file. If the file contains neither of
+ * these strings the function will first try to open "[filename].meshb"
+ * and if this fails it will try "[filename].mesh".
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADMESH(mesh,filename,strlen0,retval)\n
@@ -1386,14 +1608,17 @@ LIBMMGS_EXPORT int MMGS_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
 LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure or the NULL pointer.
- * \param sol pointer toward the level-set structure or the NULL pointer.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and optionally a solution in VTP (VTK) format from file.
  *
- * Read mesh and 0 or 1 data field at VTK vtp file format (.vtp extension). We
- * read only low-order points, edges, tria and quad.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure or the NULL pointer.
+ * \param sol pointer to the level-set structure or the NULL pointer.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function reads a mesh and optionally one data field in VTK vtp file
+ * format (.vtp extension). We read only low-order vertices, edges, triangles
+ * and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTPMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1404,15 +1629,19 @@ LIBMMGS_EXPORT int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol,
+                                    const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and multiple solutions in VTP (VTK) format from file.
  *
- * Read mesh and a list of data fields at VTK vtp file format (.vtp extension). We
- * read only low-order points, edges, tria and quad.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and multiple data fields in VTK vtp file format (.vtp extension). We
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTPMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1423,16 +1652,21 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure or the NULL pointer.
- * \param sol pointer toward the level-set structure or the NULL pointer.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and possibly data in VTU (VTK) format from file.
  *
- * Read mesh and 0 or 1 data field at VTK vtu file format (.vtu extension). We
- * read only low-order points, edges, tria and quad.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure or the NULL pointer.
+ * \param sol pointer to the level-set structure or the NULL pointer.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and optionally one data field in VTK vtu file format (.vtu
+ * extension). We read only low-order vertices, edges, triangles and
+ * quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTUMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1443,16 +1677,18 @@ LIBMMGS_EXPORT int MMGS_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and multiple solutions in VTU (VTK) format from file.
  *
- * Read mesh and a list of data field at VTK vtu file format (.vtu extension). We
- * read only low-order points, edges, tria and quad.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and multiple data field in VTK vtu file format (.vtu extension). We
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1463,17 +1699,20 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure or the NULL pointer.
- * \param sol pointer toward the level-set structure or the NULL pointer.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and possibly data in VTK format from file.
  *
- * Read mesh and 0 or 1 data field at VTK vtk file format (.vtk extension). We
- * read only low-order points, edges, tria and quad.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure or the NULL pointer.
+ * \param sol pointer to the level-set structure or the NULL pointer.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and optionally one data field in VTK vtk file format (.vtk extension). We
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTKMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1484,16 +1723,19 @@ LIBMMGS_EXPORT int MMGS_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol,
+                                    const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and multiple solutions in VTK format from file.
  *
- * Read mesh and a list of data field at VTK vtk file format (.vtk extension). We
- * read only low-order points, edges, tria and quad.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and multiple data field in VTK vtk file format (.vtk extension). We
+ * read only low-order vertices, edges, triangles and quadrangles.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1504,16 +1746,19 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and possibly a solution in .msh format from file.
  *
- * Read mesh and 0 or 1 data field at MSH file format (.msh extension). We read
- * only low-order points, edges, tria, quad, tetra and prisms.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and optionally one data field in MSH file format (.msh extension). We read
+ * only low-order vertices, edges, triangles, quadrangles, tetrahedra and prisms.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADMSHMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1524,16 +1769,18 @@ LIBMMGS_EXPORT int MMGS_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a list of solution structures.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and all data from a file in MSH format.
  *
- * Read mesh and a list of data at MSH file format (.msh extension). We read only
- * low-order points, edges, tria, quadra, tetra and prisms.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to a list of solution structures.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read a mesh and multiple data in MSH file format (.msh extension). We read only
+ * low-order vertices, edges, triangles, quadrangles, tetrahedra and prisms.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1544,16 +1791,16 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure or the NULL pointer.
- * \param sol pointer toward the level-set structure or the NULL pointer.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a mesh and all data from a file. The format will be guessed from the filename extension.
  *
- * Read mesh data.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure or the NULL pointer.
+ * \param sol pointer to the level-set structure or the NULL pointer.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADGENERICMESH(mesh,met,sol,filename,strlen0,retval)\n
@@ -1564,14 +1811,18 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol,
+                                        const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Save a mesh in .mesh or .meshb format.
  *
- * Save mesh data.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function saves a mesh in .mesh or .meshb format (depending on the
+ * filename extension).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEMESH(mesh,filename,strlen0,retval)\n
@@ -1585,13 +1836,15 @@ LIBMMGS_EXPORT int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol 
 LIBMMGS_EXPORT int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Write mesh and optionally one data field in MSH  file format (.msh extension).
  *
- * Write mesh and 0 or 1 data field at MSH  file format (.msh extension).
- * Save file at ASCII format for .msh extension, at binary format for .mshb one.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * The file is saved in ASCII format for .msh extension, an in binary format for
+ * a .mshb extension.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEMSHMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1602,18 +1855,21 @@ LIBMMGS_EXPORT int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Save a mesh and multiple data fields in MSH format, ascii or binary
+ * depending on the filename extension.
  *
- * Write mesh and a list of data fields (that are considered as solutions and
- * not metrics, thus, we do nothing over the ridge points) at MSH file format
- * (.msh extension).  Save file at ASCII format for .msh extension, at binary
- * format for .mshb one.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function saves a mesh and multiple data fields (that are considered as
+ * solutions and not metrics, thus, we do nothing over the ridge vertices) in MSH
+ * file format (.msh extension). The file is saved in ASCII format for .msh
+ * extension and in binary format for a .mshb extension.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1624,15 +1880,15 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Write mesh and optionally one data field in Vtk file format (.vtk extension).
  *
- * Write mesh and 0 or 1 data at Vtk file format (.vtk extension).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEVTKMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1643,14 +1899,17 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveVtkMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Save a mesh and multiple data fields in VTK format.
  *
- * Write mesh and a list of data fields at Vtk file format (.vtk extension).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function writes a mesh and a list of data fields in Vtk file format (.vtk extension).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1661,14 +1920,15 @@ LIBMMGS_EXPORT int MMGS_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Write mesh and optionally one data field vtu Vtk file format (.vtu extension).
  *
- * Write mesh and 0 or 1 data at vtu Vtk file format (.vtu extension).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEVTUMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1679,14 +1939,15 @@ LIBMMGS_EXPORT int MMGS_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,c
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Write a mesh and multiple data fields in vtu Vtk file format (.vtu extension).
  *
- * Write mesh and a list of data fields at vtu Vtk file format (.vtu extension).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1697,14 +1958,19 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  LIBMMGS_EXPORT int MMGS_saveVtuMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                  const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Save a mesh and optionally one data field in VTP format.
  *
- * Write mesh and 0 or 1 data at polydata Vtk file format (.vtp extension).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function writes a mesh and optionally one data in polydata Vtk file
+ * format (.vtp extension).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEVTPMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1715,14 +1981,19 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMGS_EXPORT int MMGS_saveVtpMesh(MMG5_pMesh mesh, MMG5_pSol sol,
+                                      const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Save a mesh and multiple data fields in VTP format.
  *
- * Write mesh and a list of data fields at polydata Vtk file format (.vtp extension).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function writes a mesh and multiple data fields in polydata Vtk file
+ * format (.vtp extension).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEVTPMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
@@ -1733,14 +2004,15 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  LIBMMGS_EXPORT int MMGS_saveVtpMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                                  const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Save mesh data in a file whose format depends on the filename extension.
  *
- * Save mesh data in a file whose format depends on the filename extension.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEGENERICMESH(mesh,sol,filename,strlen0,retval)\n
@@ -1751,15 +2023,18 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  LIBMMGS_EXPORT int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol,
+                                          const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load a metric field (or other solution) in medit's .sol format.
  *
- * Load metric field. The solution file (at medit file format) must contains
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Load metric field. The solution file (in medit file format) must contain
  * only 1 solution: the metric.
  *
  * \remark Fortran interface:
@@ -1771,14 +2046,15 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char* filename);
+  LIBMMGS_EXPORT int  MMGS_loadSol(MMG5_pMesh mesh, MMG5_pSol met, const char* filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solutions array
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Load one or more solutions in a solution file in medit file format.
  *
- * Load 1 or more solutions in a solution file at medit file format.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solutions array
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADALLSOLS(mesh,sol,filename,strlen0,retval)\n
@@ -1789,14 +2065,16 @@ LIBMMGS_EXPORT int MMGS_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *fi
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
+LIBMMGS_EXPORT int  MMGS_loadAllSols(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                     const char* filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \brief Write an isotropic or anisotropic metric in medit file format.
  *
- * Write isotropic or anisotropic metric at medit file format.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVESOL(mesh,met,filename,strlen0,retval)\n
@@ -1807,14 +2085,16 @@ LIBMMGS_EXPORT int  MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char*
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
+LIBMMGS_EXPORT int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met,
+                                 const char *filename);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solutions array
- * \param filename name of the solution file.
- * \return 0 or -1 if fail, 1 otherwise.
+ * \brief Save one or more solutions in a solution file in medit file format.
  *
- * Save 1 or more solutions in a solution file at medit file format.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solutions array
+ * \param filename name of the solution file.
+ * \return 0 or -1 on failure, 1 otherwise.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEALLSOLS(mesh,sol,filename,strlen0,retval)\n
@@ -1825,14 +2105,15 @@ LIBMMGS_EXPORT int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *fil
  * >   END SUBROUTINE\n
  *
  */
-LIBMMGS_EXPORT int MMGS_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
+LIBMMGS_EXPORT int MMGS_saveAllSols(MMG5_pMesh mesh, MMG5_pSol *sol,
+                                    const char *filename);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an array of solution structure (that stores solution fields).
- * \return 1
+ * \brief Deallocate an array of solution fields
  *
- * Deallocation of an array of solution fields
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to an array of solution structures (that stores solution fields).
+ * \return 1
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_Free_allSols(mesh,sol,retval)\n
@@ -1845,25 +2126,25 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 
 /* deallocations */
 /**
+ * \brief Deallocations before return.
+ *
  * \param starter dummy argument used to initialize the variadic argument list.
  * \param ... variadic arguments.
  *
- * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * For the \ref MMGS_mmgslib function, you need
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
- * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * For the \ref MMGS_mmgsls function, you need
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
- * \return 0 if fail, 1 if success
- *
- * Deallocations before return.
+ * \return 0 on failure, 1 on success
  *
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
@@ -1874,28 +2155,25 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
 
 /**
+ * \brief Structure deallocations before return.
+ *
  * \param starter dummy argument used to initialize the variadic argument list.
  * \param ... variadic arguments.
  *
- * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * For the \ref MMGS_mmgslib function, you need
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
- * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * For the \ref MMGS_mmgsls function, you need
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here, \a your_mesh is a pointer to \ref MMG5_pMesh and \a your_metric and
+ * \a your_level_set are pointers to \ref MMG5_pSol.
  *
- * Here, \a your_mesh is a pointer toward \a MMG5_pMesh and \a your_metric and
- * \a your_level_set a pointer toward \a MMG5_pSol.
- *
- * \return 0 if fail, 1 if success
- *
- * Structure deallocations before return.
+ * \return 0 on failure, 1 on success
  *
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
@@ -1906,25 +2184,25 @@ LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
 LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
 
 /**
+ * \brief Structure deallocations before return.
+ *
  * \param starter dummy argument used to initialize the variadic argument list.
  * \param ... variadic arguments.
  *
- * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * For the \ref MMGS_mmgslib function, you need
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
- * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
+ * For the \ref MMGS_mmgsls function, you need
+ * to call the \ref MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
- * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
- * are \a MMG5_pSol.
+ * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
+ * are \ref MMG5_pSol.
  *
- * \return 0 if fail, 1 if success
- *
- * Structure deallocations before return.
+ * \return 0 on failure, 1 on success
  *
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
@@ -1936,11 +2214,12 @@ LIBMMGS_EXPORT int MMGS_Free_names(const int starter,...);
 
 /* library */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol (metric) structure.
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
- * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
- * the mesh.
+ * \brief Main "program" for mesh adaptation.
+ *
+ * \param mesh pointer to the mesh structure.  \param met pointer to the sol
+ * (metric) structure.  \return \ref MMG5_SUCCESS on success, \ref
+ * MMG5_LOWFAILURE in case there is a failure but a conform mesh can be returned
+ * or \ref MMG5_STRONGFAILURE if there is a failure and we can't save the mesh.
  *
  * Main program for the library.
  *
@@ -1954,12 +2233,13 @@ LIBMMGS_EXPORT int MMGS_Free_names(const int starter,...);
 LIBMMGS_EXPORT int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol (level-set) structure.
- * \param met pointer toward the sol (metric) structure (optionnal).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
- * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
- * the mesh.
+ * \brief Main "program" for level-set discretization.
+ *
+ * \param mesh pointer to the mesh structure.  \param sol pointer to the sol
+ * (level-set) structure.  \param met pointer to the sol (metric) structure
+ * (optionnal).  \return \ref MMG5_SUCCESS on success, \ref MMG5_LOWFAILURE if
+ * there is a a failure but a conform mesh is saved or \ref MMG5_STRONGFAILURE
+ * if there is a a failure and we can't save the mesh.
  *
  * Main program for level set discretization library. If a metric \a met is
  * provided, use it to adapt the mesh.
@@ -1976,10 +2256,10 @@ LIBMMGS_EXPORT int  MMGS_mmgsls(MMG5_pMesh mesh,  MMG5_pSol sol,MMG5_pSol met);
 
 /** To associate function pointers without calling MMGS_mmgslib */
 /**
- * \param mesh pointer toward the mesh structure (unused).
- * \param met pointer toward the sol structure (unused).
+ * \brief Set function pointers for caltet, lenedg, defsiz and gradsiz.
  *
- * Set function pointers for caltet, lenedg, defsiz and gradsiz.
+ * \param mesh pointer to the mesh structure (unused).
+ * \param met pointer to the sol structure (unused).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SETFUNC(mesh,met)\n
@@ -1990,15 +2270,17 @@ LIBMMGS_EXPORT int  MMGS_mmgsls(MMG5_pMesh mesh,  MMG5_pSol sol,MMG5_pSol met);
 LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param nb_edges pointer toward the number of non boundary edges.
- * \return 0 if failed, 1 otherwise.
+ * \brief Get the number of non-boundary edges.
  *
- * Get the number of non boundary edges (for DG methods for example). An edge is
+ * \param mesh pointer to the mesh structure.
+ * \param the number of edges pointer to the number of non boundary edges.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Get the number of non-boundary edges (for DG methods for example). An edge is
  * boundary if it is located at the interface of 2 domains with different
  * references, if it belongs to one triangle only or if it is a singular edge
  * (ridge or required).
- * Append these edges to the list of edge.
+ * Append these edges to the list of edges.
  *
  * \warning reallocate the edge array and append the internal edges. This may
  * modify the behaviour of other functions.
@@ -2014,16 +2296,18 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  LIBMMGS_EXPORT int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param e0 pointer toward the first extremity of the edge.
- * \param e1 pointer toward the second  extremity of the edge.
- * \param ref pointer toward the edge reference.
- * \param idx index of the non boundary edge to get (between 1 and nb_edges)
- * \return 0 if failed, 1 otherwise.
+ * \brief Get vertices and reference of a non-boundary edge.
  *
- * Get extremities \a e0, \a e1 and reference \a ref of the idx^th non boundary
- * edge (for DG methods for example). An edge is boundary if it is located at
- * the interface of 2 domains witch different references, if it belongs to one
+ * \param mesh pointer to the mesh structure.
+ * \param e0 pointer to the first extremity of the edge (a vertex number).
+ * \param e1 pointer to the second  extremity of the edge (a vertex number).
+ * \param ref pointer to the edge reference.
+ * \param idx index of the non boundary edge to get (between 1 and the number of edges)
+ * \return 0 on failure, 1 otherwise.
+ *
+ * This function returns the vertices \a e0, \a e1 and reference \a ref of the non boundary
+ * edge \a idx. An edge is boundary if it is located at
+ * the interface of 2 domains with different references, if it belongs to one
  * triangle only or if it is a singular edge (ridge or required).
  *
  * \remark Fortran interface:
@@ -2036,17 +2320,18 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMGS_EXPORT int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref, MMG5_int idx);
+  LIBMMGS_EXPORT int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1,
+                                         MMG5_int* ref, MMG5_int idx);
 
 
 /* Tools for the library */
 /**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the sol structure
- * \return 1 if success
+ * \brief Compute an isotropic size map according to the mean of the length of the
+ * edges passing through a vertex.
  *
- * Compute isotropic size map according to the mean of the length of the
- * edges passing through a point.
+ * \param mesh pointer to the mesh structure
+ * \param met pointer to the sol structure
+ * \return 1 on success
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_DOSOL(mesh,met,retval)\n
@@ -2058,12 +2343,15 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  LIBMMGS_EXPORT extern int (*MMGS_doSol)(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the sol structure
- * \return 1 if success
+ * \brief Compute a constant size map.
  *
- * Compute constant size map according to mesh->info.hsiz, mesh->info.hmin and
- * mesh->info.hmax. Update this 3 value if not compatible.
+ * \param mesh pointer to the mesh structure
+ * \param met pointer to the sol structure
+ * \return 1 on success
+ *
+ * This function computes a constant size map according to mesh->info.hsiz,
+ * mesh->info.hmin and mesh->info.hmax. It updates these 3 values if they are
+ * not compatible.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n
@@ -2075,9 +2363,9 @@ LIBMMGS_EXPORT void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 LIBMMGS_EXPORT int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
- * \param prog pointer toward the program name.
+ * \brief Print help for mmgs options.
  *
- * Print help for mmgs options.
+ * \param prog pointer to the program name.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_USAGE(prog,strlen0,retval)\n
@@ -2088,26 +2376,28 @@ LIBMMGS_EXPORT int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
  *
  */
 LIBMMGS_EXPORT int MMGS_usage(char *prog);
+
 /**
+ * \brief Store command line arguments.
+ *
  * \param argc number of command line arguments.
  * \param argv command line arguments.
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param sol pointer toward a level-set or displacement
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
+ * \param sol pointer to a level-set or displacement
  *
  * \return 1.
- *
- * Store command line arguments.
  *
  * \remark no matching fortran function.
  *
  */
 LIBMMGS_EXPORT int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if fail, 1 if success.
+ * \brief Print the default parameter values.
  *
- * Print the default parameters values.
+ * \param mesh pointer to the mesh structure.
+ * \return 0 on failure, 1 on success.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh,retval)\n
@@ -2117,12 +2407,13 @@ LIBMMGS_EXPORT int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol 
  *
  */
 LIBMMGS_EXPORT int MMGS_defaultValues(MMG5_pMesh mesh);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- * \return 1.
+ * \brief Store the info structure in the mesh structure.
  *
- * Store the info structure in the mesh structure.
+ * \param mesh pointer to the mesh structure.
+ * \param info pointer to the info structure.
+ * \return 1.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_STOCKOPTIONS(mesh,info,retval)\n
@@ -2132,11 +2423,12 @@ LIBMMGS_EXPORT int MMGS_defaultValues(MMG5_pMesh mesh);
  *
  */
 LIBMMGS_EXPORT int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
+ * \brief Recover the info structure stored in the mesh structure.
  *
- * Recover the info structure stored in the mesh structure.
+ * \param mesh pointer to the mesh structure.
+ * \param info pointer to the info structure.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_DESTOCKOPTIONS(mesh,info)\n
@@ -2147,11 +2439,12 @@ LIBMMGS_EXPORT int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 LIBMMGS_EXPORT void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 /**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
+ * \brief Return adjacent triangles of a triangle.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param kel triangle index.
- * \param listri pointer toward the table of the indices of the three adjacent
- * triangles of the elt \a kel (the index is 0 if there is no adjacent).
+ * \param listri pointer to the array of indices of the three adjacent
+ * triangles of triangle \a kel (the index is 0 if there is no adjacent triangle).
  * \return 1.
  *
  * Find the indices of the 3 adjacent elements of triangle \a
@@ -2170,13 +2463,14 @@ LIBMMGS_EXPORT void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 LIBMMGS_EXPORT int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]);
 
 /**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
+ * \brief Find adjacent vertices of a triangle.
+ *
+ * \param mesh pointer to the mesh structure.
  * \param ip vertex index.
  * \param start index of a triangle holding \a ip.
- * \param lispoi pointer toward an array of size MMGS_LMAX that will contain
+ * \param lispoi pointer to an array of size MMGS_LMAX that will contain
  * the indices of adjacent vertices to the vertex \a ip.
- * \return nbpoi the number of adjacent points if success, 0 if fail.
+ * \return nbpoi the number of adjacent vertices on success, 0 on failure.
  *
  * Find the indices of the adjacent vertices of the vertex \a
  * ip of the triangle \a start.
@@ -2193,18 +2487,23 @@ LIBMMGS_EXPORT int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int list
 LIBMMGS_EXPORT int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX]);
 
 /**
- * \param m upper part of a symetric matric diagonalizable in |R
- * \param lambda array of the metric eigenvalues
- * \param vp array of the metric eigenvectors
+ * \brief Compute the real eigenvalues and eigenvectors of a symmetric matrix
+ *
+ * \param m upper part of a symmetric matrix diagonalizable in |R
+ * \param lambda array of eigenvalues
+ * \param vp array of eigenvectors
  *
  * \return the order of the eigenvalues
  *
- * Compute the real eigenvalues and eigenvectors of a symetric matrice m whose
+ * Compute the real eigenvalues and eigenvectors of a symmetric matrix m whose
  * upper part is provided (m11, m12, m13, m22, m23, m33 in this order).
+ *
  * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1], v[0,2] )
  * in C and to the eigenvector v(1,:) in fortran
+ *
  * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1], v[1,2] )
  * in C and to the eigenvector v(2,:) in fortran
+ *
  * lambda[2] is the eigenvalue associated to the eigenvector ( v[2][0], v[2,1], v[2,2] )
  * in C and to the eigenvector v(3,:) in fortran
  *
@@ -2219,10 +2518,10 @@ LIBMMGS_EXPORT int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_i
 LIBMMGS_EXPORT int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the solution structure
+ * \brief Free a solution.
  *
- * Free the solution.
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the solution structure
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_FREE_SOLUTIONS(mesh,sol)\n
@@ -2233,11 +2532,11 @@ LIBMMGS_EXPORT int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3]
 LIBMMGS_EXPORT void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 /**
- * \param mesh pointer toward mesh sructure
+ * \brief Clean data (triangles and edges) linked to isosurface.
+ *
+ * \param mesh pointer to mesh structure
  *
  * \return 1 if successful, 0 otherwise.
- *
- * Clean data (triangles and edges) linked to isosurface.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_CLEAN_ISOSURF(mesh,retval)\n
@@ -2249,7 +2548,7 @@ LIBMMGS_EXPORT void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
  LIBMMGS_EXPORT int MMGS_Clean_isoSurf(MMG5_pMesh mesh);
 
 /**
- * Set common pointer functions between mmgs and mmg3d to the matching mmgs
+ * \brief Set common function pointers between mmgs and mmg3d to the matching mmgs
  * functions.
  */
 LIBMMGS_EXPORT void MMGS_Set_commonFunc(void);

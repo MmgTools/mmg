@@ -26,7 +26,7 @@
 #define KTB    11
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \return 1 if success, 0 if fail
  *
  * Create adjacency relations between the triangles in the mesh
@@ -55,12 +55,7 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
   hsize = mesh->nt;
 
   /* init */
-  if ( sizeof(MMG5_int) == 8 ) {
-    inival = LONG_MAX;
-  }
-  else {
-    inival = INT_MAX;
-  }
+  inival = MMG5_INTMAX;
 
   for (k=0; k<=mesh->nt; k++)
     hcode[k] = -inival;
@@ -141,7 +136,7 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -192,12 +187,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   /* init */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
 
-  if ( sizeof(MMG5_int) == 8 ) {
-    inival = LONG_MAX;
-  }
-  else {
-    inival = INT_MAX;
-  }
+  inival = MMG5_INTMAX;
 
   iadr   = 0;
   for (k=0; k<=mesh->nquad; k++)
@@ -334,7 +324,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -445,7 +435,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 1 if success, 0 if fail
  *
@@ -527,9 +517,9 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a solution structure.
- * \param met pointer toward a solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to a solution structure.
+ * \param met pointer to a solution structure.
  *
  * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
  *

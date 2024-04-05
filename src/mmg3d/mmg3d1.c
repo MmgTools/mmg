@@ -44,8 +44,8 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward mesh
- * \param ppt pointer toward point whose geom data have to be updated
+ * \param mesh pointer to mesh
+ * \param ppt pointer to point whose geom data have to be updated
  * \param tag point tag
  * \param nmref ref that has to be setted at point \a ppt if point is non-manifold
  * \param edgref ref that has to be setted at point \a ppt if point is manifold (edg ref)
@@ -91,10 +91,10 @@ void MMG3D_set_geom(MMG5_pMesh mesh, MMG5_pPoint ppt,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param k tetrahedron index.
  * \param ie face index of tetrahedron.
- * \param ptt pointer toward the output triangle.
+ * \param ptt pointer to the output triangle.
  *
  * Set triangle corresponding to face ie of tetra k.
  *
@@ -128,10 +128,10 @@ void MMG5_tet2tri(MMG5_pMesh mesh,MMG5_int k,int8_t ie,MMG5_Tria *ptt) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k tetrahedron index.
- * \param vx pointer toward table of edges to split.
+ * \param vx pointer to table of edges to split.
  * \return 1 if success, 0 if fail.
  *
  * Find acceptable position for splitting.
@@ -276,9 +276,9 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param list pointer toward the shell of edge.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param list pointer to the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
  * \param ip new point index.
  *
@@ -347,8 +347,8 @@ int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_int
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param pt pointer toward the triangle.
+ * \param mesh pointer to the mesh structure.
+ * \param pt pointer to the triangle.
  * \param ori orientation of the triangle (1 for direct orientation, 0 otherwise).
  * \param hmax maximal edge length.
  * \param hausd maximal hausdorff distance.
@@ -584,9 +584,9 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure (only for delaunay).
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure (only for delaunay).
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
  * \return -1 if failed and swap number otherwise.
@@ -651,10 +651,10 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param crit coefficient of quality improvment.
- * \param PROctree pointer toward the PROctree structure in delaunay mode and
+ * \param PROctree pointer to the PROctree structure in delaunay mode and
  * toward the \a NULL pointer otherwise
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion)
@@ -713,9 +713,9 @@ MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param clickSurf triangle quality threshold under which we want to move
  * \param clickVol  tetra    quality threshold under which we want to move
  * \param moveVol internal move
@@ -877,8 +877,8 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
  * \return -1 if failed, number of collapsed points otherwise.
  *
@@ -1157,13 +1157,13 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k index of tetra in which we work.
  * \param imin index in \a k of edge that we consider for collapse.
  * \param lmin length of edge \a imin.
- * \param nc pointer toward count of collapses (has to be updated)
+ * \param nc pointer to count of collapses (has to be updated)
  *
  * \return -1 for strong failure.
  *
@@ -1278,8 +1278,8 @@ int MMG3D_adpcoledg(MMG5_pMesh mesh, MMG5_pSol met,
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param hash pointer toward the hash table of edges.
+ * \param mesh pointer to the mesh structure.
+ * \param hash pointer to the hash table of edges.
  * \return 0 if failed, 1 if success
  *
  * Delete the points inserted by pattern if the pattern step fail.
@@ -1320,8 +1320,8 @@ int MMG3D_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
@@ -1587,7 +1587,7 @@ split:
 }
 
 /**
- * \param ppt pointer toward the point that we update
+ * \param ppt pointer to the point that we update
  * \param pxp point toward the \a oot xpoint
  * \param no normal at ppt
  * \return 0 if failed, 1 if success.
@@ -1635,7 +1635,7 @@ MMG3D_update_rid_geom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param k index of the tetra to split.
  * \param i index of (boundary) face in which we work.
  * \param j local index in face i of the ridge.
@@ -1718,7 +1718,7 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \param k index of input tetra
  * \param imax index of edge in tetra \a k
  * \param i index of boundary face of tetra from which we will work
@@ -1734,7 +1734,7 @@ int MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh mesh,MMG5_int k,int i,int j,
  * \param to tangent at new point \a o (to fill if needed)
  * \param no1 first normal at new point \a o (to fill if needed)
  * \param no2 second normal at new point (to fill if needed)
- * \param list pointer toward edge shell (to fill)
+ * \param list pointer to edge shell (to fill)
  * \param ilist 2x edge shell size (+1 for a bdy edge)
  *
  * \return -1 for strong failure.
@@ -1847,8 +1847,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
 }
 
 /**
- * \param mesh pointer toward mesh
- * \param pt pointer toward tetra on which we work
+ * \param mesh pointer to mesh
+ * \param pt pointer to tetra on which we work
  * \param ied index in tetra \a pt of edge on which we work
  * \param i index of a face of \a pt that contains \a ied. If possible we choose
  * a boundary face with suitable orientation (to fill)
@@ -1857,8 +1857,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
  * \param i2 local index in tetra \a pt of second extremity of edge \a ied (to fill)
  * \param ip1 global index first extremity of edge \a ied (to fill)
  * \param ip2 global index in tetra \a pt of second extremity of edge \a ied (to fill)
- * \param p0 pointer toward first extremity of edge \a ied (to fill)
- * \param p1 pointer toward second extremity of edge \a ied (to fill)
+ * \param p0 pointer to first extremity of edge \a ied (to fill)
+ * \param p1 pointer to second extremity of edge \a ied (to fill)
  *
  * Search a face from wich we car reach edge \a ied. If a boundary face with
  * good orientation exists it is choosed prior to another face, otherwise, if
@@ -1908,8 +1908,8 @@ void MMG3D_find_bdyface_from_edge(MMG5_pMesh mesh,MMG5_pTetra pt,int8_t ied,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of the tetra to split.
  * \param pt tetra to split
  * \param pxt associated xtetra
@@ -2034,13 +2034,13 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of tetra thath we check
- * \param pt pointer toward the tetra that we check
- * \param pxt pointer toward the xtetra that we check
+ * \param pt pointer to the tetra that we check
+ * \param pxt pointer to the xtetra that we check
  * \param i index of the face in \a k that we check
- * \param ptt pointer toward the virtual triangle build from the face \i of \a k.
+ * \param ptt pointer to the virtual triangle build from the face \i of \a k.
  * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
  *
  * \return 1 if success, 0 if fail.
@@ -2148,8 +2148,8 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_pTetra pt,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
@@ -2241,8 +2241,8 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
@@ -2701,8 +2701,8 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 static MMG5_int (*MMG3D_anatets)(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of the tetrahedron with multiple boundary faces (to be swapped)
  * \param metRidTyp metric storage (classic or special)
  * \param ifac face of the tetra \a k that give the best results for the swap23
@@ -2987,8 +2987,8 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t met
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param nf number of swap performed.
  * \param typchk type of checking permformed.
  * \return -1 if failed, number of new points otherwise.
@@ -3072,8 +3072,8 @@ static MMG5_int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int8_t
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param nf number of swap performed.
  * \param typchk type of checking permformed.
  * \return -1 if failed, number of new points otherwise.
@@ -3116,8 +3116,8 @@ static MMG5_int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param typchk type of checking for edges length.
  * \param patternMode flag to say if we perform vertex insertion by patterns
  * or by delaunay kernel.
@@ -3130,7 +3130,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
   int        it,minit,maxit,lastit;
   MMG5_int   nc,ns,nnc,nns,nnf,ier,nf;
 
-  /* pointer toward the suitable anatets function */
+  /* pointer to the suitable anatets function */
   if ( met->m && met->size==6 ) {
     /* if the aniso metric is not compatible with the geometry, the non
      * conformal surface operators may create spurious ridges */

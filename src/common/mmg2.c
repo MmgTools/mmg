@@ -73,7 +73,7 @@ static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param pim    multimaterials inverse data table.
  * \param ref    material reference.
  * \return the nosplit/split/plus/minus attribute of the material.
@@ -120,7 +120,7 @@ static void MMG5_InvMat_error(MMG5_pInvMat pim,int ref,int k) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param pim    multimaterials inverse data table.
  * \param k      index of the material in the input table.
  *
@@ -165,7 +165,7 @@ static int MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param pim    multimaterials inverse data table.
  * \param ref    material reference.
  * \param pref   pointer to the parent material reference.
@@ -201,7 +201,7 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,MMG5_int ref,M
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param ref  final reference for which we are searching the initial one
  * \param pref pointer to the reference of the parent material.
  * \return 1 if found, 0 otherwise.
@@ -230,7 +230,7 @@ int MMG5_getStartRef(MMG5_pMesh mesh,MMG5_int ref,MMG5_int *pref) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param pim    multimaterials inverse data table.
  *
  * Print materials lookup table.
@@ -248,7 +248,7 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \return 1 if success, 0 if fail.
  *
  *
@@ -345,12 +345,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   /* Initialize the max and min reference */
   refmax = 0;
 
-  if ( sizeof(MMG5_int) == 8 ) {
-    refmin = LONG_MAX;
-  }
-  else {
-    refmin = INT_MAX;
-  }
+  refmin = MMG5_INTMAX;
 
   /* Look for the max/min reference provided in material table */
   for( k = 0; k < mesh->info.nmat; k++ ) {
@@ -404,7 +399,7 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param ref    initial reference.
  * \param refint internal reference after ls discretization.
  * \param refext external reference after ls discretization.
@@ -443,7 +438,7 @@ int MMG5_isSplit(MMG5_pMesh mesh,MMG5_int ref,MMG5_int *refint,MMG5_int *refext)
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param ref    initial reference.
  * \return 1 if entity cannot be split, 0 if can be split.
  *
@@ -466,7 +461,7 @@ int MMG5_isNotSplit(MMG5_pMesh mesh,MMG5_int ref) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
+ * \param mesh   pointer to the mesh structure.
  * \param ref0   reference of the first tetrahedron sharing the face.
  * \param ref1   reference of the second tetrahedron sharing the face..
  * \return 1 if face is on the discrete level set, 0 if not.
@@ -497,8 +492,8 @@ int MMG5_isLevelSet(MMG5_pMesh mesh,MMG5_int ref0,MMG5_int ref1) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set function.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set function.
  * \return 1 if success, 0 if fail.
  *
  * Snap values of the level set function very close to 0 to exactly 0,
@@ -612,8 +607,8 @@ int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
  * \param start index of the starting tria
  * \param istart local index (inside the tria \a start) of the vertex that we check.
  * \return 1 if success, 0 if fail
@@ -740,7 +735,7 @@ int MMG5_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istar
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ip0 First vertex of the triangle
  * \param ip1 Second vertex of the triangle
  * \param ip2 Third vertex of the triangle
@@ -765,8 +760,8 @@ double MMG5_voltri(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,MMG5_int ip2) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the ls function
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the ls function
  * \param k index of the triangle
  * \param pm 1 for computation of positive subdomain, -1 for negative one
  *
@@ -905,8 +900,8 @@ int MMG5_isbr(MMG5_pMesh mesh,MMG5_int ref) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the level-set
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the level-set
  *
  * \return 1 if success, 0 otherwise
  *
@@ -1186,7 +1181,7 @@ int MMG5_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * Reset mesh->info.isoref vertex and edge references to 0.
  *
@@ -1220,8 +1215,8 @@ int MMG5_resetRef_ls(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
  * \return 1.
  *
  * Set references to tris according to the sign of the level set function.
@@ -1296,7 +1291,7 @@ int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of starting tria.
  * \param istart local index of point that we check (in tria \a start)
  * \return 1 if the ball is manifold, 0 otherwise.
@@ -1420,7 +1415,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
 }
 
 /**
- * \param mesh pointer toward the mesh.
+ * \param mesh pointer to the mesh.
  * \return 1 if the mesh is manifold, 0 otherwise.
  *
  * Check whether the resulting two subdomains occupying mesh are manifold.

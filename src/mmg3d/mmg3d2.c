@@ -95,8 +95,8 @@ double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],int8_t i0,double v[4],int8_t part_
 
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the ls function
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the ls function
  * \param k index of the triangle
  * \return volfrac
  *
@@ -301,14 +301,14 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
 }
 
 /**
- * \param mesh pointer toward the mesh.
+ * \param mesh pointer to the mesh.
  *
  * Reset mesh->info.isoref vertex and tetra references to 0.
  *
- * \warning to improve: for now, entities linked to the old ls (corners,required
+ * \warning to improve: for now, entities linked to the old ls (corners, required
  * points, normals/tangents, triangles and edges) are deleted in loadMesh. It
- * would be better to analyze wich entities must be keeped and which one must be
- * deleted depending on the split/nosplit infos.
+ * would be better to analyze wich entities must be kept and which ones must be
+ * deleted depending on the split/nosplit info.
  */
 int MMG3D_resetRef_ls(MMG5_pMesh mesh) {
   MMG5_pTetra     pt;
@@ -390,8 +390,8 @@ MMG5_invsl(double A[3][3],double b[3],double r[3]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
  * \param k index of the starting tetra.
  * \param indp local index (inside the tria \a k) of the vertex that we check.
  * \return 1 if success, 0 if fail
@@ -658,8 +658,8 @@ MMG3D_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set function.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set function.
  * \return 1 if success, 0 if fail.
  *
  * Snap values of the level set function very close to 0 to exactly 0,
@@ -714,7 +714,7 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
+        fprintf(stderr,"  ## Warning: %s: snapping value at vertex %" MMG5_PRId "; "
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]) < MMG5_EPSD ) ?
@@ -767,8 +767,8 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the level-set
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the level-set
  *
  * \return 1 if success, 0 otherwise
  *
@@ -1015,9 +1015,9 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
- * \param met pointer toward a metric (non-mandatory).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
+ * \param met pointer to a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the implicit function carried by sol into mesh,
@@ -1248,8 +1248,8 @@ int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
  * \return 1.
  *
  * Set references to tets according to the sign of the level set function.
@@ -1301,7 +1301,7 @@ int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 if the xtetra array can't be reallocated.
  *
  * Update the xtetra array to store the new bdy faces created by the isosurface
@@ -1408,7 +1408,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start index of the starting tetra
  * \param ip point index
  *
@@ -1596,8 +1596,8 @@ int MMG3D_chkmani(MMG5_pMesh mesh){
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the metric
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the metric
  *
  * \return 1 if success, 0 otherwise.
  *
@@ -1664,7 +1664,7 @@ int MMG3D_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param k index of element in which we collapse.
  * \param iface face through wich we perform the collapse
  * \param iedg edge to collapse
@@ -2209,9 +2209,9 @@ int MMG3D_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int nde
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set.
- * \param met pointer toward  a metric (optionnal).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set.
+ * \param met pointer to  a metric (optionnal).
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.

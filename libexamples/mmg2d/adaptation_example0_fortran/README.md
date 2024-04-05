@@ -1,4 +1,4 @@
-# Basic use of the **mmg2d** library for a **Fortran** call
+# Basic use of the mmg2d library for a Fortran call
 
 ## I/ Implementation
 To call the **mmg3d** library, you must:  

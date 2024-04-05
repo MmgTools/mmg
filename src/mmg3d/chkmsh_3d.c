@@ -42,7 +42,7 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  *
  * Test that tetra have positive volumes.
  *
@@ -72,7 +72,7 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param na edge vertex
  * \param nb edge vertex
@@ -128,7 +128,7 @@ int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, 
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param start tetra from which we start to travel
  * \param ia local index of edge that must be updated
  * \param tag edge tag
@@ -191,7 +191,7 @@ int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t ta
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * Test consistency between the tags in the xtetra of all mesh edges marked as
  * boundaries.
@@ -269,7 +269,7 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param ip1 first vertex of edge to test
  * \param ip2 second vertex of edge to test
  * \param tag edge tag
@@ -306,8 +306,8 @@ void MMG3D_chkedgetag(MMG5_pMesh mesh, MMG5_int ip1, MMG5_int ip2, int tag) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param ppt pointer toward unconsistent point
+ * \param mesh pointer to the mesh
+ * \param ppt pointer to unconsistent point
  * \param k tetra index
  * \param i local index of edge in tetra \a k
  * \param ip1 first vertex of edge to test
@@ -423,7 +423,7 @@ int MMG5_chkmshsurf(MMG5_pMesh mesh){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if fail, 1 otherwise
  *
  * Check the number of boundary faces in each edge shell and the consistency of the edge tag.
@@ -463,7 +463,7 @@ int  MMG3D_chkcoquilface(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param severe level of performed check (unused)
  * \param base unused argument.
  * \return 0 if fail, 1 if success.
@@ -776,7 +776,7 @@ int MMG5_cntbdypt(MMG5_pMesh mesh, MMG5_int nump){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if fail, 1 otherwise.
  *

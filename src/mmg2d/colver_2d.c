@@ -26,8 +26,8 @@
 extern uint8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  * \param k triangle index
  * \param i local index of the edge that we want to test in the triangle \a k
  * \param list edge's shell (to fill)

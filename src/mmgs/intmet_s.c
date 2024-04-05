@@ -41,8 +41,8 @@ extern int8_t ddb;
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k element index.
  * \param i local index of edge in \a k.
  * \param s interpolation parameter.
@@ -63,8 +63,8 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,double 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k triangle in which we interpole the metrics.
  * \param i edge along which we interpole the metrics.
  * \param ip index of point in which we compute the interpolated metric.
@@ -89,8 +89,8 @@ int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,dou
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k element index.
  * \param i local index of edge in \a k.
  * \param ip global index of the new point in which we want to compute the metric.
@@ -129,8 +129,8 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,dou
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k element index.
  * \param i local index of edge in \a k.
  * \param ip global index of the new point in which we want to compute the metric.

@@ -36,7 +36,7 @@
 #include "libmmgs_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 if fail.
  *
  * tria packing
@@ -68,7 +68,7 @@ static int paktri(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 if fail.
  *
  * Create adjacency table.
@@ -97,7 +97,7 @@ int MMGS_hashTria(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0.
  *
  * Copy the properties (ref and tag) of the declared edges to the triangles,
@@ -159,7 +159,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0.
  *
  * Copy the edge tags stored in triangles in the other triangles sharing the
