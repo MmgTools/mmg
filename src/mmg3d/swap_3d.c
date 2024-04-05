@@ -77,12 +77,15 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
   np = pt->v[MMG5_iare[ia][0]];
   nq = pt->v[MMG5_iare[ia][1]];
 
+  // Algiane 05/04/24: I think that the assumption that was previously made that
+  // we can arrive from a tetrahedra without a boundary face (i.e. without an
+  // xtetra) never happens
+  assert ( pt->xt && "Boundary edges have to be swapped from a boundary face" );
+
   /* No swap of geometric edge */
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    if ( (pxt->edg[ia]>0) || MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
-      return 0;
-    }
+  pxt = &mesh->xtetra[pt->xt];
+  if ( (pxt->edg[ia]>0) || MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
+    return 0;
   }
 
   /* No swap when either internal or external component has only 1 element (as
