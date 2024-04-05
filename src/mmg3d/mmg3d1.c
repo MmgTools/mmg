@@ -618,6 +618,8 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
         if ( !(pxt->ftag[i] & MG_BDY) ) continue;
         for (j=0; j<3; j++) {
           ia  = MMG5_iarf[i][j];
+          /* Mark the edge as boundary in case of missing tag */
+          pxt->tag[ia] |= MG_BDY;
 
           /* No swap of geometric edge */
           if ( MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) )
@@ -628,6 +630,8 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
           if ( ret < 0 )  return -1;
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
+
+          /* Here, we work on a boundary edge lying along a boundary face */
           ier = MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
           if ( ier <  0 )
             return -1;
