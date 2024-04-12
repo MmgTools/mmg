@@ -195,7 +195,7 @@ jobs:
           cd src
           cp ${{ env.SCOTCH_MAKE }} Makefile.inc
           make scotch -j ${{ env.NJOBS }}
-          make install scotch -j ${{ env.NJOBS }}
+          make prefix=../../scotch-install install -j ${{ env.NJOBS }}
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
@@ -220,14 +220,14 @@ jobs:
           make install
 
       # checkout the provided branch name if workflow is manually run
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: inputs.branch_name
         with:
           ref: ${{github.event.inputs.branch}}
           path: mmg
 
       # checkout the event branch for automatic workflows
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: inputs.branch_name == ''
         with:
           path: mmg
@@ -242,7 +242,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
             -DMMG_PATTERN=${{ matrix.pattern }} \
             -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DSCOTCH_DIR=scotch \
+            -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
@@ -264,7 +264,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
             -DMMG_PATTERN=${{ matrix.pattern }} \
             -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DSCOTCH_DIR=scotch \
+            -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
@@ -286,7 +286,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
             -DMMG_PATTERN=${{ matrix.pattern }} \
             -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DSCOTCH_DIR=scotch \
+            -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
@@ -304,9 +304,9 @@ jobs:
           cmake --build build --target install --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Mmg-bin
+          name: Mmg-bin-${{ matrix.os }}-${{ matrix.pattern }}-${{ matrix.pointmap }}-${{ matrix.scotch }}-${{ matrix.vtk }}-${{ matrix.int }}
           path: |
             build/bin
 
