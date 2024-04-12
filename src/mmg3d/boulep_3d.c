@@ -763,8 +763,8 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  * -2 if there are more than two references around,
  * -3 if an edge cannot be found, and
  * -4 if a volume ball had too many elements.
- * Among these, -1 and -4 can be taken as a sign that further remeshing
- * is not possible, while -2 and -3 just mean the job could not be done.
+ * Among these, -1, -3 and -4 can be taken as a sign that further remeshing
+ * is not possible, while -2 just mean the job could not be done.
  *
  * Compute the volumic ball of a SURFACE point \a p, as well as its surfacic
  * ball, starting from tetra \a start, with point \a ip, and face \a if in the

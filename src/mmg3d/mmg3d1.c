@@ -1096,9 +1096,9 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
                 bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i,
                                               list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM);
-                if(bsret==-1 || bsret==-4){
+                if(bsret==-1 || bsret==-3 || bsret==-4){
                   return -3;   // fatal
-                }else if(bsret==-2 || bsret==-3){
+                }else if(bsret==-2){
                   continue;    // ball computation failed: cannot handle this vertex
                 }
                 assert(bsret==1 && "unexpected return value from MMG5_boulesurfvolpNom");
