@@ -91,7 +91,9 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
 
   /* Here the quality is not normalized by alpha, thus we need to
    * normalized it */
-  return  MMG5_minQualCheck(iel,minqual,MMG3D_ALPHAD);
+  int r = MMG5_minQualCheck(iel,minqual,MMG3D_ALPHAD);
+  if(r==0) MMG5_show_tet_location(mesh, pt, iel);
+  return  r;
 }
 
 /**
@@ -476,7 +478,7 @@ int MMG3D_displayQualHisto(MMG5_int ne,double max,double avg,double min,MMG5_int
     fprintf(stdout," (LES)");
   fprintf(stdout,"  %" MMG5_PRId "\n",ne);
 
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%" MMG5_PRId ")\n",
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %.6g (%" MMG5_PRId ")\n",
           max,avg / ne,min,iel);
 
   return ( MMG3D_displayQualHisto_internal(ne,max,avg,min,iel,good,med,his,

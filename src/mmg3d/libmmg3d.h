@@ -3441,4 +3441,10 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
 }
 #endif
 
+
+/* --------------------------------------  Mark's hacks ---------------------------------------------  */
+
+void MMG5_show_tet_location(MMG5_pMesh mesh, MMG5_pTetra pt, int iel);
+
+
 #endif

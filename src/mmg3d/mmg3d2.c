@@ -2147,9 +2147,21 @@ int MMG3D_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int nde
          * non manifold */
         if ( indq == -1 ) {
           if ( mesh->info.ddebug ) {
-          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %" MMG5_PRId " =  %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId ", ref = %" MMG5_PRId ".",__func__,
-                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+            //
+            // Algiane about these (wrt the "david" test cases in MICROCARD/WP7:
+            // "ça n’est pas grave du tout : ça arrive quand on prévoit que si
+            // on collapse un point on créera une situation non-manifold. Du
+            // coup on ne collapse pas. On a un warning « historique » car si ça
+            // arrive vraiment beaucoup, on peut imaginer que le maillage final
+            // ne sera pas très bon et pour des cas d’optimisation de forme on
+            // peut éviter ces situations. Sur tes géométries ça me semble
+            // évident qu’on a pas mal de cas où collapser créerait des
+            // situations non-manifold donc ça n’est pas surprenant de voir ce
+            // warning."
+            //
+            fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                    "tetra %" MMG5_PRId " =  %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId ", ref = %" MMG5_PRId ".",__func__,
+                    jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           }
           return 0;
         }
