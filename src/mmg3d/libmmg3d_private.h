@@ -313,6 +313,7 @@ int  MMG3D_resetRef_ls(MMG5_pMesh mesh);
 int  MMG3D_resetRef_lssurf(MMG5_pMesh mesh);
 int  MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
 int  MMG3D_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol);
+int  MMG3D_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp);
 int  MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
 int  MMG3D_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol);
 int  MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met);

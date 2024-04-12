@@ -154,6 +154,7 @@ extern "C" {
 #define  MG_PARBDYBDY (1 << 12)       /**< 4096 parallel boundary over a boundary */
 #define  MG_PARBDY    (1 << 13)       /**< 8192 parallel boundary */
 #define  MG_NUL       (1 << 14)       /**< 16384 vertex removed */
+#define  MG_OVERLAP   (1 << 15)       /**< 32768 elements on overlap */
 
 /* binary tags for local parameters */
 #define  MG_Vert   (1 << 0 )  /**< 1 local parameter applied over vertex */
