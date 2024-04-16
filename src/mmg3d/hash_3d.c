@@ -1560,7 +1560,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
     // that are stored more that once.
     ier = MMG5_chkBdryTria_flagExtraTriangles(mesh,&ntpres,&hashElt);
     // Delete flagged triangles
-    ier = MMG5_chkBdryTria_deleteExtraTriangles(mesh);
+    ier = MMG5_chkBdryTria_deleteExtraTriangles(mesh,NULL);
   }
   ntmesh +=ntpres;
 
@@ -1855,7 +1855,7 @@ int MMG5_chkBdryTria_flagExtraTriangles(MMG5_pMesh mesh, MMG5_int* ntpres, MMG5_
   return 1;
 }
 
-int MMG5_chkBdryTria_deleteExtraTriangles(MMG5_pMesh mesh) {
+int MMG5_chkBdryTria_deleteExtraTriangles(MMG5_pMesh mesh, MMG5_int* permtria) {
 
   MMG5_pTria ptt, pttnew;
   MMG5_int   nt, nbl, k;
@@ -1869,6 +1869,9 @@ int MMG5_chkBdryTria_deleteExtraTriangles(MMG5_pMesh mesh) {
     ++nt;
     if ( k!=nbl ) {
       pttnew = &mesh->tria[nbl];
+      if ( permtria ) {
+      permtria[k] = nbl;
+      }
       memcpy(pttnew,ptt,sizeof(MMG5_Tria));
     }
     ++nbl;
