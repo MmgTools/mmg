@@ -880,12 +880,12 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
- * \return -1 if failed, number of collapsed points otherwise.
+ * \return a negative value in case of failure, number of collapsed points otherwise.
  *
- * Attempt to collapse small edges.
+ * Attempt to collapse short edges.
  *
  */
-static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
+static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTetra     pt,ptloc;
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
@@ -897,7 +897,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   int             l,kk,isloc,ifac1;
   int16_t         tag,isnm,isnmint;
   int8_t          i,j,ip,iq;
-  int             ier;
+  int             ier, bsret;   // function return values/error codes
 
   nc = nnm = 0;
 
@@ -963,15 +963,21 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
-                  return -1;
+
+                bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i,
+                                              list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM);
+                if(bsret==-1 || bsret==-3 || bsret==-4){
+                  return -3;   // fatal
+                }else if(bsret==-2){
+                  continue;    // ball computation failed: cannot handle this vertex
+                }
+                assert(bsret==1 && "unexpected return value from MMG5_boulesurfvolpNom");
               }
             }
             else {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return -1;
+                return -2;
             }
           }
           else {
@@ -1094,15 +1100,20 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
-                  return -1;
+                bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i,
+                                              list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM);
+                if(bsret==-1 || bsret==-3 || bsret==-4){
+                  return -3;   // fatal
+                }else if(bsret==-2){
+                  continue;    // ball computation failed: cannot handle this vertex
+                }
+                assert(bsret==1 && "unexpected return value from MMG5_boulesurfvolpNom");
               }
             }
             else {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return -1;
+                return -4;
             }
           }
           else {
@@ -1134,13 +1145,13 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,iq,typchk);
-          if ( ier < 0 ) return -1;
+          if ( ier < 0 ) return -5;
           else if ( ier ) {
             MMG3D_delPt(mesh,ier);
             break;
           }
         }
-        else if (ilist < 0 ) return -1;
+        else if (ilist < 0 ) return -6;
       }
       if ( ier ) {
         p1->flag = base;
