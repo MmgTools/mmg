@@ -1556,9 +1556,11 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
    * user */
   if ( mesh->nt ) {
     ier = MMG5_chkBdryTria_hashBoundaries(mesh,ntmesh,&hashElt);
-    // Travel through the tria, delete those that are not in the hash tab or
+    // Travel through the tria, flag those that are not in the hash tab or
     // that are stored more that once.
-    ier = MMG5_chkBdryTria_deleteExtraBoundaries(mesh,&ntpres,&hashElt);
+    ier = MMG5_chkBdryTria_flagExtraTriangles(mesh,&ntpres,&hashElt);
+    // Delete flagged triangles
+    ier = MMG5_chkBdryTria_deleteExtraTriangles(mesh);
   }
   ntmesh +=ntpres;
 
@@ -1796,15 +1798,13 @@ int MMG5_chkBdryTria_hashBoundaries(MMG5_pMesh mesh, MMG5_int ntmesh, MMG5_Hash 
  *                                that are stored more that once.
  *
  */
-int MMG5_chkBdryTria_deleteExtraBoundaries(MMG5_pMesh mesh, MMG5_int* ntpres, MMG5_Hash *hashElt) {
+int MMG5_chkBdryTria_flagExtraTriangles(MMG5_pMesh mesh, MMG5_int* ntpres, MMG5_Hash *hashElt) {
 
   MMG5_pTria ptt, pttnew;
   MMG5_Hash  hashTri;
-  MMG5_int   nt, nbl, k, kk, i, j;
+  MMG5_int   k, kk, i, j;
   MMG5_int   ia, ib, ic, adj;
   int        iface;
-
-  nt=0; nbl=1;
 
   if ( ! MMG5_hashNew(mesh,&hashTri,0.51*mesh->nt,1.51*mesh->nt) ) return 0;
 
@@ -1827,6 +1827,7 @@ int MMG5_chkBdryTria_deleteExtraBoundaries(MMG5_pMesh mesh, MMG5_int* ntpres, MM
     }
     else if ( j > 0 ) {
       /* the face already exists in the tria table */
+      ptt->v[0] = 0;
       continue;
     }
 
@@ -1834,6 +1835,7 @@ int MMG5_chkBdryTria_deleteExtraBoundaries(MMG5_pMesh mesh, MMG5_int* ntpres, MM
       /* the triangle is not a boundary tri or a tri at the interface of two
         * subdomains with different references and the user don't ask to keep
         * it. */
+      ptt->v[0] = 0;
       continue;
     }
 
@@ -1847,6 +1849,22 @@ int MMG5_chkBdryTria_deleteExtraBoundaries(MMG5_pMesh mesh, MMG5_int* ntpres, MM
         ++(*ntpres);
       }
     }
+  }
+  MMG5_DEL_MEM(mesh,hashElt->item);
+  MMG5_DEL_MEM(mesh,hashTri.item);
+  return 1;
+}
+
+int MMG5_chkBdryTria_deleteExtraTriangles(MMG5_pMesh mesh) {
+
+  MMG5_pTria ptt, pttnew;
+  MMG5_int   nt, nbl, k;
+
+  nt = 0; nbl = 1;
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+
+    if ( !MG_EOK(ptt) ) continue;
 
     ++nt;
     if ( k!=nbl ) {
@@ -1863,8 +1881,6 @@ int MMG5_chkBdryTria_deleteExtraBoundaries(MMG5_pMesh mesh, MMG5_int* ntpres, MM
     MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",return 0);
     mesh->nt = nt;
   }
-  MMG5_DEL_MEM(mesh,hashElt->item);
-  MMG5_DEL_MEM(mesh,hashTri.item);
   return 1;
 }
 
