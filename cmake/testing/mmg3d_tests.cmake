@@ -539,6 +539,11 @@ ADD_TEST(NAME mmg3d_opnbdy_ref_island
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
 
+ADD_TEST(NAME mmg3d_duplicate_triangle
+COMMAND ${EXECUT_MMG3D} -v 5
+-in ${MMG3D_CI_TESTS}/DuplicateTriangle/duplicate_triangle
+-out ${CTEST_OUTPUT_DIR}/duplicate-triangle.o.meshb)
+
 ###############################################################################
 #####
 #####         Check Lagrangian motion option
