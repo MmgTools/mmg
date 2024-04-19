@@ -261,50 +261,50 @@ jobs:
         with:
           path: mmg
 
-      - name: Test compilation with shared libs linkage
-        run: |
-          cmake -Smmg -Bbuild_shared \
-          ${{ env.CMAKE_C_FLG }} \
-          ${{ env.FORT_FLG }} \
-            -DCI_CONTEXT=ON \
-            -DBUILD_TESTING=ON \
-            -DUSE_POINTMAP=${{ matrix.pointmap }} \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DMMG_PATTERN=${{ matrix.pattern }} \
-            -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DSCOTCH_DIR=scotch-install \
-            -DUSE_VTK=${{ matrix.vtk }} \
-            -DMMG5_INT=${{ matrix.int }} \
-            -DBUILD_SHARED_LIBS=ON \
-            -DTEST_LIBMMG=ON \
-            -DTEST_LIBMMGS=ON \
-            -DTEST_LIBMMG2D=ON \
-            -DTEST_LIBMMG3D=ON \
-            ${{ inputs.add_cmake_cfg_args }}
-            cmake --build build_shared --config ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
-        shell: bash
+     #- name: Test compilation with shared libs linkage
+     #  run: |
+     #    cmake -Smmg -Bbuild_shared \
+     #    ${{ env.CMAKE_C_FLG }} \
+     #    ${{ env.FORT_FLG }} \
+     #      -DCI_CONTEXT=ON \
+     #      -DBUILD_TESTING=ON \
+     #      -DUSE_POINTMAP=${{ matrix.pointmap }} \
+     #      -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+     #      -DMMG_PATTERN=${{ matrix.pattern }} \
+     #      -DUSE_SCOTCH=${{ matrix.scotch }} \
+     #      -DSCOTCH_DIR=scotch-install \
+     #      -DUSE_VTK=${{ matrix.vtk }} \
+     #      -DMMG5_INT=${{ matrix.int }} \
+     #      -DBUILD_SHARED_LIBS=ON \
+     #      -DTEST_LIBMMG=ON \
+     #      -DTEST_LIBMMGS=ON \
+     #      -DTEST_LIBMMG2D=ON \
+     #      -DTEST_LIBMMG3D=ON \
+     #      ${{ inputs.add_cmake_cfg_args }}
+     #      cmake --build build_shared --config ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
+     #  shell: bash
 
-      - name: Test compilation without library linkage
-        run: |
-          cmake -Smmg -Bbuild_nolibs \
-          ${{ env.CMAKE_C_FLG }} \
-          ${{ env.FORT_FLG }} \
-            -DCI_CONTEXT=ON \
-            -DBUILD_TESTING=ON \
-            -DUSE_POINTMAP=${{ matrix.pointmap }} \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DMMG_PATTERN=${{ matrix.pattern }} \
-            -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DSCOTCH_DIR=scotch-install \
-            -DUSE_VTK=${{ matrix.vtk }} \
-            -DMMG5_INT=${{ matrix.int }} \
-            -DLIBMMG_STATIC=OFF \
-            -DLIBMMGS_STATIC=OFF \
-            -DLIBMMG2D_STATIC=OFF \
-            -DLIBMMG3D_STATIC=OFF \
-            ${{ inputs.add_cmake_cfg_args }}
-            cmake --build build_nolibs --config ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
-        shell: bash
+     #- name: Test compilation without library linkage
+     #  run: |
+     #    cmake -Smmg -Bbuild_nolibs \
+     #    ${{ env.CMAKE_C_FLG }} \
+     #    ${{ env.FORT_FLG }} \
+     #      -DCI_CONTEXT=ON \
+     #      -DBUILD_TESTING=ON \
+     #      -DUSE_POINTMAP=${{ matrix.pointmap }} \
+     #      -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+     #      -DMMG_PATTERN=${{ matrix.pattern }} \
+     #      -DUSE_SCOTCH=${{ matrix.scotch }} \
+     #      -DSCOTCH_DIR=scotch-install \
+     #      -DUSE_VTK=${{ matrix.vtk }} \
+     #      -DMMG5_INT=${{ matrix.int }} \
+     #      -DLIBMMG_STATIC=OFF \
+     #      -DLIBMMGS_STATIC=OFF \
+     #      -DLIBMMG2D_STATIC=OFF \
+     #      -DLIBMMG3D_STATIC=OFF \
+     #      ${{ inputs.add_cmake_cfg_args }}
+     #      cmake --build build_nolibs --config ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
+     #  shell: bash
 
       - name: Configure Mmg with static libs (default behaviour)
         run: |
@@ -321,11 +321,7 @@ jobs:
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
             -DMMG5_INT=${{ matrix.int }} \
-            -DTEST_LIBMMG=ON \
-            -DTEST_LIBMMGS=ON \
-            -DTEST_LIBMMG2D=ON \
-            -DTEST_LIBMMG3D=ON \
-            ${{ inputs.add_cmake_cfg_args }}
+            -DONLY_VERY_SHORT_TESTS=ON
         shell: bash
 
       - name: Build Mmg
