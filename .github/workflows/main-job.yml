@@ -360,56 +360,8 @@ jobs:
             build
 
   upload_coverage:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     needs: ci
-
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-        pattern: [on,off]
-        pointmap: [off]
-        scotch: [on,off]
-        vtk: [off]
-        int: [int32_t]
-
-        include:
-          # test vtk only without scotch
-          - os: ubuntu-20.04
-            pattern: off
-            pointmap: off
-            scotch: off
-            vtk: on
-            int: int32_t
-
-          # Test pointmap with scotch excep
-          - os: ubuntu-20.04
-            pattern: off
-            pointmap: on
-            scotch: on
-            vtk: off
-            int: int32_t
-
-          # Test int64_t build on all archi
-          - os: ubuntu-20.04
-            pattern: on
-            pointmap: on
-            scotch: on
-            vtk: on
-            int: int64_t
-
-          - os: ubuntu-20.04
-            pattern: off
-            pointmap: off
-            scotch: on
-            vtk: on
-            int: int64_t
-
-          - os: ubuntu-20.04
-            pattern: off
-            pointmap: off
-            scotch: off
-            vtk: off
-            int: int64_t
 
     steps:
     - name: Checkout repository
@@ -421,8 +373,7 @@ jobs:
     - name: Download coverage artifact
       uses: actions/download-artifact@v4
       with:
-        name: build-${{ matrix.os }}-${{ matrix.pattern }}-${{ matrix.pointmap }}-${{ matrix.scotch }}-${{ matrix.vtk }}-${{ matrix.int }}
-        path: build
+        pattern: build-*
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-20.04' && inputs.code_coverage == true
