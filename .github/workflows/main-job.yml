@@ -377,7 +377,7 @@ jobs:
     - name: Download coverage artifact
       uses: actions/download-artifact@v4
       with:
-        pattern: build-*
+        pattern: build-ubuntu-*
 
     - name: Upload coverage to Codecov
       if: inputs.code_coverage == true
