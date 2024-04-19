@@ -376,7 +376,7 @@ jobs:
         pattern: build-*
 
     - name: Upload coverage to Codecov
-      if: matrix.os == 'ubuntu-20.04' && inputs.code_coverage == true
+      if: inputs.code_coverage == true
       uses: codecov/codecov-action@v4
       with:
         fail_ci_if_error: true
