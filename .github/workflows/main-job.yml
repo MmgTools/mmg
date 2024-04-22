@@ -335,13 +335,6 @@ jobs:
         run: |
           cmake --build build --target install --config ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
 
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Mmg-bin-${{ matrix.os }}-${{ matrix.pattern }}-${{ matrix.pointmap }}-${{ matrix.scotch }}-${{ matrix.vtk }}-${{ matrix.int }}
-          path: |
-            build/bin
-
       - name: Test Mmg with in32_t integers
         # Run long tests only with vtk off and int32_t integers
         if: matrix.vtk == 'off' && matrix.int == 'int32_t'
@@ -362,20 +355,36 @@ jobs:
           cd build
           ctest -R "msh|vtk" -VV -C ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
 
-      - name: Archive production artifacts for tests
+      - name: Archive production artifacts
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: Mmg-tests-${{ matrix.os }}-${{ matrix.pattern }}-${{ matrix.pointmap }}-${{ matrix.scotch }}-${{ matrix.vtk }}-${{ matrix.int }}
+          name: build-${{ matrix.os }}-${{ matrix.pattern }}-${{ matrix.pointmap }}-${{ matrix.scotch }}-${{ matrix.vtk }}-${{ matrix.int }}
           path: |
-            build/TEST_OUTPUTS
+            build
 
-      - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-20.04' && inputs.code_coverage == true
-        uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: true
-          root_dir: .
-          verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  upload_coverage:
+    runs-on: ubuntu-latest
+    needs: ci
+
+    steps:
+    - name: Checkout repository
+      # Codecov need the source code to pair with coverage
+      uses: actions/checkout@v4
+      with:
+        path: mmg
+
+    - name: Download coverage artifact
+      uses: actions/download-artifact@v4
+      with:
+        pattern: build-ubuntu-*
+
+    - name: Upload coverage to Codecov
+      if: inputs.code_coverage == true
+      uses: codecov/codecov-action@v4
+      with:
+        fail_ci_if_error: true
+        root_dir: .
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
