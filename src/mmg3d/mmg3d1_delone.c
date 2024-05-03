@@ -146,6 +146,10 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     }
 
     ier = 1;
+
+    /* Mark edge as bdy to avoid issue in intmet */
+    pxt->tag[imax] |= MG_BDY;
+
     if ( met && met->m ) {
       ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
     }
