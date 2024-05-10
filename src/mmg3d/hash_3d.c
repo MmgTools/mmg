@@ -1382,7 +1382,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
               if ( !(pxt->ftag[i] & MG_PARBDY)) {
                 ptt->tag[j] &= ~MG_PARBDY;
                 ptt->tag[j] &= ~MG_NOSURF;
-                ptt->tag[j] &= ~MG_REQ;
+                // ptt->tag[j] &= ~MG_REQ;           // FIXME
               }
             }
             /* Assign ref to tria from xtetra->edg */
