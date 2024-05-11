@@ -701,7 +701,7 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( i < 4 ) {
         for (i=0; i<4; i++) {
           ip = pt->v[i];
-          sol->m[ip] = -1000.0*MMG5_EPS;
+          sol->m[ip] = -1001.0*MMG5_EPS;
         }
       }
     }
@@ -718,7 +718,7 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]) < MMG5_EPSD ) ?
-        (-100.0*MMG5_EPS) : sol->m[k];
+        (-111.0*MMG5_EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0;
       ns++;
@@ -738,9 +738,9 @@ int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
         if ( p0->flag == 1 ) {
           if ( !MMG3D_ismaniball(mesh,sol,k,i) ) {
             if ( tmp[ip] < 0.0 )
-              sol->m[ip] = -100.0*MMG5_EPS;
+              sol->m[ip] = -123.0*MMG5_EPS;
             else
-              sol->m[ip] = +100.0*MMG5_EPS;
+              sol->m[ip] = +123.0*MMG5_EPS;
 
             p0->flag = 0;
             nc++;
@@ -880,7 +880,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
         for (i=0; i<4; i++) {
           ip0 = pt1->v[i];
           if ( sol->m[ip0] > 0.0 ) {
-            sol->m[ip0] = - 100*MMG5_EPS;
+            sol->m[ip0] = - 101*MMG5_EPS;
           }
         }
       }
@@ -960,7 +960,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
         pt1 = &mesh->tetra[pile[l]];
         for (i=0; i<4; i++) {
           ip0 = pt1->v[i];
-          if ( sol->m[ip0] < 0.0 ) sol->m[ip0] = 100*MMG5_EPS;
+          if ( sol->m[ip0] < 0.0 ) sol->m[ip0] = 101*MMG5_EPS;
         }
       }
       ncm++;
@@ -993,7 +993,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
           pt1 = &mesh->tetra[pile[l]];
           for (i=0; i<4; i++) {
             ip0 = pt1->v[i];
-            if ( sol->m[ip0] < 0.0 ) sol->m[ip0] = 100*MMG5_EPS;
+            if ( sol->m[ip0] < 0.0 ) sol->m[ip0] = 102*MMG5_EPS;
           }
         }
         ncm++;
@@ -1121,6 +1121,15 @@ int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       else if ( !p0->flag || !p1->flag )  continue;
 
       npneg = (np<0);
+      if(npneg){
+        double X[3];
+        printf("splitting a required edge:\n");
+        for(int i=0; i<3; i++) X[i] = p0->c[i]*mesh->info.delta + mesh->info.min[i];
+        printf("p0 index %6d at (%f, %f, %f) sol=%8g\n", ip0, X[0], X[1], X[2], v0);
+        for(int i=0; i<3; i++) X[i] = p1->c[i]*mesh->info.delta + mesh->info.min[i];
+        printf("p1 index %6d at (%f, %f, %f) sol=%8g\n", ip1, X[0], X[1], p1->c[2], v1);
+        printf("\n");
+      }
 
       s = v0 / (v0-v1);
 
