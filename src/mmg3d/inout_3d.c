@@ -145,7 +145,11 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if ( chaine[0] == '#' ) {
-        fgets(strskip,MMG5_FILESTR_LGTH,inm);
+        while(1){           // skip until end of line or file
+          char *s = fgets(strskip,MMG5_FILESTR_LGTH,inm);
+          if(!s) break;     // nothing could be read
+          if(s[strlen(s)-1]=='\n') break;   // end of line
+        }
         continue;
       }
 
