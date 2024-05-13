@@ -44,9 +44,9 @@
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  *
- * \return 0 if fail to open file, -1 for other errors, 1 if success.
+ * \return 0 if the file could not be opened, -1 for other errors, 1 if success.
  *
- * Try to open a Medit file at asked mode (read only, write, etc) and store if
+ * Try to open a Medit file in the requested mode (read only, write, etc) and store if
  * file is binary (depending on the extension).
  *
  */
@@ -145,7 +145,11 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if ( chaine[0] == '#' ) {
-        fgets(strskip,MMG5_FILESTR_LGTH,inm);
+        while(1){           // skip until end of line or file
+          char *s = fgets(strskip,MMG5_FILESTR_LGTH,inm);
+          if(!s) break;     // nothing could be read
+          if(s[strlen(s)-1]=='\n') break;   // end of line
+        }
         continue;
       }
 
@@ -807,7 +811,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       ppt->tag &= ~MG_NUL;
     }
 
-    /* Possibly switch 2 vertices number so that each tet is positively oriented */
+    /* Possibly switch 2 vertex numbers so that each tet is positively oriented */
     if ( MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
       /* mesh->xt temporary used to count reoriented tetra */
       mesh->xt++;
@@ -1233,7 +1237,7 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const c
     ier = MMG3D_loadMesh(mesh,tmp);
     if ( ier <  1 ) { break; }
 
-    /* Facultative metric */
+    /* Optional metric */
     if ( sol ) {
       MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return -1);
       strcpy(soltmp,solnameptr);
@@ -1286,7 +1290,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     return 0;
   }
 
-  /*entete fichier*/
+  /* file header */
   binch=0; bpos=10;
   if(!bin) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
@@ -2041,7 +2045,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
-  /*fin fichier*/
+  /* end of file */
   if(!bin) {
     strcpy(&chaine[0],"\n\nEnd\n");
     fprintf(inm,"%s",chaine);
@@ -2173,13 +2177,13 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     return ier;
   }
 
-  /* Allocate and store the header informations for each solution */
+  /* Allocate and store the header information for each solution */
   if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type[0]) ) {
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;
   }
-  /* For binary file, we read the verson inside the file */
+  /* For binary files, we read the verson inside the file */
   if ( ver ) met->ver = ver;
 
   MMG5_SAFE_FREE(type);
@@ -2189,7 +2193,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   fseek(inm,posnp,SEEK_SET);
 
   if ( met->ver == 1 ) {
-    /* Simple precision */
+    /* Single precision */
     for (k=1; k<=mesh->np; k++) {
       if ( MMG5_readFloatSol3D(met,inm,bin,iswp,k) < 0 ) return -1;
     }
@@ -2254,7 +2258,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
 
-    /* Give an arbitrary name to the solution because the Medit format has non
+    /* Give an arbitrary name to the solution because the Medit format has no
      * name field */
     sprintf(data,"sol_%" MMG5_PRId "",j);
     if ( !MMG3D_Set_inputSolName(mesh,psl,data) ) {
@@ -2272,7 +2276,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
       return -1;
     }
 
-    /* For binary file, we read the verson inside the file */
+    /* For binary file, we read the version inside the file */
     if ( ver ) psl->ver = ver;
   }
   MMG5_SAFE_FREE(type);
@@ -2282,7 +2286,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   fseek(inm,posnp,SEEK_SET);
 
   if ( (*sol)[0].ver == 1 ) {
-    /* Simple precision */
+    /* Single precision */
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol + j;
