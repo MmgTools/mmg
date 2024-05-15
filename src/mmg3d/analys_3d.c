@@ -109,7 +109,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   MMG5_int     k,kk,iel,jel,nvf,nf,nr,nm,nt,nre,nreq,ncc,ned,ref;
-  int16_t      tag;
+  uint16_t     tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;

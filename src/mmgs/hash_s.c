@@ -170,7 +170,7 @@ int MMGS_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash   hash;
   MMG5_pTria  pt;
   MMG5_int    k,nad;
-  int         tag;
+  uint16_t    tag;
   int8_t      i,i1,i2;
 
   /* adjust hash table params */

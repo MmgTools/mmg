@@ -112,7 +112,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
     /* Construction of bezier edge */
     double      to[3],no1[3],no2[3];
     MMG5_int    ref;
-    int16_t     tag;
+    uint16_t    tag;
     MMG5_pPoint ppt;
 
     int8_t ier = MMG3D_build_bezierEdge(mesh,k,imax,i,j,pxt,ip1,ip2,p0,p1,

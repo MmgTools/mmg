@@ -90,7 +90,7 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
  */
 static inline
 int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
-                                  int16_t tag,MMG5_int ref, MMG5_int piv,MMG5_int adj) {
+                                  uint16_t tag,MMG5_int ref, MMG5_int piv,MMG5_int adj) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     *adja;
@@ -139,7 +139,7 @@ int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, 
  * traveling its shell.
  *
  */
-int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t tag,MMG5_int ref) {
+int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,uint16_t tag,MMG5_int ref) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     piv,na,nb,adj,*adja;
@@ -235,7 +235,7 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
         ip1 = pt->v[MMG5_iare[i][0]];
         ip2 = pt->v[MMG5_iare[i][1]];
 
-        int16_t tag = 0;
+        uint16_t tag = 0;
         MMG5_int dummy = 0;
         int ier = MMG5_hGet ( &hash,ip1,ip2,&dummy,&tag);
 
@@ -871,7 +871,7 @@ int srcface(MMG5_pMesh mesh,MMG5_int n0,MMG5_int n1,MMG5_int n2) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_int      ref,minn,maxn,sn,k,ip0,ip1,ip2,mins,maxs,sum;
-  int16_t       tag;
+  uint16_t      tag;
   int8_t        i;
   static int8_t mmgWarn0 = 0;
 

@@ -36,7 +36,7 @@
 #include "libmmg3d_private.h"
 
 /** get new point address */
-MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src) {
+MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],uint16_t tag,MMG5_int src) {
 
   MMG5_pPoint  ppt;
   MMG5_int     curpt;
@@ -63,7 +63,7 @@ MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src) {
     }
     ppt->xp  = mesh->xp;
   }
-  assert(tag < 24704);
+  assert(tag <= MG_NUL*2-1 && "Value for tag is valid");
   assert(tag >= 0);
   ppt->n[0]   = 0;
   ppt->n[1]   = 0;

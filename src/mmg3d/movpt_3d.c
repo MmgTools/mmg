@@ -851,11 +851,11 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  */
 static inline
 int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int ip0,
-                                MMG5_int *ipa,MMG5_int *ipb,const int16_t edgTag,MMG5_int *ip) {
+                                MMG5_int *ipa,MMG5_int *ipb,const uint16_t edgTag,MMG5_int *ip) {
 
   MMG5_pTetra           pt;
   MMG5_int              iel,iptmpa,iptmpb;
-  int16_t               tag;
+  uint16_t              tag;
   uint8_t               i,ie,iface,iea,ieb;
 
   iel   = lists[l] / 4;
@@ -942,7 +942,7 @@ int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int i
  * other direction until meeting the second curve edge.
  */
 int MMG3D_curveEndingPts(MMG5_pMesh mesh,MMG5_int *lists,int ilists,
-                         const int16_t edgTag, MMG5_int ip0,MMG5_int *ip1,
+                         const uint16_t edgTag, MMG5_int ip0,MMG5_int *ip1,
                          MMG5_int *ip2) {
   MMG5_pTetra           pt;
   MMG5_int              iel,ipa,ipb;
@@ -1152,7 +1152,7 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int ip
                                       uint8_t isrid,const double step,
                                       double o[3],double no[3],
                                       double no2[3],double to[3],
-                                      const int16_t edgTag) {
+                                      const uint16_t edgTag) {
 
   MMG5_int ip;
 

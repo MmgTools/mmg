@@ -57,7 +57,7 @@ extern int8_t ddb;
  *
  */
 void MMG3D_set_geom(MMG5_pMesh mesh, MMG5_pPoint ppt,
-                    int16_t tag,MMG5_int nmref,MMG5_int edgref,
+                    uint16_t tag,MMG5_int nmref,MMG5_int edgref,
                     double no1[3],double no2[3],double to[3]) {
 
   if ( MG_EDG_OR_NOM(tag) ) {
@@ -895,7 +895,8 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_int        base,k,nc,nnm,lists[MMG3D_LMAX+2],refmin,refplus;
   int64_t         list[MMG3D_LMAX+2];
   int             l,kk,isloc,ifac1;
-  int16_t         tag,isnm,isnmint;
+  uint16_t        tag,isnm;
+  int16_t         isnmint;
   int8_t          i,j,ip,iq;
   int             ier;
 
@@ -934,7 +935,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         }
         else {
           /* Ignore OLDPARBDY tag of p0 */
-          int16_t tag = p0->tag;
+          uint16_t tag = p0->tag;
           tag &= ~MG_OLDPARBDY;
           if ( (tag > p1->tag) || (tag & MG_REQ) ) {
             /* Unable to merge edge */
@@ -1205,7 +1206,7 @@ int MMG3D_adpcoledg(MMG5_pMesh mesh, MMG5_pSol met,
   MMG3D_find_bdyface_from_edge(mesh,pt,imin,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
 
   /* Ignore OLDPARBDY tag of p0 */
-  int16_t tag0 = p0->tag;
+  uint16_t tag0 = p0->tag;
   tag0 &= ~MG_OLDPARBDY;
   if ( (tag0 > p1->tag) || (tag0 & MG_REQ) ) {
     /* Unable to merge edge: pass to next element */
@@ -1216,7 +1217,7 @@ int MMG3D_adpcoledg(MMG5_pMesh mesh, MMG5_pSol met,
   ilist = 0;
   if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
     /* Case of a boundary face */
-    int16_t tag = pxt->tag[MMG5_iarf[i][j]];
+    uint16_t tag = pxt->tag[MMG5_iarf[i][j]];
     if ( tag & MG_REQ ) {
       return 0;
     }
@@ -1229,7 +1230,7 @@ int MMG3D_adpcoledg(MMG5_pMesh mesh, MMG5_pSol met,
       return 0;
     }
 
-    int16_t isnm = (p0->tag & MG_NOM);
+    uint16_t isnm = (p0->tag & MG_NOM);
     if (MMG5_boulesurfvolp(mesh,k,i1,i, list,&ilist,lists,&ilists,isnm) < 0 ) {
       return -1;
     }
@@ -1752,7 +1753,7 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
                               MMG5_pxTetra pxt,
                               MMG5_int ip1,MMG5_int ip2,
                               MMG5_pPoint p0, MMG5_pPoint p1,
-                              MMG5_int *ref,int16_t *tag,
+                              MMG5_int *ref,uint16_t *tag,
                               double o[3],double to[3],double no1[3],
                               double no2[3],int64_t *list,int *ilist) {
   MMG5_Tria    ptt;
@@ -1933,7 +1934,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   MMG5_int     src,ip,ip1,ip2,ref;
   int64_t      list[MMG3D_LMAX+2];
   int          ier;
-  int16_t      tag;
+  uint16_t     tag;
   int8_t       j,i,i1,i2;
 
   assert ( pxt == &mesh->xtetra[pt->xt] );

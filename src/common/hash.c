@@ -438,7 +438,7 @@ int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
  * tag. If the edge exist, add the new tag to the already stored tags.
  *
  */
-int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int16_t tag) {
+int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,uint16_t tag) {
   MMG5_hedge  *ph;
   MMG5_int     key;
   MMG5_int    ia,ib,j;

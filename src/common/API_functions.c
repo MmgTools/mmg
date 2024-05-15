@@ -734,7 +734,7 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
-const char* MMG5_Get_tagName(int tag)
+const char* MMG5_Get_tagName(uint16_t tag)
 {
   static char tags_name[1024];
 
@@ -791,7 +791,12 @@ const char* MMG5_Get_tagName(int tag)
 
   if ( tag & MG_PARBDY) {
     strcat(tags_name,"Parbdy ");
-    }
+  }
+
+  if ( tag & MG_OVERLAP) {
+    strcat(tags_name,"Overlap ");
+  }
+
   strcat(tags_name,"tag(s).");
 
   return tags_name;

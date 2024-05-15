@@ -51,7 +51,7 @@ int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
   MMG5_int         *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
-  int16_t          tag;
+  uint16_t         tag;
   int8_t           i,ii,i1,i2;
 
   if ( !mesh->nt ) {
