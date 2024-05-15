@@ -618,6 +618,8 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
         if ( !(pxt->ftag[i] & MG_BDY) ) continue;
         for (j=0; j<3; j++) {
           ia  = MMG5_iarf[i][j];
+          /* Mark the edge as boundary in case of missing tag */
+          pxt->tag[ia] |= MG_BDY;
 
           /* No swap of geometric edge */
           if ( MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) )
@@ -628,6 +630,8 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
           if ( ret < 0 )  return -1;
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
+
+          /* Here, we work on a boundary edge lying along a boundary face */
           ier = MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
           if ( ier <  0 )
             return -1;
@@ -880,12 +884,12 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
- * \return -1 if failed, number of collapsed points otherwise.
+ * \return a negative value in case of failure, number of collapsed points otherwise.
  *
- * Attempt to collapse small edges.
+ * Attempt to collapse short edges.
  *
  */
-static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
+static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTetra     pt,ptloc;
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
@@ -898,7 +902,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   uint16_t        tag,isnm;
   int16_t         isnmint;
   int8_t          i,j,ip,iq;
-  int             ier;
+  int             ier, bsret;   // function return values/error codes
 
   nc = nnm = 0;
 
@@ -964,15 +968,21 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
-                  return -1;
+
+                bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i,
+                                              list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM);
+                if(bsret==-1 || bsret==-3 || bsret==-4){
+                  return -3;   // fatal
+                }else if(bsret==-2){
+                  continue;    // ball computation failed: cannot handle this vertex
+                }
+                assert(bsret==1 && "unexpected return value from MMG5_boulesurfvolpNom");
               }
             }
             else {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return -1;
+                return -2;
             }
           }
           else {
@@ -1095,15 +1105,20 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
-                  return -1;
+                bsret = MMG5_boulesurfvolpNom(mesh,k,ip,i,
+                                              list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM);
+                if(bsret==-1 || bsret==-3 || bsret==-4){
+                  return -3;   // fatal
+                }else if(bsret==-2){
+                  continue;    // ball computation failed: cannot handle this vertex
+                }
+                assert(bsret==1 && "unexpected return value from MMG5_boulesurfvolpNom");
               }
             }
             else {
               if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return -1;
+                return -4;
             }
           }
           else {
@@ -1135,13 +1150,13 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,iq,typchk);
-          if ( ier < 0 ) return -1;
+          if ( ier < 0 ) return -5;
           else if ( ier ) {
             MMG3D_delPt(mesh,ier);
             break;
           }
         }
-        else if (ilist < 0 ) return -1;
+        else if (ilist < 0 ) return -6;
       }
       if ( ier ) {
         p1->flag = base;
@@ -1937,7 +1952,14 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   uint16_t     tag;
   int8_t       j,i,i1,i2;
 
-  assert ( pxt == &mesh->xtetra[pt->xt] );
+  assert ( pxt == &mesh->xtetra[pt->xt] && "suitable xtetra assignation" );
+
+  assert ( ((pxt->ftag[MMG5_ifar[imax][0]] & MG_BDY) || (pxt->ftag[MMG5_ifar[imax][1]] & MG_BDY) )
+           && "Boundary edge has to be splitted from a boundary face" );
+
+  /* Mark the edge as MG_BDY to avoid wrong evaluation as an internal edge by
+   * the interpolation function (see intmet_ani) */
+  pxt->tag[imax] |= MG_BDY;
 
   /* proceed edges according to lengths */
   MMG3D_find_bdyface_from_edge(mesh,pt,imax,&i,&j,&i1,&i2,&ip1,&ip2,&p0,&p1);
@@ -2349,6 +2371,10 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           ppt = &mesh->point[ip];
 
           assert ( met );
+
+          // Add MG_BDY tag before interpolation
+          pxt->tag[ia] |= MG_BDY;
+
           if ( met->m ) {
             if ( typchk == 1 && (met->size>1) )
               ier = MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);
@@ -2419,7 +2445,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         }
         else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
           /* Point at the interface of 2 boundary faces belonging to different
-           * tetra : Point has alredy been created from another tetra so we have
+           * tetra : Point has already been created from another tetra so we have
            * to store the tangent and the second normal at edge */
           ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
           assert(ier);

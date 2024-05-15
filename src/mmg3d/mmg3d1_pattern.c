@@ -116,7 +116,7 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     else {
       /* Case of an internal face */
 
-      /* Skip only boundary edges but try to trat internal edges connecting bdy
+      /* Skip only boundary edges but try to treat internal edges connecting bdy
        * points */
       int8_t isbdy;
       ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);

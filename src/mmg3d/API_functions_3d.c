@@ -945,8 +945,8 @@ int  MMG3D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs) {
     j = (i-1)*3;
     ptt = &mesh->tria[i];
     ptt->v[0] = tria[j]  ;
-    ptt->v[1] = tria[j+2];
-    ptt->v[2] = tria[j+1];
+    ptt->v[1] = tria[j+1];
+    ptt->v[2] = tria[j+2];
     if ( refs != NULL )
       ptt->ref  = refs[i-1];
   }

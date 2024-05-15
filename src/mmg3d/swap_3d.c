@@ -77,12 +77,15 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
   np = pt->v[MMG5_iare[ia][0]];
   nq = pt->v[MMG5_iare[ia][1]];
 
+  // Algiane 05/04/24: I think that the assumption that was previously made that
+  // we can arrive from a tetrahedra without a boundary face (i.e. without an
+  // xtetra) never happens
+  assert ( pt->xt && "Boundary edges have to be swapped from a boundary face" );
+
   /* No swap of geometric edge */
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    if ( (pxt->edg[ia]>0) || MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
-      return 0;
-    }
+  pxt = &mesh->xtetra[pt->xt];
+  if ( (pxt->edg[ia]>0) || MG_EDG_OR_NOM(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ) {
+    return 0;
   }
 
   /* No swap when either internal or external component has only 1 element (as
@@ -343,7 +346,26 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
   ppt0->c[1] = 0.5*(p0->c[1] + p1->c[1]);
   ppt0->c[2] = 0.5*(p0->c[2] + p1->c[2]);
 
+#ifndef NDEBUG
+  /* Security check: ensure that the edge is boundary */
+  int16_t  tag = 0;
+  MMG5_int ref = 0;
+  if ( !MMG3D_get_shellEdgeTag(mesh,list[0]/6,list[0]%6,&tag,&ref) ) {
+    fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"
+            " (tetra %d).\n",__func__,MMG3D_indElt(mesh,list[0]/6));
+    return 0;
+  }
+  assert ( (tag & MG_BDY)  && "Edge should be boundary but is not");
+#endif
+
   if ( met->m ) {
+    pt  = &mesh->tetra[list[0]/6];
+    assert ( pt->xt && "Boundary edge interpolated from non-boundary face");
+
+    /* Mark edge as boundary to ensure suitable detection of bdy edge during
+     * interpolation */
+    mesh->xtetra[pt->xt].tag[list[0]%6] |= MG_BDY;
+
     if ( typchk == 1 && (met->size>1) ) {
       if ( MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
         return 0;
