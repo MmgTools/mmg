@@ -411,6 +411,7 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_int    k,nc,nnm,base;
   int         ier;
   int8_t      i,j,ip,iq,isnm;
+  int16_t     tag0, tag1;
 
   nc = nnm = 0;
   hmi2 = mesh->info.hmin*mesh->info.hmin;
@@ -435,9 +436,11 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];
+        tag0 = p0->tag & ~MG_OLDPARBDY;
+        tag1 = p1->tag & ~MG_OLDPARBDY;
         if ( p0->flag == base )  continue;
         else if ( p0->tag & MG_BDY ) continue;
-        else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
+        else if ( (p0->tag & MG_REQ) || (tag0 > tag1) )  continue;
 
         /* check length */
         ux = p1->c[0] - p0->c[0];
