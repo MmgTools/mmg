@@ -899,7 +899,7 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_int        base,k,nc,nnm,lists[MMG3D_LMAX+2],refmin,refplus;
   int64_t         list[MMG3D_LMAX+2];
   int             l,kk,isloc,ifac1;
-  int16_t         tag,isnm,isnmint;
+  int16_t         tag,tag0,tag1,isnm,isnmint;
   int8_t          i,j,ip,iq;
   int             ier, bsret;   // function return values/error codes
 
@@ -938,9 +938,10 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         }
         else {
           /* Ignore OLDPARBDY tag of p0 */
-          int16_t tag = p0->tag;
-          tag &= ~MG_OLDPARBDY;
-          if ( (tag > p1->tag) || (tag & MG_REQ) ) {
+          int16_t tag0 = p0->tag, tag1 = p1->tag;
+          tag0 &= ~MG_OLDPARBDY;
+          tag1 &= ~MG_OLDPARBDY;
+          if ( (tag0 > tag1) || (tag0 & MG_REQ) ) {
             /* Unable to merge edge */
             continue;
           }
@@ -956,8 +957,13 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             tag = pxt->tag[MMG5_iarf[i][j]];
             isnm = (tag & MG_NOM);
             isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
+            /* Ignore MG_OLDPARBDY for tags: commit c51f5f4f86292bdb0e33adb07c21ed327b1e2ec0 (pull request #241)
+            updates edge tags in splits: MG_OLDPARBDY may appear in edge tags and not in corresponding points
+            which could cause a wrong treatment of the next if statement */
+            tag0 = p0->tag & ~MG_OLDPARBDY;
+            tag &= ~MG_OLDPARBDY;
 
-            if ( p0->tag > tag ) continue;
+            if ( tag0 > tag ) continue;
 
             /* Catch an exterior non manifold point by an external face */
             if ( isnm ) {
@@ -1096,7 +1102,10 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
             isnm = (tag & MG_NOM);
             isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
 
-            if ( p0->tag > tag ) continue;
+            tag0 = p0->tag & ~MG_OLDPARBDY;
+            tag &= ~MG_OLDPARBDY;
+
+            if ( tag0 > tag ) continue;
             if ( isnm ) {
               if ( isnmint ) {
                 assert( 0<=ip && ip<4 && "unexpected local index for vertex");
@@ -1130,7 +1139,9 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
           tag = pxt->tag[MMG5_iarf[i][j]];
           tag |= MG_BDY;
-          if ( p0->tag > tag )  continue;
+          tag &= ~MG_OLDPARBDY;
+          tag0 &= ~MG_OLDPARBDY;
+          if ( tag0 > tag )  continue;
 
           isnm = ( tag & MG_NOM );
           isnmint = ( tag & MG_NOM ) ? ( p0->xp && mesh->xpoint[p0->xp].nnor ) : 0;
