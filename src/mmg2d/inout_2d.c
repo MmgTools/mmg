@@ -84,7 +84,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if ( chaine[0] == '#' ) {
-        fgets(strskip,MMG5_FILESTR_LGTH,inm);
+        while(1){           // skip until end of line or file
+          char *s = fgets(strskip,MMG5_FILESTR_LGTH,inm);
+          if(!s) break;     // nothing could be read
+          if(s[strlen(s)-1]=='\n') break;   // end of line
+        }
         continue;
       }
 
@@ -640,7 +644,7 @@ int MMG2D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const c
     ier = MMG2D_loadMesh(mesh,tmp);
     if ( ier <  1 ) { break; }
 
-    /* Facultative metric */
+    /* Optional metric */
     if ( sol ) {
       MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return -1);
       strcpy(soltmp,solnameptr);
@@ -960,7 +964,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   fseek(inm,posnp,SEEK_SET);
 
   if ( sol->ver == 1 ) {
-    /* Simple precision */
+    /* Single precision */
     for (k=1; k<=sol->np; k++) {
       if ( MMG2D_readFloatSol(sol,inm,bin,iswp,k) < 0 ) return -1;
     }
@@ -1041,7 +1045,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   for ( j=0; j<nsols; ++j) {
     psl = *sol+j;
 
-    /* Give an arbitrary name to the solution because the Medit format has non
+    /* Give an arbitrary name to the solution because the Medit format has no
      * name field */
     sprintf(data,"sol_%d",j);
     if ( !MMG2D_Set_inputSolName(mesh,psl,data) ) {
@@ -1059,7 +1063,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
       return -1;
     }
     psl->dim = 2;
-    /* For binary file, we read the verson inside the file */
+    /* For binary files, we read the verson inside the file */
     if ( ver ) psl->ver = ver;
   }
   MMG5_SAFE_FREE(type);
@@ -1069,7 +1073,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   fseek(inm,posnp,SEEK_SET);
 
   if ( (*sol)[0].ver == 1 ) {
-    /* Simple precision */
+    /* Single precision */
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol+j;

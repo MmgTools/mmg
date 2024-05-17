@@ -101,7 +101,11 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if ( chaine[0] == '#' ) {
-        fgets(strskip,MMG5_FILESTR_LGTH,inm);
+        while(1){           // skip until end of line or file
+          char *s = fgets(strskip,MMG5_FILESTR_LGTH,inm);
+          if(!s) break;     // nothing could be read
+          if(s[strlen(s)-1]=='\n') break;   // end of line
+        }
         continue;
       }
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
@@ -393,7 +397,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
-  /* read quads: automatic conversion into tria */
+  /* read quads: automatic conversion to triangles */
   if ( nq > 0 ) {
     rewind(inm);
     fseek(inm,posnq,SEEK_SET);
@@ -888,7 +892,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     fprintf(stdout,"  %%%% %s OPENED\n",data);
   MMG5_SAFE_FREE(data);
 
-  /*entete fichier*/
+  /* file header */
   if(!bin) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
@@ -1281,7 +1285,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     if ( nn+ng )
       fprintf(stdout,"     NUMBER OF NORMALS    %8" MMG5_PRId "  TANGENTS   %6" MMG5_PRId "\n",nn,ng);
   }
-  /*fin fichier*/
+  /* end of file */
   if(!bin) {
     strcpy(&chaine[0],"\n\nEnd\n");
     fprintf(inm,"%s",chaine);
@@ -1334,7 +1338,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
     return -1;
   }
 
-  /* #MMG5_loadSolHeader function reads only solution at vertices so we don't
+  /* #MMG5_loadSolHeader function reads only solutions at vertices so we don't
       have to check the entites on which the metric applies */
   int entities = MMG5_Vertex;
   ier = MMG5_chkMetricType(mesh,type,&entities,inm);
@@ -1343,7 +1347,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
     return ier;
   }
 
-  /* Allocate and store the header informations for each solution */
+  /* Allocate and store the header information for each solution */
   if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type[0]) ) {
     fclose(inm);
     MMG5_SAFE_FREE(type);
@@ -1424,7 +1428,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
 
-    /* Give an arbitrary name to the solution because the Medit format has non
+    /* Give an arbitrary name to the solution because the Medit format has no
      * name field */
     sprintf(data,"sol_%" MMG5_PRId "",j);
     if ( !MMGS_Set_inputSolName(mesh,psl,data) ) {
@@ -1435,13 +1439,13 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
       }
     }
 
-    /* Allocate and store the header informations for each solution */
+    /* Allocate and store the header information for each solution */
     if ( !MMGS_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,type[j]) ) {
       MMG5_SAFE_FREE(type);
       fclose(inm);
       return -1;
     }
-    /* For binary file, we read the verson inside the file */
+    /* For binary files, we read the verson inside the file */
     if ( ver ) psl->ver = ver;
   }
   MMG5_SAFE_FREE(type);
@@ -1451,7 +1455,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   fseek(inm,posnp,SEEK_SET);
 
   if ( (*sol)[0].ver == 1 ) {
-    /* Simple precision */
+    /* Single precision */
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol + j;
@@ -1502,7 +1506,7 @@ int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     fprintf(inm,"\n");
   }
 
-  /*fin fichier*/
+  /* end of file */
   if(!bin) {
     fprintf(inm,"\n\nEnd\n");
   } else {
