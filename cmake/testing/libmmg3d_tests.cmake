@@ -53,6 +53,7 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     # headers, it will ask to sort the needed source files too). Added here, we
     # can use the ADD_LIBRARY_TEST macro...
     test_compare-para-tria
+    test_req-vert-3d
     )
 ENDIF ( )
 
@@ -86,6 +87,7 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     ${MMG3D_CI_TESTS}/API_tests/vtk2mesh.c
     # Following pieces of code are left in repo to take advantage of versionning
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
+    ${PROJECT_SOURCE_DIR}/cmake/testing/code/req-vert-3d.c
     )
 ENDIF( )
 
@@ -300,6 +302,11 @@ IF ( MMG3D_CI AND NOT ONLY_VERY_SHORT_TESTS )
     )
   SET_TESTS_PROPERTIES ( test_ridge_preservation_in_ls_mode
     PROPERTIES FIXTURES_REQUIRED mmg3d_OptLs_NM_ridge )
+
+  ADD_TEST(NAME test_req-vert-3d
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_req-vert-3d
+    ${MMG3D_CI_TESTS}/test_req_vert/cube.mesh
+    )
 
 ENDIF()
 

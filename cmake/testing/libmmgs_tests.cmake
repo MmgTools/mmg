@@ -54,6 +54,24 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
   )
 
+# Additional tests that needs to download ci meshes
+IF ( MMGS_CI AND NOT ONLY_VERY_SHORT_TESTS )
+  LIST ( APPEND MMGS_LIB_TESTS
+    # Remark: not clean -> next tests don't need the library in fact (moving them
+    # in app tests will ask to clean the installation of public and private
+    # headers, it will ask to sort the needed source files too). Added here, we
+    # can use the ADD_LIBRARY_TEST macro...
+    test_req-vert-s
+  )
+
+  LIST ( APPEND MMGS_LIB_TESTS_MAIN_PATH
+    # Following pieces of code are left in repo to take advantage of versionning
+    ${PROJECT_SOURCE_DIR}/cmake/testing/code/req-vert-s.c
+
+  )
+ENDIF ( )
+
+
 IF ( LIBMMGS_STATIC )
   SET ( lib_name lib${PROJECT_NAME}s_a )
   SET ( lib_type "STATIC" )
@@ -148,6 +166,13 @@ ADD_TEST(NAME libmmgs_lsAndMetric
   "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
   "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
   )
+
+IF ( MMGS_CI AND NOT ONLY_VERY_SHORT_TESTS )
+  ADD_TEST(NAME test_req-vert-s
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_req-vert-s
+    ${MMGS_CI_TESTS}/test_req_vert/cube.mesh
+    )
+ENDIF ( )
 
 IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND ) 
   SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
