@@ -1380,11 +1380,23 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
               /* If the face from which we arrive is not a parallel face, then remove also the parallel tags
               MG_PARBDY, MG_NOSURF and MG_REQ */
               if ( !(pxt->ftag[i] & MG_PARBDY)) {
-                ptt->tag[j] &= ~MG_PARBDY;
-                ptt->tag[j] &= ~MG_NOSURF;
-                ptt->tag[j] &= ~MG_REQ;
+                /* Remove the tags only if the edge is identified as parallel.
+                   By convention in ParMmg (see tag_pmmg.c in ParMmg), if an entity is
+                     - parallel + not required: the tags are MG_PARBDY+MG_NOSURF+MG_REQ
+                     - parallel + truly required by the user: the tags are MG_PARBDY+MG_REQ
+                    so we remove the tags MG_NOSURF and MG_REQ only if the edge is identified as MG_NOSURF */
+                if ( ptt->tag[j] & MG_PARBDY ) {
+                  ptt->tag[j] &= ~MG_PARBDY;
+                  /* a truly required entity does not have MG_NOSURF tag so don't remove MG_REQ tag */
+                  /* if MG_NOSURF tag, then also remove MG_REQ and MG_SURF tags */
+                  if( ptt->tag[j] & MG_NOSURF ) {
+                    ptt->tag[j] &= ~MG_NOSURF;
+                    ptt->tag[j] &= ~MG_REQ;
+                  }
+                }
               }
             }
+
             /* Assign ref to tria from xtetra->edg */
             if ( pxt->edg[MMG5_iarf[i][j]] )
               ptt->edg[j] = pxt->edg[MMG5_iarf[i][j]];
