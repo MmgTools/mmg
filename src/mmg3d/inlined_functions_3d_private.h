@@ -89,6 +89,9 @@ inline double MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
  * metric (for classic storage of metrics at ridges points).
  *
+ * \warning in this function we may erroneously approximate the length of a
+ * curve boundary edge by the length of the straight edge if the "MG_BDY" tag is
+ * missing along the edge.
  */
 static
 inline double MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
@@ -102,8 +105,10 @@ inline double MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
   if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
     isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
+    // Computation of the length of a curve edge with 33 aniso metric
     return MMG5_lenSurfEdg33_ani(mesh, met, ip1, ip2, isedg);
   } else {
+    // Computation for an internal edge with 33 aniso metric
     return MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
                                 &met->m[6*ip1],&met->m[6*ip2]);
   }
@@ -150,8 +155,8 @@ inline double MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  * \param pt pointer to the tetra from which we come.
  * \return length of edge according to the prescribed metric, 0 if fail.
  *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for special storage of metrics at ridges points).
+ * Compute length of a straight edge \f$[i0;i1]\f$ according to the prescribed
+ * aniso metric (for special storage of metrics at ridges points).
  *
  */
 static
@@ -196,6 +201,10 @@ inline double MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
  * metric (for special storage of metrics at ridges points).
  *
+ * \warning in this function we may erroneously approximate the length of a
+ * curve boundary edge by the length of the straight edge if the "MG_BDY" tag is
+ * missing along the edge.
+ *
  */
 static
 inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
@@ -209,8 +218,10 @@ inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
   if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
     isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
+    // Computation of the length of a curve edge with ridge metric
     return MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg);
   } else {
+    // Computation for an internal edge with ridge metric
     return MMG5_lenedgspl_ani(mesh ,met, ia, pt);
   }
   return 0.0;

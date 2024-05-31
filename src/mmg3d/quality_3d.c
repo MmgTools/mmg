@@ -295,9 +295,15 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
       ier = MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         if ( (!metRidTyp) && met->size==6 && met->m ) {
+          // Warning: we may erroneously approximate the length of a curve
+          // boundary edge by the length of the straight edge if the "MG_BDY"
+          // tag is missing along the edge.
           len = MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
         else
+          // Warning: we may erroneously approximate the length of a curve
+          // boundary edge by the length of the straight edge if the "MG_BDY"
+          // tag is missing along the edge.
           len = MMG5_lenedg(mesh,met,ia,pt);
 
 
