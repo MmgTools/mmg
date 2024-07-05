@@ -2228,7 +2228,17 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
       pxp = &mesh->xprism[mesh->xpr];
       pxp->ref[i]   = ptt->ref;
       pxp->ftag[i] |= MG_BDY;
-      pxp->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      /* Store tags that are common to the 3 edges of the triangles */
+      tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      /* Remove infos that make no sense along faces */
+      tag &= ~MG_GEO;
+      tag &= ~MG_NOM;
+      assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
+      /* Assign tag to the face */
+      pxp->ftag[i] |= tag;
 
       for (j=0; j<3; j++) {
         pxp->tag[MMG5_iarf[i][j]] |= pxp->ftag[i] | ptt->tag[j];
