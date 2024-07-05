@@ -2058,6 +2058,8 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         pxt->ref[i]   = ptt->ref;
         pxt->ftag[i] |= MG_BDY;
 
+        /* here we may wrongfully add MG_REF and/or MG_BDY face tags to internal triangles
+        in opnbdy mode */
         /* Store tags that are common to the 3 edges of the triangles */
         tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
 
