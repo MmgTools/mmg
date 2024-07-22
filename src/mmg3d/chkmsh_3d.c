@@ -325,7 +325,7 @@ void MMG3D_chkfacetags(MMG5_pMesh mesh) {
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
       tag = pxt->ftag[i];
-      assert(!(tag & (MG_GEO & MG_NOM & MG_CRN)) && "Nonsensical tag on face");
+      assert(!(tag & (MG_GEO | MG_NOM | MG_CRN)) && "Nonsensical tag on face");
     }
   }
 }
