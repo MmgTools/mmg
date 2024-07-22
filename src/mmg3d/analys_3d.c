@@ -1471,6 +1471,10 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   /* define geometry for non manifold points */
   if ( !MMG3D_nmgeom(mesh) ) return 0;
 
+#ifndef NDEBUG
+  MMG3D_chkfacetags(mesh);
+#endif
+
 #ifdef USE_POINTMAP
   /* Initialize source point with input index */
   MMG5_int ip;

@@ -307,6 +307,31 @@ void MMG3D_chkedgetag(MMG5_pMesh mesh, MMG5_int ip1, MMG5_int ip2, int tag) {
 
 /**
  * \param mesh pointer to the mesh
+ *
+ * Check that faces do not have nonsensical tags (MG_GEO, MG_NOM, MG_CRN).
+ *
+ */
+void MMG3D_chkfacetags(MMG5_pMesh mesh) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     k;
+  int          i, tag;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<4; i++) {
+      tag = pxt->ftag[i];
+      assert(!(tag & (MG_GEO | MG_NOM | MG_CRN)) && "Nonsensical tag on face");
+    }
+  }
+}
+
+/**
+ * \param mesh pointer to the mesh
  * \param ppt pointer to unconsistent point
  * \param k tetra index
  * \param i local index of edge in tetra \a k
@@ -482,6 +507,9 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
 
   /* Check edge tag consistency (between xtetra) */
   MMG3D_chkmeshedgestags(mesh);
+
+  /* Check that faces do not have nonsensical tags*/
+  MMG3D_chkfacetags(mesh);
 
   /* Check point tags consistency with edge tag */
   MMG3D_chkpointtag(mesh);
