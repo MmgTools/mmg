@@ -1990,6 +1990,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
       adja = &mesh->adja[4*(k-1)+1];
       for (i=0; i<4; i++) {
         adj = adja[i] / 4;
@@ -2014,7 +2015,16 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
           pxt = &mesh->xtetra[pt->xt];
           pxt->ref[i]   = ptt->ref;
           pxt->ftag[i] |= MG_BDY;
-          pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+          /* Store tags that are common to the 3 edges of the triangles */
+          tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+          /* Remove infos that make no sense along faces */
+          tag &= ~MG_GEO;
+          tag &= ~MG_NOM;
+          assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
+          /* Assign tag to the face */
+          pxt->ftag[i] |= tag;
         }
       }
     }
@@ -2024,6 +2034,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
 
       for (i=0; i<4; i++) {
         ia = pt->v[MMG5_idir[i][0]];
@@ -2047,7 +2058,18 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         pxt = &mesh->xtetra[mesh->xt];
         pxt->ref[i]   = ptt->ref;
         pxt->ftag[i] |= MG_BDY;
-        pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+        /* here we may wrongfully add MG_REF and/or MG_BDY face tags to internal triangles
+        in opnbdy mode */
+        /* Store tags that are common to the 3 edges of the triangles */
+        tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+        /* Remove infos that make no sense along faces */
+        tag &= ~MG_GEO;
+        tag &= ~MG_NOM;
+        assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+        /* Assign tag to the face */
+        pxt->ftag[i] |= tag;
       }
     }
   }
@@ -2056,6 +2078,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
       if ( !pt->xt )  continue;
       pxt = &mesh->xtetra[pt->xt];
       adja = &mesh->adja[4*(k-1)+1];
@@ -2097,6 +2120,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
       if ( !pt->xt )  continue;
       pxt = &mesh->xtetra[pt->xt];
       adja = &mesh->adja[4*(k-1)+1];
