@@ -22,7 +22,10 @@
 */
 
 /**
- * Example of use of the mmg3d library (basic use of mesh adaptation)
+ * Compare the preservation of parallel triangles of too files when the input
+ * triangle index is store in the triangle references (so each triangle of one
+ * file has a unique reference and among the 2 files, two maching triangles have
+ * to have the same ref).
  *
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)

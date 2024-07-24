@@ -648,8 +648,14 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
       for (i=0; i<6; i++) {
         pt   = &mesh->tetra[list[j]/6];
         if ( (!metRidTyp) && met->m && met->size>1 )
+          // Warning: we may erroneously approximate the length of a curve
+          // boundary edge by the length of the straight edge if the "MG_BDY"
+          // tag is missing along the edge.
           len = MMG5_lenedg33_ani(mesh,met,i,pt);
         else
+          // Warning: for aniso metrics we may erroneously approximate the
+          // length of a curve boundary edge by the length of the straight edge
+          // if the "MG_BDY" tag is missing along the edge.
           len  = MMG5_lenedg(mesh,met,i,pt);
         if ( len < lmin) {
           lmin = len;
@@ -684,9 +690,17 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
         }
       }
       if ( (!metRidTyp) && met->m && met->size>1 )
+        /* Computation of straight edge length */
         len = MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
       else
+        /* if edge is marked MG_BDY, curve length is computed, if edge is not
+         * MG_BDY, straight length is computed (even if the edge is indeed along
+         * the boundary but misses the tag).  // Algiane 06/24: to check and fix
+         * or comment (I don't know if it is useful to compute the accurate
+         * curve length here)
+         */
         len = MMG5_lenedgspl(mesh,met,taued[5],pt0);
+
       if ( len < lmin )  break;
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
 
@@ -698,8 +712,15 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
       }
 
       if ( (!metRidTyp) && met->m && met->size>1 )
+        /* Computation of straight edge length */
         len = MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
       else
+        /* if edge is marked MG_BDY, curve length is computed, if edge is not
+         * MG_BDY, straight length is computed (even if the edge is indeed along
+         * the boundary but misses the tag).  // Algiane 06/24: to check and fix
+         * or comment (I don't know if it is useful to compute the accurate
+         * curve length here)
+         */
         len = MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
     }

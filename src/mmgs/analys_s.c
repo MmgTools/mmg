@@ -854,7 +854,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       tabl[iad+2] = ppt->c[2];
 
       if ( !MG_VOK(ppt) )  continue;
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
 
@@ -893,7 +893,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       ppt = &mesh->point[k];
 
       if ( !MG_VOK(ppt) )  continue;
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
 

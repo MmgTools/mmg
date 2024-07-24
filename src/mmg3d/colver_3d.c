@@ -161,6 +161,10 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
         /* Rough evaluation of edge length (doesn't take into account if some of
          * the modified edges of pt0 are boundaries): for a more precise
          * computation, we need to update the edge tags of pt0.  */
+
+        // Algiane 06/24: to check and fix: If the edge is marked as MG_BDY
+        // (keeping in mind that this tag is not always consistent), the curve
+        // length is computed, I don't know if it is wanted.
         ll = MMG5_lenedgspl(mesh,met,jj,pt0);
         if ( (!ll) || (ll > lon) )//LOPTL too small, we need to put greater than 1.41
           return 0;

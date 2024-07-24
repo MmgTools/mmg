@@ -1380,11 +1380,23 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
               /* If the face from which we arrive is not a parallel face, then remove also the parallel tags
               MG_PARBDY, MG_NOSURF and MG_REQ */
               if ( !(pxt->ftag[i] & MG_PARBDY)) {
-                ptt->tag[j] &= ~MG_PARBDY;
-                ptt->tag[j] &= ~MG_NOSURF;
-                ptt->tag[j] &= ~MG_REQ;
+                /* Remove the tags only if the edge is identified as parallel.
+                   By convention in ParMmg (see tag_pmmg.c in ParMmg), if an entity is
+                     - parallel + not required: the tags are MG_PARBDY+MG_NOSURF+MG_REQ
+                     - parallel + truly required by the user: the tags are MG_PARBDY+MG_REQ
+                    so we remove the tags MG_NOSURF and MG_REQ only if the edge is identified as MG_NOSURF */
+                if ( ptt->tag[j] & MG_PARBDY ) {
+                  ptt->tag[j] &= ~MG_PARBDY;
+                  /* a truly required entity does not have MG_NOSURF tag so don't remove MG_REQ tag */
+                  /* if MG_NOSURF tag, then also remove MG_REQ and MG_SURF tags */
+                  if( ptt->tag[j] & MG_NOSURF ) {
+                    ptt->tag[j] &= ~MG_NOSURF;
+                    ptt->tag[j] &= ~MG_REQ;
+                  }
+                }
               }
             }
+
             /* Assign ref to tria from xtetra->edg */
             if ( pxt->edg[MMG5_iarf[i][j]] )
               ptt->edg[j] = pxt->edg[MMG5_iarf[i][j]];
@@ -2015,6 +2027,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
           pxt = &mesh->xtetra[pt->xt];
           pxt->ref[i]   = ptt->ref;
           pxt->ftag[i] |= MG_BDY;
+
           /* Store tags that are common to the 3 edges of the triangles */
           tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
 
@@ -2068,6 +2081,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         tag &= ~MG_GEO;
         tag &= ~MG_NOM;
         assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
         /* Assign tag to the face */
         pxt->ftag[i] |= tag;
       }
@@ -2232,7 +2246,17 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
       pxp = &mesh->xprism[mesh->xpr];
       pxp->ref[i]   = ptt->ref;
       pxp->ftag[i] |= MG_BDY;
-      pxp->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      /* Store tags that are common to the 3 edges of the triangles */
+      tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      /* Remove infos that make no sense along faces */
+      tag &= ~MG_GEO;
+      tag &= ~MG_NOM;
+      assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
+      /* Assign tag to the face */
+      pxp->ftag[i] |= tag;
 
       for (j=0; j<3; j++) {
         pxp->tag[MMG5_iarf[i][j]] |= pxp->ftag[i] | ptt->tag[j];
