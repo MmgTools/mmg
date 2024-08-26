@@ -902,11 +902,11 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
     /* xt[1] */
     xt[1].tag[taued0[1]] = 0;
     xt[1].tag[taued0[3]] = pxt1->tag[taued1[0]];
-    xt[1].tag[taued0[5]] = pxt1->tag[taued1[2]];
+    xt[1].tag[taued0[5]] = pxt1->tag[taued1[1]];
 
     xt[1].edg[taued0[1]] = 0;
     xt[1].edg[taued0[3]] =  pxt1->edg[taued1[0]];
-    xt[1].edg[taued0[5]] =  pxt1->edg[taued1[2]];
+    xt[1].edg[taued0[5]] =  pxt1->edg[taued1[1]];
 
     xt[1].ref[ tau0[0]] = pxt1->ref[tau1[3]];
     xt[1].ref[ tau0[1]] = 0;
@@ -922,11 +922,11 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
     /* xt[2] */
     xt[2].tag[taued0[2]] = 0;
     xt[2].tag[taued0[4]] = pxt1->tag[taued1[0]];
-    xt[2].tag[taued0[5]] = pxt1->tag[taued1[1]];
+    xt[2].tag[taued0[5]] = pxt1->tag[taued1[2]];
 
     xt[2].edg[taued0[2]] = 0;
     xt[2].edg[taued0[4]] = pxt1->edg[taued1[0]];
-    xt[2].edg[taued0[5]] = pxt1->edg[taued1[1]];
+    xt[2].edg[taued0[5]] = pxt1->edg[taued1[2]];
 
     xt[2].ref[ tau0[0]] = pxt1->ref[tau1[2]];
     xt[2].ref[ tau0[1]] = 0;
