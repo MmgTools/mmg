@@ -178,7 +178,7 @@ jobs:
           # gfortran compiler and scotch makefile depends on the os
           if [ "$RUNNER_OS" == "macOS" ]; then
              echo "SCOTCH_MAKE=Make.inc/Makefile.inc.i686_mac_darwin10" >> "$GITHUB_ENV"
-             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-11\"" >> "$GITHUB_ENV"
+             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-14\"" >> "$GITHUB_ENV"
 
           elif [ "$RUNNER_OS" == "Linux" ]; then
              echo "SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2" >> "$GITHUB_ENV"
