@@ -879,14 +879,34 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
     pxt1 = &mesh->xtetra[xt1];
 
     /* Assignation of the xt fields to the appropriate tets */
+    /* Warning: after collapses, some boundary edges not connected to boundary
+     * faces may have a 0 tag inside a xtetra (see \ref MMG5_colver when a
+     * xtetra is assigned to one of the neighbours of the tetra of the edge
+     * shell). In consequence, we cannot simply use the stored tags. */
+
+    int16_t  tag0 = 0;
+    MMG5_int ref0 = 0;
+    int16_t  tag1 = 0;
+    MMG5_int ref1 = 0;
+
+
     /* xt[0] */
     xt[0].tag[taued0[0]] = 0;
-    xt[0].tag[taued0[3]] = pxt1->tag[taued1[2]];
-    xt[0].tag[taued0[4]] = pxt1->tag[taued1[1]];
+
+    if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[2],&tag0,&ref0) ) {
+      fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+      return 0;
+    }
+    if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[1],&tag1,&ref1) ) {
+      fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+      return 0;
+    }
+    xt[0].tag[taued0[3]] = tag0;
+    xt[0].tag[taued0[4]] = tag1;
 
     xt[0].edg[taued0[0]] = 0;
-    xt[0].edg[taued0[3]] =  pxt1->edg[taued1[2]];
-    xt[0].edg[taued0[4]] =  pxt1->edg[taued1[1]];
+    xt[0].edg[taued0[3]] = ref0;
+    xt[0].edg[taued0[4]] = ref1;
 
     xt[0].ref[ tau0[0]] = pxt1->ref[tau1[1]];
     xt[0].ref[ tau0[2]] = 0;
@@ -901,12 +921,26 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
 
     /* xt[1] */
     xt[1].tag[taued0[1]] = 0;
-    xt[1].tag[taued0[3]] = pxt1->tag[taued1[0]];
-    xt[1].tag[taued0[5]] = pxt1->tag[taued1[1]];
+
+    tag0 = 0;
+    ref0 = 0;
+    tag1 = 0;
+    ref1 = 0;
+    if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[0],&tag0,&ref0) ) {
+      fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+      return 0;
+    }
+    if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[1],&tag1,&ref1) ) {
+      fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+      return 0;
+    }
+
+    xt[1].tag[taued0[3]] = tag0;
+    xt[1].tag[taued0[5]] = tag1;
 
     xt[1].edg[taued0[1]] = 0;
-    xt[1].edg[taued0[3]] =  pxt1->edg[taued1[0]];
-    xt[1].edg[taued0[5]] =  pxt1->edg[taued1[1]];
+    xt[1].edg[taued0[3]] = ref0;
+    xt[1].edg[taued0[5]] = ref1;
 
     xt[1].ref[ tau0[0]] = pxt1->ref[tau1[3]];
     xt[1].ref[ tau0[1]] = 0;
@@ -921,12 +955,25 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
 
     /* xt[2] */
     xt[2].tag[taued0[2]] = 0;
-    xt[2].tag[taued0[4]] = pxt1->tag[taued1[0]];
-    xt[2].tag[taued0[5]] = pxt1->tag[taued1[2]];
+
+    tag0 = 0;
+    ref0 = 0;
+    tag1 = 0;
+    ref1 = 0;
+    if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[0],&tag0,&ref0) ) {
+      fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+      return 0;
+    }
+    if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[2],&tag1,&ref1) ) {
+      fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+      return 0;
+    }
+    xt[2].tag[taued0[4]] = tag0;
+    xt[2].tag[taued0[5]] = tag1;
 
     xt[2].edg[taued0[2]] = 0;
-    xt[2].edg[taued0[4]] = pxt1->edg[taued1[0]];
-    xt[2].edg[taued0[5]] = pxt1->edg[taued1[2]];
+    xt[2].edg[taued0[4]] = ref0;
+    xt[2].edg[taued0[5]] = ref1;
 
     xt[2].ref[ tau0[0]] = pxt1->ref[tau1[2]];
     xt[2].ref[ tau0[1]] = 0;
