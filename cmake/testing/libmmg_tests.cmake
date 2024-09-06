@@ -31,10 +31,20 @@ SET ( MMG_LIB_TESTS
   libmmg_cpp_a
   )
 
+IF ( MMG_CI AND NOT ONLY_VERY_SHORT_TESTS )
+  LIST ( APPEND MMG_LIB_TESTS test_get_tagname )
+ENDIF ( )
+
 SET ( MMG_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/main.cpp
   )
+
+IF ( MMG_CI AND NOT ONLY_VERY_SHORT_TESTS )
+  LIST ( APPEND MMG_LIB_TESTS_MAIN_PATH
+    ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg_get_tagname.c )
+ENDIF ( )
+
 
 IF ( LIBMMG_STATIC )
   SET ( lib_name lib${PROJECT_NAME}_a )
