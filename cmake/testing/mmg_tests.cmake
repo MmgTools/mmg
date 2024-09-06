@@ -439,11 +439,15 @@ ADD_EXECUTABLE ( mmg_get_tagname
   ${common_files}
   )
 IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-  INCLUDE_DIRECTORIES ( BEFORE ${PROJECT_SOURCE_DIR}/src/common ${PROJECT_BINARY_DIR}/include )
+  INCLUDE_DIRECTORIES ( BEFORE  ${PROJECT_SOURCE_DIR}/src/common
+    ${PROJECT_BINARY_DIR}/include
+ )
 ELSE ( )
   TARGET_INCLUDE_DIRECTORIES ( mmg_get_tagname BEFORE PUBLIC
-    ${PROJECT_SOURCE_DIR}/src/common ${PROJECT_BINARY_DIR}/include )
+    ${PROJECT_SOURCE_DIR}/src/common ${PROJECT_BINARY_DIR}/include
+  )
 ENDIF ( )
+ADD_DEPENDENCIES( mmg_get_tagname copy_3d_headers )
 
 
 ADD_TEST(NAME mmg_get_tagname COMMAND mmg_get_tagname
