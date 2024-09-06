@@ -131,7 +131,7 @@ int main(int argc,char *argv[]) {
     MMG5_pEdge ped = &mesh1->edge[k];
     if ( ped->tag & MG_GEO ) {
       MMG5_int ref;
-      int16_t  tag;
+      uint16_t tag;
       if ( !MMG5_hGet(&hash,ped->a,ped->b,&ref,&tag) ) {
         continue;
       }

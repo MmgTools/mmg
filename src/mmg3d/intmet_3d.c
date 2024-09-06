@@ -94,7 +94,7 @@ int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int i
   // explicitely added if we arrive from a boundary face and a boundary edge
   // should not be splitted from a non boundary face
   if ( mesh->adja ) {
-    int16_t  tag = 0;
+    uint16_t tag = 0;
     MMG5_int ref = 0;
     if ( !MMG3D_get_shellEdgeTag(mesh,k,i,&tag,&ref) ) {
       fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"
