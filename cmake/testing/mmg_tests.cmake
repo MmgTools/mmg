@@ -430,25 +430,28 @@ ENDFOREACH()
 
 FILE(
   GLOB
-  common_files
+  mmg_get_tagname_files
   ${PROJECT_SOURCE_DIR}/src/common/*.c
-)
-
-ADD_EXECUTABLE ( mmg_get_tagname
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg_get_tagname.c
-  ${common_files}
-  )
-IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-  INCLUDE_DIRECTORIES ( BEFORE  ${PROJECT_SOURCE_DIR}/src/common
-    ${PROJECT_BINARY_DIR}/include
- )
-ELSE ( )
-  TARGET_INCLUDE_DIRECTORIES ( mmg_get_tagname BEFORE PUBLIC
-    ${PROJECT_SOURCE_DIR}/src/common ${PROJECT_BINARY_DIR}/include
-  )
-ENDIF ( )
-ADD_DEPENDENCIES( mmg_get_tagname copy_3d_headers )
-
-
-ADD_TEST(NAME mmg_get_tagname COMMAND mmg_get_tagname
 )
+
+ADD_EXECUTABLE (  mmg_get_tagname  ${mmg_get_tagname_files} )
+
+ADD_DEPENDENCIES ( mmg_get_tagname copy_mmgcommon_headers )
+
+
+ IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
+   INCLUDE_DIRECTORIES ( BEFORE
+     ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+   if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
+     INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
+   ENDIF()
+
+ ELSE ( )
+   TARGET_INCLUDE_DIRECTORIES ( mmg_get_tagname BEFORE PUBLIC
+     ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+   if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
+     target_include_directories( mmg_get_tagname BEFORE PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+   ENDIF()
+
+ ENDIF ( )
