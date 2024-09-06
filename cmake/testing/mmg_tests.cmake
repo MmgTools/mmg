@@ -424,6 +424,27 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
     ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
     -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_OptimAni_${SHRT_EXEC}.o.meshb)
 
-
-
 ENDFOREACH()
+
+# Unit tests
+
+FILE(
+  GLOB
+  common_files
+  ${PROJECT_SOURCE_DIR}/src/common/*.c
+)
+
+ADD_EXECUTABLE ( mmg_get_tagname
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg_get_tagname.c
+  ${common_files}
+  )
+IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
+  INCLUDE_DIRECTORIES ( BEFORE ${PROJECT_SOURCE_DIR}/src/common ${PROJECT_BINARY_DIR}/include )
+ELSE ( )
+  TARGET_INCLUDE_DIRECTORIES ( mmg_get_tagname BEFORE PUBLIC
+    ${PROJECT_SOURCE_DIR}/src/common ${PROJECT_BINARY_DIR}/include )
+ENDIF ( )
+
+
+ADD_TEST(NAME mmg_get_tagname COMMAND mmg_get_tagname
+)
