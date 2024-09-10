@@ -35,7 +35,7 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-MMG5_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+MMG5_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],uint16_t tag) {
   MMG5_pPoint  ppt;
   MMG5_int     curpt;
 

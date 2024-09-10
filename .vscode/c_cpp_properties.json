@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/lib/x86_64-linux-gnu/openmpi/include",
+                "/usr/local/include/vtk-9.2/**",
+                "/home/lmottet/Work/Software/ParMmg/**",
+                "/home/lmottet/Work/Software/mmg/**",
+                "/home/lmottet/Work/Software/mmg/build-dev/include/**",
+                "/home/lmottet/Work/Software/mmg/build-dev/lib/**",
+                "/home/lmottet/Work/Software/mmg/build-*/include/**",
+                "/home/lmottet/Work/Software/mmg/build-*/lib/**"
+
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/mpirun",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

@@ -202,7 +202,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
   double        dd,nt[3];
   int           nr,nnm;
   MMG5_int      base,nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
-  int16_t       tag;
+  uint16_t      tag;
   int8_t        iopp,ipiv,indb,inda,i,isface;
   int8_t        indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
 
@@ -1176,11 +1176,11 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
  */
 static inline
 int MMG3D_settag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
-                                     int16_t tag,int edg, MMG5_int piv,MMG5_int adj) {
+                                     uint16_t tag,int edg, MMG5_int piv,MMG5_int adj) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     *adja;
-  int16_t      taginit;
+  uint16_t     taginit;
   int8_t       i;
 
   while ( adj && (adj != start) ) {
@@ -1231,11 +1231,11 @@ int MMG3D_settag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int n
  * travelling its shell.
  *
  */
-int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
+int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,uint16_t tag,int edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   MMG5_int           na,nb,*adja,adj,piv;
-  int16_t            taginit;
+  uint16_t           taginit;
 
   assert( start >= 1 );
   pt = &mesh->tetra[start];
@@ -1298,7 +1298,7 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
  */
 static inline
 int MMG3D_deltag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
-                        int16_t tag,MMG5_int piv,MMG5_int adj) {
+                        uint16_t tag,MMG5_int piv,MMG5_int adj) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     *adja;
@@ -1344,7 +1344,7 @@ int MMG3D_deltag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int n
  * shell.
  *
  */
-int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
+int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,uint16_t tag) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   MMG5_int           na,nb,*adja,adj,piv;

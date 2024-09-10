@@ -379,7 +379,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
  */
 static inline
 int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
-                                  int16_t *tag,MMG5_int *ref, MMG5_int piv,MMG5_int adj,
+                                  uint16_t *tag,MMG5_int *ref, MMG5_int piv,MMG5_int adj,
                                   int8_t *filled) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
@@ -436,7 +436,7 @@ int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, 
  * consistent through the edge shell);
  *
  */
-int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t *tag,MMG5_int *ref) {
+int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,uint16_t *tag,MMG5_int *ref) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     piv,na,nb,adj,*adja;
@@ -535,7 +535,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   double       ps,devold,devnew,hmax,hausd;
   MMG5_int     nump,numq,ndepmin,ndepplus,l,kk,iel;
   int          nr,nbbdy,isloc,iedgeOpp,ipp;
-  int16_t      tag;
+  uint16_t     tag;
   int8_t       iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 #ifndef NDEBUG
   MMG5_pPoint  p0;
@@ -635,7 +635,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
          *  shell because some MG_BDY tags may be missings due to the creation
          *  of an xtetra during a previous collapse */
         if ( (!pt->xt) || !(pxt->ftag[i] & MG_BDY) ) {
-          int16_t  tag0,tag1,tag2;
+          uint16_t  tag0,tag1,tag2;
           MMG5_int ref0,ref1,ref2;
 
           tag0 = tag1 = tag2 = 0;
@@ -954,7 +954,7 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,MMG5_int np, MMG5_int 
   int      i,j;
   MMG5_int p0,p1;
   uint8_t  ia,iav;
-  int16_t  tag,tag1;
+  uint16_t tag,tag1;
 
   /* update tags for edges */
   for ( j=0; j<3; j++ ) {
@@ -1010,11 +1010,11 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,MMG5_int np, MMG5_int 
  */
 static inline
 MMG5_int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
-                                     int16_t tag,MMG5_int ref, MMG5_int piv,MMG5_int adj) {
+                                     uint16_t tag,MMG5_int ref, MMG5_int piv,MMG5_int adj) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     *adja;
-  int16_t      xtag;
+  uint16_t     xtag;
   int8_t       i;
 
   assert ( tag & MG_BDY && "Unexpected non boundary tag");
@@ -1074,11 +1074,11 @@ MMG5_int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_
  *
  */
 static inline
-int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t tag,MMG5_int ref) {
+int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,uint16_t tag,MMG5_int ref) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_int     piv,na,nb,adj,*adja;
-  int16_t      xtag;
+  uint16_t     xtag;
 
   pt   = &mesh->tetra[start];
 
@@ -1278,9 +1278,9 @@ MMG5_int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ilist,int8_
       int iped = coled[l+0];
       int iqed = coled[l+1];
 
-      int16_t  tagip = 0;
+      uint16_t tagip = 0;
       MMG5_int refip = 0;
-      int16_t  tagiq = 0;
+      uint16_t tagiq = 0;
       MMG5_int refiq = 0;
 
       if ( !MMG3D_get_shellEdgeTag(mesh,iel,iped,&tagip,&refip) ) {

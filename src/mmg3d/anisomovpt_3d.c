@@ -503,7 +503,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  */
 static inline
 int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree,int64_t *listv,
-                            int ilistv,MMG5_int *lists, int ilists,int improve,const int16_t edgTag){
+                            int ilistv,MMG5_int *lists, int ilists,int improve,const uint16_t edgTag){
   MMG5_pTetra           pt;
   MMG5_pPoint           p0;
   MMG5_Tria             tt;

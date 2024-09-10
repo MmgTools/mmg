@@ -287,7 +287,7 @@ typedef struct {
                   the unused points)*/
   MMG5_int flag; /*!< Flag to know if we have already treated the point */
   MMG5_int s;
-  int16_t  tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
+  uint16_t  tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
   int8_t   tagdel; /*!< Tag for delaunay */
 } MMG5_Point;
@@ -313,7 +313,7 @@ typedef struct {
   MMG5_int ref; /*!< Reference of the edge */
   MMG5_int base; /*!< 2Donly: used to store the tria+ tria edge indices
                    that allow to access to the edge */
-  int16_t  tag; /*!< Binary flags */
+  uint16_t  tag; /*!< Binary flags */
 } MMG5_Edge;
 typedef MMG5_Edge * MMG5_pEdge;
 
@@ -345,7 +345,7 @@ typedef struct {
   MMG5_int edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
   MMG5_int flag;
-  int16_t  tag[3]; /*!< tag[i] contains the tag associated to the
+  uint16_t  tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
   } MMG5_Tria;
 typedef MMG5_Tria * MMG5_pTria;
@@ -375,7 +375,7 @@ typedef struct {
   MMG5_int base;
   MMG5_int edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of quadrangle */
-  int16_t  tag[4]; /*!< tag[i] contains the tag associated to the
+  uint16_t  tag[4]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of quadrangle */
 } MMG5_Quad;
 typedef MMG5_Quad * MMG5_pQuad;
@@ -414,7 +414,7 @@ typedef struct {
                  tetrahedron (only for tetrahedra that are adjacent to
                  surfaces) */
   MMG5_int flag;
-  int16_t  tag;
+  uint16_t  tag;
 } MMG5_Tetra;
 typedef MMG5_Tetra * MMG5_pTetra;
 
@@ -427,9 +427,9 @@ typedef struct {
                      \f$i^{th}\f$ vertex of the tetrahedron;*/
   MMG5_int edg[6]; /*!< edg[i] contains the reference of the
                      \f$i^{th}\f$ edge of the tetrahedron */
-  int16_t  ftag[4]; /*!< ftag[i] contains the tag associated to the
+  uint16_t  ftag[4]; /*!< ftag[i] contains the tag associated to the
                       \f$i^{th}\f$ face of the tetrahedron */
-  int16_t  tag[6]; /*!< tag[i] contains the tag associated to the
+  uint16_t  tag[6]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of the tetrahedron */
   int8_t   ori; /*!< Orientation of the triangles of the tetrahedron:
                   the $\f$i^{th}\f$ bit of ori is set to 0 when the
@@ -473,7 +473,7 @@ typedef struct {
   MMG5_int flag;
   MMG5_int xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
                   the prism*/
-  int8_t   tag;
+  uint8_t   tag;
 } MMG5_Prism;
 typedef MMG5_Prism * MMG5_pPrism;
 
@@ -488,9 +488,9 @@ typedef struct {
                     * edg[0]={0,1},edg[1]={0,2},edg[2]={0,3},edg[3]={1,2},
                     * edg[4]={1,4},edg[5]={2,5},edg[6]={3,4},edg[7]={3,5},
                     * edg[8]={4,5}*/
-  int16_t  ftag[5]; /*!< ftag[i] contains the tag associated to the
+  uint16_t  ftag[5]; /*!< ftag[i] contains the tag associated to the
                       \f$i^{th}\f$ face of the prism */
-  int16_t  tag[9]; /*!< tag[i] contains the tag associated to the
+  uint16_t  tag[9]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of the prism */
 } MMG5_xPrism;
 typedef MMG5_xPrism * MMG5_pxPrism;
@@ -572,7 +572,7 @@ typedef struct {
   MMG5_int     b;  /*!< Second extremity of edge */
   MMG5_int     ref; /*!< Reference or idx (2D) of edge */
   MMG5_int     nxt; /*!< Next element of hash table */
-  int16_t      tag; /*!< tag of edge */
+  uint16_t     tag; /*!< tag of edge */
 } MMG5_hgeom;
 
 /**

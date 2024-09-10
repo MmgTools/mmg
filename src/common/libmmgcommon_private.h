@@ -300,7 +300,7 @@ LIBMMG_CORE_EXPORT int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,d
  *
  * \warning for debug purpose, no thread safe.
  */
-const char* MMG5_Get_tagName(int tag);
+const char* MMG5_Get_tagName(uint16_t tag);
 
 /**
  * \param mesh pointer to the mesh structure.
