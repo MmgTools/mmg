@@ -427,31 +427,59 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
 ENDFOREACH()
 
 # Unit tests
-
+## Really not clean: as the organization of the functions definition in .c files
+## and headers declatation in .h files is very badly done (and has never been
+## cleaned), we have to include almost all the .c/.h files to be able to build
+## this unit test. A solution may have been to simply link the test agains one
+## of the mmg lib but the needed to include all symbols that are not publicly
+## exported by the library API on windows leads to the same issue.
 FILE(
   GLOB
   mmg_get_tagname_files
-  ${PROJECT_SOURCE_DIR}/src/common/*.c
+  ${mmg2d_library_files}
+  ${mmg3d_library_files}
+  ${mmgs_library_files}
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg_get_tagname.c
 )
 
 ADD_EXECUTABLE (  mmg_get_tagname  ${mmg_get_tagname_files} )
 
-ADD_DEPENDENCIES ( mmg_get_tagname copy_mmgcommon_headers )
+ADD_DEPENDENCIES ( mmg_get_tagname copy_mmgcommon_headers
+  copy_3d_headers copy_2d_headers copy_s_headers )
 
 
- IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-   INCLUDE_DIRECTORIES ( BEFORE
-     ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
-   if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
-     INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
-   ENDIF()
+IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
+  INCLUDE_DIRECTORIES ( BEFORE
+    ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include
+    ${PROJECT_BINARY_DIR}/src/common )
+  if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
+    INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
+  ENDIF()
 
- ELSE ( )
+  IF( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
+    # Set flags for building test program
+    INCLUDE_DIRECTORIES(AFTER ${ELAS_INCLUDE_DIR})
+
+    SET( GET_TAGNAME_LIBRARIES ${ELAS_LINK_FLAGS} ${ELAS_LIBRARY} ${LIBRARIES})
+
+  ENDIF ( )
+
+
+ELSE ( )
    TARGET_INCLUDE_DIRECTORIES ( mmg_get_tagname BEFORE PUBLIC
-     ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+     ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include
+     ${PROJECT_BINARY_DIR}/src/common
+   )
    if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
      target_include_directories( mmg_get_tagname BEFORE PUBLIC ${SCOTCH_INCLUDE_DIRS} )
-   ENDIF()
+   ENDIF ( )
+
+   IF( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
+     target_include_directories( mmg_get_tagname AFTER PUBLIC ${ELAS_INCLUDE_DIR} )
+     SET( GET_TAGNAME_LIBRARIES ${ELAS_LINK_FLAGS} ${ELAS_LIBRARY} ${LIBRARIES})
+
+   ENDIF ( )
 
  ENDIF ( )
+
+ TARGET_LINK_LIBRARIES ( mmg_get_tagname PRIVATE ${GET_TAGNAME_LIBRARIES}  )
