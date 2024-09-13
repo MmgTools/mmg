@@ -685,7 +685,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   }
 
   /** Step 2: Allocate memory to store normals for boundary points */
-  mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
+  mesh->xpmax  = MG_MAX( (MMG5_int)(1.5*mesh->xp),mesh->npmax);
 
   MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
   MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,return 0);
