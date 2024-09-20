@@ -4921,7 +4921,7 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
   int          warn,lon,ier;
   int64_t      list[MMG3D_LMAX+2];
   MMG5_int     src,i0,i1,ip;
-  int16_t      tag;
+  uint16_t     tag;
 
   warn = 0;
   pt = &mesh->tetra[iel];

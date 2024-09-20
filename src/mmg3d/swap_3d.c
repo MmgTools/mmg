@@ -348,7 +348,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
 
 #ifndef NDEBUG
   /* Security check: ensure that the edge is boundary */
-  int16_t  tag = 0;
+  uint16_t  tag = 0;
   MMG5_int ref = 0;
   if ( !MMG3D_get_shellEdgeTag(mesh,list[0]/6,list[0]%6,&tag,&ref) ) {
     fprintf(stderr,"\n  ## Warning: %s: 0. unable to get edge info"

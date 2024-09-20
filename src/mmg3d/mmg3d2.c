@@ -404,8 +404,7 @@ MMG5_invsl(double A[3][3],double b[3],double r[3]) {
  *
  */
 
-static int
-MMG3D_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
+int MMG3D_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
   MMG5_pTetra   pt,pt1;
   double        v,v0,v1,v2;
   int           ibdy,ilist,cur,l;
