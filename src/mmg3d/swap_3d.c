@@ -745,7 +745,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
   np    = pt1->v[tau1[0]];
 
   MMG5_int ref[3] = {0};
-  int16_t  tag[3] = {0};
+  uint16_t  tag[3] = {0};
   for (i=0;i<3;i++) {
     if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[i],&tag[i],&ref[i]) ) {
       fprintf(stderr,"\n  ## Error: %s: %d. unable to get edge info.\n",__func__,i);
