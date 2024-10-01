@@ -20,7 +20,7 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 
 # if PROJECT_NAME is defined, mmg is a subproject
 if(DEFINED PROJECT_NAME)
