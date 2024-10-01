@@ -137,6 +137,18 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int64_t *list,int ilist,
            (tt2.v[MMG5_inxt2[ia2]] == nq && tt2.v[MMG5_iprv2[ia2]] == np) );
   na2 = tt2.v[ia2];
 
+#ifdef NDEBUG
+  /* Check that we don't have a regular bdy edge connecting ridge or nm points */
+  if ( MG_GEO_OR_NOM(mesh->point[np].tag) && MG_GEO_OR_NOM(mesh->point[nq].tag) ) {
+    assert ( ! MG_GEO_OR_NOM(tt1.tag[ia1]) );
+    assert ( ! MG_GEO_OR_NOM(tt2.tag[ia2]) );
+  }
+#endif
+  /* No swap if it creates a regular boundary edge connecting ridge or non-manifold points */
+  if ( MG_GEO_OR_NOM(mesh->point[na1].tag) && MG_GEO_OR_NOM(mesh->point[na2].tag) ) {
+    return 0;
+  }
+
   /* Check non convexity (temporarily use b0,b1)*/
   MMG5_norpts(mesh,tt1.v[ia1],tt1.v[MMG5_inxt2[ia1]],tt2.v[ia2],b0);
   MMG5_norpts(mesh,tt2.v[ia2],tt2.v[MMG5_inxt2[ia2]],tt1.v[ia1],b1);
