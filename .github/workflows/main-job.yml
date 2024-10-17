@@ -50,7 +50,7 @@ jobs:
                 vtk: on
                 int: int32_t
 
-              - os: macos-12
+              - os: macos-14
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -118,7 +118,7 @@ jobs:
                 vtk: off
                 int: int64_t
 
-              - os: macos-12
+              - os: macos-14
                 pattern: on
                 pointmap: on
                 scotch: on
@@ -342,7 +342,7 @@ jobs:
           cd build
           ctest --timeout 7200 -VV -C ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
 
-      - name: Test Mmg with in64_t integers
+      - name: Test Mmg with int64_t integers
         # Run long tests only on ubuntu with pattern off, scotch on, vtk on and int64_t integers
         if: matrix.os == 'ubuntu-20.04' && matrix.pattern == 'off' && matrix.scotch == 'on' && matrix.vtk == 'on' && matrix.int == 'int64_t'
         run: |
