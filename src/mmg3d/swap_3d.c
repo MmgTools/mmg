@@ -744,9 +744,9 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
 
   np    = pt1->v[tau1[0]];
 
-  MMG5_int ref[3] = {0};
-  uint16_t  tag[3] = {0};
-  for (i=0;i<3;i++) {
+  MMG5_int ref[6] = {0};
+  uint16_t  tag[6] = {0};
+  for (i=0;i<6;i++) {
     if ( !MMG3D_get_shellEdgeTag(mesh,k1,taued1[i],&tag[i],&ref[i]) ) {
       fprintf(stderr,"\n  ## Error: %s: %d. unable to get edge info.\n",__func__,i);
       return 0;
@@ -900,10 +900,15 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
 
     xt[0].tag[taued0[3]] = tag[2];
     xt[0].tag[taued0[4]] = tag[1];
+    /* As the edge tag of tetra 0 may be erroneous if the edge doesn't belong to
+     * a boundary face */
+    xt[0].tag[taued0[5]] = tag[5];
+
 
     xt[0].edg[taued0[0]] = 0;
     xt[0].edg[taued0[3]] = ref[2];
     xt[0].edg[taued0[4]] = ref[1];
+    xt[0].edg[taued0[5]] = ref[5];
 
     xt[0].ref[ tau0[0]] = pxt1->ref[tau1[1]];
     xt[0].ref[ tau0[2]] = 0;
@@ -922,9 +927,14 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
     xt[1].tag[taued0[3]] = tag[0];
     xt[1].tag[taued0[5]] = tag[1];
 
+    /* As the edge tag of tetra 0 may be erroneous if the edge doesn't belong to
+     * a boundary face */
+    xt[1].tag[taued0[4]] = tag[3];
+
     xt[1].edg[taued0[1]] = 0;
     xt[1].edg[taued0[3]] = ref[0];
     xt[1].edg[taued0[5]] = ref[1];
+    xt[1].edg[taued0[4]] = ref[3];
 
     xt[1].ref[ tau0[0]] = pxt1->ref[tau1[3]];
     xt[1].ref[ tau0[1]] = 0;
@@ -943,9 +953,14 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t metRidTyp,
     xt[2].tag[taued0[4]] = tag[0];
     xt[2].tag[taued0[5]] = tag[2];
 
+    /* As the edge tag of tetra 0 may be erroneous if the edge doesn't belong to
+     * a boundary face */
+    xt[2].tag[taued0[3]] = tag[4];
+
     xt[2].edg[taued0[2]] = 0;
     xt[2].edg[taued0[4]] = ref[0];
     xt[2].edg[taued0[5]] = ref[2];
+    xt[2].edg[taued0[3]] = ref[4];
 
     xt[2].ref[ tau0[0]] = pxt1->ref[tau1[2]];
     xt[2].ref[ tau0[1]] = 0;
