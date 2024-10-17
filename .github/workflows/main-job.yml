@@ -33,22 +33,22 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-            os: [macos-12]
-            pattern: [off]
+            os: [ubuntu-20.04,macos-12]
+            pattern: [on,off]
             pointmap: [off]
-            scotch: [off]
+            scotch: [on,off]
             vtk: [off]
             int: [int32_t]
 
             include:
               # test vtk only without scotch and with delaunay insertion (more
               # tests are useless)
-              #- os: ubuntu-20.04
-              #  pattern: off
-              #  pointmap: off
-              #  scotch: off
-              #  vtk: on
-              #  int: int32_t
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: on
+                int: int32_t
 
               - os: macos-14
                 pattern: off
@@ -58,93 +58,93 @@ jobs:
                 int: int32_t
 
               # Test pointmap with scotch except on windows
-              #- os: ubuntu-20.04
-              #  pattern: off
-              #  pointmap: on
-              #  scotch: on
-              #  vtk: off
-              #  int: int32_t
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: on
+                scotch: on
+                vtk: off
+                int: int32_t
 
-              #- os: macos-12
-              #  pattern: off
-              #  pointmap: on
-              #  scotch: on
-              #  vtk: off
-              #  int: int32_t
+              - os: macos-12
+                pattern: off
+                pointmap: on
+                scotch: on
+                vtk: off
+                int: int32_t
 
               # Add windows basic test (matrix is not testable as dependencies
               # don't build with MSVC)
-              #- os: windows-2022
-              #  pattern: off
-              #  pointmap: off
-              #  scotch: off
-              #  vtk: off
-              #  int: int32_t
+              - os: windows-2022
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int32_t
 
-              #- os: windows-2022
-              #  pattern: on
-              #  pointmap: off
-              #  scotch: off
-              #  vtk: off
-              #  int: int32_t
+              - os: windows-2022
+                pattern: on
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int32_t
 
               # Add test for pointmap only if pattern off
-              #- os: windows-2022
-              #  pattern: off
-              #  pointmap: on
-              #  scotch: off
-              #  vtk: off
-              #  int: int32_t
+              - os: windows-2022
+                pattern: off
+                pointmap: on
+                scotch: off
+                vtk: off
+                int: int32_t
 
               # Test int64_t build on all archi, and try to cover all code
-              #- os: ubuntu-20.04
-              #  pattern: on
-              #  pointmap: on
-              #  scotch: on
-              #  vtk: on
-              #  int: int64_t
-              #
-              #- os: ubuntu-20.04
-              #  pattern: off
-              #  pointmap: off
-              #  scotch: on
-              #  vtk: on
-              #  int: int64_t
-              #
-              #- os: ubuntu-20.04
-              #  pattern: off
-              #  pointmap: off
-              #  scotch: off
-              #  vtk: off
-              #  int: int64_t
-              #
-              #- os: macos-14
-              #  pattern: on
-              #  pointmap: on
-              #  scotch: on
-              #  vtk: on
-              #  int: int64_t
-              #
-              #- os: macos-12
-              #  pattern: off
-              #  pointmap: off
-              #  scotch: off
-              #  vtk: off
-              #  int: int64_t
-              #
-              #- os: windows-2022
-              #  pattern: on
-              #  pointmap: on
-              #  scotch: off
-              #  vtk: off
-              #  int: int64_t
-              #
-              #- os: windows-2022
-              #  pattern: off
-              #  pointmap: off
-              #  scotch: off
-              #  vtk: off
-              #  int: int64_t
+              - os: ubuntu-20.04
+                pattern: on
+                pointmap: on
+                scotch: on
+                vtk: on
+                int: int64_t
+
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: off
+                scotch: on
+                vtk: on
+                int: int64_t
+
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int64_t
+
+              - os: macos-14
+                pattern: on
+                pointmap: on
+                scotch: on
+                vtk: on
+                int: int64_t
+
+              - os: macos-12
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int64_t
+
+              - os: windows-2022
+                pattern: on
+                pointmap: on
+                scotch: off
+                vtk: off
+                int: int64_t
+
+              - os: windows-2022
+                pattern: off
+                pointmap: off
+                scotch: off
+                vtk: off
+                int: int64_t
 
     steps:
       - name: Set cmake_build_type and export coverage flags
