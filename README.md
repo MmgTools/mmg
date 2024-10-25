@@ -73,11 +73,11 @@ To get and build Mmg, you will need:
   1. Get the repository:
 ```
       wget https://github.com/MmgTools/mmg/archive/master.zip
-      ```
+```
      or
 ```
       git clone https://github.com/MmgTools/mmg.git
-      ```
+```
 
   The project sources are available under the **src/** directory, see:
    * **src/mmg2d/**   for files related to the mmg2d application;
