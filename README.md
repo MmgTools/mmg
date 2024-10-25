@@ -21,41 +21,21 @@
 
 ---
 
-|**master branch (release)**|[![Build Status][master-build]][master-sq-build]|[![Quality Gate][master-qual-gate]][master-sq-qual-gate]|[![Vulnerabilities][master-vulnerabilities]][master-sq-vulnerabilities]|[![Coverage][master-coverage]][master-sq-coverage]|[![Duplication (%)][master-code-dpl]][master-sq-code-dpl]|
-|:---:|:---:|:---:|:---:|:---:|:---:|
-|**develop branch**|[![Build Status][dev-build]][dev-sq-build]|[![Quality Gate][dev-qual-gate]][dev-sq-qual-gate]|[![Vulnerabilities][dev-vulnerabilities]][dev-sq-vulnerabilities]|[![Coverage][dev-coverage]][dev-sq-coverage]|[![Duplication (%)][dev-code-dpl]][dev-sq-code-dpl]|
-
+|**master branch (release)**|[![Build Status][master-build]][master-sq-build]|[![codecov][master-cov]][master-codecov-cov]|
+|:---:|:---:|:---:|
+|**develop branch**|[![Build Status][dev-build]][dev-sq-build]|[![Coverage][dev-cov]][dev-codecov-cov]|
 
 [master-build]: https://github.com/MmgTools/mmg/actions/workflows/long-tests.yml/badge.svg?branch=master
 [master-sq-build]: https://github.com/MmgTools/mmg/actions/workflows/long-tests.yml?query=branch%3Amaster
 
-[master-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=alert_status
-[master-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Amaster
-
-[master-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=reliability_rating
-[master-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=reliability
-
-[master-coverage]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=coverage
-[master-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=coverage
-
-[master-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Amaster&metric=duplicated_lines_density
-[master-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=duplicated_lines_density
-
+[master-cov]: https://codecov.io/gh/MmgTools/mmg/branch/master/graph/badge.svg?token=87eWTxuzIb
+[master-codecov-cov]: https://codecov.io/gh/MmgTools/mmg
 
 [dev-build]: https://github.com/MmgTools/mmg/actions/workflows/long-tests.yml/badge.svg?branch=develop
 [dev-sq-build]: https://github.com/MmgTools/mmg/actions/workflows/long-tests.yml?query=branch%3Adevelop
 
-[dev-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=alert_status
-[dev-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Adevelop
-
-[dev-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=reliability_rating
-[dev-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=reliability
-
-[dev-coverage]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
-[dev-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
-
-[dev-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplicated_lines_density
-[dev-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplicated_lines_density
+[dev-cov]: https://codecov.io/gh/MmgTools/mmg/branch/develop/graph/badge.svg?token=87eWTxuzIb
+[dev-codecov-cov]: https://codecov.io/gh/MmgTools/mmg
 
 ---
 
