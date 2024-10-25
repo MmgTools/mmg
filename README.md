@@ -74,7 +74,9 @@ To get and build Mmg, you will need:
 ```
       wget https://github.com/MmgTools/mmg/archive/master.zip
 ```
-     or
+
+or
+
 ```
       git clone https://github.com/MmgTools/mmg.git
 ```
