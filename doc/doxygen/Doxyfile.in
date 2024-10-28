@@ -656,7 +656,7 @@ LAYOUT_FILE            = @CMAKE_CURRENT_SOURCE_DIR@/doc/doxygen/DoxygenLayout.xm
 # search path. Do not use file names with spaces, bibtex cannot handle them. See
 # also \cite for info how to create references.
 
-CITE_BIB_FILES         =
+CITE_BIB_FILES         = @CMAKE_CURRENT_SOURCE_DIR@/doc/doxygen/references.bib
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
