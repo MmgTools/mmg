@@ -265,6 +265,19 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             }
           }
         }
+        else if ( !strcmp(argv[i],"-lsopen") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isoopen,1) )
+            return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,val))
+                return 0;
+            }
+          }
+        }
         else if ( !strcmp(argv[i],"-lssurf") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isosurf,1) )
             return 0;

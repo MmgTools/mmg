@@ -114,6 +114,7 @@ extern "C" {
     MMG2D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
     MMG2D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
     MMG2D_IPARAM_iso,               /*!< [1/0], Enable level-set discretization */
+    MMG2D_IPARAM_isoopen,           /*!< [1/0], Enable two-level-set discretization of open curve */
     MMG2D_IPARAM_isosurf,           /*!< [1/0], Enable level-set discretization on the surface part only */
     MMG2D_IPARAM_opnbdy,            /*!< [1/0], Preserve edges at the interface of 2 domains with same reference */
     MMG2D_IPARAM_lag,               /*!< [-1/0/1/2], Enable Lagrangian motion */

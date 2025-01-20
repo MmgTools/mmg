@@ -375,7 +375,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   if ( !mesh->na ) return 1;
 
   /* Temporarily allocate a hash structure for storing edges */
-  ier = MMG5_hashNew ( mesh,&hash, mesh->na,3*mesh->na );
+  ier = MMG5_hashNew(mesh,&hash,mesh->na,3*mesh->na);
   if ( !ier ) {
     printf("  ## Error: %s: Unable to allocate edge hash table\n.",__func__);
     return 0;

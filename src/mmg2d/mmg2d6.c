@@ -264,8 +264,8 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
+  /* Removal of small parasitic components */
   if ( mesh->info.iso ) {
-    /* Removal of small parasitic components */
     if ( mesh->info.rmc > 0. && !MMG5_rmc(mesh,sol) ) {
       fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
       return 0;

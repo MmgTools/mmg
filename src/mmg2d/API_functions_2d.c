@@ -161,6 +161,8 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int va
     break;
   case MMG2D_IPARAM_isosurf :
     mesh->info.isosurf = val;
+  case MMG2D_IPARAM_isoopen :
+    mesh->info.isoopen = val;
     break;
   case MMG2D_IPARAM_lag :
 #ifdef USE_ELAS

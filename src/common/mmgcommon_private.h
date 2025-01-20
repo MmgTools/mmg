@@ -792,9 +792,11 @@ int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol);
 int MMG5_snpval_lssurf(MMG5_pMesh mesh,MMG5_pSol sol);
 int MMG5_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG5_resetRef_ls(MMG5_pMesh );
+int MMG5_resetRef_lsopen(MMG5_pMesh );
 int MMG5_resetRef_lssurf(MMG5_pMesh );
 int MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol);
 int MMG5_setref_lssurf(MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG5_setref_lsopen(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi);
 int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart);
 int MMG5_chkmanimesh(MMG5_pMesh mesh);
 

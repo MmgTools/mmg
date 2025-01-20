@@ -227,14 +227,17 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
     mesh->point[k].flag = mesh->base;
 
     /* Check the metric */
-    if ( met->m[k] <= 0 ) {
-      if ( !mmgWarn0 ) {
-        mmgWarn0 = 1;
-        fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+    if ( !mesh->info.isoopen ) {
+      if ( met->m[k] <= 0 ) {
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                 __func__);
-        return 0;
+          return 0;
+        }
       }
     }
+    
     /* normalization */
     met->m[k] *= dd;
   }
@@ -243,7 +246,6 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
 
   return ier;
 }
-
 
 /**
  * \param mesh pointer to the mesh structure.
@@ -647,6 +649,7 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
  *
  */
 int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+  int     k;
   double  dd;
 
   if ( !MMG5_scale_meshAndSol(mesh,met,sol,&dd) ) {
@@ -656,13 +659,19 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   if ( (!met) || (met && !met->np) || (!met->m) ) {
     return 1;
   }
-
-  if ( met->size == 1 ) {
+  
+  if ( mesh->info.isoopen ) {
+    /* Second level set function */
+    for (k=1; k<=mesh->np; k++) {
+      met->m[k] *= dd;
+    }
+  }
+  else if ( met->size == 1 ) {
     /* isotropic metric */
     if ( !MMG5_scale_scalarMetric ( mesh, met, dd ) ) {
       return 0;
     }
-        }
+  }
   else if ( met->size == (mesh->dim-1)*3 ) {
     /* anisotropic metric: met->size=3 in 2D and 6 in 3D */
     if ( !MMG5_scale_tensorMetric ( mesh, met, dd ) ) {

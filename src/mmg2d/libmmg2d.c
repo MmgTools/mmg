@@ -534,7 +534,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   MMG5_version(mesh,"2D");
 
-  if ( (!mesh->info.iso) && (!mesh->info.isosurf) ) {
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf) && (!mesh->info.isoopen) ) {
     fprintf(stdout,"\n  ## WARNING: ISO MODE NOT PROVIDED: ENABLING ISOVALUE DISCRETIZATION MODE (-ls) \n");
     mesh->info.iso = 1;
   }
@@ -702,14 +702,27 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
-  if ( !MMG2D_mmg2d6(mesh,sol,met) ) {
-    if ( mettofree ) { MMG5_SAFE_FREE (met); }
-    if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
-      _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  /* Open surface */
+  if ( mesh->info.isoopen ) {
+    if ( !MMG2D_mmg2d6_open(mesh,sol,met) ) {
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+      }
+      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
-    MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
-
+  /* Closed surface */
+  else {
+    if ( !MMG2D_mmg2d6(mesh,sol,met) ) {
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+      }
+      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
+    }
+  }
+  
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim > 0 )
