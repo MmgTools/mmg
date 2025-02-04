@@ -102,11 +102,11 @@ int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb)
 
   /* Check whether ppa or ppb is a vertex of pt */
   for (i=0; i<3; i++) {
-    if ( fabs(la[i]-1.0) < 1.0e-12 ) {
+    if (( fabs(la[i]-1.0) < 1.0e-12 ) && ( fabs(la[MMG5_inxt2[i]]) < 1.0e-12 ) && ( fabs(la[MMG5_iprv2[i]]) < 1.0e-12 )) {
       if ( lb[i] < 0.0 ) return i+1;
       else return 0;
     }
-    if ( fabs(lb[i]-1.0) < 1.0e-12) {
+    if (( fabs(lb[i]-1.0) < 1.0e-12 ) && ( fabs(lb[MMG5_inxt2[i]]) < 1.0e-12 ) && ( fabs(lb[MMG5_iprv2[i]]) < 1.0e-12 )) {
       if ( la[i] < 0.0 ) return i+1;
       else return 0;
     }
