@@ -2,6 +2,17 @@ from writeAPI import *
 
 MMG5_int = "ctypes.c_int"
 
+# Parameters
+
+par = mmgClass("MMG5_Par")
+par.addArgs([arg("hmin","ctypes.c_double")])
+par.addArgs([arg("hmax","ctypes.c_double")])
+par.addArgs([arg("hausd","ctypes.c_double")])
+par.addArgs([arg("ref",MMG5_int)])
+par.addArgs([arg("elt","ctypes.c_int8")])
+
+MMG5_pPar = "ctypes.POINTER("+par.name+")"
+
 # Point
 
 point = mmgClass("MMG5_Point")
@@ -17,6 +28,15 @@ point.addArgs([arg("tag","ctypes.c_uint16")])
 point.addArgs([arg("tagdel","ctypes.c_int8")])
 
 MMG5_pPoint = "ctypes.POINTER("+point.name+")"
+
+# xPoint
+
+xpoint = mmgClass("MMG5_xPoint")
+xpoint.addArgs(["n1","ctypes.c_double * 3"])
+xpoint.addArgs(["n2","ctypes.c_double * 3"])
+xpoint.addArgs(["nnor","ctypes.c_int8"])
+
+MMG5_pxPoint = "ctypes.POINTER("+xpoint.name+")"
 
 # mesh
 
