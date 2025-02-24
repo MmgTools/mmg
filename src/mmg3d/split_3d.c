@@ -4482,7 +4482,7 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
  */
 int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra    pt[8];
-  MMG5_xTetra    xt0,xt;
+  MMG5_xTetra    xt0,xt,yt[8]; /* yt is a dummy variable for the time being */
   MMG5_pxTetra   pxt;
   int            i,j;
   MMG5_int       iel,newtet[8],nxt0;
@@ -4499,21 +4499,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   memcpy(&xt0,pxt,sizeof(MMG5_xTetra));
 
   /* create 7 new tetras */
-  for (i=1; i<ne; i++) {
-    iel = MMG3D_newElt(mesh);
-    if ( !iel ) {
-      MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                  " a new element.\n",__func__);
-                          MMG5_INCREASE_MEM_MESSAGE();
-                          fprintf(stderr,"  Exit program.\n");
-                          return 0);
-      for ( j=0; j<i; j++ )
-        pt[j] = &mesh->tetra[newtet[j]];
-    }
-    pt[i] = &mesh->tetra[iel];
-    pt[i] = memcpy(pt[i],pt[0],sizeof(MMG5_Tetra));
-    newtet[i]=iel;
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,yt,&pxt) ) {
+    return 0;
   }
 
   /* Store face tags and refs from split tetra*/
