@@ -4482,7 +4482,7 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
  */
 int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra    pt[8];
-  MMG5_xTetra    xt0,xt,yt[8]; /* yt is a dummy variable for the time being */
+  MMG5_xTetra    xt0,yt[8];
   MMG5_pxTetra   pxt;
   int            i,j;
   MMG5_int       iel,newtet[8],nxt0;
@@ -4511,18 +4511,17 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   /* Modify first tetra */
   pt[0]->v[1] = vx[0] ; pt[0]->v[2] = vx[1]; pt[0]->v[3] = vx[2];
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[3] = ftag[3];  xt.tag[4] = ftag[2];
-    xt.tag[5] = ftag[1];  xt.edg[3] = 0;
-    xt.edg[4] = 0;  xt.edg[5] = 0;
-    xt.ref[0] = 0;  xt.ftag[0] = 0; MG_SET(xt.ori, 0);
+    yt[0].tag[3] = ftag[3];  yt[0].tag[4] = ftag[2];
+    yt[0].tag[5] = ftag[1];  yt[0].edg[3] = 0;
+    yt[0].edg[4] = 0;  yt[0].edg[5] = 0;
+    yt[0].ref[0] = 0;  yt[0].ftag[0] = 0; MG_SET(yt[0].ori, 0);
     isxt0 = 0;
     for(i=0;i<4;i++ ) {
-      if ( (xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
+      if ( (yt[0].ref[i]) || yt[0].ftag[i] ) isxt0 = 1;
     }
 
     if ( isxt0 ) {
-      memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+      memcpy(pxt,&yt[0],sizeof(MMG5_xTetra));
     }
     else {
       pt[0]->xt = 0;
@@ -4533,16 +4532,15 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[1]->v[0] = vx[0] ; pt[1]->v[2] = vx[3]; pt[1]->v[3] = vx[4];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[1] = ftag[3];  xt.tag[2] = ftag[2];
-    xt.tag[5] = ftag[0];  xt.edg[1] = 0;
-    xt.edg[2] = 0;  xt.edg[5] = 0;
-    xt.ref[1] = 0;  xt.ftag[1] = 0; MG_SET(xt.ori, 1);
+    yt[1].tag[1] = ftag[3];  yt[1].tag[2] = ftag[2];
+    yt[1].tag[5] = ftag[0];  yt[1].edg[1] = 0;
+    yt[1].edg[2] = 0;  yt[1].edg[5] = 0;
+    yt[1].ref[1] = 0;  yt[1].ftag[1] = 0; MG_SET(yt[1].ori, 1);
 
     isxt = 0;
 
     for (i=0; i<4; i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
+      if ( (yt[1].ref[i]) || yt[1].ftag[i]) isxt = 1;
     }
 
     pt[1]->xt = 0;
@@ -4551,7 +4549,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         isxt0 = 1;
         pt[1]->xt = nxt0;
         pxt = &mesh->xtetra[pt[1]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[1],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4565,7 +4563,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[1]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[1]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[1],sizeof(MMG5_xTetra));
       }
     }
   }
@@ -4574,15 +4572,14 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[2]->v[0] = vx[1] ; pt[2]->v[1] = vx[3]; pt[2]->v[3] = vx[5];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = ftag[3];  xt.tag[2] = ftag[1];
-    xt.tag[4] = ftag[0];  xt.edg[0] = 0;
-    xt.edg[2] = 0;  xt.edg[4] = 0;
-    xt.ref[2] = 0;  xt.ftag[2] = 0;  MG_SET(xt.ori, 2);
+    yt[2].tag[0] = ftag[3];  yt[2].tag[2] = ftag[1];
+    yt[2].tag[4] = ftag[0];  yt[2].edg[0] = 0;
+    yt[2].edg[2] = 0;  yt[2].edg[4] = 0;
+    yt[2].ref[2] = 0;  yt[2].ftag[2] = 0;  MG_SET(yt[2].ori, 2);
     isxt = 0;
 
     for (i=0; i<4;i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
+      if ( (yt[2].ref[i]) || yt[2].ftag[i]) isxt = 1;
     }
 
     pt[2]->xt = 0;
@@ -4591,7 +4588,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         isxt0 = 1;
         pt[2]->xt = nxt0;
         pxt = &mesh->xtetra[pt[2]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[2],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4605,7 +4602,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[2]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[2]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[2],sizeof(MMG5_xTetra));
       }
     }
   }
@@ -4614,16 +4611,15 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[3]->v[0] = vx[2] ; pt[3]->v[1] = vx[4]; pt[3]->v[2] = vx[5];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = ftag[2];  xt.tag[1] = ftag[1];
-    xt.tag[3] = ftag[0];  xt.edg[0] = 0;
-    xt.edg[1] = 0;  xt.edg[3] = 0;
-    xt.ref[3] = 0;  xt.ftag[3] = 0;  MG_SET(xt.ori, 3);
+    yt[3].tag[0] = ftag[2];  yt[3].tag[1] = ftag[1];
+    yt[3].tag[3] = ftag[0];  yt[3].edg[0] = 0;
+    yt[3].edg[1] = 0;  yt[3].edg[3] = 0;
+    yt[3].ref[3] = 0;  yt[3].ftag[3] = 0;  MG_SET(yt[3].ori, 3);
 
     isxt = 0;
 
     for (i=0; i<4; i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
+      if ( (yt[3].ref[i]) || yt[3].ftag[i]) isxt = 1;
     }
 
     pt[3]->xt = 0;
@@ -4632,7 +4628,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         isxt0 = 1;
         pt[3]->xt = nxt0;
         pxt = &mesh->xtetra[pt[3]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[3],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4646,7 +4642,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[3]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[3]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[3],sizeof(MMG5_xTetra));
       }
     }
   }
@@ -4655,20 +4651,19 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[4]->v[0] = vx[0] ; pt[4]->v[1] = vx[3]; pt[4]->v[2] = vx[1] ; pt[4]->v[3] = vx[2];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = ftag[3];  xt.tag[1] = ftag[3];
-    xt.tag[2] = ftag[2];  xt.tag[3] = ftag[3];
-    xt.edg[0] = 0;  xt.edg[1] = 0;
-    xt.edg[2] = 0;  xt.edg[3] = 0;
-    xt.tag[4] = 0;  xt.edg[4] = 0;
-    xt.tag[5] = ftag[1];  xt.edg[5] = 0;
-    xt.ref [0] = 0 ; xt.ref [1] = 0 ; xt.ref [2] = 0;
-    xt.ftag[0] = 0 ; xt.ftag[1] = 0 ; xt.ftag[2] = 0;
-    MG_SET(xt.ori, 0); MG_SET(xt.ori, 1); MG_SET(xt.ori, 2);
+    yt[4].tag[0] = ftag[3];  yt[4].tag[1] = ftag[3];
+    yt[4].tag[2] = ftag[2];  yt[4].tag[3] = ftag[3];
+    yt[4].edg[0] = 0;  yt[4].edg[1] = 0;
+    yt[4].edg[2] = 0;  yt[4].edg[3] = 0;
+    yt[4].tag[4] = 0;  yt[4].edg[4] = 0;
+    yt[4].tag[5] = ftag[1];  yt[4].edg[5] = 0;
+    yt[4].ref [0] = 0 ; yt[4].ref [1] = 0 ; yt[4].ref [2] = 0;
+    yt[4].ftag[0] = 0 ; yt[4].ftag[1] = 0 ; yt[4].ftag[2] = 0;
+    MG_SET(yt[4].ori, 0); MG_SET(yt[4].ori, 1); MG_SET(yt[4].ori, 2);
 
     isxt = 0;
 
-    if ( (xt.ref[3]) || xt.ftag[3]) isxt = 1;
+    if ( (yt[4].ref[3]) || yt[4].ftag[3]) isxt = 1;
 
     pt[4]->xt = 0;
     if ( isxt ) {
@@ -4676,7 +4671,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         isxt0 = 1;
         pt[4]->xt = nxt0;
         pxt = &mesh->xtetra[(pt[4])->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[4],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4690,7 +4685,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[4]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[4]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[4],sizeof(MMG5_xTetra));
       }
     }
   }
@@ -4699,20 +4694,19 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[5]->v[0] = vx[2] ; pt[5]->v[1] = vx[0]; pt[5]->v[2] = vx[3] ; pt[5]->v[3] = vx[4];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = ftag[2];  xt.tag[1] = 0;
-    xt.tag[2] = ftag[2];  xt.tag[3] = ftag[3];
-    xt.tag[4] = ftag[2];  xt.tag[5] = ftag[0];
-    xt.edg[0] = 0;  xt.edg[1] = 0;
-    xt.edg[2] = 0;  xt.edg[3] = 0;
-    xt.edg[4] = 0;  xt.edg[5] = 0;
-    xt.ref [0] = 0 ; xt.ref [1] = 0 ; xt.ref [3] = 0;
-    xt.ftag[0] = 0 ; xt.ftag[1] = 0 ; xt.ftag[3] = 0;
-    MG_SET(xt.ori, 0); MG_SET(xt.ori, 1); MG_SET(xt.ori, 3);
+    yt[5].tag[0] = ftag[2];  yt[5].tag[1] = 0;
+    yt[5].tag[2] = ftag[2];  yt[5].tag[3] = ftag[3];
+    yt[5].tag[4] = ftag[2];  yt[5].tag[5] = ftag[0];
+    yt[5].edg[0] = 0;  yt[5].edg[1] = 0;
+    yt[5].edg[2] = 0;  yt[5].edg[3] = 0;
+    yt[5].edg[4] = 0;  yt[5].edg[5] = 0;
+    yt[5].ref [0] = 0 ; yt[5].ref [1] = 0 ; yt[5].ref [3] = 0;
+    yt[5].ftag[0] = 0 ; yt[5].ftag[1] = 0 ; yt[5].ftag[3] = 0;
+    MG_SET(yt[5].ori, 0); MG_SET(yt[5].ori, 1); MG_SET(yt[5].ori, 3);
 
     isxt = 0;
 
-    if ( (xt.ref[2]) || xt.ftag[2]) isxt = 1;
+    if ( (yt[5].ref[2]) || yt[5].ftag[2]) isxt = 1;
 
     pt[5]->xt = 0;
     if ( isxt ) {
@@ -4720,7 +4714,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         isxt0 = 1;
         pt[5]->xt = nxt0;
         pxt = &mesh->xtetra[pt[5]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[5],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4734,7 +4728,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[5]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[5]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[5],sizeof(MMG5_xTetra));
       }
     }
   }
@@ -4743,20 +4737,19 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[6]->v[0] = vx[2] ; pt[6]->v[1] = vx[3]; pt[6]->v[2] = vx[1] ; pt[6]->v[3] = vx[5];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.edg[0] = 0;
-    xt.tag[1] = ftag[1];  xt.tag[2] = ftag[1];
-    xt.tag[3] = ftag[3];  xt.tag[4] = ftag[0];
-    xt.edg[1] = 0;  xt.edg[2] = 0;
-    xt.edg[3] = 0;  xt.edg[4] = 0;
-    xt.tag[5] = ftag[3];  xt.edg[5] = 0;
-    xt.ref [0] = 0 ; xt.ref [2] = 0 ; xt.ref [3] = 0;
-    xt.ftag[0] = 0 ; xt.ftag[2] = 0 ; xt.ftag[3] = 0;
-    MG_SET(xt.ori, 0); MG_SET(xt.ori, 2); MG_SET(xt.ori, 3);
+    yt[6].tag[0] = 0;  yt[6].edg[0] = 0;
+    yt[6].tag[1] = ftag[1];  yt[6].tag[2] = ftag[1];
+    yt[6].tag[3] = ftag[3];  yt[6].tag[4] = ftag[0];
+    yt[6].edg[1] = 0;  yt[6].edg[2] = 0;
+    yt[6].edg[3] = 0;  yt[6].edg[4] = 0;
+    yt[6].tag[5] = ftag[3];  yt[6].edg[5] = 0;
+    yt[6].ref [0] = 0 ; yt[6].ref [2] = 0 ; yt[6].ref [3] = 0;
+    yt[6].ftag[0] = 0 ; yt[6].ftag[2] = 0 ; yt[6].ftag[3] = 0;
+    MG_SET(yt[6].ori, 0); MG_SET(yt[6].ori, 2); MG_SET(yt[6].ori, 3);
 
     isxt = 0;
 
-    if ( (xt.ref[1]) || xt.ftag[1]) isxt = 1;
+    if ( (yt[6].ref[1]) || yt[6].ftag[1]) isxt = 1;
 
     pt[6]->xt = 0;
     if ( isxt ) {
@@ -4764,7 +4757,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         isxt0 = 1;
         pt[6]->xt = nxt0;
         pxt = &mesh->xtetra[pt[6]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[6],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4778,7 +4771,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[6]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[6]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[6],sizeof(MMG5_xTetra));
       }
     }
   }
@@ -4787,27 +4780,26 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[7]->v[0] = vx[2] ; pt[7]->v[1] = vx[3]; pt[7]->v[2] = vx[5] ; pt[7]->v[3] = vx[4];
 
   if ( nxt0 ) {
-    memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.tag[1] = ftag[1];
-    xt.tag[2] = ftag[2];  xt.tag[3] = ftag[0];
-    xt.tag[4] = ftag[0];  xt.tag[5] = ftag[0];
-    xt.edg[0] = 0;  xt.edg[1] = 0;
-    xt.edg[2] = 0;  xt.edg[3] = 0;
-    xt.edg[4] = 0;  xt.edg[5] = 0;
-    xt.ref [1] = 0 ; xt.ref [2] = 0 ; xt.ref [3] = 0;
-    xt.ftag[1] = 0 ; xt.ftag[2] = 0 ; xt.ftag[3] = 0;
-    MG_SET(xt.ori, 1); MG_SET(xt.ori, 2); MG_SET(xt.ori, 3);
+    yt[7].tag[0] = 0;  yt[7].tag[1] = ftag[1];
+    yt[7].tag[2] = ftag[2];  yt[7].tag[3] = ftag[0];
+    yt[7].tag[4] = ftag[0];  yt[7].tag[5] = ftag[0];
+    yt[7].edg[0] = 0;  yt[7].edg[1] = 0;
+    yt[7].edg[2] = 0;  yt[7].edg[3] = 0;
+    yt[7].edg[4] = 0;  yt[7].edg[5] = 0;
+    yt[7].ref [1] = 0 ; yt[7].ref [2] = 0 ; yt[7].ref [3] = 0;
+    yt[7].ftag[1] = 0 ; yt[7].ftag[2] = 0 ; yt[7].ftag[3] = 0;
+    MG_SET(yt[7].ori, 1); MG_SET(yt[7].ori, 2); MG_SET(yt[7].ori, 3);
 
     isxt = 0;
 
-    if ( (xt.ref[0]) || xt.ftag[0]) isxt = 1;
+    if ( (yt[7].ref[0]) || yt[7].ftag[0]) isxt = 1;
 
     pt[7]->xt = 0;
     if ( isxt ) {
       if ( !isxt0 ) {
         pt[7]->xt = nxt0;
         pxt = &mesh->xtetra[pt[7]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[7],sizeof(MMG5_xTetra));
       }
       else {
         mesh->xt++;
@@ -4821,7 +4813,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
         }
         pt[7]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[7]->xt];
-        memcpy(pxt,&xt,sizeof(MMG5_xTetra));
+        memcpy(pxt,&yt[7],sizeof(MMG5_xTetra));
       }
     }
   }
