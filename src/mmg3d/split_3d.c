@@ -4652,24 +4652,25 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     if ( (yt[7].ref[0]) || yt[7].ftag[0]) need_xt[7] = 1;
   }
 
+  /* make sure there is room in the xtetra table for all of them */
+  if ( mesh->xt > mesh->xtmax - 7 ) {
+    MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                      "larger xtetra table",
+                      mesh->xt--;
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
+  }
+
   /* assign xTetra to the new tets that need them */
   for(int t=1; t<8; t++){
     pt[t]->xt = 0;
     if ( need_xt[t] ) {
       if ( !isxt0 ) {
         isxt0 = 1;
-        pt[t]->xt = nxt0;
+        pt[t]->xt = nxt0;  /* re-use the initial xtetra */
       }
       else {
         mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
         pt[t]->xt = mesh->xt;
       }
       memcpy(&mesh->xtetra[pt[t]->xt],&yt[t],sizeof(MMG5_xTetra));
