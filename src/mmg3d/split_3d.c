@@ -1153,13 +1153,15 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
  * \param mesh pointer to the mesh structure.
  * \param newtet list of indices of the new tetra.
  * \param ne number of tetra in the list.
- * \param pt list of tetra.
- * \param xt list of xtetra.
+ * \param pt list of tetra, the first of which already exists and is the one to be split
+ * \param xt list of xtetra, none of which need to exist
  * \param pxt0 xtetra associated to the first tetra of the list
  *
  * \return 0 if fail, 1 otherwise
  *
- * Create a list of new tetra whose indices are passed in \a newtet.
+ * Create a list of new tetrahedra whose indices are returned in \a newtet.
+ * The new tetrahedra will be copies of pt[0].
+ * A list of xtetra is returned as well; these are copies of *pxt0.
  *
  */
 static inline
@@ -4509,17 +4511,20 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   }
 
   /* Modify first tetra */
-  pt[0]->v[1] = vx[0] ; pt[0]->v[2] = vx[1]; pt[0]->v[3] = vx[2];
+  pt[0]->v[1] = vx[0];
+  pt[0]->v[2] = vx[1];
+  pt[0]->v[3] = vx[2];
   if ( nxt0 ) {
-    yt[0].tag[3] = ftag[3];  yt[0].tag[4] = ftag[2];
-    yt[0].tag[5] = ftag[1];  yt[0].edg[3] = 0;
-    yt[0].edg[4] = 0;  yt[0].edg[5] = 0;
-    yt[0].ref[0] = 0;  yt[0].ftag[0] = 0; MG_SET(yt[0].ori, 0);
+    yt[0].tag[3] = ftag[3];    yt[0].edg[3] = 0;
+    yt[0].tag[4] = ftag[2];    yt[0].edg[4] = 0;
+    yt[0].tag[5] = ftag[1];    yt[0].edg[5] = 0;
+    yt[0].ref[0] = 0;
+    yt[0].ftag[0] = 0;
+    MG_SET(yt[0].ori, 0);
     isxt0 = 0;
     for(i=0;i<4;i++ ) {
       if ( (yt[0].ref[i]) || yt[0].ftag[i] ) isxt0 = 1;
     }
-
     if ( isxt0 ) {
       memcpy(pxt,&yt[0],sizeof(MMG5_xTetra));
     }
@@ -4529,71 +4534,83 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   }
 
   /* Modify second tetra */
-  pt[1]->v[0] = vx[0] ; pt[1]->v[2] = vx[3]; pt[1]->v[3] = vx[4];
-
+  pt[1]->v[0] = vx[0];
+  pt[1]->v[2] = vx[3];
+  pt[1]->v[3] = vx[4];
   if ( nxt0 ) {
-    yt[1].tag[1] = ftag[3];  yt[1].tag[2] = ftag[2];
-    yt[1].tag[5] = ftag[0];  yt[1].edg[1] = 0;
-    yt[1].edg[2] = 0;  yt[1].edg[5] = 0;
-    yt[1].ref[1] = 0;  yt[1].ftag[1] = 0; MG_SET(yt[1].ori, 1);
+    yt[1].tag[1] = ftag[3];    yt[1].edg[1] = 0;
+    yt[1].tag[2] = ftag[2];    yt[1].edg[2] = 0;
+    yt[1].tag[5] = ftag[0];    yt[1].edg[5] = 0;
+    yt[1].ref[1] = 0;
+    yt[1].ftag[1] = 0;
+    MG_SET(yt[1].ori, 1);
     for (i=0; i<4; i++) {
       if ( (yt[1].ref[i]) || yt[1].ftag[i]) need_xt[1] = 1;
     }
   }
 
   /* Modify 3rd tetra */
-  pt[2]->v[0] = vx[1] ; pt[2]->v[1] = vx[3]; pt[2]->v[3] = vx[5];
-
+  pt[2]->v[0] = vx[1];
+  pt[2]->v[1] = vx[3];
+  pt[2]->v[3] = vx[5];
   if ( nxt0 ) {
-    yt[2].tag[0] = ftag[3];  yt[2].tag[2] = ftag[1];
-    yt[2].tag[4] = ftag[0];  yt[2].edg[0] = 0;
-    yt[2].edg[2] = 0;  yt[2].edg[4] = 0;
-    yt[2].ref[2] = 0;  yt[2].ftag[2] = 0;  MG_SET(yt[2].ori, 2);
+    yt[2].tag[0] = ftag[3];    yt[2].edg[0] = 0;
+    yt[2].tag[2] = ftag[1];    yt[2].edg[2] = 0;
+    yt[2].tag[4] = ftag[0];    yt[2].edg[4] = 0;
+    yt[2].ref[2] = 0;
+    yt[2].ftag[2] = 0;
+    MG_SET(yt[2].ori, 2);
     for (i=0; i<4;i++) {
       if ( (yt[2].ref[i]) || yt[2].ftag[i]) need_xt[2] = 1;
     }
   }
 
   /* Modify 4th tetra */
-  pt[3]->v[0] = vx[2] ; pt[3]->v[1] = vx[4]; pt[3]->v[2] = vx[5];
-
+  pt[3]->v[0] = vx[2] ;
+  pt[3]->v[1] = vx[4];
+  pt[3]->v[2] = vx[5];
   if ( nxt0 ) {
-    yt[3].tag[0] = ftag[2];  yt[3].tag[1] = ftag[1];
-    yt[3].tag[3] = ftag[0];  yt[3].edg[0] = 0;
-    yt[3].edg[1] = 0;  yt[3].edg[3] = 0;
-    yt[3].ref[3] = 0;  yt[3].ftag[3] = 0;  MG_SET(yt[3].ori, 3);
+    yt[3].tag[0] = ftag[2];    yt[3].edg[0] = 0;
+    yt[3].tag[1] = ftag[1];    yt[3].edg[1] = 0;
+    yt[3].tag[3] = ftag[0];    yt[3].edg[3] = 0;
+    yt[3].ref[3] = 0;
+    yt[3].ftag[3] = 0;
+    MG_SET(yt[3].ori, 3);
     for (i=0; i<4; i++) {
       if ( (yt[3].ref[i]) || yt[3].ftag[i]) need_xt[3] = 1;
     }
   }
 
   /* Modify 5th tetra */
-  pt[4]->v[0] = vx[0] ; pt[4]->v[1] = vx[3]; pt[4]->v[2] = vx[1] ; pt[4]->v[3] = vx[2];
-
+  pt[4]->v[0] = vx[0];
+  pt[4]->v[1] = vx[3];
+  pt[4]->v[2] = vx[1];
+  pt[4]->v[3] = vx[2];
   if ( nxt0 ) {
-    yt[4].tag[0] = ftag[3];  yt[4].tag[1] = ftag[3];
-    yt[4].tag[2] = ftag[2];  yt[4].tag[3] = ftag[3];
-    yt[4].edg[0] = 0;  yt[4].edg[1] = 0;
-    yt[4].edg[2] = 0;  yt[4].edg[3] = 0;
-    yt[4].tag[4] = 0;  yt[4].edg[4] = 0;
-    yt[4].tag[5] = ftag[1];  yt[4].edg[5] = 0;
-    yt[4].ref [0] = 0 ; yt[4].ref [1] = 0 ; yt[4].ref [2] = 0;
-    yt[4].ftag[0] = 0 ; yt[4].ftag[1] = 0 ; yt[4].ftag[2] = 0;
+    yt[4].tag[0] = ftag[3];    yt[4].edg[0] = 0;
+    yt[4].tag[1] = ftag[3];    yt[4].edg[1] = 0;
+    yt[4].tag[2] = ftag[2];    yt[4].edg[2] = 0;
+    yt[4].tag[3] = ftag[3];    yt[4].edg[3] = 0;
+    yt[4].tag[4] = 0;          yt[4].edg[4] = 0;
+    yt[4].tag[5] = ftag[1];    yt[4].edg[5] = 0;
+    yt[4].ref [0] = 0;  yt[4].ref [1] = 0;  yt[4].ref [2] = 0;
+    yt[4].ftag[0] = 0;  yt[4].ftag[1] = 0;  yt[4].ftag[2] = 0;
     MG_SET(yt[4].ori, 0); MG_SET(yt[4].ori, 1); MG_SET(yt[4].ori, 2);
-
     if ( (yt[4].ref[3]) || yt[4].ftag[3]) need_xt[4] = 1;
   }
 
   /* Modify 6th tetra */
-  pt[5]->v[0] = vx[2] ; pt[5]->v[1] = vx[0]; pt[5]->v[2] = vx[3] ; pt[5]->v[3] = vx[4];
-
+  pt[5]->v[0] = vx[2];
+  pt[5]->v[1] = vx[0];
+  pt[5]->v[2] = vx[3];
+  pt[5]->v[3] = vx[4];
   if ( nxt0 ) {
-    yt[5].tag[0] = ftag[2];  yt[5].tag[1] = 0;
-    yt[5].tag[2] = ftag[2];  yt[5].tag[3] = ftag[3];
-    yt[5].tag[4] = ftag[2];  yt[5].tag[5] = ftag[0];
-    yt[5].edg[0] = 0;  yt[5].edg[1] = 0;
-    yt[5].edg[2] = 0;  yt[5].edg[3] = 0;
-    yt[5].edg[4] = 0;  yt[5].edg[5] = 0;
+    yt[5].tag[0] = ftag[2];    yt[5].edg[0] = 0;
+    yt[5].tag[1] = 0;          yt[5].edg[1] = 0;
+    yt[5].tag[2] = ftag[2];    yt[5].edg[2] = 0;
+    yt[5].tag[3] = ftag[3];    yt[5].edg[3] = 0;
+    yt[5].tag[4] = ftag[2];    yt[5].edg[4] = 0;
+    yt[5].tag[5] = ftag[0];    yt[5].edg[5] = 0;
     yt[5].ref [0] = 0 ; yt[5].ref [1] = 0 ; yt[5].ref [3] = 0;
     yt[5].ftag[0] = 0 ; yt[5].ftag[1] = 0 ; yt[5].ftag[3] = 0;
     MG_SET(yt[5].ori, 0); MG_SET(yt[5].ori, 1); MG_SET(yt[5].ori, 3);
@@ -4601,15 +4618,17 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   }
 
   /* Modify 7th tetra */
-  pt[6]->v[0] = vx[2] ; pt[6]->v[1] = vx[3]; pt[6]->v[2] = vx[1] ; pt[6]->v[3] = vx[5];
-
+  pt[6]->v[0] = vx[2];
+  pt[6]->v[1] = vx[3];
+  pt[6]->v[2] = vx[1];
+  pt[6]->v[3] = vx[5];
   if ( nxt0 ) {
-    yt[6].tag[0] = 0;  yt[6].edg[0] = 0;
-    yt[6].tag[1] = ftag[1];  yt[6].tag[2] = ftag[1];
-    yt[6].tag[3] = ftag[3];  yt[6].tag[4] = ftag[0];
-    yt[6].edg[1] = 0;  yt[6].edg[2] = 0;
-    yt[6].edg[3] = 0;  yt[6].edg[4] = 0;
-    yt[6].tag[5] = ftag[3];  yt[6].edg[5] = 0;
+    yt[6].tag[0] = 0;          yt[6].edg[0] = 0;
+    yt[6].tag[1] = ftag[1];    yt[6].edg[1] = 0;
+    yt[6].tag[2] = ftag[1];    yt[6].edg[2] = 0;
+    yt[6].tag[3] = ftag[3];    yt[6].edg[3] = 0;
+    yt[6].tag[4] = ftag[0];    yt[6].edg[4] = 0;
+    yt[6].tag[5] = ftag[3];    yt[6].edg[5] = 0;
     yt[6].ref [0] = 0 ; yt[6].ref [2] = 0 ; yt[6].ref [3] = 0;
     yt[6].ftag[0] = 0 ; yt[6].ftag[2] = 0 ; yt[6].ftag[3] = 0;
     MG_SET(yt[6].ori, 0); MG_SET(yt[6].ori, 2); MG_SET(yt[6].ori, 3);
@@ -4617,15 +4636,17 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   }
 
   /* Modify last tetra */
-  pt[7]->v[0] = vx[2] ; pt[7]->v[1] = vx[3]; pt[7]->v[2] = vx[5] ; pt[7]->v[3] = vx[4];
-
+  pt[7]->v[0] = vx[2];
+  pt[7]->v[1] = vx[3];
+  pt[7]->v[2] = vx[5];
+  pt[7]->v[3] = vx[4];
   if ( nxt0 ) {
-    yt[7].tag[0] = 0;  yt[7].tag[1] = ftag[1];
-    yt[7].tag[2] = ftag[2];  yt[7].tag[3] = ftag[0];
-    yt[7].tag[4] = ftag[0];  yt[7].tag[5] = ftag[0];
-    yt[7].edg[0] = 0;  yt[7].edg[1] = 0;
-    yt[7].edg[2] = 0;  yt[7].edg[3] = 0;
-    yt[7].edg[4] = 0;  yt[7].edg[5] = 0;
+    yt[7].tag[0] = 0;           yt[7].edg[0] = 0;
+    yt[7].tag[1] = ftag[1];     yt[7].edg[1] = 0;
+    yt[7].tag[2] = ftag[2];     yt[7].edg[2] = 0;
+    yt[7].tag[3] = ftag[0];     yt[7].edg[3] = 0;
+    yt[7].tag[4] = ftag[0];     yt[7].edg[4] = 0;
+    yt[7].tag[5] = ftag[0];     yt[7].edg[5] = 0;
     yt[7].ref [1] = 0 ; yt[7].ref [2] = 0 ; yt[7].ref [3] = 0;
     yt[7].ftag[1] = 0 ; yt[7].ftag[2] = 0 ; yt[7].ftag[3] = 0;
     MG_SET(yt[7].ori, 1); MG_SET(yt[7].ori, 2); MG_SET(yt[7].ori, 3);
