@@ -4486,7 +4486,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_pxTetra   pxt;
   int            i,j;
   MMG5_int       iel,newtet[8],nxt0;
-  int8_t         isxt0,isxt;
+  int8_t         isxt0,need_xt[8] = {0,0,0,0,0,0,0,0};
   int16_t        ftag[4];
   const int8_t   ne=8;
 
@@ -4536,35 +4536,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[1].tag[5] = ftag[0];  yt[1].edg[1] = 0;
     yt[1].edg[2] = 0;  yt[1].edg[5] = 0;
     yt[1].ref[1] = 0;  yt[1].ftag[1] = 0; MG_SET(yt[1].ori, 1);
-
-    isxt = 0;
-
     for (i=0; i<4; i++) {
-      if ( (yt[1].ref[i]) || yt[1].ftag[i]) isxt = 1;
-    }
-
-    pt[1]->xt = 0;
-    if ( isxt ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[1]->xt = nxt0;
-        pxt = &mesh->xtetra[pt[1]->xt];
-        memcpy(pxt,&yt[1],sizeof(MMG5_xTetra));
-      }
-      else {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
-        pt[1]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[1]->xt];
-        memcpy(pxt,&yt[1],sizeof(MMG5_xTetra));
-      }
+      if ( (yt[1].ref[i]) || yt[1].ftag[i]) need_xt[1] = 1;
     }
   }
 
@@ -4576,34 +4549,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[2].tag[4] = ftag[0];  yt[2].edg[0] = 0;
     yt[2].edg[2] = 0;  yt[2].edg[4] = 0;
     yt[2].ref[2] = 0;  yt[2].ftag[2] = 0;  MG_SET(yt[2].ori, 2);
-    isxt = 0;
-
     for (i=0; i<4;i++) {
-      if ( (yt[2].ref[i]) || yt[2].ftag[i]) isxt = 1;
-    }
-
-    pt[2]->xt = 0;
-    if ( isxt ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[2]->xt = nxt0;
-        pxt = &mesh->xtetra[pt[2]->xt];
-        memcpy(pxt,&yt[2],sizeof(MMG5_xTetra));
-      }
-      else {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
-        pt[2]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[2]->xt];
-        memcpy(pxt,&yt[2],sizeof(MMG5_xTetra));
-      }
+      if ( (yt[2].ref[i]) || yt[2].ftag[i]) need_xt[2] = 1;
     }
   }
 
@@ -4615,35 +4562,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[3].tag[3] = ftag[0];  yt[3].edg[0] = 0;
     yt[3].edg[1] = 0;  yt[3].edg[3] = 0;
     yt[3].ref[3] = 0;  yt[3].ftag[3] = 0;  MG_SET(yt[3].ori, 3);
-
-    isxt = 0;
-
     for (i=0; i<4; i++) {
-      if ( (yt[3].ref[i]) || yt[3].ftag[i]) isxt = 1;
-    }
-
-    pt[3]->xt = 0;
-    if ( isxt ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[3]->xt = nxt0;
-        pxt = &mesh->xtetra[pt[3]->xt];
-        memcpy(pxt,&yt[3],sizeof(MMG5_xTetra));
-      }
-      else {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
-        pt[3]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[3]->xt];
-        memcpy(pxt,&yt[3],sizeof(MMG5_xTetra));
-      }
+      if ( (yt[3].ref[i]) || yt[3].ftag[i]) need_xt[3] = 1;
     }
   }
 
@@ -4661,33 +4581,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[4].ftag[0] = 0 ; yt[4].ftag[1] = 0 ; yt[4].ftag[2] = 0;
     MG_SET(yt[4].ori, 0); MG_SET(yt[4].ori, 1); MG_SET(yt[4].ori, 2);
 
-    isxt = 0;
-
-    if ( (yt[4].ref[3]) || yt[4].ftag[3]) isxt = 1;
-
-    pt[4]->xt = 0;
-    if ( isxt ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[4]->xt = nxt0;
-        pxt = &mesh->xtetra[(pt[4])->xt];
-        memcpy(pxt,&yt[4],sizeof(MMG5_xTetra));
-      }
-      else {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
-        pt[4]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[4]->xt];
-        memcpy(pxt,&yt[4],sizeof(MMG5_xTetra));
-      }
-    }
+    if ( (yt[4].ref[3]) || yt[4].ftag[3]) need_xt[4] = 1;
   }
 
   /* Modify 6th tetra */
@@ -4703,34 +4597,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[5].ref [0] = 0 ; yt[5].ref [1] = 0 ; yt[5].ref [3] = 0;
     yt[5].ftag[0] = 0 ; yt[5].ftag[1] = 0 ; yt[5].ftag[3] = 0;
     MG_SET(yt[5].ori, 0); MG_SET(yt[5].ori, 1); MG_SET(yt[5].ori, 3);
-
-    isxt = 0;
-
-    if ( (yt[5].ref[2]) || yt[5].ftag[2]) isxt = 1;
-
-    pt[5]->xt = 0;
-    if ( isxt ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[5]->xt = nxt0;
-        pxt = &mesh->xtetra[pt[5]->xt];
-        memcpy(pxt,&yt[5],sizeof(MMG5_xTetra));
-      }
-      else {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
-        pt[5]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[5]->xt];
-        memcpy(pxt,&yt[5],sizeof(MMG5_xTetra));
-      }
-    }
+    if ( (yt[5].ref[2]) || yt[5].ftag[2]) need_xt[5] = 1;
   }
 
   /* Modify 7th tetra */
@@ -4746,34 +4613,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[6].ref [0] = 0 ; yt[6].ref [2] = 0 ; yt[6].ref [3] = 0;
     yt[6].ftag[0] = 0 ; yt[6].ftag[2] = 0 ; yt[6].ftag[3] = 0;
     MG_SET(yt[6].ori, 0); MG_SET(yt[6].ori, 2); MG_SET(yt[6].ori, 3);
-
-    isxt = 0;
-
-    if ( (yt[6].ref[1]) || yt[6].ftag[1]) isxt = 1;
-
-    pt[6]->xt = 0;
-    if ( isxt ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[6]->xt = nxt0;
-        pxt = &mesh->xtetra[pt[6]->xt];
-        memcpy(pxt,&yt[6],sizeof(MMG5_xTetra));
-      }
-      else {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             fprintf(stderr,"  Exit program.\n");
-                             return 0);
-        }
-        pt[6]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[6]->xt];
-        memcpy(pxt,&yt[6],sizeof(MMG5_xTetra));
-      }
-    }
+    if( yt[6].ref[1] || yt[6].ftag[1] ) need_xt[6] = 1;
   }
 
   /* Modify last tetra */
@@ -4789,17 +4629,16 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[7].ref [1] = 0 ; yt[7].ref [2] = 0 ; yt[7].ref [3] = 0;
     yt[7].ftag[1] = 0 ; yt[7].ftag[2] = 0 ; yt[7].ftag[3] = 0;
     MG_SET(yt[7].ori, 1); MG_SET(yt[7].ori, 2); MG_SET(yt[7].ori, 3);
+    if ( (yt[7].ref[0]) || yt[7].ftag[0]) need_xt[7] = 1;
+  }
 
-    isxt = 0;
-
-    if ( (yt[7].ref[0]) || yt[7].ftag[0]) isxt = 1;
-
-    pt[7]->xt = 0;
-    if ( isxt ) {
+  /* assign xTetra to the new tets that need them */
+  for(int t=1; t<8; t++){
+    pt[t]->xt = 0;
+    if ( need_xt[t] ) {
       if ( !isxt0 ) {
-        pt[7]->xt = nxt0;
-        pxt = &mesh->xtetra[pt[7]->xt];
-        memcpy(pxt,&yt[7],sizeof(MMG5_xTetra));
+        isxt0 = 1;
+        pt[t]->xt = nxt0;
       }
       else {
         mesh->xt++;
@@ -4811,10 +4650,9 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
                              fprintf(stderr,"  Exit program.\n");
                              return 0);
         }
-        pt[7]->xt = mesh->xt;
-        pxt = &mesh->xtetra[pt[7]->xt];
-        memcpy(pxt,&yt[7],sizeof(MMG5_xTetra));
+        pt[t]->xt = mesh->xt;
       }
+      memcpy(&mesh->xtetra[pt[t]->xt],&yt[t],sizeof(MMG5_xTetra));
     }
   }
 
