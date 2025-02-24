@@ -4518,7 +4518,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   /* Store face tags and refs from split tetra*/
   for (i=0; i<4; i++) {
-    ftag[i] = (xt.ftag[i] & ~MG_REF);
+    ftag[i] = (xt0.ftag[i] & ~MG_REF);
   }
 
   /* Modify first tetra */
