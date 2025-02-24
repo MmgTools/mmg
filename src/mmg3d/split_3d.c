@@ -4484,7 +4484,7 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
  */
 int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
   MMG5_pTetra    pt[8];
-  MMG5_xTetra    xt0,yt[8];
+  MMG5_xTetra    yt[8];
   MMG5_pxTetra   pxt;
   int            i,j;
   MMG5_int       iel,newtet[8],nxt0;
@@ -4498,7 +4498,6 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   nxt0 = pt[0]->xt;
   pxt = &mesh->xtetra[nxt0];
-  memcpy(&xt0,pxt,sizeof(MMG5_xTetra));
 
   /* create 7 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,yt,&pxt) ) {
@@ -4507,7 +4506,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   /* Store face tags and refs from split tetra*/
   for (i=0; i<4; i++) {
-    ftag[i] = (xt0.ftag[i] & ~MG_REF);
+    ftag[i] = (pxt->ftag[i] & ~MG_REF);
   }
 
   /* Modify first tetra */
