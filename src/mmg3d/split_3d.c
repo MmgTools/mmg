@@ -4523,6 +4523,12 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     yt[0].ftag[0] = 0;      // face tag
     MG_SET(yt[0].ori, 0);   // triangle orientation flags
     for(i=0;i<4;i++ ) {
+      // An xTetra is only created if any face has a reference or a tag.
+      // This means that edge references and tags are lost for edges that
+      // do not border a tetrahedron with a tagged or referenced face.
+      // This appears to be so by design because it is done everywhere.
+      // Orientation information is also lost most of the time. Maybe
+      // this is not important when there is no surface?
       if ( (yt[0].ref[i]) || yt[0].ftag[i] ) need_xt[0] = 1;
     }
     if ( need_xt[0] ) {
