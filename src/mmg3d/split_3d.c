@@ -4501,14 +4501,14 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   nxt0 = pt[0]->xt;
   pxt0 = &mesh->xtetra[nxt0];
 
+  /* Store face tags and refs from split tetra (before modifying pxt) */
+  for (i=0; i<4; i++) {
+    ftag[i] = (pxt0->ftag[i] & ~MG_REF);
+  }
+
   /* create 7 new tetras and initialize as copies of the original */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,yt,&pxt0) ) {
     return 0;
-  }
-
-  /* Store face tags and refs from split tetra*/
-  for (i=0; i<4; i++) {
-    ftag[i] = (pxt0->ftag[i] & ~MG_REF);
   }
 
   /* Modify first tetra */
