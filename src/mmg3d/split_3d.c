@@ -4483,30 +4483,32 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
  *
  */
 int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
-  MMG5_pTetra    pt[8];
-  MMG5_xTetra    yt[8];
-  MMG5_pxTetra   pxt;
+  MMG5_pTetra    pt[8];   // original tetra and 7 new
+  MMG5_xTetra    yt[8];   // scratch space for the new xtetras
+  MMG5_pxTetra   pxt0;       // original xtetra
+  MMG5_int       newtet[8];  // tetra indices
+  MMG5_int       nxt0;       // index of the original xtetra, or 0
+  int8_t         isxt0;      // 1 if original xtetra has been re-used
+  int8_t         need_xt[8] = {0,0,0,0,0,0,0,0};   // 1 for each tetra that needs an xtetra
+  int16_t        ftag[4];    // original face tags
   int            i,j;
-  MMG5_int       iel,newtet[8],nxt0;
-  int8_t         isxt0,need_xt[8] = {0,0,0,0,0,0,0,0};
-  int16_t        ftag[4];
-  const int8_t   ne=8;
+  const int8_t   ne=8;    // number of elements we create
 
   pt[0]  = &mesh->tetra[k];
   pt[0]->flag  = 0;
   newtet[0]=k;
 
   nxt0 = pt[0]->xt;
-  pxt = &mesh->xtetra[nxt0];
+  pxt0 = &mesh->xtetra[nxt0];
 
-  /* create 7 new tetras */
-  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,yt,&pxt) ) {
+  /* create 7 new tetras and initialize as copies of the original */
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,yt,&pxt0) ) {
     return 0;
   }
 
   /* Store face tags and refs from split tetra*/
   for (i=0; i<4; i++) {
-    ftag[i] = (pxt->ftag[i] & ~MG_REF);
+    ftag[i] = (pxt0->ftag[i] & ~MG_REF);
   }
 
   /* Modify first tetra */
@@ -4514,21 +4516,22 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[0]->v[2] = vx[1];
   pt[0]->v[3] = vx[2];
   if ( nxt0 ) {
-    yt[0].tag[3] = ftag[3];    yt[0].edg[3] = 0;
+    yt[0].tag[3] = ftag[3];    yt[0].edg[3] = 0; // edge references and tags
     yt[0].tag[4] = ftag[2];    yt[0].edg[4] = 0;
     yt[0].tag[5] = ftag[1];    yt[0].edg[5] = 0;
     yt[0].ref[0] = 0;
-    yt[0].ftag[0] = 0;
-    MG_SET(yt[0].ori, 0);
-    isxt0 = 0;
+    yt[0].ftag[0] = 0;      // face tag
+    MG_SET(yt[0].ori, 0);   // triangle orientation flags
     for(i=0;i<4;i++ ) {
-      if ( (yt[0].ref[i]) || yt[0].ftag[i] ) isxt0 = 1;
+      if ( (yt[0].ref[i]) || yt[0].ftag[i] ) need_xt[0] = 1;
     }
-    if ( isxt0 ) {
-      memcpy(pxt,&yt[0],sizeof(MMG5_xTetra));
+    if ( need_xt[0] ) {
+      memcpy(pxt0,&yt[0],sizeof(MMG5_xTetra));
+      isxt0 = 1;               // flag original xtetra as used
     }
     else {
       pt[0]->xt = 0;
+      isxt0 = 0;
     }
   }
 
@@ -4652,28 +4655,28 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     if ( (yt[7].ref[0]) || yt[7].ftag[0]) need_xt[7] = 1;
   }
 
-  /* make sure there is room in the xtetra table for all of them */
-  if ( mesh->xt > mesh->xtmax - 7 ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                      "larger xtetra table",
-                      mesh->xt--;
-                      fprintf(stderr,"  Exit program.\n");
-                      return 0);
-  }
-
   /* assign xTetra to the new tets that need them */
-  for(int t=1; t<8; t++){
-    pt[t]->xt = 0;
-    if ( need_xt[t] ) {
-      if ( !isxt0 ) {
-        isxt0 = 1;
-        pt[t]->xt = nxt0;  /* re-use the initial xtetra */
+  if( nxt0 ){
+    /* make sure there is room in the xtetra table for all of them */
+    if ( mesh->xt > mesh->xtmax - 8 ) {
+      MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                        "larger xtetra table",
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0);
+    }
+    for(int t=1; t<8; t++){
+      pt[t]->xt = 0;
+      if ( need_xt[t] ) {
+        if ( !isxt0 ) {
+          isxt0 = 1;
+          pt[t]->xt = nxt0;  /* re-use the initial xtetra */
+        }
+        else {
+          mesh->xt++;
+          pt[t]->xt = mesh->xt;
+        }
+        memcpy(&mesh->xtetra[pt[t]->xt],&yt[t],sizeof(MMG5_xTetra));
       }
-      else {
-        mesh->xt++;
-        pt[t]->xt = mesh->xt;
-      }
-      memcpy(&mesh->xtetra[pt[t]->xt],&yt[t],sizeof(MMG5_xTetra));
     }
   }
 
