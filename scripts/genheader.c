@@ -108,7 +108,7 @@ int main (int argc, char ** argv)
                                     strlen(libmmg_h)+
                                     strlen(header_f)+128)*sizeof(char))))
     return EXIT_FAILURE;
-  sprintf(cmd, "perl %s -f %s >> %s;",
+  sprintf(cmd, "perl %s -f %s -i 8 >> %s;",
           genfort, libmmg_h, header_f);
   fprintf(stdout, "%s\n", cmd);
   if (-1 == system(cmd))
