@@ -743,6 +743,15 @@ FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
   )
 
 /**
+ * See \ref MMG2D_Init_mesh function in mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_FREE_ALL_F, mmg2d_free_all_f,(void **arglist),
+             (arglist)) {
+  MMG2D_Free_all_fortran_var(arglist);
+  return;
+}
+
+/**
  * See \ref MMG2D_Free_structures function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,

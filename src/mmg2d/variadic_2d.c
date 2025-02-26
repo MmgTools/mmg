@@ -266,9 +266,9 @@ void MMG2D_Init_mesh_fortran_var(void **arglist) {
   disp = sol = ls = NULL;
   i = 1;
 
-  while ( ((intptr_t)arglist[i]) != MMG5_ARG_end )
+  while ( (typArg = (intptr_t)arglist[i]) != MMG5_ARG_end )
   {
-    switch ( (intptr_t)arglist[i] )
+    switch ( typArg )
     {
     case(MMG5_ARG_ppMesh):
       mesh = (MMG5_pMesh*)arglist[i+1];
@@ -304,7 +304,6 @@ void MMG2D_Init_mesh_fortran_var(void **arglist) {
 
   /* allocations */
   if ( !MMG2D_Alloc_mesh(mesh,sol,ls,disp) ) {
-    //ier = 0;
     return;
   }
   
@@ -423,6 +422,120 @@ int MMG2D_Free_all_var(va_list argptr)
   MMG5_SAFE_FREE(*mesh);
 
   return ier;
+}
+
+/**
+ * \param argptr list of the mmg structures that must be deallocated. Each
+ * structure must follow one of the \a MMG5_ARG preprocessor variable that allow to
+ * identify it.
+ *
+ * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
+ * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
+ *
+ *  To call the \a MMG2D_mmg2dlib function, you must also provide
+ * a pointer to a \a MMG5_pSol structure (that will contain the ouput
+ * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
+ * keyword).
+ *
+ *  To call the \a MMG2D_mmg2dls function, you must also provide a pointer
+ * toward a \a MMG5_pSol structure (that will contain the level-set function and
+ * identified by the MMG5_ARG_ppLs keyword).
+ *
+ *  To call the \a MMG2D_mmg2dmov library, you must also provide a
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
+ * identified by the MMG5_ARG_ppDisp keyword).
+ *
+ * \return void
+ *
+ * Internal function for deallocations before return.
+ * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
+ * a MMG structure should be passed by reference (using Fortran LOC function).
+ * 
+ */
+void MMG2D_Free_all_fortran_var(void **arglist)
+{
+
+  MMG5_pMesh     *mesh;
+  MMG5_pSol      *sol,*disp,*ls,*sols;
+  int            typArg;
+  int            meshCount,metCount,lsCount,dispCount,fieldsCount;
+  int            ier, i;
+
+  meshCount = metCount = lsCount = dispCount = fieldsCount = 0;
+  disp = sol = sols = ls = NULL;
+  i = 1;
+
+  //while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
+  while ( (typArg = (intptr_t)arglist[i]) != MMG5_ARG_end )
+  {
+    switch ( typArg )
+    {
+    case(MMG5_ARG_ppMesh):
+      mesh = (MMG5_pMesh*)arglist[i+1];
+      ++meshCount;
+      break;
+    case(MMG5_ARG_ppMet):
+      ++metCount;
+      sol = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppLs):
+      ++lsCount;
+      ls = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppDisp):
+      ++dispCount;
+      disp = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppSols):
+      ++fieldsCount;
+      sols = (MMG5_pSol*)arglist[i+1];
+      break;
+    default:
+      fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_all:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      return;
+    }
+    i+=2;
+  }
+
+  if ( meshCount !=1 ) {
+    fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_all:\n"
+            " you need to provide your mesh structure"
+            " to allow to free the associated memory.\n",__func__);
+    return;
+  }
+
+  if ( metCount > 1 || lsCount > 1 || dispCount > 1 || fieldsCount > 1 ) {
+    fprintf(stdout,"\n  ## Warning: %s: MMG2D_Free_all:\n"
+            " This function can free only one structure of each type.\n"
+            " Probable memory leak.\n",
+            __func__);
+  }
+
+  ier = MMG2D_Free_structures(MMG5_ARG_start,
+                              MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                              MMG5_ARG_ppLs,ls ,MMG5_ARG_ppDisp, disp,
+                              MMG5_ARG_ppSols, sols,
+                              MMG5_ARG_end);
+
+  if ( sol )
+    MMG5_SAFE_FREE(*sol);
+
+  if ( disp )
+    MMG5_SAFE_FREE(*disp);
+
+  if ( ls )
+    MMG5_SAFE_FREE(*ls);
+
+  if ( sols ) {
+    MMG5_DEL_MEM(*mesh,*sols);
+  }
+
+  MMG5_SAFE_FREE(*mesh);
+
+  return;
 }
 
 /**

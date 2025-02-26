@@ -1640,6 +1640,19 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
 LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
+ * \param arglist
+ *
+ * \brief init mesh
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_FREE_ALL_F(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(INOUT) :: arglist\n
+ * >   END SUBROUTINE\n
+ *
+ */
+LIBMMG2D_EXPORT int MMG2D_Free_all_F(void** arglist);
+
+/**
  * \brief Structure deallocations before return.
  *
  * \param starter dummy argument used to initialize the variadic argument
