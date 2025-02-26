@@ -44,6 +44,7 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgLs
+  MMG5_DATA_PTR_T, dimension(6) :: meshlist
   INTEGER            :: ier,argc
   CHARACTER(len=300) :: exec_name,inname,outname,lsname
   !> to cast integers into MMG5F_INT integers
@@ -76,9 +77,11 @@ PROGRAM main
   mmgMesh = 0
   mmgLs   = 0
 
-  CALL MMG2D_Init_mesh(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppLs,mmgLs, &
-       MMG5_ARG_end)
+  meshlist = (/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppLs,LOC(mmgLs), &
+       MMG5_ARG_end/) 
+
+  CALL MMG2D_Init_mesh_F(meshlist)
 
   !!------------------- Level set discretization option ---------------------
   ! Ask for level set discretization: note that it is important to do this step
@@ -140,8 +143,6 @@ PROGRAM main
   ENDIF
 
    !> 3) Free the MMG2D5 structures
-  CALL MMG2D_Free_all(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppLs,mmgLs, &
-       MMG5_ARG_end)
+  CALL MMG2D_Free_all_F(meshlist)
 
 END PROGRAM
