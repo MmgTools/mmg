@@ -371,7 +371,8 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
             if ( !MMG2D_Set_outputMeshName(mesh,argv[i]) )
               return 0;
-          }else{
+          }
+          else{
             fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
             MMG2D_usage(argv[0]);
             return 0;
@@ -384,6 +385,30 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_optim,1) )
             return 0;
+        }
+        break;
+      case 'p':
+        if ( !strcmp(argv[i],"-phi") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMG2D_Set_inputSolName(mesh,sol,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
+            MMG2D_usage(argv[0]);
+            return 0;
+          }
+        }
+        else if ( !strcmp(argv[i],"-psi") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMG2D_Set_inputSolName(mesh,met,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
+            MMG2D_usage(argv[0]);
+            return 0;
+          }
         }
         break;
       case 'r':

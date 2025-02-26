@@ -274,7 +274,7 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
-  MMG5_pSol     sol,met,disp,ls;
+  MMG5_pSol     sol,met,disp,ls,psi;
   int           ier,ierSave,fmtin,fmtout;
   char          stim[32],*ptr;
 
@@ -302,6 +302,7 @@ int main(int argc,char *argv[]) {
   met  = NULL;
   ls   = NULL;
   disp = NULL;
+  psi  = NULL;
 
   if ( !MMG2D_Init_mesh(MMG5_ARG_start,
                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
@@ -374,7 +375,7 @@ int main(int argc,char *argv[]) {
       }
       MMG5_DEL_MEM(mesh,ls->namein);
     }
-
+    
     if ( mesh->info.lag >= 0 || mesh->info.iso || mesh->info.isosurf || mesh->info.isoopen ) {
       /* displacement or isovalue are mandatory */
       if (  MMG2D_loadSol(mesh,sol,sol->namein) < 1 ) {
