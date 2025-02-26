@@ -177,6 +177,18 @@ extern "C" {
   LIBMMG2D_EXPORT int MMG2D_Init_mesh(const int starter,...);
 
 /**
+ * \param arglist
+ *
+ * \brief init mesh
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_INIT_MESH_F(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(INOUT) :: arglist\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  LIBMMG2D_EXPORT int MMG2D_Init_mesh_F(void** arglist);
+/**
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
  *

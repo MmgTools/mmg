@@ -42,23 +42,13 @@
 #include "libmmg2d_private.h"
 
 /**
- * See \ref MMG2D_Init_mesh function in common/libmmgcommon_private.h file.
+ * See \ref MMG2D_Init_mesh function in mmg2d/libmmg2d.h file.
  */
-FORTRAN_VARIADIC ( MMG2D_INIT_MESH, mmg2d_init_mesh,
-                   (const int starter, ... ),
-                   va_list argptr;
-                   int ier;
-
-                   va_start(argptr, starter);
-
-                   ier = MMG2D_Init_mesh_var(argptr);
-
-                   va_end(argptr);
-
-                   if ( !ier ) exit(EXIT_FAILURE);
-
-                   return;
-  )
+FORTRAN_NAME(MMG2D_INIT_MESH_F, mmg2d_init_mesh_f,(void **arglist),
+             (arglist)) {
+  MMG2D_Init_mesh_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMG2D_Init_fileNames function in mmg2d/libmmg2d.h file.
