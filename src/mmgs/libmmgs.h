@@ -166,7 +166,10 @@ enum MMGS_Param {
  *
  * \return 1 on success, 0 on failure
  *
- * \remark No fortran interface, to allow variadic arguments.
+* \remark Fortran interface:
+ * >   SUBROUTINE MMGS_INIT_MESH(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
  *
  */
 LIBMMGS_EXPORT int MMGS_Init_mesh(const int starter,...);
@@ -2149,7 +2152,10 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_FREE_ALL(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
  *
  */
 LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
@@ -2178,7 +2184,10 @@ LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_FREE_STRUCTURES(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
  *
  */
 LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
@@ -2207,7 +2216,10 @@ LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_FREE_NAMES(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
  *
  */
 LIBMMGS_EXPORT int MMGS_Free_names(const int starter,...);
