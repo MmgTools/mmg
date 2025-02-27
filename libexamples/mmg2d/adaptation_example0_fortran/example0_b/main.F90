@@ -15,7 +15,6 @@ PROGRAM main
 
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
-  MMG5_DATA_PTR_T, dimension(6) :: meshlist
   INTEGER          :: ier,argc
   CHARACTER(len=300) :: exec_name,fileout
 
@@ -55,10 +54,10 @@ PROGRAM main
 
   mmgMesh = 0
   mmgSol  = 0
-  meshlist = (/MMG5_ARG_start, &
+
+  CALL MMG2D_Init_mesh((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
-       MMG5_ARG_end/)
-  CALL MMG2D_Init_mesh_F(meshlist)
+       MMG5_ARG_end/))
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG2D_loadMesh function that will read a .mesh(b)
@@ -303,6 +302,8 @@ PROGRAM main
   CLOSE(inm)
 
   !> 3) Free the MMG2D structures
-  CALL MMG2D_Free_all_F(meshlist)
+  CALL MMG2D_Free_all((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
+       MMG5_ARG_end/))
 
 END PROGRAM main

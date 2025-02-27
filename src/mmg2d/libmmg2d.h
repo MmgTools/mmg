@@ -171,23 +171,15 @@ extern "C" {
  * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
- * \remark No fortran interface, to allow variadic arguments.
- *
+ * \remark Fortran interface:
+ * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
+ * a MMG structure should be passed by reference (using Fortran LOC function).
+ * >   SUBROUTINE MMG2D_INIT_MESH(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
  */
   LIBMMG2D_EXPORT int MMG2D_Init_mesh(const int starter,...);
 
-/**
- * \param arglist
- *
- * \brief init mesh
- *
- * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_INIT_MESH_F(arglist)\n
- * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(INOUT) :: arglist\n
- * >   END SUBROUTINE\n
- *
- */
-  LIBMMG2D_EXPORT int MMG2D_Init_mesh_F(void** arglist);
 /**
  * \param mesh pointer to the mesh structure.
  * \param sol pointer to the sol structure.
@@ -1634,23 +1626,13 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
- * \remark no Fortran interface to allow variadic args.
- *
- */
-LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
-
-/**
- * \param arglist
- *
- * \brief init mesh
- *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_FREE_ALL_F(arglist)\n
- * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(INOUT) :: arglist\n
+ * >   SUBROUTINE MMG2D_FREE_ALL(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
  * >   END SUBROUTINE\n
  *
  */
-LIBMMG2D_EXPORT int MMG2D_Free_all_F(void** arglist);
+LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
 
 /**
  * \brief Structure deallocations before return.

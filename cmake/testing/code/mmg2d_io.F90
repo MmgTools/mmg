@@ -16,7 +16,6 @@ PROGRAM main
 
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
-  MMG5_DATA_PTR_T, dimension(6) :: meshlist
   INTEGER          :: ier,argc,by_array
   CHARACTER(len=300) :: exec_name,filein,fileout,option
   !> to cast integers into MMG5F_INT integers
@@ -51,10 +50,9 @@ PROGRAM main
 
   mmgMesh = 0
   mmgSol  = 0
-  meshlist = (/MMG5_ARG_start, &
+  CALL MMG2D_Init_mesh((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
-       MMG5_ARG_end/)
-  CALL MMG2D_Init_mesh_F(meshlist)
+       MMG5_ARG_end/))
 
   call loadmesh(mmgMesh,trim(filein),by_array)
 
@@ -78,7 +76,9 @@ PROGRAM main
   call writemesh(mmgMesh,trim(fileout),by_array)
 
   !> 3) Free the MMG2D structures
-  CALL MMG2D_Free_all_F(meshlist)
+  CALL MMG2D_Free_all((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
+       MMG5_ARG_end/))
 
 END PROGRAM main
 
