@@ -465,7 +465,6 @@ void MMG2D_Free_all_fortran_var(void **arglist)
   disp = sol = sols = ls = NULL;
   i = 1;
 
-  //while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
   while ( (typArg = (intptr_t)arglist[i]) != MMG5_ARG_end )
   {
     switch ( typArg )
