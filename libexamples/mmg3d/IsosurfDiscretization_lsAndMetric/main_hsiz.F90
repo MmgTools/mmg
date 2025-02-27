@@ -78,10 +78,10 @@ PROGRAM main
   mmgLs   = 0
   mmgMet  = 0
 
-  CALL MMG3D_Init_mesh(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppLs,mmgLs, &
-       MMG5_ARG_ppMet,mmgMet, &
-       MMG5_ARG_end)
+  CALL MMG3D_Init_mesh((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppLs,LOC(mmgLs), &
+       MMG5_ARG_ppMet,LOC(mmgMet), &
+       MMG5_ARG_end/))
 
   !!------------------- Level set discretization option ---------------------
   ! Ask for level set discretization: note that it is important to do this step
@@ -150,9 +150,9 @@ PROGRAM main
   ENDIF
 
    !> 3) Free the MMG3D5 structures
-  CALL MMG3D_Free_all(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppLs,mmgLs, &
-       MMG5_ARG_ppMet,mmgMet, &
-       MMG5_ARG_end)
+  CALL MMG3D_Free_all((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppLs,LOC(mmgLs), &
+       MMG5_ARG_ppMet,LOC(mmgMet), &
+       MMG5_ARG_end/))
 
 END PROGRAM

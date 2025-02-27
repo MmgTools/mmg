@@ -202,9 +202,9 @@ PROGRAM main
   mmgMesh = 0
   mmgSol  = 0
 
-  CALL MMG3D_Init_mesh(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
-       MMG5_ARG_end)
+  CALL MMG3D_Init_mesh((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
+       MMG5_ARG_end/))
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
@@ -262,8 +262,8 @@ PROGRAM main
 
 
   !> 3) Free the MMG3D5 structures
-  CALL MMG3D_Free_all(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
-       MMG5_ARG_end)
+  CALL MMG3D_Free_all((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
+       MMG5_ARG_end/))
 
 END PROGRAM main
