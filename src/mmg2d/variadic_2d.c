@@ -661,6 +661,131 @@ int MMG2D_Free_structures_var(va_list argptr)
 }
 
 /**
+ * \param argptr list of the mmg structures that must be deallocated. Each
+ * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
+ * to identify it.  \a argptr contains at least a pointer to a \a MMG5_pMesh
+ * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
+ * keyword) and a pointer to a \a MMG5_pSol structure (that will contain the
+ * ouput metric (and the input one, if provided) and identified by the
+ * MMG5_ARG_ppMet keyword).
+ *
+ *  To call the \a MMG2D_mmg2dls function, you must also provide a pointer
+ * toward a \a MMG5_pSol structure (that will contain the level-set function and
+ * identified by the MMG5_ARG_ppLs keyword).
+ *
+ *  To call the \a MMG2D_mmg2dmov library, you must also provide a
+ * pointer to a \a MMG5_pSol structure storing the displacement (and
+ * identified by the MMG5_ARG_ppDisp keyword).
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Internal function for structures deallocations before return (taking a
+ * va_list as argument).
+ *
+ * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
+ * a MMG structure should be passed by reference (using Fortran LOC function).
+ *
+ */
+void MMG2D_Free_structures_fortran_var(void **arglist)
+{
+
+  MMG5_pMesh     *mesh;
+  MMG5_pSol      *sol,*disp,*ls,*sols;
+  int            typArg,i;
+  int            meshCount;
+
+  meshCount = 0;
+  mesh = NULL;
+  disp = sol = ls = sols = NULL;
+  i = 1;
+
+  while ( (typArg = (intptr_t)arglist[i]) != MMG5_ARG_end )
+  {
+    switch ( typArg )
+    {
+    case(MMG5_ARG_ppMesh):
+      mesh = (MMG5_pMesh*)arglist[i+1];
+      ++meshCount;
+      break;
+    case(MMG5_ARG_ppMet):
+      sol = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppLs):
+      ls = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppDisp):
+      disp = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppSols):
+      sols = (MMG5_pSol*)arglist[i+1];
+      break;
+    default:
+      fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_structures:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      return;
+    }
+    i+=2;
+  }
+
+  if ( meshCount !=1 ) {
+    fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_structures:\n"
+            " you need to provide your mesh structure"
+            " to allow to free the associated memory.\n",__func__);
+    return;
+  }
+
+  if ( !MMG2D_Free_names(MMG5_ARG_start,
+                         MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                         MMG5_ARG_ppLs, ls ,MMG5_ARG_ppDisp, disp,
+                         MMG5_ARG_ppSols, sols,
+                         MMG5_ARG_end) )
+    return;
+
+  /* mesh */
+  assert(mesh && *mesh);
+
+  if ( (*mesh)->edge )
+    MMG5_DEL_MEM((*mesh),(*mesh)->edge);
+
+  if ( (*mesh)->adja )
+    MMG5_DEL_MEM((*mesh),(*mesh)->adja);
+
+  if ( (*mesh)->adjq )
+    MMG5_DEL_MEM((*mesh),(*mesh)->adjq);
+
+  if ( (*mesh)->tria )
+    MMG5_DEL_MEM((*mesh),(*mesh)->tria);
+
+  if ( (*mesh)->quadra )
+    MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
+
+  /* disp */
+  if ( disp && (*disp) && (*disp)->m )
+    MMG5_DEL_MEM((*mesh),(*disp)->m);
+
+  /* ls */
+  if ( ls && (*ls) && (*ls)->m )
+    MMG5_DEL_MEM((*mesh),(*ls)->m);
+
+  /* met */
+  if ( sol && (*sol) && (*sol)->m )
+    MMG5_DEL_MEM((*mesh),(*sol)->m);
+
+  /* field */
+  if ( sols && (*mesh)->nsols ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      MMG5_DEL_MEM((*mesh),(*sols)[i].m);
+    }
+  }
+
+  MMG5_Free_structures(*mesh,NULL);
+
+  return;
+}
+
+/**
  * \param argptr list of the mmg structures for whose we want to deallocate the
  * name. Each structure must follow one of the \a MMG5_ARG* preprocessor variable
  * that allow to identify it.  \a argptr contains at least a pointer to a \a
@@ -769,4 +894,116 @@ int MMG2D_Free_names_var(va_list argptr)
   }
 
   return 1;
+}
+/**
+ * \param argptr list of the mmg structures for whose we want to deallocate the
+ * name. Each structure must follow one of the \a MMG5_ARG* preprocessor variable
+ * that allow to identify it.  \a argptr contains at least a pointer to a \a
+ * MMG5_pMesh structure (that will contain the mesh and identified by the
+ * MMG5_ARG_ppMesh keyword) and a pointer to a \a MMG5_pSol structure (that
+ * will contain the ouput metric (and the input one, if provided) and identified
+ * by the MMG5_ARG_ppMet keyword).
+ *
+ * Internal function for name deallocations before return (taking a va_list as
+ * argument).
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
+ * a MMG structure should be passed by reference (using Fortran LOC function).
+ *
+ */
+void MMG2D_Free_names_fortran_var(void ** arglist)
+{
+
+  MMG5_pMesh     *mesh;
+  MMG5_pSol      psl,*sol,*disp,*ls,*sols;
+  int            typArg,i;
+  int            meshCount;
+
+  meshCount = 0;
+  disp = sol = ls = sols = NULL;
+  i = 1;
+
+  while ( (typArg = (intptr_t)arglist[i]) != MMG5_ARG_end )
+  {
+    switch ( typArg )
+    {
+    case(MMG5_ARG_ppMesh):
+      mesh = (MMG5_pMesh*)arglist[i+1];
+      ++meshCount;
+      break;
+    case(MMG5_ARG_ppMet):
+      sol = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppLs):
+      ls = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppDisp):
+      disp = (MMG5_pSol*)arglist[i+1];
+      break;
+    case(MMG5_ARG_ppSols):
+      sols = (MMG5_pSol*)arglist[i+1];
+      break;
+    default:
+      fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_names:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      return;
+    }
+    i+=2;
+  }
+
+  if ( meshCount !=1 ) {
+    fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_names:\n"
+            " you need to provide your mesh structure"
+            " to allow to free the associated memory.\n",__func__);
+    return;
+  }
+
+  /* mesh & met */
+  if ( sol ) {
+    MMG5_mmgFree_names(*mesh,*sol);
+  }
+  else {
+    MMG5_mmgFree_names(*mesh,NULL);
+  }
+
+  /* disp */
+  if ( disp && *disp ) {
+    if ( (*disp)->namein ) {
+      MMG5_DEL_MEM(*mesh,(*disp)->namein);
+    }
+
+    if ( (*disp)->nameout ) {
+      MMG5_DEL_MEM(*mesh,(*disp)->nameout);
+    }
+  }
+
+  /* ls */
+  if ( ls && *ls ) {
+    if ( (*ls)->namein ) {
+      MMG5_DEL_MEM(*mesh,(*ls)->namein);
+    }
+
+    if ( (*ls)->nameout ) {
+      MMG5_DEL_MEM(*mesh,(*ls)->nameout);
+    }
+  }
+
+  /* Fields */
+  if ( sols ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      psl = (*sols) + i;
+      if ( psl->namein ) {
+        MMG5_DEL_MEM(*mesh,psl->namein);
+      }
+      if ( psl->nameout ) {
+        MMG5_DEL_MEM(*mesh,psl->nameout);
+      }
+    }
+  }
+
+  return;
 }

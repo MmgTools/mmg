@@ -1662,9 +1662,10 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
- * \remark No fortran interface to allow variadic arguments.
- *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_FREE_STRUCTURES(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
  *
  */
  LIBMMG2D_EXPORT int MMG2D_Free_structures(const int starter,...);
@@ -1697,10 +1698,11 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
- * \remark No fortran interface to allow variadic arguments.
- *
- * \remark no Fortran interface to allow variadic args.
- *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_FREE_NAMES(arglist)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >   END SUBROUTINE\n
+ * 
  */
   LIBMMG2D_EXPORT int MMG2D_Free_names(const int starter,...);
 
