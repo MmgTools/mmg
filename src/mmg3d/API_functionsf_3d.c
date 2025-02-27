@@ -44,22 +44,11 @@
 /**
  * See \ref MMG3D_Init_mesh function in common/libmmgcommon_private.h file.
  */
-FORTRAN_VARIADIC ( MMG3D_INIT_MESH, mmg3d_init_mesh,
-                   (const int starter, ... ),
-                   va_list argptr;
-                   int     ier;
-
-                   va_start(argptr, starter);
-
-                   ier = MMG3D_Init_mesh_var(argptr);
-
-                   va_end(argptr);
-
-                   if ( !ier ) exit(EXIT_FAILURE);
-
-                   return;
-  )
-
+FORTRAN_NAME(MMG3D_INIT_MESH,mmg3d_init_mesh,(void** arglist),(arglist)) {
+  MMG3D_Init_mesh_fortran_var(arglist);
+  return;
+}
+  
 /**
  * See \ref MMG3D_Init_parameters function in \ref mmg3d/libmmg3d.h file.
  */
@@ -984,57 +973,26 @@ FORTRAN_NAME(MMG3D_FREE_ALLSOLS,mmg3d_free_allsols,
 /**
  * See \ref MMG3D_Free_all function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,
-                 (const int starter,...),
-                 va_list argptr;
-                 int     ier;
-
-                 va_start(argptr, starter);
-
-                 ier = MMG3D_Free_all_var(argptr);
-
-                 va_end(argptr);
-
-                 if ( !ier ) exit(EXIT_FAILURE);
-                 return;
-  )
+FORTRAN_NAME(MMG3D_FREE_ALL,mmg3d_free_all,(void** arglist),(arglist)) {
+  MMG3D_Free_all_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMG3D_Free_structures function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_VARIADIC(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
-                 (const int starter,...),
-                 va_list argptr;
-                 int     ier;
-
-                 va_start(argptr, starter);
-
-                 ier = MMG3D_Free_structures_var(argptr);
-
-                 va_end(argptr);
-
-                 if ( !ier ) exit(EXIT_FAILURE);
-
-                 return;
-  )
+FORTRAN_NAME(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,(void** arglist),(arglist)) {
+  MMG3D_Free_structures_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMG3D_Free_names function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_VARIADIC(MMG3D_FREE_NAMES,mmg3d_free_names,
-                 (const int starter,...),
-                 va_list argptr;
-                 int     ier;
-
-                 va_start(argptr, starter);
-
-                 ier = MMG3D_Free_names_var(argptr);
-
-                 va_end(argptr);
-
-                 if ( !ier ) exit(EXIT_FAILURE);
-                 return;
-  )
+FORTRAN_NAME(MMG3D_FREE_NAMES,mmg3d_free_names,(void** arglist),(arglist)) {
+  MMG3D_Free_names_fortran_var(arglist);
+  return;
+}
 
 
 /**
