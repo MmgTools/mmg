@@ -841,6 +841,7 @@ void MMGS_Free_names_fortran_var(void** arglist)
               " or MMG5_ARG_ppLs\n");
       return;
     }
+    i+=2;
   }
 
   if ( meshCount !=1 ) {
