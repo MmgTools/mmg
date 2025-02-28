@@ -85,7 +85,8 @@ PROGRAM main
   CALL MMGS_Init_mesh((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppLs,LOC(mmgLs), &
        MMG5_ARG_ppMet,LOC(mmgMet), &
-       MMG5_ARG_end/))
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(100)
 
   !!------------------- Level set discretization option ---------------------
   ! Ask for level set discretization: note that it is important to do this step
@@ -180,6 +181,7 @@ PROGRAM main
   CALL MMGS_Free_all((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppLs,LOC(mmgLs), &
        MMG5_ARG_ppMet,LOC(mmgMet), &
-       MMG5_ARG_end/))
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(108)
 
 END PROGRAM
