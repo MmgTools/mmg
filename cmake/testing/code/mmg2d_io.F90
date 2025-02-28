@@ -52,7 +52,8 @@ PROGRAM main
   mmgSol  = 0
   CALL MMG2D_Init_mesh((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
-       MMG5_ARG_end/))
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(100)
 
   call loadmesh(mmgMesh,trim(filein),by_array)
 
@@ -78,7 +79,8 @@ PROGRAM main
   !> 3) Free the MMG2D structures
   CALL MMG2D_Free_all((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
-       MMG5_ARG_end/))
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(103)
 
 END PROGRAM main
 

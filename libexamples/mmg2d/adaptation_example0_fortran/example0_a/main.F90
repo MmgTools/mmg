@@ -48,7 +48,8 @@ PROGRAM main
 
   CALL MMG2D_Init_mesh((/ MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
-       MMG5_ARG_end /))
+       MMG5_ARG_end /),ier)
+  IF ( ier == 0 ) CALL EXIT(101)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG2D_loadMesh function that will read a .mesh(b)
@@ -104,6 +105,7 @@ PROGRAM main
   !> 3) Free the MMG2D5 structures
   CALL MMG2D_Free_all((/ MMG5_ARG_start, &
         MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
-        MMG5_ARG_end /))
+        MMG5_ARG_end /),ier)
+  IF ( ier == 0 ) CALL EXIT(108)
 
 END PROGRAM main

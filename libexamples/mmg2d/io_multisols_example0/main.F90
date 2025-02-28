@@ -61,7 +61,8 @@ PROGRAM main
 
   CALL MMG2D_Init_mesh((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgMet), &
-       MMG5_ARG_end/));
+       MMG5_ARG_end/),ier);
+  IF ( ier == 0 ) CALL EXIT(101)
 
 
   !!> 2) Build initial mesh and solutions in MMG5 format
@@ -154,6 +155,7 @@ PROGRAM main
 
   CALL MMG2D_Free_all((/MMG5_ARG_start, &
        MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgMet), &
-       MMG5_ARG_end/))
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(112)
 
 END PROGRAM main
