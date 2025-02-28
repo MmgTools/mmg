@@ -44,9 +44,9 @@
 /**
  * See \ref MMG2D_Init_mesh function in mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_INIT_MESH, mmg2d_init_mesh,(void **arglist),
-             (arglist)) {
-  MMG2D_Init_mesh_fortran_var(arglist);
+FORTRAN_NAME(MMG2D_INIT_MESH, mmg2d_init_mesh,(void **arglist, int* retval),
+             (arglist, retval)) {
+  *retval = MMG2D_Init_mesh_fortran_var(arglist);
   return;
 }
 
@@ -725,9 +725,9 @@ FORTRAN_NAME(MMG2D_FREE_ALLSOLS,mmg2d_free_allsols,
 /**
  * See \ref MMG2D_Init_mesh function in mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_FREE_ALL, mmg2d_free_all,(void **arglist),
-             (arglist)) {
-  MMG2D_Free_all_fortran_var(arglist);
+FORTRAN_NAME(MMG2D_FREE_ALL, mmg2d_free_all,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMG2D_Free_all_fortran_var(arglist);
   return;
 }
 

@@ -200,9 +200,9 @@ int MMG2D_outqua(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_mmg2d1(MMG5_pMesh ,MMG5_pSol );
 
 int  MMG2D_Init_mesh_var( va_list argptr );
-void MMG2D_Init_mesh_fortran_var(void ** arglist);
+int MMG2D_Init_mesh_fortran_var(void ** arglist);
 int  MMG2D_Free_all_var( va_list argptr );
-void MMG2D_Free_all_fortran_var(void ** arglist);
+int MMG2D_Free_all_fortran_var(void ** arglist);
 int  MMG2D_Free_structures_var( va_list argptr );
 void  MMG2D_Free_structures_fortran_var( void ** arglist );
 int  MMG2D_Free_names_var( va_list argptr );

@@ -254,7 +254,7 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
  * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
  * a MMG structure should be passed by reference (using Fortran LOC function).
  */
-void MMG2D_Init_mesh_fortran_var(void **arglist) {
+int MMG2D_Init_mesh_fortran_var(void **arglist) {
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp,*ls;
@@ -289,7 +289,7 @@ void MMG2D_Init_mesh_fortran_var(void **arglist) {
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               "  MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
-      return;
+      return 0;
     }
     i += 2;
   }
@@ -298,18 +298,17 @@ void MMG2D_Init_mesh_fortran_var(void **arglist) {
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n",__func__);
-    //ier = 0;
-    return;
+    return 0;
   }
 
   /* allocations */
   if ( !MMG2D_Alloc_mesh(mesh,sol,ls,disp) ) {
-    return;
+    return 0;
   }
   
   /* initialisations */
   MMG2D_Init_woalloc_mesh(mesh,sol,ls,disp);
-  return;
+  return 1;
 }
 
 /**
@@ -452,7 +451,7 @@ int MMG2D_Free_all_var(va_list argptr)
  * a MMG structure should be passed by reference (using Fortran LOC function).
  * 
  */
-void MMG2D_Free_all_fortran_var(void **arglist)
+int MMG2D_Free_all_fortran_var(void **arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -494,7 +493,7 @@ void MMG2D_Free_all_fortran_var(void **arglist)
               " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -503,7 +502,7 @@ void MMG2D_Free_all_fortran_var(void **arglist)
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_all:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   if ( metCount > 1 || lsCount > 1 || dispCount > 1 || fieldsCount > 1 ) {
@@ -534,7 +533,7 @@ void MMG2D_Free_all_fortran_var(void **arglist)
 
   MMG5_SAFE_FREE(*mesh);
 
-  return;
+  return ier;
 }
 
 /**
