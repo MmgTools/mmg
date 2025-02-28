@@ -125,8 +125,8 @@ int  MMGS_Free_all_var( va_list argptr );
 int  MMGS_Free_structures_var( va_list argptr );
 int  MMGS_Free_names_var( va_list argptr );
 
-void  MMGS_Init_mesh_fortran_var( void ** arglist );
-void  MMGS_Free_all_fortran_var( void ** arglist );
+int  MMGS_Init_mesh_fortran_var( void ** arglist );
+int  MMGS_Free_all_fortran_var( void ** arglist );
 void  MMGS_Free_structures_fortran_var( void ** arglist );
 void  MMGS_Free_names_fortran_var( void ** arglist );
 

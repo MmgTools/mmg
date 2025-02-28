@@ -43,9 +43,9 @@
 /**
  * See \ref MMGS_Init_mesh function in common/libmmgcommon_private.h file.
  */
-FORTRAN_NAME(MMGS_INIT_MESH, mmgs_init_mesh,(void **arglist),
-             (arglist)) {
-  MMGS_Init_mesh_fortran_var(arglist);
+FORTRAN_NAME(MMGS_INIT_MESH, mmgs_init_mesh,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Init_mesh_fortran_var(arglist);
   return;
 }
 
@@ -719,9 +719,9 @@ FORTRAN_NAME(MMGS_FREE_ALLSOLS,mmgs_free_allsols,
 /**
  * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMGS_FREE_ALL, mmgs_free_all,(void **arglist),
-             (arglist)) {
-  MMGS_Free_all_fortran_var(arglist);
+FORTRAN_NAME(MMGS_FREE_ALL, mmgs_free_all,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Free_all_fortran_var(arglist);
   return;
 }
 

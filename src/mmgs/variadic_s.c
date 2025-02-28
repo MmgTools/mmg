@@ -218,7 +218,7 @@ int MMGS_Init_mesh_var( va_list argptr ) {
  *
  *
  */
-void MMGS_Init_mesh_fortran_var( void** arglist ) {
+int MMGS_Init_mesh_fortran_var( void** arglist ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*ls;
   int            typArg,i;
@@ -249,7 +249,7 @@ void MMGS_Init_mesh_fortran_var( void** arglist ) {
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               " MMG5_ARG_ppLs.\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -258,16 +258,16 @@ void MMGS_Init_mesh_fortran_var( void** arglist ) {
     fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n",__func__);
-    return;
+    return 0;
   }
 
   /* allocations */
-  if ( !MMGS_Alloc_mesh(mesh,sol,ls) )  return;
+  if ( !MMGS_Alloc_mesh(mesh,sol,ls) )  return 0;
 
   /* initialisations */
   MMGS_Init_woalloc_mesh(*mesh,sol,ls);
 
-  return;
+  return 1;
 }
 
 /**
@@ -390,7 +390,7 @@ int MMGS_Free_all_var(va_list argptr)
  * Internal function for deallocations before return (taking a va_list as
  * argument).
  */
-void MMGS_Free_all_fortran_var(void** arglist)
+int MMGS_Free_all_fortran_var(void** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -428,7 +428,7 @@ void MMGS_Free_all_fortran_var(void** arglist)
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet or "
               "MMG5_ARG_ppLs.\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -437,7 +437,7 @@ void MMGS_Free_all_fortran_var(void** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMGS_Free_all:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   if ( metCount > 1 || lsCount > 1 || fieldsCount > 1 ) {
@@ -451,7 +451,7 @@ void MMGS_Free_all_fortran_var(void** arglist)
                              MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
                              MMG5_ARG_ppLs, ls,MMG5_ARG_ppSols, sols,
                              MMG5_ARG_end) )
-    return;
+    return 0;
 
   if ( sol )
     MMG5_SAFE_FREE(*sol);
@@ -462,7 +462,7 @@ void MMGS_Free_all_fortran_var(void** arglist)
 
   MMG5_SAFE_FREE(*mesh);
 
-  return;
+  return 1;
 }
 
 /**

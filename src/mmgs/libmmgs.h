@@ -167,8 +167,9 @@ enum MMGS_Param {
  * \return 1 on success, 0 on failure
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_INIT_MESH(arglist)\n
+ * >   SUBROUTINE MMGS_INIT_MESH(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2153,8 +2154,9 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_FREE_ALL(arglist)\n
+ * >   SUBROUTINE MMGS_FREE_ALL(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
