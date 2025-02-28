@@ -468,6 +468,7 @@ void MMG3D_Free_all_fortran_var(void** arglist)
   meshCount = metCount = lsCount = dispCount = fieldsCount = 0;
   mesh = NULL;
   disp = sol = sols = ls = NULL;
+  i = 1;
 
   while ( (typArg = (intptr_t)arglist[i]) != MMG5_ARG_end )
   {
