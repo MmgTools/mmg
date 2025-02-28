@@ -166,7 +166,7 @@ enum MMGS_Param {
  *
  * \return 1 on success, 0 on failure
  *
-* \remark Fortran interface:
+ * \remark Fortran interface:
  * >   SUBROUTINE MMGS_INIT_MESH(arglist)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
  * >   END SUBROUTINE\n
