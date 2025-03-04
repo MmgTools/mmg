@@ -220,13 +220,13 @@ int  MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp);
 extern int MMG5_directsurfball(MMG5_pMesh mesh, MMG5_int ip, MMG5_int *list, int ilist, double n[3]);
 
 int  MMG3D_Init_mesh_var( va_list argptr );
-void MMG3D_Init_mesh_fortran_var(void ** arglist);
+int  MMG3D_Init_mesh_fortran_var(void ** arglist);
 int  MMG3D_Free_all_var( va_list argptr );
-void MMG3D_Free_all_fortran_var(void ** arglist);
+int  MMG3D_Free_all_fortran_var(void ** arglist);
 int  MMG3D_Free_structures_var( va_list argptr );
-void MMG3D_Free_structures_fortran_var(void ** arglist);
+int  MMG3D_Free_structures_fortran_var(void ** arglist);
 int  MMG3D_Free_names_var( va_list argptr );
-void MMG3D_Free_names_fortran_var(void ** arglist);
+int  MMG3D_Free_names_fortran_var(void ** arglist);
 void MMG3D_Free_arrays(MMG5_pMesh*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*);
 MMG5_int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],uint16_t tag,MMG5_int src);
 MMG5_int  MMG3D_newElt(MMG5_pMesh mesh);

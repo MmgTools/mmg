@@ -255,7 +255,7 @@ int MMG3D_Init_mesh_var( va_list argptr ) {
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-void MMG3D_Init_mesh_fortran_var( void** arglist ) {
+int MMG3D_Init_mesh_fortran_var( void** arglist ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp,*ls;
   int            typArg, i;
@@ -290,7 +290,7 @@ void MMG3D_Init_mesh_fortran_var( void** arglist ) {
               " of the MMG5_ARG* preprocessor variable:"
               " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               "  MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -299,7 +299,7 @@ void MMG3D_Init_mesh_fortran_var( void** arglist ) {
     fprintf(stderr,"\n  ## Error: %s: MMG3D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n",__func__);
-    return;
+    return 0;
   }
 
   /* allocations */
@@ -308,7 +308,7 @@ void MMG3D_Init_mesh_fortran_var( void** arglist ) {
   /* initialisations */
   MMG3D_Init_woalloc_mesh(*mesh,sol,ls,disp);
 
-  return;
+  return 1;
 }
 
 /**
@@ -457,7 +457,7 @@ int MMG3D_Free_all_var(va_list argptr)
  * argument).
  *
  */
-void MMG3D_Free_all_fortran_var(void** arglist)
+int MMG3D_Free_all_fortran_var(void** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -501,7 +501,7 @@ void MMG3D_Free_all_fortran_var(void** arglist)
               " variable:"
               " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               " MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -510,7 +510,7 @@ void MMG3D_Free_all_fortran_var(void** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMG3D_Free_all:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   if ( metCount > 1 || lsCount > 1 || dispCount > 1 || fieldsCount > 1 ) {
@@ -525,7 +525,7 @@ void MMG3D_Free_all_fortran_var(void** arglist)
                               MMG5_ARG_ppLs, ls,MMG5_ARG_ppDisp, disp,
                               MMG5_ARG_ppSols, sols,
                               MMG5_ARG_end) ) {
-    return;
+    return 0;
   }
 
   if ( sol ) {
@@ -546,7 +546,7 @@ void MMG3D_Free_all_fortran_var(void** arglist)
 
   MMG5_SAFE_FREE(*mesh);
 
-  return;
+  return 1;
 }
 
 /**
@@ -745,7 +745,7 @@ int MMG3D_Free_structures_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMG3D_Free_structures_fortran_var(void** arglist)
+int MMG3D_Free_structures_fortran_var(void** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -785,7 +785,7 @@ void MMG3D_Free_structures_fortran_var(void** arglist)
               " variable:"
               " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               " MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -794,7 +794,7 @@ void MMG3D_Free_structures_fortran_var(void** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMG3D_Free_structures:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   if ( !MMG3D_Free_names(MMG5_ARG_start,
@@ -803,7 +803,7 @@ void MMG3D_Free_structures_fortran_var(void** arglist)
                          MMG5_ARG_ppDisp, disp,
                          MMG5_ARG_ppSols, sols,
                          MMG5_ARG_end) ) {
-    return;
+    return 0;
   }
 
   /* mesh */
@@ -812,7 +812,7 @@ void MMG3D_Free_structures_fortran_var(void** arglist)
 
   MMG3D_Free_arrays(mesh,sol,ls,disp,sols);
 
-  return;
+  return 1;
 }
 
 /**
@@ -968,7 +968,7 @@ int MMG3D_Free_names_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMG3D_Free_names_fortran_var(void** arglist)
+int MMG3D_Free_names_fortran_var(void** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -1007,7 +1007,7 @@ void MMG3D_Free_names_fortran_var(void** arglist)
               " variable:"
               " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               " MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -1016,7 +1016,7 @@ void MMG3D_Free_names_fortran_var(void** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMG3D_Free_names:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   /* mesh & met */
@@ -1060,5 +1060,5 @@ void MMG3D_Free_names_fortran_var(void** arglist)
     }
   }
 
-  return;
+  return 1;
 }

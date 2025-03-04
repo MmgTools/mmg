@@ -216,8 +216,9 @@ enum MMG3D_Param {
  * functions must be initialized with this function.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_INIT_MESH(arglist)\n
+ * >   SUBROUTINE MMG3D_INIT_MESH(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  * \warning detected bugs:
@@ -2805,8 +2806,9 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_FREE_ALL(arglist)\n
+ * >   SUBROUTINE MMG3D_FREE_ALL(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2841,8 +2843,9 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_FREE_STRUCTURES(arglist)\n
+ * >   SUBROUTINE MMG3D_FREE_STRUCTURES(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2874,8 +2877,9 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * \return 0 if fail, 1 if success
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_FREE_NAMES(arglist)\n
+ * >   SUBROUTINE MMG3D_FREE_NAMES(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
