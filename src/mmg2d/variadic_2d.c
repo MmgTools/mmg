@@ -685,7 +685,7 @@ int MMG2D_Free_structures_var(va_list argptr)
  * a MMG structure should be passed by reference (using Fortran LOC function).
  *
  */
-void MMG2D_Free_structures_fortran_var(void **arglist)
+int MMG2D_Free_structures_fortran_var(void **arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -723,7 +723,7 @@ void MMG2D_Free_structures_fortran_var(void **arglist)
               " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -732,7 +732,7 @@ void MMG2D_Free_structures_fortran_var(void **arglist)
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_structures:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   if ( !MMG2D_Free_names(MMG5_ARG_start,
@@ -740,7 +740,7 @@ void MMG2D_Free_structures_fortran_var(void **arglist)
                          MMG5_ARG_ppLs, ls ,MMG5_ARG_ppDisp, disp,
                          MMG5_ARG_ppSols, sols,
                          MMG5_ARG_end) )
-    return;
+    return 0;
 
   /* mesh */
   assert(mesh && *mesh);
@@ -781,7 +781,7 @@ void MMG2D_Free_structures_fortran_var(void **arglist)
 
   MMG5_Free_structures(*mesh,NULL);
 
-  return;
+  return 1;
 }
 
 /**
@@ -912,7 +912,7 @@ int MMG2D_Free_names_var(va_list argptr)
  * a MMG structure should be passed by reference (using Fortran LOC function).
  *
  */
-void MMG2D_Free_names_fortran_var(void ** arglist)
+int MMG2D_Free_names_fortran_var(void ** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -949,7 +949,7 @@ void MMG2D_Free_names_fortran_var(void ** arglist)
               " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -958,7 +958,7 @@ void MMG2D_Free_names_fortran_var(void ** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_names:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   /* mesh & met */
@@ -1004,5 +1004,5 @@ void MMG2D_Free_names_fortran_var(void ** arglist)
     }
   }
 
-  return;
+  return 1;
 }

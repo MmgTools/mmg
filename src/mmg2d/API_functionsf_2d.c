@@ -734,18 +734,18 @@ FORTRAN_NAME(MMG2D_FREE_ALL, mmg2d_free_all,(void **arglist, int* retval),
 /**
  * See \ref MMG2D_Free_structures function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_FREE_STRUCTURES, mmg2d_free_structures,(void **arglist),
-             (arglist)) {
-  MMG2D_Free_structures_fortran_var(arglist);
+FORTRAN_NAME(MMG2D_FREE_STRUCTURES, mmg2d_free_structures,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMG2D_Free_structures_fortran_var(arglist);
   return;
 }
 
 /**
  * See \ref MMG2D_Free_names function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_FREE_NAMES, mmg2d_free_names,(void **arglist),
-             (arglist)) {
-  MMG2D_Free_names_fortran_var(arglist);
+FORTRAN_NAME(MMG2D_FREE_NAMES, mmg2d_free_names,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMG2D_Free_names_fortran_var(arglist);
   return;
 }
 

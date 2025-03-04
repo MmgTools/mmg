@@ -1665,8 +1665,9 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_FREE_STRUCTURES(arglist)\n
+ * >   SUBROUTINE MMG2D_FREE_STRUCTURES(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1701,8 +1702,9 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_FREE_NAMES(arglist)\n
+ * >   SUBROUTINE MMG2D_FREE_NAMES(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  * 
  */
