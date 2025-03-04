@@ -127,8 +127,8 @@ int  MMGS_Free_names_var( va_list argptr );
 
 int  MMGS_Init_mesh_fortran_var( void ** arglist );
 int  MMGS_Free_all_fortran_var( void ** arglist );
-void  MMGS_Free_structures_fortran_var( void ** arglist );
-void  MMGS_Free_names_fortran_var( void ** arglist );
+int  MMGS_Free_structures_fortran_var( void ** arglist );
+int  MMGS_Free_names_fortran_var( void ** arglist );
 
 int  MMGS_zaldy(MMG5_pMesh mesh);
 int  MMGS_assignEdge(MMG5_pMesh mesh);

@@ -2187,8 +2187,9 @@ LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_FREE_STRUCTURES(arglist)\n
+ * >   SUBROUTINE MMGS_FREE_STRUCTURES(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2219,8 +2220,9 @@ LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_FREE_NAMES(arglist)\n
+ * >   SUBROUTINE MMGS_FREE_NAMES(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
  * >   END SUBROUTINE\n
  *
  */

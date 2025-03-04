@@ -728,18 +728,18 @@ FORTRAN_NAME(MMGS_FREE_ALL, mmgs_free_all,(void **arglist, int* retval),
 /**
  * See \ref MMGS_Free_structures function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMGS_FREE_STRUCTURES, mmgs_free_structures,(void **arglist),
-             (arglist)) {
-  MMGS_Free_structures_fortran_var(arglist);
+FORTRAN_NAME(MMGS_FREE_STRUCTURES, mmgs_free_structures,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Free_structures_fortran_var(arglist);
   return;
 }
 
 /**
  * See \ref MMGS_Free_names function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMGS_FREE_NAMES, mmgs_free_names,(void **arglist),
-             (arglist)) {
-  MMGS_Free_names_fortran_var(arglist);
+FORTRAN_NAME(MMGS_FREE_NAMES, mmgs_free_names,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Free_names_fortran_var(arglist);
   return;
 }
 

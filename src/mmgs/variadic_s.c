@@ -592,7 +592,7 @@ int MMGS_Free_structures_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMGS_Free_structures_fortran_var(void** arglist)
+int MMGS_Free_structures_fortran_var(void** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -627,7 +627,7 @@ void MMGS_Free_structures_fortran_var(void** arglist)
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet or"
               " MMG5_ARG_ppLs.\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -636,7 +636,7 @@ void MMGS_Free_structures_fortran_var(void** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMGS_Free_structures:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   MMGS_Free_names(MMG5_ARG_start,
@@ -666,7 +666,7 @@ void MMGS_Free_structures_fortran_var(void** arglist)
 
   MMG5_Free_structures(*mesh,NULL);
 
-  return;
+  return 1;
 }
 
 /**
@@ -804,7 +804,7 @@ int MMGS_Free_names_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMGS_Free_names_fortran_var(void** arglist)
+int MMGS_Free_names_fortran_var(void** arglist)
 {
 
   MMG5_pMesh     *mesh;
@@ -839,7 +839,7 @@ void MMGS_Free_names_fortran_var(void** arglist)
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet "
               " or MMG5_ARG_ppLs\n");
-      return;
+      return 0;
     }
     i+=2;
   }
@@ -848,7 +848,7 @@ void MMGS_Free_names_fortran_var(void** arglist)
     fprintf(stderr,"\n  ## Error: %s: MMGS_Free_names:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
-    return;
+    return 0;
   }
 
   /* mesh & met */
@@ -883,6 +883,5 @@ void MMGS_Free_names_fortran_var(void** arglist)
     }
   }
 
-
-  return;
+  return 1;
 }
