@@ -248,7 +248,7 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
  * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
- * \return void
+ * \return 0 if fail, 1 otherwise
  *
  * Internal function for structure allocations.
  * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
@@ -444,7 +444,7 @@ int MMG2D_Free_all_var(va_list argptr)
  * pointer to a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
- * \return void
+ * \return 0 if fail, 1 if success
  *
  * Internal function for deallocations before return.
  * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 

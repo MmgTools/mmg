@@ -166,6 +166,10 @@ enum MMGS_Param {
  *
  * \return 1 on success, 0 on failure
  *
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
+ * 
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_INIT_MESH(arglist,retval)\n
  * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
@@ -2150,8 +2154,9 @@ LIBMMGS_EXPORT int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  * \return 0 on failure, 1 on success
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_FREE_ALL(arglist,retval)\n
@@ -2183,8 +2188,9 @@ LIBMMGS_EXPORT int MMGS_Free_all(const int starter,...);
  *
  * \return 0 on failure, 1 on success
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_FREE_STRUCTURES(arglist,retval)\n
@@ -2216,8 +2222,9 @@ LIBMMGS_EXPORT int MMGS_Free_structures(const int starter,...);
  *
  * \return 0 on failure, 1 on success
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_FREE_NAMES(arglist,retval)\n

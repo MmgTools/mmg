@@ -716,11 +716,11 @@ int MMG3D_Free_structures_var(va_list argptr)
 }
 
 /**
- * \param argptr list of the mmg structures that must be deallocated. Each
+ * \param arglist list of the mmg structures that must be deallocated. Each
  * structure must follow one of the MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
+ * \a arglist contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG3D_mmg3dlib function, you must also provide
@@ -939,11 +939,11 @@ int MMG3D_Free_names_var(va_list argptr)
 }
 
 /**
- * \param argptr list of the mmg structures for whose we want to deallocate the
+ * \param arglist list of the mmg structures for whose we want to deallocate the
  * name. Each structure must follow one of the \a MMG5_ARG* preprocessor
  * variable that allow to identify it.
  *
- * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
+ * \a arglist contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
  *
  *  To call the \a MMG3D_mmg3dlib function, you must also provide

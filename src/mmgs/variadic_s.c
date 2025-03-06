@@ -369,11 +369,11 @@ int MMGS_Free_all_var(va_list argptr)
 }
 
 /**
- * \param argptr list of the mmg structures that must be deallocated. Each
+ * \param arglist list of the mmg structures that must be deallocated. Each
  * structure must follow one of the \a MMG5_ARG preprocessor variable that allow to
  * identify it.
  *
- * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
+ * \a arglist contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
  *
  *  To call the \a MMGS_mmgslib function, you must also provide
@@ -567,11 +567,11 @@ int MMGS_Free_structures_var(va_list argptr)
 }
 
 /**
- * \param argptr list of the mmg structures that must be deallocated. Each
+ * \param arglist list of the mmg structures that must be deallocated. Each
  * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
  * to identify it.
  *
- * \a argptr contains at least a pointer to a \a MMG5_pMesh structure
+ * \a arglist contains at least a pointer to a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
  *
  *  To call the \a MMGS_mmgslib function, you must also provide
@@ -778,11 +778,11 @@ int MMGS_Free_names_var(va_list argptr)
 }
 
 /**
- * \param argptr list of the mmg structures for whose we want to deallocate the
+ * \param arglist list of the mmg structures for whose we want to deallocate the
  * name. Each structure must follow one of the \a MMG5_ARG preprocessor variable
  * that allow to identify it.
  *
- * \a argptr contains at least a pointer to a \a MMG5_pMesh
+ * \a arglist contains at least a pointer to a \a MMG5_pMesh
  * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
  * keyword).
  *
