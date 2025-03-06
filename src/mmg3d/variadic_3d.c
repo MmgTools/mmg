@@ -303,7 +303,7 @@ int MMG3D_Init_mesh_fortran_var( void** arglist ) {
   }
 
   /* allocations */
-  if ( !MMG3D_Alloc_mesh(mesh,sol,ls,disp) ) return;
+  if ( !MMG3D_Alloc_mesh(mesh,sol,ls,disp) ) return 0;
 
   /* initialisations */
   MMG3D_Init_woalloc_mesh(*mesh,sol,ls,disp);
