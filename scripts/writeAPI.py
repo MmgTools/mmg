@@ -24,12 +24,16 @@ class pythonAPI:
         self.ns = namespace
         self.classes   = []
         self.functions = []
+        self.typenames = {}
 
     def addClass(self,cl):
         self.classes.append(cl)
 
     def addFunction(self,fn):
         self.functions.append(fn)
+
+    def addType(self,key,value):
+        self.typenames[key] = value
 
     def writeAPI(self):
         def writeClass(f, cl):

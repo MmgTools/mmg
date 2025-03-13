@@ -14,7 +14,7 @@ def setAPIClasses(api : pythonAPI):
     par.addArgs([arg("elt","ctypes.c_int8")])
 
     MMG5_pPar = "ctypes.POINTER("+par.name+")"
-
+    api.addType("pPar",MMG5_pPar)
     api.classes.append(par)
 
     # Point
@@ -32,7 +32,7 @@ def setAPIClasses(api : pythonAPI):
     point.addArgs([arg("tagdel","ctypes.c_int8")])
 
     MMG5_pPoint = "ctypes.POINTER("+point.name+")"
-
+    api.addType("pPoint",MMG5_pPoint)
     api.classes.append(point)
 
     # xPoint
@@ -43,7 +43,7 @@ def setAPIClasses(api : pythonAPI):
     xpoint.addArgs([arg("nnor","ctypes.c_int8")])
 
     MMG5_pxPoint = "ctypes.POINTER("+xpoint.name+")"
-
+    api.addType("pxPoint",MMG5_pxPoint)
     api.classes.append(xpoint)
 
     # Edge
@@ -54,7 +54,7 @@ def setAPIClasses(api : pythonAPI):
     edge.addArgs([arg("tag","ctypes.c_uint16")])
 
     MMG5_pEdge = "ctypes.POINTER("+edge.name+")"
-
+    api.addType("pEdge",MMG5_pEdge)
     api.classes.append(edge)
 
     # Tria
@@ -70,7 +70,7 @@ def setAPIClasses(api : pythonAPI):
     tria.addArgs([arg("tag","ctypes.c_uint16 * 3")])
 
     MMG5_pTria = "ctypes.POINTER("+tria.name+")"
-
+    api.addType("pTria",MMG5_pTria)
     api.classes.append(tria)
 
     # Quad
@@ -83,7 +83,7 @@ def setAPIClasses(api : pythonAPI):
     quad.addArgs([arg("tag","ctypes.c_uint16 * 4")])
 
     MMG5_pQuad = "ctypes.POINTER("+quad.name+")"
-
+    api.addType("pQuad",MMG5_pQuad)
     api.classes.append(quad)
 
     # Tetra
@@ -99,7 +99,7 @@ def setAPIClasses(api : pythonAPI):
     tetra.addArgs([arg("tag","ctypes.c_uint16")])
 
     MMG5_pTetra = "ctypes.POINTER("+tetra.name+")"
-
+    api.addType("pTetra",MMG5_pTetra)
     api.classes.append(tetra)
 
     # xTetra
@@ -112,7 +112,7 @@ def setAPIClasses(api : pythonAPI):
     xtetra.addArgs([arg("ori","ctypes.c_int8")])
 
     MMG5_pxTetra = "ctypes.POINTER("+xtetra.name+")"
-
+    api.addType("pxTetra",MMG5_pxTetra)
     api.classes.append(xtetra)
 
     # Prism
@@ -126,7 +126,7 @@ def setAPIClasses(api : pythonAPI):
     prism.addArgs([arg("tag","ctypes.c_int8")])
 
     MMG5_pPrism = "ctypes.POINTER("+prism.name+")"
-
+    api.addType("pPrism",MMG5_pPrism)
     api.classes.append(prism)
 
     # xPrism
@@ -138,7 +138,7 @@ def setAPIClasses(api : pythonAPI):
     xprism.addArgs([arg("tag","ctypes.c_uint16 * 9")])
 
     MMG5_pxPrism = "ctypes.POINTER("+xprism.name+")"
-
+    api.addType("pxPrism",MMG5_pxPrism)
     api.classes.append(xprism)
 
     # Mat
@@ -150,7 +150,7 @@ def setAPIClasses(api : pythonAPI):
     mat.addArgs([arg("rex",MMG5_int)])
 
     MMG5_pMat = "ctypes.POINTER("+mat.name+")"
-
+    api.addType("pMat",MMG5_pMat)
     api.classes.append(mat)
 
     # InvMat
@@ -161,7 +161,7 @@ def setAPIClasses(api : pythonAPI):
     invmat.addArgs([arg("lookup","ctypes.POINTER(ctypes.c_int)")])
 
     MMG5_pInvMat = "ctypes.POINTER("+invmat.name+")"
-
+    api.addType("pInvMat",MMG5_pInvMat)
     api.classes.append(invmat)
 
     # Info
@@ -273,7 +273,7 @@ def setAPIClasses(api : pythonAPI):
     mesh.addArgs([arg("nameout","ctypes.c_char_p")])
 
     MMG5_pMesh = "ctypes.POINTER("+mesh.name+")"
-
+    api.addType("pMesh",MMG5_pMesh)
     api.classes.append(mesh)
 
     # sol 
@@ -295,6 +295,6 @@ def setAPIClasses(api : pythonAPI):
     sol.addArgs([arg("nameout","ctypes.c_char_p")])
 
     MMG5_pSol = "ctypes.POINTER("+sol.name+")"
-
+    api.addType("pSol",MMG5_pSol)
     api.classes.append(sol)
 
