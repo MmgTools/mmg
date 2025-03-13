@@ -171,9 +171,9 @@ def setAPIClasses(api : pythonAPI):
     info.addArgs([arg("dhd","ctypes.c_double"),arg("hmin","ctypes.c_double"),arg("hmax","ctypes.c_double")])
     info.addArgs([arg("hsiz","ctypes.c_double"),arg("hgrad","ctypes.c_double"),arg("hgradreq","ctypes.c_double")])
     info.addArgs([arg("hausd","ctypes.c_double")])
-    info.addArgs([arg("min","ctypes.double * 3"),arg("max","ctypes.double * 3")])
-    info.addArgs([arg("delta","ctypes.double"),arg("ls","ctypes.double")])
-    info.addArgs([arg("lxreg","ctypes.double"),arg("rmc","ctypes.double")])
+    info.addArgs([arg("min","ctypes.c_double * 3"),arg("max","ctypes.c_double * 3")])
+    info.addArgs([arg("delta","ctypes.c_double"),arg("ls","ctypes.c_double")])
+    info.addArgs([arg("lxreg","ctypes.c_double"),arg("rmc","ctypes.c_double")])
     info.addArgs([arg("br","ctypes.POINTER(ctypes.c_int)")])
     info.addArgs([arg("isoref",MMG5_int),arg("nsd",MMG5_int)])
     info.addArgs([arg("mem","ctypes.c_int"),arg("npar","ctypes.c_int"),arg("npari","ctypes.c_int")])
@@ -233,7 +233,7 @@ def setAPIClasses(api : pythonAPI):
 
     # mesh
 
-    mesh = mmgClass("MMG5_mesh")
+    mesh = mmgClass("MMG5_Mesh")
     mesh.addArgs([arg("memMax","ctypes.c_size_t")])
     mesh.addArgs([arg("memCur","ctypes.c_size_t")])
     mesh.addArgs([arg("gap","ctypes.c_double")])

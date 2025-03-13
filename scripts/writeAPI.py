@@ -75,6 +75,7 @@ class pythonAPI:
                 else:
                     f.write("ctypes.byref(" + a.name + ")")
             f.write(")")
+            f.write("\n\n")
 
 
         with open(self.ns + ".py", "w") as f:
@@ -90,7 +91,7 @@ python_header = """import ctypes
 import os
 
 libdir  = os.path.dirname(os.path.realpath(__file__))
-libpath = os.path.join(libdir,"libtest.dylib")
+libpath = os.path.join(libdir,"libmmg.dylib")
 
 lib = ctypes.CDLL(libpath)
 
