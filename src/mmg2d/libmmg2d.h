@@ -141,7 +141,7 @@ extern "C" {
     MMG2D_DPARAM_ls,                /*!< [val], Function value where the level set is to be discretized */
     MMG2D_DPARAM_xreg,              /*!< [val], Relaxation parameter for coordinate regularization (0<val<1) */
     MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small disconnected components in level-set mode */
-    MMG2D_IPARAM_nofem,             /*!< [1/0], Do not attempt to make the mesh suitable for finite-element computations */
+    MMG2D_IPARAM_fem,               /*!< [0/1], make the mesh suitable for finite-element computations */
     MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   };
 
