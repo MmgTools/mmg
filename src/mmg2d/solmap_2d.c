@@ -38,8 +38,8 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  * \param ani 1 for aniso metric, 0 for iso one.
  *
  * \return 0 if fail, 1 if succeed.
@@ -86,8 +86,8 @@ int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met, int ani) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the sol structure
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the sol structure
  * \return 1 if success
  *
  * Compute isotropic size map according to the mean of the length of the edges
@@ -164,8 +164,8 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the sol structure
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the sol structure
  * \return 1 if success
  *
  * Compute anisotropic unit size map using statistical concept of

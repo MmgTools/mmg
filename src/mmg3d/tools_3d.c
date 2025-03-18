@@ -595,7 +595,9 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,dou
     /* Coordinates of the new tangent and normal */
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {  // function should not be used in that case
         memcpy(to,t0,3*sizeof(double));
-        return 1;
+        /* returning 1 here may create memory error afterward because no (that
+         * is not filled) will be used */
+        return 0;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -1004,15 +1006,15 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ip global index of point in which we want to compute the local parameters
- * \param listv pointer toward the ball of \a ip
+ * \param listv pointer to the ball of \a ip
  * \param ilistv number of tetra in the ball of \a ip
- * \param lists pointer toward the surface ball of \a ip
+ * \param lists pointer to the surface ball of \a ip
  * \param ilists number of tetra in the surface ball of \a ip
- * \param hausd_ip pointer toward the local hausdorff parameter to compute
- * \param hmin_ip pointer toward the local minimal edge size to compute
- * \param hmax_ip pointer toward the local maximal edge size to compute
+ * \param hausd_ip pointer to the local hausdorff parameter to compute
+ * \param hmin_ip pointer to the local minimal edge size to compute
+ * \param hmax_ip pointer to the local maximal edge size to compute
  *
  * \return 1 if success, 0 if fail
  *
@@ -1126,14 +1128,14 @@ int MMG3D_localParamReg(MMG5_pMesh mesh,MMG5_int ip,int64_t *listv,int ilistv,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param iel index of tetra in which we work
  * \param iface index of face in \a iel
  * \param ia index of edge in \a iel along which we want to compute the local
  * parameters
- * \param hausd_ip pointer toward the local hausdorff parameter to compute
- * \param hmin_ip pointer toward the local minimal edge size to compute
- * \param hmax_ip pointer toward the local maximal edge size to compute
+ * \param hausd_ip pointer to the local hausdorff parameter to compute
+ * \param hmin_ip pointer to the local minimal edge size to compute
+ * \param hmax_ip pointer to the local maximal edge size to compute
  *
  * \return 1 if success, 0 if fail
  *
@@ -1279,7 +1281,7 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,MMG5_int iel,int iface,int ia,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Mark the mesh vertices that belong to triangles or quadrangles as used (for
  * Mmgs or Mmg2d).
@@ -1332,7 +1334,7 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param nsd subdomain index.
  *
  * Remove tetra that do not belong to subdomain of index \a nsd
@@ -1382,7 +1384,7 @@ void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param nsd index of subdomain to keep.
  *
  * Keep only subdomain of index \a nsd and remove other subdomains.

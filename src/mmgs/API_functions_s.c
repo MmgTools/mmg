@@ -543,8 +543,8 @@ int  MMGS_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs) {
       j = (i-1)*3;
       ptt = &mesh->tria[i];
       ptt->v[0] = tria[j]  ;
-      ptt->v[1] = tria[j+2];
-      ptt->v[2] = tria[j+1];
+      ptt->v[1] = tria[j+1];
+      ptt->v[2] = tria[j+2];
 
       mesh->point[ptt->v[0]].tag &= ~MG_NUL;
       mesh->point[ptt->v[1]].tag &= ~MG_NUL;
@@ -1393,9 +1393,12 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val
                   return 0);
     MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
+    MMG5_int inival;
+    inival = MMG5_INTMAX;
+
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
-      mesh->info.par[k].ref   = INT_MAX;
+      mesh->info.par[k].ref   = inival;
       mesh->info.par[k].hausd = mesh->info.hausd;
       mesh->info.par[k].hmin  = mesh->info.hmin;
       mesh->info.par[k].hmax  = mesh->info.hmax;

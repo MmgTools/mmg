@@ -1,4 +1,4 @@
-/* =============================================================================
+/** =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
@@ -19,7 +19,7 @@
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
-*/
+**/
 
 /**
  * Example of use of the mmg3dmov function of the mmg3d library (basic use of
@@ -50,14 +50,14 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  MMG5_pSol       mmgSol,mmgDisp;
+  MMG5_pSol       mmgMetric, mmgDisp;
   int             ier;
-  char            *inname,*outname;
+  char            *inname, *outname;
 
-  fprintf(stdout,"  -- TEST MMG3DMOV \n");
+  fprintf(stdout, "  -- TEST MMG3DMOV \n");
 
   if ( argc != 3 ) {
-    printf(" Usage: %s filein fileout \n",argv[0]);
+    printf(" Usage: %s filein fileout \n", argv[0]);
     return(1);
   }
 
@@ -78,17 +78,23 @@ int main(int argc,char *argv[]) {
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
-   * MMG5_ARG_start: we start to give the args of a variadic func
-   * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
-   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
-   * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
-   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
+   * MMG5_ARG_start: we start to give the args of a variadic function
+   * MMG5_ARG_ppMesh: next arg will be a pointer to an MMG5_pMesh
+   * &mmgMesh: pointer to your MMG5_pMesh (that stores your mesh)
+   * MMG5_ARG_ppMet: next arg will be a pointer to MMG5_pSol storing a metric
+   * &mmgMetric: pointer to an MMG5_pSol that stores your metric field
+   * MMG5_ARG_ppDisp: next arg will be a pointer to MMG5_pSol storing a displacement
+   * &mmgDisp: pointer to an MMG5_pSol that stores your displacement field
+   * In this example the metric field is not used but it must be provided
+   * to MMG3D_mmg3dmov() and therefore it must be initialized; it cannot
+   * remain a NULL pointer. */
   mmgMesh = NULL;
-  mmgSol  = NULL;
+  mmgMetric = NULL;
   mmgDisp = NULL;
   MMG3D_Init_mesh(MMG5_ARG_start,
-                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
-                  MMG5_ARG_ppDisp,&mmgDisp,
+                  MMG5_ARG_ppMesh, &mmgMesh,
+                  MMG5_ARG_ppMet, &mmgMetric,
+                  MMG5_ARG_ppDisp, &mmgDisp,
                   MMG5_ARG_end);
 
   /** 2) Build mesh in MMG5 format */
@@ -96,7 +102,7 @@ int main(int argc,char *argv[]) {
      file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** with MMG3D_loadMesh function */
-  if ( MMG3D_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh, inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build displacement in MMG5 format */
   /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
@@ -104,15 +110,15 @@ int main(int argc,char *argv[]) {
 
   /**------------------- Lagrangian motion option ----------------------------*/
   /* Ask for lagrangian motion (mode 1) */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_lag, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh, mmgDisp, MMG3D_IPARAM_lag, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** With MMG3D_loadSol function */
-  if ( MMG3D_loadSol(mmgMesh,mmgDisp,inname) != 1 )
+  if ( MMG3D_loadSol(mmgMesh, mmgDisp, inname) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( MMG3D_Chk_meshData(mmgMesh,mmgDisp) != 1 ) exit(EXIT_FAILURE);
+  if ( MMG3D_Chk_meshData(mmgMesh, mmgDisp) != 1 ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
       MMG3D_Set_iparameter and MMG3D_Set_dparameter function
@@ -122,11 +128,11 @@ int main(int argc,char *argv[]) {
   /**------------------- Lagrangian motion computation ---------------------*/
 
   /* debug mode ON (default value = OFF) */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_debug, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh, mmgDisp, MMG3D_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** remesh function */
-  ier = MMG3D_mmg3dmov(mmgMesh,mmgSol,mmgDisp);
+  ier = MMG3D_mmg3dmov(mmgMesh, mmgMetric, mmgDisp);
 
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DMOV: UNABLE TO SAVE MESH\n");
@@ -135,13 +141,14 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DMOV\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
+  if ( MMG3D_saveMesh(mmgMesh, outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* 9) free the MMG3D5 structures */
   MMG3D_Free_all(MMG5_ARG_start,
-                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
-                 MMG5_ARG_ppDisp,&mmgDisp,
+                 MMG5_ARG_ppMesh, &mmgMesh,
+                 MMG5_ARG_ppMet, &mmgMetric,
+                 MMG5_ARG_ppDisp, &mmgDisp,
                  MMG5_ARG_end);
   free(inname);
   inname = NULL;

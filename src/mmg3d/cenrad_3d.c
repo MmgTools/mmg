@@ -33,7 +33,7 @@
 
 #include "libmmg3d_private.h"
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ct coordinates of vertices of the element.
  * \param c center of circumscribing circle to the element.
  * \param rad squared radius of circumscribing circle to the element.
@@ -128,7 +128,7 @@ int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ct coordinates of vertices of the element.
  * \param m metric at the point for which we compute the cavity.
  * \param c center of circumscribing circle to the element.

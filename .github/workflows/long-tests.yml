@@ -5,7 +5,7 @@ on:
   push:
   # run tests on PR events
   pull_request:
-    types: [synchronize]
+    types: [opened, synchronize]
 
   # run tests manually on a given branch (default is master)
   workflow_dispatch:
@@ -26,3 +26,5 @@ jobs:
       cmake_build_type: RelWithAssert
       add_cmake_cfg_args: -D LONG_TESTS=ON
       branch_name:  ${{github.event.inputs.branch}}
+      code_coverage: true
+    secrets: inherit

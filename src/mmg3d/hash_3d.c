@@ -40,7 +40,7 @@
 extern int8_t  ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if success, 0 if fail
  *
@@ -111,7 +111,7 @@ MMG5_int MMG5_hashGetFace(MMG5_Hash *hash,MMG5_int ia,MMG5_int ib,MMG5_int ic) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param pack we pack the mesh at function begining if \f$pack=1\f$.
  * \return 0 if failed, 1 otherwise.
  *
@@ -151,7 +151,9 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 
   /* init */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
-  inival = INT_MAX;
+
+  inival = MMG5_INTMAX;
+
   iadr   = 0;
   for (k=0; k<=mesh->ne; k++)
     hcode[k] = -inival;
@@ -225,7 +227,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -233,7 +235,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
  *
  * \remark Adjacencies between prisms and tetra are not filled here.
  *
- * \warning check the hashtable efficiency
+ * \warning check the efficiency of the hash table
  */
 int MMG3D_hashPrism(MMG5_pMesh mesh) {
   MMG5_pPrism    pp,pp1;
@@ -270,7 +272,9 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
 
   /* init */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
-  inival = INT_MAX;
+
+  inival = MMG5_INTMAX;
+
   iadr   = 0;
   for (k=0; k<=mesh->nprism; k++)
     hcode[k] = -inival;
@@ -609,8 +613,14 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
   return 1;
 }
 
+
+static inline
+uint16_t MMG5_skip_ParBdy ( uint16_t tag ) {
+  return (tag & MG_PARBDY);
+}
+
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if success, 0 if fail.
  * Seek the non-required non-manifold points and try to analyse whether they are
@@ -619,35 +629,44 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
  * \remark We don't know how to travel through the shell of a non-manifold point
  * by triangle adjacency. Thus the work done here can't be performed in the \ref
  * MMG5_singul function.
+ *
+ * \remark a temporary array \a tmp is used instead of the tmp field of the
+ * points to not break the ParMmg distributed analysis in which this field is
+ * used to store the global numbering of nodes.
  */
-static inline
-int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
+int MMG5_setVertexNmTag(MMG5_pMesh mesh,uint16_t func(uint16_t) ) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt0,ppt1;
   MMG5_Hash           hash;
   int                 i,ier;
-  MMG5_int            k,np,nc,nre,*nfeat;
+  MMG5_int            k,np,nc,nre,*nfeat,*tmp;
 
   /** Seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
 
   /** Step 1: count the number or feature edges passing through each points */
   np = 0;
+  MMG5_SAFE_MALLOC(tmp,mesh->np+1,MMG5_int,return 0);
+
   for (k=1; k<=mesh->np; ++k) {
     ppt0 = &mesh->point[k];
     if ( !MG_VOK(ppt0) ) {
-      ppt0->tmp = 0;
+      tmp[k] = 0;
     }
-    else if ( (ppt0->tag & MG_REQ) || (ppt0->tag & MG_PARBDY) ) {
-      /* Skip required and parallel points */
-      ppt0->tmp = 0;
+    else if ( ppt0->tag & MG_REQ || func(ppt0->tag) ) {
+      /* Skip required points and points satisfying condition "func". For
+       * "classic" analysis, func test if the point is PARBDY, between ParMmg
+       * iterations, it tests if the point is not an old PARBDY point (we want
+       * to update analysis only on old parbdy points so we skip the other
+       * ones). */
+      tmp[k] = 0;
     }
     else if ( !(ppt0->tag & MG_NOM) ) {
       /* Skip manifold points */
-      ppt0->tmp = 0;
+      tmp[k] = 0;
     }
     else {
-      ppt0->tmp = ++np;
+      tmp[k] = ++np;
     }
   }
 
@@ -677,13 +696,13 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       }
 
       /* Here we have a feature edge: seek if we have already seen it. If not,
-       * hash it and increment nfeat: for point ppt, nfeat[3*ppt->tmp] stores
-       * the number of ridges passing through the point, nfeat[3*ppt->tmp+1]
+       * hash it and increment nfeat: for point ppt, nfeat[3*tmp] stores
+       * the number of ridges passing through the point, nfeat[3*tmp+1]
        * stores the number of reference edges, nfeat[3*ppt->tmp+2] the number of
        * non-manifold edges.*/
       assert ( MG_VOK(ppt1) &&  MG_VOK(ppt0) );
 
-      if ( (!ppt1->tmp) && (!ppt0->tmp) ) {
+      if ( (!tmp[np0]) && (!tmp[np1]) ) {
         continue;
       }
 
@@ -697,23 +716,23 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       }
 
       if ( pxt->tag[i] & MG_GEO ) {
-        ++nfeat[3*ppt0->tmp];
+        ++nfeat[3*tmp[np0]];
       }
       else if ( pxt->tag[i] & MG_NOM ) {
-        ++nfeat[3*ppt0->tmp+1];
+        ++nfeat[3*tmp[np0]+1];
       }
       else if ( pxt->tag[i] & MG_REF ) {
-        ++nfeat[3*ppt0->tmp+2];
+        ++nfeat[3*tmp[np0]+2];
       }
 
       if ( pxt->tag[i] & MG_GEO ) {
-        ++nfeat[3*ppt1->tmp];
+        ++nfeat[3*tmp[np1]];
       }
       else if ( pxt->tag[i] & MG_NOM ) {
-        ++nfeat[3*ppt1->tmp+1];
+        ++nfeat[3*tmp[np1]+1];
       }
       else if ( pxt->tag[i] & MG_REF ) {
-        ++nfeat[3*ppt1->tmp+2];
+        ++nfeat[3*tmp[np1]+2];
       }
     }
   }
@@ -723,13 +742,13 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->np; ++k) {
     ppt0 = &mesh->point[k];
 
-    if ( (!MG_VOK(ppt0)) || (!ppt0->tmp) ) {
+    if ( (!MG_VOK(ppt0)) || (!tmp[k]) ) {
       continue;
     }
 
-    MMG5_int ng  = nfeat[3*ppt0->tmp];
-    MMG5_int nrp = nfeat[3*ppt0->tmp+1];
-    MMG5_int nm  = nfeat[3*ppt0->tmp+2];
+    MMG5_int ng  = nfeat[3*tmp[k]];
+    MMG5_int nrp = nfeat[3*tmp[k]+1];
+    MMG5_int nm  = nfeat[3*tmp[k]+2];
 
     if ( (ng+nrp+nm) > 2 ) {
       /* More than 2 feature edges are passing through the point: point is
@@ -773,6 +792,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   }
 
   /* Free the edge hash table */
+  MMG5_SAFE_FREE(tmp);
   MMG5_SAFE_FREE(nfeat);
   MMG5_DEL_MEM(mesh,hash.item);
 
@@ -801,13 +821,13 @@ int MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
-  if ( !MMG5_setVertexNmTag(mesh) ) return 0;
+  if ( !MMG5_setVertexNmTag(mesh,MMG5_skip_ParBdy) ) return 0;
 
   return 1;
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param hash Edges hash table.
  * \return 1 if success, 0 if failed.
  *
@@ -880,7 +900,7 @@ int MMG5_hashPop(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
 
 
 /**
- * \param hash pointer toward the hash table in which edges are stored
+ * \param hash pointer to the hash table in which edges are stored
  * \param a first edge extremity
  * \param b second edge extremity
  * \param ref reference to assign to the edge
@@ -891,7 +911,7 @@ int MMG5_hashPop(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
  * set tag to edge on geometry
  *
  */
-int MMG5_hTag(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,int16_t tag) {
+int MMG5_hTag(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,uint16_t tag) {
   MMG5_hgeom  *ph;
   MMG5_int    key;
   MMG5_int    ia,ib;
@@ -924,7 +944,7 @@ int MMG5_hTag(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,int16_t tag) {
 }
 
 /** remove edge from hash table */
-int MMG5_hPop(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,int16_t *tag) {
+int MMG5_hPop(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,uint16_t *tag) {
   MMG5_hgeom  *ph,*php;
   MMG5_int    key;
   MMG5_int    ia,ib,iph,iphp;
@@ -984,7 +1004,7 @@ int MMG5_hPop(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,int16_t *tag)
 }
 
 /** get ref and tag to edge on geometry */
-int MMG5_hGet(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,int16_t *tag) {
+int MMG5_hGet(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,uint16_t *tag) {
   MMG5_hgeom  *ph;
   MMG5_int    key;
   MMG5_int    ia,ib;
@@ -1017,7 +1037,7 @@ int MMG5_hGet(MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int *ref,int16_t *tag)
 }
 
 /** store edge on geometry */
-int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,int16_t tag) {
+int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int a,MMG5_int b,MMG5_int ref,uint16_t tag) {
   MMG5_hgeom  *ph;
   MMG5_int    key;
   MMG5_int    ia,ib,j;
@@ -1082,10 +1102,10 @@ int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int hsiz,MMG5_int hmax) {
 }
 
 /**
- * \param mesh pointer toward he mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 otherwise
  *
- * Build hashtable for initial mesh edges.
+ * Build hash table for initial mesh edges.
  *
  */
 int MMG5_hGeom(MMG5_pMesh mesh) {
@@ -1094,7 +1114,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_Hash    hash;
   MMG5_int     edg,*adja,k,kk;
   int          ier;
-  int16_t      tag;
+  uint16_t     tag;
   int8_t       i,i1,i2;
 
   /* if edges exist in mesh, hash special edges from existing field */
@@ -1261,7 +1281,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
 
   if  ( mesh->nprism && (ntmesh!=ntinit) ) {
     /* If a triangle at the interface between a prism and a tetra is not
-     * provided, the hashtable is used to recover from the prism a boundary tria
+     * provided, the hash table is used to recover from the prism a boundary tria
      * created by tetra */
     if ( ! MMG5_hashNew(mesh,&hash,0.51*ntmesh,1.51*ntmesh) ) return 0;
     tofree=1;
@@ -1340,18 +1360,49 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
          * mesh->nt=0 at the beginning of the function) */
         ptt->cc = 4*k + i;
 
+        /* If in LS mode, in analysis after ls discretization: xtetra exists. It has been created by MMG5_bdrySet */
         if ( pxt ) {
-          /* useful only when saving mesh or in ls mode */
+          /* Useful only when saving mesh or in ls mode */
           for( j = 0; j < 3; j++ ) {
+            /* Assign tags to tria from xtetra->tag and remove redundant boundary tag:
+               when called from ParMmg in ls mode, it is needed to remove the parallel tags
+               coming from previous surface analysis to ensure the suitable setting of the
+               MG_BDY tag along edges at the intersection between geometrical (true)
+               boundaries and purely parallel interfaces. For that, it is mandatory to
+               remove the MG_PARBDYBDY tag already added along such edges
+               (see the step 2 of the mmgHashTria implementation) */
             if ( pxt->tag[MMG5_iarf[i][j]] ) {
               ptt->tag[j] = pxt->tag[MMG5_iarf[i][j]];
-              /* Remove redundant boundary tag */
+              /* MG_BDY is removed because by definition a triangle is on the boundary */
               ptt->tag[j] &= ~MG_BDY;
+              /* MG_PARBDYBDY is removed because it will be handled properly by MMG5_mmgHashTria  */
+              ptt->tag[j] &= ~MG_PARBDYBDY;
+              /* If the face from which we arrive is not a parallel face, then remove also the parallel tags
+              MG_PARBDY, MG_NOSURF and MG_REQ */
+              if ( !(pxt->ftag[i] & MG_PARBDY)) {
+                /* Remove the tags only if the edge is identified as parallel.
+                   By convention in ParMmg (see tag_pmmg.c in ParMmg), if an entity is
+                     - parallel + not required: the tags are MG_PARBDY+MG_NOSURF+MG_REQ
+                     - parallel + truly required by the user: the tags are MG_PARBDY+MG_REQ
+                    so we remove the tags MG_NOSURF and MG_REQ only if the edge is identified as MG_NOSURF */
+                if ( ptt->tag[j] & MG_PARBDY ) {
+                  ptt->tag[j] &= ~MG_PARBDY;
+                  /* a truly required entity does not have MG_NOSURF tag so don't remove MG_REQ tag */
+                  /* if MG_NOSURF tag, then also remove MG_REQ and MG_SURF tags */
+                  if( ptt->tag[j] & MG_NOSURF ) {
+                    ptt->tag[j] &= ~MG_NOSURF;
+                    ptt->tag[j] &= ~MG_REQ;
+                  }
+                }
+              }
             }
+
+            /* Assign ref to tria from xtetra->edg */
             if ( pxt->edg[MMG5_iarf[i][j]] )
               ptt->edg[j] = pxt->edg[MMG5_iarf[i][j]];
           }
         }
+
         if ( adj ) {
           if ( mesh->info.iso ) {
             /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to mesh->info.isoref ref */
@@ -1484,7 +1535,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
  * - Remove double triangles from tria array.
@@ -1506,16 +1557,51 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
  *
  */
 int MMG5_chkBdryTria(MMG5_pMesh mesh) {
-  MMG5_pTetra    pt,pt1;
-  MMG5_pPrism    pp,pp1;
-  MMG5_pTria     ptt,pttnew;
-  MMG5_int       *adja,adj,k,kk,i,j,ntmesh;
-  MMG5_int       ia,ib,ic, nbl,nt,ntpres;
-  int            iface;
-  MMG5_Hash      hashElt, hashTri;
+  MMG5_int       ntmesh,ntpres;
+  int            ier;
+  MMG5_Hash      hashElt;
 
   /** Step 1: scan the mesh and count the boundaries */
-  ntmesh = ntpres = 0;
+  ier = MMG5_chkBdryTria_countBoundaries(mesh,&ntmesh,&ntpres);
+
+  /** Step 2: detect the extra boundaries (that will be ignored) provided by the
+   * user */
+  if ( mesh->nt ) {
+    ier = MMG5_chkBdryTria_hashBoundaries(mesh,ntmesh,&hashElt);
+    // Travel through the tria, flag those that are not in the hash tab or
+    // that are stored more that once.
+    ier = MMG5_chkBdryTria_flagExtraTriangles(mesh,&ntpres,&hashElt);
+    // Delete flagged triangles
+    ier = MMG5_chkBdryTria_deleteExtraTriangles(mesh,NULL);
+  }
+  ntmesh +=ntpres;
+
+  /** Step 3: add the missing boundary triangles or, if the mesh contains
+   * prisms, set to required the triangles at interface betwen prisms and tet */
+  ier = MMG5_chkBdryTria_addMissingTriangles(mesh,ntmesh,ntpres);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param ntmesh number of boundary triangles in the mesh.
+ * \param ntpres number of preserved boundaries in the mesh.
+ * \return 0 if failed, 1 if success.
+ *
+ * Step 1 of MMG5_chkBdryTria : scan the mesh and count the boundaries
+ *
+ */
+int MMG5_chkBdryTria_countBoundaries(MMG5_pMesh mesh, MMG5_int *ntmesh, MMG5_int *ntpres) {
+
+  MMG5_pTetra pt, pt1;
+  MMG5_pPrism pp, pp1;
+  MMG5_int    *adja,adj,k;
+  MMG5_int    ia,ib,ic,j;
+  MMG5_Hash   hashTri;
+  int         i;
+  
+  *ntmesh = *ntpres = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -1524,13 +1610,13 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
       adj = adja[i];
 
       if ( !adj ) {
-        ++ntmesh;
+        ++(*ntmesh);
         continue;
       }
       adj /= 4;
       pt1 = &mesh->tetra[adj];
       if ( pt->ref > pt1->ref )
-        ++ntmesh;
+        ++(*ntmesh);
     }
   }
 
@@ -1552,7 +1638,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         if ( pt->ref != pt1->ref ) continue;
 
         if ( (mesh->xtetra[pt->xt].ftag[i] & MG_BDY) &&
-             (MG_GET(mesh->xtetra[pt->xt].ori,i) ) ) ++ntpres;
+             (MG_GET(mesh->xtetra[pt->xt].ori,i) ) ) ++(*ntpres);
       }
     }
   }
@@ -1567,7 +1653,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         adj = adja[i];
 
         if ( !adj ) {
-          ++ntmesh;
+          ++(*ntmesh);
           continue;
         }
         else if ( adj<0 ) {
@@ -1577,14 +1663,14 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         adj /= 5;
         pp1 = &mesh->prism[adj];
         if ( pp->ref > pp1->ref) {
-          ++ntmesh;
+          ++(*ntmesh);
         }
       }
     }
 
     /* Detect the triangles at the interface of the prisms and tetra (they have been
      * counted twice) */
-    if ( ! MMG5_hashNew(mesh,&hashTri,0.51*ntmesh,1.51*ntmesh) ) return 0;
+    if ( ! MMG5_hashNew(mesh,&hashTri,0.51*(*ntmesh),1.51*(*ntmesh)) ) return 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
@@ -1622,151 +1708,211 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         j = MMG5_hashGetFace(&hashTri,ia,ib,ic);
         if ( !j ) continue;
 
-        --ntmesh;
+        --(*ntmesh);
         adja[i] = -j;
       }
     }
     MMG5_DEL_MEM(mesh,hashTri.item);
   }
+  return 1;
+}
 
-  /** Step 2: detect the extra boundaries (that will be ignored) provided by the
-   * user */
-  if ( mesh->nt ) {
-    if ( ! MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return 0;
-    // Hash the boundaries found in the mesh
-    if ( mesh->info.opnbdy) {
-      /* We want to keep the internal triangles: we must hash all the tetra faces */
-      for (k=1; k<=mesh->ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( !MG_EOK(pt) )  continue;
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param ntmesh number of boundary triangles in the mesh.
+ * \param hashElt pointer towards face hash table.
+ * \return 0 if failed, 1 if success.
+ *
+ * Step 2 of MMG5_chkBdryTria : create hash tables of boundaries in the mesh
+ *
+ */
+int MMG5_chkBdryTria_hashBoundaries(MMG5_pMesh mesh, MMG5_int ntmesh, MMG5_Hash *hashElt) {
 
-        for (i=0; i<4; i++) {
+  MMG5_pTetra pt, pt1;
+  MMG5_pPrism pp, pp1;
+  MMG5_int    *adja,adj,k;
+  MMG5_int    ia,ib,ic;
+  int         i;
+
+  if ( ! MMG5_hashNew(mesh,hashElt,0.51*ntmesh,1.51*ntmesh) ) return 0;
+  // Hash the boundaries found in the mesh
+  if ( mesh->info.opnbdy) {
+    /* We want to keep the internal triangles: we must hash all the tetra faces */
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+
+      for (i=0; i<4; i++) {
+        ia = pt->v[MMG5_idir[i][0]];
+        ib = pt->v[MMG5_idir[i][1]];
+        ic = pt->v[MMG5_idir[i][2]];
+        if ( !MMG5_hashFace(mesh,hashElt,ia,ib,ic,4*k+i) ) return 0;
+      }
+    }
+  } else {
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
+        adj = adja[i];
+        if ( !adj ) {
           ia = pt->v[MMG5_idir[i][0]];
           ib = pt->v[MMG5_idir[i][1]];
           ic = pt->v[MMG5_idir[i][2]];
-          if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return 0;
+          if ( !MMG5_hashFace(mesh,hashElt,ia,ib,ic,4*k+i) ) return 0;
         }
-      }
-    } else {
-      for (k=1; k<=mesh->ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( !MG_EOK(pt) )  continue;
-        adja = &mesh->adja[4*(k-1)+1];
-        for (i=0; i<4; i++) {
-          adj = adja[i];
-          if ( !adj ) {
-            ia = pt->v[MMG5_idir[i][0]];
-            ib = pt->v[MMG5_idir[i][1]];
-            ic = pt->v[MMG5_idir[i][2]];
-            if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return 0;
-          }
-          adj /= 4;
+        adj /= 4;
 
-          pt1 = &mesh->tetra[adj];
-          if ( pt->ref > pt1->ref ) {
-            ia = pt->v[MMG5_idir[i][0]];
-            ib = pt->v[MMG5_idir[i][1]];
-            ic = pt->v[MMG5_idir[i][2]];
-            if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return 0;
-          }
+        pt1 = &mesh->tetra[adj];
+        if ( pt->ref > pt1->ref ) {
+          ia = pt->v[MMG5_idir[i][0]];
+          ib = pt->v[MMG5_idir[i][1]];
+          ic = pt->v[MMG5_idir[i][2]];
+          if ( !MMG5_hashFace(mesh,hashElt,ia,ib,ic,4*k+i) ) return 0;
         }
       }
     }
-    for (k=1; k<=mesh->nprism; k++) {
-      pp = &mesh->prism[k];
-      if ( !MG_EOK(pp) )  continue;
-      adja = &mesh->adjapr[5*(k-1)+1];
-      for (i=0; i<2; i++) {
-        adj = adja[i];
-        if ( !adj ) {
-          ia = pp->v[MMG5_idir_pr[i][0]];
-          ib = pp->v[MMG5_idir_pr[i][1]];
-          ic = pp->v[MMG5_idir_pr[i][2]];
-          if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,5*k+i) ) return 0;
-        }
-        else if ( adj<0 ) continue;
-
-        adj /= 5;
-
-        pp1 = &mesh->prism[MMG5_abs(adj)];
-        if ( pp->ref > pp1->ref ) {
-          ia = pp->v[MMG5_idir_pr[i][0]];
-          ib = pp->v[MMG5_idir_pr[i][1]];
-          ic = pp->v[MMG5_idir_pr[i][2]];
-          if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,5*k+i) ) return 0;
-        }
-      }
-    }
-
-
-    // Travel through the tria, delete those that are not in the hash tab or
-    // that are stored more that once.
-    nt=0; nbl=1;
-
-    if ( ! MMG5_hashNew(mesh,&hashTri,0.51*mesh->nt,1.51*mesh->nt) ) return 0;
-
-    for (k=1; k<=mesh->nt; k++) {
-      ptt = &mesh->tria[k];
-
-      ia = ptt->v[0];
-      ib = ptt->v[1];
-      ic = ptt->v[2];
-
-      i = MMG5_hashGetFace(&hashElt,ia,ib,ic);
-      j = MMG5_hashFace(mesh,&hashTri,ia,ib,ic,k);
-
-      ptt->cc = i;
-
-      if ( !j ) {
-        MMG5_DEL_MEM(mesh,hashElt.item);
-        MMG5_DEL_MEM(mesh,hashTri.item);
-        return 0;
-      }
-      else if ( j > 0 ) {
-        /* the face already exists in the tria table */
-        continue;
-      }
-
-      if ( !i ) {
-        /* the triangle is not a boundary tri or a tri at the interface of two
-         * subdomains with different references and the user don't ask to keep
-         * it. */
-        continue;
-      }
-
-      if ( mesh->info.opnbdy ) {
-        kk    = i/4;
-        iface = i%4;
-        adj   = mesh->adja[4*(kk-1)+1+iface];
-        /* Check if we have found a triangle at the interface of 2 doms of same
-         * ref */
-        if ( adj && mesh->tetra[kk].ref == mesh->tetra[adj/4].ref ) {
-          ++ntpres;
-        }
-      }
-
-      ++nt;
-      if ( k!=nbl ) {
-        pttnew = &mesh->tria[nbl];
-        memcpy(pttnew,ptt,sizeof(MMG5_Tria));
-      }
-      ++nbl;
-    }
-    nbl = mesh->nt-nt;
-    if ( nbl ) {
-      fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " extra boundaries provided."
-              " Ignored\n",__func__,nbl);
-      MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return 0);
-      MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",return 0);
-      mesh->nt = nt;
-    }
-    MMG5_DEL_MEM(mesh,hashElt.item);
-    MMG5_DEL_MEM(mesh,hashTri.item);
   }
-  ntmesh +=ntpres;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+    adja = &mesh->adjapr[5*(k-1)+1];
+    for (i=0; i<2; i++) {
+      adj = adja[i];
+      if ( !adj ) {
+        ia = pp->v[MMG5_idir_pr[i][0]];
+        ib = pp->v[MMG5_idir_pr[i][1]];
+        ic = pp->v[MMG5_idir_pr[i][2]];
+        if ( !MMG5_hashFace(mesh,hashElt,ia,ib,ic,5*k+i) ) return 0;
+      }
+      else if ( adj<0 ) continue;
 
-  /** Step 3: add the missing boundary triangles or, if the mesh contains
-   * prisms, set to required the triangles at interface betwen prisms and tet */
+      adj /= 5;
+
+      pp1 = &mesh->prism[MMG5_abs(adj)];
+      if ( pp->ref > pp1->ref ) {
+        ia = pp->v[MMG5_idir_pr[i][0]];
+        ib = pp->v[MMG5_idir_pr[i][1]];
+        ic = pp->v[MMG5_idir_pr[i][2]];
+        if ( !MMG5_hashFace(mesh,hashElt,ia,ib,ic,5*k+i) ) return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \return 0 if failed, 1 if success.
+ *
+ * Step 2.5 of MMG5_chkBdryTria : Travel through the tria, delete those that are not in the hash tab or
+ *                                that are stored more that once.
+ *
+ */
+int MMG5_chkBdryTria_flagExtraTriangles(MMG5_pMesh mesh, MMG5_int* ntpres, MMG5_Hash *hashElt) {
+
+  MMG5_pTria ptt, pttnew;
+  MMG5_Hash  hashTri;
+  MMG5_int   k, kk, i, j;
+  MMG5_int   ia, ib, ic, adj;
+  int        iface;
+
+  if ( ! MMG5_hashNew(mesh,&hashTri,0.51*mesh->nt,1.51*mesh->nt) ) return 0;
+
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+
+    ia = ptt->v[0];
+    ib = ptt->v[1];
+    ic = ptt->v[2];
+
+    i = MMG5_hashGetFace(hashElt,ia,ib,ic);
+    j = MMG5_hashFace(mesh,&hashTri,ia,ib,ic,k);
+
+    ptt->cc = i;
+
+    if ( !j ) {
+      MMG5_DEL_MEM(mesh,hashElt->item);
+      MMG5_DEL_MEM(mesh,hashTri.item);
+      return 0;
+    }
+    else if ( j > 0 ) {
+      /* the face already exists in the tria table */
+      ptt->v[0] = 0;
+      continue;
+    }
+
+    if ( !i ) {
+      /* the triangle is not a boundary tri or a tri at the interface of two
+        * subdomains with different references and the user don't ask to keep
+        * it. */
+      ptt->v[0] = 0;
+      continue;
+    }
+
+    if ( mesh->info.opnbdy ) {
+      kk    = i/4;
+      iface = i%4;
+      adj   = mesh->adja[4*(kk-1)+1+iface];
+      /* Check if we have found a triangle at the interface of 2 doms of same
+        * ref */
+      if ( adj && mesh->tetra[kk].ref == mesh->tetra[adj/4].ref ) {
+        ++(*ntpres);
+      }
+    }
+  }
+  MMG5_DEL_MEM(mesh,hashElt->item);
+  MMG5_DEL_MEM(mesh,hashTri.item);
+  return 1;
+}
+
+int MMG5_chkBdryTria_deleteExtraTriangles(MMG5_pMesh mesh, MMG5_int* permtria) {
+
+  MMG5_pTria ptt, pttnew;
+  MMG5_int   nt, nbl, k;
+
+  nt = 0; nbl = 1;
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+
+    if ( !MG_EOK(ptt) ) continue;
+
+    ++nt;
+    if ( k!=nbl ) {
+      pttnew = &mesh->tria[nbl];
+      if ( permtria ) {
+      permtria[k] = nbl;
+      }
+      memcpy(pttnew,ptt,sizeof(MMG5_Tria));
+    }
+    ++nbl;
+  }
+  nbl = mesh->nt-nt;
+  if ( nbl ) {
+    fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " extra boundaries provided."
+            " Ignored\n",__func__,nbl);
+    MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return 0);
+    MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",return 0);
+    mesh->nt = nt;
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \return 0 if failed, 1 if success.
+ *
+ * Step 3 of MMG5_chkBdryTria : add the missing boundary triangles or, if the mesh contains
+ *                              prisms, set to required the triangles at interface betwen prisms and tet
+ *
+ */
+int MMG5_chkBdryTria_addMissingTriangles(MMG5_pMesh mesh, MMG5_int ntmesh, MMG5_int ntpres) {
+
+  MMG5_pTria ptt;
+  MMG5_int   k, nbl;
+  int        i;
+
   if ( ntpres && (mesh->info.imprim > 5 || mesh->info.ddebug) )
     printf("     %" MMG5_PRId " triangles between 2 tetrahdra with same"
            " references\n",ntpres);
@@ -1802,9 +1948,8 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
   return MMG5_bdryTria(mesh,ntmesh);
 }
 
-
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 if success.
  *
  * Set the triangles references to the tetrahedra faces and edges.
@@ -1819,7 +1964,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_Hash     hash;
   MMG5_int      ref,*adja,adj,k,ia,ib,ic,kt,initedg[3];
   int           j;
-  int16_t       tag,inittag[3];
+  uint16_t      tag,inittag[3];
   int8_t        i,i1,i2;
 
   if ( !mesh->nt )  return 1;
@@ -1857,6 +2002,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
       adja = &mesh->adja[4*(k-1)+1];
       for (i=0; i<4; i++) {
         adj = adja[i] / 4;
@@ -1881,7 +2027,17 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
           pxt = &mesh->xtetra[pt->xt];
           pxt->ref[i]   = ptt->ref;
           pxt->ftag[i] |= MG_BDY;
-          pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+          /* Store tags that are common to the 3 edges of the triangles */
+          tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+          /* Remove infos that make no sense along faces */
+          tag &= ~MG_GEO;
+          tag &= ~MG_NOM;
+          assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
+          /* Assign tag to the face */
+          pxt->ftag[i] |= tag;
         }
       }
     }
@@ -1891,6 +2047,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
 
       for (i=0; i<4; i++) {
         ia = pt->v[MMG5_idir[i][0]];
@@ -1914,7 +2071,19 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         pxt = &mesh->xtetra[mesh->xt];
         pxt->ref[i]   = ptt->ref;
         pxt->ftag[i] |= MG_BDY;
-        pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+        /* here we may wrongfully add MG_REF and/or MG_BDY face tags to internal triangles
+        in opnbdy mode */
+        /* Store tags that are common to the 3 edges of the triangles */
+        tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+        /* Remove infos that make no sense along faces */
+        tag &= ~MG_GEO;
+        tag &= ~MG_NOM;
+        assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
+        /* Assign tag to the face */
+        pxt->ftag[i] |= tag;
       }
     }
   }
@@ -1923,6 +2092,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
       if ( !pt->xt )  continue;
       pxt = &mesh->xtetra[pt->xt];
       adja = &mesh->adja[4*(k-1)+1];
@@ -1964,6 +2134,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
+      if (pt->tag & MG_OVERLAP) continue;
       if ( !pt->xt )  continue;
       pxt = &mesh->xtetra[pt->xt];
       adja = &mesh->adja[4*(k-1)+1];
@@ -2075,7 +2246,17 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
       pxp = &mesh->xprism[mesh->xpr];
       pxp->ref[i]   = ptt->ref;
       pxp->ftag[i] |= MG_BDY;
-      pxp->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      /* Store tags that are common to the 3 edges of the triangles */
+      tag = (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      /* Remove infos that make no sense along faces */
+      tag &= ~MG_GEO;
+      tag &= ~MG_NOM;
+      assert(  !(tag & MG_CRN) && "MG_CRN tag has no sense along edges" );
+
+      /* Assign tag to the face */
+      pxp->ftag[i] |= tag;
 
       for (j=0; j<3; j++) {
         pxp->tag[MMG5_iarf[i][j]] |= pxp->ftag[i] | ptt->tag[j];
@@ -2117,7 +2298,7 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash     hash;
   MMG5_int      ia,ib,ic,k,kt;
   int           j;
-  int16_t       tag;
+  uint16_t      tag;
   int8_t        i;
 
   if ( !mesh->nt )  return 1;
@@ -2194,7 +2375,7 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Make orientation of triangles compatible with tetra faces for external tria

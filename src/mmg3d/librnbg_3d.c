@@ -39,8 +39,8 @@
 #include "librnbg_private.h"
 
 /**
- * \param tetras pointer toward a table containing the tetra structures.
- * \param *perm pointer toward the permutation table (to perform in place
+ * \param tetras pointer to a table containing the tetra structures.
+ * \param *perm pointer to the permutation table (to perform in place
  * permutations).
  * \param ind1 index of the first tetra to swap.
  * \param ind2 index of the second tetra to swap.
@@ -99,9 +99,9 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, MMG5_int* perm, MMG5_int in
 
 /**
  * \param boxVertNbr number of vertices by box.
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
- * \param fields pointer toward an array of solution fields
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solution structure
+ * \param fields pointer to an array of solution fields
  * \param permNodGlob array to store the global permutation of nodes (non mandatory)
  *
  * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable,

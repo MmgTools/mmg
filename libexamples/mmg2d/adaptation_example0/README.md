@@ -1,4 +1,4 @@
-# Basic use of the **mmg2d** library
+# Basic use of the mmg2d library
 
 ## I/ Implementation
 To call the **mmg2d** library, you must:  

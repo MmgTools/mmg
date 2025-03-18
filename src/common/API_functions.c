@@ -43,7 +43,7 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Initialization of the input parameters.
  *
@@ -123,8 +123,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  *
  * Initialize file names to their default values.
  *
@@ -143,7 +143,7 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param meshin input mesh name.
  * \return 1 if success, 0 if fail
  *
@@ -178,8 +178,8 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param solin name of the input solution file.
  * \return 1 if success, 0 if fail
  *
@@ -235,7 +235,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param fparamin name of the input solution file.
  * \return 1 if success, 0 if fail
  *
@@ -263,7 +263,7 @@ int MMG5_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param meshout name of the output mesh file.
  * \return 1 if success, 0 if fail.
  *
@@ -377,8 +377,8 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \param solout name of the output solution file.
  * \return 0 if failed, 1 otherwise.
  *
@@ -504,8 +504,8 @@ int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  *
  * Structures unallocation before return (common structures between all codes).
  *
@@ -553,8 +553,8 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  *
  * File name deallocations before return.
  *
@@ -734,7 +734,7 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
-const char* MMG5_Get_tagName(int tag)
+const char* MMG5_Get_tagName(uint16_t tag)
 {
   static char tags_name[1024];
 
@@ -791,14 +791,19 @@ const char* MMG5_Get_tagName(int tag)
 
   if ( tag & MG_PARBDY) {
     strcat(tags_name,"Parbdy ");
-    }
+  }
+
+  if ( tag & MG_OVERLAP) {
+    strcat(tags_name,"Overlap ");
+  }
+
   strcat(tags_name,"tag(s).");
 
   return tags_name;
 }
 
 /**
- * \param ptr pointer toward the file extension (dot included)
+ * \param ptr pointer to the file extension (dot included)
  * \param fmt default file format.
  *
  * \return and index associated to the file format detected from the extension.
@@ -898,7 +903,7 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
 /**
  * \param filename string containing a filename
  *
- * \return pointer toward the filename extension or toward the end of the string
+ * \return pointer to the filename extension or toward the end of the string
  * if no extension have been founded
  *
  * Get the extension of the filename string. Do not consider '.o' as an extension.
@@ -926,7 +931,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the path allocated here
+ * \return a pointer to the path allocated here
  *
  * Remove filename from a path and return the path in a newly allocated string.
  *

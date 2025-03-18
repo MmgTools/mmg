@@ -39,10 +39,10 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param list pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param list pointer to the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 0.9 of the old minimum element quality.
@@ -161,10 +161,10 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param list pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param list pointer to the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 0.9 of the old minimum element quality.
@@ -334,8 +334,8 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param ip0 global index of the point that we move
  * \param r rotation matrix that sends the normal at \a ip0 to z-axis
@@ -463,8 +463,8 @@ int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,MMG5_int *lists,int ilists,MMG5_in
 
 
 /**
-* \param mesh pointer toward the mesh
-* \param lists pointer toward the surface ball of \a ip0
+* \param mesh pointer to the mesh
+* \param lists pointer to the surface ball of \a ip0
 * \param kel index of the current element in the ball
 * \param ip0 global index of the point to move
 * \param n normal at \a ip0
@@ -478,6 +478,7 @@ int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,MMG5_int *lists,int ilists,MMG5_in
 * Compute the Bezier patch at element \a lists[kel], compute the new point
 * coordinates, normal and tangent and check the geometric approximation.
 *
+* \warning may invalidate n if it is a pointer to the xpoint array
 */
 int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,MMG5_int *lists,const MMG5_int kel,
                            const MMG5_int ip0,double n[3],double lambda[3],double o[3],
@@ -607,12 +608,12 @@ int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,MMG5_int *lists,const MMG5_int kel,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -629,7 +630,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_pPoint       p0;
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
-  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,det2d;
+  double            n[3],r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,det2d;
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],o[3],no[3];
   double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
@@ -650,7 +651,11 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   p0 = &mesh->point[ip0];
   assert( p0->xp && !MG_EDG(p0->tag) );
 
-  n = &(mesh->xpoint[p0->xp].n1[0]);
+  /* Don't use a pointer for n to avoid issues with the reallocation of the
+   * xpoint array and invalid pointers (see ls-CenIn-DisOut-8 test of ParMmg) */
+  n[0] = mesh->xpoint[p0->xp].n1[0];
+  n[1] = mesh->xpoint[p0->xp].n1[1];
+  n[2] = mesh->xpoint[p0->xp].n1[2];
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !MMG5_rotmatrix(n,r) ) return 0;
@@ -727,6 +732,9 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
   /** Step 5 : come back to original problem, and compute patch in triangle iel */
+  // Remark: if we call following function with a pointer for n, we have to set
+  // the pointer again after the function call as it may invalidate it if it
+  // reallocates the xpoint array
   nxp = MMG3D_movbdyregpt_geom(mesh,lists,kel,ip0,n,lambda,o,no);
   if ( nxp < 0 ) {
     return -1;
@@ -821,8 +829,8 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param lists pointer toward the surfacic ball of the point we want to move (\a ip0).
+ * \param mesh pointer to the mesh structure.
+ * \param lists pointer to the surfacic ball of the point we want to move (\a ip0).
  * \param l item of \a lists to process.
  * \param ip0 global index of point whose ball is passed.
  * \param ipa global idx of second vertex of previous bdy tria of the list (updated at end of tria processing).
@@ -843,11 +851,11 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  */
 static inline
 int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int ip0,
-                                MMG5_int *ipa,MMG5_int *ipb,const int16_t edgTag,MMG5_int *ip) {
+                                MMG5_int *ipa,MMG5_int *ipb,const uint16_t edgTag,MMG5_int *ip) {
 
   MMG5_pTetra           pt;
   MMG5_int              iel,iptmpa,iptmpb;
-  int16_t               tag;
+  uint16_t              tag;
   uint8_t               i,ie,iface,iea,ieb;
 
   iel   = lists[l] / 4;
@@ -915,8 +923,8 @@ int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int i
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param edgTag Type of edge on which we move (\ref MG_REF, \ref MG_NOM or \ref MG_GEO).
  * \param ip0 point that we want to move along curve.
@@ -934,7 +942,7 @@ int MMG3D_curveEndingPts_chkEdg(MMG5_pMesh mesh,MMG5_int *lists,int l,MMG5_int i
  * other direction until meeting the second curve edge.
  */
 int MMG3D_curveEndingPts(MMG5_pMesh mesh,MMG5_int *lists,int ilists,
-                         const int16_t edgTag, MMG5_int ip0,MMG5_int *ip1,
+                         const uint16_t edgTag, MMG5_int ip0,MMG5_int *ip1,
                          MMG5_int *ip2) {
   MMG5_pTetra           pt;
   MMG5_int              iel,ipa,ipb;
@@ -1023,10 +1031,10 @@ int MMG3D_curveEndingPts(MMG5_pMesh mesh,MMG5_int *lists,int ilists,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -1115,7 +1123,7 @@ int MMG3D_movbdycurvept_chckAndUpdate(MMG5_pMesh mesh, MMG5_pSol met,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param p0 point that we want to move.
  * \param ip0 global index of point \a p0.
  * \param ip1 First ending point of curve.
@@ -1144,7 +1152,7 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int ip
                                       uint8_t isrid,const double step,
                                       double o[3],double no[3],
                                       double no2[3],double to[3],
-                                      const int16_t edgTag) {
+                                      const uint16_t edgTag) {
 
   MMG5_int ip;
 
@@ -1226,12 +1234,12 @@ int MMG3D_movbdycurvept_newPosForSimu(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int ip
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -1419,12 +1427,12 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -1442,12 +1450,12 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -1466,10 +1474,10 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -1589,12 +1597,12 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
+ * \param listv pointer to the volumic ball of the point.
  * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
+ * \param lists pointer to the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
@@ -1610,8 +1618,8 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the metric structure.
  * \param k element index
  * \param ip local index of point
  *
@@ -1729,8 +1737,8 @@ int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the metric structure.
  * \param k tetra index.
  * \param ib local index of the point inside the tetra k.
  * \return 0 if fail, 1 if success.
@@ -1857,8 +1865,8 @@ int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int ib) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the metric structure.
  * \param k element index
  * \param ip local index of point
  *

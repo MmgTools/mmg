@@ -37,7 +37,7 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 1 if success, 0 if fail
  *
@@ -48,7 +48,7 @@ int MMGS_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
-  int16_t      tag;
+  uint16_t     tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
@@ -244,7 +244,7 @@ int MMGS_setadj(MMG5_pMesh mesh){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -436,7 +436,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -486,7 +486,7 @@ static int setdhd(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -584,7 +584,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -739,8 +739,8 @@ static int norver(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer towards the mesh
- * \param pt pointer towards current triangle
+ * \param mesh pointer to the mesh
+ * \param pt pointer to current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
  * \param n normal of triangle before regularization
@@ -807,7 +807,7 @@ static inline int MMGS_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, dou
 }
 
 /**
- * \param mesh pointer toward a MMG5 mesh structure.
+ * \param mesh pointer to a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Regularization procedure for vertices coordinates,
@@ -854,7 +854,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       tabl[iad+2] = ppt->c[2];
 
       if ( !MG_VOK(ppt) )  continue;
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
 
@@ -893,7 +893,7 @@ int MMGS_regver(MMG5_pMesh mesh) {
       ppt = &mesh->point[k];
 
       if ( !MG_VOK(ppt) )  continue;
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
 
@@ -1032,7 +1032,7 @@ int MMGS_remDup(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 1 if succeed, 0 if fail
  *

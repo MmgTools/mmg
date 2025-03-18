@@ -20,7 +20,7 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 
 # if PROJECT_NAME is defined, mmg is a subproject
 if(DEFINED PROJECT_NAME)
@@ -62,9 +62,9 @@ include(GNUInstallDirs)
 ###############################################################################
 
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
-SET (CMAKE_RELEASE_VERSION_MINOR "7" )
-SET (CMAKE_RELEASE_VERSION_PATCH "1" )
-SET (CMAKE_RELEASE_DATE "Dec. 20, 2022" )
+SET (CMAKE_RELEASE_VERSION_MINOR "8" )
+SET (CMAKE_RELEASE_VERSION_PATCH "0" )
+SET (CMAKE_RELEASE_DATE "Oct. 30, 2024" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -93,12 +93,14 @@ ENDIF ()
 SET (MMG5_INT "int32_t" CACHE STRING "Integer type")
 IF (${MMG5_INT} STREQUAL "int64_t")
   SET ( DEF_MMG5_INT "#define MMG5_int int64_t")
+  SET ( DEF_MMG5_INTMAX "#define MMG5_INTMAX LONG_MAX" )
   SET ( DEF_MMG5_PRId "#define MMG5_PRId PRId64")
   SET ( DEF_MMG5F_INT "#define MMG5F_INT SELECTED_INT_KIND(18)")
   SET ( DEF_MMG_SWPBIN "#define MMG5_SWAPBIN(x) MMG5_swapbin_int(x)")
   SET ( DEF_MMG_ABS "#define MMG5_abs(x) (int64_t)labs((int64_t)x)")
 ELSE ()
   SET ( DEF_MMG5_INT "#define MMG5_int int32_t")
+  SET ( DEF_MMG5_INTMAX "#define MMG5_INTMAX INT_MAX" )
   SET ( DEF_MMG5_PRId "#define MMG5_PRId PRId32")
   SET ( DEF_MMG5F_INT "#define MMG5F_INT SELECTED_INT_KIND(9)")
   SET ( DEF_MMG_SWPBIN "#define MMG5_SWAPBIN(x) MMG5_swapbin(x)")
@@ -339,4 +341,7 @@ include(doxygen)
 #####         Create Package
 #####
 ###############################################################################
-include(packages)
+SET (MMG5_PACKAGE TRUE CACHE BOOL "add CPack directives")
+IF (MMG5_PACKAGE)
+  include(packages)
+ENDIF ( MMG5_PACKAGE )

@@ -37,12 +37,12 @@
 extern MMG5_Info  info;
 
 /**
- * \param mesh pointer toward mesh structure.
+ * \param mesh pointer to mesh structure.
  * \param start a triangle to which \a ip belongs.
  * \param ip local point index
- * \param adja pointer toward the adjacency array.
- * \param list pointer toward the list of points connected to \a ip.
- * \param tlist pointer toward the list of triangles sharing \a ip.
+ * \param adja pointer to the adjacency array.
+ * \param list pointer to the list of points connected to \a ip.
+ * \param tlist pointer to the list of triangles sharing \a ip.
  *
  * \return -ilist if buffer overflow, ilist otherwise.
  *
@@ -106,11 +106,11 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *adja, MMG5_int *
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param adjt pointer toward the table of triangle adjacency.
+ * \param mesh pointer to the mesh structure.
+ * \param adjt pointer to the table of triangle adjacency.
  * \param start index of triangle where we start to work.
  * \param ip local index of vertex where the normal is computed.
- * \param nn pointer toward the computed tangent.
+ * \param nn pointer to the computed tangent.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute average normal of triangles sharing P without crossing ridge.
@@ -186,11 +186,11 @@ int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *nn)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param adjt pointer toward the table of triangle adjacency.
+ * \param mesh pointer to the mesh structure.
+ * \param adjt pointer to the table of triangle adjacency.
  * \param start index of triangle where we start to work.
  * \param ip index of vertex where the tangent is computed.
- * \param tt pointer toward the computed tangent.
+ * \param tt pointer to the computed tangent.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute the tangent to the curve at point \a ip.
@@ -269,14 +269,14 @@ int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,double *tt)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param adjt pointer toward the table of triangle adjacency.
+ * \param mesh pointer to the mesh structure.
+ * \param adjt pointer to the table of triangle adjacency.
  * \param start index of triangle where we start to work.
  * \param ip index of vertex on which we work.
- * \param list pointer toward the computed list of GEO vertices incident to \a ip.
- * \param listref pointer toward the corresponding edge references
- * \param ng pointer toward the number of ridges.
- * \param nr pointer toward the number of reference edges.
+ * \param list pointer to the computed list of GEO vertices incident to \a ip.
+ * \param listref pointer to the corresponding edge references
+ * \param ng pointer to the number of ridges.
+ * \param nr pointer to the number of reference edges.
  * \param lmax maxmum size for the ball of the point \a ip.
  * \return The number of edges incident to the vertex \a ip.
  *
@@ -348,10 +348,10 @@ int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,int ip,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
- * \param list pointer toward the computed ball of \a ip.
+ * \param list pointer to the computed ball of \a ip.
  * \param s 1 if called from mmgs, 0 if called from mmg2d.
  * \param opn 0 for a closed ball, 1 for an open ball.
  * \return the size of the computed ball or 0 if fail.

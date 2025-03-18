@@ -147,29 +147,19 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ENDIF()
   ADD_DEPENDENCIES( ${target_name} ${target_dependencies})
 
-  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( BEFORE
-      ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR})
-  ELSE ( )
-    target_include_directories( ${target_name} BEFORE PUBLIC
-      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/>
-      $<BUILD_INTERFACE:${MMGCOMMON_SOURCE_DIR}>
-      $<BUILD_INTERFACE:${MMGCOMMON_BINARY_DIR}>
-      $<BUILD_INTERFACE:${MMG3D_SOURCE_DIR}>
-      $<BUILD_INTERFACE:${MMGS_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-      )
-
-  ENDIF ( )
+  target_include_directories( ${target_name} BEFORE PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/>
+    $<BUILD_INTERFACE:${MMGCOMMON_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${MMGCOMMON_BINARY_DIR}>
+    $<BUILD_INTERFACE:${MMG3D_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${MMGS_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
 
   if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
-    IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-      INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
-    ELSE ( )
-      target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
-    endif()
-  endif( )
+    target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+  endif()
 
   SET_TARGET_PROPERTIES ( ${target_name} PROPERTIES
     OUTPUT_NAME ${output_name}
@@ -236,22 +226,11 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     my_add_link_flags ( ${exec_name} "/SAFESEH:NO")
   ENDIF ( )
 
- IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-   INCLUDE_DIRECTORIES ( BEFORE
-     ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
-   if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
-     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
-     INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
-   ENDIF()
-
- ELSE ( )
-   TARGET_INCLUDE_DIRECTORIES ( ${exec_name} BEFORE PUBLIC
-     ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
-   if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
-     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
-     target_include_directories( ${exec_name} BEFORE PUBLIC ${SCOTCH_INCLUDE_DIRS} )
-   ENDIF()
-
+  TARGET_INCLUDE_DIRECTORIES ( ${exec_name} BEFORE PUBLIC
+    ${MMGCOMMON_BINARY_DIR} ${MMGCOMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
+  if ( SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF )
+    message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
+    target_include_directories( ${exec_name} BEFORE PUBLIC ${SCOTCH_INCLUDE_DIRS} )
  ENDIF ( )
 
   TARGET_LINK_LIBRARIES ( ${exec_name} PRIVATE ${LIBRARIES}  )
@@ -295,11 +274,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name lib_ty
   ADD_EXECUTABLE ( ${target_name} ${main_path} )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
-  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( BEFORE ${PROJECT_BINARY_DIR}/include )
-  ELSE ( )
-    TARGET_INCLUDE_DIRECTORIES ( ${target_name} BEFORE PUBLIC ${PROJECT_BINARY_DIR}/include )
-  ENDIF ( )
+  TARGET_INCLUDE_DIRECTORIES ( ${target_name} BEFORE PUBLIC ${PROJECT_BINARY_DIR}/include )
 
   IF ( WIN32 AND ((NOT MINGW) AND SCOTCH_FOUND AND NOT USE_SCOTCH MATCHES OFF) )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )

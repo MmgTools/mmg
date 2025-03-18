@@ -41,8 +41,8 @@
 #include "mmg3dexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
  * \return -1 if failed.
  * \return number of new points.
@@ -116,7 +116,7 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     else {
       /* Case of an internal face */
 
-      /* Skip only boundary edges but try to trat internal edges connecting bdy
+      /* Skip only boundary edges but try to treat internal edges connecting bdy
        * points */
       int8_t isbdy;
       ilist = MMG5_coquil(mesh,k,imax,list,&isbdy);
@@ -181,8 +181,8 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return -1 if failed.
  * \return number of deleted points.
  *
@@ -245,8 +245,8 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param permNodGlob if provided, strore the global permutation of nodes.
  *
  * \return 0 if failed, 1 otherwise.
@@ -416,8 +416,8 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param permNodGlob if provided, strore the global permutation of nodes.
  *
  * \return 0 if failed, 1 if success.

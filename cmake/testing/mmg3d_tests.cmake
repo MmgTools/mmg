@@ -539,6 +539,11 @@ ADD_TEST(NAME mmg3d_opnbdy_ref_island
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
 
+ADD_TEST(NAME mmg3d_duplicate_triangle
+COMMAND ${EXECUT_MMG3D} -v 5
+-in ${MMG3D_CI_TESTS}/DuplicateTriangle/duplicate_triangle
+-out ${CTEST_OUTPUT_DIR}/duplicate-triangle.o.meshb)
+
 ###############################################################################
 #####
 #####         Check Lagrangian motion option
@@ -571,6 +576,12 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
     -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-nsd3.o.meshb
     )
+
+  IF (${MMG5_INT} MATCHES int64_t )
+    SET(passElasRegex "## Error: MMG5_velextLS: impossible to call elasticity library with int64 integers")
+    SET_PROPERTY(TEST mmg3d_LagMotion0_tinyBoxt mmg3d_LagMotion1_tinyBoxt mmg3d_LagMotion2_tinyBoxt mmg3d_LagMotion2_tinyBoxt-nsd3
+      PROPERTY PASS_REGULAR_EXPRESSION "${passElasRegex}")
+  ENDIF()
 
 ENDIF()
 
@@ -892,8 +903,11 @@ IF ( LONG_TESTS )
       -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
       -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_boxt-boxt.o.meshb
       )
+    IF (${MMG5_INT} MATCHES int64_t )
+      SET_PROPERTY(TEST mmg3d_LagMotion0_boxt mmg3d_LagMotion1_boxt mmg3d_LagMotion2_boxt
+      PROPERTY PASS_REGULAR_EXPRESSION "${passElasRegex}")
+    ENDIF()
   ENDIF()
-
 ENDIF()
 
 ###############################################################################

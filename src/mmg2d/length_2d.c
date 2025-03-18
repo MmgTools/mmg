@@ -140,6 +140,16 @@ int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   ibmax = 0;
   nullEdge = 0;
 
+  if ( (!sol) || (!sol->m) ) {
+    /* the functions that computes the edge length cannot be called without an
+     * allocated metric */
+    return 0;
+  }
+
+  if ( !mesh->nt ) {
+    return 0;
+  }
+
   for (k=0; k<9; k++)  hl[k] = 0;
 
   for (k=1; k<=mesh->nt; k++) {

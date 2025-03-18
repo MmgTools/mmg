@@ -24,8 +24,8 @@
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the sol structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Check if all edges exist in the mesh and if not force them.

@@ -35,7 +35,7 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-MMG5_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+MMG5_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],uint16_t tag) {
   MMG5_pPoint  ppt;
   MMG5_int     curpt;
 
@@ -64,7 +64,9 @@ void MMG2D_delPt(MMG5_pMesh mesh,MMG5_int ip) {
   ppt->tmp    = mesh->npnil;
 
   mesh->npnil = ip;
-  if ( ip == mesh->np )  mesh->np--;
+  if ( ip == mesh->np ) {
+    while ( (!MG_VOK((&mesh->point[mesh->np]))) && mesh->np )  mesh->np--;
+  }
 }
 
 void MMG5_delEdge(MMG5_pMesh mesh,MMG5_int iel) {
@@ -119,12 +121,14 @@ int MMG2D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
     memset(&mesh->adja[iadr],0,3*sizeof(MMG5_int));
 
   mesh->nenil = iel;
-  if ( iel == mesh->nt )  mesh->nt--;
+  if ( iel == mesh->nt ) {
+    while ( (!MG_EOK((&mesh->tria[mesh->nt]))) && mesh->nt ) mesh->nt--;
+  }
   return 1;
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -223,7 +227,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -234,15 +238,15 @@ int MMG2D_memOption(MMG5_pMesh mesh) {
 
   mesh->memMax = MMG5_memSize();
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,MMG2D_NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,MMG2D_NEMAX);
+  mesh->npmax = MG_MAX((MMG5_int)(1.5*mesh->np),MMG2D_NPMAX);
+  mesh->ntmax = MG_MAX((MMG5_int)(1.5*mesh->nt),MMG2D_NEMAX);
   mesh->namax = mesh->na;
 
   return  MMG2D_memOption_memSet(mesh);
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -293,7 +297,7 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *

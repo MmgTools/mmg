@@ -37,17 +37,18 @@
 #define _INLINED_FUNC_H
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param m0 metric at point np0.
  * \param m1 metric at point np1.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric, 0 if fail.
+ * \return length of a curve edge according to the prescribed metric, 0 if fail.
  *
- * Compute length of surface edge \f$[np0;np1]\f$ according to the prescribed
- * aniso metrics \a m0 and \a m1.
+ * Compute the curve length of surface edge \f$[np0;np1]\f$ according to the
+ * prescribed aniso metrics \a m0 and \a m1.
  *
+ * \remark the edge has to be a boundary edge
  */
 static inline
 double MMG5_lenEdg(MMG5_pMesh mesh,MMG5_int np0,MMG5_int np1,
@@ -83,7 +84,6 @@ double MMG5_lenEdg(MMG5_pMesh mesh,MMG5_int np0,MMG5_int np1,
       n2 = &mesh->xpoint[p0->xp].n2[0];
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
       ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
-
       if ( fabs(ps2) < fabs(ps1) ) {
         n1  = &mesh->xpoint[p0->xp].n2[0];
         ps1 = ps2;
@@ -181,17 +181,19 @@ double MMG5_lenEdg(MMG5_pMesh mesh,MMG5_int np0,MMG5_int np1,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
  * \return length of edge according to the prescribed metric, 0 if fail.
  *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
- * aniso metric (for special storage of metrics at ridges points). Here the
- * length is computed taking into account the curve nature of the surface edge.
+ * Compute the curve length of surface edge \f$[i0;i1]\f$ according to the
+ * prescribed aniso metric (for special storage of metrics at ridges
+ * points). Here the length is computed taking into account the curve nature of
+ * the surface edge.
  *
+ * \remark the edge has to be a boundary edge
  */
 static inline
 double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,MMG5_int np1,int8_t isedg) {
@@ -250,16 +252,17 @@ double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,MMG5_int n
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
  * \return length of edge according to the prescribed metric.
  *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
- * aniso metric (for classic storage of metrics at ridges points).
+ * Compute the curve length of surface edge \f$[i0;i1]\f$ according to the
+ * prescribed aniso metric (for classic storage of metrics at ridges points).
  *
+ * \remark the edge has to be a boundary edge
  */
 static inline
 double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
@@ -274,16 +277,16 @@ double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the sol structure.
  * \param ip1 index of edge's extremity.
  * \param ip2 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise (dummy arg for
  * compatibility with \a lenedg_ani).
  * \return length of edge according to the prescribed metric.
  *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed iso
- * metric.
+ * Compute the "straight" length of edge \f$[i0;i1]\f$ according to the
+ * prescribed iso metric.
  *
  */
 static

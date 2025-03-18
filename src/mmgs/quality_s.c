@@ -41,8 +41,8 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param iel element index
  * \return 0 if fail, -1 if orientation is reversed with regards to orientation
  * of vertices, the computed quality otherwise.
@@ -271,8 +271,8 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
  * 1 for special storage.
  * \return 0 if fail, 1 otherwise.
@@ -296,6 +296,16 @@ int MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   lmin = 1.e30;
   amin = amax = bmin = bmax = 0;
   nullEdge = 0;
+
+  if ( (!met) || (!met->m) ) {
+    /* the functions that computes the edge length cannot be called without an
+     * allocated metric */
+    return 0;
+  }
+
+  if ( !mesh->nt ) {
+    return 0;
+  }
 
   /* Hash all edges in the mesh */
   if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
@@ -378,8 +388,8 @@ int MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for classical storage of ridges
@@ -446,8 +456,8 @@ int MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for special storage of ridges metrics

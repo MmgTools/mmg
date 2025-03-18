@@ -1,4 +1,4 @@
-# Basic use of the **mmg** library for an adaptation testcase in C++
+# Basic use of the mmg library for an adaptation testcase in C++
 
 ## I/ Implementation
 To call the **mmg** library, you must:  

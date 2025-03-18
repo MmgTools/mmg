@@ -110,7 +110,7 @@ double MMG5_swapd(double sbin)
 }
 
 /**
- * \param inm pointer toward file unit
+ * \param inm pointer to file unit
  * \param nelts number of elements
  * \param iswap 1 if we need to swap bites for little/big endian conversion
  * \param np number of points
@@ -260,12 +260,12 @@ int MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param filename pointer toward the name of file
- * \param inm pointer toward the file pointer
- * \param posNodes pointer toward the position of nodes data in file
- * \param posElts pointer toward the position of elts data in file
- * \param posNodeData pointer toward the list of the positions of data in file
+ * \param mesh pointer to the mesh
+ * \param filename pointer to the name of file
+ * \param inm pointer to the file pointer
+ * \param posNodes pointer to the position of nodes data in file
+ * \param posElts pointer to the position of elts data in file
+ * \param posNodeData pointer to the list of the positions of data in file
  * \param bin 1 if binary format
  * \param nelts number of elements in file
  * \param nsol number of data in file
@@ -514,8 +514,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
 }
 
 /**
- * \param mesh pointer toward an Mmg mesh
- * \param nref pointer toward the number of negative refs (replaced by abolute values).
+ * \param mesh pointer to an Mmg mesh
+ * \param nref pointer to the number of negative refs (replaced by abolute values).
  *
  * \return 1 if success, 0 otherwise
  *
@@ -531,6 +531,7 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
   MMG5_pTetra pt;
   int         i;
   MMG5_int    k,aux;
+  double      area;
 
   if ( nref ) {
     fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
@@ -555,10 +556,11 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
       for(i=0 ; i<3 ; i++)
         ptt->edg[i] = 0;
 
-      if ( MMG2D_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
-                           mesh->point[ptt->v[2]].c) < 0.0 ) {
-        /* mesh->xt temporary used to count reoriented tetra*/
-        mesh->xt++;
+      area = MMG2D_quickarea(mesh->point[ptt->v[0]].c,
+                             mesh->point[ptt->v[1]].c,
+                             mesh->point[ptt->v[2]].c);
+      if ( area < 0.0 ) {
+        mesh->xt++;  /* mesh->xt temporarily used to count reoriented tetra*/
         aux = ptt->v[2];
         ptt->v[2] = ptt->v[1];
         ptt->v[1] = aux;
@@ -643,9 +645,9 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, MMG5_int nref ) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the solutions array
- * \param inm pointer toward the file pointer
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the solutions array
+ * \param inm pointer to the file pointer
  * \param posNodes position of nodes data in file
  * \param posElts position of elts data in file
  * \param posNodeData position of solution data in file
@@ -1511,8 +1513,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the sol structure.
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to the sol structure.
  * \param index of point in which we want to build the metric
  * \param dbuf builded metric
  *
@@ -1568,8 +1570,8 @@ void  MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an array of solutions.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to an array of solutions.
  * \param filename name of file.
  * \param metricData 1 if the data saved is a metric (if only 1 data)
  * \return 0 if failed, 1 otherwise.
@@ -2055,7 +2057,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 /**
  * \param filename name of file.
  * \param meshDim mesh dimenson.
- * \param inm allocatable pointer toward the FILE structure
+ * \param inm allocatable pointer to the FILE structure
  * \param ver file version (1=simple precision, 2=double)
  * \param bin 1 if the file is a binary
  * \param iswp 1 or 0 depending on the endianness (binary only)
@@ -2063,7 +2065,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
  * \param dim solution dimension
  * \param nsols number of solutions of different types in the file
  * \param type type of solutions
- * \param posnp pointer toward the position of the point list in the file
+ * \param posnp pointer to the position of the point list in the file
  * \param imprim verbosity
  *
  * \return -1 data invalid or we fail, 0 no file, 1 ok.
@@ -2206,8 +2208,8 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
 }
 
 /**
- * \param sol pointer toward an allocatable sol structure.
- * \param inm pointer toward the solution file
+ * \param sol pointer to an allocatable sol structure.
+ * \param inm pointer to the solution file
  * \param bin 1 if binary file
  * \param iswp Endianess
  * \param index of the readed solution
@@ -2255,8 +2257,8 @@ int MMG5_readFloatSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
 }
 
 /**
- * \param sol pointer toward an allocatable sol structure.
- * \param inm pointer toward the solution file
+ * \param sol pointer to an allocatable sol structure.
+ * \param inm pointer to the solution file
  * \param bin 1 if binary file
  * \param iswp Endianess
  * \param index of the readed solution
@@ -2305,9 +2307,9 @@ int MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG5_int pos) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward an allocatable sol structure.
- * \param inm pointer toward the solution file
+ * \param mesh pointer to the mesh structure
+ * \param sol pointer to an allocatable sol structure.
+ * \param inm pointer to the solution file
  * \param bin 1 if binary file
  * \param pos of the writted solution
  * \param metricData 1 if the data saved is a metric (if only 1 data)
@@ -2365,9 +2367,9 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param filename name of file.
- * \param inm allocatable pointer toward the FILE structure.
+ * \param inm allocatable pointer to the FILE structure.
  * \param ver file version (1=simple precision, 2=double).
  * \param bin 1 if the file is a binary.
  * \param bpos cumulative field position for binary Medit format.
@@ -2507,8 +2509,8 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param inm pointer toward the opened file unit.
+ * \param mesh pointer to the mesh structure.
+ * \param inm pointer to the opened file unit.
  * \param ver file version (1=simple precision, 2=double).
  * \param bin 1 if the file is a binary.
  * \param bpos cumulative field position for binary Medit format.
@@ -2576,8 +2578,8 @@ int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param inm pointer toward the opened file unit.
+ * \param mesh pointer to the mesh structure.
+ * \param inm pointer to the opened file unit.
  * \param ver file version (1=simple precision, 2=double).
  * \param bin 1 if the file is a binary.
  * \param bpos cumulative field position for binary Medit format.
@@ -2645,7 +2647,7 @@ int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param type type of the metric
  * \param entities entities on which the metric applies (should be MMG5_Vertex)
  * \param inm metric file
@@ -2696,8 +2698,8 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, int *entities, FILE *inm) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  *
  * print metric statistics
  *
@@ -2714,8 +2716,8 @@ void MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solutions array.
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the solutions array.
  *
  * print solutions statistics
  *

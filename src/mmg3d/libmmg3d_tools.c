@@ -57,19 +57,39 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG5_caltet          = MMG5_caltet_iso;
       MMG5_caltri          = MMG5_caltri_iso;
       MMG3D_doSol          = MMG3D_doSol_iso;
+      // same as MMG5_lenSurfEdg_iso for iso metric. The edge can be boundary or
+      // intenal but the test relies on the MG_BDY tag that may be missing along
+      // boundary edges (it doesn't matter in iso mode as we always compute the
+      // "straight" edge length). It starts from tetra pointer and edge index.
       MMG5_lenedg          = MMG5_lenedg_iso;
+      // has to be used to compute "straight" edge length from coordinates
       MMG3D_lenedgCoor     = MMG5_lenedgCoor_iso;
+      // Straight edge length (edge is guessed to be a surface edge) from point indices
       MMG5_lenSurfEdg      = MMG5_lenSurfEdg_iso;
     }
     else {
       MMG5_caltet          = MMG5_caltet_ani;
       MMG5_caltri          = MMG5_caltri_ani;
       MMG3D_doSol          = MMG3D_doSol_ani;
+      // lenedg is meant to compute the curve length along boundary edges
+      // and the straight length for internal edges (from
+      // tetra pointer and an edge index) but it relies
+      // on the MG_BDY tag which is not always consistent to detect boundary
+      // edges. Moreover, it seems that the "straight" length is computed in iso
+      // mode - the origin and effect of computing curve lengths along boudary
+      // edges should be investigated...
       MMG5_lenedg          = MMG5_lenedg_ani;
+      // lenedgCoor has to be used to compute "straight" edge length from
+      // coordinates
       MMG3D_lenedgCoor     = MMG5_lenedgCoor_ani;
+      // lenSurfEdg can be called only from a boundary edge: curve length for
+      // aniso metric from point indices
       MMG5_lenSurfEdg      = MMG5_lenSurfEdg_ani;
     }
     MMG5_intmet          = MMG5_intmet_ani;
+    // warning the lenedg_ani function we may erroneously approximate the length
+    // of a curve boundary edge by the length of the straight edge if the
+    // "MG_BDY" tag is missing along the edge.
     MMG5_lenedgspl       = MMG5_lenedg_ani;
     MMG5_movintpt        = MMG5_movintpt_ani;
     MMG5_movbdyregpt     = MMG5_movbdyregpt_ani;
@@ -97,8 +117,14 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     MMG5_caltri          = MMG5_caltri_iso;
     MMG3D_doSol          = MMG3D_doSol_iso;
+    // same as MMG5_lenSurfEdg_iso for iso metric. The edge can be boundary or
+    // intenal but the test relies on the MG_BDY tag that may be missing along
+    // boundary edges (it doesn't matter in iso mode as we always compute the
+    // "straight" edge length). It starts from tetra pointer and edge index.
     MMG5_lenedg          = MMG5_lenedg_iso;
+    // lenedgCoor has to be used to compute "straight" edge length from coordinates
     MMG3D_lenedgCoor     = MMG5_lenedgCoor_iso;
+    // Straight edge length (edge is guessed to be a surface edge) from point indices
     MMG5_lenSurfEdg      = MMG5_lenSurfEdg_iso;
     MMG5_intmet          = MMG5_intmet_iso;
     MMG5_lenedgspl       = MMG5_lenedg_iso;
@@ -197,11 +223,11 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 /**
  * \param argc number of command line args
  * \param argv command line args
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- * \param sol pointer toward the solution (level-set or displacement)
- * \param mmgArgc pointer toward the number of appened unknown args (to fill)
- * \param mmgArgv pointer toward the appened unknown args (to fill)
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
+ * \param sol pointer to the solution (level-set or displacement)
+ * \param mmgArgc pointer to the number of appened unknown args (to fill)
+ * \param mmgArgv pointer to the appened unknown args (to fill)
  *
  * \return 1 if success, 0 if fail (missing value for argument)
  *
@@ -1402,9 +1428,15 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       ier = MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         if ( (!metRidTyp) && met->m && met->size>1 ) {
+          // Warning: for aniso metrics, we may erroneously approximate the
+          // length of a curve boundary edge by the length of the straight edge
+          // if the "MG_BDY" tag is missing along the edge.
           len = MMG5_lenedg(mesh,met,ia,pt);
         }
         else {
+          // Warning: we may erroneously approximate the length of a curve
+          // boundary edge by the length of the straight edge if the "MG_BDY"
+          // tag is missing along the edge.
           len = MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
 
@@ -1420,8 +1452,8 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  * \param ani 1 for aniso metric, 0 for iso one
  *
  * \return 0 if fail, 1 if succeed.
@@ -1470,8 +1502,8 @@ int MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -1545,8 +1577,8 @@ int MMG3D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if succeed, 0 if fail
  *

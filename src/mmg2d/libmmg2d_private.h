@@ -185,7 +185,7 @@ static const unsigned int MMG2D_idir[5] = {0,1,2,0,1};
 
 /* Prototypes */
 /*zaldy*/
-MMG5_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag);
+MMG5_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],uint16_t tag);
 void MMG2D_delPt(MMG5_pMesh mesh,MMG5_int ip) ;
 void MMG5_delEdge(MMG5_pMesh mesh,MMG5_int iel);
 MMG5_int MMG2D_newElt(MMG5_pMesh mesh);

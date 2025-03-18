@@ -49,7 +49,7 @@ extern int8_t  ddb;
  * splitted).
  *
  */
-static inline
+inline
 void MMG3D_split1_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued) {
 
   /* default is case 1 */
@@ -82,8 +82,8 @@ void MMG3D_split1_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \return 0 if split leads to invalid situation, else 1.
@@ -122,13 +122,11 @@ int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
- *
- * \return 0 if fail, 1 otherwise
  *
  * Split 1 edge of tetra \a k.
  *
@@ -140,6 +138,7 @@ int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_int            iel;
   int8_t              i,isxt,isxt1;
   uint8_t             tau[4];
+  int16_t             ftag[4];
   const uint8_t       *taued;
 
   /* create a new tetra */
@@ -170,13 +169,18 @@ int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   MMG3D_split1_cfg(pt->flag,tau,&taued);
 
+  /* Store face tags from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt.ftag[i] & ~MG_REF);
+  }
+
   /* Generic formulation of split of 1 edge */
   pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
 
   if ( pt->xt ) {
     /* Reset edge tag */
-    xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
-    xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
+    xt.tag [taued[3]] = ftag[tau[3]];  xt.tag [taued[4]] = ftag[tau[2]];
+    xt1.tag[taued[1]] = ftag[tau[3]];  xt1.tag[taued[2]] = ftag[tau[2]];
     xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
     xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
     xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
@@ -244,8 +248,9 @@ nextstep1:
   }
   return 1;
 }
+
 /**
- * \param mesh  pointer toward the mesh structure
+ * \param mesh  pointer to the mesh structure
  * \param start index of the tetra that we want to split
  * \param iface local index of the boundary face that we want to split
  * \param ia    local index of the boundary edge that we want to split
@@ -306,10 +311,11 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , MMG5_int  start, int8_t   iface, int
 
   return  ier;
 }
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric.
- * \param list pointer toward the edge shell.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric.
+ * \param list pointer to the edge shell.
  * \param ret size of the edge shell.
  * \param ip new point index.
  *
@@ -450,7 +456,7 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_in
 }
 
 /**
- * \param mesh  pointer toward the mesh structure
+ * \param mesh  pointer to the mesh structure
  * \param start index of the working tetra
  * \param iface local index of the boundary face of the tetra \a start
  * \param ia    local index on face \a iface of the edge through which we seek
@@ -497,10 +503,10 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , MMG5_int start, int8_t iface, int ia,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param ip index of new point.
  * \param k position of the tetra to split in the shell of edge.
- * \param list pointer toward the shell of edge.
+ * \param list pointer to the shell of edge.
  * \param newtet list of indices of created tetra
  * \param tau vertices permutation
  *
@@ -516,6 +522,7 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,int64_t *list,MMG
   MMG5_pxTetra         pxt0;
   MMG5_int             iel;
   MMG5_int             jel;
+  int16_t              ftag[4];
   int8_t               ie,isxt,isxt1,i;
   const uint8_t       *taued;
 
@@ -540,12 +547,17 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,int64_t *list,MMG
   MG_SET(flag,ie);
   MMG3D_split1_cfg(flag,tau,&taued);
 
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt.ftag[i] & ~MG_REF);
+  }
+
   /* Generic formulation of split of 1 edge */
   pt->v[tau[1]] = pt1->v[tau[0]] = ip;
   if ( pt->xt ) {
     /* Reset edge tag */
-    xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
-    xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
+    xt.tag [taued[3]] = ftag[tau[3]];  xt.tag [taued[4]] = ftag[tau[2]];
+    xt1.tag[taued[1]] = ftag[tau[3]];  xt1.tag[taued[2]] = ftag[tau[2]];
     xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
     xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
     xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
@@ -598,9 +610,9 @@ int MMG5_split1b_eltspl(MMG5_pMesh mesh,MMG5_int ip,MMG5_int k,int64_t *list,MMG
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param list pointer toward the shell of edge.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param list pointer to the shell of edge.
  * \param ret size of the shell of edge.
  * \param ip idex of new point.
  * \param cas flag to watch the length of the new edges.
@@ -636,8 +648,14 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
       for (i=0; i<6; i++) {
         pt   = &mesh->tetra[list[j]/6];
         if ( (!metRidTyp) && met->m && met->size>1 )
+          // Warning: we may erroneously approximate the length of a curve
+          // boundary edge by the length of the straight edge if the "MG_BDY"
+          // tag is missing along the edge.
           len = MMG5_lenedg33_ani(mesh,met,i,pt);
         else
+          // Warning: for aniso metrics we may erroneously approximate the
+          // length of a curve boundary edge by the length of the straight edge
+          // if the "MG_BDY" tag is missing along the edge.
           len  = MMG5_lenedg(mesh,met,i,pt);
         if ( len < lmin) {
           lmin = len;
@@ -672,9 +690,17 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
         }
       }
       if ( (!metRidTyp) && met->m && met->size>1 )
+        /* Computation of straight edge length */
         len = MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
       else
+        /* if edge is marked MG_BDY, curve length is computed, if edge is not
+         * MG_BDY, straight length is computed (even if the edge is indeed along
+         * the boundary but misses the tag).  // Algiane 06/24: to check and fix
+         * or comment (I don't know if it is useful to compute the accurate
+         * curve length here)
+         */
         len = MMG5_lenedgspl(mesh,met,taued[5],pt0);
+
       if ( len < lmin )  break;
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
 
@@ -686,8 +712,15 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
       }
 
       if ( (!metRidTyp) && met->m && met->size>1 )
+        /* Computation of straight edge length */
         len = MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
       else
+        /* if edge is marked MG_BDY, curve length is computed, if edge is not
+         * MG_BDY, straight length is computed (even if the edge is indeed along
+         * the boundary but misses the tag).  // Algiane 06/24: to check and fix
+         * or comment (I don't know if it is useful to compute the accurate
+         * curve length here)
+         */
         len = MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
     }
@@ -991,18 +1024,17 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int64_t *list, int ret, MMG5_int
 
 /**
  * \param flag flag to detect the splitting configuration
+ * \param v indices of the tetra nodes (global node indices if called from ParMmg in ls mode)
  * \param tau vertices permutation
  * \param taued edges permutation
- * \param pt tetra in which the splitting is performed
  *
  * Compute vertices and edges permutation for the split of 2 edge along the same
  * face. The configuration flag is computed such as the i^th bit of flag is 1 if
  * the i^th edge is splitted).
  *
  */
-static inline
-uint8_t MMG3D_split2sf_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTetra pt) {
-  uint8_t imin;
+inline
+void MMG3D_split2sf_cfg(MMG5_int flag,MMG5_int v[4],uint8_t *tau,const uint8_t **taued,uint8_t *imin) {
 
   /* identity is case 48 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -1054,15 +1086,12 @@ uint8_t MMG3D_split2sf_cfg(MMG5_int flag,uint8_t *tau,const uint8_t **taued,MMG5
     break;
   }
 
-  imin = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2] ;
-
-  return imin;
+  (*imin) = (v[tau[1]] < v[tau[2]]) ? tau[1] : tau[2] ;
 }
 
-
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -1083,7 +1112,7 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  imin = MMG3D_split2sf_cfg(pt->flag,tau,&taued,pt);
+  MMG3D_split2sf_cfg(pt->flag,pt->v,tau,&taued,&imin);
 
   /* Test orientation of the three tets to be created */
 
@@ -1121,7 +1150,7 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param newtet list of indices of the new tetra.
  * \param ne number of tetra in the list.
  * \param pt list of tetra.
@@ -1174,8 +1203,8 @@ int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,MMG5_int *newtet,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ne number of tetra in the list
  * \param newtet list of tetra indices
  * \param pt list of tetra
@@ -1213,10 +1242,30 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * Split of two edges that belong to a common face : 1 tetra becomes 3
+ *
+ */
+int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp){
+  MMG5_pTetra    pt;
+
+  /* Tetra to be split */
+  pt  = &mesh->tetra[k];
+
+  return MMG5_split2sf_globNum(mesh,met,k,vx,pt->v,metRidTyp);
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
  * \param metRidTyp metric storage (classic or special)
  *
  * \return 0 if fail, 1 otherwise
@@ -1224,14 +1273,15 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
  * Split of two edges that belong to a common face : 1 tetra becomes 3
  *
  */
-int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp){
+int MMG5_split2sf_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp){
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
   int                 i,flg;
   MMG5_int            newtet[3];
-  int8_t              imin,firstxt,isxt[3];
-  uint8_t             tau[4];
+  int8_t              firstxt,isxt[3];
+  int16_t             ftag[4];
+  uint8_t             tau[4],imin;
   const uint8_t       *taued;
   const int           ne=3;
 
@@ -1240,46 +1290,56 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   pt[0]->flag = 0;
   newtet[0]=k;
 
+  /* Determine tau, taued and imin the condition for vertices permutation */
+  /* Remark: It is mandatory to call MMG3D_split2sf_cfg before MMG3D_crea_newTetra.
+             Indeed, vGlobNum is set in MMG3D_split2sf as being pt->v. This value might
+             point to a wrong memory address if the tetra array is reallocated
+             in MMG3D_crea_newTetra before the use of vGlobNum */
+  MMG3D_split2sf_cfg(flg,vGlobNum,tau,&taued,&imin);
+
   /* Create 2 new tetra */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
-  imin = MMG3D_split2sf_cfg(flg,tau,&taued,pt[0]);
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
+  }
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
-  pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
-  xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[1]] = 0;
-  xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[0]] = 0;
-  xt[0].edg[taued[1]] = 0;  xt[0].edg[taued[3]] = 0;
+  pt[0]->v[tau[1]]  = vx[taued[4]]  ;  pt[0]->v[tau[2]] = vx[taued[5]];
+  xt[0].tag[taued[0]] = ftag[tau[2]];  xt[0].tag[taued[1]] = ftag[tau[1]];
+  xt[0].tag[taued[3]] = ftag[tau[0]];  xt[0].edg[taued[0]] = 0;
+  xt[0].edg[taued[1]] = 0;             xt[0].edg[taued[3]] = 0;
   xt[0].ref[  tau[3]] = 0;  xt[0].ftag[ tau[3]] = 0;  MG_SET(xt[0].ori, tau[3]);
 
   if ( imin == tau[1] ) {
     pt[1]->v[tau[2]] = vx[taued[5]];  pt[1]->v[tau[3]] = vx[taued[4]];
     pt[2]->v[tau[3]] = vx[taued[5]];
 
-    xt[1].tag[taued[1]] = 0;  xt[1].tag[taued[2]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[5]] = 0;
-    xt[1].edg[taued[1]] = 0;  xt[1].edg[taued[2]] = 0;
-    xt[1].edg[taued[3]] = 0;  xt[1].edg[taued[5]] = 0;
+    xt[1].tag[taued[1]] = ftag[tau[1]];  xt[1].tag[taued[2]] = ftag[tau[2]];
+    xt[1].tag[taued[3]] = ftag[tau[0]];  xt[1].tag[taued[5]] = ftag[tau[0]];
+    xt[1].edg[taued[1]] = 0;   xt[1].edg[taued[2]] = 0;
+    xt[1].edg[taued[3]] = 0;   xt[1].edg[taued[5]] = 0;
     xt[1].ref [ tau[1]] = 0;  xt[1].ref [ tau[3]] = 0;
     xt[1].ftag[ tau[1]] = 0;  xt[1].ftag[ tau[3]] = 0;
     MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[3]);
 
-    xt[2].tag[taued[2]] = 0;  xt[2].tag[taued[4]] = 0;
-    xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[4]] = 0;
+    xt[2].tag[taued[2]] = ftag[tau[1]];  xt[2].tag[taued[4]] = ftag[tau[0]];
+    xt[2].edg[taued[2]] = 0 ;  xt[2].edg[taued[4]] = 0;
     xt[2].ref[  tau[2]] = 0;  xt[2].ftag[ tau[2]] = 0;  MG_SET(xt[2].ori, tau[2]);
   }
   else {
     pt[1]->v[tau[3]] = vx[taued[4]];
     pt[2]->v[tau[1]] = vx[taued[4]];  pt[2]->v[tau[3]] = vx[taued[5]];
 
-    xt[1].tag[taued[2]] = 0;  xt[1].tag[taued[5]] = 0;
-    xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[5]] = 0;
+    xt[1].tag[taued[2]] = ftag[tau[2]];  xt[1].tag[taued[5]] = ftag[tau[0]];
+    xt[1].edg[taued[2]] = 0 ;  xt[1].edg[taued[5]] = 0;
     xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;  MG_SET(xt[1].ori, tau[1]);
 
-    xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[4]] = 0;
+    xt[2].tag[taued[0]] = ftag[tau[2]];  xt[2].tag[taued[2]] = ftag[tau[1]];
+    xt[2].tag[taued[3]] = ftag[tau[0]];  xt[2].tag[taued[4]] = ftag[tau[0]];
     xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[2]] = 0;
     xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[4]] = 0;
     xt[2].ref [ tau[2]] = 0;  xt[2].ref [ tau[3]] = 0;
@@ -1354,8 +1414,8 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -1415,8 +1475,8 @@ int MMG3D_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
@@ -1433,6 +1493,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   int                 i;
   MMG5_int            newtet[4];
   int8_t              flg,firstxt,isxt[4];
+  int16_t             ftag[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
   const int           ne=4;
@@ -1461,35 +1522,40 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     break;
   }
 
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
+  }
+
   /* Generic formulation for the split of 2 opposite edges */
   pt[0]->v[tau[1]] = vx[taued[0]];  pt[0]->v[tau[2]] = vx[taued[5]];
   pt[1]->v[tau[1]] = vx[taued[0]];  pt[1]->v[tau[3]] = vx[taued[5]];
   pt[2]->v[tau[0]] = vx[taued[0]];  pt[2]->v[tau[2]] = vx[taued[5]];
   pt[3]->v[tau[0]] = vx[taued[0]];  pt[3]->v[tau[3]] = vx[taued[5]];
 
-  xt[0].tag[taued[1]] = 0;  xt[0].tag[taued[3]] = 0;
-  xt[0].tag[taued[4]] = 0;  xt[0].edg[taued[1]] = 0;
+  xt[0].tag[taued[1]] = ftag[tau[1]];  xt[0].tag[taued[3]] = 0;
+  xt[0].tag[taued[4]] = ftag[tau[2]];  xt[0].edg[taued[1]] = 0;
   xt[0].edg[taued[3]] = 0;  xt[0].edg[taued[4]] = 0;
   xt[0].ref [ tau[0]] = 0;  xt[0].ref [ tau[3]] = 0;
   xt[0].ftag[ tau[0]] = 0;  xt[0].ftag[ tau[3]] = 0;
   MG_SET(xt[0].ori, tau[0]);  MG_SET(xt[0].ori, tau[3]);
 
-  xt[1].tag[taued[2]] = 0;  xt[1].tag[taued[3]] = 0;
+  xt[1].tag[taued[2]] = ftag[tau[1]];  xt[1].tag[taued[3]] = ftag[tau[3]];
   xt[1].tag[taued[4]] = 0;  xt[1].edg[taued[2]] = 0;
   xt[1].edg[taued[3]] = 0;  xt[1].edg[taued[4]] = 0;
   xt[1].ref [ tau[0]] = 0;  xt[1].ref [ tau[2]] = 0;
   xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[2]] = 0;
   MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[2]);
 
-  xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-  xt[2].tag[taued[3]] = 0;  xt[2].edg[taued[1]] = 0;
+  xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = ftag[tau[2]];
+  xt[2].tag[taued[3]] = ftag[tau[0]];  xt[2].edg[taued[1]] = 0;
   xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[3]] = 0;
   xt[2].ref [ tau[1]] = 0;  xt[2].ref [ tau[3]] = 0;
   xt[2].ftag[ tau[1]] = 0;  xt[2].ftag[ tau[3]] = 0;
   MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[3]);
 
-  xt[3].tag[taued[1]] = 0;  xt[3].tag[taued[2]] = 0;
-  xt[3].tag[taued[4]] = 0;  xt[3].edg[taued[1]] = 0;
+  xt[3].tag[taued[1]] = ftag[tau[3]];  xt[3].tag[taued[2]] = 0;
+  xt[3].tag[taued[4]] = ftag[tau[0]];  xt[3].edg[taued[1]] = 0;
   xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[4]] = 0;
   xt[3].ref [ tau[1]] = 0;  xt[3].ref [ tau[2]] = 0;
   xt[3].ftag[ tau[1]] = 0;  xt[3].ftag[ tau[2]] = 0;
@@ -1627,8 +1693,8 @@ int MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
@@ -1645,6 +1711,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   int                 i;
   MMG5_int            newtet[4];
   int8_t              flg,firstxt,isxt[4];
+  int16_t             ftag[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
   const int           ne=4;
@@ -1657,6 +1724,11 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   /* create 3 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
+  }
+
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
   }
 
   /* update vertices, case 11 is default */
@@ -1683,24 +1755,24 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   pt[2]->v[tau[0]] = vx[taued[1]];  pt[2]->v[tau[1]] = vx[taued[3]];
   pt[3]->v[tau[0]] = vx[taued[0]];  pt[3]->v[tau[1]] = vx[taued[3]];  pt[3]->v[tau[2]] = vx[taued[1]];
 
-  xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-  xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
+  xt[0].tag[taued[3]] = ftag[tau[3]];  xt[0].tag[taued[4]] = ftag[tau[2]];
+  xt[0].tag[taued[5]] = ftag[tau[1]];  xt[0].edg[taued[3]] = 0;
   xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
   xt[0].ref[  tau[0]] = 0;  xt[0].ftag[ tau[0]] = 0;  MG_SET(xt[0].ori, tau[0]);
 
-  xt[1].tag[taued[1]] = 0;  xt[1].tag[taued[2]] = 0;
-  xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[1]] = 0;
+  xt[1].tag[taued[1]] = ftag[tau[3]];  xt[1].tag[taued[2]] = ftag[tau[2]];
+  xt[1].tag[taued[5]] = ftag[tau[0]];  xt[1].edg[taued[1]] = 0;
   xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[5]] = 0;
   xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;  MG_SET(xt[1].ori, tau[1]);
 
-  xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
-  xt[2].tag[taued[4]] = 0;  xt[2].edg[taued[0]] = 0;
+  xt[2].tag[taued[0]] = ftag[tau[3]];  xt[2].tag[taued[2]] = ftag[tau[1]];
+  xt[2].tag[taued[4]] = ftag[tau[0]];  xt[2].edg[taued[0]] = 0;
   xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[4]] = 0;
   xt[2].ref[  tau[2]] = 0;  xt[2].ftag[ tau[2]] = 0;  MG_SET(xt[2].ori, tau[2]);
 
-  xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
-  xt[3].tag[taued[2]] = 0;  xt[3].tag[taued[3]] = 0;
-  xt[3].tag[taued[4]] = 0;  xt[3].tag[taued[5]] = 0;
+  xt[3].tag[taued[0]] = ftag[tau[3]];  xt[3].tag[taued[1]] = ftag[tau[3]];
+  xt[3].tag[taued[2]] = ftag[tau[2]];  xt[3].tag[taued[3]] = ftag[tau[3]];
+  xt[3].tag[taued[4]] = ftag[tau[0]];  xt[3].tag[taued[5]] = ftag[tau[1]];
   xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[1]] = 0;
   xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[3]] = 0;
   xt[3].edg[taued[4]] = 0;  xt[3].edg[taued[5]] = 0;
@@ -1776,8 +1848,68 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param flag initial tetra
+ * \param v indices of the tetra nodes (global node indices if called from ParMmg in ls mode)
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param ia first  condition to choose the split
+ * \param ib second condition to choose the split
+ *
+ * Set permutation of vertices for the split of 3 edges in cone configuration.
+ * Reference configuration 7.
+ *
+ */
+inline
+void MMG3D_split3cone_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
+                          const uint8_t **taued,uint8_t *ia,uint8_t *ib) {
+
+
+  /* Set permutation of vertices : reference configuration 7 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  (*taued) = &MMG5_permedge[0][0];
+
+  switch(flag) {
+  case 25:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[4][0];
+    break;
+
+  case 42:
+    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[6][0];
+    break;
+
+  case 52:
+    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
+    (*taued) = &MMG5_permedge[10][0];
+    break;
+  }
+
+  /* Determine the condition to choose split pattern to apply  */
+  /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
+  if ( v[tau[1]] < v[tau[2]] ) {
+    (*ia) = tau[1];
+    (*ib) = tau[2];
+  }
+  else {
+    (*ia) = tau[2];
+    (*ib) = tau[1];
+  }
+
+  if ( v[tau[3]] < v[(*ia)] ) {
+    (*ib) = (*ia);
+    (*ia) = tau[3];
+  }
+  else {
+    if ( v[tau[3]] < v[(*ib)] ) {
+      (*ib) = tau[3];
+    }
+  }
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -1798,49 +1930,8 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  /* identity is case 7 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-
-  switch(pt->flag) {
-  case 25:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-
-  case 42:
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-
-  case 52:
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
-
-  /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
-  /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
-  if ( pt->v[tau[1]] < pt->v[tau[2]] ) {
-    ia = tau[1];
-    ib = tau[2];
-  }
-  else {
-    ia = tau[2];
-    ib = tau[1];
-  }
-
-  if ( pt->v[tau[3]] < pt->v[ia] ) {
-    ib = ia;
-    ia = tau[3];
-  }
-  else {
-    if ( pt->v[tau[3]] < pt->v[ib] ) {
-      ib = tau[3];
-    }
-    else {
-    }
-  }
+  /* Determine tau, taued, ia and ib the conditions for vertices permutation */
+  MMG3D_split3cone_cfg(pt->flag,pt->v,tau,&taued,&ia,&ib);
 
   /* Check orientation of the 4 newly created tets */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -1956,25 +2047,46 @@ int MMG3D_split3cone_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
- *
- * \return 0 if fail, 1 otherwise
  *
  * Split 3 edge in cone configuration
  *
  */
 int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
+  MMG5_pTetra    pt;
+
+  /* Tetra to be split */
+  pt  = &mesh->tetra[k];
+
+  return MMG5_split3cone_globNum(mesh,met,k,vx,pt->v,metRidTyp);
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 3 opposite edges in a tetra
+ *
+ */
+int MMG5_split3cone_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp){
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
   MMG5_int            newtet[4];
-  int8_t              flg,firstxt,isxt[4],ia,ib;
-  uint8_t             tau[4];
+  int8_t              flg,firstxt,isxt[4];
+  int16_t             ftag[4];
+  uint8_t             tau[4],ia,ib;
   const uint8_t       *taued;
   const int           ne=4;
 
@@ -1983,58 +2095,27 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
   pt[0]->flag  = 0;
   newtet[0]=k;
 
-  /* create 3 new tetras */
+  /* Determine tau, taued, ia and ib the conditions for vertices permutation */
+  /* Remark: It is mandatory to call MMG3D_split3cone_cfg before MMG3D_crea_newTetra.
+             Indeed, vGlobNum is set in MMG3D_split3cone as being pt->v. This value might
+             point to a wrong memory address if the tetra array is reallocated
+             in MMG3D_crea_newTetra before the use of vGlobNum */
+  MMG3D_split3cone_cfg(flg,vGlobNum,tau,&taued,&ia,&ib);
+
+  /* Create 3 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
-  /* Set permutation of vertices : reference configuration is 7 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-
-  switch(flg) {
-  case 25:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-
-  case 42:
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-
-  case 52:
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
   }
 
   /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
-  /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
-  if ( (pt[0])->v[tau[1]] < (pt[0])->v[tau[2]] ) {
-    ia = tau[1];
-    ib = tau[2];
-  }
-  else {
-    ia = tau[2];
-    ib = tau[1];
-  }
-
-  if ( (pt[0])->v[tau[3]] < (pt[0])->v[ia] ) {
-    ib = ia;
-    ia = tau[3];
-  }
-  else {
-    if ( (pt[0])->v[tau[3]] < (pt[0])->v[ib] ) {
-      ib = tau[3];
-    }
-    else {
-    }
-  }
-
   pt[0]->v[tau[1]] = vx[taued[0]] ; pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
-  xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-  xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
+  xt[0].tag[taued[3]] = ftag[tau[3]];  xt[0].tag[taued[4]] = ftag[tau[2]];
+  xt[0].tag[taued[5]] = ftag[tau[1]];  xt[0].edg[taued[3]] = 0;
   xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
   xt[0].ref [ tau[0]] = 0;
   xt[0].ftag[ tau[0]] = 0;
@@ -2042,9 +2123,9 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
 
   if ( ia == tau[3] ) {
     pt[1]->v[tau[0]] = vx[taued[2]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]];
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
-    xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[0]] = 0;
+    xt[1].tag[taued[0]] = ftag[tau[2]];  xt[1].tag[taued[1]] = ftag[tau[1]];
+    xt[1].tag[taued[3]] = ftag[tau[3]];  xt[1].tag[taued[4]] = ftag[tau[2]];
+    xt[1].tag[taued[5]] = ftag[tau[1]];  xt[1].edg[taued[0]] = 0;
     xt[1].edg[taued[1]] = 0;  xt[1].edg[taued[3]] = 0;
     xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
     xt[1].ref [ tau[0]] = 0;  xt[1].ref [ tau[3]] = 0;
@@ -2053,8 +2134,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
 
     if ( ib == tau[1] ) {
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
-      xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-      xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[5]] = 0;
+      xt[2].tag[taued[1]] = ftag[tau[3]];  xt[2].tag[taued[2]] = ftag[tau[2]];
+      xt[2].tag[taued[3]] = ftag[tau[3]];  xt[2].tag[taued[5]] = ftag[tau[1]];
       xt[2].edg[taued[1]] = 0;  xt[2].edg[taued[2]] = 0;
       xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[5]] = 0;
       xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[1]] = 0;
@@ -2062,7 +2143,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[1]);
 
       pt[3]->v[tau[0]] = vx[taued[1]] ;
-      xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
+      xt[3].tag[taued[0]] = ftag[tau[3]];  xt[3].tag[taued[2]] = ftag[tau[1]];
       xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[2]] = 0;
       xt[3].ref [ tau[2]] = 0;
       xt[3].ftag[ tau[2]] = 0;
@@ -2072,8 +2153,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       assert(ib == tau[2]);
 
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
-      xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
-      xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[4]] = 0;
+      xt[2].tag[taued[0]] = ftag[tau[3]];  xt[2].tag[taued[2]] = ftag[tau[1]];
+      xt[2].tag[taued[3]] = ftag[tau[3]];  xt[2].tag[taued[4]] = ftag[tau[2]];
       xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[2]] = 0;
       xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[4]] = 0;
       xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[2]] = 0;
@@ -2081,7 +2162,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[2]);
 
       pt[3]->v[tau[0]] = vx[taued[0]] ;
-      xt[3].tag[taued[1]] = 0;  xt[3].tag[taued[2]] = 0;
+      xt[3].tag[taued[1]] = ftag[tau[3]];  xt[3].tag[taued[2]] = ftag[tau[2]];
       xt[3].edg[taued[1]] = 0;  xt[3].edg[taued[2]] = 0;
       xt[3].ref [ tau[1]] = 0;
       xt[3].ftag[ tau[1]] = 0;
@@ -2091,9 +2172,9 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
 
   else if (ia == tau[2] ) {
     pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[2]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
-    xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[0]] = 0;
+    xt[1].tag[taued[0]] = ftag[tau[3]];  xt[1].tag[taued[2]] = ftag[tau[1]];
+    xt[1].tag[taued[3]] = ftag[tau[3]];  xt[1].tag[taued[4]] = ftag[tau[2]];
+    xt[1].tag[taued[5]] = ftag[tau[1]];  xt[1].edg[taued[0]] = 0;
     xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[3]] = 0;
     xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
     xt[1].ref [ tau[0]] = 0;  xt[1].ref [ tau[2]] = 0;
@@ -2102,8 +2183,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
 
     if ( ib == tau[3] ) {
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
-      xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[1]] = 0;
-      xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[4]] = 0;
+      xt[2].tag[taued[0]] = ftag[tau[2]];  xt[2].tag[taued[1]] = ftag[tau[1]];
+      xt[2].tag[taued[3]] = ftag[tau[3]];  xt[2].tag[taued[4]] = ftag[tau[2]];
       xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[1]] = 0;
       xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[4]] = 0;
       xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[3]] = 0;
@@ -2111,7 +2192,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[3]);
 
       pt[3]->v[tau[0]] = vx[taued[0]] ;
-      xt[3].tag[taued[1]] = 0;  xt[3].tag[taued[2]] = 0;
+      xt[3].tag[taued[1]] = ftag[tau[3]];  xt[3].tag[taued[2]] = ftag[tau[2]];
       xt[3].edg[taued[1]] = 0;  xt[3].edg[taued[2]] = 0;
       xt[3].ref [ tau[1]] = 0;
       xt[3].ftag[ tau[1]] = 0;
@@ -2121,8 +2202,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       assert(ib == tau[1]);
 
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
-      xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-      xt[2].tag[taued[4]] = 0;  xt[2].tag[taued[5]] = 0;
+      xt[2].tag[taued[1]] = ftag[tau[3]];  xt[2].tag[taued[2]] = ftag[tau[2]];
+      xt[2].tag[taued[4]] = ftag[tau[2]];  xt[2].tag[taued[5]] = ftag[tau[1]];
       xt[2].edg[taued[1]] = 0;  xt[2].edg[taued[2]] = 0;
       xt[2].edg[taued[4]] = 0;  xt[2].edg[taued[5]] = 0;
       xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[1]] = 0;
@@ -2130,7 +2211,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[1]);
 
       pt[3]->v[tau[0]] = vx[taued[2]] ;
-      xt[3].tag[taued[0]] = 0;    xt[3].tag[taued[1]] = 0;
+      xt[3].tag[taued[0]] = ftag[tau[2]];    xt[3].tag[taued[1]] = ftag[tau[1]];
       xt[3].edg[taued[0]] = 0;    xt[3].edg[taued[1]] = 0;
       xt[3].ref [ tau[3]] = 0;
       xt[3].ftag[ tau[3]] = 0;
@@ -2141,9 +2222,9 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
     assert(ia == tau[1]);
 
     pt[1]->v[tau[0]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].tag[taued[1]] = 0;  xt[1].tag[taued[2]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
-    xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[1]] = 0;
+    xt[1].tag[taued[1]] = ftag[tau[3]];  xt[1].tag[taued[2]] = ftag[tau[2]];
+    xt[1].tag[taued[3]] = ftag[tau[3]];  xt[1].tag[taued[4]] = ftag[tau[2]];
+    xt[1].tag[taued[5]] = ftag[tau[1]];  xt[1].edg[taued[1]] = 0;
     xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[3]] = 0;
     xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
     xt[1].ref [ tau[0]] = 0;  xt[1].ref [ tau[1]] = 0;
@@ -2152,8 +2233,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
 
     if ( ib == tau[2] ) {
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
-      xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
-      xt[2].tag[taued[4]] = 0;  xt[2].tag[taued[5]] = 0;
+      xt[2].tag[taued[0]] = ftag[tau[3]];  xt[2].tag[taued[2]] = ftag[tau[1]];
+      xt[2].tag[taued[4]] = ftag[tau[2]];  xt[2].tag[taued[5]] = ftag[tau[1]];
       xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[2]] = 0;
       xt[2].edg[taued[4]] = 0;  xt[2].edg[taued[5]] = 0;
       xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[2]] = 0;
@@ -2161,7 +2242,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[2]);
 
       pt[3]->v[tau[0]] = vx[taued[2]] ;
-      xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
+      xt[3].tag[taued[0]] = ftag[tau[2]];  xt[3].tag[taued[1]] = ftag[tau[1]];
       xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[1]] = 0;
       xt[3].ref [ tau[3]] = 0;
       xt[3].ftag[ tau[3]] = 0;
@@ -2171,8 +2252,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       assert(ib == tau[3]);
 
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
-      xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[1]] = 0;
-      xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[5]] = 0;
+      xt[2].tag[taued[0]] = ftag[tau[2]];  xt[2].tag[taued[1]] = ftag[tau[1]];
+      xt[2].tag[taued[3]] = ftag[tau[3]];  xt[2].tag[taued[5]] = ftag[tau[1]];
       xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[1]] = 0;
       xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[5]] = 0;
       xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[3]] = 0;
@@ -2180,7 +2261,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
       MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[3]);
 
       pt[3]->v[tau[0]] = vx[taued[1]] ;
-      xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
+      xt[3].tag[taued[0]] = ftag[tau[3]];  xt[3].tag[taued[2]] = ftag[tau[1]];
       xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[2]] = 0;
       xt[3].ref [ tau[2]] = 0;
       xt[3].ftag[ tau[2]] = 0;
@@ -2253,7 +2334,6 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
   /* Quality update */
   MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
-
   return 1;
 }
 
@@ -2282,7 +2362,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
  *
  */
 static inline
-void MMG3D_configSplit3op(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split3op_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                            const uint8_t **taued,
                            uint8_t sym[4],uint8_t symed[6],
                            uint8_t *ip0,uint8_t *ip1,
@@ -2421,6 +2501,7 @@ void MMG3D_configSplit3op(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
   assert(vx[(*ie3)] <= 0);
   assert(vx[(*ie4)] <= 0);
 
+  /* Determine the condition to choose split pattern to apply  */
   (*imin03) = (pt->v[(*ip0)] < pt->v[(*ip3)]) ? (*ip0) : (*ip3);
   (*imin12) = (pt->v[(*ip1)] < pt->v[(*ip2)]) ? (*ip1) : (*ip2);
 
@@ -2428,8 +2509,8 @@ void MMG3D_configSplit3op(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -2452,7 +2533,7 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
-  MMG3D_configSplit3op(pt,vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+  MMG3D_split3op_cfg(pt,vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -2559,8 +2640,8 @@ int MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
@@ -2575,9 +2656,10 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
   MMG5_xTetra          xt[5];
   MMG5_pxTetra         pxt0;
   MMG5_int             iel;
-  MMG5_int             newtet[5];
+  MMG5_int             newtet[5],ref[4];
   uint8_t              imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
   uint8_t              ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
+  int16_t              ftag[4];
   const uint8_t        *taued=NULL;
   const int            ne=4;
 
@@ -2585,7 +2667,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
   newtet[0]=k;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
-  MMG3D_configSplit3op(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+  MMG3D_split3op_cfg(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
   pt[0]->flag  = 0;
 
@@ -2594,6 +2676,11 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     return 0;
   }
   newtet[4] = 0;
+
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
+  }
 
   if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
     iel = MMG3D_newElt(mesh);
@@ -2625,8 +2712,8 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
   /* Generic formulation of split of 3 edges in op configuration (edges 0,1,5 splitted) */
   if ( (imin12 == ip2) && (imin03 == ip0) ) {
     pt[0]->v[ip0] = vx[ie1] ;  pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip3] = vx[ie5] ;
-    xt[0].tag[ie0] = 0;  xt[0].tag[ie2] = 0;
-    xt[0].tag[ie3] = 0;  xt[0].tag[ie4] = 0;
+    xt[0].tag[ie0] = ftag[ip3];  xt[0].tag[ie2] = ftag[ip1];
+    xt[0].tag[ie3] = ftag[ip3];  xt[0].tag[ie4] = 0;
     xt[0].edg[ie0] = 0;  xt[0].edg[ie2] = 0;
     xt[0].edg[ie3] = 0;  xt[0].edg[ie4] = 0;
     xt[0].ref [ip0] = 0 ; xt[0].ref [ip2] = 0 ;
@@ -2634,24 +2721,24 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     MG_SET(xt[0].ori, ip0); MG_SET(xt[0].ori, ip2);
 
     pt[1]->v[ip0] = vx[ie0] ; pt[1]->v[ip3] = vx[ie5] ;
-    xt[1].tag[ie1] = 0;  xt[1].tag[ie2] = 0;
-    xt[1].tag[ie4] = 0;  xt[1].edg[ie1] = 0;
+    xt[1].tag[ie1] = ftag[ip3];  xt[1].tag[ie2] = 0;
+    xt[1].tag[ie4] = ftag[ip0];  xt[1].edg[ie1] = 0;
     xt[1].edg[ie2] = 0;  xt[1].edg[ie4] = 0;
     xt[1].ref [ip1] = 0 ; xt[1] .ref[ip2] = 0 ;
     xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ;
     MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
-    xt[2].tag[ie3] = 0;  xt[2].edg[ie1] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = ftag[ip2];
+    xt[2].tag[ie3] = ftag[ip0];  xt[2].edg[ie1] = 0;
     xt[2].edg[ie2] = 0;  xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip1] = vx[ie0] ; pt[3]->v[ip2] = vx[ie1] ; pt[3]->v[ip3] = vx[ie5] ;
-    xt[3].tag[ie2] = 0;  xt[3].tag[ie3] = 0;
-    xt[3].tag[ie4] = 0;  xt[3].tag[ie5] = 0;
+    xt[3].tag[ie2] = ftag[ip1];  xt[3].tag[ie3] = ftag[ip3];
+    xt[3].tag[ie4] = 0;  xt[3].tag[ie5] = ftag[ip1];
     xt[3].edg[ie2] = 0;  xt[3].edg[ie3] = 0;
     xt[3].edg[ie4] = 0;  xt[3].edg[ie5] = 0;
     xt[3].ref [ip0] = 0 ; xt[3].ref [ip2] = 0 ;
@@ -2659,8 +2746,8 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip2);
 
     pt[4]->v[ip1] = vx[ie0] ; pt[4]->v[ip2] = vx[ie5];
-    xt[4].tag[ie1] = 0;  xt[4].tag[ie3] = 0;
-    xt[4].tag[ie4] = 0;  xt[4].edg[ie1] = 0;
+    xt[4].tag[ie1] = ftag[ip1];  xt[4].tag[ie3] = 0;
+    xt[4].tag[ie4] = ftag[ip2];  xt[4].edg[ie1] = 0;
     xt[4].edg[ie3] = 0;  xt[4].edg[ie4] = 0;
     xt[4].ref [ip0] = 0 ; xt[4].ref [ip3] = 0 ;
     xt[4].ftag[ip0] = 0 ; xt[4].ftag[ip3] = 0 ;
@@ -2669,17 +2756,17 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
 
   else if ( (imin12 == ip1) && (imin03 == ip0) ) {
     pt[0]->v[ip0] = vx[ie1] ; pt[0]->v[ip3] = vx[ie5] ;
-    xt[0].tag[ie0] = 0;  xt[0].tag[ie2] = 0;
-    xt[0].tag[ie4] = 0;  xt[0].edg[ie0] = 0;
+    xt[0].tag[ie0] = ftag[ip3];  xt[0].tag[ie2] = ftag[ip1];
+    xt[0].tag[ie4] = ftag[ip0];  xt[0].edg[ie0] = 0;
     xt[0].edg[ie2] = 0;  xt[0].edg[ie4] = 0;
     xt[0].ref[ip2]  = 0 ;
     xt[0].ftag[ip2] = 0 ;
     MG_SET(xt[0].ori, ip2);
 
     pt[1]->v[ip0] = vx[ie0] ; pt[1]->v[ip2] = vx[ie1] ; pt[1]->v[ip3] = vx[ie5];
-    xt[1].tag[ie1] = 0;  xt[1].tag[ie2] = 0;
-    xt[1].tag[ie3] = 0;  xt[1].tag[ie4] = 0;
-    xt[1].tag[ie5] = 0;  xt[1].edg[ie1] = 0;
+    xt[1].tag[ie1] = ftag[ip3];  xt[1].tag[ie2] = 0;
+    xt[1].tag[ie3] = ftag[ip3];  xt[1].tag[ie4] = ftag[ip0];
+    xt[1].tag[ie5] = ftag[ip1];  xt[1].edg[ie1] = 0;
     xt[1].edg[ie2] = 0;  xt[1].edg[ie3] = 0;
     xt[1].edg[ie4] = 0;  xt[1].edg[ie5] = 0;
     xt[1].ref [ip0] = 0 ; xt[1].ref [ip1] = 0 ; xt[1].ref [ip2] = 0 ;
@@ -2687,24 +2774,24 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     MG_SET(xt[1].ori, ip0); MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
-    xt[2].tag[ie3] = 0;  xt[2].edg[ie1] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = ftag[ip2];
+    xt[2].tag[ie3] = ftag[ip0];  xt[2].edg[ie1] = 0;
     xt[2].edg[ie2] = 0;  xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip1] = vx[ie0] ; pt[3]->v[ip2] = vx[ie5];
-    xt[3].tag[ie1] = 0;  xt[3].tag[ie3] = 0;
-    xt[3].tag[ie4] = 0;  xt[3].edg[ie1] = 0;
+    xt[3].tag[ie1] = ftag[ip1];  xt[3].tag[ie3] = 0;
+    xt[3].tag[ie4] = ftag[ip2];  xt[3].edg[ie1] = 0;
     xt[3].edg[ie3] = 0;  xt[3].edg[ie4] = 0;
     xt[3].ref [ip0] = 0 ; xt[3].ref [ip3] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip3] = 0 ;
     MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip3);
 
     pt[4]->v[ip1] = vx[ie0] ; pt[4]->v[ip2] = vx[ie1]; pt[4]->v[ip3] = vx[ie5];
-    xt[4].tag[ie2] = 0;  xt[4].tag[ie3] = 0;
-    xt[4].tag[ie4] = 0;  xt[4].tag[ie5] = 0;
+    xt[4].tag[ie2] = ftag[ip1];  xt[4].tag[ie3] = ftag[ip3];
+    xt[4].tag[ie4] = 0;  xt[4].tag[ie5] = ftag[ip1];
     xt[4].edg[ie2] = 0;  xt[4].edg[ie3] = 0;
     xt[4].edg[ie4] = 0;  xt[4].edg[ie5] = 0;
     xt[4].ref [ip0] = 0 ; xt[4].ref [ip2] = 0 ;
@@ -2714,17 +2801,17 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
 
   else if ( (imin12 == ip2) && (imin03 == ip3) ) {
     pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip2] = vx[ie1] ;
-    xt[0].tag[ie3] = 0;  xt[0].tag[ie4] = 0;
-    xt[0].tag[ie5] = 0;  xt[0].edg[ie3] = 0;
+    xt[0].tag[ie3] = ftag[ip3];  xt[0].tag[ie4] = ftag[ip2];
+    xt[0].tag[ie5] = ftag[ip1];  xt[0].edg[ie3] = 0;
     xt[0].edg[ie4] = 0;  xt[0].edg[ie5] = 0;
     xt[0].ref[ip0]  = 0 ;
     xt[0].ftag[ip0] = 0 ;
     MG_SET(xt[0].ori, ip0);
 
     pt[1]->v[ip0] = vx[ie1] ; pt[1]->v[ip1] = vx[ie0] ; pt[1]->v[ip2] = vx[ie5];
-    xt[1].tag[ie0] = 0;  xt[1].tag[ie1] = 0;
-    xt[1].tag[ie2] = 0;  xt[1].tag[ie3] = 0;
-    xt[1].tag[ie4] = 0;  xt[1].edg[ie0] = 0;
+    xt[1].tag[ie0] = ftag[ip3];  xt[1].tag[ie1] = ftag[ip1];
+    xt[1].tag[ie2] = ftag[ip1];  xt[1].tag[ie3] = 0;
+    xt[1].tag[ie4] = ftag[ip2];  xt[1].edg[ie0] = 0;
     xt[1].edg[ie1] = 0;  xt[1].edg[ie2] = 0;
     xt[1].edg[ie3] = 0;  xt[1].edg[ie4] = 0;
     xt[1].ref [ip0] = 0 ; xt[1].ref [ip2] = 0 ; xt[1].ref [ip3] = 0 ;
@@ -2732,16 +2819,16 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2); MG_SET(xt[1].ori, ip3);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
-    xt[2].tag[ie3] = 0;  xt[2].edg[ie1] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = ftag[ip2];
+    xt[2].tag[ie3] = ftag[ip0];  xt[2].edg[ie1] = 0;
     xt[2].edg[ie2] = 0;  xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip0] = vx[ie1] ; pt[3]->v[ip1] = vx[ie0]; pt[3]->v[ip3] = vx[ie5];
-    xt[3].tag[ie0] = 0;  xt[3].tag[ie2] = 0;
-    xt[3].tag[ie3] = 0;  xt[3].tag[ie4] = 0;
+    xt[3].tag[ie0] = ftag[ip3];  xt[3].tag[ie2] = ftag[ip1];
+    xt[3].tag[ie3] = ftag[ip3];  xt[3].tag[ie4] = 0;
     xt[3].edg[ie0] = 0;  xt[3].edg[ie2] = 0;
     xt[3].edg[ie3] = 0;  xt[3].edg[ie4] = 0;
     xt[3].ref [ip0] = 0 ; xt[3].ref [ip2] = 0 ;
@@ -2749,8 +2836,8 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip2);
 
     pt[4]->v[ip0] = vx[ie0] ; pt[4]->v[ip3] = vx[ie5];
-    xt[4].tag[ie1] = 0;  xt[4].tag[ie2] = 0;
-    xt[4].tag[ie4] = 0;  xt[4].edg[ie1] = 0;
+    xt[4].tag[ie1] = ftag[ip3];  xt[4].tag[ie2] = 0;
+    xt[4].tag[ie4] = ftag[ip0];  xt[4].edg[ie1] = 0;
     xt[4].edg[ie2] = 0;  xt[4].edg[ie4] = 0;
     xt[4].ref [ip1] = 0 ; xt[4].ref [ip2] = 0 ;
     xt[4].ftag[ip1] = 0 ; xt[4].ftag[ip2] = 0 ;
@@ -2760,24 +2847,24 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     assert((imin12 == ip1) && (imin03 == ip3)) ;
 
     pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip2] = vx[ie1] ;
-    xt[0].tag[ie3] = 0;  xt[0].tag[ie4] = 0;
-    xt[0].tag[ie5] = 0;  xt[0].edg[ie3] = 0;
+    xt[0].tag[ie3] = ftag[ip3];  xt[0].tag[ie4] = ftag[ip2];
+    xt[0].tag[ie5] = ftag[ip1];  xt[0].edg[ie3] = 0;
     xt[0].edg[ie4] = 0;  xt[0].edg[ie5] = 0;
     xt[0].ref [ip0] = 0 ;
     xt[0].ftag[ip0] = 0 ;
     MG_SET(xt[0].ori, ip0);
 
     pt[1]->v[ip0] = vx[ie1] ; pt[1]->v[ip3] = vx[ie5] ;
-    xt[1].tag[ie0] = 0;  xt[1].tag[ie2] = 0;
-    xt[1].tag[ie4] = 0;  xt[1].edg[ie0] = 0;
+    xt[1].tag[ie0] = ftag[ip3];  xt[1].tag[ie2] = ftag[ip1];
+    xt[1].tag[ie4] = ftag[ip0];  xt[1].edg[ie0] = 0;
     xt[1].edg[ie2] = 0;  xt[1].edg[ie4] = 0;
     xt[1].ref [ip2] = 0 ;
     xt[1].ftag[ip2] = 0 ;
     MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie1] ;
-    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
-    xt[2].tag[ie3] = 0;  xt[2].tag[ie5] = 0;
+    xt[2].tag[ie1] = ftag[ip3];  xt[2].tag[ie2] = ftag[ip2];
+    xt[2].tag[ie3] = ftag[ip3];  xt[2].tag[ie5] = ftag[ip1];
     xt[2].edg[ie1] = 0;  xt[2].edg[ie2] = 0;
     xt[2].edg[ie3] = 0;  xt[2].edg[ie5] = 0;
     xt[2].ref [ip0] = 0 ; xt[2].ref [ip1] = 0 ;
@@ -2785,8 +2872,8 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
     MG_SET(xt[2].ori, ip0); MG_SET(xt[2].ori, ip1);
 
     pt[3]->v[ip0] = vx[ie1] ; pt[3]->v[ip2] = vx[ie5] ;
-    xt[3].tag[ie0] = 0;  xt[3].tag[ie1] = 0;
-    xt[3].tag[ie2] = 0;  xt[3].tag[ie3] = 0;
+    xt[3].tag[ie0] = ftag[ip3];  xt[3].tag[ie1] = ftag[ip1];
+    xt[3].tag[ie2] = ftag[ip1];  xt[3].tag[ie3] = ftag[ip0];
     xt[3].edg[ie0] = 0;  xt[3].edg[ie1] = 0;
     xt[3].edg[ie2] = 0;  xt[3].edg[ie3] = 0;
     xt[3].ref [ip2] = 0 ; xt[3].ref [ip3] = 0 ;
@@ -2949,8 +3036,8 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k tetra index.
  * \param metRidTyp metric storage (classic or special)
  * \return 0 if fail, index of created point otherwise (\a ib)
@@ -3170,7 +3257,7 @@ MMG5_int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k,int8_t metRid
  *
  */
 static inline
-void MMG3D_configSplit4sf(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split4sf_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                           const uint8_t **taued, uint8_t *imin23,uint8_t *imin12) {
 
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -3237,8 +3324,8 @@ void MMG3D_configSplit4sf(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -3261,7 +3348,7 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation of vertices : reference configuration : 23 */
-  MMG3D_configSplit4sf(pt,vx,tau,&taued,&imin23,&imin12);
+  MMG3D_split4sf_cfg(pt,vx,tau,&taued,&imin23,&imin12);
 
   /* Generic formulation of split of 4 edges (with 3 on same face) */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -3339,8 +3426,8 @@ int MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
@@ -3356,6 +3443,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   MMG5_pxTetra        pxt0;
   MMG5_int            newtet[6];
   int8_t              firstxt,isxt[6],j,i;
+  int16_t             ftag[4];
   uint8_t             tau[4],imin23,imin12;
   const uint8_t       *taued = NULL;
   const int           ne=6;
@@ -3364,7 +3452,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   newtet[0]=k;
 
   /* Set permutation of vertices : reference configuration : 23 */
-  MMG3D_configSplit4sf(pt[0],vx,tau,&taued,&imin23,&imin12);
+  MMG3D_split4sf_cfg(pt[0],vx,tau,&taued,&imin23,&imin12);
   pt[0]->flag  = 0;
 
   /* create 5 new tetras */
@@ -3372,10 +3460,15 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     return 0;
   }
 
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
+  }
+
   /* Generic formulation of split of 4 edges (with 3 on same face) */
   pt[0]->v[tau[1]] = vx[taued[0]] ;   pt[0]->v[tau[2]] = vx[taued[1]] ;   pt[0]->v[tau[3]] = vx[taued[2]];
-  xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-  xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
+  xt[0].tag[taued[3]] = ftag[tau[3]];  xt[0].tag[taued[4]] = ftag[tau[2]];
+  xt[0].tag[taued[5]] = ftag[tau[1]];  xt[0].edg[taued[3]] = 0;
   xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
   xt[0].ref [ tau[0]] = 0 ;
   xt[0].ftag[ tau[0]] = 0 ;
@@ -3383,9 +3476,9 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 
   pt[1]->v[tau[0]] = vx[taued[2]] ; pt[1]->v[tau[1]] = vx[taued[0]] ;
   pt[1]->v[tau[2]] = vx[taued[1]] ; pt[1]->v[tau[3]] = vx[taued[4]] ;
-  xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
-  xt[1].tag[taued[2]] = 0;  xt[1].tag[taued[3]] = 0;
-  xt[1].tag[taued[4]] = 0;  xt[1].tag[taued[5]] = 0;
+  xt[1].tag[taued[0]] = ftag[tau[2]];  xt[1].tag[taued[1]] = ftag[tau[1]];
+  xt[1].tag[taued[2]] = ftag[tau[2]];  xt[1].tag[taued[3]] = ftag[tau[3]];
+  xt[1].tag[taued[4]] = ftag[tau[2]];  xt[1].tag[taued[5]] = 0;
   xt[1].edg[taued[0]] = 0;  xt[1].edg[taued[1]] = 0;
   xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[3]] = 0;
   xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
@@ -3395,8 +3488,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 
   if ( imin12 == tau[1] ) {
     pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[4]] ;
-    xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[5]] = 0;
+    xt[2].tag[taued[1]] = ftag[tau[3]];  xt[2].tag[taued[2]] = ftag[tau[2]];
+    xt[2].tag[taued[3]] = ftag[tau[3]];  xt[2].tag[taued[5]] = 0;
     xt[2].edg[taued[1]] = 0;  xt[2].edg[taued[2]] = 0;
     xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[5]] = 0;
     xt[2].ref [ tau[0]] = 0 ; xt[2].ref [ tau[1]] = 0 ;
@@ -3404,8 +3497,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[2].ori, tau[0]); MG_SET(xt[2].ori, tau[1]);
 
     pt[3]->v[tau[0]] = vx[taued[1]] ; pt[3]->v[tau[3]] = vx[taued[4]] ;
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
-    xt[3].tag[taued[5]] = 0;  xt[3].edg[taued[0]] = 0;
+    xt[3].tag[taued[0]] = ftag[tau[3]];  xt[3].tag[taued[2]] = 0;
+    xt[3].tag[taued[5]] = ftag[tau[0]];  xt[3].edg[taued[0]] = 0;
     xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[5]] = 0;
     xt[3].ref [ tau[1]] = 0 ; xt[3].ref [ tau[2]] = 0 ;
     xt[3].ftag[ tau[1]] = 0 ; xt[3].ftag[ tau[2]] = 0 ;
@@ -3413,9 +3506,9 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   }
   else {
     pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[1]] = vx[taued[0]] ; pt[2]->v[tau[3]] = vx[taued[4]] ;
-    xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[4]] = 0;
-    xt[2].tag[taued[5]] = 0;  xt[2].edg[taued[0]] = 0;
+    xt[2].tag[taued[0]] = ftag[tau[3]];  xt[2].tag[taued[2]] = 0;
+    xt[2].tag[taued[3]] = ftag[tau[3]];  xt[2].tag[taued[4]] = ftag[tau[2]];
+    xt[2].tag[taued[5]] = ftag[tau[0]];  xt[2].edg[taued[0]] = 0;
     xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[3]] = 0;
     xt[2].edg[taued[4]] = 0;  xt[2].edg[taued[5]] = 0;
     xt[2].ref [ tau[0]] = 0 ; xt[2].ref [ tau[1]] = 0 ; xt[2].ref [tau[2]] = 0 ;
@@ -3423,8 +3516,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[2].ori, tau[0]); MG_SET(xt[2].ori, tau[1]); MG_SET(xt[2].ori, tau[2]);
 
     pt[3]->v[tau[0]] = vx[taued[0]] ; pt[3]->v[tau[3]] = vx[taued[4]] ;
-    xt[3].tag[taued[1]] = 0;  xt[3].tag[taued[2]] = 0;
-    xt[3].tag[taued[5]] = 0;  xt[3].edg[taued[1]] = 0;
+    xt[3].tag[taued[1]] = ftag[tau[3]];  xt[3].tag[taued[2]] = ftag[tau[2]];
+    xt[3].tag[taued[5]] = ftag[tau[0]];  xt[3].edg[taued[1]] = 0;
     xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[5]] = 0;
     xt[3].ref [ tau[1]] = 0 ;
     xt[3].ftag[ tau[1]] = 0 ;
@@ -3433,9 +3526,9 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 
   if ( imin23 == tau[2] ) {
     pt[4]->v[tau[0]] = vx[taued[1]] ; pt[4]->v[tau[1]] = vx[taued[4]] ; pt[4]->v[tau[3]] = vx[taued[2]] ;
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[2]] = 0;
-    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;
+    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[2]] = ftag[tau[1]];
+    xt[4].tag[taued[3]] = ftag[tau[0]];  xt[4].tag[taued[4]] = ftag[tau[2]];
+    xt[4].tag[taued[5]] = ftag[tau[1]];
     xt[4].edg[taued[0]] = 0;  xt[4].edg[taued[2]] = 0;
     xt[4].edg[taued[3]] = 0;  xt[4].edg[taued[4]] = 0;
     xt[4].edg[taued[5]] = 0;
@@ -3446,8 +3539,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[4].ori, tau[0]); MG_SET(xt[4].ori, tau[2]); MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[1]] = vx[taued[4]] ;
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[1]] = 0;
-    xt[5].tag[taued[3]] = 0;  xt[5].edg[taued[0]] = 0;
+    xt[5].tag[taued[0]] = ftag[tau[2]];  xt[5].tag[taued[1]] = ftag[tau[1]];
+    xt[5].tag[taued[3]] = ftag[tau[0]];  xt[5].edg[taued[0]] = 0;
     xt[5].edg[taued[1]] = 0;  xt[5].edg[taued[3]] = 0;
     xt[5].ref [ tau[3]] = 0 ;
     xt[5].ftag[ tau[3]] = 0 ;
@@ -3455,8 +3548,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   }
   else {
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[4]] ; pt[4]->v[tau[2]] = vx[taued[1]] ;
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
-    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[5]] = 0;
+    xt[4].tag[taued[0]] = ftag[tau[2]];  xt[4].tag[taued[1]] = ftag[tau[1]];
+    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[5]] = ftag[tau[1]];
     xt[4].edg[taued[0]] = 0;  xt[4].edg[taued[1]] = 0;
     xt[4].edg[taued[3]] = 0;  xt[4].edg[taued[5]] = 0;
     xt[4].ref [ tau[0]] = 0;  xt[4].ref [ tau[3]] = 0 ;
@@ -3464,8 +3557,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[4].ori, tau[0]); MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[1]] ; pt[5]->v[tau[1]] = vx[taued[4]] ;
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[2]] = 0;
-    xt[5].tag[taued[3]] = 0;  xt[5].edg[taued[0]] = 0;
+    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[2]] = ftag[tau[1]];
+    xt[5].tag[taued[3]] = ftag[tau[0]];  xt[5].edg[taued[0]] = 0;
     xt[5].edg[taued[2]] = 0;  xt[5].edg[taued[3]] = 0;
     xt[5].ref [ tau[2]] = 0;  xt[5].ref [ tau[3]] = 0 ;
     xt[5].ftag[ tau[2]] = 0;  xt[5].ftag[ tau[3]] = 0 ;
@@ -3541,8 +3634,46 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param flag initial tetra
+ * \param v indices of tetra nodes (global node indices if called from ParMmg in ls mode)
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param imin01 minimal index of vertices ip0 and ip1
+ * \param imin23 minimal index of vertices ip2 and ip3
+ *
+ * Set permutation of vertices for the split of 4 edges when on opposite edges.
+ * Reference configuration 30.
+ *
+ */
+inline
+void MMG3D_split4op_cfg(MMG5_int flag,MMG5_int v[4],uint8_t tau[4],
+                          const uint8_t **taued, uint8_t *imin01,uint8_t *imin23) {
+
+
+  /* Set permutation of vertices : reference configuration 30 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  (*taued) = &MMG5_permedge[0][0];
+
+  switch(flag){
+  case 45:
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    (*taued) = &MMG5_permedge[5][0];
+    break;
+
+  case 51:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    (*taued) = &MMG5_permedge[4][0];
+    break;
+  }
+
+  /* Determine the condition to choose split pattern to apply  */
+  (*imin01) = (v[tau[0]] < v[tau[1]]) ? tau[0] : tau[1];
+  (*imin23) = (v[tau[2]] < v[tau[3]]) ? tau[2] : tau[3];
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -3661,10 +3792,30 @@ int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * Split 4 edges in a configuration when no 3 edges lie on the same face
+ *
+ */
+int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
+  MMG5_pTetra    pt;
+
+  /* Tetra to be split */
+  pt  = &mesh->tetra[k];
+
+  return MMG5_split4op_globNum(mesh,met,k,vx,pt->v,metRidTyp);
+}
+
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param vGlobNum vertices indices of the tetra k (global node indices if called from ParMmg in ls mode).
  * \param metRidTyp metric storage (classic or special)
  *
  * \return 0 if fail, 1 otherwise
@@ -3672,58 +3823,57 @@ int MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) 
  * Split 4 edges in a configuration when no 3 edges lie on the same face
  *
  */
-int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp) {
+int MMG5_split4op_globNum(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],MMG5_int vGlobNum[4],int8_t metRidTyp) {
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
   MMG5_int            newtet[6];
-  int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
-  uint8_t             tau[4];
+  int8_t              flg,firstxt,isxt[6],i,j;
+  int16_t             ftag[4];
+  uint8_t             tau[4],imin01,imin23;
   const uint8_t       *taued;
   const int           ne=6;
 
-  pt[0]  = &mesh->tetra[k];
+  /* Store the initial tetra and flag */
+  pt[0] = &mesh->tetra[k];
   flg = pt[0]->flag;
-  pt[0]->flag  = 0;
-  newtet[0]=k;
 
-  /* Set permutation of vertices : reference configuration 30 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
+  /* Reinitialize the flag of the initial tetra */
+  pt[0]->flag = 0;
 
-  switch(flg){
-  case 45:
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
+  /* Store the id of the initial tetra */
+  newtet[0] = k;
 
-  case 51:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  }
+  /* Determine tau, taued, imin01 and imin23 the conditions for vertices permutation */
+  /* Remark: It is mandatory to call MMG3D_split4op_cfg before MMG3D_crea_newTetra.
+             Indeed, vGlobNum is set in MMG3D_split4op as being pt->v. This value might
+             point to a wrong memory address if the tetra array is reallocated
+             in MMG3D_crea_newTetra before the use of vGlobNum */
+  MMG3D_split4op_cfg(flg,vGlobNum,tau,&taued,&imin01,&imin23);
 
-  imin01 = ((pt[0])->v[tau[0]] < (pt[0])->v[tau[1]]) ? tau[0] : tau[1];
-  imin23 = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
-
-  /* create 5 new tetras */
+  /* Create 5 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
+  }
+
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
   }
 
   /* Generic formulation for split of 4 edges, with no 3 edges lying on the same face */
   if ( imin01 == tau[0] ) {
     pt[0]->v[tau[2]] = vx[taued[3]] ; pt[0]->v[tau[3]] = vx[taued[4]];
-    xt[0].tag[taued[1]] = 0;  xt[0].tag[taued[5]] = 0;
-    xt[0].tag[taued[2]] = 0;  xt[0].edg[taued[1]] = 0;
+    xt[0].tag[taued[1]] = ftag[tau[3]];  xt[0].tag[taued[5]] = ftag[tau[0]];
+    xt[0].tag[taued[2]] = ftag[tau[2]];  xt[0].edg[taued[1]] = 0;
     xt[0].edg[taued[5]] = 0;  xt[0].edg[taued[2]] = 0;
     xt[0].ref [ tau[1]] = 0;
     xt[0].ftag[ tau[1]] = 0;
     MG_SET(xt[0].ori, tau[1]);
 
     pt[1]->v[tau[1]] = vx[taued[4]] ; pt[1]->v[tau[2]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
+    xt[1].tag[taued[0]] = ftag[tau[2]];  xt[1].tag[taued[1]] = ftag[tau[3]];
+    xt[1].tag[taued[3]] = ftag[tau[0]];  xt[1].tag[taued[4]] = ftag[tau[2]];
     xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[0]] = 0;
     xt[1].edg[taued[1]] = 0;  xt[1].edg[taued[3]] = 0;
     xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
@@ -3732,8 +3882,8 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[3]);
 
     pt[2]->v[tau[1]] = vx[taued[3]] ; pt[2]->v[tau[2]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[2]];
-    xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[3]] = 0;
-    xt[2].tag[taued[4]] = 0;  xt[2].tag[taued[5]] = 0;
+    xt[2].tag[taued[0]] = ftag[tau[3]];  xt[2].tag[taued[3]] = ftag[tau[3]];
+    xt[2].tag[taued[4]] = 0;  xt[2].tag[taued[5]] = ftag[tau[1]];
     xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[3]] = 0;
     xt[2].edg[taued[4]] = 0;  xt[2].edg[taued[5]] = 0;
     xt[2].ref [ tau[0]] = 0;  xt[2].ref [ tau[2]] = 0;
@@ -3742,16 +3892,16 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   }
   else {
     pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
-    xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-    xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
+    xt[0].tag[taued[3]] = ftag[tau[3]];  xt[0].tag[taued[4]] = ftag[tau[2]];
+    xt[0].tag[taued[5]] = ftag[tau[1]];  xt[0].edg[taued[3]] = 0;
     xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
     xt[0].ref [ tau[0]] = 0;
     xt[0].ftag[ tau[0]] = 0;
     MG_SET(xt[0].ori, tau[0]);
 
     pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[2]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
-    xt[1].tag[taued[2]] = 0;  xt[1].tag[taued[4]] = 0;
+    xt[1].tag[taued[0]] = ftag[tau[3]];  xt[1].tag[taued[1]] = ftag[tau[3]];
+    xt[1].tag[taued[2]] = ftag[tau[1]];  xt[1].tag[taued[4]] = ftag[tau[2]];
     xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[0]] = 0;
     xt[1].edg[taued[1]] = 0;  xt[1].edg[taued[2]] = 0;
     xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
@@ -3760,8 +3910,8 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[2]);
 
     pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[2]] = vx[taued[3]] ; pt[2]->v[tau[3]] = vx[taued[4]];
-    xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[1]] = 0;
-    xt[2].tag[taued[2]] = 0;  xt[2].tag[taued[5]] = 0;
+    xt[2].tag[taued[0]] = ftag[tau[2]];  xt[2].tag[taued[1]] = 0;
+    xt[2].tag[taued[2]] = ftag[tau[2]];  xt[2].tag[taued[5]] = ftag[tau[0]];
     xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[1]] = 0;
     xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[5]] = 0;
     xt[2].ref [ tau[1]] = 0;  xt[2].ref [ tau[3]] = 0;
@@ -3771,17 +3921,17 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
 
   if ( imin23 == tau[2] ) {
     pt[3]->v[tau[0]] = vx[taued[2]] ; pt[3]->v[tau[1]] = vx[taued[4]];
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
-    xt[3].tag[taued[3]] = 0;  xt[3].edg[taued[0]] = 0;
+    xt[3].tag[taued[0]] = ftag[tau[2]];  xt[3].tag[taued[1]] = ftag[tau[1]];
+    xt[3].tag[taued[3]] = ftag[tau[0]];  xt[3].edg[taued[0]] = 0;
     xt[3].edg[taued[1]] = 0;  xt[3].edg[taued[3]] = 0;
     xt[3].ref [ tau[3]] = 0;
     xt[3].ftag[ tau[3]] = 0;
     MG_SET(xt[3].ori, tau[3]);
 
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[3]] ; pt[4]->v[tau[3]] = vx[taued[4]];
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
-    xt[4].tag[taued[2]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[0]] = 0;
+    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = ftag[tau[1]];
+    xt[4].tag[taued[2]] = ftag[tau[2]];  xt[4].tag[taued[4]] = ftag[tau[0]];
+    xt[4].tag[taued[5]] = ftag[tau[0]];  xt[4].edg[taued[0]] = 0;
     xt[4].edg[taued[1]] = 0;  xt[4].edg[taued[2]] = 0;
     xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
     xt[4].ref [ tau[1]] = 0;  xt[4].ref [ tau[2]] = 0;  xt[4].ref [tau[3]] = 0;
@@ -3789,8 +3939,8 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[4].ori, tau[1]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[1]] ; pt[5]->v[tau[1]] = vx[taued[3]] ; pt[5]->v[tau[3]] = vx[taued[2]];
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[2]] = 0;
-    xt[5].tag[taued[4]] = 0;  xt[5].tag[taued[5]] = 0;
+    xt[5].tag[taued[0]] = ftag[tau[3]];  xt[5].tag[taued[2]] = ftag[tau[1]];
+    xt[5].tag[taued[4]] = 0;  xt[5].tag[taued[5]] = ftag[tau[1]];
     xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[2]] = 0;
     xt[5].edg[taued[4]] = 0;  xt[5].edg[taued[5]] = 0;
     xt[5].ref [ tau[0]] = 0;  xt[5].ref [ tau[2]] = 0;
@@ -3799,17 +3949,17 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   }
   else {
     pt[3]->v[tau[0]] = vx[taued[1]] ; pt[3]->v[tau[1]] = vx[taued[3]];
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
-    xt[3].tag[taued[4]] = 0;  xt[3].edg[taued[0]] = 0;
+    xt[3].tag[taued[0]] = ftag[tau[3]];  xt[3].tag[taued[2]] = ftag[tau[1]];
+    xt[3].tag[taued[4]] = ftag[tau[0]];  xt[3].edg[taued[0]] = 0;
     xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[4]] = 0;
     xt[3].ref [ tau[2]] = 0;
     xt[3].ftag[ tau[2]] = 0;
     MG_SET(xt[3].ori, tau[2]);
 
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[3]] ; pt[4]->v[tau[2]] = vx[taued[1]];
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
-    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[0]] = 0;
+    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = ftag[tau[1]];
+    xt[4].tag[taued[3]] = ftag[tau[3]];  xt[4].tag[taued[4]] = ftag[tau[0]];
+    xt[4].tag[taued[5]] = ftag[tau[1]];  xt[4].edg[taued[0]] = 0;
     xt[4].edg[taued[1]] = 0;  xt[4].edg[taued[3]] = 0;
     xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
     xt[4].ref [ tau[0]] = 0;  xt[4].ref [ tau[2]] = 0;  xt[4].ref [tau[3]] = 0;
@@ -3817,8 +3967,8 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
     MG_SET(xt[4].ori, tau[0]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[1]] = vx[taued[4]] ; pt[5]->v[tau[2]] = vx[taued[3]];
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[1]] = 0;
-    xt[5].tag[taued[3]] = 0;  xt[5].tag[taued[5]] = 0;
+    xt[5].tag[taued[0]] = ftag[tau[2]];  xt[5].tag[taued[1]] = 0;
+    xt[5].tag[taued[3]] = ftag[tau[0]];  xt[5].tag[taued[5]] = ftag[tau[0]];
     xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[1]] = 0;
     xt[5].edg[taued[3]] = 0;  xt[5].edg[taued[5]] = 0;
     xt[5].ref [ tau[1]] = 0;  xt[5].ref [ tau[3]] = 0;
@@ -3909,7 +4059,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
  *
  */
 static inline
-void MMG3D_configSplit5(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
+void MMG3D_split5_cfg(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
                         const uint8_t **taued,uint8_t *imin) {
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
@@ -3948,8 +4098,8 @@ void MMG3D_configSplit5(MMG5_pTetra pt,MMG5_int vx[6],uint8_t tau[4],
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -3972,7 +4122,7 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
   if ( vold < MMG5_EPSOK ) return 0;
 
   /* Set permutation of vertices : reference configuration : 62 */
-  MMG3D_configSplit5(pt,vx,tau,&taued,&imin);
+  MMG3D_split5_cfg(pt,vx,tau,&taued,&imin);
 
   /* Generic formulation of split of 5 edges */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -4039,8 +4189,8 @@ int MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
@@ -4057,6 +4207,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   int                 i,j;
   MMG5_int            newtet[7];
   int8_t              firstxt,isxt[7];
+  int16_t             ftag[4];
   uint8_t             tau[4],imin;
   const uint8_t       *taued=NULL;
   const int           ne=7;
@@ -4065,7 +4216,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   newtet[0]=k;
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
-  MMG3D_configSplit5(pt[0],vx,tau,&taued,&imin);
+  MMG3D_split5_cfg(pt[0],vx,tau,&taued,&imin);
   pt[0]->flag  = 0;
 
   /* create 6 new tetras */
@@ -4073,18 +4224,23 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     return 0;
   }
 
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt[0].ftag[i] & ~MG_REF);
+  }
+
   /* Generic formulation of split of 5 edges */
   pt[0]->v[tau[0]] = vx[taued[2]] ;   pt[0]->v[tau[1]] = vx[taued[4]] ;   pt[0]->v[tau[2]] = vx[taued[5]];
-  xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[1]] = 0;
-  xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[0]] = 0;
+  xt[0].tag[taued[0]] = ftag[tau[2]];  xt[0].tag[taued[1]] = ftag[tau[1]];
+  xt[0].tag[taued[3]] = ftag[tau[0]];  xt[0].edg[taued[0]] = 0;
   xt[0].edg[taued[1]] = 0;  xt[0].edg[taued[3]] = 0;
   xt[0].ref [ tau[3]] = 0;
   xt[0].ftag[ tau[3]] = 0;
   MG_SET(xt[0].ori, tau[3]);
 
   pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[1]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[5]];
-  xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[2]] = 0;
-  xt[1].tag[taued[4]] = 0;  xt[1].edg[taued[0]] = 0;
+  xt[1].tag[taued[0]] = ftag[tau[3]];  xt[1].tag[taued[2]] = ftag[tau[1]];
+  xt[1].tag[taued[4]] = ftag[tau[0]];  xt[1].edg[taued[0]] = 0;
   xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[4]] = 0;
   xt[1].ref [ tau[2]] = 0;
   xt[1].ftag[ tau[2]] = 0;
@@ -4092,9 +4248,9 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[1]] = vx[taued[4]];
   pt[2]->v[tau[2]] = vx[taued[3]] ; pt[2]->v[tau[3]] = vx[taued[5]];
-  xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[1]] = 0;
-  xt[2].tag[taued[2]] = 0;  xt[2].tag[taued[3]] = 0;
-  xt[2].tag[taued[4]] = 0;  xt[2].tag[taued[5]] = 0;
+  xt[2].tag[taued[0]] = ftag[tau[2]];  xt[2].tag[taued[1]] = 0;
+  xt[2].tag[taued[2]] = ftag[tau[1]];  xt[2].tag[taued[3]] = ftag[tau[0]];
+  xt[2].tag[taued[4]] = ftag[tau[0]];  xt[2].tag[taued[5]] = ftag[tau[0]];
   xt[2].edg[taued[0]] = 0;  xt[2].edg[taued[1]] = 0;
   xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[3]] = 0;
   xt[2].edg[taued[4]] = 0;  xt[2].edg[taued[5]] = 0;
@@ -4104,9 +4260,9 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   pt[3]->v[tau[0]] = vx[taued[2]] ; pt[3]->v[tau[1]] = vx[taued[3]];
   pt[3]->v[tau[2]] = vx[taued[1]] ; pt[3]->v[tau[3]] = vx[taued[5]];
-  xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
-  xt[3].tag[taued[2]] = 0;  xt[3].tag[taued[3]] = 0;
-  xt[3].tag[taued[4]] = 0;  xt[3].tag[taued[5]] = 0;
+  xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = ftag[tau[1]];
+  xt[3].tag[taued[2]] = ftag[tau[1]];  xt[3].tag[taued[3]] = ftag[tau[3]];
+  xt[3].tag[taued[4]] = ftag[tau[0]];  xt[3].tag[taued[5]] = ftag[tau[1]];
   xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[1]] = 0;
   xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[3]] = 0;
   xt[3].edg[taued[4]] = 0;  xt[3].edg[taued[5]] = 0;
@@ -4116,17 +4272,17 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( imin == tau[0] ) {
     pt[4]->v[tau[2]] = vx[taued[3]] ; pt[4]->v[tau[3]] = vx[taued[4]];
-    xt[4].tag[taued[1]] = 0;  xt[4].tag[taued[2]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[1]] = 0;
+    xt[4].tag[taued[1]] = ftag[tau[3]];  xt[4].tag[taued[2]] = ftag[tau[2]];
+    xt[4].tag[taued[5]] = ftag[tau[0]];  xt[4].edg[taued[1]] = 0;
     xt[4].edg[taued[2]] = 0;  xt[4].edg[taued[5]] = 0;
     xt[4].ref [ tau[1]] = 0;
     xt[4].ftag[ tau[1]] = 0;
     MG_SET(xt[4].ori, tau[1]);
 
     pt[5]->v[tau[1]] = vx[taued[4]] ; pt[5]->v[tau[2]] = vx[taued[3]]; pt[5]->v[tau[3]] = vx[taued[2]];
-    xt[5].tag[taued[0]] = 0;
-    xt[5].tag[taued[1]] = 0;  xt[5].tag[taued[3]] = 0;
-    xt[5].tag[taued[4]] = 0;  xt[5].tag[taued[5]] = 0;
+    xt[5].tag[taued[0]] = ftag[tau[2]];
+    xt[5].tag[taued[1]] = ftag[tau[3]];  xt[5].tag[taued[3]] = ftag[tau[0]];
+    xt[5].tag[taued[4]] = ftag[tau[2]];  xt[5].tag[taued[5]] = 0;
     xt[5].edg[taued[0]] = 0;
     xt[5].edg[taued[1]] = 0;  xt[5].edg[taued[3]] = 0;
     xt[5].edg[taued[4]] = 0;  xt[5].edg[taued[5]] = 0;
@@ -4135,9 +4291,9 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     MG_SET(xt[5].ori, tau[0]); MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
 
     pt[6]->v[tau[1]] = vx[taued[3]] ; pt[6]->v[tau[2]] = vx[taued[1]]; pt[6]->v[tau[3]] = vx[taued[2]];
-    xt[6].tag[taued[0]] = 0;
-    xt[6].tag[taued[3]] = 0;  xt[6].tag[taued[4]] = 0;
-    xt[6].tag[taued[5]] = 0;  xt[6].edg[taued[0]] = 0;
+    xt[6].tag[taued[0]] = ftag[tau[3]];
+    xt[6].tag[taued[3]] = ftag[tau[3]];  xt[6].tag[taued[4]] = 0;
+    xt[6].tag[taued[5]] = ftag[tau[1]];  xt[6].edg[taued[0]] = 0;
     xt[6].edg[taued[3]] = 0;
     xt[6].edg[taued[4]] = 0;  xt[6].edg[taued[5]] = 0;
     xt[6].ref [ tau[0]] = 0;  xt[6].ref [ tau[2]] = 0;
@@ -4147,16 +4303,16 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   }
   else {
     pt[4]->v[tau[2]] = vx[taued[1]] ; pt[4]->v[tau[3]] = vx[taued[2]];
-    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[3]] = 0;
+    xt[4].tag[taued[3]] = ftag[tau[3]];  xt[4].tag[taued[4]] = ftag[tau[2]];
+    xt[4].tag[taued[5]] = ftag[tau[1]];  xt[4].edg[taued[3]] = 0;
     xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
     xt[4].ref [ tau[0]] = 0;
     xt[4].ftag[ tau[0]] = 0;
     MG_SET(xt[4].ori, tau[0]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[2]] = vx[taued[3]]; pt[5]->v[tau[3]] = vx[taued[4]];
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[1]] = 0;
-    xt[5].tag[taued[2]] = 0;  xt[5].tag[taued[5]] = 0;
+    xt[5].tag[taued[0]] = ftag[tau[2]];  xt[5].tag[taued[1]] = 0;
+    xt[5].tag[taued[2]] = ftag[tau[2]];  xt[5].tag[taued[5]] = ftag[tau[0]];
     xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[1]] = 0;
     xt[5].edg[taued[2]] = 0;  xt[5].edg[taued[5]] = 0;
     xt[5].ref [ tau[1]] = 0; xt[5].ref [ tau[3]] = 0;
@@ -4164,8 +4320,8 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
 
     pt[6]->v[tau[0]] = vx[taued[1]] ; pt[6]->v[tau[2]] = vx[taued[3]]; pt[6]->v[tau[3]] = vx[taued[2]];
-    xt[6].tag[taued[0]] = 0;  xt[6].tag[taued[1]] = 0;
-    xt[6].tag[taued[2]] = 0;  xt[6].tag[taued[4]] = 0;
+    xt[6].tag[taued[0]] = ftag[tau[3]];  xt[6].tag[taued[1]] = ftag[tau[3]];
+    xt[6].tag[taued[2]] = ftag[tau[1]];  xt[6].tag[taued[4]] = ftag[tau[2]];
     xt[6].tag[taued[5]] = 0;  xt[6].edg[taued[0]] = 0;
     xt[6].edg[taued[1]] = 0;  xt[6].edg[taued[2]] = 0;
     xt[6].edg[taued[4]] = 0;  xt[6].edg[taued[5]] = 0;
@@ -4245,8 +4401,8 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  *
@@ -4313,8 +4469,8 @@ int MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
@@ -4331,6 +4487,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   int            i,j;
   MMG5_int       iel,newtet[8],nxt0;
   int8_t         isxt0,isxt;
+  int16_t        ftag[4];
   const int8_t   ne=8;
 
   pt[0]  = &mesh->tetra[k];
@@ -4359,12 +4516,17 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
     newtet[i]=iel;
   }
 
+  /* Store face tags and refs from split tetra*/
+  for (i=0; i<4; i++) {
+    ftag[i] = (xt.ftag[i] & ~MG_REF);
+  }
+
   /* Modify first tetra */
   pt[0]->v[1] = vx[0] ; pt[0]->v[2] = vx[1]; pt[0]->v[3] = vx[2];
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[3] = 0;  xt.tag[4] = 0;
-    xt.tag[5] = 0;  xt.edg[3] = 0;
+    xt.tag[3] = ftag[3];  xt.tag[4] = ftag[2];
+    xt.tag[5] = ftag[1];  xt.edg[3] = 0;
     xt.edg[4] = 0;  xt.edg[5] = 0;
     xt.ref[0] = 0;  xt.ftag[0] = 0; MG_SET(xt.ori, 0);
     isxt0 = 0;
@@ -4385,8 +4547,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[1] = 0;  xt.tag[2] = 0;
-    xt.tag[5] = 0;  xt.edg[1] = 0;
+    xt.tag[1] = ftag[3];  xt.tag[2] = ftag[2];
+    xt.tag[5] = ftag[0];  xt.edg[1] = 0;
     xt.edg[2] = 0;  xt.edg[5] = 0;
     xt.ref[1] = 0;  xt.ftag[1] = 0; MG_SET(xt.ori, 1);
 
@@ -4426,8 +4588,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.tag[2] = 0;
-    xt.tag[4] = 0;  xt.edg[0] = 0;
+    xt.tag[0] = ftag[3];  xt.tag[2] = ftag[1];
+    xt.tag[4] = ftag[0];  xt.edg[0] = 0;
     xt.edg[2] = 0;  xt.edg[4] = 0;
     xt.ref[2] = 0;  xt.ftag[2] = 0;  MG_SET(xt.ori, 2);
     isxt = 0;
@@ -4466,8 +4628,8 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.tag[1] = 0;
-    xt.tag[3] = 0;  xt.edg[0] = 0;
+    xt.tag[0] = ftag[2];  xt.tag[1] = ftag[1];
+    xt.tag[3] = ftag[0];  xt.edg[0] = 0;
     xt.edg[1] = 0;  xt.edg[3] = 0;
     xt.ref[3] = 0;  xt.ftag[3] = 0;  MG_SET(xt.ori, 3);
 
@@ -4507,12 +4669,12 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.tag[1] = 0;
-    xt.tag[2] = 0;  xt.tag[3] = 0;
+    xt.tag[0] = ftag[3];  xt.tag[1] = ftag[3];
+    xt.tag[2] = ftag[2];  xt.tag[3] = ftag[3];
     xt.edg[0] = 0;  xt.edg[1] = 0;
     xt.edg[2] = 0;  xt.edg[3] = 0;
     xt.tag[4] = 0;  xt.edg[4] = 0;
-    xt.tag[5] = 0;  xt.edg[5] = 0;
+    xt.tag[5] = ftag[1];  xt.edg[5] = 0;
     xt.ref [0] = 0 ; xt.ref [1] = 0 ; xt.ref [2] = 0;
     xt.ftag[0] = 0 ; xt.ftag[1] = 0 ; xt.ftag[2] = 0;
     MG_SET(xt.ori, 0); MG_SET(xt.ori, 1); MG_SET(xt.ori, 2);
@@ -4551,9 +4713,9 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.tag[1] = 0;
-    xt.tag[2] = 0;  xt.tag[3] = 0;
-    xt.tag[4] = 0;  xt.tag[5] = 0;
+    xt.tag[0] = ftag[2];  xt.tag[1] = 0;
+    xt.tag[2] = ftag[2];  xt.tag[3] = ftag[3];
+    xt.tag[4] = ftag[2];  xt.tag[5] = ftag[0];
     xt.edg[0] = 0;  xt.edg[1] = 0;
     xt.edg[2] = 0;  xt.edg[3] = 0;
     xt.edg[4] = 0;  xt.edg[5] = 0;
@@ -4596,11 +4758,11 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
     xt.tag[0] = 0;  xt.edg[0] = 0;
-    xt.tag[1] = 0;  xt.tag[2] = 0;
-    xt.tag[3] = 0;  xt.tag[4] = 0;
+    xt.tag[1] = ftag[1];  xt.tag[2] = ftag[1];
+    xt.tag[3] = ftag[3];  xt.tag[4] = ftag[0];
     xt.edg[1] = 0;  xt.edg[2] = 0;
     xt.edg[3] = 0;  xt.edg[4] = 0;
-    xt.tag[5] = 0;  xt.edg[5] = 0;
+    xt.tag[5] = ftag[3];  xt.edg[5] = 0;
     xt.ref [0] = 0 ; xt.ref [2] = 0 ; xt.ref [3] = 0;
     xt.ftag[0] = 0 ; xt.ftag[2] = 0 ; xt.ftag[3] = 0;
     MG_SET(xt.ori, 0); MG_SET(xt.ori, 2); MG_SET(xt.ori, 3);
@@ -4639,9 +4801,9 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
   if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
-    xt.tag[0] = 0;  xt.tag[1] = 0;
-    xt.tag[2] = 0;  xt.tag[3] = 0;
-    xt.tag[4] = 0;  xt.tag[5] = 0;
+    xt.tag[0] = 0;  xt.tag[1] = ftag[1];
+    xt.tag[2] = ftag[2];  xt.tag[3] = ftag[0];
+    xt.tag[4] = ftag[0];  xt.tag[5] = ftag[0];
     xt.edg[0] = 0;  xt.edg[1] = 0;
     xt.edg[2] = 0;  xt.edg[3] = 0;
     xt.edg[4] = 0;  xt.edg[5] = 0;
@@ -4685,10 +4847,10 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
 
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param ip index of new point.
- * \param list pointer toward the shell of edge.
+ * \param list pointer to the shell of edge.
  * \param ret size of the shell of edge.
  * \param crit quality threshold.
  * \return 0 if fail, 1 otherwise.
@@ -4739,9 +4901,10 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
   }
   return 1;
 }
+
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param iel tetra index
  * \param iar edge index of iel
  * \param crit quality threshold.
@@ -4758,7 +4921,7 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
   int          warn,lon,ier;
   int64_t      list[MMG3D_LMAX+2];
   MMG5_int     src,i0,i1,ip;
-  int16_t      tag;
+  uint16_t     tag;
 
   warn = 0;
   pt = &mesh->tetra[iel];

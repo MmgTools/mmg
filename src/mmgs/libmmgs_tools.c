@@ -796,8 +796,8 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the solution structure.
  * \param ani 1 for aniso metric, 0 for iso one
  *
  * \return 0 if fail, 1 if succeed.
@@ -845,8 +845,8 @@ int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
 
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if succeed, 0 if fail
  *
@@ -920,7 +920,7 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param k index of starting triangle
  * \param i local index of point \a p1 in \a k
  * \param p1 point on which we want to compute the 3D unit tensor
@@ -1031,7 +1031,7 @@ int MMGS_unitTensor_3D( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,double *
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param p0 starting point
  * \param k index of starting element
  * \param i local index of \a p0 in \a k
@@ -1131,7 +1131,7 @@ int MMGS_surfopenballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_int k, int i,
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param k index of starting triangle
  * \param i local index of point \a p1 in \a k
  * \param p1 point on which we want to compute the 3D unit tensor
@@ -1319,8 +1319,8 @@ int MMGS_unitTensor_2D ( MMG5_pMesh mesh,MMG5_int k,int i,MMG5_pPoint p1,
 
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
+ * \param mesh pointer to the mesh
+ * \param met pointer to the metric
  *
  * \return 1 if succeed, 0 if fail
  *

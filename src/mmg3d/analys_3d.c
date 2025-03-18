@@ -109,7 +109,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   MMG5_int     k,kk,iel,jel,nvf,nf,nr,nm,nt,nre,nreq,ncc,ned,ref;
-  int16_t      tag;
+  uint16_t     tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
@@ -462,7 +462,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \return 1.
  *
  * check subdomains connected by a vertex and mark these vertex as CRN and REQ.
@@ -616,7 +616,7 @@ int MMG5_singul(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \return 1 if successful, 0 if failed
  *
  * Compute normals at C1 vertices, for C0: tangents.
@@ -685,7 +685,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   }
 
   /** Step 2: Allocate memory to store normals for boundary points */
-  mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
+  mesh->xpmax  = MG_MAX( (MMG5_int)(1.5*mesh->xp),mesh->npmax);
 
   MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
   MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,return 0);
@@ -813,8 +813,8 @@ int MMG5_norver(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer towards the mesh
- * \param pt pointer towards current triangle
+ * \param mesh pointer to the mesh
+ * \param pt pointer to current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
 * \param n normal of triangle before regularization
@@ -881,7 +881,7 @@ static inline int MMG3D_dichotomytria(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k
 }
 
 /**
- * \param mesh pointer towards the mesh
+ * \param mesh pointer to the mesh
  * \param v list of vertices of current tetrahedron
  * \param k number of current point
  * \param c input : newly computed coordinates (giving negative area), output : coordinates after dichotomy
@@ -947,7 +947,7 @@ static inline int MMG3D_dichotomytetra(MMG5_pMesh mesh, MMG5_int *v, MMG5_int k,
 }
 
 /**
- * \param mesh pointer toward a MMG5 mesh structure.
+ * \param mesh pointer to a MMG5 mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * Regularization procedure for vertices coordinates, dual Laplacian in 3D
@@ -1008,7 +1008,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
       tabl[iad+1] = ppt->c[1];
       tabl[iad+2] = ppt->c[2];
       if ( !MG_VOK(ppt) )  continue;
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
       if ( !iel ) continue; // Mmg3d
@@ -1048,7 +1048,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
       ppt = &mesh->point[k];
 
       if ( !MG_VOK(ppt) )  continue;
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
+      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) continue;
 
       iel = ppt->s;
       if ( !iel ) continue; // Mmg3d
@@ -1176,7 +1176,7 @@ int MMG3D_regver(MMG5_pMesh mesh) {
 
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -1298,7 +1298,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
 }
 
 /**
- * \param mesh pointer toward mesh
+ * \param mesh pointer to mesh
  * \return 1 if successful, 0 if fail
  *
  * preprocessing stage: mesh analysis.
@@ -1470,6 +1470,10 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
   /* define geometry for non manifold points */
   if ( !MMG3D_nmgeom(mesh) ) return 0;
+
+#ifndef NDEBUG
+  MMG3D_chkfacetags(mesh);
+#endif
 
 #ifdef USE_POINTMAP
   /* Initialize source point with input index */

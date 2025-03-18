@@ -35,8 +35,8 @@
 #include "mmgcommon_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param node pointer toward a MMG5_iNode (cell for linked list)
+ * \param mesh pointer to the mesh structure (for count of used memory).
+ * \param node pointer to a MMG5_iNode (cell for linked list)
  * \return 1 if we can alloc the node \a node, 0 otherwise.
  *
  * Node allocation.
@@ -54,8 +54,8 @@ int MMG5_Alloc_inode( MMG5_pMesh mesh, MMG5_iNode **node ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the address of the root of the linked list.
+ * \param mesh pointer to the mesh structure (for count of used memory).
+ * \param liLi pointer to the address of the root of the linked list.
  * \param val value to add to the linked list.
  * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
  *
@@ -111,8 +111,8 @@ int MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param liLi pointer toward the root of the linked list.
+ * \param mesh pointer to the mesh structure (for count of used memory).
+ * \param liLi pointer to the root of the linked list.
  *
  * Free the memory used by the linked list whose root is \a liLi.
  *
@@ -130,8 +130,8 @@ void MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param bdryRefs pointer toward the list of the boundary references.
+ * \param mesh pointer to the mesh structure.
+ * \param bdryRefs pointer to the list of the boundary references.
  * \return npar, the number of local parameters at triangles if success,
  * 0 otherwise.
  *
@@ -175,9 +175,9 @@ int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param bdryRefs pointer toward the list of the boundary references.
- * \param out pointer toward the file in which to write.
+ * \param mesh pointer to the mesh structure.
+ * \param bdryRefs pointer to the list of the boundary references.
+ * \param out pointer to the file in which to write.
  * \return 1 if success, 0 otherwise.
  *
  * Write the local default values at triangles in the parameter file.

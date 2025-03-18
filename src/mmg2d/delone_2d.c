@@ -92,8 +92,8 @@ static int MMG2D_correction_iso(MMG5_pMesh mesh,MMG5_int ip,MMG5_int *list,int i
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param hash pointer toward the hash table structure
+ * \param mesh pointer to the mesh structure
+ * \param hash pointer to the hash table structure
  * \param iel index of triangle
  * \param i index of the face of the element
  *
@@ -237,8 +237,8 @@ int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the solution (metric) structure
+ * \param mesh pointer to the mesh
+ * \param sol pointer to the solution (metric) structure
  * \param ip index of point to insert
  * \param list Cavity of the point \a ip.
  * \param ilist number of trias in the cavity of \a ip.

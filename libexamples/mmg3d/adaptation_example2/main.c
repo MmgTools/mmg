@@ -1,4 +1,4 @@
-/* =============================================================================
+/** =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
@@ -19,7 +19,7 @@
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
-*/
+**/
 
 /**
  * Example of use of the mmg3d library (advanced use of mesh adaptation)
@@ -86,9 +86,9 @@ int main(int argc,char *argv[]) {
   /* args of InitMesh:
    * MMG5_ARG_start: we start to give the args of a variadic func
    * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
-   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+   * &mmgMesh: pointer to your MMG5_pMesh (that stores your mesh)
    * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
-   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
+   * &mmgSol: pointer to your MMG5_pSol (that stores your metric) */
 
   mmgMesh = NULL;
   mmgSol  = NULL;

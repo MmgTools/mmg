@@ -37,7 +37,7 @@
 extern int8_t ddb;
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param init_cc 1 if we need to reinitialized \a cc field of tria because
  * setadj has already been called (isosurf mode)
  *
@@ -51,8 +51,12 @@ int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
   MMG5_int         *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
-  int16_t          tag;
+  uint16_t         tag;
   int8_t           i,ii,i1,i2;
+
+  if ( !mesh->nt ) {
+    return 1;
+  }
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
@@ -264,7 +268,7 @@ int MMG2D_setadj(MMG5_pMesh mesh, int8_t init_cc) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param ref reference of the boundary to analyze (analyze all the boundaries
  * if MMG5_UNSET)
  *
@@ -398,7 +402,7 @@ int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  * \param ref reference of the boundary to analyze (analyze all the boundaries
  * if MMG5_UNSET)
  *
@@ -504,7 +508,7 @@ int MMG2D_norver(MMG5_pMesh mesh, MMG5_int ref) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 0 if fail, 1 if success
  *
@@ -769,8 +773,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer towards the mesh
- * \param pt pointer towards current triangle
+ * \param mesh pointer to the mesh
+ * \param pt pointer to current triangle
  * \param k number of current point
  * \param c newly computed coordinates (giving negative area)
  *
@@ -838,7 +842,7 @@ static inline int MMG2D_dichotomy(MMG5_pMesh mesh, MMG5_pTria pt, MMG5_int k, do
 
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 0 if fail, 1 if success
  *

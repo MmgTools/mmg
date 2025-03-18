@@ -36,9 +36,9 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set values.
- * \param met pointer toward a metric (non-mandatory).
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set values.
+ * \param met pointer to a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the implicit function carried by sol into mesh,
@@ -229,9 +229,9 @@ static int MMGS_cuttri(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the level-set
- * \param met pointer toward a metric (optionnal)
+ * \param mesh pointer to the mesh structure.
+ * \param sol pointer to the level-set
+ * \param met pointer to a metric (optionnal)
  *
  * \return 0 if fail, 1 otherwise.
  *

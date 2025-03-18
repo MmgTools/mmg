@@ -37,8 +37,8 @@
 #include "mmgexterns_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param i index of edge to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
@@ -96,8 +96,8 @@ int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i,MMG5_int *vx)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param i index of edge to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
@@ -144,8 +144,8 @@ int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i,MMG5_int *vx) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of the starting triangle.
  * \param i local index of the edge to split in \a k.
  * \param ip index of the point that we try to create.
@@ -269,7 +269,7 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k,int i,MMG5_int ip)
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param k index of element to split.
  * \param i index of edge to split.
  * \param ip index of the new point.
@@ -369,8 +369,8 @@ int split1b(MMG5_pMesh mesh,MMG5_int k,int8_t i,MMG5_int ip) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \return 0 if split leads to invalid element, else 1.
@@ -447,8 +447,8 @@ int MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \return 1 if success, 0 if fail.
@@ -519,8 +519,8 @@ int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \return 0 if split leads to invalid element, else 1.
@@ -608,8 +608,8 @@ int MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \return 1 if success, 0 if fail.

@@ -42,10 +42,10 @@
 #define _LS_MU          8.2e5
 
 /**
- * \param mesh pointer toward the mesh
- * \param disp pointer toward the displacement
- * \param lsst pointer toward the elastic structure (mesh + sol + info)
- * \param npfin pointer toward the final number of points in the packed mesh
+ * \param mesh pointer to the mesh
+ * \param disp pointer to the displacement
+ * \param lsst pointer to the elastic structure (mesh + sol + info)
+ * \param npfin pointer to the final number of points in the packed mesh
  * for the elasticity call
  *
  * \return invperm array of the permutation (vertices) from the submesh (given
@@ -65,13 +65,6 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
   MMG5_int       k,ip,npf,ntf,iel,jel,*perm,*invperm,*adja,*list,vper[4];
   int            refdirh,refdirnh;
   int8_t         i,j,jface;
-
-  /* LibElas is not compatible with int64: Check for int32 overflow */
-  if ( mesh->np > INT_MAX || mesh->ne > INT_MAX ) {
-    fprintf(stderr,"\n  ## Error: %s: impossible to call elasticity library"
-            " with int64 integers.\n",__func__);
-    return NULL;
-  }
 
   nlay = 20;
   refdirh = 0;
@@ -354,10 +347,10 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param disp pointer toward the displacement
- * \param lsst pointer toward the elastic structure (mesh + sol + info)
- * \param npf pointer toward the number of points in the submesh
+ * \param mesh pointer to the mesh
+ * \param disp pointer to the displacement
+ * \param lsst pointer to the elastic structure (mesh + sol + info)
+ * \param npf pointer to the number of points in the submesh
  * \param invperm array of the permutation from the submesh toward
  * the global one
  *
@@ -389,8 +382,8 @@ int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_in
 }
 
 /**
- * \param mesh pointer toward the mesh.
- * \param disp pointer toward the displacement.
+ * \param mesh pointer to the mesh.
+ * \param disp pointer to the displacement.
  *
  * \return 0 if fail, 1 if success.
  *
@@ -400,6 +393,13 @@ int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_in
 int MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst        *lsst;
   MMG5_int    npf,*invperm;
+
+  /* LibElas is not compatible with int64: Check for int32 overflow */
+  if ( mesh->np > INT_MAX || mesh->ne > INT_MAX || sizeof(MMG5_int) == 8 ) {
+    fprintf(stderr,"\n  ## Error: %s: impossible to call elasticity library"
+            " with int64 integers.\n",__func__);
+    return 0;
+  }
 
   /* Creation of the data structure for the submesh */
   lsst    = LS_init(mesh->dim,mesh->ver,P1,1);

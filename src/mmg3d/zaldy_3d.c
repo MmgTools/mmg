@@ -36,7 +36,7 @@
 #include "libmmg3d_private.h"
 
 /** get new point address */
-MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src) {
+MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],uint16_t tag,MMG5_int src) {
 
   MMG5_pPoint  ppt;
   MMG5_int     curpt;
@@ -63,7 +63,7 @@ MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,MMG5_int src) {
     }
     ppt->xp  = mesh->xp;
   }
-  assert(tag < 24704);
+  assert(tag <= MG_NUL*2-1 && "Value for tag is valid");
   assert(tag >= 0);
   ppt->n[0]   = 0;
   ppt->n[1]   = 0;
@@ -91,7 +91,7 @@ void MMG3D_delPt(MMG5_pMesh mesh,MMG5_int ip) {
   ppt->tmp    = mesh->npnil;
   mesh->npnil = ip;
   if ( ip == mesh->np ) {
-    while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+    while ( (!MG_VOK((&mesh->point[mesh->np]))) && mesh->np )  mesh->np--;
   }
 }
 
@@ -111,7 +111,7 @@ MMG5_int MMG3D_newElt(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  * \param iel index of the element to delete
  *
  * \return 1 if success, 0 if fail
@@ -135,13 +135,13 @@ int MMG3D_delElt(MMG5_pMesh mesh,MMG5_int iel) {
     memset(&mesh->adja[iadr],0,4*sizeof(MMG5_int));
   mesh->nenil = iel;
   if ( iel == mesh->ne ) {
-    while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
+    while ( (!MG_EOK((&mesh->tetra[mesh->ne]))) && mesh->ne )  mesh->ne--;
   }
   return 1;
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -163,7 +163,7 @@ int MMG3D_memOption_memSet(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -261,7 +261,7 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer to the mesh structure
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -270,15 +270,15 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
  */
 int MMG3D_memOption(MMG5_pMesh mesh) {
 
-  mesh->npmax = MG_MAX((int)(1.5*mesh->np),MMG3D_NPMAX);
-  mesh->nemax = MG_MAX((int)(1.5*mesh->ne),MMG3D_NEMAX);
-  mesh->ntmax = MG_MAX((int)(1.5*mesh->nt),MMG3D_NTMAX);
+  mesh->npmax = MG_MAX((MMG5_int)(1.5*mesh->np),MMG3D_NPMAX);
+  mesh->nemax = MG_MAX((MMG5_int)(1.5*mesh->ne),MMG3D_NEMAX);
+  mesh->ntmax = MG_MAX((MMG5_int)(1.5*mesh->nt),MMG3D_NTMAX);
 
   return  MMG3D_memOption_memSet(mesh);
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * \return 0 if failed, 1 otherwise.
  *
@@ -336,7 +336,7 @@ int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer to the mesh
  *
  * \return 1 if success, 0 if fail
  *
@@ -351,7 +351,7 @@ int MMG3D_zaldy(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Free xtetra structure.
  *
@@ -370,7 +370,7 @@ void MMG5_freeXTets(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  *
  * Free xprism structure.
  *

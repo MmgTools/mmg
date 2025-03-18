@@ -34,7 +34,7 @@
 #include "inlined_functions_3d_private.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer to the mesh structure.
  * \param iel element index.
  * \param item bad entity.
  * \return -1 if fail, element type otherwise.
@@ -315,9 +315,9 @@ static int MMG3D_typelt(MMG5_pMesh mesh,MMG5_int iel,int *item) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to not try to swap.
  * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
@@ -353,9 +353,9 @@ int MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to not try to swap.
  * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
@@ -380,9 +380,9 @@ int MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to split.
  * \param OCRIT quality threshold.
@@ -426,9 +426,9 @@ int MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to not split.
  * \return 1 if success, 0 otherwise
@@ -459,9 +459,9 @@ int MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctre
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param PROctree pointer to the PROctree structure.
  * \param testmark all the tets with a mark less than testmark will not be treated.
  * \return 0 if fail, number of improved elts otherwise.
  *

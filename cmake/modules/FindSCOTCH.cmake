@@ -51,6 +51,8 @@
 # (To distribute this file outside of Morse, substitute the full
 #  License text for the above reference.)
 
+set(CMAKE_REQUIRED_QUIET SCOTCH_FIND_QUIETLY)
+
 if (NOT SCOTCH_FOUND)
   set(SCOTCH_DIR "" CACHE PATH "Installation directory of SCOTCH library")
   if (NOT SCOTCH_FIND_QUIETLY)
@@ -367,3 +369,5 @@ find_package_handle_standard_args(SCOTCH DEFAULT_MSG
 #
 # TODO: Add possibility to check for specific functions in the library
 #
+
+unset(CMAKE_REQUIRED_QUIET)

@@ -789,6 +789,12 @@ IF ( ELAS_FOUND AND NOT USE_ELAS MATCHES OFF )
     -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-nsd3.o.mesh
     )
 
+  IF (${MMG5_INT} MATCHES int64_t )
+    SET(passElasRegex "## Error: MMG2D_velextLS: impossible to call elasticity library with int64 integers")
+    SET_PROPERTY(TEST mmg2d_LagMotion0_circle mmg2d_LagMotion1_circle mmg2d_LagMotion2_circle mmg2d_LagMotion2_circle-nsd3
+      PROPERTY PASS_REGULAR_EXPRESSION "${passElasRegex}")
+  ENDIF()
+
 ENDIF()
 
 ###############################################################################

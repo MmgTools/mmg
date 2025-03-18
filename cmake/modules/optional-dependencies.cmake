@@ -101,6 +101,11 @@ ENDIF ( )
 SET ( USE_VTK "" CACHE STRING "Use VTK I/O (ON, OFF or <empty>)" )
 SET_PROPERTY(CACHE USE_VTK PROPERTY STRINGS "ON" "OFF" "")
 
+IF ( PMMG_CALL )
+  SET ( PMMG_VTK_MESS "Mmg -" )
+ENDIF ( )
+
+
 IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" OR USE_VTK )
   # Variable is not provided by the user or is setted to on
 
@@ -108,7 +113,12 @@ IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" OR USE_V
   # Before v9
   FIND_PACKAGE(VTK QUIET)
   IF ( VTK_FOUND )
-    message (STATUS "VTK_VERSION: ${VTK_VERSION}")
+    message (STATUS "${PMMG_VTK_MESS} VTK_VERSION: ${VTK_VERSION}")
+
+    IF ( PMMG_CALL )
+      SET ( PMMG_VTK_COMP "vtkParallelCore vtkParallelMPI" )
+    ENDIF ( )
+
     IF (VTK_VERSION VERSION_LESS "9.0.0")
       find_package(VTK  COMPONENTS
         vtkCommonCore
@@ -117,8 +127,14 @@ IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" OR USE_V
         vtkIOParallel
         vtkIOParallelXML
         vtkIOXML
+        ${PMMG_VTK_COMP}
         QUIET)
     ELSE()
+
+      IF ( PMMG_CALL )
+        SET ( PMMG_VTK_COMP "ParallelCore ParallelMPI" )
+      ENDIF ( )
+
       # After v9
       FIND_PACKAGE(VTK COMPONENTS
         CommonCore
@@ -127,20 +143,21 @@ IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK MATCHES " +" OR USE_V
         IOParallel
         IOParallelXML
         IOXML
+        ${PMMG_VTK_COMP}
         QUIET)
     ENDIF()
 
   ELSEIF ( USE_VTK )
     # USE_VTK is not empty so user explicitely ask for VTK...
     # but it is not found: raise an error
-    MESSAGE(FATAL_ERROR "VTK library not found.")
+    MESSAGE(FATAL_ERROR "${PMMG_VTK_MESS} VTK library not found.")
   ENDIF()
 ENDIF()
 
 IF ( VTK_FOUND AND NOT USE_VTK MATCHES OFF)
   add_definitions(-DUSE_VTK)
 
-  MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
+  MESSAGE ( STATUS "${PMMG_VTK_MESS} Compilation with VTK: add vtk, vtp and vtu I/O." )
 
   IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
     INCLUDE ( ${VTK_USE_FILE} )
