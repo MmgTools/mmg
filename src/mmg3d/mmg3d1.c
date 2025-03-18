@@ -487,11 +487,12 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
     /*   } */
     /* } */
 
-
-    /* Split regular boundary edges connecting ridge or non-manifold points */
-    if ( (MG_GEO_OR_NOM(p[i1]->tag) && MG_GEO_OR_NOM(p[i2]->tag)) && !MG_GEO_OR_NOM(pt->tag[i]) ) {
-      MG_SET(pt->flag,i);
-      continue;
+    if ( mesh->info.setfem == MMG3D_STRONGFEM) {
+      /* Split regular boundary edges connecting ridge or non-manifold points */
+      if ( (MG_GEO_OR_NOM(p[i1]->tag) && MG_GEO_OR_NOM(p[i2]->tag)) && !MG_GEO_OR_NOM(pt->tag[i]) ) {
+        MG_SET(pt->flag,i);
+        continue;
+      }
     }
 
     /* check length */
@@ -2289,7 +2290,7 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * \remark ridge points creation: with fem (finite element method) mode a tetra
  * cannot have 2 boundary faces. Thus, the ridge point is created from a given
  * tetra and it is seen a second time from another tetra, which allows to update
- * its second normal. With nofem mode, a ref edge or ridge can be at the
+ * its second normal. With fem 0 mode, a ref edge or ridge can be at the
  * interface of 2 boundary faces belonging to the same tetra.
  *
  */

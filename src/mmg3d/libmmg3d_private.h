@@ -149,6 +149,7 @@ extern "C" {
 #define MMG3D_BADKAL    0.2
 #define MMG3D_MAXKAL     1.
 
+#define MMG3D_STRONGFEM 2
 
 #define MMG3D_NPMAX  1000000 //200000
 #define MMG3D_NAMAX   200000 //40000
