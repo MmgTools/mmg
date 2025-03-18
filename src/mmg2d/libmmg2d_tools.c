@@ -170,7 +170,7 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           }
         }
         else if ( !strcmp(argv[i],"-fem") ) {
-          if ( ++i < argc && isdigit(argv[i][0]) && (0 <= atoi(argv[i]) <= 1) ) {
+          if ( ++i < argc && isdigit(argv[i][0]) && (atoi(argv[i]) == 0 || atoi(argv[i]) == 1) ) {
             if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_fem,atoi(argv[i])) )
               return 0;
           }
