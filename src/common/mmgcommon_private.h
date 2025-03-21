@@ -558,29 +558,6 @@ void MMG5_excfun(int sigid) {
   { nu pc; }                                    \
   void nu pl
 
-/**
- * \def FORTRAN_VARIADIC(nu,nl,pl,body)
- * \brief Adds function definitions.
- * \param nu function name in upper case.
- * \param nl function name in lower case.
- * \param pl type of arguments.
- * \param body body of the function.
- *
- * Adds function definitions with upcase, underscore and double
- * underscore to match any fortran compiler.
- *
- */
-#define FORTRAN_VARIADIC(nu,nl,pl,body)           \
-  void nu pl                                      \
-  { body }                                        \
-  void nl pl                                      \
-  { body }                                        \
-  void nl##_ pl                                   \
-  { body }                                        \
-  void nl##__ pl                                  \
-  { body }                                        \
-
-
 /* Global variables */
   static const uint8_t MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
   static const uint8_t MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
