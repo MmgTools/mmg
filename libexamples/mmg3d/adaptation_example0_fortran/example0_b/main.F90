@@ -57,9 +57,10 @@ PROGRAM main
   mmgMesh = 0
   mmgSol  = 0
 
-  CALL MMG3D_Init_mesh(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
-       MMG5_ARG_end)
+  CALL MMG3D_Init_mesh((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(100)
   CALL MMG3D_SET_IPARAMETER(mmgMesh,mmgSol,MMG3D_IPARAM_verbose,5_immg,ier)
 
   !> 2) Build mesh in MMG5 format
@@ -374,7 +375,8 @@ PROGRAM main
   CLOSE(inm)
 
   !> 3) Free the MMG3D5 structures
-  CALL MMG3D_Free_all(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
-       MMG5_ARG_end)
+  CALL MMG3D_Free_all((/MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,LOC(mmgMesh),MMG5_ARG_ppMet,LOC(mmgSol), &
+       MMG5_ARG_end/),ier)
+  IF ( ier == 0 ) CALL EXIT(101)
 END PROGRAM main

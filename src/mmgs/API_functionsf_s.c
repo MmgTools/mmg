@@ -43,20 +43,11 @@
 /**
  * See \ref MMGS_Init_mesh function in common/libmmgcommon_private.h file.
  */
-FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
-                   (const int starter, ... ),
-                   va_list argptr;
-                   int     ier;
-
-                   va_start(argptr, starter);
-
-                   ier = MMGS_Init_mesh_var(argptr);
-
-                   va_end(argptr);
-
-                   if ( !ier ) exit(EXIT_FAILURE);
-                   return;
-  )
+FORTRAN_NAME(MMGS_INIT_MESH, mmgs_init_mesh,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Init_mesh_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMGS_Init_parameters function in \ref mmgs/libmmgs.h file.
@@ -728,60 +719,29 @@ FORTRAN_NAME(MMGS_FREE_ALLSOLS,mmgs_free_allsols,
 /**
  * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
-                 (const int starter,...),
-                 va_list argptr;
-
-                 int ier;
-
-                 va_start(argptr, starter);
-
-                 ier = MMGS_Free_all_var(argptr);
-
-                 va_end(argptr);
-
-                 if ( !ier ) exit(EXIT_FAILURE);
-
-                 return;
-  )
+FORTRAN_NAME(MMGS_FREE_ALL, mmgs_free_all,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Free_all_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMGS_Free_structures function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
-                 (const int starter,...),
-                 va_list argptr;
-                 int     ier;
-
-                 va_start(argptr, starter);
-
-                 ier = MMGS_Free_structures_var(argptr);
-
-                 va_end(argptr);
-
-                 if ( !ier ) exit(EXIT_FAILURE);
-
-                 return;
-  )
+FORTRAN_NAME(MMGS_FREE_STRUCTURES, mmgs_free_structures,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Free_structures_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMGS_Free_names function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_VARIADIC(MMGS_FREE_NAMES,mmgs_free_names,
-                 (const int starter,...),
-                 va_list argptr;
-                 int     ier;
-
-                 va_start(argptr, starter);
-
-                 ier = MMGS_Free_names_var(argptr);
-
-                 va_end(argptr);
-
-                 if ( !ier  ) exit(EXIT_FAILURE);
-
-                 return;
-  )
+FORTRAN_NAME(MMGS_FREE_NAMES, mmgs_free_names,(void **arglist, int* retval),
+             (arglist,retval)) {
+  *retval = MMGS_Free_names_fortran_var(arglist);
+  return;
+}
 
 /**
  * See \ref MMGS_loadMesh function in \ref mmgs/libmmgs.h file.

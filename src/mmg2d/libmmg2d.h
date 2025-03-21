@@ -171,8 +171,13 @@ extern "C" {
  * Here, \a your_mesh is a \ref MMG5_pMesh, \a your_metric and \a your_level_set
  * are \ref MMG5_pSol.
  *
- * \remark No fortran interface, to allow variadic arguments.
- *
+ * \remark Fortran interface:
+ * Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
+ * a MMG structure should be passed by reference (using Fortran LOC function).
+ * >   SUBROUTINE MMG2D_INIT_MESH(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  */
   LIBMMG2D_EXPORT int MMG2D_Init_mesh(const int starter,...);
 
@@ -1619,10 +1624,14 @@ LIBMMG2D_EXPORT int  MMG2D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MM
  *
  * \return 0 on failure, 1 on success
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every pointer to 
+ * a MMG structure should be passed by reference (using Fortran LOC function).
  *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_FREE_ALL(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
 LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
@@ -1652,12 +1661,15 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \return 0 on failure, 1 on success
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
- * \remark No fortran interface to allow variadic arguments.
- *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_FREE_STRUCTURES(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
  LIBMMG2D_EXPORT int MMG2D_Free_structures(const int starter,...);
@@ -1687,13 +1699,16 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  * \return 0 on failure, 1 otherwise
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
- * \remark No fortran interface to allow variadic arguments.
- *
- * \remark no Fortran interface to allow variadic args.
- *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_FREE_NAMES(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
+ * 
  */
   LIBMMG2D_EXPORT int MMG2D_Free_names(const int starter,...);
 
