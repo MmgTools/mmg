@@ -45,15 +45,22 @@ int MMG5_resetRef_ls_open(MMG5_pMesh mesh) {
   MMG5_pPoint     p0;
   MMG5_int        ref,k;
   int8_t          i;
-
+  
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
 
     for (i=0; i<3; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( pt->edg[i] == mesh->info.isoref ) pt->edg[i] = 0;
-      if ( p0->ref == mesh->info.isoref ) p0->ref = 0;
+      if ( pt->edg[i] == mesh->info.isoref ) {
+        pt->tag[i] &= ~MG_BDY;
+        pt->tag[i] &= ~MG_REF;
+        pt->edg[i] = 0;
+      }
+      if ( p0->ref == mesh->info.isoref ) {
+        p0->ref = 0;
+        p0->tag = 0;
+      }
     }
   }
 
@@ -435,7 +442,7 @@ int MMG2D_mmg2d6_open(MMG5_pMesh mesh, MMG5_pSol phi,MMG5_pSol psi) {
     return 0;
   }
   
-  /* Snapping: to do */
+  /* Snapping: not sure... may create troubles if several lines intersect */
   
   /* Removal of small parasitic components: to do */
 
@@ -443,9 +450,11 @@ int MMG2D_mmg2d6_open(MMG5_pMesh mesh, MMG5_pSol phi,MMG5_pSol psi) {
   MMG5_DEL_MEM(mesh,mesh->adja);
   
   /* Reset the mesh->info.isoref field everywhere it appears */
-  if ( !MMG5_resetRef_ls_open(mesh) ) {
-    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
-    return 0;
+  if ( !mesh->info.kiso ) {
+    if ( !MMG5_resetRef_ls_open(mesh) ) {
+      fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
+      return 0;
+    }
   }
   
   /* Effective splitting of the crossed triangles */

@@ -231,6 +231,7 @@ enum MMG5_entities {
   MMG5_Edg,  /*!< Edge entity */
   MMG5_Triangle, /*!< Triangle entity */
   MMG5_Tetrahedron, /*!< Tetra entity */
+  MMG5_Crn, /*!< Corner entity */
 };
 
 /**
@@ -545,6 +546,7 @@ typedef struct {
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
   int8_t        fem; /*!< internal value for fem / no fem mesh output */
+  int8_t        kiso; /*!< Retain previous ls entities (in ls mode) */
   int8_t        lag; /*!< lagrangian mode */
   int8_t        parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point

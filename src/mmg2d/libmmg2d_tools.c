@@ -240,6 +240,12 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           return 0;
         }
         break;
+      case 'k':
+        if ( !strcmp(argv[i],"-kiso") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_kiso,1) )
+            return 0;
+        }
+        break;
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -692,6 +698,11 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else if ( !strcmp(data,"edges") || !strcmp(data,"edge") ) {
             if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Edg,ref,fp1,fp2,fp3) ) {
+              return 0;
+            }
+          }
+          else if ( !strcmp(data,"corners") || !strcmp(data,"corner") ) {
+            if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Crn,ref,fp1,fp2,fp3) ) {
               return 0;
             }
           }

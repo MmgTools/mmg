@@ -108,7 +108,6 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.dhd      = MMG5_ANGEDG;
 }
 
-
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int val){
   int k;
 
@@ -146,6 +145,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int va
                 " set to default value\n",__func__);
       mesh->info.dhd    = MMG5_ANGEDG;
     }
+    break;
+  case MMG2D_IPARAM_kiso :
+    mesh->info.kiso = val;
     break;
   case MMG2D_IPARAM_nofem :
     mesh->info.setfem = (val==1)? 0 : 1;
@@ -397,11 +399,11 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
     fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
     return 0;
   }
-  if ( typ != MMG5_Triangle && typ != MMG5_Edg ) {
+  if ( typ != MMG5_Triangle && typ != MMG5_Edg && typ != MMG5_Crn ) {
     fprintf(stderr,"\n  ## Warning: %s: you must apply your local parameters",
             __func__);
-    fprintf(stderr," on triangles (MMG5_Triangle or %d) or edges"
-            " (MMG5_Edg or %d).\n",MMG5_Triangle,MMG5_Edg);
+    fprintf(stderr," on triangles (MMG5_Triangle or %d), edges"
+            " (MMG5_Edg or %d) or corners (MMG5_Crn or %d).\n",MMG5_Triangle,MMG5_Edg,MMG5_Crn);
     fprintf(stderr,"\n  ## Unknown type of entity: ignored.\n");
     return 0;
   }
@@ -447,7 +449,7 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
   mesh->info.par[mesh->info.npari].hmin  = hmin;
   mesh->info.par[mesh->info.npari].hmax  = hmax;
   mesh->info.par[mesh->info.npari].hausd = hausd;
-
+  
   switch ( typ )
   {
   case ( MMG5_Triangle ):
@@ -455,6 +457,9 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
     break;
   case ( MMG5_Edg ):
     mesh->info.parTyp |= MG_Edge;
+    break;
+  case ( MMG5_Crn ) :
+    mesh->info.parTyp |= MG_Crn;
     break;
   default:
     fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",

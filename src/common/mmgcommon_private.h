@@ -161,7 +161,7 @@ extern "C" {
 #define  MG_Tria   (1 << 1 )  /**< 2 local parameter applied over triangle */
 #define  MG_Tetra  (1 << 2 )  /**< 4 local parameter applied over tetrahedron */
 #define  MG_Edge   (1 << 3 )  /**< 8 local parameter applied over edge */
-
+#define  MG_Crn (1 << 4 )  /**< 16 local parameter applied over corner */
 
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */

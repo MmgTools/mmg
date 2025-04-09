@@ -339,6 +339,17 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           break;
         }
       }
+      
+      /* Retrieve local parameters associated to vertex k if corner */
+      if ( p0->tag & MG_CRN ) {
+        for (l=0; l<mesh->info.npar; l++) {
+          ppa = &mesh->info.par[l];
+          if ( ppa->elt == MMG5_Crn && ppa->ref == p0->ref ) {
+            met->m[k] = MG_MAX(hmin,MG_MIN(met->m[k],ppa->hmax));
+            break;
+          }
+        }
+      }
     }
   }
 

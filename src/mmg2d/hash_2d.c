@@ -404,7 +404,6 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
         pa = &mesh->edge[ia];
         pt->edg[i2] = pa->ref;
         pt->tag[i2] |= pa->tag;
-
       }
     }
   }
