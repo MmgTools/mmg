@@ -47,7 +47,6 @@ my $fichier;
 #my $format = "MMG_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
 my $formatbyval = "#define %-30s \%val(%d)";
-my $definebyval = "#define MMG5_ARG_%-30s \%val(%d)\n";
 my %opts;
 
 ###############################################################################
@@ -131,6 +130,7 @@ sub Convert {
     my $tabcount = 0;
     my $interfaceprinted = 0;
     my $modulename;
+    my $definebyval = "#define MMG5_ARG_%-30s %d_$int\n";
 
     open (APIc, $fichier);
 

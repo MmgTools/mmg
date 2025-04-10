@@ -341,4 +341,7 @@ include(doxygen)
 #####         Create Package
 #####
 ###############################################################################
-include(packages)
+SET (MMG5_PACKAGE TRUE CACHE BOOL "add CPack directives")
+IF (MMG5_PACKAGE)
+  include(packages)
+ENDIF ( MMG5_PACKAGE )
