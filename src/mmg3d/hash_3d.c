@@ -130,7 +130,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   if ( mesh->adja ) {
     return 1;
   }
-
+  
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
@@ -747,8 +747,8 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh,uint16_t func(uint16_t) ) {
     }
 
     MMG5_int ng  = nfeat[3*tmp[k]];
-    MMG5_int nrp = nfeat[3*tmp[k]+1];
-    MMG5_int nm  = nfeat[3*tmp[k]+2];
+    MMG5_int nm  = nfeat[3*tmp[k]+1];
+    MMG5_int nrp = nfeat[3*tmp[k]+2];
 
     if ( (ng+nrp+nm) > 2 ) {
       /* More than 2 feature edges are passing through the point: point is
@@ -1253,7 +1253,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
  *
  * Fill tria array with missing triangles:
  * - if called from the first time, xtetra is not allocated so missing triangles
- *    may be founded at domains interface or external boundary.
+ *    may be found at domains interface or external boundary.
  * - Otherwise, the tria array is reconstructed from the xtetra
  *   infos.
  *
@@ -1320,7 +1320,8 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
           /* Classic mode (no open bdy) or no info stored in xtetra (first
            * call) */
           if ( adj && ( pt->ref <= pt1->ref) )  continue;
-        } else {
+        }
+        else {
           /* info stored in xtetra and opnbdy mode */
           if ( adj && ( (pt->ref<pt1->ref) || (!pt->xt) ||
                         (!(pxt->ftag[i] & MG_BDY)) || (!MG_GET(pxt->ori,i) ) ) )
@@ -1354,7 +1355,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
         mesh->point[ptt->v[1]].tag |= MG_BDY;
         ptt->v[2] = pt->v[MMG5_idir[i][2]];
         mesh->point[ptt->v[2]].tag |= MG_BDY;
-
+        
         /* the cc field is used to be able to recover the tetra (and its face)
          * from which comes a boundary triangle (when called by packmesh =>
          * mesh->nt=0 at the beginning of the function) */
@@ -1547,7 +1548,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
  * Count the number of faces in mesh and compare this number to the number of
  *   given triangles.
  *
- * - If the founded number exceed the given one, add the missing
+ * - If the found number exceed the given one, add the missing
  *   boundary triangles (call to MMG5_bdryTria). Do nothing otherwise.
  *
  * - Fill the adjacency relationship between prisms and tetra (fill adjapr with
@@ -1563,7 +1564,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
 
   /** Step 1: scan the mesh and count the boundaries */
   ier = MMG5_chkBdryTria_countBoundaries(mesh,&ntmesh,&ntpres);
-
+  
   /** Step 2: detect the extra boundaries (that will be ignored) provided by the
    * user */
   if ( mesh->nt ) {
@@ -1579,7 +1580,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
   /** Step 3: add the missing boundary triangles or, if the mesh contains
    * prisms, set to required the triangles at interface betwen prisms and tet */
   ier = MMG5_chkBdryTria_addMissingTriangles(mesh,ntmesh,ntpres);
-
+  
   return 1;
 }
 
@@ -1619,10 +1620,10 @@ int MMG5_chkBdryTria_countBoundaries(MMG5_pMesh mesh, MMG5_int *ntmesh, MMG5_int
         ++(*ntmesh);
     }
   }
-
+    
   if ( mesh->info.opnbdy && mesh->xtetra ) {
     /* We want to preserve internal triangle and we came from bdryBuild: we need
-     * to count the preserved boudaries */
+     * to count the preserved boudnaries */
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || !pt->xt )  continue;
@@ -1636,7 +1637,7 @@ int MMG5_chkBdryTria_countBoundaries(MMG5_pMesh mesh, MMG5_int *ntmesh, MMG5_int
         pt1 = &mesh->tetra[adj];
 
         if ( pt->ref != pt1->ref ) continue;
-
+                
         if ( (mesh->xtetra[pt->xt].ftag[i] & MG_BDY) &&
              (MG_GET(mesh->xtetra[pt->xt].ori,i) ) ) ++(*ntpres);
       }
@@ -1749,7 +1750,8 @@ int MMG5_chkBdryTria_hashBoundaries(MMG5_pMesh mesh, MMG5_int ntmesh, MMG5_Hash 
         if ( !MMG5_hashFace(mesh,hashElt,ia,ib,ic,4*k+i) ) return 0;
       }
     }
-  } else {
+  }
+  else {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
@@ -1774,6 +1776,7 @@ int MMG5_chkBdryTria_hashBoundaries(MMG5_pMesh mesh, MMG5_int ntmesh, MMG5_Hash 
       }
     }
   }
+  
   for (k=1; k<=mesh->nprism; k++) {
     pp = &mesh->prism[k];
     if ( !MG_EOK(pp) )  continue;
@@ -1910,7 +1913,7 @@ int MMG5_chkBdryTria_deleteExtraTriangles(MMG5_pMesh mesh, MMG5_int* permtria) {
 int MMG5_chkBdryTria_addMissingTriangles(MMG5_pMesh mesh, MMG5_int ntmesh, MMG5_int ntpres) {
 
   MMG5_pTria ptt;
-  MMG5_int   k, nbl;
+  MMG5_int   k,nbl;
   int        i;
 
   if ( ntpres && (mesh->info.imprim > 5 || mesh->info.ddebug) )

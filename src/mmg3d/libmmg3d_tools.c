@@ -407,6 +407,19 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
             }
           }
         }
+        else if ( !strcmp(argv[i],"-lsopen") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isoopen,1) )
+            return 0;
+
+          if ( i < argc -1 ) {
+            val = strtof(argv[i+1],&endptr);
+            if ( endptr == &(argv[i+1][strlen(argv[i+1])]) ) {
+              ++i;
+              if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,val))
+                return 0;
+            }
+          }
+        }
         else if ( !strcmp(argv[i],"-lssurf") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isosurf,1) )
             return 0;
@@ -538,6 +551,30 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         else {
           /* Arg unknown by Mmg: arg starts with -o but is not known */
           MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
+        break;
+      case 'p':
+        if ( !strcmp(argv[i],"-phi") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMG3D_Set_inputSolName(mesh,sol,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
+            MMG3D_usage(argv[0]);
+            return 0;
+          }
+        }
+        else if ( !strcmp(argv[i],"-psi") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMG3D_Set_inputSolName(mesh,met,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"\nMissing filname for %s\n",argv[i-1]);
+            MMG3D_usage(argv[0]);
+            return 0;
+          }
         }
         break;
       case 'r':

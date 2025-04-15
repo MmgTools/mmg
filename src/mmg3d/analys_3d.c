@@ -1335,8 +1335,9 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
+  /* In case of LS mode and opnbdy, add info from triangles stemming from LS discretization to xtetra field */
   if ( mesh->info.iso && mesh->info.opnbdy ) {
-    ier = MMG3D_update_xtetra ( mesh );
+    ier = MMG3D_update_xtetra(mesh);
     if ( !ier ) {
       fprintf(stderr,"\n  ## Problem when updating the xtetra data after ls discretization."
               " Exit program.\n");
@@ -1356,7 +1357,7 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     return 0;
   }
   
-  /* identify surface mesh */
+  /* Identify and possibly correct surface mesh */
   if ( !MMG5_chkBdryTria(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     return 0;

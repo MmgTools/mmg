@@ -1064,6 +1064,7 @@ int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
   if ( !MMG5_hashNew(mesh,&hash,nb,7*nb) ) return 0;
+  
   /* Hash all boundary and required edges, and put ip = -1 in hash structure */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1096,7 +1097,6 @@ int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       }
     }
   }
-
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1314,8 +1314,8 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
   MMG5_int      *adja,k,jel;
 
   if ( (!mesh->info.iso) || (!mesh->info.opnbdy) ) {
-    /* In non opnbdy mode, info stored in xtetra is not used */
-    /* In non ls mode, xtetra are alread updated */
+    /* In non opnbdy mode, info stored in xtetra is not used at the moment where this function is used */
+    /* In non ls mode, xtetra are alread up-to-date at the moment of use */
     return 1;
   }
 
@@ -1331,7 +1331,6 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       __func__);
     return 0;
   }
-
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

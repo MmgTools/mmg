@@ -297,7 +297,7 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int main(int argc,char *argv[]) {
 
   MMG5_pMesh      mesh;
-  MMG5_pSol       sol,met,disp,ls;
+  MMG5_pSol       sol,met,disp,ls,psi;
   int             ier,ierSave,fmtin,fmtout;
   char            stim[32],*ptr;
 
@@ -326,6 +326,7 @@ int main(int argc,char *argv[]) {
   met  = NULL;
   disp = NULL;
   ls   = NULL;
+  psi  = NULL;
 
   MMG3D_Init_mesh(MMG5_ARG_start,
                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
@@ -358,7 +359,7 @@ int main(int argc,char *argv[]) {
   if ( mesh->info.lag >= 0 ) {
     sol = disp;
   }
-  else if ( mesh->info.iso || mesh->info.isosurf ) {
+  else if ( mesh->info.iso || mesh->info.isosurf || mesh->info.isoopen ) {
     sol = ls;
   }
   else {
@@ -395,7 +396,7 @@ int main(int argc,char *argv[]) {
       MMG5_DEL_MEM(mesh,ls->namein);
     }
 
-    if ( mesh->info.lag >= 0 || mesh->info.iso || mesh->info.isosurf ) {
+    if ( mesh->info.lag >= 0 || mesh->info.iso || mesh->info.isosurf || mesh->info.isoopen ) {
       /* displacement or isovalue are mandatory */
       if ( MMG3D_loadSol(mesh,sol,sol->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION FILE.\n");
@@ -411,7 +412,7 @@ int main(int argc,char *argv[]) {
     }
 
     /* In iso mode: read metric if any */
-    if ( mesh->info.iso ) {
+    if ( mesh->info.iso || mesh->info.isoopen ) {
       if (met->namein) {
         if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
           fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
@@ -447,7 +448,7 @@ int main(int argc,char *argv[]) {
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
   }
-  else if ( mesh->info.iso || mesh->info.isosurf ) {
+  else if ( mesh->info.iso || mesh->info.isosurf || mesh->info.isoopen ) {
      if ( ls == NULL || ls->m == NULL ) {
         fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
@@ -455,7 +456,7 @@ int main(int argc,char *argv[]) {
     }
 
   /* Read parameter file */
-    if ( !MMG3D_parsop(mesh,met) )
+  if ( !MMG3D_parsop(mesh,met) )
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);
@@ -474,7 +475,7 @@ int main(int argc,char *argv[]) {
     ier = MMG3D_mmg3dmov(mesh,met,disp);
   }
   /* Level Set mode */
-  else if ( mesh->info.iso || mesh->info.isosurf ) {
+  else if ( mesh->info.iso || mesh->info.isosurf || mesh->info.isoopen ) {
     ier = MMG3D_mmg3dls(mesh,ls,met);
   }
   /* Remeshing mode */

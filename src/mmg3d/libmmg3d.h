@@ -146,6 +146,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_debug,                     /*!< [1/0], Turn on/off debug mode */
   MMG3D_IPARAM_angle,                     /*!< [1/0], Turn on/off angle detection */
   MMG3D_IPARAM_iso,                       /*!< [1/0], Enable level-set discretization (volume and surfaces) */
+  MMG3D_IPARAM_isoopen,                   /*!< [1/0], Enable two level-set discretization of open surface */
   MMG3D_IPARAM_isosurf,                   /*!< [1/0], Enable level-set discretization on the surfaces only */
   MMG3D_IPARAM_nofem,                     /*!< [1/0], Do not attempt to make the mesh suitable for finite-element computations */
   MMG3D_IPARAM_opnbdy,                    /*!< [1/0], Preserve triangles at interface of 2 domains with the same reference */

@@ -102,7 +102,6 @@ MMG5_int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   MMG5_int    k,nr;
   int         i;
 
-
   /* rebuild triangles*/
   if ( mesh->tria )
     MMG5_DEL_MEM(mesh,mesh->tria);
@@ -112,7 +111,7 @@ MMG5_int MMG3D_bdryBuild(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Error: %s: unable to rebuild triangles\n",__func__);
     return -1;
   }
-
+      
   /* build hash table for edges */
   if ( mesh->htab.geom )
     MMG5_DEL_MEM(mesh,mesh->htab.geom);
@@ -961,9 +960,10 @@ int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   nr = MMG3D_bdryBuild(mesh);
+
   if ( nr < 0 ) return 0;
 
-  /* to could save the mesh, the adjacency have to be correct */
+  /* To save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!MMG5_chkmsh(mesh,1,1) ) ) {
     fprintf(stderr,"\n  ##  Warning: %s: invalid mesh.\n",__func__);
     return 0;
@@ -1200,8 +1200,8 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   assert ( sol );
   assert ( mesh->point );
   assert ( mesh->tetra );
-
-  if ( (!mesh->info.iso) && (!mesh->info.isosurf) ) {
+  
+  if ( (!mesh->info.iso) && (!mesh->info.isosurf) && (!mesh->info.isoopen) ) {
     fprintf(stdout,"\n  ## WARNING: ISO MODE NOT PROVIDED: ENABLING ISOVALUE DISCRETIZATION MODE (-ls) \n");
     mesh->info.iso = 1;
   }
@@ -1356,11 +1356,25 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
-  if ( !MMG3D_mmg3d2(mesh,sol,met) ) {
-    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( mesh->info.isoopen ) {
+    if ( !MMG3D_mmg3d2_open(mesh,sol,met) ) {
+      if ( mettofree ) {
+        MMG5_DEL_MEM(mesh,met->m);
+        MMG5_SAFE_FREE (met);
+      }
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
   }
-
+  else {
+    if ( !MMG3D_mmg3d2(mesh,sol,met) ) {
+      if ( mettofree ) {
+        MMG5_DEL_MEM(mesh,met->m);
+        MMG5_SAFE_FREE (met);
+      }
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
+  }
+  
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim > 0 )
@@ -1386,7 +1400,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     if ( !MMG5_unscaleMesh(mesh,met,sol) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
-
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);

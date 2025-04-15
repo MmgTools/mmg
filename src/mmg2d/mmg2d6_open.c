@@ -110,8 +110,8 @@ int MMG5_setref_lsopen(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi) {
 
 /**
  * \param mesh pointer to the mesh
- * \param sol pointer to the level-set
- * \param met pointer to a metric (non-mandatory)
+ * \param phi pointer to the level set function phi
+ * \param psi pointer to the second level set function psi
  *
  * \return 1 if success, 0 otherwise
  *
@@ -270,12 +270,12 @@ int MMG2D_cuttri_lsopen_phi(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi){
 
 /**
  * \param mesh pointer to the mesh
- * \param sol pointer to the level-set
- * \param met pointer to a metric (non-mandatory)
+ * \param phi pointer to the level set function phi
+ * \param psi pointer to the second level set function psi
  *
  * \return 1 if success, 0 otherwise
  *
- * Effective discretization of the part of 0 level set of psi intersecting .
+ * Effective discretization of the part of 0 level set of psi intersecting the 0 level set of phi.
  *
  */
 int MMG2D_cuttri_lsopen_psi(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi){
