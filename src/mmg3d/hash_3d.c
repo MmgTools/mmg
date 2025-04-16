@@ -1216,6 +1216,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         i2  = MMG5_iprv2[i];
         kk  = adja[i] / 3;
         if ( (!kk) || pt->tag[i] & MG_NOM ) {
+          if ( !kk ) pt->tag[i] |= (MG_BDY + MG_GEO); // Dunno what to do here
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
               pt->edg[i] = ( pt->edg[i] != 0 ) ?  -MMG5_abs(pt->edg[i]) : mesh->info.isoref;

@@ -600,7 +600,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       else if ( (pt->ref==pt1->ref) && MG_SIN(pt->tag[i]) ) {
         ++mesh->na;
       }
-      else if ( mesh->info.opnbdy ) {
+      else if ( mesh->info.opnbdy && pt->ref == pt1->ref && k < iel ) {
         if ( (pt->tag[i] & MG_REF) || pt->tag[i] & MG_BDY ) {
           assert ( pt->tag[i] & (MG_REF+MG_BDY) );
           ++mesh->na;
@@ -608,6 +608,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       }
     }
   }
+    
   /** Count edges stored in quadrangles */
   for (k=1; k<=mesh->nquad; k++) {
     pq = &mesh->quadra[k];
@@ -676,7 +677,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
           pt1 = &mesh->tria[iel];
           if ( !iel || (pt->ref > pt1->ref) ||
                ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
-               (mesh->info.opnbdy && ((pt->tag[i] & MG_REF) || (pt->tag[i] & MG_BDY)))) {
+               (mesh->info.opnbdy && (pt->ref==pt1->ref) && (k<iel) && ((pt->tag[i] & MG_REF) || (pt->tag[i] & MG_BDY)))) {
             ++ned;
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];

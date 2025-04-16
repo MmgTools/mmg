@@ -1304,7 +1304,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  /* edges */
+  /* Edges */
   nedreq = 0;
   if ( mesh->na ) {
     if(!bin) {
