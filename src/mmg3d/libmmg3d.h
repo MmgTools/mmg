@@ -215,7 +215,15 @@ enum MMG3D_Param {
  * types MMG5_pMesh and MMG5_pSol that will be given as arguments to Mmg
  * functions must be initialized with this function.
  *
- * \remark No fortran interface to allow variadic arguments.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
+ * 
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_INIT_MESH(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  *
  * \warning detected bugs:
  *   - some vertices along open boundaries end up with a normal (while they should not)
@@ -2798,10 +2806,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \return 1 if success, 0 if fail
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_FREE_ALL(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT int MMG3D_Free_all(const int starter,...);
@@ -2831,12 +2844,15 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  * \return 0 if fail, 1 if success
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
- * \remark No fortran interface to allow variadic arguments.
- *
- * \remark no Fortran interface to allow variadic args.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_FREE_STRUCTURES(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT int MMG3D_Free_structures(const int starter,...);
@@ -2863,13 +2879,18 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
- *
+ * 
  * \return 0 if fail, 1 if success
+ * 
+ * \remark Fortran users should provide a MMG5_DATA_PTR_T array, where every 
+ * pointer to a MMG structure should be passed by reference 
+ * (using Fortran LOC function).
  *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- * \remark No fortran interface to allow variadic arguments.
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_FREE_NAMES(arglist,retval)\n
+ * >     MMG5_DATA_PTR_T,DIMENSION(*),INTENT(IN) :: arglist\n
+ * >     INTEGER, INTENT(OUT)                    :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
   LIBMMG3D_EXPORT int MMG3D_Free_names(const int starter,...);

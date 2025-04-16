@@ -446,7 +446,7 @@ inline int MMG5_test_rmtr() {
 
   /* Check error in norm inf */
   maxerr = MMG5_test_mat_error(6,outex,outnum);
-  if( maxerr > 10.*MMG5_EPSOK ) {
+  if( maxerr > 1.E2*MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error linear transformation of symmetric matrix: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;

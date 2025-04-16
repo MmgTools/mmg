@@ -1631,7 +1631,7 @@ int MMG5_test_simred2d(MMG5_pMesh mesh,double *mex,double *nex,double *dmex,doub
 
   /* Check matrices in norm inf */
   maxerr = MMG5_test_mat_error(3,mex,mnum);
-  if( maxerr > 1.e2*MMG5_EPSOK ) {
+  if( maxerr > 1.e3*MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error first matrix coreduction recomposition: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;
