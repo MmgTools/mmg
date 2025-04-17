@@ -182,7 +182,7 @@ jobs:
 
           elif [ "$RUNNER_OS" == "Linux" ]; then
              echo "SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2" >> "$GITHUB_ENV"
-             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-9\"" >> "$GITHUB_ENV"
+             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-13\"" >> "$GITHUB_ENV"
           fi
           echo "NJOBS=$NJOBS" >> "$GITHUB_ENV"
           # Remark: variable values are still empty inside this context
