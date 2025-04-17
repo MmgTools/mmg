@@ -212,13 +212,20 @@ jobs:
             sudo apt-get install -y libvtk9-dev
           fi
 
+      - name: Install bison
+        if: ${{ matrix.scotch == 'on' && runner.os == 'macos' }}
+        run: |
+          brew install bison
+          echo "BISON_FLG=\"-DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison\"" >> $GITHUB_ENV
+
       - name: Install Scotch
         # Download scotch only if used
         if: matrix.scotch == 'on'
         run: |
           git clone --branch v7.0.7 https://gitlab.inria.fr/scotch/scotch.git
           cmake -Sscotch -Bbuild-scotch -DCMAKE_INSTALL_PREFIX=scotch-install \
-          -DBUILD_PTSCOTCH=OFF -DCMAKE_C_FLAGS=-fPIC ${{ env.FORT_FLG }}
+          -DBUILD_PTSCOTCH=OFF -DCMAKE_C_FLAGS=-fPIC ${{ env.FORT_FLG }} \
+          -DBISON_EXECUTABLE=${{ env.BISON_FLG }}
           cmake --build build-scotch --target install -j ${{ env.NJOBS }} 
 
       - name: Install LibCommons
