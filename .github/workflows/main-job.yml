@@ -218,13 +218,9 @@ jobs:
         # Download scotch only if used
         if: matrix.scotch == 'on'
         run: |
-          git clone https://gitlab.inria.fr/scotch/scotch.git
-          cd scotch
-          git checkout v6.1.3
-          cd src
-          cp ${{ env.SCOTCH_MAKE }} Makefile.inc
-          make scotch -j ${{ env.NJOBS }}
-          make prefix=../../scotch-install install -j ${{ env.NJOBS }}
+          git clone --branch v7.0.7 https://gitlab.inria.fr/scotch/scotch.git
+          cmake -Sscotch -Bbuild-scotch -DCMAKE_INSTALL_PREFIX=/scotch-install
+          cmake --build build-scotch --target install -j ${{ env.NJOBS }} 
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
