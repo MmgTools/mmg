@@ -23,6 +23,9 @@ on:
         default: true
         type: boolean
 
+env:
+  BISON_PATH: /usr/bin/bison
+
 # job
 jobs:
   ci:
