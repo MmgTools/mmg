@@ -207,9 +207,12 @@ jobs:
           if [ "$RUNNER_OS" == "macOS" ]; then
             brew install vtk
           elif [ "$RUNNER_OS" == "Linux" ]; then
-            sudo sed -i 's/azure\.//' /etc/apt/sources.list
-            sudo apt-get update
-            sudo apt-get install -y libvtk9-dev
+            #sudo sed -i 's/azure\.//' /etc/apt/sources.list
+            #sudo apt-get update
+            #sudo apt-get install -y libvtk9-dev
+            git clone --branch v9.4.2 https://gitlab.kitware.com/vtk/vtk.git
+            cmake -Svtk -Bbuild-vtk -DCMAKE_INSTALL_PREFIX=vtk-install
+            cmake --build build-vtk --target install -j ${{ env.NJOBS }}
           fi
 
       - name: Install bison
@@ -276,6 +279,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
+            -DVTK_DIR=vtk-install \
             -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
             -DTEST_LIBMMG=ON \
@@ -299,6 +303,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
+            -DVTK_DIR=vtk-install \
             -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
             -DLIBMMGS_STATIC=OFF \
@@ -322,6 +327,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
+            -DVTK_DIR=vtk-install \
             -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
