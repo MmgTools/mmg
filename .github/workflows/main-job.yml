@@ -220,7 +220,7 @@ jobs:
         run: |
           git clone --branch v7.0.7 https://gitlab.inria.fr/scotch/scotch.git
           cmake -Sscotch -Bbuild-scotch -DCMAKE_INSTALL_PREFIX=scotch-install \
-          -DBUILD_PTSCOTCH=OFF -DCMAKE_C_FLAG=-fPIC
+          -DBUILD_PTSCOTCH=OFF -DCMAKE_C_FLAGS=-fPIC
           cmake --build build-scotch --target install -j ${{ env.NJOBS }} 
 
       - name: Install LibCommons
