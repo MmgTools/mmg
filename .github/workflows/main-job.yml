@@ -211,7 +211,7 @@ jobs:
           elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo sed -i 's/azure\.//' /etc/apt/sources.list
             sudo apt-get update
-            sudo apt-get install -y libvtk7-dev
+            sudo apt-get install -y libvtk9-dev
           fi
 
       - name: Install Sctoch
