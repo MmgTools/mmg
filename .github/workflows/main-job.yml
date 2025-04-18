@@ -279,7 +279,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-          ${{ env.VTK_DIR }}
+          ${{ env.VTK_DIR }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
             -DTEST_LIBMMG=ON \
@@ -303,7 +303,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-          ${{ env.VTK_DIR }}
+          ${{ env.VTK_DIR }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
             -DLIBMMGS_STATIC=OFF \
@@ -327,7 +327,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-          ${{ env.VTK_DIR }}
+          ${{ env.VTK_DIR }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
