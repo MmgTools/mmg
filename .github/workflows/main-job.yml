@@ -33,7 +33,7 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-            os: [ubuntu-24.04,macos-14]
+            os: [ubuntu-22.04,macos-14]
             pattern: [on,off]
             pointmap: [off]
             scotch: [on,off]
@@ -43,7 +43,7 @@ jobs:
             include:
               # test vtk only without scotch and with delaunay insertion (more
               # tests are useless)
-              - os: ubuntu-24.04
+              - os: ubuntu-22.04
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -58,7 +58,7 @@ jobs:
                 int: int32_t
 
               # Test pointmap with scotch except on windows
-              - os: ubuntu-24.04
+              - os: ubuntu-22.04
                 pattern: off
                 pointmap: on
                 scotch: on
@@ -97,21 +97,21 @@ jobs:
                 int: int32_t
 
               # Test int64_t build on all archi, and try to cover all code
-              - os: ubuntu-24.04
+              - os: ubuntu-22.04
                 pattern: on
                 pointmap: on
                 scotch: on
                 vtk: on
                 int: int64_t
 
-              - os: ubuntu-24.04
+              - os: ubuntu-22.04
                 pattern: off
                 pointmap: off
                 scotch: on
                 vtk: on
                 int: int64_t
 
-              - os: ubuntu-24.04
+              - os: ubuntu-22.04
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -149,7 +149,7 @@ jobs:
     steps:
       - name: Set cmake_build_type and export coverage flags
         run: |
-          if ${{ matrix.os == 'ubuntu-24.04' && inputs.code_coverage == true }}; then
+          if ${{ matrix.os == 'ubuntu-22.04' && inputs.code_coverage == true }}; then
             # if code coverage is enabled, linux build is runned in Debug mode
 
             if [[ ${{ inputs.cmake_build_type }} != Debug ]]; then
@@ -180,7 +180,7 @@ jobs:
              echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-14\"" >> "$GITHUB_ENV"
 
           elif [ "$RUNNER_OS" == "Linux" ]; then
-             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-13\"" >> "$GITHUB_ENV"
+             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-9\"" >> "$GITHUB_ENV"
           fi
           echo "NJOBS=$NJOBS" >> "$GITHUB_ENV"
           # Remark: variable values are still empty inside this context
@@ -206,13 +206,9 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
             brew install vtk
-            echo "VTK_DIR=\"-DVTK_DIR=/opt/homebrew/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
           elif [ "$RUNNER_OS" == "Linux" ]; then
-            git clone --branch v9.4.2 https://gitlab.kitware.com/vtk/vtk.git
-            cmake -Svtk -Bbuild-vtk -DCMAKE_INSTALL_PREFIX=vtk-install \
-                  -DVTK_USE_X=NO
-            cmake --build build-vtk --target install -j ${{ env.NJOBS }}
-            echo "VTK_DIR=\"-DVTK_DIR=vtk-install/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
+            apt update
+            apt install -y libvtk7-dev
           fi
 
       - name: Install bison
@@ -279,7 +275,6 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-          ${{ env.VTK_DIR }}
             -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
             -DTEST_LIBMMG=ON \
@@ -303,7 +298,6 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-          ${{ env.VTK_DIR }}
             -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
             -DLIBMMGS_STATIC=OFF \
@@ -327,7 +321,6 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-          ${{ env.VTK_DIR }}
             -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
@@ -352,7 +345,7 @@ jobs:
 
       - name: Test Mmg with int64_t integers
         # Run long tests only on ubuntu with pattern off, scotch on, vtk on and int64_t integers
-        if: matrix.os == 'ubuntu-24.04' && matrix.pattern == 'off' && matrix.scotch == 'on' && matrix.vtk == 'on' && matrix.int == 'int64_t'
+        if: matrix.os == 'ubuntu-22.04' && matrix.pattern == 'off' && matrix.scotch == 'on' && matrix.vtk == 'on' && matrix.int == 'int64_t'
         run: |
           cd build
           ctest --timeout 7200 -VV -C ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
@@ -372,7 +365,7 @@ jobs:
             build
 
   upload_coverage:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: ci
 
     steps:
