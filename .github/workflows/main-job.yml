@@ -206,11 +206,13 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
             brew install vtk
+            echo "VTK_DIR=\"-DVTK_DIR=/opt/homebrew/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
           elif [ "$RUNNER_OS" == "Linux" ]; then
             git clone --branch v9.4.2 https://gitlab.kitware.com/vtk/vtk.git
             cmake -Svtk -Bbuild-vtk -DCMAKE_INSTALL_PREFIX=vtk-install \
                   -DVTK_USE_X=NO
             cmake --build build-vtk --target install -j ${{ env.NJOBS }}
+            echo "VTK_DIR=\"-DVTK_DIR=vtk-install/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
           fi
 
       - name: Install bison
@@ -277,7 +279,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-            -DVTK_DIR=vtk-install \
+          ${{ env.VTK_DIR }}
             -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
             -DTEST_LIBMMG=ON \
@@ -301,7 +303,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-            -DVTK_DIR=vtk-install \
+          ${{ env.VTK_DIR }}
             -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
             -DLIBMMGS_STATIC=OFF \
@@ -325,7 +327,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
-            -DVTK_DIR=vtk-install \
+          ${{ env.VTK_DIR }}
             -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
