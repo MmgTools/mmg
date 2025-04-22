@@ -572,7 +572,6 @@ int MMG3D_setref_lsopen(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi) {
         pt1->xt = mesh->xt;
       }
             
-      /* Tagger les edges aussi ? */
       pxt = &mesh->xtetra[pt->xt];
       if ( !(pxt->ftag[i] & MG_BDY) ) {
         pxt->ftag[i] |= MG_BDY;

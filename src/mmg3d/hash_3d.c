@@ -1117,7 +1117,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   uint16_t     tag;
   int8_t       i,i1,i2;
 
-  /* if edges exist in mesh, hash special edges from existing field */
+  /* If edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX((MMG5_int)(1.5*mesh->na),MMG3D_NAMAX);
@@ -1176,7 +1176,8 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
     MMG5_DEL_MEM(mesh,mesh->edge);
     mesh->na   = 0;
   }
-  /* else, infer special edges from information carried by triangles */
+  
+  /* Else, infer special edges from information carried by triangles */
   else {
     if ( !mesh->adjt ) {
       memset(&hash,0x0,sizeof(MMG5_Hash));
@@ -1193,7 +1194,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;
-         else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
+        else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
       }
     }
 
@@ -1216,7 +1217,6 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         i2  = MMG5_iprv2[i];
         kk  = adja[i] / 3;
         if ( (!kk) || pt->tag[i] & MG_NOM ) {
-          if ( !kk ) pt->tag[i] |= (MG_BDY + MG_GEO); // Dunno what to do here
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
               pt->edg[i] = ( pt->edg[i] != 0 ) ?  -MMG5_abs(pt->edg[i]) : mesh->info.isoref;
@@ -1230,7 +1230,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         }
       }
     }
-    /* now check triangles */
+    /* Make this information consistent with that carried by triangles */
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
@@ -1243,6 +1243,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
       }
     }
   }
+  
   return 1;
 }
 
