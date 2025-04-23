@@ -212,7 +212,7 @@ jobs:
             cmake -Svtk -Bbuild-vtk -DCMAKE_INSTALL_PREFIX=vtk-install \
                   -DVTK_USE_X=NO
             cmake --build build-vtk --target install -j ${{ env.NJOBS }}
-            echo "VTK_DIR=\"-DVTK_DIR=vtk-install/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
+            echo "VTK_DIR=\"-DVTK_DIR=../vtk-install/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
           fi
 
       - name: Install bison
