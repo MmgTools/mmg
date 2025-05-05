@@ -167,6 +167,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,                    /*!< [n], Max number of vertices per PROctree cell (DELAUNAY) */
   MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwriting of sizes at required vertices (advanced usage) */
+  MMG3D_IPARAM_kiso,                      /*!< [1/0], Keep previous isoline in mesh (in ls mode) */
   MMG3D_IPARAM_isoref,                    /*!< [0/n], Isosurface boundary material reference */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection (degrees) */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal edge length */

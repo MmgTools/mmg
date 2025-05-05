@@ -504,10 +504,9 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
         /* Set edge tag and point tags to MG_REQ if the non-manifold edge shared
          * separated domains */
         if ( ph->s > 3 ) {
-          start = ptt->cc/4;
+          start = ptt->cc/4; // ptt->cc contains information about a supporting tetrahedron
           assert(start);
           pt = &mesh->tetra[start];
-
 
           for (ia=0; ia<6; ++ia) {
             ipa = MMG5_iare[ia][0];
@@ -516,7 +515,6 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
           }
           assert(ia<6);
-
 
           /* Travel throug the shell of the edge until reaching a tetra without adjacent
            * or until reaching the starting tetra */
@@ -799,6 +797,102 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh,uint16_t func(uint16_t) ) {
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"     %" MMG5_PRId " corner and %" MMG5_PRId " required vertices added\n",nc,nre);
 
+  return 1;
+}
+
+/**
+ * \param mesh pointer towar the mesh structure.
+ * \param hash  hash table.
+ * \return 1 if success, 0 if failed.
+ *
+ * Remove duplicate faces from the  triangle mesh
+ *
+ */
+int MMG5_remdup(MMG5_pMesh mesh,MMG5_Hash *hash) {
+  MMG5_pTria     pt;
+  MMG5_hedge     *ph;
+  MMG5_int       dup,k,kk,hmax,ip0,ip1,ip2,min,max,sum,key;
+
+  dup = 0;
+  
+  /* Allocate hash table params */
+  hash->siz  = mesh->np;
+  hmax       = MG_MAX(hash->siz,mesh->nt);
+  hash->max  = hmax + 1;
+  hash->nxt  = hash->siz;
+  MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(MMG5_hedge),"hash table",return 0);
+  MMG5_SAFE_CALLOC(hash->item,hash->max+1,MMG5_hedge,return 0);
+  
+  /* Hash triangles */
+  for(k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+    
+    ip0  = pt->v[0];
+    ip1  = pt->v[1];
+    ip2  = pt->v[2];
+    
+    min = MG_MIN(ip0,MG_MIN(ip1,ip2));
+    max = MG_MAX(ip0,MG_MAX(ip1,ip2));
+    sum = ip0 + ip1 + ip2;
+    
+    key = (MMG5_KA*(int64_t)min + MMG5_KB*(int64_t)max + MMG5_KC*(int64_t)sum) % hash->siz;
+    ph  = &hash->item[key];
+    
+    /* Empty cell: store tria */
+    if ( ph->a == 0 ) {
+      ph->a   = min;
+      ph->b   = max;
+      ph->k   = sum;
+      ph->nxt = 0;
+      continue;
+    }
+
+    while ( ph->a ) {
+      /* Remove duplicate */
+      if ( ph->a == min && ph->b == max && ph->k == sum ) {
+        pt->v[0] = 0;
+        dup++;
+        break;
+      }
+      else if ( !ph->nxt ) {
+        ph->nxt = hash->nxt;
+        hash->nxt++;
+        ph = &hash->item[ph->nxt];
+        assert(ph);
+
+        if ( hash->nxt >= hash->max-1 ) {
+          if ( mesh->info.ddebug ) {
+            fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
+                    " %" MMG5_PRId "\n",__func__,hash->max);
+          }
+          MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
+                              "MMG5_edge",
+                              MMG5_DEL_MEM(mesh,hash->item);
+                              return 0);
+
+          ph = &hash->item[hash->nxt];
+        }
+        
+        ph->a     = min;
+        ph->b     = max;
+        ph->k     = sum;
+        ph->nxt   = 0;
+        break;
+      }
+      else {
+        ph = &hash->item[ph->nxt];
+      }
+    }
+  }
+    
+  /* Display information */
+  if ( abs(mesh->info.imprim) > 5 && dup > 0 ) {
+    fprintf(stdout,"  ## ");  fflush(stdout);
+    if ( dup > 0 )  fprintf(stdout," %" MMG5_PRId " duplicate removed",dup);
+    fprintf(stdout,"\n");
+  }
+    
   return 1;
 }
 

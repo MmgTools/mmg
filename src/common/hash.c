@@ -44,7 +44,7 @@
  *
  * Create surface adjacency
  *
- * \remark the ph->s field computation is useless in mmgs.
+ * \remark the ph->s field computation (containing the number of triangles shared by a hashed edge)  is useless in mmgs.
  *
  *
  * \remark: as all triangles are mesh boundaries, we do not need to mark their

@@ -140,7 +140,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   mesh->np = mesh->nt = mesh->ne = 0;
   nref = 0;
 
-
   if (!bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
@@ -522,7 +521,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       }
     }
   }
-
 
   /* get corners */
   if(ncor) {
@@ -1056,6 +1054,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   if( ier < 1 ) return ier;
 
   fclose(inm);
+  
   return 1;
 }
 

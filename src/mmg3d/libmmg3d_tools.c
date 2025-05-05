@@ -382,6 +382,12 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
           MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;
+      case 'k':
+        if ( !strcmp(argv[i],"-kiso") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_kiso,1) )
+            return 0;
+        }
+        break;
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -719,7 +725,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   MMG5_SAFE_MALLOC( mmgArgv, argc, char*,return 0);
   MMG_ARGV_APPEND ( argv, mmgArgv, 0, mmgArgc,return 0);
 
-  int ier = MMG3D_storeknownar( argc,argv,mesh,met,sol,&mmgArgc,mmgArgv);
+  int ier = MMG3D_storeknownar(argc,argv,mesh,met,sol,&mmgArgc,mmgArgv);
 
   /* Third step: treat unknown args */
   if ( ier ) {

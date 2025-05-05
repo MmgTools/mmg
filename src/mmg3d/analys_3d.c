@@ -1368,6 +1368,14 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
   /* Set surface triangles to required in nosurf mode or for parallel boundaries */
   MMG3D_set_reqBoundaries(mesh);
+  
+  /* Remove duplicate triangles */
+  memset ( &hash, 0x0, sizeof(MMG5_Hash));
+  if ( !MMG5_remdup(mesh,&hash) ) {
+    MMG5_DEL_MEM(mesh,hash.item);
+    fprintf(stderr,"\n  ## Problem in removing duplicate faces. Exit program.\n");
+    return 0;
+  }
 
   /* create surface adjacency */
   memset ( &hash, 0x0, sizeof(MMG5_Hash));
@@ -1449,6 +1457,11 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     MMG5_DEL_MEM(mesh,mesh->xpoint);
     return 0;
   }
+  
+  /* printf("On est bien ici maintenant??\n");
+  MMG3D_packMesh(mesh,NULL,NULL);
+  MMG3D_saveMesh(mesh,mesh->nameout);
+  exit(0);*/
 
   /* check subdomains connected by a vertex and mark these vertex as corner and
      required */

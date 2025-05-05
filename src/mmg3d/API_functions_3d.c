@@ -2153,6 +2153,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,MMG5_int val
       mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
+  case MMG3D_IPARAM_kiso :
+    mesh->info.kiso = val;
+    break;
   case MMG3D_IPARAM_nofem :
     mesh->info.setfem = (val==1)? 0 : 1;
     break;

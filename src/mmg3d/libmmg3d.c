@@ -101,7 +101,7 @@ MMG5_int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   MMG5_hgeom  *ph;
   MMG5_int    k,nr;
   int         i;
-
+  
   /* rebuild triangles*/
   if ( mesh->tria )
     MMG5_DEL_MEM(mesh,mesh->tria);
@@ -1296,9 +1296,11 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   }
 
   /* clean old isosurface */
-  if ( !MMG3D_Clean_isoSurf(mesh) ) {
-    fprintf(stderr,"\n  ## Unable to clean old isosurface.\n");
-    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( ! mesh->info.kiso ) {
+    if ( !MMG3D_Clean_isoSurf(mesh) ) {
+      fprintf(stderr,"\n  ## Unable to clean old isosurface.\n");
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
   }
 
   chrono(OFF,&(ctim[1]));
