@@ -261,7 +261,7 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   static int8_t   mmgWarn0=0,mmgWarn1=0;
 
   /* Reset tagdel field */
-  for (k=1; k<ilist; k++)
+  for (k=1; k<=mesh->np-4; k++)
     mesh->point[k].tagdel = 0;
 
   /* Triangles in the cavity are those s.t. pt->base == base */
