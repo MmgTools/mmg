@@ -38,7 +38,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_int        list[MMG5_TRIA_LMAX],list2[3];
   MMG5_int        k,l,kk,nex,kdep,lon,iel;
   int             iare,ied;
-  MMG5_int        ia,ib,ilon,rnd,idep,*adja,ir,adj;
+  MMG5_int        ia,ib,ilon,ii,idep,*adja,ir,adj;
   int8_t          i,i1,i2,j;
 //  int       iadr2,*adja2,ndel,iadr,ped0,ped1;
   static int8_t   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
@@ -183,11 +183,10 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       /* Randomly swap edges in the list, while... */
       ilon = lon;
-      srand(time(NULL));
+      ii = 0;
 
       while ( ilon > 0 ) {
-        rnd = ( rand() % lon );
-        k   = list[rnd] / 3;
+        k   = list[ii] / 3;
 
         /* Check for triangle k in the pipe until one triangle with base+1 is met (indicating that it is
            crossed by the considered edge) */
@@ -195,11 +194,11 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         while ( l++ < lon ) {
           pt = &mesh->tria[k];
           if ( pt->base == mesh->base+1 ) break;
-          k = list[(++rnd)%lon] / 3;
+          k = list[(++ii)%lon] / 3;
         }
 
         assert ( l <= lon );
-        idep = list[rnd] % 3;
+        idep = list[ii] % 3;
         // if(mesh->info.ddebug) printf("i= %" MMG5_PRId " < %" MMG5_PRId " ? on demarre avec %" MMG5_PRId "\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
 
@@ -248,7 +247,8 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           }
           break;
         }
-     }
+        ii++;
+      }
     }
   }
 
