@@ -1457,11 +1457,6 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     MMG5_DEL_MEM(mesh,mesh->xpoint);
     return 0;
   }
-  
-  /* printf("On est bien ici maintenant??\n");
-  MMG3D_packMesh(mesh,NULL,NULL);
-  MMG3D_saveMesh(mesh,mesh->nameout);
-  exit(0);*/
 
   /* check subdomains connected by a vertex and mark these vertex as corner and
      required */
@@ -1484,6 +1479,14 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
   /* define geometry for non manifold points */
   if ( !MMG3D_nmgeom(mesh) ) return 0;
+  
+  /* Save mesh */
+  /*
+  MMG3D_packMesh(mesh,NULL,NULL);
+  MMG3D_saveMesh(mesh,mesh->nameout);
+  exit(0);
+  */
+
 
 #ifndef NDEBUG
   MMG3D_chkfacetags(mesh);

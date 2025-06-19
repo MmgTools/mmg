@@ -797,6 +797,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
+  /* If ismet */
   else {
 
     /* size truncation */
@@ -932,7 +933,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /** 3) Travel all boundary faces to update size prescription for points on
+  /** Step 4: Travel all boundary faces to update size prescription for points on
    * ridges/edges */
   /* Warning: here we pass more than once per each point because we see it from
      all the edges to which it belongs */
@@ -958,9 +959,12 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /* Skip this step if both points are on a required edge */
         if ( p0->flag == 3 && p1->flag == 3 ) continue;
+        
+        // if ( ip0 == 19680 ) printf("Coucou \n");
 
         /* Skip regular edges */
-        if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
+        if ( !(MG_EDG(p0->tag) || (p0->tag & MG_NOM)) && !(MG_EDG(p1->tag) || (p1->tag & MG_NOM)) )  continue;
+        // if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
 
         /** First step: search for local parameters */
         if ( !MMG3D_localParamNm(mesh,k,i,ia,&hausd,&hmin,&hmax) ) {
@@ -1027,9 +1031,12 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         else
           lm = sqrt(8.0*hausd / kappa);
 
-        if ( MG_EDG(p0->tag) && !MG_SIN_OR_NOM(p0->tag) && p0->flag != 3 )
+        /* Condition p0->flag = 3 seems empty: TO CHECK */
+        // if ( MG_EDG(p0->tag) && !MG_SIN_OR_NOM(p0->tag) && p0->flag != 3 )
+        if ( (MG_EDG(p0->tag) || (p0->tag & MG_NOM)) && !MG_SIN(p0->tag) && p0->flag != 3 )
           met->m[ip0] = MG_MAX(hmin,MG_MIN(met->m[ip0],lm));
-        if ( MG_EDG(p1->tag) && !MG_SIN_OR_NOM(p1->tag) && p1->flag != 3 )
+        // if ( MG_EDG(p1->tag) && !MG_SIN_OR_NOM(p1->tag) && p1->flag != 3 )
+        if ( (MG_EDG(p1->tag) || (p1->tag & MG_NOM)) && !MG_SIN_OR_NOM(p1->tag) && p1->flag != 3 )
           met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
       }
     }

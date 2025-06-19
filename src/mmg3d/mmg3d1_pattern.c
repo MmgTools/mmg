@@ -465,7 +465,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
   }
-
+  
   /* Debug: export variable MMG_SAVE_DEFSIZ to save adapted mesh at the end of
    * anatet wave */
   if ( getenv("MMG_SAVE_DEFSIZ") ) {
