@@ -437,7 +437,7 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
-  double       ux,uy,ll,hmin2;
+  double       ux,uy,ll;
   MMG5_int     k;
   int          ilist;
   MMG5_int     nc;
@@ -445,7 +445,6 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_int     list[MMG5_TRIA_LMAX+2];
 
   nc = 0;
-  hmin2 = mesh->info.hmin * mesh->info.hmin;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -479,11 +478,19 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
         ux = p2->c[0] - p1->c[0];
         uy = p2->c[1] - p1->c[1];
         ll = ux*ux + uy*uy;
+        double hmin2 = mesh->info.hmin * mesh->info.hmin;
         if ( ll > hmin2 ) continue;
       }
       else {
         ll = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
-        if ( ll > MMG2D_LSHRT ) continue;
+        double lmax;
+        if ( typchk == 2 ) {
+          lmax = MMG2D_LSHRT;
+        }
+        else if (typchk == 3 ) {
+          lmax = MMG2D_LOPTL;
+        }
+        if ( ll > lmax ) continue;
       }
 
       /* Check whether the geometry is preserved */
@@ -564,7 +571,8 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
       }
 
-      nc = MMG2D_adpcol(mesh,met);
+      //nc = MMG2D_adpcol(mesh,met);
+      nc = MMG2D_colelt(mesh,met,3);
       if ( nc < 0 ) {
         fprintf(stderr,"  ## Problem in function adpcol."
                 " Unable to complete mesh. Exit program.\n");
