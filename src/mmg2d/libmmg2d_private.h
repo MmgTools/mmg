@@ -266,7 +266,7 @@ int MMG2D_grad2metreq_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria,MMG5_int,MMG5_int);
 int MMG2D_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_gradsizreq_ani(MMG5_pMesh ,MMG5_pSol );
 MMG5_int MMG2D_anaelt(MMG5_pMesh ,MMG5_pSol ,int );
-MMG5_int MMG2D_colelt(MMG5_pMesh ,MMG5_pSol ,int, double);
+MMG5_int MMG2D_colelt(MMG5_pMesh ,MMG5_pSol ,int, double );
 MMG5_int MMG2D_swpmsh(MMG5_pMesh ,MMG5_pSol ,int );
 double MMG2D_lencurv_iso(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int );
 double MMG2D_lencurv_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_int ,MMG5_int );

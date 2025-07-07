@@ -437,7 +437,7 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk, double lmax) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
-  double       ux,uy,ll;
+  double       ll;
   MMG5_int     k;
   int          ilist;
   MMG5_int     nc;
@@ -475,10 +475,11 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk, double lmax) {
 
       /* Check length */
       if ( typchk == 1 ) {
+        double ux, uy, hmin2;
         ux = p2->c[0] - p1->c[0];
         uy = p2->c[1] - p1->c[1];
         ll = ux*ux + uy*uy;
-        double hmin2 = mesh->info.hmin * mesh->info.hmin;
+        hmin2 = mesh->info.hmin * mesh->info.hmin;
         if ( ll > hmin2 ) continue;
       }
       else {
