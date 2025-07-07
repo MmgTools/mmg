@@ -69,7 +69,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       }
 
       /* Collapse short edges */
-      nc = MMG2D_colelt(mesh,met,typchk);
+      nc = MMG2D_colelt(mesh,met,typchk,MMG2D_LSHRT);
       if ( nc < 0 ) {
         fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
         return 0;
@@ -434,7 +434,7 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /* Travel triangles and collapse short edges */
-MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk, double lmax) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   double       ux,uy,ll;
@@ -483,13 +483,6 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       }
       else {
         ll = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
-        double lmax;
-        if ( typchk == 2 ) {
-          lmax = MMG2D_LSHRT;
-        }
-        else if (typchk == 3 ) {
-          lmax = MMG2D_LOPTS;
-        }
         if ( ll > lmax ) continue;
       }
 
@@ -571,10 +564,9 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
       }
 
-      //nc = MMG2D_adpcol(mesh,met);
-      nc = MMG2D_colelt(mesh,met,3);
+      nc = MMG2D_colelt(mesh,met,2,MMG2D_LOPTS);
       if ( nc < 0 ) {
-        fprintf(stderr,"  ## Problem in function adpcol."
+        fprintf(stderr,"  ## Problem in function colelt."
                 " Unable to complete mesh. Exit program.\n");
         return 0;
       }
@@ -698,65 +690,6 @@ MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   return ns;
-}
-
-/* Analysis and collapse routine for edges in the final step of the algorithm */
-int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria        pt;
-  MMG5_pPoint       p1,p2;
-  double            len;
-  MMG5_int          k,nc;
-  int               ilist;
-  int8_t            i,i1,i2,open;
-  MMG5_int          list[MMG5_TRIA_LMAX+2];
-  
-  nc = 0;
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
-
-    /* Check edge length, and attempt collapse */
-    pt->flag = 0;
-    for (i=0; i<3; i++) {
-      if ( MG_SIN(pt->tag[i]) ) continue;
-
-      open = ( mesh->adja[3*(k-1)+1+i] == 0 ) ? 1 : 0;
-
-      i1 = MMG5_inxt2[i];
-      i2 = MMG5_iprv2[i];
-      p1 = &mesh->point[pt->v[i1]];
-      p2 = &mesh->point[pt->v[i2]];
-
-      if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) continue;
-      else if ( p1->tag & MG_GEO ) {
-        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
-      }
-      else if ( p1->tag & MG_REF ) {
-        if ( ! (p2->tag & MG_GEO || p2->tag & MG_REF) || !(pt->tag[i] & MG_REF) ) continue;
-      }
-
-      len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
-
-      if ( len > MMG2D_LOPTS ) continue;
-
-      ilist = MMG2D_chkcol(mesh,met,k,i,list,2);
-
-      if ( ilist > 3 || ( ilist==3 && open ) ) {
-        nc += MMG2D_colver(mesh,ilist,list);
-        break;
-      }
-      else if ( ilist == 3 ) {
-        nc += MMG2D_colver3(mesh,list);
-        break;
-      }
-      else if ( ilist == 2 ) {
-        nc += MMG2D_colver2(mesh,list);
-        break;
-      }
-    }
-  }
-
-  return nc;
 }
 
 /* Analyze points to relocate them according to a quality criterion */
