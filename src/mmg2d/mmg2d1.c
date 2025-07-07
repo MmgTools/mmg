@@ -488,7 +488,7 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
           lmax = MMG2D_LSHRT;
         }
         else if (typchk == 3 ) {
-          lmax = MMG2D_LOPTL;
+          lmax = MMG2D_LOPTS;
         }
         if ( ll > lmax ) continue;
       }
