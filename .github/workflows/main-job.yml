@@ -65,7 +65,7 @@ jobs:
                 vtk: off
                 int: int32_t
 
-              - os: macos-latest
+              - os: macos-14
                 pattern: off
                 pointmap: on
                 scotch: on
@@ -125,7 +125,7 @@ jobs:
                 vtk: on
                 int: int64_t
 
-              - os: macos-latest
+              - os: macos-14
                 pattern: off
                 pointmap: off
                 scotch: off
