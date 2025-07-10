@@ -33,7 +33,7 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-            os: [ubuntu-20.04,macos-13]
+            os: [ubuntu-24.04,macos-14]
             pattern: [on,off]
             pointmap: [off]
             scotch: [on,off]
@@ -43,7 +43,7 @@ jobs:
             include:
               # test vtk only without scotch and with delaunay insertion (more
               # tests are useless)
-              - os: ubuntu-20.04
+              - os: ubuntu-24.04
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -58,14 +58,14 @@ jobs:
                 int: int32_t
 
               # Test pointmap with scotch except on windows
-              - os: ubuntu-20.04
+              - os: ubuntu-24.04
                 pattern: off
                 pointmap: on
                 scotch: on
                 vtk: off
                 int: int32_t
 
-              - os: macos-latest
+              - os: macos-14
                 pattern: off
                 pointmap: on
                 scotch: on
@@ -97,21 +97,21 @@ jobs:
                 int: int32_t
 
               # Test int64_t build on all archi, and try to cover all code
-              - os: ubuntu-20.04
+              - os: ubuntu-24.04
                 pattern: on
                 pointmap: on
                 scotch: on
                 vtk: on
                 int: int64_t
 
-              - os: ubuntu-20.04
+              - os: ubuntu-24.04
                 pattern: off
                 pointmap: off
                 scotch: on
                 vtk: on
                 int: int64_t
 
-              - os: ubuntu-20.04
+              - os: ubuntu-24.04
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -125,7 +125,7 @@ jobs:
                 vtk: on
                 int: int64_t
 
-              - os: macos-latest
+              - os: macos-14
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -149,7 +149,7 @@ jobs:
     steps:
       - name: Set cmake_build_type and export coverage flags
         run: |
-          if ${{ matrix.os == 'ubuntu-20.04' && inputs.code_coverage == true }}; then
+          if ${{ matrix.os == 'ubuntu-24.04' && inputs.code_coverage == true }}; then
             # if code coverage is enabled, linux build is runned in Debug mode
 
             if [[ ${{ inputs.cmake_build_type }} != Debug ]]; then
@@ -177,12 +177,10 @@ jobs:
 
           # gfortran compiler and scotch makefile depends on the os
           if [ "$RUNNER_OS" == "macOS" ]; then
-             echo "SCOTCH_MAKE=Make.inc/Makefile.inc.i686_mac_darwin10" >> "$GITHUB_ENV"
              echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-14\"" >> "$GITHUB_ENV"
 
           elif [ "$RUNNER_OS" == "Linux" ]; then
-             echo "SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2" >> "$GITHUB_ENV"
-             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-9\"" >> "$GITHUB_ENV"
+             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-13\"" >> "$GITHUB_ENV"
           fi
           echo "NJOBS=$NJOBS" >> "$GITHUB_ENV"
           # Remark: variable values are still empty inside this context
@@ -208,23 +206,30 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
             brew install vtk
+            echo "VTK_DIR=\"-DVTK_DIR=/opt/homebrew/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
           elif [ "$RUNNER_OS" == "Linux" ]; then
-            sudo sed -i 's/azure\.//' /etc/apt/sources.list
-            sudo apt-get update
-            sudo apt-get install -y libvtk7-dev
+            git clone --branch v9.4.2 https://gitlab.kitware.com/vtk/vtk.git
+            cmake -Svtk -Bbuild-vtk -DCMAKE_INSTALL_PREFIX=vtk-install \
+                  -DVTK_USE_X=NO
+            cmake --build build-vtk --target install -j ${{ env.NJOBS }}
+            echo "VTK_DIR=\"-DVTK_DIR=../vtk-install/lib/cmake/vtk-9.4 \"" >> "$GITHUB_ENV"
           fi
 
-      - name: Install Sctoch
+      - name: Install bison
+        if: ${{ matrix.scotch == 'on' && runner.os == 'macos' }}
+        run: |
+          brew install bison
+          echo "BISON_FLG=\"-DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison\"" >> $GITHUB_ENV
+
+      - name: Install Scotch
         # Download scotch only if used
         if: matrix.scotch == 'on'
         run: |
-          git clone https://gitlab.inria.fr/scotch/scotch.git
-          cd scotch
-          git checkout v6.1.3
-          cd src
-          cp ${{ env.SCOTCH_MAKE }} Makefile.inc
-          make scotch -j ${{ env.NJOBS }}
-          make prefix=../../scotch-install install -j ${{ env.NJOBS }}
+          git clone --branch v7.0.7 https://gitlab.inria.fr/scotch/scotch.git
+          cmake -Sscotch -Bbuild-scotch -DCMAKE_INSTALL_PREFIX=scotch-install \
+          -DBUILD_PTSCOTCH=OFF -DCMAKE_C_FLAGS=-fPIC ${{ env.FORT_FLG }} \
+          ${{ env.BISON_FLG }}
+          cmake --build build-scotch --target install -j ${{ env.NJOBS }} 
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
@@ -274,6 +279,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
+          ${{ env.VTK_DIR }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DBUILD_SHARED_LIBS=ON \
             -DTEST_LIBMMG=ON \
@@ -297,6 +303,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
+          ${{ env.VTK_DIR }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DLIBMMG_STATIC=OFF \
             -DLIBMMGS_STATIC=OFF \
@@ -320,6 +327,7 @@ jobs:
             -DUSE_SCOTCH=${{ matrix.scotch }} \
             -DSCOTCH_DIR=scotch-install \
             -DUSE_VTK=${{ matrix.vtk }} \
+          ${{ env.VTK_DIR }} \
             -DMMG5_INT=${{ matrix.int }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
@@ -344,7 +352,7 @@ jobs:
 
       - name: Test Mmg with int64_t integers
         # Run long tests only on ubuntu with pattern off, scotch on, vtk on and int64_t integers
-        if: matrix.os == 'ubuntu-20.04' && matrix.pattern == 'off' && matrix.scotch == 'on' && matrix.vtk == 'on' && matrix.int == 'int64_t'
+        if: matrix.os == 'ubuntu-24.04' && matrix.pattern == 'off' && matrix.scotch == 'on' && matrix.vtk == 'on' && matrix.int == 'int64_t'
         run: |
           cd build
           ctest --timeout 7200 -VV -C ${{ env.BUILD_TYPE }} -j ${{ env.NJOBS }}
@@ -364,7 +372,7 @@ jobs:
             build
 
   upload_coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: ci
 
     steps:
