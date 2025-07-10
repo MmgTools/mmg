@@ -261,8 +261,14 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   static int8_t   mmgWarn0=0,mmgWarn1=0;
 
   /* Initialize tagdel field */
-  for (k=1; k<=mesh->np-4; k++)
-    mesh->point[k].tagdel = 0;
+  for (k=0; k<ilist; k++) {
+    old = list[k];
+    pt1 = &mesh->tria[old];
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[ pt1->v[i] ];
+      ppt->tagdel = 0;
+    }
+  }
 
   /* Triangles in the cavity are those s.t. pt->base == base */
   base = mesh->base;
