@@ -194,7 +194,8 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         while ( l++ < lon ) {
           pt = &mesh->tria[k];
           if ( pt->base == mesh->base+1 ) break;
-          k = list[(++ii)%lon] / 3;
+          ii = (ii+1)%lon;
+          k = list[ii] / 3;
         }
 
         assert ( l <= lon );
@@ -247,7 +248,7 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           }
           break;
         }
-        ii++;
+        ii = (ii+1)%lon;
       }
     }
   }
