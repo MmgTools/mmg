@@ -261,17 +261,23 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   static int8_t   mmgWarn0=0,mmgWarn1=0;
 
   /* Initialize tagdel field */
-  for (k=1; k<=mesh->np-4; k++)
-    mesh->point[k].tagdel = 0;
+  for (k=0; k<ilist; k++) {
+    iel = list[k];
+    pt1 = &mesh->tria[iel];
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[ pt1->v[i] ];
+      ppt->tagdel = 0;
+    }
+  }
 
   /* Triangles in the cavity are those s.t. pt->base == base */
   base = mesh->base;
   /* Count the number of external faces in the cavity, and tag the corresponding vertices */
   size = 0;
   for (k=0; k<ilist; k++) {
-    old  = list[k];
-    pt1  = &mesh->tria[old];
-    iadr = (old-1)*3 + 1;
+    iel  = list[k];
+    pt1  = &mesh->tria[iel];
+    iadr = (iel-1)*3 + 1;
     adja = &mesh->adja[iadr];
     nei[0]  = adja[0]/3 ;
     nei[1]  = adja[1]/3 ;
@@ -292,8 +298,8 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   /* Check for an isolated vertex (the cavity should ne contain any internal vertex) */
   alert = 0;
   for (k=0; k<ilist; k++) {
-    old  = list[k];
-    pt1  = &mesh->tria[old];
+    iel  = list[k];
+    pt1  = &mesh->tria[iel];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt1->v[i] ];
       if ( !ppt->tagdel ) {
@@ -303,8 +309,8 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
   }
   /* Reset tagdel field */
   for (k=0; k<ilist; k++) {
-    old  = list[k];
-    pt1  = &mesh->tria[old];
+    iel  = list[k];
+    pt1  = &mesh->tria[iel];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt1->v[i] ];
       ppt->tagdel = 0;
