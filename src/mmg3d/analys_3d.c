@@ -63,6 +63,7 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
         ptt->tag[i] |= MG_REQ;
       }
     }
+  }
 
   return;
 }
