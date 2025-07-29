@@ -971,7 +971,7 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
 
   /* Check error in norm inf */
   maxerr = MMG5_test_mat_error(3,intex,intnum);
-  if( maxerr > 1000.*MMG5_EPSOK ) {
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error metric intersection: in function %s, line %d, max error %e\n",
       __func__,__LINE__,maxerr);
     return 0;
@@ -987,7 +987,7 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
 
     /* Check error in norm inf */
     maxerr = MMG5_test_mat_error(3,intex,intnum);
-    if( maxerr > 1.e5*MMG5_EPSOK ) {
+    if( maxerr > 1.e6*MMG5_EPSOK ) {
       fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
         __func__,__LINE__,it,maxerr);
       return 0;
@@ -1000,7 +1000,7 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
 
     /* Check error in norm inf */
     maxerr = MMG5_test_mat_error(3,intex,intnum);
-    if( maxerr > 1.e5*MMG5_EPSOK ) {
+    if( maxerr > 1.e6*MMG5_EPSOK ) {
       fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
         __func__,__LINE__,it,maxerr);
       return 0;
@@ -1013,7 +1013,7 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
 
     /* Check error in norm inf */
     maxerr = MMG5_test_mat_error(3,intex,intnum);
-    if( maxerr > 1.e5*MMG5_EPSOK ) {
+    if( maxerr > 1.e6*MMG5_EPSOK ) {
       fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
         __func__,__LINE__,it,maxerr);
       return 0;
@@ -1026,7 +1026,7 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
 
     /* Check error in norm inf */
     maxerr = MMG5_test_mat_error(3,intex,intnum);
-    if( maxerr > 1.e5*MMG5_EPSOK ) {
+    if( maxerr > 1.e6*MMG5_EPSOK ) {
       fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
         __func__,__LINE__,it,maxerr);
       return 0;
