@@ -5,12 +5,13 @@ class mmgFunction():
         self.args = args
 
 class arg():
-    def __init__(self,arg_name,arg_type):
-        self.name = arg_name
-        self.type = arg_type
+    def __init__(self,arg_name,arg_type,arg_pointer=0):
+        self.name    = arg_name
+        self.type    = arg_type
+        self.pointer = arg_pointer
 
 class mmgClass():
-    def __init__(self,name,):
+    def __init__(self,name):
         self.name = name
         self.args = []
 
@@ -53,9 +54,12 @@ class pythonAPI:
         def writeFunctionResArgs(f,fn):
             f.write("lib." + fn.name + ".argtypes = (")
             for a in fn.args:
-                f.write("ctypes.POINTER(" + a.type + "),")
+                if (a.pointer):
+                    f.write("ctypes.POINTER(" + a.type + "),")
+                else:
+                    f.write(a.type + ",")
             f.write(")\n")
-            f.write("lib." + fn.name + ".restype = ")
+            f.write("lib." + fn.name + ".restype  = ")
             f.write(fn.return_type)
             f.write("\n\n")
 
@@ -68,14 +72,26 @@ class pythonAPI:
                 else:
                     f.write(a.name + ": " + a.type)
             f.write("):\n")
-            f.write(indentfn + "lib." + fn.name + "(")
+            f.write(indentfn)
+            if (not (fn.return_type == "None")):
+                f.write("ier = ")
+            f.write("lib." + fn.name + "(")
             for a in fn.args:
                 if (not (a == fn.args[-1])):
-                    f.write("ctypes.byref(" + a.name + "),")
+                    if (a.pointer):
+                        f.write("ctypes.byref(" + a.name + "),")
+                    else:
+                        f.write(a.name + ",")
                 else:
-                    f.write("ctypes.byref(" + a.name + ")")
+                    if (a.pointer):
+                        f.write("ctypes.byref(" + a.name + ")")
+                    else:
+                        f.write(a.name)
             f.write(")")
-            f.write("\n\n")
+            f.write("\n")
+            if (not (fn.return_type == "None")):
+                f.write(indentfn + "return ier\n")
+            f.write("\n")
 
 
         with open(self.ns + ".py", "w") as f:
