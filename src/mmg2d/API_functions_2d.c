@@ -101,11 +101,16 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* default values for doubles */
   /* level set value */
   mesh->info.ls       = MMG5_LS;
-/* xreg relaxation parameter value */
+  /* xreg relaxation parameter value */
   mesh->info.lxreg    = MMG5_XREG;
-
+  /* [0/1]   ,avoid/enforce istropic remeshing even with anisotropic metric */
+  mesh->info.isotropic = MMG5_OFF;
+  /* limit angle to avoid remeshing some good triangles */
+  mesh->info.limit_angle = 5.*atan(1.);
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
+
+  mesh->info.bdy_adaptation = MMG5_OFF;
 }
 
 
@@ -147,6 +152,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int va
       mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
+  case MMG2D_IPARAM_bdy_adaptation:
+    mesh->info.bdy_adaptation = val;
+    break;
   case MMG2D_IPARAM_nofem :
     mesh->info.setfem = (val==1)? 0 : 1;
     break;
@@ -161,6 +169,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, MMG5_int va
     break;
   case MMG2D_IPARAM_isosurf :
     mesh->info.isosurf = val;
+    break;
+  case MMG2D_IPARAM_isotropic :
+    mesh->info.isotropic = val;
     break;
   case MMG2D_IPARAM_lag :
 #ifdef USE_ELAS
@@ -348,6 +359,15 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     }
     else
       mesh->info.hausd    = val;
+    break;
+  case MMG2D_DPARAM_hmin_factor :
+    mesh->info.min[2] = val;
+    break;
+  case MMG2D_DPARAM_hmax_factor :
+    mesh->info.max[2] = val;
+    break;
+  case MMG2D_DPARAM_limit_angle :
+    mesh->info.limit_angle = val;
     break;
   case MMG2D_DPARAM_ls :
     mesh->info.ls       = val;

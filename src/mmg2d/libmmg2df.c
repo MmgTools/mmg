@@ -51,7 +51,7 @@ FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
                                             ,int* retval),(mesh,met
                                                            ,retval)){
 
-  *retval = MMG2D_mmg2dlib(*mesh,*met);
+  *retval = MMG2D_mmg2dlib(*mesh,*met,NULL);
 
   return;
 }

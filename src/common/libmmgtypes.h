@@ -524,9 +524,12 @@ typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,lxreg,rmc;
+  double        limit_angle; /*< Angle threshold for modifying triangles or not */
   MMG5_int      *br; /*!< list of based references to which an implicit surface can be attached */
   MMG5_int      isoref; /*!< isovalue reference in ls mode */
   MMG5_int      nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
+  int           isotropic; /*!< force the use of some isotropic functions */
+  int           bdy_adaptation;
   int           mem,npar,npari;
   int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
   int           opnbdy; /*!< floating surfaces */

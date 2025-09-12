@@ -148,6 +148,11 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
           return 0;
         break;
+      case 'b':
+        if ( !strcmp(argv[i],"-bdy-adaptation") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_bdy_adaptation,1) )
+            return 0;
+        }
       case 'd':
         if ( !strcmp(argv[i],"-default") ) {
           mesh->mark=1;
@@ -194,6 +199,12 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           else if ( !strcmp(argv[i],"-hgrad") ) {
             param = MMG2D_DPARAM_hgrad;
           }
+          else if ( !strcmp(argv[i],"-hmin_factor") ) {
+            param = MMG2D_DPARAM_hmin_factor;
+          }
+          else if ( !strcmp(argv[i],"-hmax_factor") ) {
+            param = MMG2D_DPARAM_hmax_factor;
+          }
           else {
             /* Arg unknown by Mmg: arg starts with -h but is not known */
             MMG2D_usage(argv[0]);
@@ -233,6 +244,10 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isoref,
                                      atoi(argv[i])) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-isotropic") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isotropic,1) )
             return 0;
         }
         else {
@@ -277,6 +292,10 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
                 return 0;
             }
           }
+        }
+        else if ( !strcmp(argv[i],"-limit_angle") && ++i < argc ) {
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_limit_angle,atof(argv[i])) )
+            return 0;
         }
         break;
       case 'm':  /* memory */

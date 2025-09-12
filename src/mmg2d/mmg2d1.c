@@ -37,7 +37,7 @@
  based on patterns, collapses and swaps.
    typchk = 1 -> adaptation based on edge lengths
    typchk = 2 -> adaptation based on lengths calculated in metric met */
-int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
+int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk,double* velocity) {
   int       it,maxit;
   MMG5_int  ns,nc,nsw,nns,nnc,nnsw;
 
@@ -50,13 +50,13 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( typchk == 2 && it == 0 ) {
 // #warning Luca: check consistency with 3D
     }
-    if ( !mesh->info.noinsert ) {
+    if ( !mesh->info.noinsert && mesh->info.limit_angle >= 4.*atan(1.)) {
       /* Memory free */
       MMG5_DEL_MEM(mesh,mesh->adja);
       mesh->adja = 0;
 
       /* Split long edges according to patterns */
-      ns = MMG2D_anaelt(mesh,met,typchk);
+      ns = MMG2D_anaelt(mesh,met,typchk,velocity);
       if ( ns < 0 ) {
         fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
         return 0;
@@ -69,7 +69,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       }
 
       /* Collapse short edges */
-      nc = MMG2D_colelt(mesh,met,typchk);
+      nc = MMG2D_colelt(mesh,met,typchk,MMG2D_LSHRT,velocity);
       if ( nc < 0 ) {
         fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
         return 0;
@@ -82,7 +82,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     }
     /* Swap edges */
     if ( !mesh->info.noswap ) {
-      nsw = MMG2D_swpmsh(mesh,met,typchk);
+      nsw = MMG2D_swpmsh(mesh,met,typchk,velocity);
       if ( nsw < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return 0;
@@ -107,8 +107,134 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   return 1;
 }
 
+// Minimum angle function
+double MMG2D_minangle(MMG5_pMesh mesh, int k, double* velocity) {
+
+  MMG5_pTria pt = &mesh->tria[k];
+  MMG5_pPoint pp1, pp2, pp3;
+  int* adja = &mesh->adja[3*(k-1)+1];
+  int p1, p2, p3;
+  double length[6];
+  double c1 = 1.35*mesh->info.limit_angle;
+  if (c1 > 1.) c1 = 1.;
+  double coef = 1.;
+  double factor_max = mesh->info.max[2]; // 1.75;
+  double factor_min = mesh->info.min[2]; // 1.33;
+
+  p1 = pt->v[0];
+  p2 = pt->v[1];
+  p3 = pt->v[2];
+
+  pp1 = &mesh->point[p1];
+  pp2 = &mesh->point[p2];
+  pp3 = &mesh->point[p3];
+
+  double square_root_area = sqrt(0.5*fabs((pp2->c[0]-pp1->c[0])*(pp3->c[1]-pp1->c[1]) - (pp2->c[1]-pp1->c[1])*(pp3->c[0]-pp1->c[0])));
+  double mean_velocity = 0.;
+
+  // Velocity is only considered for already existing points
+  if (velocity != NULL && p1 <= mesh->mark && p2 <= mesh->mark && p3 <= mesh->mark && pp1->tmp == -1 && pp2->tmp == -1 && pp3->tmp == -1) 
+    mean_velocity = ( sqrt(pow(velocity[p1-1],2) + pow(velocity[p1-1+mesh->mark],2)) + sqrt(pow(velocity[p2-1],2) + pow(velocity[p2-1+mesh->mark],2)) + sqrt(pow(velocity[p3-1],2) + pow(velocity[p3-1+mesh->mark],2))  )/3.;
+
+  double dt, x1, x2, x3, y1, y2, y3;
+  if (mean_velocity < 1.e12) {
+    dt = 0.;
+    x1 = pp1->c[0];
+    x2 = pp2->c[0];
+    x3 = pp3->c[0];
+    y1 = pp1->c[1];
+    y2 = pp2->c[1];
+    y3 = pp3->c[1];
+  }
+  else {
+    dt = 0.25*square_root_area / mean_velocity;
+    x1 = pp1->c[0]+velocity[p1-1]*dt;
+    x2 = pp2->c[0]+velocity[p2-1]*dt;
+    x3 = pp3->c[0]+velocity[p3-1]*dt;
+    y1 = pp1->c[1]+velocity[p1-1+mesh->mark]*dt;
+    y2 = pp2->c[1]+velocity[p2-1+mesh->mark]*dt;
+    y3 = pp3->c[1]+velocity[p3-1+mesh->mark]*dt;
+  }
+
+  length[0] = pow(x1-x2,2.) + pow(y1-y2,2.);
+  length[1] = pow(x2-x3,2.) + pow(y2-y3,2.);
+  length[2] = pow(x3-x1,2.) + pow(y3-y1,2.);
+
+  length[3] = pow(pp1->c[0] - pp2->c[0],2.) + pow(pp1->c[1] - pp2->c[1],2.);
+  length[4] = pow(pp2->c[0] - pp3->c[0],2.) + pow(pp2->c[1] - pp3->c[1],2.);
+  length[5] = pow(pp3->c[0] - pp1->c[0],2.) + pow(pp3->c[1] - pp1->c[1],2.);
+
+  double min = length[0];
+  double max = length[0];
+  int min_index = 0;
+
+  for (int i = 1; i < 3; i++) {
+    if (length[i] < min) {
+      min = length[i];
+      min_index = i;
+    }
+    if (length[i] > max) max = length[i];
+  }
+
+  if (sqrt(min) < mesh->info.hmin/factor_min) return 0.;
+  if (sqrt(max) > factor_max*mesh->info.hmax) return 0.;
+
+  double cosA = ( length[(min_index+1)%3] + length[(min_index+2)%3] - length[min_index] ) / (2*pow(length[(min_index+1)%3],0.5)*pow(length[(min_index+2)%3],0.5));
+
+  min = length[3];
+  max = length[3];
+  min_index = 0;
+  for (int i = 1; i < 3; i++) {
+    if (length[i+3] < min) {
+      min = length[i+3];
+      min_index = i;
+    }
+    if (length[i+3] > max) max = length[i+3];
+  }
+
+  if (sqrt(min) < mesh->info.hmin/factor_min) return 0.;
+  if (sqrt(max) > factor_max*mesh->info.hmax) return 0.;
+
+  // If the triangle is on a boundary, the tolerance is multiplied by two
+  if (mesh->info.bdy_adaptation) {
+    if ((pp1->tag & MG_BDY) || (pp2->tag & MG_BDY) || (pp3->tag & MG_BDY)) {
+      coef = c1;
+    }
+    else {
+      for(int i = 0; i < 3; i++ ) {
+        int k1 = adja[i]/3;
+  
+        if (!k1) continue;
+  
+        MMG5_pTria pt_neigh = &mesh->tria[k1];
+  
+        for (int j = 0; j < 3; j++) {
+          MMG5_pPoint pp = &mesh->point[pt_neigh->v[j]];
+          if (pp->tag & MG_BDY) {
+            coef = c1;
+            break;
+          }
+        }
+  
+        if (coef < 0.999) break;
+      }
+    }
+  }
+
+  double cosA2 = ( length[(min_index+1)%3+3] + length[(min_index+2)%3+3] - length[min_index+3] ) / (2*pow(length[(min_index+1)%3+3],0.5)*pow(length[(min_index+2)%3+3],0.5));
+  if (cosA2 > cosA) cosA = cosA2;
+
+  if (cosA <= -1.) {
+    return 3.14;
+  }
+  else if (cosA >= 1) {
+    return 0.;
+  }
+  else return coef*acos(cosA);
+}
+
 /* Travel triangles and split long edges according to patterns */
-MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk,double* velocity) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
   MMG5_Hash       hash;
@@ -129,6 +255,8 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || (pt->ref < 0) ) continue;
     if ( MG_SIN(pt->tag[0]) || MG_SIN(pt->tag[1]) || MG_SIN(pt->tag[2]) )  continue;
+
+    if (mesh->info.limit_angle <= 4*atan(1.) && MMG2D_minangle(mesh,k,velocity) > mesh->info.limit_angle) continue;
 
     /* Check if pt should be cut */
     pt->flag = 0;
@@ -434,10 +562,10 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 }
 
 /* Travel triangles and collapse short edges */
-MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk, double lmax,double* velocity) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
-  double       ux,uy,ll,hmin2;
+  double       ll;
   MMG5_int     k;
   int          ilist;
   MMG5_int     nc;
@@ -445,11 +573,12 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_int     list[MMG5_TRIA_LMAX+2];
 
   nc = 0;
-  hmin2 = mesh->info.hmin * mesh->info.hmin;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+    if (mesh->info.limit_angle <= 4*atan(1.) && MMG2D_minangle(mesh,k,velocity) > mesh->info.limit_angle) continue;
 
     /* Travel 3 edges of the triangle and decide whether to collapse p1->p2, based on length criterion */
     pt->flag = 0; // was here before, but probably serves for nothing
@@ -476,14 +605,16 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 
       /* Check length */
       if ( typchk == 1 ) {
+        double ux, uy, hmin2;
         ux = p2->c[0] - p1->c[0];
         uy = p2->c[1] - p1->c[1];
         ll = ux*ux + uy*uy;
+        hmin2 = mesh->info.hmin * mesh->info.hmin;
         if ( ll > hmin2 ) continue;
       }
       else {
         ll = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
-        if ( ll > MMG2D_LSHRT ) continue;
+        if ( ll > lmax ) continue;
       }
 
       /* Check whether the geometry is preserved */
@@ -511,7 +642,7 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 }
 
 /* Travel triangles and swap edges to improve quality */
-MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk,double* velocity) {
   MMG5_pTria pt;
   int        it,maxit;
   MMG5_int   ns,nns;
@@ -527,6 +658,8 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+      if (mesh->info.limit_angle <= 4*atan(1.) && MMG2D_minangle(mesh,k,velocity) > mesh->info.limit_angle) continue;
 
       for (i=0; i<3; i++) {
         if ( MG_SIN(pt->tag[i]) || MG_EDG(pt->tag[i]) ) continue;
@@ -547,7 +680,7 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 
 /* Mesh adaptation routine for the final stage of the algorithm: intertwine splitting
  based on patterns, collapses, swaps and vertex relocations.*/
-int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met,double* velocity) {
   int                  maxit,it;
   MMG5_int             nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
 
@@ -557,16 +690,16 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   do {
 
     if ( !mesh->info.noinsert ) {
-      ns = MMG2D_adpspl(mesh,met);
+      ns = MMG2D_adpspl(mesh,met,velocity);
       if ( ns < 0 ) {
         fprintf(stderr,"  ## Problem in function adpspl."
                 " Unable to complete mesh. Exit program.\n");
         return 0;
       }
 
-      nc = MMG2D_adpcol(mesh,met);
+      nc = MMG2D_colelt(mesh,met,2,MMG2D_LOPTS,velocity);
       if ( nc < 0 ) {
-        fprintf(stderr,"  ## Problem in function adpcol."
+        fprintf(stderr,"  ## Problem in function colelt."
                 " Unable to complete mesh. Exit program.\n");
         return 0;
       }
@@ -577,7 +710,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     
     if ( !mesh->info.noswap ) {
-      nsw = MMG2D_swpmsh(mesh,met,2);
+      nsw = MMG2D_swpmsh(mesh,met,2,velocity);
       if ( nsw < 0 ) {
         fprintf(stderr,"  ## Problem in function swpmsh."
                 " Unable to complete mesh. Exit program.\n");
@@ -588,7 +721,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       nsw = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = MMG2D_movtri(mesh,met,1,0);
+      nm = MMG2D_movtri(mesh,met,1,0,velocity);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Problem in function movtri. "
                 "Unable to complete mesh. Exit program.\n");
@@ -612,7 +745,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Last iterations of vertex relocation only */
   if ( !mesh->info.nomove ) {
-    nm = MMG2D_movtri(mesh,met,5,1);
+    nm = MMG2D_movtri(mesh,met,5,1,velocity);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Problem in function movtri. Unable to complete mesh."
               " Exit program.\n");
@@ -637,7 +770,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
  * edges are only splitted on a one-by-one basis
  *
  */
-MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met,double* velocity) {
   MMG5_pTria         pt;
   double             lmax,len;
   MMG5_int           ip,ns,k,nt;
@@ -651,6 +784,8 @@ MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+    if (mesh->info.limit_angle <= 4*atan(1.) && MMG2D_minangle(mesh,k,velocity) > mesh->info.limit_angle) continue;
 
     imax = -1;
     lmax = -1.0;
@@ -692,67 +827,8 @@ MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   return ns;
 }
 
-/* Analysis and collapse routine for edges in the final step of the algorithm */
-int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria        pt;
-  MMG5_pPoint       p1,p2;
-  double            len;
-  MMG5_int          k,nc;
-  int               ilist;
-  int8_t            i,i1,i2,open;
-  MMG5_int          list[MMG5_TRIA_LMAX+2];
-  
-  nc = 0;
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
-
-    /* Check edge length, and attempt collapse */
-    pt->flag = 0;
-    for (i=0; i<3; i++) {
-      if ( MG_SIN(pt->tag[i]) ) continue;
-
-      open = ( mesh->adja[3*(k-1)+1+i] == 0 ) ? 1 : 0;
-
-      i1 = MMG5_inxt2[i];
-      i2 = MMG5_iprv2[i];
-      p1 = &mesh->point[pt->v[i1]];
-      p2 = &mesh->point[pt->v[i2]];
-
-      if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) continue;
-      else if ( p1->tag & MG_GEO ) {
-        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
-      }
-      else if ( p1->tag & MG_REF ) {
-        if ( ! (p2->tag & MG_GEO || p2->tag & MG_REF) || !(pt->tag[i] & MG_REF) ) continue;
-      }
-
-      len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
-
-      if ( len > MMG2D_LOPTS ) continue;
-
-      ilist = MMG2D_chkcol(mesh,met,k,i,list,2);
-
-      if ( ilist > 3 || ( ilist==3 && open ) ) {
-        nc += MMG2D_colver(mesh,ilist,list);
-        break;
-      }
-      else if ( ilist == 3 ) {
-        nc += MMG2D_colver3(mesh,list);
-        break;
-      }
-      else if ( ilist == 2 ) {
-        nc += MMG2D_colver2(mesh,list);
-        break;
-      }
-    }
-  }
-
-  return nc;
-}
-
 /* Analyze points to relocate them according to a quality criterion */
-MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
+MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve,double* velocity) {
   MMG5_pTria           pt;
   MMG5_pPoint          p0;
   MMG5_int             nnm,nm,ns,k;
@@ -773,6 +849,8 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
 
+      if (mesh->info.limit_angle <= 4*atan(1.) && MMG2D_minangle(mesh,k,velocity) > mesh->info.limit_angle) continue;
+
       for (i=0; i<3; i++) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
@@ -785,7 +863,7 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
           if ( ier ) ns++;
         }
         else {
-          if ( met->size == 3 && met->m )
+          if ( met->size == 3 && met->m && !mesh->info.isotropic)
             ier = MMG2D_movintpt_ani(mesh,met,ilist,list,improve);
           else
             ier = MMG2D_movintpt(mesh,met,ilist,list,improve);
@@ -816,13 +894,16 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
  * Mesh adaptation -- new version of mmg2d1.c
  *
  **/
-int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met,double* velocity) {
+
+  mesh->mark = mesh->np;
+  for (int i = 1; i <= mesh->np; i++) mesh->point[i].tmp = -1;
 
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-  if ( !MMG2D_anatri(mesh,met,1) ) {
+  if ( !MMG2D_anatri(mesh,met,1,velocity) ) {
     fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
     return 0;
   }
@@ -871,7 +952,7 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     return 1;
   }
 
-  if ( !MMG2D_anatri(mesh,met,2) ) {
+  if ( !MMG2D_anatri(mesh,met,2,velocity) ) {
     fprintf(stderr,"  ## Unable to proceed adaptation. Exit program.\n");
     return 0;
   }
@@ -885,7 +966,7 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   /* Stage 3: fine mesh improvements */
-  if ( !MMG2D_adptri(mesh,met) ) {
+  if ( !MMG2D_adptri(mesh,met,velocity) ) {
     fprintf(stderr,"  ## Unable to make fine improvements. Exit program.\n");
     return 0;
   }

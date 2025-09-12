@@ -60,7 +60,7 @@ void MMG2D_Set_commonFunc(void) {
     return;
 }
 
-int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met,double* velocity) {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -219,7 +219,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
   /* Mesh improvement */
-  if ( !MMG2D_mmg2d1n(mesh,met) ) {
+  if ( !MMG2D_mmg2d1n(mesh,met,velocity) ) {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
@@ -306,6 +306,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  double* velocity;
 
   assert ( mesh );
   assert ( met );
@@ -479,7 +480,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT (%s)\n",
             met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
-  if ( !MMG2D_mmg2d1n(mesh,met) ) {
+  if ( !MMG2D_mmg2d1n(mesh,met,velocity) ) {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
@@ -526,6 +527,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
   int8_t    mettofree = 0;
+  double*   velocity;
 
   assert ( mesh );
   assert ( sol );
@@ -758,7 +760,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
-  if ( !MMG2D_mmg2d1n(mesh,met) ) {
+  if ( !MMG2D_mmg2d1n(mesh,met,velocity) ) {
     if ( mettofree ) {
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
@@ -822,6 +824,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   char      stim[32];
   int       ier;
   MMG5_int  k,*invalidTris;
+  double*   velocity;
 
   assert ( mesh );
   assert ( disp );
@@ -984,7 +987,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
     }
 
-    if ( !MMG2D_mmg2d1n(mesh,met) ) {
+    if ( !MMG2D_mmg2d1n(mesh,met,velocity) ) {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
       MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
