@@ -2,6 +2,46 @@ from mmg_classes import *
 
 def setAPIFunctions(api : pythonAPI):
 
+    type_dict = {
+        "void"    : "None",
+        "int"     : "ctypes.c_int",
+        "double"  : "ctypes.c_double",
+        "MMG5_int": "MMG5_int"
+    }
+
+    # read each prototype found in libmmg3d.h
+    # manipulate strings to extract each piece of information: return type,
+    # function name and list of arguments (type and name of each argument)
+    for line in header:
+        if (line.find("LIBMMG3D_EXPORT") != -1):
+            line_split = line.split(maxsplit=2)
+            if (line_split[1] != "extern" ):
+                prototype = line_split[2].split("(",maxsplit=1)
+                arglist_str = prototype[1].strip(" )\n ;").split(",")
+                
+                name     = prototype[0]
+                restype  = type_dict[line_split[1]]
+                arglist = []
+                print(arglist_str)
+                for item in arglist_str:
+                    item_split = item.split()
+                    offset = 0
+                    if (len(item_split)>=3):
+                        offset = 1
+                    print(item_split)
+                    var_type = item_split[0+offset]
+                    var_name = item_split[1+offset]
+                    if ((var_type.find("_p") != -1) or (var_type.find("*") != -1)):
+                        ptr = 1
+                        var_type = var_type.replace("_p","_")
+                        var_type = var_type.replace("*"," ")
+                    else:
+                        ptr = 0
+                    arglist.append(arg(var_name,var_type,ptr))
+            
+            func = mmgFunction(name,restype,argtypes)
+            api.addFunction(func)
+
     mmg3d_init_parameters = mmgFunction("MMG3D_Init_parameters","None",
                                         [arg("mesh","MMG5_Mesh",1)])
     api.addFunction(mmg3d_init_parameters)
@@ -300,99 +340,12 @@ def setAPIFunctions(api : pythonAPI):
                                      arg("n2","ctypes.c_double")])
     api.addFunction(mmg3d_set_normalatvertex)
 
-LIBMMG3D_EXPORT int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,MMG5_int pos);
     mmg3d_set_scalarsol = mmgFunction("MMG3D_Set_scalarSol",
                                     "ctypes.c_int",
                                     [arg("sol","MMG5_Sol",1),
                                      arg("s","ctypes.c_double"),
                                      arg("pos","MMG5_int")])
     api.addFunction(mmg3d_set_scalarsol)
-  LIBMMG3D_EXPORT int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
-  LIBMMG3D_EXPORT int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
- LIBMMG3D_EXPORT int MMG3D_Set_vectorSols(MMG5_pSol met, double *sols);
- LIBMMG3D_EXPORT int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
-  LIBMMG3D_EXPORT int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
-  LIBMMG3D_EXPORT int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
-  LIBMMG3D_EXPORT int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
- LIBMMG3D_EXPORT void MMG3D_Set_handGivenMesh(MMG5_pMesh mesh);
- LIBMMG3D_EXPORT int MMG3D_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
- LIBMMG3D_EXPORT int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
-                                           MMG5_int val);
- LIBMMG3D_EXPORT int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam,
-                                           double val);
-  LIBMMG3D_EXPORT int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
-                                                MMG5_int ref,double hmin,double hmax,double hausd);
- LIBMMG3D_EXPORT int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
-                                         MMG5_int rmin, MMG5_int rplus);
-LIBMMG3D_EXPORT int  MMG3D_Set_lsBaseReference(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int br);
-  LIBMMG3D_EXPORT int  MMG3D_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* ne,MMG5_int *nprism, MMG5_int* nt,
-                                          MMG5_int* nquad, MMG5_int* na);
-  LIBMMG3D_EXPORT int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
-                                         MMG5_int* np,int* typSol);
-  LIBMMG3D_EXPORT int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
-                                                    MMG5_int* nentities,int* typSol);
-  LIBMMG3D_EXPORT int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
-                                        MMG5_int* ref,int* isCorner, int* isRequired);
- LIBMMG3D_EXPORT int  MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, MMG5_int* ref,
-                                            int* isCorner, int* isRequired,MMG5_int idx);
-  LIBMMG3D_EXPORT int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_int* refs,
-                                          int* areCorners, int* areRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,
-                                             MMG5_int* v3,MMG5_int* ref, int* isRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, MMG5_int* tetra,MMG5_int* refs,
-                                            int* areRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_prism(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,
-                                       MMG5_int* v3,MMG5_int* v4,MMG5_int* v5,MMG5_int* ref, int* isRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_prisms(MMG5_pMesh mesh, MMG5_int* prisms,MMG5_int* refs,
-                                        int* areRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref,
-                                          int* isRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int* refs,
-                                           int* areRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,MMG5_int* v3,
-                                               MMG5_int* ref, int* isRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int* quads, MMG5_int* refs,
-                                                int* areRequired);
-  LIBMMG3D_EXPORT int  MMG3D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref,
-                                      int* isRidge, int* isRequired);
-  LIBMMG3D_EXPORT int MMG3D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, MMG5_int* refs);
-  LIBMMG3D_EXPORT int MMG3D_Get_edges(MMG5_pMesh mesh,MMG5_int *edges,MMG5_int* refs,
-                                      int *areRidges,int *areRequired);
- LIBMMG3D_EXPORT int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double *n0, double *n1,
-                                               double *n2) ;
-  LIBMMG3D_EXPORT double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k);
- LIBMMG3D_EXPORT int  MMG3D_Get_scalarSol(MMG5_pSol met, double* s);
- LIBMMG3D_EXPORT int  MMG3D_Get_scalarSols(MMG5_pSol met, double* s);
- LIBMMG3D_EXPORT int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
- LIBMMG3D_EXPORT int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols);
- LIBMMG3D_EXPORT int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
-                                         double *m22,double *m23, double *m33);
- LIBMMG3D_EXPORT int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
-  LIBMMG3D_EXPORT int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG5_int pos);
-  LIBMMG3D_EXPORT int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
- LIBMMG3D_EXPORT int MMG3D_Get_iparameter(MMG5_pMesh mesh, MMG5_int iparam);
-  LIBMMG3D_EXPORT int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
-                                             MMG5_int v2, MMG5_int v3, MMG5_int ref);
-  LIBMMG3D_EXPORT MMG5_int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
-                                             double c2, MMG5_int ref);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     mmg3d_load_mesh = mmgFunction("MMG3D_loadMesh","ctypes.c_int",
                                   [arg("mesh","MMG5_Mesh",1),
