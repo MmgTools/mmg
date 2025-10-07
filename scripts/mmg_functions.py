@@ -26,12 +26,12 @@ def setAPIFunctions(api : pythonAPI):
                 if (line_buf != ""):
                     line = line_buf.strip(" \n") + line.strip(" ")
                     line_buf = ""
-          
+
                 line_split = line.split(maxsplit=2)
                 if (line_split[1] != "extern" ):
                     prototype = line_split[2].split("(",maxsplit=1)
                     name = prototype[0]
-                    restype = line_split[1]
+                    restype = type_dict[line_split[1]]
                     arglist_str = prototype[1].strip(" ) \n;").split(",")
                     arglist = []
                     for item in arglist_str:
