@@ -157,6 +157,18 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
 
 ENDIF()
 
+IF (MMG_PYTHON_API)
+  IF (NOT LIBMMG_SHARED)
+    MESSAGE ("SHARED LIBRARIES MUST BE ACTIVATED TO CREATE PYTHON API (OPTION BUILD_SHARED_LIBS).")
+  ELSE()
+    SET(ENV{HEADER_FILE} ${MMG3D_INCLUDE}/libmmg3d.h)
+    SET(ENV{SHARED_LIB_FILE} ${PROJECT_BINARY_DIR}/lib/libmmg3d.dylib)
+    EXECUTE_PROCESS(COMMAND python3 genpython.py WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts)
+  ENDIF()
+
+ENDIF()
+
+
 ###############################################################################
 #####
 #####         Continuous integration

@@ -1,4 +1,5 @@
 from mmg_classes import *
+import os
 
 def setAPIFunctions(api : pythonAPI):
 
@@ -11,7 +12,8 @@ def setAPIFunctions(api : pythonAPI):
         "char*"   : "ctypes.c_char_p"
     }
 
-    header   = open("libmmg3d.h","r")
+    header_file_path = os.getenv("HEADER_FILE")
+    header   = open(header_file_path,"r")
     # read each prototype found in libmmg3d.h
     # manipulate strings to extract each piece of information: return type,
     # function name and list of arguments (type and name of each argument)

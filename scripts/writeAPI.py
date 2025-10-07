@@ -1,3 +1,5 @@
+import os
+
 class mmgFunction():
     def __init__(self,name,rtype,args):
         self.name = name
@@ -103,12 +105,10 @@ class pythonAPI:
             for fn in self.functions:
                 writeFunction(f,fn)
 
-python_header = """import ctypes
+python_header = """\
+import ctypes
 import os
 
-libdir  = os.path.dirname(os.path.realpath(__file__))
-libpath = os.path.join(libdir,"libmmg.dylib")
+lib = ctypes.CDLL({libpath})
 
-lib = ctypes.CDLL(libpath)
-
-"""
+""".format(libpath=os.getenv("SHARED_LIB_FILE"))

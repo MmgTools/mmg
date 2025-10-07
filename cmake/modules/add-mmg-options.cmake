@@ -120,3 +120,7 @@ CMAKE_DEPENDENT_OPTION(
 #---------------------- install provate headers for library built on top of Mmg
 OPTION ( MMG_INSTALL_PRIVATE_HEADERS
   "Install private headers of Mmg (use at your own risk)" OFF )
+
+#-- generate python API mmg.py (requires shared libraries)
+OPTION (MMG_PYTHON_API
+  "Create mmg.py file for Python API" OFF)
