@@ -333,7 +333,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  * \param start tetra index.
  * \param ip point index.
  * \param t computed tangent vector.
- * \return 0 when more than two NOM points are attached to ip, 1 if sucess.
+ * \return 0 when more than two NOM points are attached to ip, 1 if success.
  *
  * Travel the ball of the internal non manifold point ip in tetra start
  * and calculate the tangent vector to the underlying curve.

@@ -236,19 +236,16 @@ MMG5_int MMG3D_unfold_shell(MMG5_pMesh  mesh,MMG5_int start,MMG5_int end, MMG5_i
 /**
  * \param mesh pointer to the mesh structure.
  * \param k index of the starting tetra.
- * \param iface local index of the starting face in the tetra \a k.
- * \param ideg local index of the starting edge in the face \a iface.
- * \param lists surfacic ball of p.
- * \param ilists number of elements in the surfacic ball of p.
+ * \param iface local index of starting face in the tetra \a k.
+ * \param iedg local index of starting edge in the face \a iface (local num).
+ * \param lists surfacic ball of point \a np.
+ * \param ilists number of elements in the surfacic ball of point \a np.
  *
  * \return 0 if the check of the topology fails, 1 if success, -1 if the
  * function fails.
  *
- * Topological check on the surface ball of np and nq in collapsing np->nq ;
- *  iface = boundary face on which lie edge iedg - in local face num.  (pq, or
- *  ia in local tet notation). See the Mmg Google
- *  Drive/Documentation/mmg3d/topchkcol_bdy3D.pdf for a picture of the
- *  configuration.
+ * Topological checks of surfacic ball of \a np and \a nq in collapsing
+ * \a np over \a nq.
  *
  */
 static int
@@ -496,33 +493,35 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,uint16_t *
 /**
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
- * \param k index of element in which we collapse.
- * \param iface face through wich we perform the collapse
- * \param iedg edge to collapse (in local face num)
- * \param listv pointer to the list of the tetra in the ball of \a p0.
- * \param ilistv number of tetra in the ball of \a p0.
- * \param lists pointer to the surfacic ball of \a p0.
- * \param ilists number of tetra in the surfacic ball of \a p0.
- * \param refmin reference of one of the two subdomains in presence
- * \param refplus reference of the other subdomain in presence
+ * \param k index of element from which collapse occurs.
+ * \param iface face through which collapse is performed.
+ * \param iedg edge to collapse (in local face num).
+ * \param listv pointer to the list of tetra in ball of \a p0.
+ * \param ilistv number of tetra in ball of \a p0.
+ * \param lists pointer to surfacic ball of \a p0.
+ * \param ilists number of tetra in surfacic ball of \a p0.
+ * \param refmin reference of one of the two subdomains in presence.
+ * \param refplus reference of the other subdomain in presence.
  * \param typchk  typchk type of checking permformed for edge length
  * (hmax or MMG3D_LLONG criterion).
- * \param isnm 1 if edge is non-manifold
- * \param isnmint 1 if ip is an internal non manifold point;
+ * \param isnm 1 if edge is non-manifold.
+ * \param isnmint 1 if ip is an internal non manifold point.
  *
  * \return ilistv if success, 0 if the point cannot be collapsed, -1 if fail.
  *
- * Check whether collapse ip -> iq could be performed, ip boundary point;
- *  'mechanical' tests (positive jacobian) are not performed here ;
- *  iface = boundary face on which lie edge iedg - in local face num.
- *  (pq, or ia in local tet notation).
- * If isnm is 1, the collapse occurs along an external MG_NOM edge.
- * If isnmint is 1, ip is an internal non manifold point and dont have normals.
- *  In this last case, \a lists, \a ilists \a refmin, \a refplus and \a isnm
- *  variables aren't used (we neither have a surfacic ball nor "positive" and
- *  "negative" volumes)
+ * Check whether collapse point \a ip over \a iq could be performed, where
+ * \a ip is a boundary point.
  *
- * \remark we don't check edge lengths.
+ * 'Mechanical' tests (positive jacobian) are not performed here.
+ *
+ * If \a isnm is 1, the collapse occurs along an external MG_NOM edge.
+ *
+ * If \a isnmint is 1, ip is an internal non manifold point and does not have
+ * normals. In this last case, \a lists, \a ilists \a refmin, \a refplus and
+ * \a isnm variables aren't used (we neither have a surfacic ball nor
+ * "positive" and "negative" volumes)
+ *
+ * \remark edge lengths are not checked.
  */
 int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
                     int8_t iedg,int64_t *listv,int ilistv,MMG5_int *lists,int ilists,
@@ -605,7 +604,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
       }
 
       if ( nbbdy == 4 ) {
-        /* Only one element in the domain: we don't want to delete it */
+        /* Only one element in the domain: it cannot be deleted */
         return 0;
       }
       else if ( nbbdy == 3 ) {
@@ -632,7 +631,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
 
         /*  Avoid surface crimping: check that the collapse doesn't merge 3
          *  bdy edge along a non bdy face: we have to check the edge of each
-         *  shell because some MG_BDY tags may be missings due to the creation
+         *  shell because some MG_BDY tags may be missing due to the creation
          *  of an xtetra during a previous collapse */
         if ( (!pt->xt) || !(pxt->ftag[i] & MG_BDY) ) {
           uint16_t  tag0,tag1,tag2;
