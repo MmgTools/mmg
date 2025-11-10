@@ -109,6 +109,8 @@ python_header = """\
 import ctypes
 import os
 
-lib = ctypes.CDLL({libpath})
+lib = ctypes.CDLL("{libpath}")
+
+MMG5_int = "ctypes.c_int"
 
 """.format(libpath=os.getenv("SHARED_LIB_FILE"))

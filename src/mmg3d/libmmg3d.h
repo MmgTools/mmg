@@ -2661,7 +2661,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG3D_EXPORT int MMG3D_saveTetgenMesh(MMG5_pMesh mesh,const char * filename);
+  LIBMMG3D_EXPORT int MMG3D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename);
 
 /**
  * \brief Save mesh data in a file whose format depends on the filename extension.
