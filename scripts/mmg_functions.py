@@ -1,5 +1,5 @@
 from mmg_classes import *
-import os
+import os, re
 
 def setAPIFunctions(api : pythonAPI):
 
@@ -41,6 +41,11 @@ def setAPIFunctions(api : pythonAPI):
                     restype = type_dict[line_split[1]]
                     arglist_str = prototype[1].strip(" ) \n;").split(",")
                     arglist = []
+
+                    if (name.find("parsar") != -1):
+                        continue
+                    if (name.find("commonFunc") != -1):
+                        continue
                     for item in arglist_str:
                         item_split = item.split()
                         offset = 0
@@ -66,6 +71,14 @@ def setAPIFunctions(api : pythonAPI):
                             var_type = type_dict[var_type]
                         if (var_type.find("MMG5_int") != -1):
                             var_type = type_dict[var_type]
+                        array_size_brackets = re.search(r"[\d+]", var_name)
+                        if (array_size_brackets):
+                            array_size = array_size_brackets.group(0).strip("[]")
+                            var_name_tmp = var_name.split("[",maxsplit=1)
+                            var_name = var_name_tmp[0]
+                            var_type = var_type + "*" + array_size
+                        if (var_name.find("lambda") != -1):
+                            var_name = var_name + "0"
                         arglist.append(arg(var_name,var_type,ptr))
 
                     func = mmgFunction(name,restype,arglist)
