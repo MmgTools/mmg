@@ -71,15 +71,21 @@ class pythonAPI:
             indentfn = "    "
             f.write("def " + fn.name + "(")
             for a in fn.args:
-                if (not (a == fn.args[-1])):
-                    f.write(a.name + ": " + a.type + ",")
+                if (a == "str"):
+                    if (not (a == fn.args[-1])):
+                        f.write(a.name + ",")
+                    else:
+                        f.write(a.name)
                 else:
-                    f.write(a.name + ": " + a.type)
+                    if (not (a == fn.args[-1])):
+                        f.write(a.name + ": " + a.type + ",")
+                    else:
+                        f.write(a.name + ": " + a.type)
             f.write("):\n")
             f.write(indentfn)
             if (fn.str_encode):
-                f.write("name = ctypes.c_char_p(name.encode('utf-8'))")
-                f.write("\n")
+                f.write("if (isinstance(name,str)):\n")
+                f.write(indentfn + indentfn + "name = ctypes.c_char_p(name.encode('utf-8'))\n")
                 f.write(indentfn)
             if (not (fn.return_type == "None")):
                 f.write("ier = ")
