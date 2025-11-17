@@ -9,7 +9,9 @@ def setAPIFunctions(api : pythonAPI):
         "int8_t"  : "ctypes.c_int8",
         "double"  : "ctypes.c_double",
         "MMG5_int": "ctypes.c_int",
-        "char*"   : "ctypes.c_char_p"
+        "char*"   : "ctypes.c_char_p",
+        ""        : "",
+        "str"     : "str"
     }
 
     header_file_path = os.getenv("HEADER_FILE")
@@ -37,6 +39,7 @@ def setAPIFunctions(api : pythonAPI):
                     prototype = line_split[2].split("(",maxsplit=1)
                     # prototype[0] : function name
                     # prototype[1] : argument list (types and names)
+                    str_encode = 0
                     name = prototype[0]
                     restype = type_dict[line_split[1]]
                     arglist_str = prototype[1].strip(" ) \n;").split(",")
@@ -60,8 +63,11 @@ def setAPIFunctions(api : pythonAPI):
                             var_type = var_type.replace("*","")
                         elif ((var_name.find("*") != -1 ) and (var_type.find("char") != -1 )):
                             ptr = 0
-                            var_name = var_name.replace("*","")
-                            var_type = "char*"
+                            #var_name = var_name.replace("*","")
+                            #var_type = "char*"
+                            var_name = "name"
+                            var_type = "str"
+                            str_encode = 1
                         elif ((var_name.find("*") != -1)):
                             ptr = 1
                             var_name = var_name.replace("*","")
@@ -81,5 +87,5 @@ def setAPIFunctions(api : pythonAPI):
                             var_name = var_name + "0"
                         arglist.append(arg(var_name,var_type,ptr))
 
-                    func = mmgFunction(name,restype,arglist)
+                    func = mmgFunction(name,restype,arglist,str_encode)
                     api.addFunction(func)

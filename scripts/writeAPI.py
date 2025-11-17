@@ -1,10 +1,11 @@
 import os
 
 class mmgFunction():
-    def __init__(self,name,rtype,args):
+    def __init__(self,name,rtype,args,encode):
         self.name = name
         self.return_type = rtype
         self.args = args
+        self.str_encode = encode
 
 class arg():
     def __init__(self,arg_name,arg_type,arg_pointer=0):
@@ -54,13 +55,14 @@ class pythonAPI:
             f.write("]\n\n")
 
         def writeFunctionResArgs(f,fn):
-            f.write("lib." + fn.name + ".argtypes = (")
-            for a in fn.args:
-                if (a.pointer):
-                    f.write("ctypes.POINTER(" + a.type + "),")
-                else:
-                    f.write(a.type + ",")
-            f.write(")\n")
+            if (not fn.str_encode):
+                f.write("lib." + fn.name + ".argtypes = (")
+                for a in fn.args:
+                    if (a.pointer):
+                        f.write("ctypes.POINTER(" + a.type + "),")
+                    else:
+                        f.write(a.type + ",")
+                f.write(")\n")
             f.write("lib." + fn.name + ".restype  = ")
             f.write(fn.return_type)
             f.write("\n\n")
@@ -75,6 +77,10 @@ class pythonAPI:
                     f.write(a.name + ": " + a.type)
             f.write("):\n")
             f.write(indentfn)
+            if (fn.str_encode):
+                f.write("name = ctypes.c_char_p(name.encode('utf-8'))")
+                f.write("\n")
+                f.write(indentfn)
             if (not (fn.return_type == "None")):
                 f.write("ier = ")
             f.write("lib." + fn.name + "(")
