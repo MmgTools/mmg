@@ -889,3 +889,131 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   return 1;
 }
+
+/**
+ * \param mesh pointer to the mesh structure.
+ *
+ * \return 0 if failure, 1 otherwise.
+ *
+ * Give a consistent orientation to (each connected line making) the edges in the mesh -- useful only in opnbdy mode
+ *
+ */
+int MMG2D_oriEdg(MMG5_pMesh mesh) {
+  MMG5_pTria      pt,pt1;
+  MMG5_pEdge      pa,pa1;
+  MMG5_pPoint     ppt;
+  int             k,kk,iel,jel,ip0,ip1,nac,ipil,iadr,nre,*pile,*link,*adja,*adjaed;
+  int8_t          i,ii,i1,ii1,voy;
+  
+  /* Memory allocation */
+  MMG5_SAFE_CALLOC(link,mesh->np+1,MMG5_int,return 0);
+  MMG5_SAFE_CALLOC(adjaed,2*mesh->na+1,MMG5_int,return 0);
+  
+  adja = mesh->adja;
+  nac  = 0;
+  nre  = 0;
+      
+  /* Build adjacency table for edges (of opnbdy type only) */
+  for (k=1; k<=mesh->na; k++) {
+    pa  = &mesh->edge[k];
+    iel = pa->base / 3;
+    i   = pa->base % 3;
+    pt  = &mesh->tria[iel];
+    jel = adja[3*(iel-1)+1+i] / 3;
+    pt1 = &mesh->tria[jel];
+    
+    /* Consider only internal edges that are not limits of subdomains */
+    if ( !jel || pt->ref != pt1->ref ) continue;
+    
+    pa->base = -pa->base;
+    nac++;
+    
+    for (i=0; i<2; i++) {
+      i1  = (i+1)%2;
+      ip1 = ( !i1 ) ? pa->a : pa->b;
+      ppt = &mesh->point[ip1];
+      if ( ppt->tag & MG_NOM ) continue;
+            
+      /* Store adjacency relation if empty */
+      if ( !link[ip1] )
+        link[ip1] = 2*k+i;
+      /* Adjacent found */
+      else {
+        kk   = link[ip1] / 2;
+        ii   = link[ip1] % 2;
+        adjaed[2*(k-1)+1+i]   = link[ip1];
+        adjaed[2*(kk-1)+1+ii] = 2*k+i;
+      }
+    }
+  }
+
+  /* At this stage, all nac candidate edges for reorientation have negative pa->base */
+  MMG5_SAFE_CALLOC(pile,nac+1,MMG5_int,return 0);
+  ipil = 0;
+  
+  /* Search for unflagged edge */
+  for (k=1; k<=mesh->na; k++) {
+    if ( mesh->edge[k].base < 0 ) {
+      ipil       = 1;
+      pile[ipil] = k;
+      mesh->edge[k].base = -mesh->edge[k].base;
+      break;
+    }
+  }
+  
+  /* Travel connected components (pa->base > 0 indicates correct orientation) */
+  while ( ipil > 0 ) {
+    /* Travel connected component of pile[1]*/
+    while ( ipil > 0 ) {
+      k  = pile[ipil];
+      ipil--;
+      pa = &mesh->edge[k];
+
+      for (i=0; i<2; i++) {
+        kk   = adjaed[2*(k-1)+1+i] / 2;
+        ii   = adjaed[2*(k-1)+1+i] % 2;
+        pa1  = &mesh->edge[kk];
+        
+        if ( !kk || pa1->base > 0 ) continue;
+        pa1->base = -pa1->base;
+      
+        ipil++;
+        pile[ipil] = kk;
+                          
+        /* Change orientation if need be */
+        if ( i == ii ) {
+          nre++;
+          ii1 = (ii+1)%2;
+        
+          ip1    = pa1->a;
+          pa1->a = pa1->b;
+          pa1->b = ip1;
+                  
+          /* Change adjacencies in k */
+          adjaed[2*(k-1)+1+i] = 2*kk+ii1;
+        
+          /* Change adjacencies in kk */
+          iadr = adjaed[2*(kk-1)+1+0];
+          adjaed[2*(kk-1)+1+0] = adjaed[2*(kk-1)+1+1];
+          adjaed[2*(kk-1)+1+1] = iadr;
+        }
+      }
+    }
+    
+    /* Find next unflagged edge */
+    for (k=1; k<=mesh->na; k++) {
+      if ( mesh->edge[k].base < 0 ) {
+        ipil       = 1;
+        pile[ipil] = k;
+        break;
+      }
+    }
+  }
+
+  /* Free memory */
+  MMG5_SAFE_FREE(link);
+  MMG5_SAFE_FREE(pile);
+  MMG5_SAFE_FREE(adjaed);
+  
+  return 1;
+}

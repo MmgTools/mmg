@@ -518,7 +518,7 @@ int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-
+    
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -531,7 +531,7 @@ int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       ns++;
     }
   }
-
+  
   /* Check that the snapping process has not led to a nonmanifold situation */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -548,8 +548,8 @@ int MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       /* Catch a snapped point by a triangle where there is a sign change: use
        * the same convention than in ismaniball to evaluate sign changes. If
        * travelled in direct sense from a triangle, an edge is considered
-       * without sign change if first vertex is 0. It has a sign change if
-       * second vertex is 0 or if we have 2 vertices with different signs
+       * without sign change if second vertex is 0. It has a sign change if
+       * first vertex is 0 or if we have 2 vertices with different signs
        * (otherwise a 0 vertex leads to count 2 sign changes instead of one). */
       int smsgn = ((fabs(v2) < MMG5_EPS) || MG_SMSGN(v1,v2)) ? 1 : 0;
       if ( p0->flag && !smsgn ) {

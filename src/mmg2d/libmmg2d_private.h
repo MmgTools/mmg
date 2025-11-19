@@ -196,6 +196,7 @@ int MMG2D_memOption(MMG5_pMesh mesh);
 int  MMG2D_setMeshSize_alloc(MMG5_pMesh);
 
 int MMG2D_pack(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
+int MMG2D_oriEdg(MMG5_pMesh );
 int MMG2D_outqua(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_mmg2d1(MMG5_pMesh ,MMG5_pSol );
 

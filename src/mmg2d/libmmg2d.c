@@ -247,6 +247,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Unscale mesh */
   if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   if (!MMG2D_pack(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
+  if ( mesh->info.opnbdy && !MMG2D_oriEdg(mesh) ) _LIBMMG5_RETURN(mesh,sol,met,MMG5_LOWFAILURE);
+  
 
   chrono(OFF,&(ctim[1]));
 
@@ -811,6 +813,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   /* Pack mesh */
   if (!MMG2D_pack(mesh,sol,met) ) {
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_LOWFAILURE);
+  }
+  
+  if ( mesh->info.opnbdy && !MMG2D_oriEdg(mesh) ) {
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_LOWFAILURE);
   }
 

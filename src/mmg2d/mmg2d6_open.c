@@ -441,8 +441,17 @@ int MMG2D_mmg2d6_open(MMG5_pMesh mesh, MMG5_pSol phi,MMG5_pSol psi) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
+
+  /* Snapping */
+  if ( !MMG5_snpval_ls(mesh,phi) ) {
+    fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
+    return 0;
+  }
   
-  /* Snapping: not sure... may create troubles if several lines intersect */
+  if ( !MMG5_snpval_ls(mesh,psi) ) {
+    fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
+    return 0;
+  }
   
   /* Removal of small parasitic components: to do */
 
