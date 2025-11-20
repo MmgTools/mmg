@@ -225,7 +225,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
+  LIBMMG2D_EXPORT int  MMG2D_Set_inputMeshName(MMG5_pMesh mesh, const char *meshin);
 
 /**
  * \param mesh pointer to the mesh structure.
@@ -243,7 +243,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
+  LIBMMG2D_EXPORT int  MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char *meshout);
 
 /**
  * \param mesh pointer to the mesh structure.
@@ -262,7 +262,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
+  LIBMMG2D_EXPORT int  MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char *solin);
 
 /**
  * \param mesh pointer to the mesh structure.
@@ -281,7 +281,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
+  LIBMMG2D_EXPORT int  MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char *solout);
 
 /**
  * \param mesh pointer to the mesh structure.
@@ -299,7 +299,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int  MMG2D_Set_inputParamName(MMG5_pMesh mesh, const char* fparamin);
+  LIBMMG2D_EXPORT int  MMG2D_Set_inputParamName(MMG5_pMesh mesh, const char *fparamin);
 
 /**
  * \param mesh pointer to the mesh structure.
@@ -1730,7 +1730,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadMesh(MMG5_pMesh mesh,const char * filename);
+  LIBMMG2D_EXPORT int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename);
 
 /**
  * \brief Load a mesh and possibly a solution in VTP (VTK) format from file.
@@ -1951,7 +1951,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char * filename);
+  LIBMMG2D_EXPORT int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \brief Read mesh data in a format determined by the filename extension.
@@ -1996,10 +1996,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
-
-  /* FIXME: why is this here, neither implemented nor documented? */
-  LIBMMG2D_EXPORT int MMG2D_loadVect(MMG5_pMesh ,char *);
+  LIBMMG2D_EXPORT int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename);
 
 /**
  * \brief Save a mesh in .mesh/.meshb format.
@@ -2017,7 +2014,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_saveMesh(MMG5_pMesh ,const char *);
+  LIBMMG2D_EXPORT int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename);
 
 /**
  * \brief Save a mesh and optionally one data field in MSH format, ascii or
@@ -2213,7 +2210,7 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * >   END SUBROUTINE\n
  *
  */
-  LIBMMG2D_EXPORT int MMG2D_saveTetgenMesh(MMG5_pMesh ,const char *);
+  LIBMMG2D_EXPORT int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename);
 
 /**
  * \brief Save mesh data in a file whose format depends on the filename extension.
@@ -2270,9 +2267,6 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  */
   LIBMMG2D_EXPORT int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
-
-  /* FIXME: why is this here? */
-  LIBMMG2D_EXPORT int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda);
 
 /**
  * \brief Main "program" for the mesh adaptation library.
@@ -2746,28 +2740,6 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  * functions.
  */
   LIBMMG2D_EXPORT void MMG2D_Set_commonFunc(void);
-
-/**
- * \brief Normalize the mesh and size information.
- *
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
- * \param ls pointer to a solution structure (level-set or displacement).
- *
- * \return 1 on success, 0 in case of failure (computed bounding box too small
- * or one af the anisotropic input metric is not valid).
- *
- * This function scales the mesh and the size information between 0 and 1.
- * Compute a default value for the hmin/hmax parameters if needed.
- *
- * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SCALEMESH(mesh,met,ls,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,ls\n
- * >     INTEGER, INTENT(OUT)           :: retval\n
- * >   END SUBROUTINE\n
- *
- */
-  LIBMMG2D_EXPORT int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
 
 #ifdef __cplusplus
 }

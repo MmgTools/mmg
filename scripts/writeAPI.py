@@ -125,4 +125,4 @@ lib = ctypes.CDLL("{libpath}")
 
 MMG5_int = "ctypes.c_int"
 
-""".format(libpath=os.getenv("SHARED_LIB_FILE"))
+""".format(libpath=os.getenv("SHARED_LIB_FILE2D"))
