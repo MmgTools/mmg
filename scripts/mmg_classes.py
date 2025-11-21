@@ -294,6 +294,7 @@ def setAPIClasses(api : pythonAPI):
     sol.addArgs([arg("namein","ctypes.c_char_p")])
     sol.addArgs([arg("nameout","ctypes.c_char_p")])
 
+    sol.addConstruct(["size",1])
     MMG5_pSol = "ctypes.POINTER("+sol.name+")"
     api.addType("pSol",MMG5_pSol)
     api.classes.append(sol)

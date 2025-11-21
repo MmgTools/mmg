@@ -15,12 +15,16 @@ class arg():
 
 class mmgClass():
     def __init__(self,name):
-        self.name = name
-        self.args = []
+        self.name      = name
+        self.args      = []
+        self.construct = []
 
     def addArgs(self,args):
         for f in args:
             self.args.append(f)
+
+    def addConstruct(self,val):
+        self.construct.append(val)
 
 class mmgEnum():
     def __init__(self,name):
@@ -65,6 +69,11 @@ class pythonAPI:
                 else:
                     f.write(indentfl+"(\""+a.name+"\","+a.type+"),\n")
             f.write("]\n\n")
+
+            if (cl.construct):
+                f.write(indentcl + "def __init__(self):\n")
+                for co in cl.construct:
+                    f.write(2*indentcl + "self." + co[0] + " = " + str(co[1]) + "\n\n")
 
         def writeFunctionResArgs(f,fn):
             if (not fn.str_encode):
