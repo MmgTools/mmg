@@ -22,13 +22,25 @@ class mmgClass():
         for f in args:
             self.args.append(f)
 
+class mmgEnum():
+    def __init__(self,name):
+        self.name = name
+        self.enum = []
+
+    def addElement(self,element):
+        self.enum.append(element)
+
 class pythonAPI:
 
     def __init__(self, namespace="mmg"):
         self.ns = namespace
+        self.enums     = []
         self.classes   = []
         self.functions = []
         self.typenames = {}
+
+    def addEnum(self,en):
+        self.enums.append(en)
 
     def addClass(self,cl):
         self.classes.append(cl)
@@ -107,9 +119,18 @@ class pythonAPI:
                 f.write(indentfn + "return ier\n")
             f.write("\n")
 
+        def writeEnum(f,en):
+            f.write("class " + en.name + "(IntEnum):\n")
+            indenten = "    "
+            val = 0
+            for elt in en.enum:
+                f.write(indenten + elt + " = " + str(val) + "\n")
+                val = val + 1
 
         with open(self.ns + ".py", "w") as f:
             f.write(python_header)
+            for en in self.enums:
+                writeEnum(f,en)
             for cl in self.classes:
                 writeClass(f,cl)
             for fn in self.functions:
@@ -120,6 +141,7 @@ class pythonAPI:
 python_header = """\
 import ctypes
 import os
+from enum import IntEnum
 
 lib = ctypes.CDLL("{libpath}")
 

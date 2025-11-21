@@ -95,3 +95,26 @@ def setAPIFunctions(api : pythonAPI):
 
                         func = mmgFunction(name,restype,arglist,str_encode)
                         api.addFunction(func)
+
+def setAPIEnums(api : pythonAPI):
+    header_file_path = []
+    #header_file_path.append(os.getenv("HEADER3D_FILE"))
+    header_file_path.append(os.getenv("HEADER2D_FILE"))
+    #header_file_path.append(os.getenv("HEADERS_FILE"))
+    for file in header_file_path:
+        header   = open(file,"r")
+        enum_start = 0
+        for line in header:
+            if (line.find("enum") != -1 and line.find("*") == -1):
+                enum_start = 1
+                line_split = line.split()
+                name = line_split[1]
+                enum = mmgEnum(name)
+                continue
+            if (enum_start and line.find(",") != -1):
+                line_split = line.split(",")
+                element = line_split[0].strip(" \n,")
+                enum.addElement(element)
+            if (enum_start and line.find(";") != -1):
+                enum_start = 0
+                api.addEnum(enum)
