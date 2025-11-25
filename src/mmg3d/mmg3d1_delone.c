@@ -203,9 +203,8 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
      * only non bdy edge are considered */
 
     int8_t force_splt = 0;
-    const int8_t fem_mode = 2; // value of info.fem in case of fem mode
 
-    if ( mesh->info.fem == fem_mode ) {
+    if ( mesh->info.fem ) {
       /* Force splitting of internal edges connecting bdy points */
       if ( MG_TRUE_BDY(p0->tag) && MG_TRUE_BDY(p1->tag) ) {
         force_splt = 1;

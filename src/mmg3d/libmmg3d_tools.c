@@ -184,7 +184,9 @@ int MMG3D_usage(char *prog) {
 #endif
   fprintf(stdout,"\n");
 
-  fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
+  fprintf(stdout,"-fem     n   n = 0 : do not force mmg to create a finite element mesh \n");
+  fprintf(stdout,"             n = 1 : create a finite element mesh (default)\n");
+  fprintf(stdout,"             n = 2 : forbid regular edges joining feature points\n");
   fprintf(stdout,"-nosurf      no surface modifications\n");
 
   fprintf(stdout,"\n");
@@ -305,6 +307,17 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
           }
           else {
             fprintf(stderr,"\nMissing filename for %s\n",argv[i-1]);
+            return 0;
+          }
+        }
+        else if ( !strcmp(argv[i],"-fem") ) {
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
+            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_fem,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"\nMissing or unexpected argument option %s\n",argv[i-1]);
+            MMG3D_usage(argv[0]);
             return 0;
           }
         }
@@ -458,11 +471,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         }
         break;
       case 'n':
-        if ( !strcmp(argv[i],"-nofem") ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nofem,1) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-nreg") ) {
+        if ( !strcmp(argv[i],"-nreg") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nreg,1) )
             return 0;
         }

@@ -853,7 +853,7 @@ endif()
 
 ADD_TEST(NAME test_para_tria
   COMMAND ${EXECUT_MMG3D}
-  -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
+  -ar 0.02 -fem 0 -nosizreq -hgradreq -1 -hgrad -1
   ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
   -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
   ${CTEST_OUTPUT_DIR}/proc0.o.mesh

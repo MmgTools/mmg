@@ -487,9 +487,17 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
     /*   } */
     /* } */
 
-    hma2 = MMG3D_LLONG*MMG3D_LLONG*hmax*hmax;
+    if ( mesh->info.setfem == MMG3D_STRONGFEM) {
+      /* Split regular boundary edges connecting ridge or non-manifold points */
+      if ( (MG_GEO_OR_NOM(p[i1]->tag) && MG_GEO_OR_NOM(p[i2]->tag)) && !MG_GEO_OR_NOM(pt->tag[i]) ) {
+        MG_SET(pt->flag,i);
+        continue;
+      }
+    }
 
     /* check length */
+    hma2 = MMG3D_LLONG*MMG3D_LLONG*hmax*hmax;
+
     ux = p[i2]->c[0] - p[i1]->c[0];
     uy = p[i2]->c[1] - p[i1]->c[1];
     uz = p[i2]->c[2] - p[i1]->c[2];
@@ -2282,7 +2290,7 @@ static MMG5_int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * \remark ridge points creation: with fem (finite element method) mode a tetra
  * cannot have 2 boundary faces. Thus, the ridge point is created from a given
  * tetra and it is seen a second time from another tetra, which allows to update
- * its second normal. With nofem mode, a ref edge or ridge can be at the
+ * its second normal. With fem 0 mode, a ref edge or ridge can be at the
  * interface of 2 boundary faces belonging to the same tetra.
  *
  */
@@ -2428,7 +2436,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
           memcpy(ppt->n,to,3*sizeof(double));
 
-          if ( mesh->info.fem<typchk ) {
+          if ( !mesh->info.fem ) {
             /* A ridge can be at the interface of 2 boundary faces of the same
              * tetra: second normal has to be computed */
             if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
@@ -3176,13 +3184,22 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
   minit = 3;
   maxit = 6;
   mesh->gap = 0.5;
-  do {
-    if ( typchk==2 && lastit==1 )  ++mesh->info.fem;
 
+  if ( mesh->info.setfem && typchk == 1 ) {
+    mesh->info.fem = 1;
+  }
+  else if ( mesh->info.setfem && typchk == 2) {
+    mesh->info.fem = 0;
+  }
+
+  do {
+    if ( mesh->info.setfem && typchk == 2 && lastit == 1 ) {
+      mesh->info.fem = 1;
+    }
 
     /* split or swap tetra with more than 2 bdry faces */
     nf = ier = 0;
-    if ( mesh->info.fem == typchk ) {
+    if ( mesh->info.fem ) {
       ier = MMG5_anatet4(mesh,met,&nf,typchk);
       if ( ier < 0 )  return 0;
     }
@@ -3272,9 +3289,6 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
       ++lastit;
     }
     else if ( lastit ) {
-      /* Avoid the incrementation of mesh->info.fem if we have detected a last
-         iteration but anatet4 leads to have nc, nf or ns != 0 so we perform a last
-         iter */
       ++lastit;
     }
   }
