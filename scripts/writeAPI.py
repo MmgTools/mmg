@@ -113,15 +113,13 @@ class pythonAPI:
             f.write("lib." + fn.name + "(")
             for a in fn.args:
                 if (not (a == fn.args[-1])):
-                    if (a.pointer):
-                        f.write("ctypes.byref(" + a.name + "),")
-                    else:
-                        f.write(a.name + ",")
+                    comma = ","
                 else:
-                    if (a.pointer):
-                        f.write("ctypes.byref(" + a.name + ")")
-                    else:
-                        f.write(a.name)
+                    comma = ""
+                if (a.pointer):
+                    f.write("ctypes.byref(" + a.name + ")" + comma)
+                else:
+                    f.write(a.name + comma)
             f.write(")")
             f.write("\n")
             if (not (fn.return_type == "None")):
