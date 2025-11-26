@@ -133,6 +133,7 @@ class pythonAPI:
             for elt in en.enum:
                 f.write(indenten + elt + " = " + str(val) + "\n")
                 val = val + 1
+            f.write("\n")
 
         with open(self.ns + ".py", "w") as f:
             f.write(python_header)
