@@ -239,7 +239,7 @@ jobs:
           cd Commons
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
           make install
 
       - name: Install LinearElasticity
@@ -250,7 +250,7 @@ jobs:
           cd LinearElasticity
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
           make install
 
       # checkout the provided branch name if workflow is manually run
