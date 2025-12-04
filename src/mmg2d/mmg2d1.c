@@ -653,6 +653,8 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk,double* velocity)
   maxit = 2;
   mesh->base++;
 
+  if (mesh->info.limit_angle <= 4*atan(1.)) mesh->info.fem = 0;
+
   do {
     ns = 0;
     for (k=1; k<=mesh->nt; k++) {
@@ -674,6 +676,9 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk,double* velocity)
   while ( ns > 0 && ++it<maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
+
+  if (mesh->info.limit_angle <= 4*atan(1.)) mesh->info.fem = mesh->info.setfem;
+
   return nns;
 }
 
