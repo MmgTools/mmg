@@ -83,7 +83,7 @@ def setAPIFunctions(api : pythonAPI):
                                 var_type = type_dict[var_type]
                             if (var_type.find("MMG5_int") != -1):
                                 var_type = type_dict[var_type]
-                            array_size_brackets = re.search(r"[\d+]", var_name)
+                            array_size_brackets = re.search(r"\[((\d+)|(MMG2D_[a-zA-Z]+))\]", var_name)
                             if (array_size_brackets):
                                 array_size = array_size_brackets.group(0).strip("[]")
                                 var_name_tmp = var_name.split("[",maxsplit=1)

@@ -155,4 +155,6 @@ lib = ctypes.CDLL("{libpath}")
 
 MMG5_int = "ctypes.c_int"
 
+MMG2D_LMAX = 1024
+
 """.format(libpath=os.getenv("SHARED_LIB_FILE2D"))
