@@ -1379,7 +1379,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
   fclose(inm);
 
   /* For anisotropic metric, check that eigenvalues are stricly positive*/
-  if ( met->size == 3 ) {
+  if ( met->size == 6 ) {
     for (k=1; k<=met->np; k++) {
       double lambda[3],vp[3][3];
       MMG5_eigenv3d(1,met->m+6*k,lambda,vp);
@@ -1492,7 +1492,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   /* For anisotropic metric, check that eigenvalues are stricly positive*/
   for ( j=0; j<nsols; j++) {
     psl = *sol + j;
-    if ( psl->size == 3 ) {
+    if ( psl->size == 6 ) {
       for (k=1; k<=psl->np; k++) {
         double lambda[3],vp[3][3];
         MMG5_eigenv3d(1,psl->m+6*k,lambda,vp);
