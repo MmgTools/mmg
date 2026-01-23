@@ -275,6 +275,7 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     sol,met,disp,ls;
+  double*       velocity;
   int           ier,ierSave,fmtin,fmtout;
   char          stim[32],*ptr;
 
@@ -469,7 +470,7 @@ int main(int argc,char *argv[]) {
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
 
-    ier = MMG2D_mmg2dlib(mesh,met);
+    ier = MMG2D_mmg2dlib(mesh,met,velocity);
   }
 
   if ( ier != MMG5_STRONGFAILURE ) {

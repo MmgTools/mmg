@@ -745,7 +745,7 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   mesh->info.delta = 1.;
   mesh->info.min[0]= 0.;
   mesh->info.min[1]= 0.;
-  mesh->info.min[2]= 0.;
+  if (mesh->dim == 3) mesh->info.min[2]= 0.;
 
   /* de-normalize metric */
   if ( !(met && met->np && met->m) )  return 1;
