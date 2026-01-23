@@ -948,7 +948,7 @@ int MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
  * \param PROctree pointer to the PROctree structure.
- * \param permNodGlob if provided, strore the global permutation of nodes
+ * \param permNodGlob if provided, store the global permutation of nodes
  * \return 0 if failed, 1 otherwise.
  *
  * Analyze tetrahedra and split long / collapse short, according to

@@ -883,8 +883,8 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
 /**
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
- * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
- * \return a negative value in case of failure, number of collapsed points otherwise.
+ * \param typchk type of edge length criterion (hmin or LSHORT criterion).
+ * \return negative value in case of failure, number of collapsed points otherwise.
  *
  * Attempt to collapse short edges.
  *
@@ -904,7 +904,7 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   int16_t         isnmint;
 
   int8_t          i,j,ip,iq;
-  int             ier, bsret;   // function return values/error codes
+  int             ier, bsret;
 
   nc = nnm = 0;
 
@@ -935,7 +935,7 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
         if ( p0->flag == base ) {
           /* I think that we can't pass here because we break the loop when base
-           * is setted and just after we increment it */
+           * is set and just after we increment it */
           assert(0);
           continue;
         }
