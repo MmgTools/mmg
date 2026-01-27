@@ -138,11 +138,16 @@ extern "C" {
     MMG2D_DPARAM_hausd,             /*!< [val], Global Hausdorff distance (on all the boundary surfaces of the mesh) */
     MMG2D_DPARAM_hgrad,             /*!< [val], Global gradation */
     MMG2D_DPARAM_hgradreq,          /*!< [val], Global gradation on required entites (advanced usage) */
+    MMG2D_DPARAM_hmin_factor,       /*!< [val], Factor on minimal edge length when limit_angle is active */
+    MMG2D_DPARAM_hmax_factor,       /*!< [val], Factor on maximal edge length when limit_angle is active */
     MMG2D_DPARAM_ls,                /*!< [val], Function value where the level set is to be discretized */
     MMG2D_DPARAM_xreg,              /*!< [val], Relaxation parameter for coordinate regularization (0<val<1) */
     MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small disconnected components in level-set mode */
     MMG2D_IPARAM_nofem,             /*!< [1/0], Do not attempt to make the mesh suitable for finite-element computations */
     MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
+    MMG2D_IPARAM_isotropic,         /*!< [0/1], Avoid/enforce isotropic remeshing even with anisotropic metric */
+    MMG2D_DPARAM_limit_angle,       /*!< [val], Minimal angle in triangles under which remeshing is achieved */
+    MMG2D_IPARAM_bdy_adaptation,    /*!< [1/0], Enable thorough adaptation close to the boundaries (if limit_angle < Pi) */
   };
 
 /*----------------------------- function headers -----------------------------*/
