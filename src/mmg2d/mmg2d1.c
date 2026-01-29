@@ -107,7 +107,18 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   return 1;
 }
 
-// Minimum angle function
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param k triangle index.
+ * \return the minimal angle of a triangle or 0 if the triangle size
+ * is not conform to the tolerance sizes.
+ *
+ * Compute the minimal angle of triangle k. If the velocity of each
+ * node is given, the extrapolated minimal angle of the triangle
+ * is also calculated. If the edge lengths are too small of too
+ * large, 0 is returned as we want this triangle to be remeshed.
+ *
+ */
 double MMG2D_minangle(MMG5_pMesh mesh, int k) {
 
   MMG5_pTria pt = &mesh->tria[k];
@@ -129,11 +140,13 @@ double MMG2D_minangle(MMG5_pMesh mesh, int k) {
   pp2 = &mesh->point[p2];
   pp3 = &mesh->point[p3];
 
-  double square_root_area = sqrt(0.5*fabs((pp2->c[0]-pp1->c[0])*(pp3->c[1]-pp1->c[1]) - (pp2->c[1]-pp1->c[1])*(pp3->c[0]-pp1->c[0])));
+  double square_root_area = sqrt(0.5*fabs((pp2->c[0]-pp1->c[0])*(pp3->c[1]-pp1->c[1]) -
+                                          (pp2->c[1]-pp1->c[1])*(pp3->c[0]-pp1->c[0])));
   double mean_velocity = 0.;
 
   // Velocity is only considered for already existing points
-  if (mesh->velocity && p1 <= mesh->mark && p2 <= mesh->mark && p3 <= mesh->mark && pp1->tmp == -1 && pp2->tmp == -1 && pp3->tmp == -1)
+  if (mesh->velocity && p1 <= mesh->mark && p2 <= mesh->mark && p3 <= mesh->mark
+                     && pp1->tmp == -1 && pp2->tmp == -1 && pp3->tmp == -1)
     mean_velocity = ( sqrt(pow(mesh->velocity[p1-1],2) + pow(mesh->velocity[p1-1+mesh->mark],2)) + 
                       sqrt(pow(mesh->velocity[p2-1],2) + pow(mesh->velocity[p2-1+mesh->mark],2)) + 
                       sqrt(pow(mesh->velocity[p3-1],2) + pow(mesh->velocity[p3-1+mesh->mark],2))  )/3.;
@@ -149,6 +162,7 @@ double MMG2D_minangle(MMG5_pMesh mesh, int k) {
     y3 = pp3->c[1];
   }
   else {
+    // Extrapolated triangle location based on a fictitious time step
     dt = 0.25*square_root_area / mean_velocity;
     x1 = pp1->c[0] + mesh->velocity[p1-1]*dt;
     x2 = pp2->c[0] + mesh->velocity[p2-1]*dt;
@@ -158,14 +172,17 @@ double MMG2D_minangle(MMG5_pMesh mesh, int k) {
     y3 = pp3->c[1] + mesh->velocity[p3-1+mesh->mark]*dt;
   }
 
+  // Compute the length of the triangle edges
   length[0] = pow(x1-x2,2.) + pow(y1-y2,2.);
   length[1] = pow(x2-x3,2.) + pow(y2-y3,2.);
   length[2] = pow(x3-x1,2.) + pow(y3-y1,2.);
 
+  // Compute the length of the fictitious triangle edges
   length[3] = pow(pp1->c[0] - pp2->c[0],2.) + pow(pp1->c[1] - pp2->c[1],2.);
   length[4] = pow(pp2->c[0] - pp3->c[0],2.) + pow(pp2->c[1] - pp3->c[1],2.);
   length[5] = pow(pp3->c[0] - pp1->c[0],2.) + pow(pp3->c[1] - pp1->c[1],2.);
 
+  // Check if the edge lengths satisfy the extended tolerances
   double min = length[0];
   double max = length[0];
   int min_index = 0;
@@ -198,10 +215,12 @@ double MMG2D_minangle(MMG5_pMesh mesh, int k) {
   if (sqrt(min) < mesh->info.hmin/factor_min) return 0.;
   if (sqrt(max) > factor_max*mesh->info.hmax) return 0.;
 
-  // If the triangle is on a boundary, the tolerance is multiplied by two
+  // If the triangle is on a boundary, the angle tolerance is divided by two
+  // to extend remeshing close to boundaries where the mesh can be often squeezed
   if (mesh->info.bdy_adaptation) {
     if ((pp1->tag & MG_BDY) || (pp2->tag & MG_BDY) || (pp3->tag & MG_BDY)) coef = c1;
     else {
+      // The neighbours of boundary triangles also have a reduced tolerance
       for(int i = 0; i < 3; i++ ) {
         int k1 = adja[i]/3;
 
@@ -222,6 +241,7 @@ double MMG2D_minangle(MMG5_pMesh mesh, int k) {
     }
   }
 
+  // Minimal angle
   double cosA2 = ( length[(min_index+1)%3+3] + length[(min_index+2)%3+3] - length[min_index+3] ) / 
                  (2*pow(length[(min_index+1)%3+3],0.5)*pow(length[(min_index+2)%3+3],0.5));
 
@@ -872,8 +892,11 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
           ier = MMG2D_movedgpt(mesh,met,ilist,list,improve);
           if ( ier ) ns++;
         }
+        else if (mesh->info.isotropic_pt_relocation) {
+            ier = MMG2D_movintpt(mesh,met,ilist,list,improve);
+        }
         else {
-          if ( met->size == 3 && met->m && !mesh->info.isotropic)
+          if ( met->size == 3 && met->m )
             ier = MMG2D_movintpt_ani(mesh,met,ilist,list,improve);
           else
             ier = MMG2D_movintpt(mesh,met,ilist,list,improve);

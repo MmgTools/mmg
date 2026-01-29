@@ -528,8 +528,8 @@ typedef struct {
   MMG5_int      *br; /*!< list of based references to which an implicit surface can be attached */
   MMG5_int      isoref; /*!< isovalue reference in ls mode */
   MMG5_int      nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
-  int           isotropic; /*!< force the use of some isotropic functions */
-  int           bdy_adaptation;
+  int           isotropic_pt_relocation; /*!< force the use of the isotropic point relocation */
+  int           bdy_adaptation; /*!< extend the remeshing close to boundaries when limit_angle is activated */
   int           mem,npar,npari;
   int           nbr,nbri; /*!< number of based references for level-set (BC to which a material can be attached) */
   int           opnbdy; /*!< floating surfaces */

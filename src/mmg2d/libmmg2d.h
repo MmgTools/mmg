@@ -145,7 +145,7 @@ extern "C" {
     MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small disconnected components in level-set mode */
     MMG2D_IPARAM_nofem,             /*!< [1/0], Do not attempt to make the mesh suitable for finite-element computations */
     MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
-    MMG2D_IPARAM_isotropic,         /*!< [0/1], Avoid/enforce isotropic remeshing even with anisotropic metric */
+    MMG2D_IPARAM_isotropic_smoothing,       /*!< [0/1], Avoid/enforce isotropic smoothing even with anisotropic metric */
     MMG2D_DPARAM_limit_angle,       /*!< [val], Minimal angle in triangles under which remeshing is achieved */
     MMG2D_IPARAM_bdy_adaptation,    /*!< [1/0], Enable thorough adaptation close to the boundaries (if limit_angle < Pi) */
   };

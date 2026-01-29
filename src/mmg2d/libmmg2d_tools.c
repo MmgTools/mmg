@@ -149,7 +149,7 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           return 0;
         break;
       case 'b':
-        if ( !strcmp(argv[i],"-bdy-adaptation") ) {
+        if ( !strcmp(argv[i],"-bdyadaptation") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_bdy_adaptation,1) )
             return 0;
         }
@@ -199,10 +199,10 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           else if ( !strcmp(argv[i],"-hgrad") ) {
             param = MMG2D_DPARAM_hgrad;
           }
-          else if ( !strcmp(argv[i],"-hmin_factor") ) {
+          else if ( !strcmp(argv[i],"-hminfactor") ) {
             param = MMG2D_DPARAM_hmin_factor;
           }
-          else if ( !strcmp(argv[i],"-hmax_factor") ) {
+          else if ( !strcmp(argv[i],"-hmaxfactor") ) {
             param = MMG2D_DPARAM_hmax_factor;
           }
           else {
@@ -246,8 +246,8 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
                                      atoi(argv[i])) )
             return 0;
         }
-        else if ( !strcmp(argv[i],"-isotropic") ) {
-          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isotropic,1) )
+        else if ( !strcmp(argv[i],"-isotropicsmoothing") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isotropic_smoothing,1) )
             return 0;
         }
         else {
@@ -293,7 +293,7 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             }
           }
         }
-        else if ( !strcmp(argv[i],"-limit_angle") && ++i < argc ) {
+        else if ( !strcmp(argv[i],"-limitangle") && ++i < argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_limit_angle,atof(argv[i])) )
             return 0;
         }
