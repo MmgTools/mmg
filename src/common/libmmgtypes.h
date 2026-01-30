@@ -525,6 +525,7 @@ typedef struct {
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,lxreg,rmc;
   double        limit_angle; /*< Angle threshold for modifying triangles or not */
+  double        relative_min_tolerance, relative_max_tolerance; /* < Tolerance on the minimal and maximal element sizes */
   MMG5_int      *br; /*!< list of based references to which an implicit surface can be attached */
   MMG5_int      isoref; /*!< isovalue reference in ls mode */
   MMG5_int      nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
@@ -649,7 +650,7 @@ typedef struct {
                     \f$k^th\f$ quadrilaterals are adjacent and share their
                     edges \a j and \a l (resp.) */
   int       *ipar;  /*!< Store indices of the local parameters */
-  double    *velocity; /*!< Velocity of the vertices when Lagrangian resolution */
+  double    *lagrangian_velocity; /*!< Velocity of the vertices when Lagrangian resolution */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */

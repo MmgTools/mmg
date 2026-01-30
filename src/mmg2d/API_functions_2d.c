@@ -106,7 +106,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* [0/1]   ,avoid/enforce isotropic smoothing even with anisotropic metric */
   mesh->info.isotropic_pt_relocation = MMG5_OFF;
   /* limit angle to avoid remeshing some good triangles */
-  mesh->info.limit_angle = 5.*atan(1.);
+  mesh->info.limit_angle = -1.; // Deactivated when negative or > PI/3
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
   /* to adapt more thoroughly close to boundaries */
@@ -361,10 +361,10 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
       mesh->info.hausd    = val;
     break;
   case MMG2D_DPARAM_hmin_factor :
-    mesh->info.min[2] = val;
+    mesh->info.relative_min_tolerance = val;
     break;
   case MMG2D_DPARAM_hmax_factor :
-    mesh->info.max[2] = val;
+    mesh->info.relative_max_tolerance = val;
     break;
   case MMG2D_DPARAM_limit_angle :
     mesh->info.limit_angle = val;
