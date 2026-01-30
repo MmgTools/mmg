@@ -107,6 +107,9 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.isotropic_pt_relocation = MMG5_OFF;
   /* limit angle to avoid remeshing some good triangles */
   mesh->info.limit_angle = -1.; // Deactivated when negative or > PI/3
+  /* Tolerances on the element sizes when the limit_angle is activated */
+  mesh->info.relative_min_tolerance = 1.e10;
+  mesh->info.relative_max_tolerance = 1.e10;
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
   /* to adapt more thoroughly close to boundaries */
