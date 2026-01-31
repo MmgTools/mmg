@@ -63,11 +63,11 @@ MMG5_int MMG5_swapbin_int(MMG5_int sbin)
   MMG5_int out;
   char     *p_in = (char *) &sbin;
   char     *p_out = (char *) &out;
-  int8_t   i;
+  int      i, Nbytes=sizeof(MMG5_int);
 
-  for(i=0;i<8;i++)
+  for(i=0;i<Nbytes;i++)
   {
-    p_out[i] = p_in[7-i];
+    p_out[i] = p_in[Nbytes-1-i];
   }
 
   return out;
