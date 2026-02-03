@@ -61,7 +61,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
         fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
         return 0;
       }
-
+      
       /* Recreate adjacencies */
       if ( !MMG2D_hashTria(mesh) ) {
         fprintf(stdout,"  ## Hashing problem. Exit program.\n");
@@ -215,7 +215,6 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
     else if ( pt->flag == 7 ) continue;
     nc = 0;
-
     for (i=0; i<3; i++) {
       i1 = MMG5_iprv2[i];
       i2 = MMG5_inxt2[i];

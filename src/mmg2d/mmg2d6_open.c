@@ -215,8 +215,9 @@ int MMG2D_cuttri_lsopen_phi(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi){
       }
       phi->m[np] = 0.0;
       
-      /* Interpolate psi at newly created vertex */
+      /* Interpolate psi at newly created vertex, and possibly snap value */
       psi->m[np] = psi->m[ip0] + s*(psi->m[ip1]-psi->m[ip0]);
+      if ( fabs(psi->m[np]) < MMG5_EPS ) psi->m[np] = 0.0;
 
       MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
@@ -319,7 +320,7 @@ int MMG2D_cuttri_lsopen_psi(MMG5_pMesh mesh, MMG5_pSol phi, MMG5_pSol psi){
     }
   }
   if ( !nb ) return 1;
-  
+    
   /* Create the intersection points between the edges in the mesh and the 0 level set of psi */
   if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
@@ -471,7 +472,7 @@ int MMG2D_mmg2d6_open(MMG5_pMesh mesh, MMG5_pSol phi,MMG5_pSol psi) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
     return 0;
   }
-  
+
   if ( !MMG2D_cuttri_lsopen_psi(mesh,phi,psi) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
     return 0;
