@@ -78,6 +78,11 @@ int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int8_t i,double cr
   arean2 = MMG2D_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
   if ( cal2 > crit )  return 0;
 
+  /* Avoid creation of a flat triangle*/
+  if (fabs(arean1) < MMG2D_EPSD || fabs(arean2) < MMG2D_EPSD) {
+    return 0;
+  }
+
   if ( arean1 < 0.0 || arean2 < 0.0 || fabs((area1+area2)-(arean1+arean2)) > MMG2D_EPSD ) {
     if(mesh->info.ddebug) printf("  ## Warning: non convex configuration\n");
     return 0;
