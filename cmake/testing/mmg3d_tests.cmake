@@ -450,6 +450,22 @@ ADD_TEST(NAME mmg3d_hybrid-nsd1
   ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
   ${CTEST_OUTPUT_DIR}/mmg3d_hybrid-nsd.mesh)
 
+# fem 0/1/2
+ADD_TEST(NAME mmg3d_fem_0
+  COMMAND ${EXECUT_MMG3D} -v 5 -fem 0
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_fem0.o.meshb)
+
+ADD_TEST(NAME mmg3d_fem_1
+  COMMAND ${EXECUT_MMG3D} -v 5 -fem 1
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_fem1.o.meshb)
+
+ADD_TEST(NAME mmg3d_fem_2
+  COMMAND ${EXECUT_MMG3D} -v 5 -fem 2
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_fem2.o.meshb)
+
 ###############################################################################
 #####
 #####         Check Boundaries
@@ -853,7 +869,7 @@ endif()
 
 ADD_TEST(NAME test_para_tria
   COMMAND ${EXECUT_MMG3D}
-  -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
+  -ar 0.02 -fem 0 -nosizreq -hgradreq -1 -hgrad -1
   ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
   -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
   ${CTEST_OUTPUT_DIR}/proc0.o.mesh
