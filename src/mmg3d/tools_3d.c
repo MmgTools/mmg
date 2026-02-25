@@ -595,9 +595,7 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,dou
     /* Coordinates of the new tangent and normal */
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {  // function should not be used in that case
         memcpy(to,t0,3*sizeof(double));
-        /* returning 1 here may create memory error afterward because no (that
-         * is not filled) will be used */
-        return 0;
+        return 1;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
