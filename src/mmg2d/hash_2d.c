@@ -912,7 +912,7 @@ int MMG2D_oriEdg(MMG5_pMesh mesh) {
   adja = mesh->adja;
   nac  = 0;
   nre  = 0;
-      
+        
   /* Build adjacency table for edges (of opnbdy type only) */
   for (k=1; k<=mesh->na; k++) {
     pa  = &mesh->edge[k];
@@ -974,7 +974,7 @@ int MMG2D_oriEdg(MMG5_pMesh mesh) {
         ii   = adjaed[2*(k-1)+1+i] % 2;
         pa1  = &mesh->edge[kk];
         
-        if ( !kk || pa1->base > 0 ) continue;
+        if ( !kk || pa1->base >= 0 ) continue;
         pa1->base = -pa1->base;
       
         ipil++;
@@ -999,12 +999,13 @@ int MMG2D_oriEdg(MMG5_pMesh mesh) {
         }
       }
     }
-    
+        
     /* Find next unflagged edge */
     for (k=1; k<=mesh->na; k++) {
       if ( mesh->edge[k].base < 0 ) {
         ipil       = 1;
         pile[ipil] = k;
+        mesh->edge[k].base = -mesh->edge[k].base;
         break;
       }
     }
