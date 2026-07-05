@@ -119,6 +119,23 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   }
   while ( ++it < maxit && ns+nc+nsw >0 );
 
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    int phase = (typchk == 1) ?
+      MMG5_PHASE_GEOMETRIC_MESH :
+      MMG5_PHASE_COMPUTATIONAL_MESH;
+    if ( !mesh->info.progressCb(
+           mesh, phase, maxit-1, maxit,
+           (int64_t)ns, (int64_t)nc,
+           (int64_t)nsw, 0,
+           mesh->info.progressData) ) {
+      fprintf(stderr,
+        "\n  ## %s cancelled by user callback.\n",
+        (typchk == 1) ?
+        "Geometric mesh" : "Computational mesh");
+      return 0;
+    }
+  }
+
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
       fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %d iter.\n",nns,nnc,nnsw,it);
@@ -640,6 +657,15 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && (nc+ns+nsw+nm > 0) );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_ADAPTATION, maxit-1, maxit,
+                                (int64_t)ns, (int64_t)nc, (int64_t)nsw,
+                                (int64_t)nm, mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Remeshing cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   /* Last iterations of vertex relocation only */
   if ( !mesh->info.nomove ) {

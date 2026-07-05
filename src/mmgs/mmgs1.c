@@ -1340,6 +1340,15 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
   }
   while( ++it < maxit && nc+ns > 0 );
 
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_ADAPTATION, maxit-1, maxit,
+                                (int64_t)ns, (int64_t)nc, (int64_t)nf,
+                                (int64_t)nm, mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Remeshing cancelled by user callback.\n");
+      return 0;
+    }
+  }
+
   /* renumbering if available */
   if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
@@ -1385,6 +1394,15 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
     }
   }
   while( ++it < maxit && nm+nf > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, maxit-1, maxit,
+                                0, 0, (int64_t)nf, (int64_t)nm,
+                                mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   if ( !mesh->info.nomove ) {
     nm = movtri(mesh,met,5);
@@ -1481,6 +1499,23 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( it > 3 && MMG5_abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    int phase = (typchk == 1) ?
+      MMG5_PHASE_GEOMETRIC_MESH :
+      MMG5_PHASE_COMPUTATIONAL_MESH;
+    if ( !mesh->info.progressCb(
+           mesh, phase, maxit-1, maxit,
+           (int64_t)ns, (int64_t)nc,
+           (int64_t)nf, 0,
+           mesh->info.progressData) ) {
+      fprintf(stderr,
+        "\n  ## %s cancelled by user callback.\n",
+        (typchk == 1) ?
+        "Geometric mesh" : "Computational mesh");
+      return 0;
+    }
+  }
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )

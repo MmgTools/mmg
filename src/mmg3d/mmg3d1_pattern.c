@@ -339,6 +339,15 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
   }
   while( ++it < maxit && nc+ns > 0 );
 
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_ADAPTATION, maxit-1, maxit,
+                                (int64_t)ns, (int64_t)nc, (int64_t)nf,
+                                (int64_t)nm, mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Remeshing cancelled by user callback.\n");
+      return 0;
+    }
+  }
+
   if ( warn ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point in last"
             " call of MMG5_adpspl.\n",__func__);
@@ -410,6 +419,15 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     }
   }
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, maxit-1, maxit,
+                                0, 0, (int64_t)nf, (int64_t)nm,
+                                mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   if ( !mesh->info.nomove ) {
     nm = MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);

@@ -668,6 +668,7 @@ typedef struct MMG5_iNode_s {
  int           MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);
  void          MMG5_mmgUsage(char *prog);
+ int           MMG5_cliProgressBar(void*,int,int,int,int64_t,int64_t,int64_t,int64_t,void*);
  void          MMG5_paramUsage1(void);
  void          MMG5_paramUsage2(void);
  void          MMG5_2d3dUsage(void);

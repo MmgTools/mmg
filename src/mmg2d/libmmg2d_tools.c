@@ -373,6 +373,17 @@ int MMG2D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
         }
         break;
+      case 'p':
+        if ( !strcmp(argv[i],"-progress") ) {
+          if ( !MMG2D_Set_progressCallback(mesh,MMG5_cliProgressBar,NULL) )
+            return 0;
+        }
+        else {
+          fprintf(stderr,"\nUnrecognized option %s\n",argv[i]);
+          MMG2D_usage(argv[0]);
+          return 0;
+        }
+        break;
       case 'r':
         if ( !strcmp(argv[i],"-rmc") ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,0) )

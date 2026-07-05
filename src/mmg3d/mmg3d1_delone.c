@@ -627,6 +627,15 @@ int MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   }
   while( ++it < maxit && nw+nm+nf > 0 );
 
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, maxit-1, maxit,
+                                0, 0, (int64_t)nf, (int64_t)nm,
+                                mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+      return 0;
+    }
+  }
+
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
@@ -755,6 +764,15 @@ int MMG5_adpdel(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* wa
   }
   while( ++it < maxit && (noptim || nc+ns > 0) );
 
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_ADAPTATION, maxit-1, maxit,
+                                (int64_t)ns, (int64_t)nc, (int64_t)nf,
+                                (int64_t)nm, mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Remeshing cancelled by user callback.\n");
+      return 0;
+    }
+  }
+
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
       fprintf(stdout,"     %8"MMG5_PRId" filtered, %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed,"
@@ -840,6 +858,15 @@ int MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     }
   }
   while( ++it < maxit && nw+nm+nf > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, maxit-1, maxit,
+                                0, 0, (int64_t)nf, (int64_t)nm,
+                                mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   if ( !mesh->info.nomove ) {
     /* move for tria with qual<declicsurf, tetra with qual<declic, internal
@@ -958,6 +985,15 @@ int MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     }
   }
   while( ++it < maxit && nw+nm+nf > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, maxit-1, maxit,
+                                0, 0, (int64_t)nf, (int64_t)nm,
+                                mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   if ( !mesh->info.nomove ) {
     /* move for tria with qual<1., tetra with qual<1., internal move allowed,

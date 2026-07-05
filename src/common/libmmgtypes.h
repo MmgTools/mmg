@@ -40,6 +40,8 @@
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
 
+#define MMG5_HAS_PROGRESS_CALLBACK 1
+
 /**
  * \enum MMG5_progressPhase
  * \brief Phases reported by the progress callback.
@@ -56,7 +58,9 @@ enum MMG5_progressPhase {
  * \typedef MMG5_progressCallback
  * \brief Callback function type for progress reporting.
  *
- * Called at each iteration within a phase to report progress.
+ * Called at each iteration within a phase to report progress. If a phase
+ * converges before its maximum iteration count, a final completion callback may
+ * be emitted with iteration set to max_iterations-1.
  *
  * \param mesh       pointer to the mesh structure (opaque to caller).
  * \param phase      current phase (\ref MMG5_progressPhase).
@@ -70,9 +74,7 @@ enum MMG5_progressPhase {
  *
  * \return 1 to continue, 0 to request cancellation.
  *
- * \remark The callback is only invoked when set (non-NULL). When not set,
- * there is zero overhead — no function pointer check occurs in the hot
- * loops.
+ * \remark The callback is only invoked when set (non-NULL).
  */
 typedef int (*MMG5_progressCallback)(void *mesh,
                                      int phase,
