@@ -3263,6 +3263,24 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
       fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nf);
     }
 
+    /* Progress callback */
+    if ( mesh->info.progressCb ) {
+      int phase = (typchk == 1) ?
+        MMG5_PHASE_GEOMETRIC_MESH :
+        MMG5_PHASE_COMPUTATIONAL_MESH;
+      if ( !mesh->info.progressCb(
+             mesh, phase, it, maxit,
+             (int64_t)ns, (int64_t)nc,
+             (int64_t)nf, 0,
+             mesh->info.progressData) ) {
+        fprintf(stderr,
+          "\n  ## %s cancelled by user callback.\n",
+          (typchk == 1) ?
+          "Geometric mesh" : "Computational mesh");
+        return 0;
+      }
+    }
+
     if ( it > minit-1 && ( !(ns+nc) || (MMG5_abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
       ++lastit;
       if ( it > minit && lastit>2 ) break;
@@ -3279,6 +3297,23 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
     }
   }
   while ( ++it < maxit && (ns+nc+nf > 0 || lastit<3) );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    int phase = (typchk == 1) ?
+      MMG5_PHASE_GEOMETRIC_MESH :
+      MMG5_PHASE_COMPUTATIONAL_MESH;
+    if ( !mesh->info.progressCb(
+           mesh, phase, maxit-1, maxit,
+           (int64_t)ns, (int64_t)nc,
+           (int64_t)nf, 0,
+           mesh->info.progressData) ) {
+      fprintf(stderr,
+        "\n  ## %s cancelled by user callback.\n",
+        (typchk == 1) ?
+        "Geometric mesh" : "Computational mesh");
+      return 0;
+    }
+  }
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
