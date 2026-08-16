@@ -40,6 +40,7 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_lsAndMetric_hsiz
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
+  test_mmg3d_binary_multisols
   )
 
 # Additional tests that needs to download ci meshes
@@ -71,6 +72,7 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/binary-multisols.c
   )
 
 # Additional library tests that needs to download ci meshes to be run
@@ -153,6 +155,9 @@ FOREACH ( test_idx RANGE ${nbTests} )
 
 ENDFOREACH ( )
 
+TARGET_COMPILE_DEFINITIONS ( test_mmg3d_binary_multisols
+  PRIVATE MMG_MULTISOL_3D )
+
 # Following source files are needed to find non exported symbols on windows
 SET ( src_test_met3d
   ${PROJECT_SOURCE_DIR}/src/common/bezier.c
@@ -233,6 +238,10 @@ ADD_TEST(NAME libmmg3d_example6_io_1
   COMMAND  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example6_io
   "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
   "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "1"
+  )
+ADD_TEST(NAME test_mmg3d_binary_multisols
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_mmg3d_binary_multisols
+  "${CTEST_OUTPUT_DIR}/test_mmg3d_binary_multisols.solb"
   )
 ADD_TEST(NAME libmmg3d_lsOnly
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly

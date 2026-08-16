@@ -39,6 +39,7 @@ SET ( MMGS_LIB_TESTS
   libmmgs_lsAndMetric_optim
   libmmgs_lsAndMetric_hsiz
   libmmgs_lsAndMetric
+  test_mmgs_binary_multisols
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c
@@ -52,6 +53,7 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_optim.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/binary-multisols.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -124,6 +126,9 @@ FOREACH ( test_idx RANGE ${nbTests} )
 
 ENDFOREACH ( )
 
+TARGET_COMPILE_DEFINITIONS ( test_mmgs_binary_multisols
+  PRIVATE MMG_MULTISOL_S )
+
 ADD_TEST(NAME libmmgs_example0_a
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a
   "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
@@ -153,6 +158,10 @@ ADD_TEST(NAME libmmgs_example3_io_1
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3
   "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
   "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
+  )
+ADD_TEST(NAME test_mmgs_binary_multisols
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_mmgs_binary_multisols
+  "${CTEST_OUTPUT_DIR}/test_mmgs_binary_multisols.solb"
   )
 ADD_TEST(NAME libmmgs_lsOnly
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly

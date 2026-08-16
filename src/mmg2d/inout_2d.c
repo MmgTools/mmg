@@ -1650,7 +1650,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( !MG_VOK(ppt) )  continue;
 
     MMG2D_writeDoubleSol(sol,inm,bin,k,gmsh);
-    fprintf(inm,"\n");
+    if ( !bin )  fprintf(inm,"\n");
   }
 
   /* End file */
@@ -1741,7 +1741,7 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
         MMG2D_writeDoubleSol(psl,inm,bin,k,gmsh);
       }
     }
-    fprintf(inm,"\n");
+    if ( !bin )  fprintf(inm,"\n");
   }
 
   MMG5_saveSolAtTrianglesHeader( mesh,inm,(*sol)[0].ver,bin,&bpos,mesh->nsols,
@@ -1757,7 +1757,7 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
         MMG2D_writeDoubleSol(psl,inm,bin,k,gmsh);
       }
     }
-    fprintf(inm,"\n");
+    if ( !bin )  fprintf(inm,"\n");
   }
 
   MMG5_SAFE_FREE(type);
