@@ -40,6 +40,7 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_lsAndMetric_optim
   libmmg2d_lsAndMetric_hsiz
   libmmg2d_lsAndMetric
+  test_mmg2d_binary_multisols
   )
 
 # Additional tests that needs to download ci meshes
@@ -60,6 +61,7 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main_optim.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/binary-multisols.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -141,6 +143,9 @@ FOREACH ( test_idx RANGE ${nbTests} )
 
 ENDFOREACH ( )
 
+TARGET_COMPILE_DEFINITIONS ( test_mmg2d_binary_multisols
+  PRIVATE MMG_MULTISOL_2D )
+
 SET ( src_test_met2d
   ${PROJECT_SOURCE_DIR}/src/common/bezier.c
   ${PROJECT_SOURCE_DIR}/src/common/eigenv.c
@@ -194,6 +199,10 @@ ADD_TEST(NAME libmmg2d_ls0_io_1
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_ls_example0
   "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
   "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "1"
+  )
+ADD_TEST(NAME test_mmg2d_binary_multisols
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_mmg2d_binary_multisols
+  "${CTEST_OUTPUT_DIR}/test_mmg2d_binary_multisols.solb"
   )
 ADD_TEST(NAME libmmg2d_lsOnly
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsOnly

@@ -2335,7 +2335,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     if ( !MG_VOK(ppt) ) continue;
 
     MMG5_writeDoubleSol3D(mesh,met,inm,bin,k,1);
-    fprintf(inm,"\n");
+    if ( !bin )  fprintf(inm,"\n");
   }
 
   /* End file */
@@ -2403,7 +2403,7 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
         MMG5_writeDoubleSol3D(mesh,psl,inm,bin,k,0);
       }
     }
-    fprintf(inm,"\n");
+    if ( !bin )  fprintf(inm,"\n");
   }
 
   MMG5_saveSolAtTetrahedraHeader( mesh,inm,(*sol)[0].ver,bin,&bpos,mesh->nsols,
@@ -2419,7 +2419,7 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
         MMG5_writeDoubleSol3D(mesh,psl,inm,bin,k,0);
       }
     }
-    fprintf(inm,"\n");
+    if ( !bin )  fprintf(inm,"\n");
   }
 
 
