@@ -225,7 +225,7 @@ jobs:
         # Download scotch only if used
         if: matrix.scotch == 'on'
         run: |
-          git clone --branch v7.0.7 https://gitlab.inria.fr/scotch/scotch.git
+          git clone --branch v7.0.11 https://gitlab.inria.fr/scotch/scotch.git
           cmake -Sscotch -Bbuild-scotch -DCMAKE_INSTALL_PREFIX=scotch-install \
           -DBUILD_PTSCOTCH=OFF -DCMAKE_C_FLAGS=-fPIC ${{ env.FORT_FLG }} \
           ${{ env.BISON_FLG }}
