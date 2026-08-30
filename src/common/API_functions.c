@@ -324,6 +324,9 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
       case ( MMG5_FMT_Ply ):
         strcat(mesh->nameout,".ply");
         break;
+      case ( MMG5_FMT_Su2 ):
+        strcat(mesh->nameout,".su2");
+        break;
       case ( MMG5_FMT_MeditASCII ): default:
         strcat(mesh->nameout,".mesh");
         break;
@@ -371,6 +374,9 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
         break;
       case ( MMG5_FMT_Ply ):
         strcat(mesh->nameout,".o.ply");
+        break;
+      case ( MMG5_FMT_Su2 ):
+        strcat(mesh->nameout,".o.su2");
         break;
       case ( MMG5_FMT_MeditASCII ): default:
         strcat(mesh->nameout,".o.mesh");
@@ -876,6 +882,9 @@ int MMG5_Get_format( char *ptr, int fmt ) {
   else if ( !strncmp ( ptr,".ply",strlen(".ply") ) ) {
     return MMG5_FMT_Ply;
   }
+  else if ( !strncmp ( ptr,".su2",strlen(".su2") ) ) {
+    return MMG5_FMT_Su2;
+  }
 
   return defFmt;
 }
@@ -930,6 +939,9 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
     break;
   case MMG5_FMT_Ply:
     return "MMG5_FMT_Ply";
+    break;
+  case MMG5_FMT_Su2:
+    return "MMG5_FMT_Su2";
     break;
   default:
     return "MMG5_Unknown";

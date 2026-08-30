@@ -1221,6 +1221,10 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const c
 
   switch ( fmt ) {
 
+  case ( MMG5_FMT_Su2 ):
+    ier = MMG3D_loadSu2Mesh(mesh,tmp);
+    break;
+
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMG3D_loadMshMesh(mesh,sol,tmp);
     break;
@@ -2094,6 +2098,9 @@ int MMG3D_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
   int8_t savesolFile = 0;
 
   switch ( fmt ) {
+  case ( MMG5_FMT_Su2 ):
+    ier = MMG3D_saveSu2Mesh(mesh,tmp);
+    break;
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMG3D_saveMshMesh(mesh,sol,tmp);
     break;

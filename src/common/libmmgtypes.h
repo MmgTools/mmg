@@ -251,6 +251,7 @@ enum MMG5_Format {
   MMG5_FMT_Obj, /*!< Wavefront OBJ */
   MMG5_FMT_Stl, /*!< STL surface mesh */
   MMG5_FMT_Ply, /*!< PLY surface mesh */
+  MMG5_FMT_Su2, /*!< SU2 mesh */
   MMG5_FMT_Unknown /*!< Unrecognized */
 };
 
