@@ -94,6 +94,30 @@ static int readsTranslatedInput(const char *filename) {
   return valid;
 }
 
+static int readsTinyInput(const char *filename) {
+  const double coordinates[9] = {
+    0.,0.,0., 1.e-15,0.,0., 0.,1.e-15,0.
+  };
+  MMG5_pMesh mesh = NULL;
+  MMG5_int   np,nt,na;
+  FILE       *out = fopen(filename,"w");
+  int        valid = 0;
+
+  if ( !out ) return 0;
+  fprintf(out,"solid tiny_triangle\n");
+  if ( !writeFacet(out,coordinates) ) { fclose(out); return 0; }
+  fprintf(out,"endsolid tiny_triangle\n");
+  if ( fclose(out) ) return 0;
+
+  MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
+  if ( MMGS_loadStlMesh(mesh,filename) == 1 &&
+       MMGS_Get_meshSize(mesh,&np,&nt,&na) && np == 3 && nt == 1 && !na ) {
+    valid = 1;
+  }
+  MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
+  return valid;
+}
+
 static int checkMesh(MMG5_pMesh mesh) {
   MMG5_int np,nt,na;
 
@@ -105,7 +129,8 @@ int main(int argc,char **argv) {
   int        ier = 1;
 
   if ( argc != 6 || !writeInput(argv[1]) ||
-       !rejectsEmptyBinary(argv[4]) || !readsTranslatedInput(argv[5]) ) {
+       !rejectsEmptyBinary(argv[4]) || !readsTinyInput(argv[4]) ||
+       !readsTranslatedInput(argv[5]) ) {
     return 1;
   }
   MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);

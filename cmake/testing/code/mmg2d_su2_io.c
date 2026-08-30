@@ -28,7 +28,8 @@ static int writeInput(const char *filename) {
   fprintf(out,"NMARK= 2\n");
   fprintf(out,"MARKER_TAG= wall\nMARKER_ELEMS= 2\n");
   fprintf(out,"3 0 1\n3 1 2\n");
-  fprintf(out,"MARKER_TAG= mmg_ref_42\nMARKER_ELEMS= 2\n");
+  /* This explicit value must be reserved before `wall` gets its fallback. */
+  fprintf(out,"MARKER_TAG= mmg_ref_1\nMARKER_ELEMS= 2\n");
   fprintf(out,"3 3 4\n3 4 5\n");
   return !fclose(out);
 }
@@ -44,17 +45,17 @@ static int writeRejectedInput(const char *filename) {
 
 static int checkMesh(MMG5_pMesh mesh) {
   MMG5_int np,nt,nquad,na,a,b,ref;
-  int      isRidge,isRequired,nref1=0,nref42=0;
+  int      isRidge,isRequired,nref1=0,nref2=0;
 
   if ( !MMG2D_Get_meshSize(mesh,&np,&nt,&nquad,&na) ||
        np != 7 || nt != 1 || nquad != 1 || na != 4 ) return 0;
   while ( na-- ) {
     if ( !MMG2D_Get_edge(mesh,&a,&b,&ref,&isRidge,&isRequired) ) return 0;
     if ( ref == 1 ) ++nref1;
-    else if ( ref == 42 ) ++nref42;
+    else if ( ref == 2 ) ++nref2;
     else return 0;
   }
-  return nref1 == 2 && nref42 == 2;
+  return nref1 == 2 && nref2 == 2;
 }
 
 static int rejectsUnsupportedVolume(const char *filename) {

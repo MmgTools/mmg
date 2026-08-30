@@ -77,15 +77,16 @@ static int MMG2D_su2Vertex(long long value,MMG5_int *vertex) {
   return 1;
 }
 
-static int MMG2D_su2MarkerRef(const char *name,MMG5_int fallback,
-                              MMG5_int *reference) {
+static int MMG2D_su2MarkerRef(const char *name,MMG5_int *reference,
+                              unsigned char *isExplicit) {
   const char *number = name;
   char       *end;
   long long  parsed;
 
   if ( !strncmp(name,"mmg_ref_",8) ) number = name+8;
   if ( number == name ) {
-    *reference = fallback;
+    *reference = 0;
+    *isExplicit = 0;
     return 1;
   }
   errno = 0;
@@ -96,12 +97,56 @@ static int MMG2D_su2MarkerRef(const char *name,MMG5_int fallback,
     return 0;
   }
   *reference = (MMG5_int)parsed;
+  *isExplicit = 1;
+  return 1;
+}
+
+static int MMG2D_su2CompareRef(const void *left,const void *right) {
+  const MMG5_int a = *(const MMG5_int *)left;
+  const MMG5_int b = *(const MMG5_int *)right;
+
+  return (a > b)-(a < b);
+}
+
+/** Assign positive fallback references after every explicit reference is
+ * known.  Sorting the reserved values avoids quadratic behavior for files
+ * with many boundary markers. */
+static int MMG2D_su2ResolveMarkerRefs(MMG5_int *refs,
+                                     const unsigned char *isExplicit,
+                                     MMG5_int *reserved,MMG5_int nmark) {
+  MMG5_int candidate=1,i,nreserved=0,reservedIndex=0;
+
+  for ( i=0; i<nmark; ++i ) {
+    if ( isExplicit[i] && refs[i] > 0 ) reserved[nreserved++] = refs[i];
+  }
+  qsort(reserved,(size_t)nreserved,sizeof(MMG5_int),MMG2D_su2CompareRef);
+  for ( i=0; i<nmark; ++i ) {
+    if ( isExplicit[i] ) continue;
+    while ( reservedIndex < nreserved && reserved[reservedIndex] < candidate ) {
+      ++reservedIndex;
+    }
+    while ( reservedIndex < nreserved && reserved[reservedIndex] == candidate ) {
+      while ( reservedIndex < nreserved && reserved[reservedIndex] == candidate ) {
+        ++reservedIndex;
+      }
+      if ( candidate == MMG5_INTMAX ) return 0;
+      ++candidate;
+    }
+    refs[i] = candidate;
+    if ( candidate == MMG5_INTMAX ) {
+      for ( ++i; i<nmark; ++i ) if ( !isExplicit[i] ) return 0;
+      break;
+    }
+    ++candidate;
+  }
   return 1;
 }
 
 int MMG2D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename) {
   MMG2D_Su2Cell *cells = NULL;
-  MMG5_int      *edges = NULL,*edgeRefs = NULL;
+  MMG5_int      *edges = NULL,*edgeRefs = NULL,*markerRefs = NULL;
+  MMG5_int      *reservedRefs = NULL;
+  unsigned char *explicitRefs = NULL;
   double        *points = NULL;
   MMG5_int      ndim=0,nelem=0,np=0,nmark=0,nt=0,nquad=0,na=0;
   MMG5_int      i,j,edgeCapacity=0;
@@ -170,14 +215,19 @@ int MMG2D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename) {
   if ( status < 0 ) goto parse_error;
   if ( status > 0 ) {
     if ( MMG2D_su2Integer(line,"NMARK",&nmark) != 1 ) goto parse_error;
+    if ( nmark ) {
+      MMG5_SAFE_MALLOC(markerRefs,nmark,MMG5_int,goto memory_error);
+      MMG5_SAFE_MALLOC(reservedRefs,nmark,MMG5_int,goto memory_error);
+      MMG5_SAFE_MALLOC(explicitRefs,nmark,unsigned char,goto memory_error);
+    }
     for ( i=0; i<nmark; ++i ) {
-      MMG5_int markerElements,reference;
+      MMG5_int markerElements;
       char *equal;
       if ( MMG2D_su2Line(inm,line) < 1 || strncmp(line,"MARKER_TAG",10) ||
            !(equal=strchr(line,'=')) ) goto parse_error;
       strncpy(tag,MMG2D_su2Trim(equal+1),sizeof(tag)-1);
       tag[sizeof(tag)-1] = '\0';
-      if ( !MMG2D_su2MarkerRef(tag,i+1,&reference) ||
+      if ( !MMG2D_su2MarkerRef(tag,&markerRefs[i],&explicitRefs[i]) ||
            MMG2D_su2Line(inm,line) < 1 ||
            MMG2D_su2Integer(line,"MARKER_ELEMS",&markerElements) != 1 ) goto parse_error;
       if ( markerElements > MMG5_INTMAX-na ||
@@ -200,9 +250,14 @@ int MMG2D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename) {
         if ( !MMG2D_su2Vertex(a,&edges[2*na]) ||
              !MMG2D_su2Vertex(b,&edges[2*na+1]) ||
              edges[2*na] > np || edges[2*na+1] > np ) goto parse_error;
-        edgeRefs[na++] = reference;
+        /* Store the marker ordinal until explicit references from every
+         * marker are known and collision-free fallbacks can be assigned. */
+        edgeRefs[na++] = i;
       }
     }
+    if ( !MMG2D_su2ResolveMarkerRefs(markerRefs,explicitRefs,reservedRefs,
+                                     nmark) ) goto parse_error;
+    for ( i=0; i<na; ++i ) edgeRefs[i] = markerRefs[edgeRefs[i]];
   }
   for ( i=0; i<nelem; ++i ) {
     for ( j=0; j<(cells[i].type == 5 ? 3 : 4); ++j ) {
@@ -235,6 +290,9 @@ int MMG2D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_SAFE_FREE(points);
   MMG5_SAFE_FREE(edges);
   MMG5_SAFE_FREE(edgeRefs);
+  MMG5_SAFE_FREE(markerRefs);
+  MMG5_SAFE_FREE(reservedRefs);
+  MMG5_SAFE_FREE(explicitRefs);
   MMG5_check_readedMesh(mesh,0);
   return 1;
 parse_error:
@@ -245,6 +303,9 @@ memory_error:
   MMG5_SAFE_FREE(points);
   MMG5_SAFE_FREE(edges);
   MMG5_SAFE_FREE(edgeRefs);
+  MMG5_SAFE_FREE(markerRefs);
+  MMG5_SAFE_FREE(reservedRefs);
+  MMG5_SAFE_FREE(explicitRefs);
   return -1;
 }
 

@@ -157,6 +157,7 @@ ADD_TEST(NAME libmmgs_ply_io
   "${CTEST_OUTPUT_DIR}/libmmgs_ply_output.ply"
   "${CTEST_OUTPUT_DIR}/libmmgs_ply_output.plya"
   "${CTEST_OUTPUT_DIR}/libmmgs_ply_big_endian.ply"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_wide_output.ply"
   )
 
 ADD_TEST(NAME libmmgs_nastran_io

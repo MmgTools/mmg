@@ -12,8 +12,13 @@
 #include "mmg/mmgs/libmmgs.h"
 
 #include <stdio.h>
+#include <string.h>
 
-static MMG5_int wideReference(void) {
+static MMG5_int unsignedReference(void) {
+  return sizeof(MMG5_int) > 4 ? (MMG5_int)INT64_C(3000000000) : 42;
+}
+
+static MMG5_int rejectedReference(void) {
   return sizeof(MMG5_int) > 4 ? (MMG5_int)INT64_C(5000000000) : 42;
 }
 
@@ -26,13 +31,11 @@ static int writeInput(const char *filename) {
   fprintf(out,"element vertex 5\r\nproperty uchar red\r\n");
   fprintf(out,"property double z\r\nproperty double x\r\n");
   fprintf(out,"property double y\r\n");
-  fprintf(out,"element face 2\r\nproperty %s ref\r\n",
-          sizeof(MMG5_int) > 4 ? "int64" : "int");
+  fprintf(out,"element face 2\r\nproperty int ref\r\n");
   fprintf(out,"property list uchar int vertex_indices\r\nend_header\r\n");
   fprintf(out,"255 0 0 0\r\n255 0 1 0\r\n255 0 1 1\r\n");
   fprintf(out,"255 0 0 1\r\n255 1 0 0\r\n");
-  fprintf(out,"7 4 0 1 2 3\r\n%" MMG5_PRId " 3 0 3 4\r\n",
-          wideReference());
+  fprintf(out,"7 4 0 1 2 3\r\n42 3 0 3 4\r\n");
   return !fclose(out);
 }
 
@@ -66,7 +69,7 @@ static int readsLargeFloatCoordinates(const char *filename) {
 
 static int checkMesh(MMG5_pMesh mesh) {
   MMG5_int np,nt,na,v0,v1,v2,ref;
-  int      required,nref7 = 0,nrefWide = 0;
+  int      required,nref7 = 0,nref42 = 0;
 
   if ( !MMGS_Get_meshSize(mesh,&np,&nt,&na) || np != 5 || nt != 3 || na ) {
     return 0;
@@ -74,10 +77,54 @@ static int checkMesh(MMG5_pMesh mesh) {
   while ( nt-- ) {
     if ( !MMGS_Get_triangle(mesh,&v0,&v1,&v2,&ref,&required) ) return 0;
     if ( ref == 7 ) ++nref7;
-    else if ( ref == wideReference() ) ++nrefWide;
+    else if ( ref == 42 ) ++nref42;
     else return 0;
   }
-  return nref7 == 2 && nrefWide == 1;
+  return nref7 == 2 && nref42 == 1;
+}
+
+static int checksWideReferencePolicy(const char *input,const char *output) {
+  MMG5_pMesh mesh = NULL,reloaded = NULL;
+  MMG5_int   v0,v1,v2,ref;
+  int        required,valid = 0;
+  FILE       *out;
+  char       line[256];
+  int        hasUintRef = 0;
+
+  if ( sizeof(MMG5_int) <= 4 ) return 1;
+  out = fopen(input,"w");
+  if ( !out ) return 0;
+  fprintf(out,"ply\nformat ascii 1.0\nelement vertex 3\n");
+  fprintf(out,"property double x\nproperty double y\nproperty double z\n");
+  fprintf(out,"element face 1\nproperty int64 ref\n");
+  fprintf(out,"property list uchar int vertex_indices\nend_header\n");
+  fprintf(out,"0 0 0\n1 0 0\n0 1 0\n%" MMG5_PRId " 3 0 1 2\n",
+          unsignedReference());
+  if ( fclose(out) ) return 0;
+
+  MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
+  if ( MMGS_loadPlyMesh(mesh,input) == 1 &&
+       MMGS_Get_triangle(mesh,&v0,&v1,&v2,&ref,&required) &&
+       ref == unsignedReference() && MMGS_savePlyMesh(mesh,output) == 1 ) {
+    /* Values above INT32_MAX must use standard PLY "uint", not "int64". */
+    out = fopen(output,"r");
+    if ( out ) {
+      while ( fgets(line,sizeof(line),out) ) {
+        if ( !strcmp(line,"property uint ref\n") ) hasUintRef = 1;
+        if ( !strcmp(line,"end_header\n") ) break;
+      }
+      fclose(out);
+    }
+    MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&reloaded,MMG5_ARG_end);
+    if ( hasUintRef && MMGS_loadPlyMesh(reloaded,output) == 1 &&
+         MMGS_Get_triangle(reloaded,&v0,&v1,&v2,&ref,&required) &&
+         ref == unsignedReference() &&
+         MMGS_Set_triangle(mesh,v0,v1,v2,rejectedReference(),1) &&
+         MMGS_savePlyMesh(mesh,output) == 0 ) valid = 1;
+  }
+  MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh,&reloaded,MMG5_ARG_end);
+  MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
+  return valid;
 }
 
 static int rejectsBigEndian(const char *filename) {
@@ -95,8 +142,9 @@ int main(int argc,char **argv) {
   MMG5_pMesh mesh = NULL;
   int        ier = 1;
 
-  if ( argc != 5 || !writeInput(argv[1]) || !rejectsBigEndian(argv[4]) ||
-       !readsLargeFloatCoordinates(argv[4]) ) {
+  if ( argc != 6 || !writeInput(argv[1]) || !rejectsBigEndian(argv[4]) ||
+       !readsLargeFloatCoordinates(argv[4]) ||
+       !checksWideReferencePolicy(argv[4],argv[5]) ) {
     return 1;
   }
   MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);

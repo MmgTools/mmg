@@ -363,15 +363,14 @@ static int MMGS_plyWriteDouble(FILE *out,double value) {
 int MMGS_savePlyMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pPoint point;
   MMG5_pTria  triangle;
-  MMG5_int    i,np=0,nt=0;
+  MMG5_int    i,np=0,nt=0,minRef=0,maxRef=0;
   const char  *extension;
   FILE        *out;
-  int         ascii,wideIndex = 0,wideRef = 0;
+  int         ascii,unsignedIndex = 0,unsignedRef = 0;
 
   if ( !filename ) return 0;
   extension = strrchr(filename,'.');
   ascii = extension && !strcmp(extension,".plya");
-  if ( !(out=fopen(filename,ascii ? "w" : "wb")) ) return 0;
   for ( i=1; i<=mesh->np; ++i ) {
     point = &mesh->point[i];
     point->tmp = MG_VOK(point) ? ++np : 0;
@@ -382,22 +381,35 @@ int MMGS_savePlyMesh(MMG5_pMesh mesh,const char *filename) {
          mesh->point[triangle->v[1]].tmp &&
          mesh->point[triangle->v[2]].tmp ) {
       ++nt;
-      if ( sizeof(MMG5_int) > 4 &&
-           (triangle->ref < INT32_MIN || triangle->ref > INT32_MAX) ) {
-        wideRef = 1;
-      }
+      if ( nt == 1 || triangle->ref < minRef ) minRef = triangle->ref;
+      if ( nt == 1 || triangle->ref > maxRef ) maxRef = triangle->ref;
     }
   }
-  /* PLY's `int` type is exactly 32 bits.  Advertise and write 64-bit values
-   * whenever an MMG5_int cannot be represented by that property type. */
-  wideIndex = sizeof(MMG5_int) > 4 && np > INT32_MAX;
+  /* PLY 1.0 has no 64-bit integer scalar type.  Use its unsigned 32-bit type
+   * when possible and reject values that cannot be represented exactly.  The
+   * reader remains permissive toward nonstandard int64/uint64 input files. */
+  if ( (uint64_t)np > (uint64_t)UINT32_MAX+1 ) {
+    fprintf(stderr,"  ## Error: PLY output cannot represent more than "
+            "2^32 vertices.\n");
+    return 0;
+  }
+  unsignedIndex = np > INT32_MAX;
+  if ( minRef < INT32_MIN || maxRef > INT32_MAX ) {
+    if ( minRef < 0 || (uint64_t)maxRef > UINT32_MAX ) {
+      fprintf(stderr,"  ## Error: PLY output cannot represent references "
+              "outside the signed or unsigned 32-bit range.\n");
+      return 0;
+    }
+    unsignedRef = 1;
+  }
+  if ( !(out=fopen(filename,ascii ? "w" : "wb")) ) return 0;
   fprintf(out,"ply\nformat %s 1.0\ncomment written by MMGS\n",
           ascii ? "ascii" : "binary_little_endian");
   fprintf(out,"element vertex %" MMG5_PRId "\nproperty double x\n"
           "property double y\nproperty double z\n",np);
   fprintf(out,"element face %" MMG5_PRId "\nproperty list uchar %s "
           "vertex_indices\nproperty %s ref\nend_header\n",nt,
-          wideIndex ? "int64" : "int",wideRef ? "int64" : "int");
+          unsignedIndex ? "uint" : "int",unsignedRef ? "uint" : "int");
   for ( i=1; i<=mesh->np; ++i ) {
     point = &mesh->point[i];
     if ( !point->tmp ) continue;
@@ -427,12 +439,13 @@ int MMGS_savePlyMesh(MMG5_pMesh mesh,const char *filename) {
     }
     if ( !MMGS_plyWriteBytes(out,3,1) ) goto error;
     for ( j=0; j<3; ++j ) {
-      if ( !MMGS_plyWriteBytes(out,(uint64_t)indices[j],wideIndex ? 8 : 4) ) {
+      if ( !MMGS_plyWriteBytes(out,(uint64_t)indices[j],4) ) {
         goto error;
       }
     }
-    if ( !MMGS_plyWriteBytes(out,(uint64_t)(int64_t)triangle->ref,
-                             wideRef ? 8 : 4) ) goto error;
+    if ( !MMGS_plyWriteBytes(out,(uint64_t)(int64_t)triangle->ref,4) ) {
+      goto error;
+    }
   }
   return !fclose(out);
 error:

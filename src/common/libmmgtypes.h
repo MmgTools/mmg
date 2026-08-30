@@ -248,8 +248,7 @@ enum MMG5_Format {
   MMG5_FMT_VtkVtp, /*!< VTK vtp */
   MMG5_FMT_VtkVtk, /*!< VTK vtk */
   MMG5_FMT_Tetgen, /*!< Tetgen or Triangle */
-  /* Keep this public value stable for source and binary compatibility. */
-  MMG5_FMT_Unknown = 10, /*!< Unrecognized */
+  MMG5_FMT_Unknown, /*!< Unrecognized; keep at value 10 for ABI stability */
   MMG5_FMT_Obj, /*!< Wavefront OBJ */
   MMG5_FMT_Stl, /*!< STL surface mesh */
   MMG5_FMT_Ply, /*!< PLY surface mesh */

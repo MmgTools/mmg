@@ -105,7 +105,7 @@ static uint64_t MMGS_stlHash(int64_t x,int64_t y,int64_t z) {
 
 /** Weld facet vertices and transfer the resulting indexed mesh to MMGS. */
 static int MMGS_stlBuildMesh(MMG5_pMesh mesh,const MMGS_StlFacets *facets) {
-  double      *points = NULL,tolerance,min[3],max[3],scale = 1.0;
+  double      *points = NULL,tolerance,min[3],max[3],scale = 0.0;
   MMG5_int    *triangles = NULL,*heads = NULL,*next = NULL,*map = NULL;
   int64_t     *cells = NULL,q[3];
   unsigned char *used = NULL;
@@ -140,7 +140,13 @@ static int MMGS_stlBuildMesh(MMG5_pMesh mesh,const MMGS_StlFacets *facets) {
     if ( !isfinite(extent) ) return -1;
     scale = MG_MAX(scale,extent);
   }
+  /* A unit-sized lower bound would collapse otherwise valid meshes whose
+   * coordinates and extent are both very small.  Degenerate, zero-extent
+   * facet sets cannot produce a surface mesh and would also make the spatial
+   * hash quantization divide by zero. */
+  if ( scale <= 0.0 ) return -1;
   tolerance = 64.0*DBL_EPSILON*scale;
+  if ( tolerance <= 0.0 ) return -1;
 
   MMG5_SAFE_MALLOC(points,3*nraw,double,goto memory_error);
   MMG5_SAFE_MALLOC(triangles,nraw,MMG5_int,goto memory_error);

@@ -30,7 +30,8 @@ static int writeNativeInput(const char *filename) {
   fprintf(out,"13 4 6 5 7 9 8 82\n");
   fprintf(out,"NMARK= 2\n");
   fprintf(out,"MARKER_TAG= wall\nMARKER_ELEMS= 1\n5 0 2 1\n");
-  fprintf(out,"MARKER_TAG= mmg_ref_42\nMARKER_ELEMS= 1\n9 4 5 8 7\n");
+  /* This explicit value must be reserved before `wall` gets its fallback. */
+  fprintf(out,"MARKER_TAG= mmg_ref_1\nMARKER_ELEMS= 1\n9 4 5 8 7\n");
   return !fclose(out);
 }
 
@@ -75,9 +76,9 @@ static int checkNativeMesh(MMG5_pMesh mesh) {
     return 0;
   }
   if ( !MMG3D_Get_triangle(mesh,&v[0],&v[1],&v[2],&ref,&required) ||
-       ref != 1 ) return 0;
+       ref != 2 ) return 0;
   return MMG3D_Get_quadrilateral(mesh,&v[0],&v[1],&v[2],&v[3],&ref,
-                                 &required) && ref == 42;
+                                 &required) && ref == 1;
 }
 
 static void sort3(MMG5_int value[3]) {
