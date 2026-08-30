@@ -130,12 +130,24 @@ static int MMGS_objRefIsUsed(const MMGS_ObjGroups *groups,MMG5_int ref) {
   return 0;
 }
 
+/** Decode an explicit mmg_ref_<integer> group name. */
+static int MMGS_objExplicitRef(const char *name,MMG5_int *ref) {
+  char      *end;
+  long long value;
+
+  if ( strncmp(name,"mmg_ref_",8) ) return 0;
+  errno = 0;
+  value = strtoll(name+8,&end,10);
+  if ( errno || end == name+8 || *end ||
+       (sizeof(MMG5_int) == 4 &&
+        (value < INT32_MIN || value > INT32_MAX)) ) return 0;
+  *ref = (MMG5_int)value;
+  return 1;
+}
+
 /** Get a stable reference for a group name. */
 static int MMGS_objGroupRef(MMGS_ObjGroups *groups,const char *name,
                             MMG5_int *ref) {
-  const char *number;
-  char       *end;
-  long long  value;
   size_t     i,length;
 
   for ( i=0; i<groups->size; ++i ) {
@@ -145,20 +157,13 @@ static int MMGS_objGroupRef(MMGS_ObjGroups *groups,const char *name,
     }
   }
 
-  *ref = 0;
-  number = name;
-  if ( !strncmp(name,"mmg_ref_",8) ) number = name+8;
-  if ( number != name ) {
-    errno = 0;
-    value = strtoll(number,&end,10);
-    if ( !errno && end != number && !*end &&
-         (sizeof(MMG5_int) > 4 || (value >= INT32_MIN && value <= INT32_MAX)) ) {
-      *ref = (MMG5_int)value;
+  if ( !MMGS_objExplicitRef(name,ref) ) {
+    while ( MMGS_objRefIsUsed(groups,groups->nextRef) ) {
+      if ( groups->nextRef == MMG5_INTMAX ) return 0;
+      ++groups->nextRef;
     }
-  }
-  if ( number == name || (*ref == 0 && strcmp(number,"0")) ) {
-    while ( MMGS_objRefIsUsed(groups,groups->nextRef) ) ++groups->nextRef;
-    *ref = groups->nextRef++;
+    *ref = groups->nextRef;
+    if ( groups->nextRef < MMG5_INTMAX ) ++groups->nextRef;
   }
 
   if ( groups->size == groups->capacity ) {
@@ -239,11 +244,25 @@ int MMGS_loadObjMesh(MMG5_pMesh mesh,const char *filename) {
       }
       nt += nvertex-2;
     }
+    else if ( (payload = MMGS_objPayload(line,"g")) ||
+              (payload = MMGS_objPayload(line,"usemtl")) ) {
+      MMG5_int explicitRef;
+
+      payload = MMGS_objGroupName(payload);
+      /* Reserve every explicit reference before assigning fallbacks.  This
+       * prevents an earlier arbitrary group from silently taking mmg_ref_N. */
+      if ( MMGS_objExplicitRef(payload,&explicitRef) &&
+           !MMGS_objGroupRef(&groups,payload,&explicitRef) ) {
+        status = -1;
+        break;
+      }
+    }
   }
   if ( status < 0 || ferror(inm) || !np || !nt ) {
     fprintf(stderr,"  ## Error: invalid or empty OBJ mesh in %s.\n",filename);
     fclose(inm);
     MMG5_SAFE_FREE(line);
+    MMGS_objFreeGroups(&groups);
     return -1;
   }
 
@@ -251,6 +270,7 @@ int MMGS_loadObjMesh(MMG5_pMesh mesh,const char *filename) {
   if ( !MMGS_Set_meshSize(mesh,np,nt,0) ) {
     fclose(inm);
     MMG5_SAFE_FREE(line);
+    MMGS_objFreeGroups(&groups);
     return -1;
   }
 

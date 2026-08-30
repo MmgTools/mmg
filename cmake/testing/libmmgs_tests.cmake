@@ -148,6 +148,8 @@ ADD_TEST(NAME libmmgs_stl_io
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_input.stla"
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stl"
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stla"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_empty.stl"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_translated.stla"
   )
 ADD_TEST(NAME libmmgs_ply_io
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_ply_io

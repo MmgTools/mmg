@@ -37,8 +37,10 @@ static float MMGS_stlFloat(const unsigned char *bytes) {
 static int MMGS_stlAppend(MMGS_StlFacets *facets,const double coordinates[9]) {
   if ( facets->size == facets->capacity ) {
     size_t oldCapacity = facets->capacity;
-    size_t newCapacity = oldCapacity ? 2*oldCapacity : 256;
+    size_t newCapacity;
 
+    if ( oldCapacity > SIZE_MAX/2 ) return 0;
+    newCapacity = oldCapacity ? 2*oldCapacity : 256;
     if ( newCapacity > SIZE_MAX/(9*sizeof(double)) ) return 0;
     MMG5_SAFE_REALLOC(facets->coordinates,9*oldCapacity,9*newCapacity,
                       double,"STL facets",return 0);
@@ -56,7 +58,8 @@ static int MMGS_stlReadBinary(FILE *inm,uint32_t nfacet,
   uint32_t      k;
   int           i;
 
-  if ( fseek(inm,84,SEEK_SET) ) return 0;
+  /* An STL with no facets cannot describe an MMGS mesh. */
+  if ( !nfacet || fseek(inm,84,SEEK_SET) ) return 0;
   for ( k=0; k<nfacet; ++k ) {
     if ( fread(record,sizeof(record),1,inm) != 1 ) return 0;
     for ( i=0; i<9; ++i ) {
@@ -106,20 +109,37 @@ static int MMGS_stlBuildMesh(MMG5_pMesh mesh,const MMGS_StlFacets *facets) {
   MMG5_int    *triangles = NULL,*heads = NULL,*next = NULL,*map = NULL;
   int64_t     *cells = NULL,q[3];
   unsigned char *used = NULL;
-  size_t      nraw = 3*facets->size,nhash = 2*nraw+1,i,j,npoint = 0;
+  size_t      nraw,nhash,i,j,npoint = 0;
   MMG5_int    ntriangle = 0,nused = 0;
   int         axis,dx,dy,dz;
 
-  for ( axis=0; axis<3; ++axis ) min[axis] = max[axis] = facets->coordinates[axis];
+  if ( !facets->size || !facets->coordinates ||
+       facets->size > SIZE_MAX/3 || facets->size > (size_t)MMG5_INTMAX/3 ) {
+    return -1;
+  }
+  nraw = 3*facets->size;
+  if ( nraw > (SIZE_MAX-1)/2 ) return -1;
+  nhash = 2*nraw+1;
+
+  for ( axis=0; axis<3; ++axis ) {
+    min[axis] = max[axis] = facets->coordinates[axis];
+  }
   for ( i=0; i<nraw; ++i ) {
     for ( axis=0; axis<3; ++axis ) {
       double value = facets->coordinates[3*i+axis];
       min[axis] = MG_MIN(min[axis],value);
       max[axis] = MG_MAX(max[axis],value);
-      scale = MG_MAX(scale,fabs(value));
     }
   }
-  for ( axis=0; axis<3; ++axis ) scale = MG_MAX(scale,max[axis]-min[axis]);
+  /* Base welding on the mesh extent, not its distance from the origin.  An
+   * absolute-coordinate scale would merge unrelated vertices after a large
+   * translation of an otherwise unchanged mesh. */
+  for ( axis=0; axis<3; ++axis ) {
+    double extent = max[axis]-min[axis];
+
+    if ( !isfinite(extent) ) return -1;
+    scale = MG_MAX(scale,extent);
+  }
   tolerance = 64.0*DBL_EPSILON*scale;
 
   MMG5_SAFE_MALLOC(points,3*nraw,double,goto memory_error);

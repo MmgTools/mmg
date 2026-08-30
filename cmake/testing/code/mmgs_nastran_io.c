@@ -17,7 +17,9 @@ static int writeInput(const char *filename) {
   FILE *out = fopen(filename,"w");
 
   if ( !out ) return 0;
+  fprintf(out,"$MMG_REFERENCE is an ordinary comment\n");
   fprintf(out,"$MMG_REF,1,-7\nBEGIN BULK\n");
+  fprintf(out,"ENDDATAX\n");
   fprintf(out,"GRID,10,,0.0,0.0,0.0\n");
   fprintf(out,"%-8s%8d%8s%8s%8s%8s\n","GRID",20,"","1.0","0.0","0.0");
   fprintf(out,"%-8s%8d%8s%8s%8s%8s\n","GRID",30,"","0.0","1.0","0.0");
@@ -28,7 +30,7 @@ static int writeInput(const char *filename) {
   fprintf(out,"CTRIAR,1,1,10,20,30\n");
   fprintf(out,"%-8s%8d%8d%8d%8d%8d%8d\n",
           "CQUADR",2,42,20,40,50,30);
-  fprintf(out,"ENDDATA\n");
+  fprintf(out,"enddata\n");
   return !fclose(out);
 }
 

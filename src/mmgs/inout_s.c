@@ -1687,7 +1687,8 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
   if ( ier && savesolFile ) {
     /* Medit or tetgen output: save the solution in a .sol file */
     if ( sol && sol->np ) {
-      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return 0);
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,
+                       { MMG5_SAFE_FREE(tmp); return 0; });
       strcpy(soltmp,solnameptr);
 
       if ( MMGS_saveSol(mesh,sol,soltmp) == -1) {
@@ -1698,5 +1699,6 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
     }
   }
 
+  MMG5_SAFE_FREE(tmp);
   return ier;
 }

@@ -2474,7 +2474,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  LIBMMG3D_EXPORT  int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
- * \brief Load a three-dimensional mesh in SU2 format.
+ * \brief Load a three-dimensional, single-zone mesh in SU2 format.
  * \param mesh pointer to the mesh structure.
  * \param filename name of the file to load.
  * \return 0 on failure, 1 otherwise.
@@ -2605,7 +2605,7 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   LIBMMG3D_EXPORT int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
- * \brief Save a three-dimensional mesh in SU2 format.
+ * \brief Save a three-dimensional, single-zone mesh in SU2 format.
  * \param mesh pointer to the mesh structure.
  * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.

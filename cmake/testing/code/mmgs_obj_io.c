@@ -27,7 +27,8 @@ static int writeInput(const char *filename) {
   fprintf(out,"mtllib ignored-input.mtl\n");
   fprintf(out,"usemtl skin\n");
   fprintf(out,"f 1/1 2/2 3/3 4/4\n");
-  fprintf(out,"g mmg_ref_42\n");
+  /* This explicit reference occurs after `skin`; it must still be reserved. */
+  fprintf(out,"g mmg_ref_1\n");
   /* An active OBJ group is authoritative over a different material. */
   fprintf(out,"usemtl paint\n");
   fprintf(out,"f -5//1 -2//1 -1//1\n");
@@ -38,7 +39,7 @@ static int writeInput(const char *filename) {
 
 static int checkMesh(MMG5_pMesh mesh) {
   MMG5_int np,nt,na,v0,v1,v2,ref;
-  int      required,nref1 = 0,nref42 = 0,nrefMinus7 = 0;
+  int      required,nref1 = 0,nref2 = 0,nrefMinus7 = 0;
 
   if ( !MMGS_Get_meshSize(mesh,&np,&nt,&na) || np != 5 || nt != 4 || na ) {
     return 0;
@@ -46,11 +47,11 @@ static int checkMesh(MMG5_pMesh mesh) {
   while ( nt-- ) {
     if ( !MMGS_Get_triangle(mesh,&v0,&v1,&v2,&ref,&required) ) return 0;
     if ( ref == 1 ) ++nref1;
-    else if ( ref == 42 ) ++nref42;
+    else if ( ref == 2 ) ++nref2;
     else if ( ref == -7 ) ++nrefMinus7;
     else return 0;
   }
-  return nref1 == 2 && nref42 == 1 && nrefMinus7 == 1;
+  return nref1 == 1 && nref2 == 2 && nrefMinus7 == 1;
 }
 
 static int checkOutputFiles(const char *objName,const char *mtlName) {
@@ -58,7 +59,7 @@ static int checkOutputFiles(const char *objName,const char *mtlName) {
   char       line[256],expected[256];
   FILE       *in;
   long long  ref;
-  int        hasLibrary=0,hasUseMtl=0,nref1=0,nref42=0,nrefMinus7=0;
+  int        hasLibrary=0,hasUseMtl=0,nref1=0,nref2=0,nrefMinus7=0;
 
   basename = basename ? basename+1 : mtlName;
   if ( snprintf(expected,sizeof(expected),"mtllib %s",basename) < 0 ) return 0;
@@ -74,14 +75,14 @@ static int checkOutputFiles(const char *objName,const char *mtlName) {
   while ( fgets(line,sizeof(line),in) ) {
     if ( sscanf(line,"newmtl mmg_ref_%lld",&ref) != 1 ) continue;
     if ( ref == 1 ) ++nref1;
-    else if ( ref == 42 ) ++nref42;
+    else if ( ref == 2 ) ++nref2;
     else if ( ref == -7 ) ++nrefMinus7;
     else {
       fclose(in);
       return 0;
     }
   }
-  return !fclose(in) && nref1 == 1 && nref42 == 1 && nrefMinus7 == 1;
+  return !fclose(in) && nref1 == 1 && nref2 == 1 && nrefMinus7 == 1;
 }
 
 int main(int argc,char **argv) {

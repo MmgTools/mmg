@@ -14,6 +14,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <math.h>
 
 #define MMG3D_SU2_LINE_LENGTH 4096
 
@@ -276,7 +277,10 @@ int MMG3D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename) {
       for ( i=0; i<np; ++i ) {
         if ( MMG3D_su2Line(inm,line) < 1 ||
              sscanf(line,"%lf %lf %lf",&points[3*i],&points[3*i+1],
-                    &points[3*i+2]) != 3 ) goto parse_error;
+                    &points[3*i+2]) != 3 || !isfinite(points[3*i]) ||
+             !isfinite(points[3*i+1]) || !isfinite(points[3*i+2]) ) {
+          goto parse_error;
+        }
       }
       havePoints = 1;
     }

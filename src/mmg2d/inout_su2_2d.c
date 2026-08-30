@@ -14,6 +14,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <math.h>
 
 #define MMG2D_SU2_LINE_LENGTH 4096
 
@@ -154,7 +155,8 @@ int MMG2D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename) {
       MMG5_SAFE_MALLOC(points,2*np,double,goto memory_error);
       for ( i=0; i<np; ++i ) {
         if ( MMG2D_su2Line(inm,line) < 1 ||
-             sscanf(line,"%lf %lf",&points[2*i],&points[2*i+1]) != 2 ) {
+             sscanf(line,"%lf %lf",&points[2*i],&points[2*i+1]) != 2 ||
+             !isfinite(points[2*i]) || !isfinite(points[2*i+1]) ) {
           goto parse_error;
         }
       }

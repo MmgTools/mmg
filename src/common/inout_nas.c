@@ -15,7 +15,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
-#include <strings.h>
 
 #define MMG5_NAS_MAX_FIELDS 24
 #define MMG5_NAS_FIELD_SIZE 64
@@ -71,6 +70,18 @@ static void MMG5_nasUpper(char *text) {
     *text = (char)toupper((unsigned char)*text);
     ++text;
   }
+}
+
+/** Portable case-insensitive comparison for Nastran keywords. */
+static int MMG5_nasEqualNoCase(const char *left,const char *right) {
+  while ( *left && *right ) {
+    if ( toupper((unsigned char)*left) != toupper((unsigned char)*right) ) {
+      return 0;
+    }
+    ++left;
+    ++right;
+  }
+  return !*left && !*right;
 }
 
 static int MMG5_nasKnownCard(const char *name) {
@@ -293,7 +304,7 @@ static int MMG5_nasMetadata(char *line,MMG5_NastranRef **refs,
   long long rawPid,rawRef;
   char      extra;
 
-  if ( strncmp(line,"$MMG_REF",8) ) return 1;
+  if ( strncmp(line,"$MMG_REF,",9) ) return 1;
   if ( sscanf(line,"$MMG_REF,%lld,%lld %c",&rawPid,&rawRef,&extra) != 2 ||
        rawPid <= 0 ||
        (sizeof(MMG5_int) == 4 &&
@@ -421,14 +432,14 @@ int MMG5_loadNastranMeshData(const char *filename,MMG5_NastranMesh *nas) {
   if ( !filename || !(inm=fopen(filename,"r")) ) return 0;
   while ( (status=MMG5_nasReadLine(inm,&line,&capacity)) > 0 ) {
     trimmed = MMG5_nasTrim(line);
-    if ( !strncmp(trimmed,"$MMG_REF",8) ) {
+    if ( !strncmp(trimmed,"$MMG_REF,",9) ) {
       if ( !MMG5_nasMetadata(trimmed,&refs,&nref,&refCapacity) ) {
         status = -1; break;
       }
       continue;
     }
     if ( *trimmed == '$' ) continue;
-    if ( !strncasecmp(trimmed,"ENDDATA",7) ) break;
+    if ( MMG5_nasEqualNoCase(trimmed,"ENDDATA") ) break;
     if ( !MMG5_nasPhysicalCard(line,&card,nas,&pointCapacity,
                                &elementCapacity) ) {
       status = -1; break;

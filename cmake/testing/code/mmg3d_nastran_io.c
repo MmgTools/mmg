@@ -54,6 +54,7 @@ static int writeMixedInput(const char *filename) {
   };
 
   if ( !out ) return 0;
+  fprintf(out,"$MMG_REFERENCE is an ordinary comment\n");
   fprintf(out,"$MMG_REF,1,101\n$MMG_REF,2,102\n");
   fprintf(out,"$MMG_REF,3,103\n$MMG_REF,4,104\nBEGIN BULK\n");
   for ( i=0; i<23; ++i ) {
