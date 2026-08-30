@@ -1802,6 +1802,26 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *
 LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
 
 /**
+ * \brief Load a surface mesh in Wavefront OBJ format.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Polygonal faces are triangulated with a fan. Texture coordinates and vertex
+ * normals are ignored. OBJ groups are converted to triangle references.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADOBJMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_loadObjMesh(MMG5_pMesh mesh, const char *filename);
+
+/**
  * \brief Load a mesh and all data from a file. The format will be guessed from the filename extension.
  *
  * \param mesh pointer to the mesh structure.
@@ -1889,6 +1909,25 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *
  *
  */
 LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol, const char *filename);
+
+/**
+ * \brief Save a surface mesh in Wavefront OBJ format.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Triangle references are written as OBJ groups named `mmg_ref_<reference>`.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVEOBJMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_saveObjMesh(MMG5_pMesh mesh, const char *filename);
 
 /**
  * \brief Write mesh and optionally one data field in Vtk file format (.vtk extension).

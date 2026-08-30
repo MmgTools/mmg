@@ -795,6 +795,10 @@ int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const ch
 
   switch ( fmtin ) {
 
+  case ( MMG5_FMT_Obj ):
+    ier = MMGS_loadObjMesh(mesh,tmp);
+    break;
+
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMGS_loadMshMesh(mesh,sol,tmp);
     break;
@@ -1641,6 +1645,9 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
   int8_t savesolFile = 0;
 
   switch ( fmt ) {
+  case ( MMG5_FMT_Obj ):
+    ier = MMGS_saveObjMesh(mesh,tmp);
+    break;
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMGS_saveMshMesh(mesh,sol,tmp);
     break;
