@@ -40,6 +40,7 @@ SET ( MMGS_LIB_TESTS
   libmmgs_lsAndMetric_hsiz
   libmmgs_lsAndMetric
   libmmgs_obj_io
+  libmmgs_stl_io
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c
@@ -54,6 +55,7 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_obj_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_stl_io.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -135,6 +137,12 @@ ADD_TEST(NAME libmmgs_obj_io
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_obj_io
   "${CTEST_OUTPUT_DIR}/libmmgs_obj_input.obj"
   "${CTEST_OUTPUT_DIR}/libmmgs_obj_output.obj"
+  )
+ADD_TEST(NAME libmmgs_stl_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_stl_io
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_input.stla"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stl"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stla"
   )
 ADD_TEST(NAME libmmgs_example0_b
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b

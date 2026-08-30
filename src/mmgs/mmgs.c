@@ -422,6 +422,9 @@ int main(int argc,char *argv[]) {
   case ( MMG5_FMT_Obj ):
     ier = MMGS_loadObjMesh(mesh,mesh->namein);
     break;
+  case ( MMG5_FMT_Stl ):
+    ier = MMGS_loadStlMesh(mesh,mesh->namein);
+    break;
 
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMGS_loadMshMesh(mesh,sol,mesh->namein);
@@ -531,6 +534,9 @@ int main(int argc,char *argv[]) {
     switch ( fmtout ) {
     case ( MMG5_FMT_Obj ):
       ierSave = MMGS_saveObjMesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Stl ):
+      ierSave = MMGS_saveStlMesh(mesh,mesh->nameout);
       break;
     case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
