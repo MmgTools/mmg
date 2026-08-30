@@ -41,6 +41,7 @@ SET ( MMGS_LIB_TESTS
   libmmgs_lsAndMetric
   libmmgs_obj_io
   libmmgs_stl_io
+  libmmgs_ply_io
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c
@@ -56,6 +57,7 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_obj_io.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_stl_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_ply_io.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -143,6 +145,13 @@ ADD_TEST(NAME libmmgs_stl_io
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_input.stla"
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stl"
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stla"
+  )
+ADD_TEST(NAME libmmgs_ply_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_ply_io
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_input.plya"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_output.ply"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_output.plya"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_big_endian.ply"
   )
 ADD_TEST(NAME libmmgs_example0_b
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b

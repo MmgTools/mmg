@@ -1841,6 +1841,26 @@ LIBMMGS_EXPORT int MMGS_loadObjMesh(MMG5_pMesh mesh, const char *filename);
 LIBMMGS_EXPORT int MMGS_loadStlMesh(MMG5_pMesh mesh, const char *filename);
 
 /**
+ * \brief Load an ASCII or binary little-endian PLY surface mesh.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Polygonal faces are triangulated with a fan. A face property named `ref`,
+ * `reference`, or `material_index` is imported as the triangle reference.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADPLYMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_loadPlyMesh(MMG5_pMesh mesh, const char *filename);
+
+/**
  * \brief Load a mesh and all data from a file. The format will be guessed from the filename extension.
  *
  * \param mesh pointer to the mesh structure.
@@ -1968,6 +1988,27 @@ LIBMMGS_EXPORT int MMGS_saveObjMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  */
 LIBMMGS_EXPORT int MMGS_saveStlMesh(MMG5_pMesh mesh, const char *filename);
+
+/**
+ * \brief Save a surface mesh in PLY format.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * `.plya` selects ASCII output. `.ply` and `.plyb` select binary
+ * little-endian output. Triangle references are stored in a face `ref`
+ * property.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVEPLYMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_savePlyMesh(MMG5_pMesh mesh, const char *filename);
 
 /**
  * \brief Write mesh and optionally one data field in Vtk file format (.vtk extension).
