@@ -386,6 +386,9 @@ int main(int argc,char *argv[]) {
   case ( MMG5_FMT_Su2 ):
     ier = MMG3D_loadSu2Mesh(mesh,mesh->namein);
     break;
+  case ( MMG5_FMT_Nastran ):
+    ier = MMG3D_loadNastranMesh(mesh,mesh->namein);
+    break;
 
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMG3D_loadMesh(mesh,mesh->namein);
@@ -511,6 +514,9 @@ int main(int argc,char *argv[]) {
       break;
     case ( MMG5_FMT_Su2 ):
       ierSave = MMG3D_saveSu2Mesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Nastran ):
+      ierSave = MMG3D_saveNastranMesh(mesh,mesh->nameout);
       break;
     case ( MMG5_FMT_Tetgen ):
       ierSave = MMG3D_saveTetgenMesh(mesh,mesh->nameout);

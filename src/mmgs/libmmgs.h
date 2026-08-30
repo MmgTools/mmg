@@ -1861,6 +1861,27 @@ LIBMMGS_EXPORT int MMGS_loadStlMesh(MMG5_pMesh mesh, const char *filename);
 LIBMMGS_EXPORT int MMGS_loadPlyMesh(MMG5_pMesh mesh, const char *filename);
 
 /**
+ * \brief Load a low-order Nastran bulk-data surface mesh.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read `GRID`, `CTRIA3`/`CTRIAR`, and `CQUAD4`/`CQUADR` cards in small, large,
+ * or free-field form. Quadrilaterals are split into triangles. Only the basic
+ * coordinate system is supported.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADNASTRANMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_loadNastranMesh(MMG5_pMesh mesh,
+                                        const char *filename);
+
+/**
  * \brief Load a mesh and all data from a file. The format will be guessed from the filename extension.
  *
  * \param mesh pointer to the mesh structure.
@@ -2009,6 +2030,26 @@ LIBMMGS_EXPORT int MMGS_saveStlMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  */
 LIBMMGS_EXPORT int MMGS_savePlyMesh(MMG5_pMesh mesh, const char *filename);
+
+/**
+ * \brief Save a surface mesh as a free-field Nastran bulk-data file.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * The output is a mesh-only bulk-data deck; it does not synthesize structural
+ * material or property definitions.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVENASTRANMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_saveNastranMesh(MMG5_pMesh mesh,
+                                        const char *filename);
 
 /**
  * \brief Write mesh and optionally one data field in Vtk file format (.vtk extension).

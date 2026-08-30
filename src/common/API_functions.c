@@ -327,6 +327,9 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
       case ( MMG5_FMT_Su2 ):
         strcat(mesh->nameout,".su2");
         break;
+      case ( MMG5_FMT_Nastran ):
+        strcat(mesh->nameout,".bdf");
+        break;
       case ( MMG5_FMT_MeditASCII ): default:
         strcat(mesh->nameout,".mesh");
         break;
@@ -377,6 +380,9 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
         break;
       case ( MMG5_FMT_Su2 ):
         strcat(mesh->nameout,".o.su2");
+        break;
+      case ( MMG5_FMT_Nastran ):
+        strcat(mesh->nameout,".o.bdf");
         break;
       case ( MMG5_FMT_MeditASCII ): default:
         strcat(mesh->nameout,".o.mesh");
@@ -885,6 +891,11 @@ int MMG5_Get_format( char *ptr, int fmt ) {
   else if ( !strncmp ( ptr,".su2",strlen(".su2") ) ) {
     return MMG5_FMT_Su2;
   }
+  else if ( !strncmp ( ptr,".bdf",strlen(".bdf") ) ||
+            !strncmp ( ptr,".nas",strlen(".nas") ) ||
+            !strncmp ( ptr,".fem",strlen(".fem") ) ) {
+    return MMG5_FMT_Nastran;
+  }
 
   return defFmt;
 }
@@ -942,6 +953,9 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
     break;
   case MMG5_FMT_Su2:
     return "MMG5_FMT_Su2";
+    break;
+  case MMG5_FMT_Nastran:
+    return "MMG5_FMT_Nastran";
     break;
   default:
     return "MMG5_Unknown";
