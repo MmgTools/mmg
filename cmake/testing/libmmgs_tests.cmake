@@ -141,6 +141,7 @@ ADD_TEST(NAME libmmgs_obj_io
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_obj_io
   "${CTEST_OUTPUT_DIR}/libmmgs_obj_input.obj"
   "${CTEST_OUTPUT_DIR}/libmmgs_obj_output.obj"
+  "${CTEST_OUTPUT_DIR}/libmmgs_obj_output.mtl"
   )
 ADD_TEST(NAME libmmgs_stl_io
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_stl_io

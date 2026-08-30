@@ -1809,7 +1809,8 @@ LIBMMGS_EXPORT int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
  * \return 0 on failure, 1 otherwise.
  *
  * Polygonal faces are triangulated with a fan. Texture coordinates and vertex
- * normals are ignored. OBJ groups are converted to triangle references.
+ * normals are ignored. OBJ groups are converted to triangle references. A
+ * `usemtl` name supplies the reference when no OBJ group is active.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADOBJMESH(mesh,filename,strlen0,retval)\n
@@ -1977,7 +1978,9 @@ LIBMMGS_EXPORT int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh, MMG5_pSol *sol,
  * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
- * Triangle references are written as OBJ groups named `mmg_ref_<reference>`.
+ * Triangle references are written as OBJ groups and materials named
+ * `mmg_ref_<reference>`. A companion `.mtl` file provides deterministic
+ * display colors; Mmg does not store the material's rendering properties.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEOBJMESH(mesh,filename,strlen0,retval)\n
