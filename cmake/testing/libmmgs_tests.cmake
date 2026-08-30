@@ -42,6 +42,7 @@ SET ( MMGS_LIB_TESTS
   libmmgs_obj_io
   libmmgs_stl_io
   libmmgs_ply_io
+  libmmgs_su2_io
   libmmgs_nastran_io
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
@@ -59,6 +60,7 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_obj_io.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_stl_io.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_ply_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_su2_io.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_nastran_io.c
   )
 
@@ -145,11 +147,11 @@ ADD_TEST(NAME libmmgs_obj_io
   )
 ADD_TEST(NAME libmmgs_stl_io
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_stl_io
-  "${CTEST_OUTPUT_DIR}/libmmgs_stl_input.stla"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_input.stl"
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stl"
-  "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stla"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_direct_output.stl"
   "${CTEST_OUTPUT_DIR}/libmmgs_stl_empty.stl"
-  "${CTEST_OUTPUT_DIR}/libmmgs_stl_translated.stla"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_translated.stl"
   )
 ADD_TEST(NAME libmmgs_ply_io
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_ply_io
@@ -166,6 +168,14 @@ ADD_TEST(NAME libmmgs_nastran_io
   "${CTEST_OUTPUT_DIR}/libmmgs-nastran-generic.bdf"
   "${CTEST_OUTPUT_DIR}/libmmgs-nastran-direct.nas"
   "${CTEST_OUTPUT_DIR}/libmmgs-nastran-rejected.fem"
+  )
+ADD_TEST(NAME libmmgs_su2_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_su2_io
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-input.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-generic.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-direct.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-domain.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-rejected.su2"
   )
 ADD_TEST(NAME libmmgs_example0_b
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b

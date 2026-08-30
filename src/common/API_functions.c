@@ -882,7 +882,7 @@ int MMG5_Get_format( char *ptr, int fmt ) {
   else if ( !strncmp ( ptr,".obj",strlen(".obj") ) ) {
     return MMG5_FMT_Obj;
   }
-  else if ( !strncmp ( ptr,".stl",strlen(".stl") ) ) {
+  else if ( !strcmp(ptr,".stl") ) {
     return MMG5_FMT_Stl;
   }
   else if ( !strncmp ( ptr,".ply",strlen(".ply") ) ) {

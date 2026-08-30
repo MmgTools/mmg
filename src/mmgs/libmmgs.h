@@ -1862,6 +1862,29 @@ LIBMMGS_EXPORT int MMGS_loadStlMesh(MMG5_pMesh mesh, const char *filename);
 LIBMMGS_EXPORT int MMGS_loadPlyMesh(MMG5_pMesh mesh, const char *filename);
 
 /**
+ * \brief Load a three-dimensional SU2 boundary surface mesh.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Triangular and quadrilateral faces in SU2 marker sections are imported;
+ * quadrilaterals are split into triangles. Marker tags named
+ * `mmg_ref_<reference>` preserve their reference. Standalone surface files
+ * containing only triangular or quadrilateral `NELEM` entries are accepted as
+ * an interoperability extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADSU2MESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_loadSu2Mesh(MMG5_pMesh mesh, const char *filename);
+
+/**
  * \brief Load a low-order Nastran bulk-data surface mesh.
  * \param mesh pointer to the mesh structure.
  * \param filename name of the file to load.
@@ -1999,9 +2022,8 @@ LIBMMGS_EXPORT int MMGS_saveObjMesh(MMG5_pMesh mesh, const char *filename);
  * \param filename name of the file to write.
  * \return 0 on failure, 1 otherwise.
  *
- * `.stla` selects ASCII output. `.stl` and `.stlb` select binary output.
- * STL has no portable entity-reference field, so triangle references are not
- * written.
+ * Output is binary STL and should use the standard `.stl` extension. STL has
+ * no portable entity-reference field, so triangle references are not written.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVESTLMESH(mesh,filename,strlen0,retval)\n
@@ -2033,6 +2055,28 @@ LIBMMGS_EXPORT int MMGS_saveStlMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  */
 LIBMMGS_EXPORT int MMGS_savePlyMesh(MMG5_pMesh mesh, const char *filename);
+
+/**
+ * \brief Save a surface mesh in three-dimensional SU2 format.
+ *
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Triangles are written in SU2 marker sections grouped by their Mmg
+ * reference. Marker names use `mmg_ref_<reference>` for lossless round trips.
+ * MMGS edge constraints have no corresponding entity in a three-dimensional
+ * SU2 boundary marker and are not written.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVESU2MESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+LIBMMGS_EXPORT int MMGS_saveSu2Mesh(MMG5_pMesh mesh, const char *filename);
 
 /**
  * \brief Save a surface mesh as a free-field Nastran bulk-data file.

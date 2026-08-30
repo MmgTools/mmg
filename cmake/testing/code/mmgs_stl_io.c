@@ -144,6 +144,10 @@ int main(int argc,char **argv) {
   mesh = NULL;
   MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
   if ( MMGS_loadStlMesh(mesh,argv[2]) != 1 || !checkMesh(mesh) ) goto cleanup;
+  MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
+  mesh = NULL;
+  MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh,&mesh,MMG5_ARG_end);
+  if ( MMGS_loadStlMesh(mesh,argv[3]) != 1 || !checkMesh(mesh) ) goto cleanup;
   ier = 0;
 
 cleanup:

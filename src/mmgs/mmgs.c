@@ -428,6 +428,9 @@ int main(int argc,char *argv[]) {
   case ( MMG5_FMT_Ply ):
     ier = MMGS_loadPlyMesh(mesh,mesh->namein);
     break;
+  case ( MMG5_FMT_Su2 ):
+    ier = MMGS_loadSu2Mesh(mesh,mesh->namein);
+    break;
   case ( MMG5_FMT_Nastran ):
     ier = MMGS_loadNastranMesh(mesh,mesh->namein);
     break;
@@ -546,6 +549,9 @@ int main(int argc,char *argv[]) {
       break;
     case ( MMG5_FMT_Ply ):
       ierSave = MMGS_savePlyMesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Su2 ):
+      ierSave = MMGS_saveSu2Mesh(mesh,mesh->nameout);
       break;
     case ( MMG5_FMT_Nastran ):
       ierSave = MMGS_saveNastranMesh(mesh,mesh->nameout);

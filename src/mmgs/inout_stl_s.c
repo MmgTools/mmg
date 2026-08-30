@@ -6,7 +6,7 @@
 */
 
 /** \file inout_stl_s.c
- *  \brief ASCII and binary STL input/output for MMGS.
+ *  \brief ASCII/binary STL input and binary STL output for MMGS.
  */
 
 #include "libmmgs.h"
@@ -304,60 +304,34 @@ static int MMGS_stlWriteFloat(FILE *out,double value) {
 }
 
 int MMGS_saveStlMesh(MMG5_pMesh mesh,const char *filename) {
-  const char   *extension;
+  unsigned char header[80] = {0},attribute[2] = {0,0};
   MMG5_pTria   triangle;
   MMG5_int     k,ntriangle = 0;
   FILE         *out;
-  int          ascii;
 
   if ( !filename ) return 0;
-  extension = strrchr(filename,'.');
-  ascii = extension && !strcmp(extension,".stla");
-  if ( !(out = fopen(filename,ascii ? "w" : "wb")) ) return 0;
+  if ( !(out = fopen(filename,"wb")) ) return 0;
   for ( k=1; k<=mesh->nt; ++k ) if ( MG_EOK(&mesh->tria[k]) ) ++ntriangle;
 
-  if ( ascii ) {
-    fprintf(out,"solid mmgs\n");
-    for ( k=1; k<=mesh->nt; ++k ) {
-      double normal[3];
-      int i;
-
-      triangle = &mesh->tria[k];
-      if ( !MG_EOK(triangle) ) continue;
-      MMGS_stlNormal(mesh,triangle,normal);
-      fprintf(out,"  facet normal %.17g %.17g %.17g\n    outer loop\n",
-              normal[0],normal[1],normal[2]);
-      for ( i=0; i<3; ++i ) {
-        const double *point = mesh->point[triangle->v[i]].c;
-        fprintf(out,"      vertex %.17g %.17g %.17g\n",point[0],point[1],point[2]);
-      }
-      fprintf(out,"    endloop\n  endfacet\n");
-    }
-    fprintf(out,"endsolid mmgs\n");
+  if ( ntriangle > UINT32_MAX ) { fclose(out); return 0; }
+  snprintf((char *)header,sizeof(header),"Binary STL written by MMGS");
+  if ( fwrite(header,sizeof(header),1,out) != 1 ||
+       !MMGS_stlWriteUint32(out,(uint32_t)ntriangle) ) {
+    fclose(out); return 0;
   }
-  else {
-    unsigned char header[80] = {0},attribute[2] = {0,0};
+  for ( k=1; k<=mesh->nt; ++k ) {
+    double normal[3];
+    int i,j;
 
-    if ( ntriangle > UINT32_MAX ) { fclose(out); return 0; }
-    snprintf((char *)header,sizeof(header),"Binary STL written by MMGS");
-    if ( fwrite(header,sizeof(header),1,out) != 1 ||
-         !MMGS_stlWriteUint32(out,(uint32_t)ntriangle) ) {
-      fclose(out); return 0;
+    triangle = &mesh->tria[k];
+    if ( !MG_EOK(triangle) ) continue;
+    MMGS_stlNormal(mesh,triangle,normal);
+    for ( i=0; i<3; ++i ) if ( !MMGS_stlWriteFloat(out,normal[i]) ) goto error;
+    for ( i=0; i<3; ++i ) {
+      const double *point = mesh->point[triangle->v[i]].c;
+      for ( j=0; j<3; ++j ) if ( !MMGS_stlWriteFloat(out,point[j]) ) goto error;
     }
-    for ( k=1; k<=mesh->nt; ++k ) {
-      double normal[3];
-      int i,j;
-
-      triangle = &mesh->tria[k];
-      if ( !MG_EOK(triangle) ) continue;
-      MMGS_stlNormal(mesh,triangle,normal);
-      for ( i=0; i<3; ++i ) if ( !MMGS_stlWriteFloat(out,normal[i]) ) goto error;
-      for ( i=0; i<3; ++i ) {
-        const double *point = mesh->point[triangle->v[i]].c;
-        for ( j=0; j<3; ++j ) if ( !MMGS_stlWriteFloat(out,point[j]) ) goto error;
-      }
-      if ( fwrite(attribute,sizeof(attribute),1,out) != 1 ) goto error;
-    }
+    if ( fwrite(attribute,sizeof(attribute),1,out) != 1 ) goto error;
   }
   return !fclose(out);
 

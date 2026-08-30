@@ -804,6 +804,9 @@ int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const ch
   case ( MMG5_FMT_Ply ):
     ier = MMGS_loadPlyMesh(mesh,tmp);
     break;
+  case ( MMG5_FMT_Su2 ):
+    ier = MMGS_loadSu2Mesh(mesh,tmp);
+    break;
   case ( MMG5_FMT_Nastran ):
     ier = MMGS_loadNastranMesh(mesh,tmp);
     break;
@@ -1662,6 +1665,9 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
     break;
   case ( MMG5_FMT_Ply ):
     ier = MMGS_savePlyMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Su2 ):
+    ier = MMGS_saveSu2Mesh(mesh,tmp);
     break;
   case ( MMG5_FMT_Nastran ):
     ier = MMGS_saveNastranMesh(mesh,tmp);
