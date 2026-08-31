@@ -85,9 +85,18 @@ inline int MMG5_directsurfball(MMG5_pMesh mesh, MMG5_int ip, MMG5_int *list, int
     return 2;
 }
 
-/** If need be, reorder the surfacic ball of point ip, so that its first element has
-    edge (p,q) (nump,q = global num) as edge MMG5_iprv2[ip] of face iface.
-    return 2 = orientation reversed, 1 otherwise */
+/**
+ * \param mesh pointer to mesh structure.
+ * \param nump point to collapse (global num).
+ * \param numq point receiving collapse (global num).
+ * \param list pointer to surfacic ball of \a nump.
+ * \param ilist number of elements in surfacic ball.
+ * \return 2 if ball reordered, 1 otherwise.
+ *
+ * Reorder surfacic ball of point \a ip, so that its first element has
+ * edge \a (p,q) as edge \a MMG5_iprv2[ip] of face \a iface.
+ *
+ */
 int MMG5_startedgsurfball(MMG5_pMesh mesh,MMG5_int nump,MMG5_int numq,MMG5_int *list,int ilist) {
     MMG5_pTetra pt;
     int         l;
@@ -105,7 +114,7 @@ int MMG5_startedgsurfball(MMG5_pMesh mesh,MMG5_int nump,MMG5_int numq,MMG5_int *
 
     ipt = MMG5_idirinv[iface][ip]; // index of ip in face iface
     ipt = MMG5_inxt2[ipt];         // next index in this face
-    ipt = MMG5_idir[iface][ipt];  // index of this point in local num of tetra
+    ipt = MMG5_idir[iface][ipt];   // index of this point in local num of tetra
 
     if(pt->v[ipt] == numq) return 1;
 

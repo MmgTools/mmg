@@ -868,8 +868,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
  * in (tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
- * Define metric map at a REGULAR vertex of the mesh, associated to
- * the geometric approx of the surface.
+ * Define metric map at a REGULAR surface vertex of the mesh,
+ * associated to the geometric approx of the surface.
  *
  */
 static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, int ip) {
@@ -1110,6 +1110,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
 
+  /** 1. no metric is provided: Set isotropic hmax size at the vertex */
   if ( !ismet ) {
 
     for (k=1; k<=mesh->ne; k++) {
@@ -1121,8 +1122,6 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
         ip = pt->v[l];
         ppt = &mesh->point[ip];
         if ( ppt->flag || ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
-
-        /** 1. no metric is provided: Set isotropic hmax size at the vertex */
 
         /** First step: search for local parameters */
         if ( mesh->info.parTyp ) {

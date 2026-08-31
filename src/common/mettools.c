@@ -660,7 +660,7 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * \param uy distance \f$[p0;p1]\f$ along y axis.
  * \param uz distance \f$[p0;p1]\f$ along z axis.
  * \param mr computed metric tensor.
- * \param r basis in which the metric is diagona
+ * \param r basis in which the metric is diagonal
  *
  * \return 1 if success
  *
@@ -707,7 +707,7 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,
     dn = m[3];
   }
 
-  /* Check that choosed normal is not null */
+  /* Check that chosen normal is not null */
   /* Remark: a null second normal along ridge point in mmg3d may be the
    * consequence of the computation of the same normal with opposite sign for n1
    * and n2 at a previously inserted ridge point. This append when the ridge

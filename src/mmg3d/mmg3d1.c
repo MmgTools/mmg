@@ -47,11 +47,11 @@ extern int8_t ddb;
  * \param mesh pointer to mesh
  * \param ppt pointer to point whose geom data have to be updated
  * \param tag point tag
- * \param nmref ref that has to be setted at point \a ppt if point is non-manifold
- * \param edgref ref that has to be setted at point \a ppt if point is manifold (edg ref)
- * \param no1 normal that has to be setted at point \a ppt (if needed)
- * \param no2 normal that has to be setted at point \a ppt (if needed)
- * \param to tangent that has to be setted at point \a ppt (if needed)
+ * \param nmref ref that has to be set at point \a ppt if point is non-manifold
+ * \param edgref ref that has to be set at point \a ppt if point is manifold (edg ref)
+ * \param no1 normal that has to be set at point \a ppt (if needed)
+ * \param no2 normal that has to be set at point \a ppt (if needed)
+ * \param to tangent that has to be set at point \a ppt (if needed)
  *
  * Set geometric info (ref, tag, normals and tangent) at point \a ppt.
  *
@@ -883,8 +883,8 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
 /**
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
- * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
- * \return a negative value in case of failure, number of collapsed points otherwise.
+ * \param typchk type of edge length criterion (hmin or LSHORT criterion).
+ * \return negative value in case of failure, number of collapsed points otherwise.
  *
  * Attempt to collapse short edges.
  *
@@ -904,7 +904,7 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   int16_t         isnmint;
 
   int8_t          i,j,ip,iq;
-  int             ier, bsret;   // function return values/error codes
+  int             ier, bsret;
 
   nc = nnm = 0;
 
@@ -935,7 +935,7 @@ static MMG5_int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
         if ( p0->flag == base ) {
           /* I think that we can't pass here because we break the loop when base
-           * is setted and just after we increment it */
+           * is set and just after we increment it */
           assert(0);
           continue;
         }
@@ -1890,8 +1890,8 @@ int8_t MMG3D_build_bezierEdge(MMG5_pMesh mesh,MMG5_int k,
  * \param p0 pointer to first extremity of edge \a ied (to fill)
  * \param p1 pointer to second extremity of edge \a ied (to fill)
  *
- * Search a face from wich we car reach edge \a ied. If a boundary face with
- * good orientation exists it is choosed prior to another face, otherwise, if
+ * Search a face from which we can reach edge \a ied. If a boundary face with
+ * good orientation exists it is chosen prior to another face, otherwise, if
  * possible, we choose a boundary face. Fill data needed to work on edge.
  *
  */
@@ -2744,10 +2744,10 @@ static MMG5_int (*MMG3D_anatets)(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk);
  * best worst quality otherwise (1 if split4bar, 2 if swap23).
  *
  * Simulation of the swap23 and of the split at its barycenter of a tetra when
- * more than 1 boundary face. The quality of the worst created element is
+ * more than 1 boundary face. The quality of the worst element created is
  * computed for both operators and we return the identifier of the operator that
- * give the best results. If the swap23 is choosen, we fill the needed info to
- * perform it (index of the face and tetra that are choosen to swap) and
+ * give the best results. If the swap23 is chosen, we fill the needed info to
+ * perform it (index of the face and tetra that are chosen to swap) and
  * configuration of both tetra.
  *
  */
@@ -3097,7 +3097,7 @@ static MMG5_int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int8_t
   }
 
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     boundary elements: %7" MMG5_PRId " splitted %7" MMG5_PRId " swapped\n",ns,*nf);
+    fprintf(stdout,"     boundary elements: %7" MMG5_PRId " split %7" MMG5_PRId " swapped\n",ns,*nf);
   return ns;
 }
 
@@ -3140,7 +3140,7 @@ static MMG5_int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int
     }
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     boundary elements: %7" MMG5_PRId " splitted\n",ns);
+    fprintf(stdout,"     boundary elements: %7" MMG5_PRId " split\n",ns);
   return ns;
 }
 
