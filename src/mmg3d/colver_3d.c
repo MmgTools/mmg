@@ -1142,7 +1142,7 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,uint16_
  * \param indq local index of the point on which we collapse
  * \param typchk type of check performed depending on the remeshing step
  *
- * \return np the index of the collpased point if success, 0 if we cannot
+ * \return np the index of the collapsed point if success, 0 if we cannot
  * collapse, -1 if we fail.
  *
  * Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra
@@ -1159,7 +1159,7 @@ MMG5_int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ilist,int8_
 
   /* coledge[i] contains the local indices of edges that will be merged by the
    * collapse corresponding with the configuration i. The edge coledge[i][0] is
-   * merged with the edge coledge[i][1] a,d the edge coledge[i][2] is merged
+   * merged with the edge coledge[i][1] and the edge coledge[i][2] is merged
    * with edge coledge[i][3].
    * Config 0: merge of vertices 0 and 1
    * config 1: merge of vertices 0 and 2

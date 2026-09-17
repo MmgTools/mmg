@@ -1943,13 +1943,13 @@ void MMG3D_find_bdyface_from_edge(MMG5_pMesh mesh,MMG5_pTetra pt,int8_t ied,
  * \param k index of the tetra to split.
  * \param pt tetra to split
  * \param pxt associated xtetra
- * \param imax index of the edge to split to split
+ * \param imax index of the edge to split
  * \param typchk type of check
  * \param chkRidTet check for ridge metric
- * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
+ * \param *warn \a warn set to 1 if not enough memory.
  *
  * \return -1 if fail, 0 if we can't split but the upper loop may continue, 1 if
- * the edge is splitted, 2 if we can't split due to lack of memory
+ * the edge is split, 2 if we can't split due to lack of memory
  *
  * Split a surface edge using split1b
  *
@@ -2028,7 +2028,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   }
 
   /* simbulgept needs a valid tangent at ridge point (to build ridge metric in
-   * order to comute edge lengths). Thus we need to store the geometric info of
+   * order to compute edge lengths). Thus we need to store the geometric info of
    * point here. */
   ppt = &mesh->point[ip];
   MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
@@ -2146,7 +2146,7 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_pTetra pt,
       return 1;
     }
 
-    /* put back flag on tetra */
+    /* put flag back on tetra */
     for (j=0; j<3; j++){
       if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
       if ( MG_GET(ptt->flag,j) )  MG_SET(pt->flag,MMG5_iarf[i][j]);
