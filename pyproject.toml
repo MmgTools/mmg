@@ -1,19 +1,8 @@
 [build-system]
-requires      = ["py-build-cmake~=0.5.0"]
-build-backend = "py_build_cmake.build"
+requires      = ["scikit-build-core"]
+build-backend = "scikit_build_core.build"
 
 [project]
-name    = "mmg"
+name    = "pymmg"
 version = "1.0"
-
-[tool.py_build_cmake.module]
-name = "mmg"
-
-[tool.py-build_cmake.dist]
-include = ["CMakeLists.txt", "src/*/*.c"]
-
-[tool.py-build_cmake.cmake]
-minimum_version = "3.17"
-build_type      = "Release"
-build_args      = ["-j"]
 
