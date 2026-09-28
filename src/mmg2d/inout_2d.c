@@ -978,11 +978,11 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   fclose(inm);
 
-  /* For anisotropic metric, check that eigenvalues are stricly positive*/
+  /* For anisotropic metric, check that eigenvalues are strictly positive */
   if ( sol->size == 3 ) {
     for (k=1; k<=sol->np; k++) {
       double lambda[2],vp[2][2];
-      MMG5_eigensym(sol->m+3*k,lambda,vp);
+      MMG5_eigensym(&sol->m[3*k],lambda,vp);
 
       if (!(lambda[0] > 0. && lambda[1] > 0.)) {
         fprintf(stderr, "  ## Error: At least one negative eigenvalue in"
@@ -1107,13 +1107,13 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   }
   fclose(inm);
 
-  /* For anisotropic metric, check that eigenvalues are stricly positive*/
+  /* For anisotropic metric, check that eigenvalues are strictly positive */
   for ( j=0; j<nsols; j++ ) {
-    psl = *sol+j;
+    psl = &(*sol)[j];
     if ( psl->size == 3 ) {
       for ( k=1; k<=psl->np; k++ ) {
         double lambda[2],vp[2][2];
-        MMG5_eigensym(psl->m+3*k,lambda,vp);
+        MMG5_eigensym(&psl->m[3*k],lambda,vp);
 
         if (!(lambda[0] > 0. && lambda[1] > 0.)) {
           fprintf(stderr, "  ## Error: At least one negative eigenvalue in"
