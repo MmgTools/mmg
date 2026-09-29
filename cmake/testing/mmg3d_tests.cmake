@@ -862,6 +862,14 @@ ADD_TEST(NAME test_para_tria
 SET_TESTS_PROPERTIES ( test_para_tria
   PROPERTIES FIXTURES_SETUP test_para_tria )
 
+# negative eigenvalues: exit code properly
+ADD_TEST(NAME mmg3d_negative_eigenvalues
+  COMMAND ${EXECUT_MMG3D} -v 5
+  ${MMG3D_CI_TESTS}/Eigenvalues/cube
+  ${CTEST_OUTPUT_DIR}/mmg3d_negative_eigenvalues.o.mesh)
+SET_PROPERTY(TEST mmg3d_negative_eigenvalues
+  PROPERTY PASS_REGULAR_EXPRESSION "negative eigenvalue"
+  )
 
 IF ( LONG_TESTS )
   # Test the Ls option
