@@ -335,7 +335,7 @@ ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
 # negative eigenvalues: exit code properly
 ADD_TEST(NAME mmgs_negative_eigenvalues
   COMMAND ${EXECUT_MMGS} -v 5
-  ${MMGS/CI_TESTS}/Eigenvalues.cube_surfacique
+  ${MMGS_CI_TESTS}/Eigenvalues/cube_surfacique
   ${CTEST_OUTPUT_DIR}/mmgs_negative_eigenvalues.o.mesh)
 SET_PROPERTY(TEST mmgs_negative_eigenvalues
   PROPERTY PASS_REGULAR_EXPRESSION "negative eigenvalue")
