@@ -778,7 +778,8 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
  *
  */
 int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
-  double dd,sqDelta,trmat,vnorm;
+  double dd,sqDelta,trmat,vnorm,scale,a[4];
+  int exponent;
   static int8_t  mmgWarn0=0;
 
   /* wrapper function if symmetric matrix */
@@ -786,9 +787,23 @@ int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
     return MMG5_eigensym(mat,lambda,vp);
 
 
-  dd = mat[0] - mat[3];
-  sqDelta = sqrt(fabs(dd*dd + 4.0*mat[1]*mat[2]));
-  trmat = mat[0] + mat[3];
+  /* M^-1 N can be almost a multiple of I at any physical scale. An
+   * absolute gap test may report distinct eigenvalues that round to the
+   * same double, producing two identical eigenvectors. Normalize first,
+   * as in MMG5_eigensym, so both the gap and vector tests are relative.
+   * Keep mat unchanged: callers can retain it for independent checks. */
+  scale = 0.;
+  for ( int i=0; i<4; ++i ) {
+    if ( !isfinite(mat[i]) ) return 0;
+    scale = MG_MAX(scale,fabs(mat[i]));
+  }
+  if ( !scale ) return 0;
+  /* Power-of-two scaling avoids rounding the entries during normalization. */
+  frexp(scale,&exponent);
+  for ( int i=0; i<4; ++i ) a[i] = scalbn(mat[i],-exponent);
+  dd = a[0] - a[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*a[1]*a[2]));
+  trmat = a[0] + a[3];
 
   lambda[0] = 0.5 * (trmat - sqDelta);
   if ( lambda[0] < 0.0 ) {
@@ -801,9 +816,14 @@ int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
   }
 
   /* First case : matrices m and n are homothetic: n = lambda0*m */
-  if ( sqDelta < MMG5_EPS ) {
+  if ( sqDelta < 64.*DBL_EPSILON ) {
 
     /* only one eigenvalue with degree 2 */
+    lambda[0] = scalbn(lambda[0],exponent);
+    lambda[1] = lambda[0];
+    /* A scalar matrix admits any basis; provide both vectors to callers. */
+    vp[0][0] = vp[1][1] = 1.;
+    vp[0][1] = vp[1][0] = 0.;
     return 2;
 
   }
@@ -813,33 +833,39 @@ int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
     lambda[1] = 0.5 * (trmat + sqDelta);
     assert(lambda[1] >= 0.0);
 
-    vp[0][0] = mat[1];
-    vp[0][1] = (lambda[0] - mat[0]);
+    vp[0][0] = a[1];
+    vp[0][1] = (lambda[0] - a[0]);
     vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
-    if ( vnorm < MMG5_EPS ) {
-      vp[0][0] = (lambda[0] - mat[3]);
-      vp[0][1] = mat[2];
-      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+    /* Use the alternate row if the first is small at the matrix scale. */
+    if ( vnorm < 64.*DBL_EPSILON ) {
+      vp[0][0] = (lambda[0] - a[3]);
+      vp[0][1] = a[2];
+      vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
     }
+    if ( !vnorm ) return 0;
 
     vnorm   = 1.0 / vnorm;
     vp[0][0] *= vnorm;
     vp[0][1] *= vnorm;
 
-    vp[1][0] = mat[1];
-    vp[1][1] = (lambda[1] - mat[0]);
+    vp[1][0] = a[1];
+    vp[1][1] = (lambda[1] - a[0]);
     vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
 
-    if ( vnorm < MMG5_EPS ) {
-      vp[1][0] = (lambda[1] - mat[3]);
-      vp[1][1] = mat[2];
-      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+    if ( vnorm < 64.*DBL_EPSILON ) {
+      vp[1][0] = (lambda[1] - a[3]);
+      vp[1][1] = a[2];
+      vnorm = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
     }
+    if ( !vnorm ) return 0;
 
     vnorm   = 1.0 / vnorm;
     vp[1][0] *= vnorm;
     vp[1][1] *= vnorm;
+
+    lambda[0] = scalbn(lambda[0],exponent);
+    lambda[1] = scalbn(lambda[1],exponent);
 
     /* two distinct eigenvalues with degree 1 */
     return 1;

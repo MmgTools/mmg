@@ -965,6 +965,47 @@ int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
   double intex[3] = {4500.,-2500.,1500.}; /* Exact intersection */
   double intnum[3],maxerr; /* Numerical quantities */
 
+  /* The root separation of m^-1 n is smaller than rounding at its scale.
+   * Treating it as two distinct roots used to give identical vectors and
+   * fail the intersection, although n already satisfies both metrics. */
+  double coarse[3] = {4.,0.,4.};
+  double fine[3] = {1.e12,1.e-5,1.e12};
+  if ( !MMG5_intersecmet22(mesh,coarse,fine,intnum) )
+    return 0;
+  for ( int i=0; i<3; ++i ) {
+    if ( !isfinite(intnum[i]) || fabs(intnum[i]-fine[i]) > 64.*DBL_EPSILON*fine[0] ) {
+      fprintf(stderr,"  ## Error: nearly proportional metric intersection in %s\n",__func__);
+      return 0;
+    }
+  }
+
+  /* Scaling a matrix must not change whether its roots are distinct.
+   * Check both cases, including both returned roots and the vector basis. */
+  for ( int exponent=-200; exponent<=200; exponent+=20 ) {
+    double scale=pow(10.,exponent);
+    double a[4]={scale,0.,0.,2.*scale},lambda[2],v[2][2];
+    int order=MMG5_eigenv2d(0,a,lambda,v);
+    if ( order != 1 || !isfinite(lambda[0]) || !isfinite(lambda[1]) ||
+         fabs(lambda[0]/scale-1.) > 64.*DBL_EPSILON ||
+         fabs(lambda[1]/scale-2.) > 64.*DBL_EPSILON ||
+         !isfinite(v[0][0]*v[1][1]-v[0][1]*v[1][0]) ||
+         fabs(v[0][0]*v[1][1]-v[0][1]*v[1][0]) < .99 ) {
+      fprintf(stderr,"  ## Error: scaled distinct roots in %s, exponent %d\n",__func__,exponent);
+      return 0;
+    }
+    a[0]=a[3]=2.*scale;
+    lambda[0]=lambda[1]=NAN;
+    v[0][0]=v[0][1]=v[1][0]=v[1][1]=NAN;
+    order=MMG5_eigenv2d(0,a,lambda,v);
+    if ( order != 2 || !isfinite(lambda[0]) || !isfinite(lambda[1]) ||
+         fabs(lambda[0]/scale-2.) > 64.*DBL_EPSILON ||
+         fabs(lambda[1]/scale-2.) > 64.*DBL_EPSILON ||
+         v[0][0] != 1. || v[1][1] != 1. || v[0][1] != 0. || v[1][0] != 0. ) {
+      fprintf(stderr,"  ## Error: scaled repeated root in %s, exponent %d\n",__func__,exponent);
+      return 0;
+    }
+  }
+
   /** Compute intersection m^{-1}n */
   if( !MMG5_intersecmet22(mesh,m,n,intnum) )
     return 0;
