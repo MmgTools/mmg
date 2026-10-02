@@ -170,6 +170,9 @@ int main(int argc,char *argv[]) {
     return EXIT_FAILURE;
 
   /* metrics intersection test */
+  /* The 3D surface metric path also uses the shared 2 x 2 intersection. */
+  if( !MMG5_test_intersecmet22(mmgMesh) )
+    return EXIT_FAILURE;
   if( !MMG5_test_intersecmet33(mmgMesh) )
     return EXIT_FAILURE;
 
