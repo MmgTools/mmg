@@ -52,34 +52,16 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
 
-    if ( mesh->info.nosurf  && (!(ptt->tag[0] & MG_REQ)) ) {
-      ptt->tag[0] |= MG_REQ;
-      ptt->tag[0] |= MG_NOSURF;
-    }
+    for (int i=0;i<3;i++) {
+      if ( mesh->info.nosurf  && (!(ptt->tag[i] & MG_REQ)) ) {
+        ptt->tag[i] |= MG_REQ;
+        ptt->tag[i] |= MG_NOSURF;
+      }
 
-    if ( ptt->tag[0] & MG_PARBDY ) {
-      ptt->tag[0] |= MG_NOSURF;
-      ptt->tag[0] |= MG_REQ;
-    }
-
-    if ( mesh->info.nosurf && (!(ptt->tag[1] & MG_REQ)) ) {
-      ptt->tag[1] |= MG_REQ;
-      ptt->tag[1] |= MG_NOSURF;
-    }
-
-    if ( ptt->tag[1] & MG_PARBDY ) {
-      ptt->tag[1] |= MG_NOSURF;
-      ptt->tag[1] |= MG_REQ;
-    }
-
-    if ( mesh->info.nosurf && (!(ptt->tag[2] & MG_REQ)) ) {
-      ptt->tag[2] |= MG_REQ;
-      ptt->tag[2] |= MG_NOSURF;
-    }
-
-    if ( ptt->tag[2] & MG_PARBDY ) {
-      ptt->tag[2] |= MG_NOSURF;
-      ptt->tag[2] |= MG_REQ;
+      if ( ptt->tag[i] & MG_PARBDY ) {
+        ptt->tag[i] |= MG_NOSURF;
+        ptt->tag[i] |= MG_REQ;
+      }
     }
   }
 
