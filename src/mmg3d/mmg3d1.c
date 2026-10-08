@@ -2436,7 +2436,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
           memcpy(ppt->n,to,3*sizeof(double));
 
-          if ( mesh->info.fem<typchk ) {
+          if ( !mesh->info.fem ) {
             /* A ridge can be at the interface of 2 boundary faces of the same
              * tetra: second normal has to be computed */
             if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
@@ -3184,13 +3184,22 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
   minit = 3;
   maxit = 6;
   mesh->gap = 0.5;
-  do {
-    if ( typchk==2 && lastit==1 )  ++mesh->info.fem;
 
+  if ( mesh->info.setfem && typchk == 1 ) {
+    mesh->info.fem = 1;
+  }
+  else if ( mesh->info.setfem && typchk == 2) {
+    mesh->info.fem = 0;
+  }
+
+  do {
+    if ( mesh->info.setfem && typchk == 2 && lastit == 1 ) {
+      mesh->info.fem = 1;
+    }
 
     /* split or swap tetra with more than 2 bdry faces */
     nf = ier = 0;
-    if ( mesh->info.fem == typchk ) {
+    if ( mesh->info.fem ) {
       ier = MMG5_anatet4(mesh,met,&nf,typchk);
       if ( ier < 0 )  return 0;
     }
@@ -3280,9 +3289,6 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
       ++lastit;
     }
     else if ( lastit ) {
-      /* Avoid the incrementation of mesh->info.fem if we have detected a last
-         iteration but anatet4 leads to have nc, nf or ns != 0 so we perform a last
-         iter */
       ++lastit;
     }
   }

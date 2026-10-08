@@ -540,10 +540,12 @@ typedef struct {
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
   int8_t        isosurf; /*!< level-set discretization mode on the surface */
-  int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
-                      * connecting 2 bdy points and tet with more than 1 bdy
-                      * face) */
-  int8_t        fem; /*!< internal value for fem / no fem mesh output */
+  int8_t        setfem; /*!< user input value for enforcing finite element mesh
+                          (= 0 : do nothing,
+                          = 1 : create a finite element mesh (default),
+                          = 2 : forbid regular edges joining feature points) */
+  int8_t        fem; /*!< internal value for fem / no fem mesh output to indicate
+                      if option is currently active or not*/
   int8_t        lag; /*!< lagrangian mode */
   int8_t        parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point

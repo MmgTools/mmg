@@ -97,6 +97,8 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
 
   fprintf(stdout,"gradation control for required entities (-hgradreq)  : %lf\n",
           (mesh->info.hgradreq < 0) ? mesh->info.hgradreq : exp(mesh->info.hgradreq) );
+  fprintf(stdout,"isosurface reference in -ls mode    (-isoref) : %d\n",
+          mesh->info.isoref);
   fprintf(stdout,"coordinate regularization parameter (-xreg) : %lf\n",
           mesh->info.lxreg);
 }
@@ -249,6 +251,7 @@ void MMG5_paramUsage1(void) {
   fprintf(stdout,"-hmax   val  maximal mesh size\n");
   fprintf(stdout,"-hmin   val  minimal mesh size\n");
   fprintf(stdout,"-hsiz   val  constant mesh size\n");
+  fprintf(stdout,"-isoref val  reference for isosurface entities\n");
   fprintf(stdout,"-rmc   [val] enable the removal of componants whose volume fraction is less than\n"
           "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
 }

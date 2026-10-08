@@ -1073,8 +1073,8 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
-  /* reset fem value to user setting (needed for multiple library call) */
-  mesh->info.fem = (mesh->info.setfem ? 1 : 0);
+  /* reset fem value to 0 (needed for multiple library call) */
+  mesh->info.fem = 0;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -1312,8 +1312,8 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
   }
 
-  /* reset fem value to user setting (needed for multiple library call) */
-  mesh->info.fem = (mesh->info.setfem ? 1 : 0);
+  /* reset fem value to 0 (needed for multiple library call) */
+  mesh->info.fem = 0;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,sol) ) {
@@ -1578,7 +1578,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   /* reset fem value to user setting (needed for multiple library call) */
-  mesh->info.fem = (mesh->info.setfem ? 1 : 0);
+  mesh->info.fem = 0;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,disp) )   _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
