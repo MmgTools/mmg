@@ -2474,6 +2474,51 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  LIBMMG3D_EXPORT  int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
+ * \brief Load a three-dimensional, single-zone mesh in SU2 format.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read tetrahedra, prisms, hexahedra, pyramids, and triangle or quadrilateral
+ * boundary markers. If hexahedra or pyramids are present, all non-tetrahedral
+ * volume elements are converted to tetrahedra using cell-center vertices and
+ * globally deterministic quadrilateral diagonals. Marker names written as
+ * `mmg_ref_<reference>` preserve Mmg references.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADSU2MESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+  LIBMMG3D_EXPORT int MMG3D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename);
+
+/**
+ * \brief Load a low-order Nastran bulk-data volume mesh.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read `GRID`, `CTRIA3`/`CTRIAR`, `CQUAD4`/`CQUADR`, `CTETRA`, `CPENTA`,
+ * `CPYRAM`, and `CHEXA` cards in small, large, or free-field form. If
+ * hexahedra or pyramids occur, all non-tetrahedral volume cells are converted
+ * to tetrahedra with cell-center vertices and globally deterministic
+ * quadrilateral diagonals. Only the basic coordinate system is supported.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADNASTRANMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+  LIBMMG3D_EXPORT int MMG3D_loadNastranMesh(MMG5_pMesh mesh,
+                                            const char *filename);
+
+/**
  * \brief Read mesh data in a format determined by the filename extension.
  *
  * \param mesh pointer to the mesh structure.
@@ -2558,6 +2603,42 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
  *
  */
   LIBMMG3D_EXPORT int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \brief Save a three-dimensional, single-zone mesh in SU2 format.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVESU2MESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+  LIBMMG3D_EXPORT int MMG3D_saveSu2Mesh(MMG5_pMesh mesh,const char *filename);
+
+/**
+ * \brief Save a volume mesh as a free-field Nastran bulk-data file.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * The output is a mesh-only bulk-data deck; it does not synthesize structural
+ * material or property definitions.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVENASTRANMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+  LIBMMG3D_EXPORT int MMG3D_saveNastranMesh(MMG5_pMesh mesh,
+                                            const char *filename);
 
 /**
  * \brief Save a mesh and optionally one solution in VTK format.

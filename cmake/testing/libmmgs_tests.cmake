@@ -39,6 +39,11 @@ SET ( MMGS_LIB_TESTS
   libmmgs_lsAndMetric_optim
   libmmgs_lsAndMetric_hsiz
   libmmgs_lsAndMetric
+  libmmgs_obj_io
+  libmmgs_stl_io
+  libmmgs_ply_io
+  libmmgs_su2_io
+  libmmgs_nastran_io
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c
@@ -52,6 +57,11 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_optim.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_obj_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_stl_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_ply_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_su2_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmgs_nastran_io.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -128,6 +138,44 @@ ADD_TEST(NAME libmmgs_example0_a
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a
   "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
   "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_a-cube.o"
+  )
+ADD_TEST(NAME libmmgs_obj_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_obj_io
+  "${CTEST_OUTPUT_DIR}/libmmgs_obj_input.obj"
+  "${CTEST_OUTPUT_DIR}/libmmgs_obj_output.obj"
+  "${CTEST_OUTPUT_DIR}/libmmgs_obj_output.mtl"
+  )
+ADD_TEST(NAME libmmgs_stl_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_stl_io
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_input.stl"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_output.stl"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_direct_output.stl"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_empty.stl"
+  "${CTEST_OUTPUT_DIR}/libmmgs_stl_translated.stl"
+  )
+ADD_TEST(NAME libmmgs_ply_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_ply_io
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_input.plya"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_output.ply"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_output.plya"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_big_endian.ply"
+  "${CTEST_OUTPUT_DIR}/libmmgs_ply_wide_output.ply"
+  )
+
+ADD_TEST(NAME libmmgs_nastran_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_nastran_io
+  "${CTEST_OUTPUT_DIR}/libmmgs-nastran-input.bdf"
+  "${CTEST_OUTPUT_DIR}/libmmgs-nastran-generic.bdf"
+  "${CTEST_OUTPUT_DIR}/libmmgs-nastran-direct.nas"
+  "${CTEST_OUTPUT_DIR}/libmmgs-nastran-rejected.fem"
+  )
+ADD_TEST(NAME libmmgs_su2_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_su2_io
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-input.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-generic.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-direct.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-domain.su2"
+  "${CTEST_OUTPUT_DIR}/libmmgs-su2-rejected.su2"
   )
 ADD_TEST(NAME libmmgs_example0_b
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b

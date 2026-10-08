@@ -1107,6 +1107,41 @@ FORTRAN_NAME(MMG3D_LOADMSHMESH,mmg3d_loadmshmesh,
 }
 
 /**
+ * See \ref MMG3D_loadSu2Mesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_LOADSU2MESH,mmg3d_loadsu2mesh,
+             (MMG5_pMesh *mesh,char *filename,int *strlen0,int *retval),
+             (mesh,filename,strlen0,retval)) {
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMG3D_loadSu2Mesh(*mesh,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG3D_loadNastranMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_LOADNASTRANMESH,mmg3d_loadnastranmesh,
+             (MMG5_pMesh *mesh,char *filename,int *strlen0,int *retval),
+             (mesh,filename,strlen0,retval)) {
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+  *retval = MMG3D_loadNastranMesh(*mesh,tmp);
+  MMG5_SAFE_FREE(tmp);
+  return;
+}
+
+/**
  * See \ref MMG3D_loadGenericMesh function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_LOADGENERICMESH,mmg3d_loadgenericmesh,
@@ -1294,6 +1329,41 @@ FORTRAN_NAME(MMG3D_SAVETETGENMESH,mmg3d_savetetgenmesh,(MMG5_pMesh *mesh,char *m
   *retval = MMG3D_saveTetgenMesh(*mesh,tmp);
   MMG5_SAFE_FREE(tmp);
 
+  return;
+}
+
+/**
+ * See \ref MMG3D_saveSu2Mesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SAVESU2MESH,mmg3d_savesu2mesh,
+             (MMG5_pMesh *mesh,char *filename,int *strlen0,int *retval),
+             (mesh,filename,strlen0,retval)) {
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMG3D_saveSu2Mesh(*mesh,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG3D_saveNastranMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SAVENASTRANMESH,mmg3d_savenastranmesh,
+             (MMG5_pMesh *mesh,char *filename,int *strlen0,int *retval),
+             (mesh,filename,strlen0,retval)) {
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+  *retval = MMG3D_saveNastranMesh(*mesh,tmp);
+  MMG5_SAFE_FREE(tmp);
   return;
 }
 

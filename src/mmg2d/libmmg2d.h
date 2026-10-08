@@ -1928,6 +1928,25 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  */
   LIBMMG2D_EXPORT int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
+/**
+ * \brief Load a two-dimensional, single-zone mesh in SU2 format.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to load.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * Read triangles, quadrilaterals, and boundary marker edges. Marker names
+ * written as `mmg_ref_<reference>` preserve Mmg references.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADSU2MESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+  LIBMMG2D_EXPORT int MMG2D_loadSu2Mesh(MMG5_pMesh mesh,const char *filename);
+
   /* FIXME: why is it called medit format and is this really specific for metrics? */
 /**
  * \brief Load a metric field (or other solution) in medit's .sol format.
@@ -2065,6 +2084,22 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  *
  */
   LIBMMG2D_EXPORT int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \brief Save a two-dimensional, single-zone mesh in SU2 format.
+ * \param mesh pointer to the mesh structure.
+ * \param filename name of the file to write.
+ * \return 0 on failure, 1 otherwise.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVESU2MESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ */
+  LIBMMG2D_EXPORT int MMG2D_saveSu2Mesh(MMG5_pMesh mesh,const char *filename);
 
 /**
  * \brief Save a mesh and optionally one solution in VTK format.
