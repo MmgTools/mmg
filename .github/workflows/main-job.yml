@@ -65,7 +65,7 @@ jobs:
                 vtk: off
                 int: int32_t
 
-              - os: macos-latest
+              - os: macos-14
                 pattern: off
                 pointmap: on
                 scotch: on
@@ -125,7 +125,7 @@ jobs:
                 vtk: on
                 int: int64_t
 
-              - os: macos-latest
+              - os: macos-14
                 pattern: off
                 pointmap: off
                 scotch: off
@@ -239,7 +239,7 @@ jobs:
           cd Commons
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
           make install
 
       - name: Install LinearElasticity
@@ -250,7 +250,7 @@ jobs:
           cd LinearElasticity
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
           make install
 
       # checkout the provided branch name if workflow is manually run
