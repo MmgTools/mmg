@@ -23,42 +23,6 @@
 #include "libmmg2d_private.h"
 #include "mmg2dexterns_private.h"
 
-/* Compute isotropic edge length */
-double long_iso(double *ca,double *cb,double *ma,double *mb) {
-  double   ha,hb,ux,uy,dd,rap,len;
-
-  ha = *ma;
-  hb = *mb;
-  ux = cb[0] - ca[0];
-  uy = cb[1] - ca[1];
-  dd = sqrt(ux*ux + uy*uy);
-
-  rap = (hb - ha) / ha;
-  if ( fabs(rap) < MMG2D_EPSD )
-    len = dd / ha;
-  else
-    len = dd * (1.0/ha + 1.0/hb + 8.0 / (ha+hb)) / 6.0;
-
-  return len;
-}
-
-
-/* compute aniso edge length */
-double long_ani(double *ca,double *cb,double *ma,double *mb) {
-  double   ux,uy,dd1,dd2,len;
-  ux = cb[0] - ca[0];
-  uy = cb[1] - ca[1];
-
-  dd1 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
-  if ( dd1 <= 0.0 )  dd1 = 0.0;
-  dd2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
-  if ( dd2 <= 0.0 )  dd2 = 0.0;
-
-  len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
-
-  return len;
-}
-
 /** Calculate length of a curve in the considered isotropic metric */
 double MMG2D_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2) {
   MMG5_pPoint     p1,p2;
