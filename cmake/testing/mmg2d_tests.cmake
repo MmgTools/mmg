@@ -463,6 +463,14 @@ ADD_TEST(NAME mmg2d_Disk-optim
   ${MMG2D_CI_TESTS}/Disk/disk-orphan
   -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optim.o.mesh)
 
+# negative eigenvalues: exit properly
+ADD_TEST(NAME mmg2d_negative_eigenvalues
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Eigenvalues/carre
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_negative_eigenvalyes.o.mesh)
+SET_PROPERTY(TEST mmg2d_negative_eigenvalues
+  PROPERTY PASS_REGULAR_EXPRESSION "negative eigenvalue")
+
 ###############################################################################
 #####
 #####         Mesh generation
