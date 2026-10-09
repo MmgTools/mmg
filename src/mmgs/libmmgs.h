@@ -777,7 +777,7 @@ LIBMMGS_EXPORT int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, MMG5_int k, double 
  * >   END SUBROUTINE\n
  *
  */
-  double MMGS_Get_triangleQuality(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k);
+LIBMMGS_EXPORT double MMGS_Get_triangleQuality(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k);
 
 /**
  * \brief Set a single element of a scalar solution structure.
