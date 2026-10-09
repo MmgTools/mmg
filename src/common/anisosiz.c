@@ -221,8 +221,8 @@ double MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
  * \param met pointer to the metric structure.
  * \param ismet 1 if user provided metric.
  *
- * Search for points with unintialized metric and define anisotropic size at
- * this points.
+ * Search for points with uninitialized metric and define anisotropic size at
+ * these points.
  *
  */
 void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
@@ -281,10 +281,11 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
  * \param tAA matrix to fill
  * \param tAb second member
  *
- * Fill matrice \sum tAA and second member \sum tAb with \f$ A=( X_{P_i}^2
- * Y_{P_i}^2 X_{P_i}Y_{P_i}) \f$ and \f$ b= Z_{P_i}\f$ with P_i the
- * physical points at edge [i0;i1] extremities and middle.  Compute the physical
- * coor \a c of the curve edge's mid-point for a regular or reference point.
+ * Fill matrix {}^tAA and right-hand side {}^tAb with \f$ A=( X_{P_i}^2
+ * Y_{P_i}^2 X_{P_i}Y_{P_i}) \f$ and \f$ b= Z_{P_i}\f$ with P_i
+ * physical points at edge [i0;i1] extremities and middle.
+ * Compute physical coordinates \a c of curved edge mid-point for a regular or
+ * reference point.
  *
  */
 void MMG5_fillDefmetregSys( MMG5_int k, MMG5_pPoint p0, int i0, MMG5_Bezier b,
@@ -429,8 +430,8 @@ void MMG5_fillDefmetregSys( MMG5_int k, MMG5_pPoint p0, int i0, MMG5_Bezier b,
  * \param hausd hausdorff value at point.
  * \return 1 if success, 0 if fail.
  *
- * Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) for a regular
- * point.
+ * Solve {}^tAA \times tmp_m = {}^tAb and fill m with tmp_m (after rotation)
+ * for a regular surface point.
  *
  */
 int MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],

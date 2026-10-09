@@ -37,10 +37,10 @@
 #include "libmmg3d_private.h"
 
 /**
- * \param mesh pointer towarad the mesh structure.
+ * \param mesh pointer towards the mesh structure.
  *
  * Set all boundary triangles to required and add a tag to detect that they are
- * not realy required.
+ * not really required.
  *
  */
 void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {

@@ -1538,7 +1538,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
  * \param mesh pointer to the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
- * - Remove double triangles from tria array.
+ * - Remove duplicate triangles from tria array.
  *
  * - Remove triangles that do not belong to a boundary (non opnbdy mode) from
  *   tria array.
@@ -1547,13 +1547,13 @@ int MMG5_bdryTria(MMG5_pMesh mesh, MMG5_int ntmesh) {
  * Count the number of faces in mesh and compare this number to the number of
  *   given triangles.
  *
- * - If the founded number exceed the given one, add the missing
+ * - If found number exceeds given one, add the missing
  *   boundary triangles (call to MMG5_bdryTria). Do nothing otherwise.
  *
  * - Fill the adjacency relationship between prisms and tetra (fill adjapr with
  *   a negative value to mark this special faces).
  *
- * - Set to required the triangles at interface betwen prisms and tet.
+ * - Set triangles at interface betwen prisms and tet to required.
  *
  */
 int MMG5_chkBdryTria(MMG5_pMesh mesh) {
@@ -1585,11 +1585,11 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer to the mesh structure.
- * \param ntmesh number of boundary triangles in the mesh.
- * \param ntpres number of preserved boundaries in the mesh.
+ * \param ntmesh number of boundary triangles.
+ * \param ntpres number of preserved boundaries (open boundary mode).
  * \return 0 if failed, 1 if success.
  *
- * Step 1 of MMG5_chkBdryTria : scan the mesh and count the boundaries
+ * Step 1 of MMG5_chkBdryTria : scan the mesh and count the boundaries.
  *
  */
 int MMG5_chkBdryTria_countBoundaries(MMG5_pMesh mesh, MMG5_int *ntmesh, MMG5_int *ntpres) {
