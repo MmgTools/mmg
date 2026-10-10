@@ -2576,6 +2576,21 @@ LIBMMGS_EXPORT void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
  */
 LIBMMGS_EXPORT void MMGS_Set_commonFunc(void);
 
+/**
+ * \brief Set a progress callback for the remeshing process.
+ *
+ * \param mesh       pointer to the mesh structure.
+ * \param callback   progress callback function (NULL to disable).
+ * \param user_data  opaque pointer forwarded to every callback invocation.
+ *
+ * \return 1 on success.
+ *
+ * \sa MMG5_progressCallback, MMG3D_Set_progressCallback.
+ */
+LIBMMGS_EXPORT int MMGS_Set_progressCallback(MMG5_pMesh mesh,
+                                             MMG5_progressCallback callback,
+                                             void *user_data);
+
 #ifdef __cplusplus
 }
 #endif

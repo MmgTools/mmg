@@ -2585,3 +2585,11 @@ int MMG3D_Free_names(const int starter,...)
 
   return ier;
 }
+
+int MMG3D_Set_progressCallback(MMG5_pMesh mesh,
+                               MMG5_progressCallback callback,
+                               void *user_data) {
+  mesh->info.progressCb   = callback;
+  mesh->info.progressData = user_data;
+  return 1;
+}

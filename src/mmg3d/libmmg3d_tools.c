@@ -240,7 +240,7 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
   MMG5_pSol tmp = NULL;
   double  val;
   int     i;
-  char    namein[MMG5_FILESTR_LGTH],*endptr;
+  char    *endptr;
   int     param;
 
   i = 1;
@@ -537,6 +537,16 @@ int MMG3D_storeknownar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,
         }
         else {
           /* Arg unknown by Mmg: arg starts with -o but is not known */
+          MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
+        }
+        break;
+      case 'p':
+        if ( !strcmp(argv[i],"-progress") ) {
+          if ( !MMG3D_Set_progressCallback(mesh,MMG5_cliProgressBar,NULL) )
+            return 0;
+        }
+        else {
+          /* Arg unknown by Mmg: arg starts with -p but is not known */
           MMG_ARGV_APPEND(argv, mmgArgv, i, *mmgArgc,return 0);
         }
         break;

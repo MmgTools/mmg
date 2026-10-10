@@ -34,6 +34,15 @@
 
 #include "mmgcommon_private.h"
 
+#if defined(_WIN32)
+#include <io.h>
+#include <windows.h>
+#define MMG5_ISATTY(stream) _isatty(_fileno(stream))
+#else
+#include <unistd.h>
+#define MMG5_ISATTY(stream) isatty(fileno(stream))
+#endif
+
 /**
  * \param mesh pointer to the mesh
  * \param dim string dontaining the dimension (3D,2D or S)
@@ -219,6 +228,7 @@ void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-v [n]    Tune level of verbosity, [-1..10]\n");
   fprintf(stdout,"-m [n]    Set maximal memory size to n Mbytes\n");
   fprintf(stdout,"-d        Turn on debug mode\n");
+  fprintf(stdout,"-progress Display a progress bar during remeshing\n");
   fprintf(stdout,"-val      Print the default parameters values\n");
   fprintf(stdout,"-default  Save a local parameters file for default parameters"
           " values\n");
@@ -234,6 +244,211 @@ void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-ls     val create mesh of isovalue val (0 if no argument provided)\n");
   fprintf(stdout,"-lssurf val split mesh boundaries on isovalue val (0 if no argument provided)\n");
 
+}
+
+static const char *MMG5_progressPhaseName(int phase) {
+  switch ( phase ) {
+  case MMG5_PHASE_GEOMETRIC_MESH:
+    return "Geometric Mesh";
+  case MMG5_PHASE_COMPUTATIONAL_MESH:
+    return "Computational Mesh";
+  case MMG5_PHASE_ADAPTATION:
+    return "Adaptation";
+  case MMG5_PHASE_OPTIMIZATION:
+    return "Optimization";
+  default:
+    return "Unknown";
+  }
+}
+
+static void MMG5_clearProgressBarLine(void) {
+  int i;
+
+  fprintf(stdout,"\r");
+  for ( i=0; i<120; ++i ) {
+    fputc(' ',stdout);
+  }
+  fprintf(stdout,"\r");
+}
+
+static int MMG5_enableAnsiProgressBar(void) {
+#if defined(_WIN32)
+  static int cached = -1;
+  HANDLE console;
+  DWORD mode;
+
+  if ( cached >= 0 ) {
+    return cached;
+  }
+
+  cached = 0;
+  console = GetStdHandle(STD_OUTPUT_HANDLE);
+  if ( console == INVALID_HANDLE_VALUE ) {
+    return cached;
+  }
+
+  if ( !GetConsoleMode(console,&mode) ) {
+    return cached;
+  }
+
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
+  if ( SetConsoleMode(console,mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) ) {
+    cached = 1;
+  }
+
+  return cached;
+#else
+  return 1;
+#endif
+}
+
+static int MMG5_useAnsiProgressBar(int isTTY) {
+  char *noColor, *term;
+
+  if ( !isTTY ) {
+    return 0;
+  }
+
+  noColor = getenv("NO_COLOR");
+  if ( noColor && noColor[0] ) {
+    return 0;
+  }
+
+  term = getenv("TERM");
+  if ( term && !strcmp(term,"dumb") ) {
+    return 0;
+  }
+
+  return MMG5_enableAnsiProgressBar();
+}
+
+static void MMG5_printProgressBarLine(const char *phaseName,int iteration,
+                                      int max_iterations,int percent,
+                                      int64_t n_split,int64_t n_collapse,
+                                      int64_t n_swap,int64_t n_move,
+                                      int useAnsi) {
+  const int width = 30;
+  int current_iteration, filled, i;
+
+  current_iteration = iteration + 1;
+  filled = (width * percent) / 100;
+
+  fprintf(stdout,"  %-18s ",phaseName);
+  if ( useAnsi ) {
+    fprintf(stdout,"\033[2m[\033[0m");
+    for ( i=0; i<width; ++i ) {
+      if ( i < filled ) {
+        fprintf(stdout,"\033[48;2;178;235;220m \033[0m");
+      }
+      else {
+        fputc(' ',stdout);
+      }
+    }
+    fprintf(stdout,"\033[2m]\033[0m");
+  }
+  else {
+    fputc('[',stdout);
+    for ( i=0; i<width; ++i ) {
+      fputc(i < filled ? '=' : ' ',stdout);
+    }
+    fputc(']',stdout);
+  }
+  fprintf(stdout," %3d/%-3d split=%" PRId64 " collapse=%" PRId64
+          " swap=%" PRId64 " move=%" PRId64,
+          current_iteration,max_iterations,
+          n_split,n_collapse,n_swap,n_move);
+}
+
+int MMG5_cliProgressBar(void *mesh,
+                        int phase,
+                        int iteration,
+                        int max_iterations,
+                        int64_t n_split,
+                        int64_t n_collapse,
+                        int64_t n_swap,
+                        int64_t n_move,
+                        void *user_data) {
+  MMG5_pMesh mmgMesh;
+  static int previousPhase = MMG5_UNSET;
+  static int previousIteration = 0;
+  static int previousMaxIterations = 0;
+  static int64_t previousNSplit = 0;
+  static int64_t previousNCollapse = 0;
+  static int64_t previousNSwap = 0;
+  static int64_t previousNMove = 0;
+  const char *phaseName;
+  int isTTY, live, lineByLine, percent, useAnsi;
+
+  (void)user_data;
+
+  assert(max_iterations >= 0);
+
+  if ( max_iterations > 0 ) {
+    percent = (100 * (iteration + 1)) / max_iterations;
+  }
+  else {
+    max_iterations = iteration + 1;
+    percent = 100;
+  }
+  percent = MG_MIN(percent,100);
+  phaseName = MMG5_progressPhaseName(phase);
+  mmgMesh = (MMG5_pMesh)mesh;
+  isTTY = MMG5_ISATTY(stdout);
+  lineByLine = isTTY && mmgMesh &&
+    ( abs(mmgMesh->info.imprim) >= 5 || mmgMesh->info.ddebug );
+  live = isTTY && !lineByLine;
+  useAnsi = live && MMG5_useAnsiProgressBar(isTTY);
+
+  if ( lineByLine ) {
+    MMG5_printProgressBarLine(phaseName,iteration,max_iterations,percent,
+                              n_split,n_collapse,n_swap,n_move,0);
+    fprintf(stdout,"\n");
+    return 1;
+  }
+
+  if ( previousPhase != MMG5_UNSET && previousPhase != phase ) {
+    if ( live ) {
+      MMG5_clearProgressBarLine();
+    }
+    MMG5_printProgressBarLine(MMG5_progressPhaseName(previousPhase),
+                              previousIteration,previousMaxIterations,
+                              100,previousNSplit,
+                              previousNCollapse,previousNSwap,
+                              previousNMove,useAnsi);
+    fprintf(stdout,"\n");
+    previousPhase = MMG5_UNSET;
+  }
+
+  if ( percent == 100 ) {
+    if ( live ) {
+      MMG5_clearProgressBarLine();
+    }
+    MMG5_printProgressBarLine(phaseName,iteration,max_iterations,percent,
+                              n_split,n_collapse,n_swap,n_move,useAnsi);
+    fprintf(stdout,"\n");
+    previousPhase = MMG5_UNSET;
+  }
+  else {
+    previousPhase = phase;
+    previousIteration = iteration;
+    previousMaxIterations = max_iterations;
+    previousNSplit = n_split;
+    previousNCollapse = n_collapse;
+    previousNSwap = n_swap;
+    previousNMove = n_move;
+
+    if ( live ) {
+      MMG5_clearProgressBarLine();
+      MMG5_printProgressBarLine(phaseName,iteration,max_iterations,percent,
+                                n_split,n_collapse,n_swap,n_move,useAnsi);
+      fflush(stdout);
+    }
+  }
+
+  return 1;
 }
 
 /**

@@ -3458,6 +3458,31 @@ LIBMMG3D_EXPORT int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol
   * functions.
   */
   LIBMMG3D_EXPORT void MMG3D_Set_commonFunc(void);
+
+/**
+ * \brief Set a progress callback for the remeshing process.
+ *
+ * \param mesh       pointer to the mesh structure.
+ * \param callback   progress callback function (NULL to disable).
+ * \param user_data  opaque pointer forwarded to every callback invocation.
+ *
+ * \return 1 on success.
+ *
+ * The callback is invoked at each iteration of every remeshing phase:
+ * geometric mesh, computational mesh, adaptation loop, and optimization.
+ * Returning 0 from the callback requests graceful cancellation.
+ *
+ * When \a callback is NULL (the default), no function-pointer check is
+ * performed in the hot loops, so there is zero overhead.
+ *
+ * \remark No Fortran interface.
+ *
+ * \sa MMG5_progressCallback for the callback signature.
+ */
+  LIBMMG3D_EXPORT int MMG3D_Set_progressCallback(MMG5_pMesh mesh,
+                                                 MMG5_progressCallback callback,
+                                                 void *user_data);
+
 #ifdef __cplusplus
 }
 #endif

@@ -2769,6 +2769,21 @@ LIBMMG2D_EXPORT int MMG2D_Free_all(const int starter,...);
  */
   LIBMMG2D_EXPORT int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
 
+/**
+ * \brief Set a progress callback for the remeshing process.
+ *
+ * \param mesh       pointer to the mesh structure.
+ * \param callback   progress callback function (NULL to disable).
+ * \param user_data  opaque pointer forwarded to every callback invocation.
+ *
+ * \return 1 on success.
+ *
+ * \sa MMG5_progressCallback, MMG3D_Set_progressCallback.
+ */
+  LIBMMG2D_EXPORT int MMG2D_Set_progressCallback(MMG5_pMesh mesh,
+                                                 MMG5_progressCallback callback,
+                                                 void *user_data);
+
 #ifdef __cplusplus
 }
 #endif

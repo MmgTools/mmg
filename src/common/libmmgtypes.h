@@ -40,6 +40,52 @@
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
 
+#define MMG5_HAS_PROGRESS_CALLBACK 1
+
+/**
+ * \enum MMG5_progressPhase
+ * \brief Phases reported by the progress callback.
+ */
+enum MMG5_progressPhase {
+  MMG5_PHASE_GEOMETRIC_MESH,  /*!< Geometric mesh analysis and splitting */
+  MMG5_PHASE_COMPUTATIONAL_MESH, /*!< Metric definition and gradation */
+  MMG5_PHASE_ADAPTATION,     /*!< Main adaptation loop
+                                (split/collapse/swap/move) */
+  MMG5_PHASE_OPTIMIZATION    /*!< Final quality optimization (swap/move) */
+};
+
+/**
+ * \typedef MMG5_progressCallback
+ * \brief Callback function type for progress reporting.
+ *
+ * Called at each iteration within a phase to report progress. If a phase
+ * converges before its maximum iteration count, a final completion callback may
+ * be emitted with iteration set to max_iterations-1.
+ *
+ * \param mesh       pointer to the mesh structure (opaque to caller).
+ * \param phase      current phase (\ref MMG5_progressPhase).
+ * \param iteration  current iteration within the phase (0-based).
+ * \param max_iterations  maximum iterations for this phase.
+ * \param n_split    number of edge splits performed in this iteration.
+ * \param n_collapse number of edge collapses performed in this iteration.
+ * \param n_swap     number of edge swaps performed in this iteration.
+ * \param n_move     number of vertex moves performed in this iteration.
+ * \param user_data  opaque pointer passed by the user.
+ *
+ * \return 1 to continue, 0 to request cancellation.
+ *
+ * \remark The callback is only invoked when set (non-NULL).
+ */
+typedef int (*MMG5_progressCallback)(void *mesh,
+                                     int phase,
+                                     int iteration,
+                                     int max_iterations,
+                                     int64_t n_split,
+                                     int64_t n_collapse,
+                                     int64_t n_swap,
+                                     int64_t n_move,
+                                     void *user_data);
+
 /**
  * \def MMG5_SUCCESS
  *
@@ -561,6 +607,12 @@ typedef struct {
 
   MMG5_pMat     mat;
   MMG5_InvMat   invmat;
+
+  /* Progress callback (optional, NULL by default) */
+  MMG5_progressCallback progressCb;   /**< Progress callback (NULL =
+                                         disabled, zero overhead) */
+  void                 *progressData; /**< Opaque user data forwarded
+                                         to progressCb */
 } MMG5_Info;
 
 /**
