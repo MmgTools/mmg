@@ -311,8 +311,6 @@ int MMG2D_freeLocalPar(MMG5_pMesh );
 /* functions pointers */
 int    MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 int    MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol);
-double long_ani(double *ca,double *cb,double *ma,double *mb);
-double long_iso(double *ca,double *cb,double *ma,double *mb);
 double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 int    interp_ani(double *,double *,double * ,double );
