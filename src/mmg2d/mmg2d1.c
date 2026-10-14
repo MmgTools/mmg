@@ -50,7 +50,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( typchk == 2 && it == 0 ) {
 // #warning Luca: check consistency with 3D
     }
-    if ( !mesh->info.noinsert ) {
+    if ( !mesh->info.noinsert && (mesh->info.limit_angle >= M_PI/3. || mesh->info.limit_angle <= 0.)) {
       /* Memory free */
       MMG5_DEL_MEM(mesh,mesh->adja);
       mesh->adja = 0;
@@ -107,6 +107,158 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   return 1;
 }
 
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param k triangle index.
+ * \return the minimal angle of a triangle or 0 if the triangle size
+ * is not conform to the tolerance sizes.
+ *
+ * Compute the minimal angle of triangle k. If the velocity of each
+ * node is given, the extrapolated minimal angle of the triangle
+ * is also calculated. If the edge lengths are too small of too
+ * large, 0 is returned as we want this triangle to be remeshed.
+ *
+ */
+double MMG2D_minangle(MMG5_pMesh mesh, int k) {
+
+  MMG5_pTria pt = &mesh->tria[k];
+  MMG5_pPoint pp1, pp2, pp3;
+  int* adja = &mesh->adja[3*(k-1)+1];
+  int p1, p2, p3;
+  double length[6];
+  double c1 = 1.35*mesh->info.limit_angle;
+  if (c1 > 1.) c1 = 1.;
+  double coef = 1.;
+  double factor_max = mesh->info.relative_max_tolerance;
+  double factor_min = mesh->info.relative_min_tolerance;
+
+  p1 = pt->v[0];
+  p2 = pt->v[1];
+  p3 = pt->v[2];
+
+  pp1 = &mesh->point[p1];
+  pp2 = &mesh->point[p2];
+  pp3 = &mesh->point[p3];
+
+  double square_root_area = sqrt(0.5*fabs((pp2->c[0]-pp1->c[0])*(pp3->c[1]-pp1->c[1]) -
+                                          (pp2->c[1]-pp1->c[1])*(pp3->c[0]-pp1->c[0])));
+  double mean_velocity = 0.;
+  double* velocity = &mesh->lagrangian_velocity[0];
+
+  // Velocity is only considered for already existing points
+  if (velocity && p1 <= mesh->mark && p2 <= mesh->mark && p3 <= mesh->mark
+               && pp1->tmp == -1 && pp2->tmp == -1 && pp3->tmp == -1)
+    mean_velocity = ( sqrt(pow(velocity[p1-1],2) + pow(velocity[p1-1+mesh->mark],2)) + 
+                      sqrt(pow(velocity[p2-1],2) + pow(velocity[p2-1+mesh->mark],2)) + 
+                      sqrt(pow(velocity[p3-1],2) + pow(velocity[p3-1+mesh->mark],2))  )/3.;
+
+  double dt, x1, x2, x3, y1, y2, y3;
+  if (mean_velocity < 1.e12) {
+    dt = 0.;
+    x1 = pp1->c[0];
+    x2 = pp2->c[0];
+    x3 = pp3->c[0];
+    y1 = pp1->c[1];
+    y2 = pp2->c[1];
+    y3 = pp3->c[1];
+  }
+  else {
+    // Extrapolated triangle location based on a fictitious time step
+    dt = 0.25*square_root_area / mean_velocity;
+    x1 = pp1->c[0] + velocity[p1-1]*dt;
+    x2 = pp2->c[0] + velocity[p2-1]*dt;
+    x3 = pp3->c[0] + velocity[p3-1]*dt;
+    y1 = pp1->c[1] + velocity[p1-1+mesh->mark]*dt;
+    y2 = pp2->c[1] + velocity[p2-1+mesh->mark]*dt;
+    y3 = pp3->c[1] + velocity[p3-1+mesh->mark]*dt;
+  }
+
+  // Compute the length of the triangle edges
+  length[0] = pow(x1-x2,2.) + pow(y1-y2,2.);
+  length[1] = pow(x2-x3,2.) + pow(y2-y3,2.);
+  length[2] = pow(x3-x1,2.) + pow(y3-y1,2.);
+
+  // Compute the length of the fictitious triangle edges
+  length[3] = pow(pp1->c[0] - pp2->c[0],2.) + pow(pp1->c[1] - pp2->c[1],2.);
+  length[4] = pow(pp2->c[0] - pp3->c[0],2.) + pow(pp2->c[1] - pp3->c[1],2.);
+  length[5] = pow(pp3->c[0] - pp1->c[0],2.) + pow(pp3->c[1] - pp1->c[1],2.);
+
+  // Check if the edge lengths satisfy the extended tolerances
+  double min = length[0];
+  double max = length[0];
+  int min_index = 0;
+
+  for (int i = 1; i < 3; i++) {
+    if (length[i] < min) {
+      min = length[i];
+      min_index = i;
+    }
+    if (length[i] > max) max = length[i];
+  }
+
+  if (sqrt(min) < mesh->info.hmin/factor_min) return 0.;
+  if (sqrt(max) > factor_max*mesh->info.hmax) return 0.;
+
+  double cosA = ( length[(min_index+1)%3] + length[(min_index+2)%3] - length[min_index] ) / 
+                (2*pow(length[(min_index+1)%3],0.5)*pow(length[(min_index+2)%3],0.5));
+
+  min = length[3];
+  max = length[3];
+  min_index = 0;
+  for (int i = 1; i < 3; i++) {
+    if (length[i+3] < min) {
+      min = length[i+3];
+      min_index = i;
+    }
+    if (length[i+3] > max) max = length[i+3];
+  }
+
+  if (sqrt(min) < mesh->info.hmin/factor_min) return 0.;
+  if (sqrt(max) > factor_max*mesh->info.hmax) return 0.;
+
+  // If the triangle is on a boundary, the angle tolerance is divided by two
+  // to extend remeshing close to boundaries where the mesh can be often squeezed
+  if (mesh->info.bdy_adaptation) {
+    if ((pp1->tag & MG_BDY) || (pp2->tag & MG_BDY) || (pp3->tag & MG_BDY)) coef = c1;
+    else {
+      // The neighbours of boundary triangles also have a reduced tolerance
+      for(int i = 0; i < 3; i++ ) {
+        int k1 = adja[i]/3;
+
+        if (!k1) continue;
+
+        MMG5_pTria pt_neigh = &mesh->tria[k1];
+
+        for (int j = 0; j < 3; j++) {
+          MMG5_pPoint pp = &mesh->point[pt_neigh->v[j]];
+          if (pp->tag & MG_BDY) {
+            coef = c1;
+            break;
+          }
+        }
+
+        if (coef < 0.999) break;
+      }
+    }
+  }
+
+  // Minimal angle
+  double cosA2 = ( length[(min_index+1)%3+3] + length[(min_index+2)%3+3] - length[min_index+3] ) / 
+                 (2*pow(length[(min_index+1)%3+3],0.5)*pow(length[(min_index+2)%3+3],0.5));
+
+  if (cosA2 > cosA) cosA = cosA2;
+
+  if (cosA <= -1.) {
+    return 3.14;
+  }
+  else if (cosA >= 1) {
+    return 0.;
+  }
+  else return coef*acos(cosA);
+
+}
+
+
 /* Travel triangles and split long edges according to patterns */
 MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria      pt;
@@ -129,6 +281,8 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || (pt->ref < 0) ) continue;
     if ( MG_SIN(pt->tag[0]) || MG_SIN(pt->tag[1]) || MG_SIN(pt->tag[2]) )  continue;
+
+    if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3. && MMG2D_minangle(mesh,k) > mesh->info.limit_angle) continue;
 
     /* Check if pt should be cut */
     pt->flag = 0;
@@ -450,6 +604,8 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk, double lmax) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
 
+    if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3. && MMG2D_minangle(mesh,k) > mesh->info.limit_angle) continue;
+
     /* Travel 3 edges of the triangle and decide whether to collapse p1->p2, based on length criterion */
     pt->flag = 0; // was here before, but probably serves for nothing
 
@@ -523,11 +679,18 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   maxit = 2;
   mesh->base++;
 
+  // If some triangles are not adapted using the limiting option on the triangle minimal angle, 
+  // using fem = 1 here can lead to very poor triangles that remain in the final mesh.
+  // So, in this case, we enforce the use of fem = 0.
+  if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3.) mesh->info.fem = 0;
+
   do {
     ns = 0;
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+      if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3. && MMG2D_minangle(mesh,k) > mesh->info.limit_angle) continue;
 
       for (i=0; i<3; i++) {
         if ( MG_SIN(pt->tag[i]) || MG_EDG(pt->tag[i]) ) continue;
@@ -542,6 +705,10 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   while ( ns > 0 && ++it<maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
+
+  // The fem value is restored after the swaps
+  if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3.) mesh->info.fem = mesh->info.setfem;
+
   return nns;
 }
 
@@ -653,6 +820,8 @@ MMG5_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
 
+    if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3. && MMG2D_minangle(mesh,k) > mesh->info.limit_angle) continue;
+
     imax = -1;
     lmax = -1.0;
     for (i=0; i<3; i++) {
@@ -715,6 +884,8 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
 
+      if (mesh->info.limit_angle >= 0. && mesh->info.limit_angle <= M_PI/3. && MMG2D_minangle(mesh,k) > mesh->info.limit_angle) continue;
+
       for (i=0; i<3; i++) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
@@ -725,6 +896,9 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
         if ( MG_EDG(p0->tag) ) {
           ier = MMG2D_movedgpt(mesh,met,ilist,list,improve);
           if ( ier ) ns++;
+        }
+        else if (mesh->info.isotropic_pt_relocation) {
+            ier = MMG2D_movintpt(mesh,met,ilist,list,improve);
         }
         else {
           if ( met->size == 3 && met->m )
@@ -759,6 +933,9 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
  *
  **/
 int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
+
+  mesh->mark = mesh->np;
+  for (int i = 1; i <= mesh->np; i++) mesh->point[i].tmp = -1;
 
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
