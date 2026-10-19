@@ -371,6 +371,31 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
 }
 
 /**
+ * \brief Check that eigenvalues are strictly positive.
+ * \param sol pointer to metric structure.
+ *
+ * \return 1 if eigenvalues are strictly positive or 0 if one is non-positive.
+ */
+int MMG5_check_eigenvalues(MMG5_pSol met) {
+
+  if ( met->size != 6 ) return 1;
+
+  for (int k=1; k<=met->np; k++) {
+    double lambda[3],vp[3][3];
+    MMG5_eigenv3d(1,&met->m[6*k],lambda,vp);
+
+    if (!(lambda[0] > 0. && lambda[1] > 0. && lambda[2] > 0.)) {
+      fprintf(stderr, "  ## Error: At least one non-positive eigenvalue in"
+                      " provided metric file : %lf %lf %lf \n", lambda[0],
+                      lambda[1], lambda[2]);
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+/**
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
  * \param mat pointer to the matrix.

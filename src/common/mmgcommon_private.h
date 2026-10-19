@@ -620,6 +620,7 @@ typedef struct MMG5_iNode_s {
  extern int    MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
  int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, MMG5_int,double*, double*,double[3][3]);
  void          MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax);
+ int           MMG5_check_eigenvalues(MMG5_pSol met);
  int           MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
  void          MMG5_transpose3d(double m[3][3]);
  void          MMG5_dotprod(int8_t dim,double *a,double *b,double *result);
