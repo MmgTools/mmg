@@ -1485,6 +1485,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     if (!MMG5_check_eigenvalues(psl)) {
       return -1;
     }
+  }
 
   /* stats */
   MMG5_printSolStats(mesh,sol);
