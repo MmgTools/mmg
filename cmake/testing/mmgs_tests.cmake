@@ -338,7 +338,7 @@ ADD_TEST(NAME mmgs_negative_eigenvalues
   ${MMGS_CI_TESTS}/Eigenvalues/cube_surfacique
   ${CTEST_OUTPUT_DIR}/mmgs_negative_eigenvalues.o.mesh)
 SET_PROPERTY(TEST mmgs_negative_eigenvalues
-  PROPERTY PASS_REGULAR_EXPRESSION "negative eigenvalue")
+  PROPERTY PASS_REGULAR_EXPRESSION "non-positive eigenvalue")
 
 ###############################################################################
 #####

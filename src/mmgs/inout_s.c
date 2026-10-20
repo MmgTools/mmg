@@ -1385,7 +1385,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
       MMG5_eigenv3d(1,&met->m[6*k],lambda,vp);
 
       if (!(lambda[0] > 0. && lambda[1] > 0. && lambda[2] > 0.)) {
-        fprintf(stderr, "  ## Error: At least one negative eigenvalue in"
+        fprintf(stderr, "  ## Error: At least one non-positive eigenvalue in"
                         " provided metric file : %lf %lf %lf \n", lambda[0],
                         lambda[1], lambda[2]);
         return -1;
@@ -1498,7 +1498,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
         MMG5_eigenv3d(1,&psl->m[6*k],lambda,vp);
 
         if (!(lambda[0] > 0. && lambda[1] > 0. && lambda[2] > 0.)) {
-          fprintf(stderr, "  ## Error: At least one negative eigenvalue in"
+          fprintf(stderr, "  ## Error: At least one non-positive eigenvalue in"
                           " provided metric file : %lf %lf %lf \n", lambda[0],
                           lambda[1], lambda[2]);
           return -1;

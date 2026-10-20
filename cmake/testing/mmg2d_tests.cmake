@@ -467,9 +467,9 @@ ADD_TEST(NAME mmg2d_Disk-optim
 ADD_TEST(NAME mmg2d_negative_eigenvalues
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/Eigenvalues/carre
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_negative_eigenvalyes.o.mesh)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_negative_eigenvalues.o.mesh)
 SET_PROPERTY(TEST mmg2d_negative_eigenvalues
-  PROPERTY PASS_REGULAR_EXPRESSION "negative eigenvalue")
+  PROPERTY PASS_REGULAR_EXPRESSION "non-positive eigenvalue")
 
 ###############################################################################
 #####

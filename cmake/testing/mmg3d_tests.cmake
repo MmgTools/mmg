@@ -868,7 +868,7 @@ ADD_TEST(NAME mmg3d_negative_eigenvalues
   ${MMG3D_CI_TESTS}/Eigenvalues/cube
   ${CTEST_OUTPUT_DIR}/mmg3d_negative_eigenvalues.o.mesh)
 SET_PROPERTY(TEST mmg3d_negative_eigenvalues
-  PROPERTY PASS_REGULAR_EXPRESSION "negative eigenvalue"
+  PROPERTY PASS_REGULAR_EXPRESSION "non-positive eigenvalue"
   )
 
 IF ( LONG_TESTS )
