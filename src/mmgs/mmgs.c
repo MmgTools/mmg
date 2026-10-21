@@ -419,6 +419,22 @@ int main(int argc,char *argv[]) {
 
   switch ( fmtin ) {
 
+  case ( MMG5_FMT_Obj ):
+    ier = MMGS_loadObjMesh(mesh,mesh->namein);
+    break;
+  case ( MMG5_FMT_Stl ):
+    ier = MMGS_loadStlMesh(mesh,mesh->namein);
+    break;
+  case ( MMG5_FMT_Ply ):
+    ier = MMGS_loadPlyMesh(mesh,mesh->namein);
+    break;
+  case ( MMG5_FMT_Su2 ):
+    ier = MMGS_loadSu2Mesh(mesh,mesh->namein);
+    break;
+  case ( MMG5_FMT_Nastran ):
+    ier = MMGS_loadNastranMesh(mesh,mesh->namein);
+    break;
+
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMGS_loadMshMesh(mesh,sol,mesh->namein);
     break;
@@ -525,6 +541,21 @@ int main(int argc,char *argv[]) {
     fmtout = MMG5_Get_format(ptr,fmtin);
 
     switch ( fmtout ) {
+    case ( MMG5_FMT_Obj ):
+      ierSave = MMGS_saveObjMesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Stl ):
+      ierSave = MMGS_saveStlMesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Ply ):
+      ierSave = MMGS_savePlyMesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Su2 ):
+      ierSave = MMGS_saveSu2Mesh(mesh,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Nastran ):
+      ierSave = MMGS_saveNastranMesh(mesh,mesh->nameout);
+      break;
     case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
       break;
