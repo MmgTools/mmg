@@ -26,7 +26,9 @@ on:
 # job
 jobs:
   ci:
-    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    if: >-
+      contains(github.event.head_commit.message, '[run ci]')
+      || github.event_name == 'pull_request'
     runs-on: ${{ matrix.os }}
 
     # Launch a matrix of jobs
