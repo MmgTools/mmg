@@ -2207,6 +2207,11 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   fclose(inm);
 
+  /* For anisotropic metric, check that eigenvalues are strictly positive */
+  if (!MMG5_check_eigenvalues(met)) {
+    return -1;
+  }
+
   /* stats */
   MMG5_printMetStats(mesh,met);
 
@@ -2304,6 +2309,14 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     }
   }
   fclose(inm);
+
+  /* For anisotropic metric, check that eigenvalues are strictly positive */
+  for ( j=0; j<nsols; j++) {
+    psl = &(*sol)[j];
+    if (!MMG5_check_eigenvalues(psl)) {
+      return -1;
+    }
+  }
 
   /* stats */
   MMG5_printSolStats(mesh,sol);
