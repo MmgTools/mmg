@@ -434,14 +434,14 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int64_t *list,int ret,MMG5_in
           continue;
         }
         else if ( wrongOri ) {
-          /* We skeep this tria because it is seen from a wrong side. The next
+          /* We skip this tria because it is seen from a wrong side. The next
            * will be ok */
           wrongOri = 0;
           continue;
         }
         complete = 1;
 
-        /* Test sharp angle creation along the splitted edge */
+        /* Test sharp angle creation along split edge */
         if ( !MMG5_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
           return 2;
         }

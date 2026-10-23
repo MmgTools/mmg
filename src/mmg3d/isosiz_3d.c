@@ -81,10 +81,10 @@ inline double MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
  * \param hmin minimal edge size.
  * \param hmax maximal edge size.
  * \param hausd hausdorff value.
- * \return the isotropic size at the point if success, FLT_MAX if fail.
+ * \return isotropic size at the point if success, FLT_MAX if fail.
  *
  * Define isotropic size at regular point nump, whose surfacic ball is provided
- * and update metric at 'regular' non-manifold points of the surfacic ball of
+ * and update metric at "regular" non-manifold points of the surfacic ball of
  * point.
  *
  */
@@ -556,8 +556,8 @@ int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *has
  *
  * \return 0 if fail, 1 otherwise
  *
- * Compute the metric at points on trequired adges as the mean of the lengths of
- * the required eges to which belongs the point. The processeed points are
+ * Compute metric at points on required edges as the mean of lengths of
+ * the required edges to which the point belongs. Processeed points are
  * marked with flag 3.
  *
  */
@@ -654,9 +654,12 @@ int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t is
  * \param met pointer to the metric structure.
  * \return 0 if fail, 1 otherwise.
  *
- * Define isotropic size map at all boundary vertices of the mesh, associated
- * with geometric approx, and prescribe hmax at the internal vertices Field h of
- * Point is used, to store the prescribed size (not inverse, squared,...)
+ * Define isotropic size map at mesh vertices, whether or not metric data
+ * is provided by the user. Vertices are treated in the following order:
+ *  - required vertices,
+ *  - regular internal vertices,
+ *  - regular surface vertices,
+ *  - ridge/edge surface vertices.
  *
  */
 int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
@@ -887,7 +890,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /** Step 3: size at regular surface points */
+  /** 2) Size at regular surface points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     // Warning: why are we skipped the tetra with negative refs ?
@@ -1041,8 +1044,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer to the mesh structure.
  *
- * Set the s field of the points that belongs to a required edge to 4*ne+3, set it to
- * 0 otherwise.
+ * Set field s of points that belong to a required edge to 4*ne+3.
+ * Set it to 0 otherwise.
  *
  */
 void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
