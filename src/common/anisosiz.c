@@ -430,7 +430,7 @@ void MMG5_fillDefmetregSys( MMG5_int k, MMG5_pPoint p0, int i0, MMG5_Bezier b,
  * \param hausd hausdorff value at point.
  * \return 1 if success, 0 if fail.
  *
- * Solve {}^tAA \times tmp_m = {}^tAb and fill m with tmp_m (after rotation)
+ * Solve ${}^tAA \times tmp_m = {}^tAb$ and fill m with tmp_m (after rotation)
  * for a regular surface point.
  *
  */

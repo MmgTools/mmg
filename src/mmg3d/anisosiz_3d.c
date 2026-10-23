@@ -1891,9 +1891,9 @@ int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
  * \param npmaster edge extremity that cannot be modified
  * \param npslave edge extremity to modify to respect the gradation.
  *
- * \return 1 if the graddation succeed, 0 otherwise
+ * \return 1 if successful gradation , 0 otherwise
  *
- * Enforces gradation of metric from required entity toward other using the
+ * Enforces gradation of metric from required entity towards other using the
  * simultaneous reduction technique (note that as the gradation is propagated,
  * we can be on an edge without a required extremity).
  *
