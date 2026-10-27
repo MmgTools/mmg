@@ -39,6 +39,23 @@
 #include "librnbg_private.h"
 
 /**
+ * \param lhs pointer to the first {box, vertex} pair.
+ * \param rhs pointer to the second {box, vertex} pair.
+ * \return a negative value, zero or a positive value if the first box index
+ * is respectively lower than, equal to or greater than the second one.
+ *
+ * Compare the box index of two Scotch partition pairs.
+ *
+ */
+static int
+MMG5_compareScotchPairsFirst(const void *lhs, const void *rhs) {
+  const SCOTCH_Num *a = (const SCOTCH_Num *)lhs;
+  const SCOTCH_Num *b = (const SCOTCH_Num *)rhs;
+
+  return (a[0] > b[0]) - (a[0] < b[0]);
+}
+
+/**
  * \param graf pointer to the input graph structure.
  * \param vertNbr the number of vertices.
  * \param boxVertNbr the number of vertices of each box.
@@ -125,7 +142,8 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG5_int vertNbr, MMG5_int boxVertN
   }
 
   // Sorting the tabular, which contains box values and vertex numbers
-  _SCOTCHintSort2asc1(sortPartTb, vertNbr);
+  qsort(sortPartTb, (size_t)vertNbr, 2 * sizeof(*sortPartTb),
+        MMG5_compareScotchPairsFirst);
 
 
   /* Infering the new numbering */
