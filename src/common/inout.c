@@ -57,17 +57,24 @@ int MMG5_swapbin(int sbin)
 /**
  * swap bytes if needed (conversion from big/little endian toward little/big
  * endian)
+ *
+ * NOTE this function is probably not useful for i/o because integer sizes
+ * in files are fixed and the size of MMG5_int is configurable; it is meant
+ * only for internal usage. This is perhaps some litter remaining from the
+ * interoduction of a configurable integer size. If it is ever needed, it
+ * should probably be MMG5_swapbin_int64(int64_t sbin).
+ *
  */
 MMG5_int MMG5_swapbin_int(MMG5_int sbin)
 {
   MMG5_int out;
   char     *p_in = (char *) &sbin;
   char     *p_out = (char *) &out;
-  int8_t   i;
+  int      i, Nbytes=sizeof(MMG5_int);
 
-  for(i=0;i<8;i++)
+  for(i=0;i<Nbytes;i++)
   {
-    p_out[i] = p_in[7-i];
+    p_out[i] = p_in[Nbytes-1-i];
   }
 
   return out;
