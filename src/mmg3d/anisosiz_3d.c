@@ -868,8 +868,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface,
  * in (tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
- * Define metric map at a REGULAR vertex of the mesh, associated to
- * the geometric approx of the surface.
+ * Define metric map at a REGULAR surface vertex of the mesh,
+ * associated to the geometric approx of the surface.
  *
  */
 static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, int ip) {
@@ -1110,6 +1110,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
 
+  /** 1. no metric is provided: Set isotropic hmax size at the vertex */
   if ( !ismet ) {
 
     for (k=1; k<=mesh->ne; k++) {
@@ -1121,8 +1122,6 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
         ip = pt->v[l];
         ppt = &mesh->point[ip];
         if ( ppt->flag || ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
-
-        /** 1. no metric is provided: Set isotropic hmax size at the vertex */
 
         /** First step: search for local parameters */
         if ( mesh->info.parTyp ) {
@@ -1767,12 +1766,12 @@ void MMG5_grad2metVol_setmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8
  * \param np2 global index of the second edge extremity.
  *
  * \return -1 on failure, else local indices of graded point on the edge
- * (bitwise encoded, so 0 for no update, 1 if the first point iis updated, 2 if
+ * (bitwise encoded, so 0 for no update, 1 if the first point is updated, 2 if
  * the second one is updated, 3 if both). Use the third bit to switch on warning
  * information at output.
  *
  * Enforces gradation of metric in both extremities of an edge with respect to
- * one other.
+ * one another.
  *
  */
 static inline
@@ -1892,9 +1891,9 @@ int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
  * \param npmaster edge extremity that cannot be modified
  * \param npslave edge extremity to modify to respect the gradation.
  *
- * \return 1 if the graddation succeed, 0 otherwise
+ * \return 1 if successful gradation , 0 otherwise
  *
- * Enforces gradation of metric from required entity toward other using the
+ * Enforces gradation of metric from required entity towards other using the
  * simultaneous reduction technique (note that as the gradation is propagated,
  * we can be on an edge without a required extremity).
  *

@@ -65,13 +65,13 @@ int8_t  ddb;
  *
  * \return -1 for strong failure.
  *
- * \return 0 if edge cannot be splitted and if we want to pass to next loop step
+ * \return 0 if edge cannot be split and if we want to pass to next loop step
  * (next element or next tetra edge)
  *
- * \return 1 if edge cannot be splitted and we want to try to collapse too long
+ * \return 1 if edge cannot be split and we want to try to collapse too long
  * edge.
  *
- * \return 2 if edge has been splitted and we want to treat next element.
+ * \return 2 if edge has been split and we want to treat next element.
  *
  * \return 3 if nothing has been done (no error but no split either).
  *
@@ -160,7 +160,7 @@ int MMG3D_mmg3d1_delone_split(MMG5_pMesh mesh, MMG5_pSol met,
 
     /* Simulation only if intmet call is successful */
     /* simbulgept needs a valid tangent at ridge point (to build ridge metric in
-     * order to comute edge lengths). Thus we need to store the geometric info of
+     * order to compute edge lengths). Thus we need to store the geometric info of
      * point here. */
     ppt = &mesh->point[ip];
     MMG3D_set_geom(mesh,ppt,tag,ref,pxt->ref[i],no1,no2,to);
@@ -393,7 +393,7 @@ int MMG3D_mmg3d1_delone_splcol(MMG5_pMesh mesh, MMG5_pSol met,
   }
 
   /** If unable to treat edge with ier==1 return value or if edge has
-   * not been splitted but slpit_delone has not raised any error: try to
+   * not been splitted but split_delone has not raised any error: try to
    * collapse short edge. */
 
   /** 2. Try to merge small edge: if collapse is not possible, pass to
@@ -948,7 +948,7 @@ int MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * \param mesh pointer to the mesh structure.
  * \param met pointer to the metric structure.
  * \param PROctree pointer to the PROctree structure.
- * \param permNodGlob if provided, strore the global permutation of nodes
+ * \param permNodGlob if provided, store the global permutation of nodes
  * \return 0 if failed, 1 otherwise.
  *
  * Analyze tetrahedra and split long / collapse short, according to
