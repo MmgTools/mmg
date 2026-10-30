@@ -806,7 +806,7 @@ const char* MMG5_Get_tagName(uint16_t tag)
  * \param ptr pointer to the file extension (dot included)
  * \param fmt default file format.
  *
- * \return and index associated to the file format detected from the extension.
+ * \return file format detected from the extension.
  *
  * Get the wanted file format from the mesh extension. If \a fmt is provided, it
  * is used as default file format (\a ptr==NULL), otherwise, the default file
@@ -814,10 +814,8 @@ const char* MMG5_Get_tagName(uint16_t tag)
  *
  */
 int MMG5_Get_format( char *ptr, int fmt ) {
-  /* Default is the Medit file format or a format given as input */
-  int defFmt = fmt;
 
-  if ( !ptr ) return defFmt;
+  if ( !*ptr ) return fmt;
 
   if ( !strncmp ( ptr,".meshb",strlen(".meshb") ) ) {
     return MMG5_FMT_MeditBinary;
@@ -837,7 +835,7 @@ int MMG5_Get_format( char *ptr, int fmt ) {
   else if ( !strncmp ( ptr,".vtu",strlen(".vtu") ) ) {
     return MMG5_FMT_VtkVtu;
   }
-  else if ( !strncmp ( ptr,".pvtp",strlen(".pvtu") ) ) {
+  else if ( !strncmp ( ptr,".pvtp",strlen(".pvtp") ) ) {
     return MMG5_FMT_VtkPvtp;
   }
   else if ( !strncmp ( ptr,".vtp",strlen(".vtp") ) ) {
@@ -850,7 +848,7 @@ int MMG5_Get_format( char *ptr, int fmt ) {
     return MMG5_FMT_Tetgen;
   }
 
-  return defFmt;
+  return MMG5_FMT_Unknown;
 }
 
 /**
@@ -896,7 +894,7 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
     return "MMG5_FMT_Tetgen";
     break;
   default:
-    return "MMG5_Unknown";
+    return "MMG5_FMT_Unknown";
   }
 }
 
@@ -904,9 +902,10 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
  * \param filename string containing a filename
  *
  * \return pointer to the filename extension or toward the end of the string
- * if no extension have been founded
+ * if no extension has been found.
  *
- * Get the extension of the filename string. Do not consider '.o' as an extension.
+ * Get the extension of the filename string.
+ * Do not consider '.o' as an extension.
  *
  */
 char *MMG5_Get_filenameExt( char *filename ) {
@@ -918,7 +917,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
   }
 
   dot = strrchr(filename, '.');
-  lastpath = (pathsep == 0) ? NULL : strrchr (filename, pathsep);
+  lastpath = strrchr(filename, pathsep);
 
   if ( (!dot) || dot == filename || (lastpath>dot) || (!strcmp(dot,".o")) ) {
     /* No extension */

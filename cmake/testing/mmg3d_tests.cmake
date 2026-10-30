@@ -42,7 +42,7 @@ SET ( test_names
 SET ( input_files
   ${MMG3D_CI_TESTS}/Cube/cube
   ### Multidom
-  ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
+  ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d.mesh
    ### non-manifold
   ${MMG3D_CI_TESTS}/NM_Cube/nm
   ${MMG3D_CI_TESTS}/NM_Complex/nm4
@@ -119,35 +119,35 @@ IF ( LONG_TESTS )
 
   SET ( input_files  ${input_files}
     ### Cube
-    ${MMG3D_CI_TESTS}/CubeIso_h_hminMax/CubeIso0.1
-    ${MMG3D_CI_TESTS}/CubeIso_0.5h_hminMax/CubeIso0.1
-    ${MMG3D_CI_TESTS}/CubeIso_0.25h_hminMax/CubeIso0.1
+    ${MMG3D_CI_TESTS}/CubeIso_h_hminMax/CubeIso0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeIso_0.5h_hminMax/CubeIso0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeIso_0.25h_hminMax/CubeIso0.1.meshb
     ###
-    ${MMG3D_CI_TESTS}/CubeIso_h_met/CubeIso0.1
-    ${MMG3D_CI_TESTS}/CubeIso_0.5h_met/CubeIso0.1
-    ${MMG3D_CI_TESTS}/CubeIso_0.25h_met/CubeIso0.1
-    ${MMG3D_CI_TESTS}/CubeIso_0.125h_met/CubeIso0.1
-    ${MMG3D_CI_TESTS}/CubeAniIso_0.125h_met/CubeIso0.1
+    ${MMG3D_CI_TESTS}/CubeIso_h_met/CubeIso0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeIso_0.5h_met/CubeIso0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeIso_0.25h_met/CubeIso0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeIso_0.125h_met/CubeIso0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeAniIso_0.125h_met/CubeIso0.1.meshb
     ### Sphere
-    ${MMG3D_CI_TESTS}/SphereIso_h_met/SphereIso0.5
-    ${MMG3D_CI_TESTS}/SphereIso_0.5h_met/SphereIso0.5
-    ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5
-    ${MMG3D_CI_TESTS}/SphereIso_0.125h_met/SphereIso0.5
-    ${MMG3D_CI_TESTS}/SphereIso_0.020_met/SphereIso0.5
+    ${MMG3D_CI_TESTS}/SphereIso_h_met/SphereIso0.5.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_0.5h_met/SphereIso0.5.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_0.125h_met/SphereIso0.5.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_0.020_met/SphereIso0.5.meshb
     # ${MMG3D_CI_TESTS}/SphereIso_0.020-0.015_met/SphereIso0.020
     ${MMG3D_CI_TESTS}/SphereAni_0.02/sphere
     ###
-    ${MMG3D_CI_TESTS}/SphereIso_2smallh_met/SphereIso0.0625
-    ${MMG3D_CI_TESTS}/SphereIso_4smallh_met/SphereIso0.0625
-    ${MMG3D_CI_TESTS}/SphereIso_8smallh_met/SphereIso0.0625
+    ${MMG3D_CI_TESTS}/SphereIso_2smallh_met/SphereIso0.0625.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_4smallh_met/SphereIso0.0625.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_8smallh_met/SphereIso0.0625.meshb
     ###
-    ${MMG3D_CI_TESTS}/SphereIso_h_hausd0.001/SphereIso0.5
-    ${MMG3D_CI_TESTS}/SphereIso_h_hausd0.005/SphereIso0.5
+    ${MMG3D_CI_TESTS}/SphereIso_h_hausd0.001/SphereIso0.5.meshb
+    ${MMG3D_CI_TESTS}/SphereIso_h_hausd0.005/SphereIso0.5.meshb
     ### CubeSkin
-    ${MMG3D_CI_TESTS}/CubeSkin0.05_Inside0.4/CubeSkin0.05
-    ${MMG3D_CI_TESTS}/CubeSkin0.1_Inside0.4/CubeSkin0.1
-    ${MMG3D_CI_TESTS}/CubeSkin0.2_Inside0.4/CubeSkin0.2
-    ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.125/CubeSkin0.125
+    ${MMG3D_CI_TESTS}/CubeSkin0.05_Inside0.4/CubeSkin0.05.meshb
+    ${MMG3D_CI_TESTS}/CubeSkin0.1_Inside0.4/CubeSkin0.1.meshb
+    ${MMG3D_CI_TESTS}/CubeSkin0.2_Inside0.4/CubeSkin0.2.meshb
+    ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.meshb
     # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
     # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.5/CubeSkin0.5
     ### Linkrods
@@ -161,7 +161,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa
     ### MultiDomain
     ${MMG3D_CI_TESTS}/MultiDom_Cube/c
-    ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
+    ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d.mesh
     ${MMG3D_CI_TESTS}/NM_Cube/nm
     ${MMG3D_CI_TESTS}/NM_Complex/nm4
     )
@@ -428,7 +428,7 @@ SET_PROPERTY(TEST mmg3d_val
 
 ADD_TEST(NAME mmg3d_locParamCrea
   COMMAND ${EXECUT_MMG3D} -v 5 -default
-  ${MMG3D_CI_TESTS}/LocParamsCrea/step.0)
+  ${MMG3D_CI_TESTS}/LocParamsCrea/step.0.mesh)
 
 SET_TESTS_PROPERTIES ( mmg3d_locParamCrea
   PROPERTIES FIXTURES_SETUP mmg3d_locParamCrea )
@@ -624,7 +624,7 @@ ADD_TEST(NAME mmg3d_OptimAni_Cube
 #####
 ADD_TEST(NAME mmg3d_OptimLES_sphere
   COMMAND ${EXECUT_MMG3D} -v 5 -optimLES
-  ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5
+  ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5.meshb
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimLES_Sphere.o.mesh
   )
 

@@ -328,7 +328,7 @@ SET_PROPERTY(TEST mmg_hsizHmin_${SHRT_EXEC}
 # Required entities
 ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntities_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hausd 0.002 ${common_args}
-  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
+  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntities_${SHRT_EXEC}.o.meshb)
 
 ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}

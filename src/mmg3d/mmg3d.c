@@ -427,7 +427,7 @@ int main(int argc,char *argv[]) {
     break;
 
   default:
-    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmtin) );
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n", ptr);
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 
