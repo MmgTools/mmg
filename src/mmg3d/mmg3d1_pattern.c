@@ -323,10 +323,30 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nf,nm);
+
+    /* Progress callback */
+    if ( mesh->info.progressCb ) {
+      if ( !mesh->info.progressCb(mesh, MMG5_PHASE_ADAPTATION, it, maxit,
+                                  (int64_t)ns, (int64_t)nc, (int64_t)nf,
+                                  (int64_t)nm, mesh->info.progressData) ) {
+        fprintf(stderr,"\n  ## Remeshing cancelled by user callback.\n");
+        return 0;
+      }
+    }
+
     if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
     else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && nc+ns > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_ADAPTATION, maxit-1, maxit,
+                                (int64_t)ns, (int64_t)nc, (int64_t)nf,
+                                (int64_t)nm, mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Remeshing cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   if ( warn ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point in last"
@@ -387,8 +407,27 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nf,nm);
     }
+
+    /* Progress callback */
+    if ( mesh->info.progressCb ) {
+      if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, it, maxit,
+                                  0, 0, (int64_t)nf, (int64_t)nm,
+                                  mesh->info.progressData) ) {
+        fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+        return 0;
+      }
+    }
   }
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
+
+  if ( mesh->info.progressCb && it+1 < maxit ) {
+    if ( !mesh->info.progressCb(mesh, MMG5_PHASE_OPTIMIZATION, maxit-1, maxit,
+                                0, 0, (int64_t)nf, (int64_t)nm,
+                                mesh->info.progressData) ) {
+      fprintf(stderr,"\n  ## Optimization cancelled by user callback.\n");
+      return 0;
+    }
+  }
 
   if ( !mesh->info.nomove ) {
     nm = MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
