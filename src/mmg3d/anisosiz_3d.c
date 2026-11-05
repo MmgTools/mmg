@@ -1867,20 +1867,20 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,int np1,int np2) {
 int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
   double ip[3][3];
 
-  /* P^-1 */
+  /* ip = (tP)^-1 = tP^-1, vp storing the basis vectors as rows */
   if ( !MMG5_invmat33(vp,ip) ) {
     return 0;
   }
 
-  /* tp^-1 * dn * P^-1 */
-  n[0] = dn[0]*ip[0][0]*ip[0][0] + dn[1]*ip[1][0]*ip[1][0] + dn[2]*ip[2][0]*ip[2][0];
-  n[1] = dn[0]*ip[0][0]*ip[0][1] + dn[1]*ip[1][0]*ip[1][1] + dn[2]*ip[2][0]*ip[2][1];
-  n[2] = dn[0]*ip[0][0]*ip[0][2] + dn[1]*ip[1][0]*ip[1][2] + dn[2]*ip[2][0]*ip[2][2];
+  /* tP^-1 * dn * P^-1 */
+  n[0] = dn[0]*ip[0][0]*ip[0][0] + dn[1]*ip[0][1]*ip[0][1] + dn[2]*ip[0][2]*ip[0][2];
+  n[1] = dn[0]*ip[0][0]*ip[1][0] + dn[1]*ip[0][1]*ip[1][1] + dn[2]*ip[0][2]*ip[1][2];
+  n[2] = dn[0]*ip[0][0]*ip[2][0] + dn[1]*ip[0][1]*ip[2][1] + dn[2]*ip[0][2]*ip[2][2];
 
-  n[3] = dn[0]*ip[0][1]*ip[0][1] + dn[1]*ip[1][1]*ip[1][1] + dn[2]*ip[2][1]*ip[2][1];
-  n[4] = dn[0]*ip[0][1]*ip[0][2] + dn[1]*ip[1][1]*ip[1][2] + dn[2]*ip[2][1]*ip[2][2];
+  n[3] = dn[0]*ip[1][0]*ip[1][0] + dn[1]*ip[1][1]*ip[1][1] + dn[2]*ip[1][2]*ip[1][2];
+  n[4] = dn[0]*ip[1][0]*ip[2][0] + dn[1]*ip[1][1]*ip[2][1] + dn[2]*ip[1][2]*ip[2][2];
 
-  n[5] = dn[0]*ip[0][2]*ip[0][2] + dn[1]*ip[1][2]*ip[1][2] + dn[2]*ip[2][2]*ip[2][2];
+  n[5] = dn[0]*ip[2][0]*ip[2][0] + dn[1]*ip[2][1]*ip[2][1] + dn[2]*ip[2][2]*ip[2][2];
 
   return 1;
 }
