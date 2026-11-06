@@ -40,6 +40,8 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_lsAndMetric_hsiz
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
+  libmmg3d_su2_io
+  libmmg3d_nastran_io
   )
 
 # Additional tests that needs to download ci meshes
@@ -71,6 +73,8 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg3d_su2_io.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg3d_nastran_io.c
   )
 
 # Additional library tests that needs to download ci meshes to be run
@@ -247,6 +251,26 @@ ADD_TEST(NAME libmmg3d_lsAndMetric
   "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_multimat.o"
   )
 ADD_TEST(NAME test_met3d  COMMAND  ${EXECUTABLE_OUTPUT_PATH}/test_met3d)
+
+ADD_TEST(NAME libmmg3d_su2_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_su2_io
+  "${CTEST_OUTPUT_DIR}/libmmg3d-su2-native-input.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-su2-generic.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-su2-direct.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-su2-mixed-input.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-su2-mixed-output.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-su2-rejected.su2"
+  )
+
+ADD_TEST(NAME libmmg3d_nastran_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_nastran_io
+  "${CTEST_OUTPUT_DIR}/libmmg3d-nastran-native-input.bdf"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-nastran-generic.bdf"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-nastran-direct.nas"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-nastran-mixed-input.bdf"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-nastran-mixed-output.fem"
+  "${CTEST_OUTPUT_DIR}/libmmg3d-nastran-rejected.bdf"
+  )
 
 ADD_TEST(NAME libmmg3d_generic_io_msh
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_generic_io

@@ -795,6 +795,22 @@ int MMGS_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol sol, const ch
 
   switch ( fmtin ) {
 
+  case ( MMG5_FMT_Obj ):
+    ier = MMGS_loadObjMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Stl ):
+    ier = MMGS_loadStlMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Ply ):
+    ier = MMGS_loadPlyMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Su2 ):
+    ier = MMGS_loadSu2Mesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Nastran ):
+    ier = MMGS_loadNastranMesh(mesh,tmp);
+    break;
+
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMGS_loadMshMesh(mesh,sol,tmp);
     break;
@@ -1641,6 +1657,21 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
   int8_t savesolFile = 0;
 
   switch ( fmt ) {
+  case ( MMG5_FMT_Obj ):
+    ier = MMGS_saveObjMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Stl ):
+    ier = MMGS_saveStlMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Ply ):
+    ier = MMGS_savePlyMesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Su2 ):
+    ier = MMGS_saveSu2Mesh(mesh,tmp);
+    break;
+  case ( MMG5_FMT_Nastran ):
+    ier = MMGS_saveNastranMesh(mesh,tmp);
+    break;
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMGS_saveMshMesh(mesh,sol,tmp);
     break;
@@ -1662,7 +1693,8 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
   if ( ier && savesolFile ) {
     /* Medit or tetgen output: save the solution in a .sol file */
     if ( sol && sol->np ) {
-      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return 0);
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,
+                       { MMG5_SAFE_FREE(tmp); return 0; });
       strcpy(soltmp,solnameptr);
 
       if ( MMGS_saveSol(mesh,sol,soltmp) == -1) {
@@ -1673,5 +1705,6 @@ int MMGS_saveGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) {
     }
   }
 
+  MMG5_SAFE_FREE(tmp);
   return ier;
 }

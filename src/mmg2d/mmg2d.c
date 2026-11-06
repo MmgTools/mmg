@@ -362,6 +362,10 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_loadVtkMesh(mesh,met,sol,mesh->namein);
     break;
 
+  case ( MMG5_FMT_Su2 ):
+    ier = MMG2D_loadSu2Mesh(mesh,mesh->namein);
+    break;
+
   case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMG2D_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
@@ -492,6 +496,9 @@ int main(int argc,char *argv[]) {
       break;
     case ( MMG5_FMT_VtkVtk ):
       ierSave = MMG2D_saveVtkMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_Su2 ):
+      ierSave = MMG2D_saveSu2Mesh(mesh,mesh->nameout);
       break;
     case ( MMG5_FMT_Tetgen ):
       ierSave = MMG2D_saveTetgenMesh(mesh,mesh->nameout);

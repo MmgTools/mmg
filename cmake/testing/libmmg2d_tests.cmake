@@ -40,6 +40,7 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_lsAndMetric_optim
   libmmg2d_lsAndMetric_hsiz
   libmmg2d_lsAndMetric
+  libmmg2d_su2_io
   )
 
 # Additional tests that needs to download ci meshes
@@ -60,6 +61,7 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main_optim.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg2d_su2_io.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -217,6 +219,14 @@ IF ( MMG2D_CI AND NOT ONLY_VERY_SHORT_TESTS )
 ENDIF()
 
 ADD_TEST(NAME test_met2d   COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_met2d  )
+
+ADD_TEST(NAME libmmg2d_su2_io
+  COMMAND ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_su2_io
+  "${CTEST_OUTPUT_DIR}/libmmg2d-su2-input.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg2d-su2-generic.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg2d-su2-direct.su2"
+  "${CTEST_OUTPUT_DIR}/libmmg2d-su2-rejected.su2"
+  )
 
 IF ( CMAKE_Fortran_COMPILER AND PERL_FOUND)
   ADD_TEST(NAME libmmg2d_fortran_a
